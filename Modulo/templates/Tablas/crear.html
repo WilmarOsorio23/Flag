@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block titulo %} Agrgar Nuevo tabla {% endblock %}
+
+{% block contenido %}
+
+   <div class="card">
+    <div class="card-header">Crear un tabla</div>
+    <div class="card-body">
+        <h4 class="card-title">Datos de la tabla</h4>
+        {% include 'Tablas/forms.html' %}
+        
+
+    </div>
+    <div class="card-footer text-muted">Footer</div>
+   </div>
+   
+   
+
+{% endblock %}
