@@ -4,22 +4,52 @@
 
 {% block contenido %}
 
-<h1>Hola, la plantilla se está cargando correctamente</h1>
 
 <div class="card">
-    <div class="card-header"> 
-        <a
-            name=""
-            id=""
-            class="btn btn-success"
-            href="{% url 'crear' %}"
-            role="button"
-            >Agregar nueva Tabla</a
-        >
+    <div class="card-header d-flex justify-content-between align-items-center"> 
+        <h4 class="card-title " >Tabla Módulos</h4>
         
     </div>
     <div class="card-body">
-        <h4 class="card-title">Tablas</h4>
+         <!-- CRUD Icons -->
+        <td>
+            <i name=""
+            id=""
+            class="fas fa-plus-circle"  
+            title="Crear"
+            href="{% url 'editar' %}"
+            role="button"></i> 
+        |
+            <i name=""
+            id="" 
+            class="fas fa-edit" 
+            title="Actualizar"
+            href="#"
+            role="button"></i> 
+        | 
+            <i name=""
+            id=""
+            class="fas fa-eye"
+            title="Visualizar"
+            href="#"
+            role="button"></i>
+        
+        | 
+            <i name=""
+            id=""
+            class="fas fa-trash-alt"
+            title="Eliminar"
+            href="#"
+            role="button"></i>
+        |
+            <i name=""
+            id=""
+            class="fas fa-download" 
+            title="Descargar"
+            href="#"
+            role="button"></i>
+         </td>
+    </tr>
     </div>
     <div class="card-footer text-muted">
         <div
@@ -30,9 +60,11 @@
             >
                 <thead>
                     <tr>
-                        <th scope="col">ModuloId</th>
-                        <th scope="col">Nombre</th>
-                        <th scope="col">Acciones</th>
+                        <th>
+                            <input type="checkbox" id="select-all">
+                        </th>
+                        <th scope="col">Id</th>
+                        <th scope="col">Nombre módulo</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,42 +72,10 @@
                     {% for modulo in modulos %}
 
                     <tr class="">
+                        <td><input type="checkbox" class="row-select"></td>
                         <td>{{ modulo.id }}</td>
                         <td>{{ modulo.Nombre }}</td>
-                        <td> <a
-                            name=""
-                            id=""
-                            class="btn btn-info"
-                            href="{% url 'editar' %}"
-                            role="button"
-                            >Editar</a
-                        >
-                         | <a
-                            name=""
-                            id=""
-                            class="btn btn-danger"
-                            href="#"
-                            role="button"
-                            >Borrar</a
-                         >
-                         | <a
-                            name=""
-                            id=""
-                            class="btn btn-primary"
-                            href="#"
-                            role="button"
-                            >Visualizar</a
-                        >
-                        | <a
-                            name=""
-                            id=""
-                            class="btn btn-primary"
-                            href="#"
-                            role="button"
-                            >Descargar</a
-                      >
-                         </td>
-                    </tr>
+                       
                     {% endfor %}
                 </tbody>
             </table>
