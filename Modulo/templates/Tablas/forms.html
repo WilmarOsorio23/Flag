@@ -1,17 +1,19 @@
 <form enctype="multipart/form-data" method="post">
+    {% csrf_token %}
+    {% for campo in formulario %}
 
-<div class="mb-3">
-    <label for="" class="form-label">Nombre</label>
-    <input
-        type="text"
-        class="form-control"
-        name=""
-        id=""
-        aria-describedby="helpId"
-        placeholder="Nombre"
-    />
-</div>
-
+        <div class="mb-3">
+            <label for="" class="form-label">Nombre</label>
+            <input
+                type="text"
+                class="form-control"
+                name=""
+                id=""
+                aria-describedby="helpId"
+                placeholder="Nombre"
+            />
+        </div>
+    {% endfor %}
 
 
 </form>
