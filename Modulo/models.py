@@ -10,3 +10,6 @@ class Modulo(models.Model):
 
     def delete(self, using=None, Keep_parents=False):
         super().delete()
+
+    class Meta:
+        db_table = 'Modulo'
