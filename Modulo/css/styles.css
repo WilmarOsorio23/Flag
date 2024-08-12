@@ -12,13 +12,14 @@
     color: #000000; /* Texto negro */
     transition: all 0.3s;
     border-right: 1px solid #dddddd; /* Borde derecho para diferenciarlo del contenido */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra ligera */
 }
 
 #sidebar .sidebar-header {
     padding: 20px;
-    background: #f8f9fa; /* Fondo más claro para el encabezado del sidebar */
+    background: #ffffff; /* Fondo blanco */
     color: #000000; /* Texto negro */
-    border-bottom: 1px solid #dddddd; /* Borde inferior para diferenciarlo del menú */
+    border-bottom: 1px solid #dddddd; /* Borde inferior */
 }
 
 #sidebar ul.components {
@@ -31,11 +32,14 @@
     font-size: 1.1em;
     display: block;
     color: #000000; /* Texto negro */
+    background: #ffffff; /* Fondo blanco */
+    border-radius: 5px; /* Bordes redondeados */
+    margin: 5px 10px; /* Margen para separar los elementos */
 }
 
 #sidebar ul li a:hover {
     color: #007bff; /* Texto azul al pasar el mouse */
-    background: #e9ecef; /* Fondo gris claro al pasar el mouse */
+    background: #f0f0f0; /* Fondo gris claro al pasar el mouse */
     text-decoration: none;
 }
 
@@ -54,6 +58,7 @@ a[aria-expanded="true"] {
     margin-left: 250px;
     padding: 20px;
 }
+
 
 /* Estilo general para las tablas */
 .table-responsive {
