@@ -6,29 +6,63 @@
         <!-- Required meta tags -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        
+        <!-- Enlace al archivo styles.css -->
+        <link rel="stylesheet" href="{% static 'styles.css' %}">  
 
         <!-- Bootstrap CSS v5.2.1 -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
         <!-- Incluye FontAwesome para los iconos -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
     </head>
     <body>
-        <nav class="navbar navbar-expand navbar-light bg-light">
+       <!--  <nav class="navbar navbar-expand navbar-light bg-light">
             <div class="nav navbar-nav">
                 <a class="nav-item nav-link active" href="{% url 'inicio'%}"> Inicio </a> 
                 <a class="nav-item nav-link active" href="{% url 'Tablas'%}"> Tablas </a> 
             </div>
-        </nav>
+        </nav>-->
+        <div class="d-flex">
+            <!-- Menú lateral -->
+            <nav id="sidebar" class="bg-light text-black">
+                <div class="sidebar-header">
+                    <h3>Mi Aplicación</h3>
+                </div>
         
-
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    {% block contenido %}  {% endblock %}
+                <ul class="list-unstyled components">
+                    <li>
+                        <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Inicio</a>
+                        <ul class="collapse list-unstyled" id="homeSubmenu">
+                            <li><a href="#">Subitem 1</a></li>
+                            <li><a href="#">Subitem 2</a></li>
+                            <li><a href="#">Subitem 3</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#">Dashboard</a></li>
+                    <li>
+                        <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Páginas</a>
+                        <ul class="collapse list-unstyled" id="pageSubmenu">
+                            <li><a href="#">Subitem 1</a></li>
+                            <li><a href="#">Subitem 2</a></li>
+                            <li><a href="#">Subitem 3</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#">Contactos</a></li>
+                </ul>
+            </nav>
+        
+            <!-- Contenido de la página -->
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        {% block contenido %}  {% endblock %}
+                    </div>
                 </div>
             </div>
         </div>
+
         
         <!-- Bootstrap JavaScript Libraries -->
         <script
