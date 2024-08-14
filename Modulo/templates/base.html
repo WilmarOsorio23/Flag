@@ -45,12 +45,19 @@
                                 </a>
                             </li>
                         </ul>
+                        <ul class="collapse list-unstyled" id="homeSubmenu">
+                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                                <a class="nav-item nav-link" href="" style="color: black; text-decoration: none;">
+                                    <i class="fas fa-table" style="color: black;"></i> IPC
+                                </a>
+                            </li>
+                        </ul>
                     </li>                    
                 </ul>                
             </nav>
         
             <!-- Contenido de la página -->
-            <div class="container" id="content" style="margin-left: 260px;">
+            <div class="container" id="content">
                 <div class="row">
                     <div class="col-12">
                         {% block contenido %}{% endblock %}

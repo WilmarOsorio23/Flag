@@ -119,3 +119,31 @@ a[aria-expanded="true"] {
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
 }
+.menu-item {
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px 0;
+    transition: background-color 0.3s ease; 
+}
+
+.menu-item a {
+    color: black;
+    text-decoration: none;
+}
+
+.menu-item:hover {
+    background-color: #ccc; 
+}
+
+.menu-item a:hover {
+    color: white; 
+}
+
+.menu-item i {
+    color: black;
+}
+
+.menu-item:hover i {
+    color: white; 
+}
