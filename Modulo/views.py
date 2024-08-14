@@ -1,7 +1,6 @@
-import pandas as pd
+import csv
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from django.db import models
 from .models import Modulo
 from .forms import ModuloForm
 
@@ -16,17 +15,11 @@ def Tablas(request):
     modulos = Modulo.objects.all().order_by('id')
     return render(request, 'Tablas/index.html', {'modulos': modulos})
 
-
-def crear(request):
+def crear(request):    
     if request.method == 'POST':
         form = ModuloForm(request.POST)
         if form.is_valid():
-            max_id = Modulo.objects.all().aggregate(max_id=models.Max('id'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_modulo = form.save(commit=False)
-            nuevo_modulo.id = new_id
-            nuevo_modulo.save()
-            
+            form.save()
             return redirect('Tablas')
     else:
         form = ModuloForm()
@@ -50,25 +43,30 @@ def eliminar(request):
         return redirect('Tablas')
     return redirect('Tablas')
 
-def descargar_excel(request):
+def descargar_csv(request):
+    # Verifica si la solicitud es POST
     if request.method == 'POST':
+        # Obtén los IDs seleccionados del formulario
         item_ids = request.POST.getlist('items_to_delete')
+
+        # Filtra los módulos seleccionados
         modulos = Modulo.objects.filter(id__in=item_ids)
+        
+        # Crea una respuesta HTTP con el tipo de contenido de CSV
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="modulos_seleccionados.csv"'
 
-        # Crear un DataFrame con los datos de los módulos
-        data = []
+        # Crea un escritor CSV
+        writer = csv.writer(response)
+        
+        # Escribe el encabezado
+        writer.writerow(['Id', 'Nombre módulo'])
+
+        # Escribe los datos de los módulos
         for modulo in modulos:
-            data.append([modulo.id, modulo.Nombre])
-
-        df = pd.DataFrame(data, columns=['Id', 'Nombre'])
-
-        # Crear una respuesta HTTP con el tipo de contenido de Excel
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="modulos_seleccionados.xlsx"'
-
-        # Exportar el DataFrame a un archivo Excel
-        df.to_excel(response, index=False)
-
+            writer.writerow([modulo.id, modulo.Nombre])
+        
         return response
 
+    # Si no es POST, redirige a la página de tablas
     return redirect('Tablas')
