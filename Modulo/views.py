@@ -51,21 +51,19 @@ def descargar_csv(request):
 
         # Filtra los módulos seleccionados
         modulos = Modulo.objects.filter(id__in=item_ids)
-        
-        # Crea una respuesta HTTP con el tipo de contenido de CSV
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="modulos_seleccionados.csv"'
 
-        # Crea un escritor CSV
-        writer = csv.writer(response)
-        
-        # Escribe el encabezado
-        writer.writerow(['Id', 'Nombre módulo'])
 
-        # Escribe los datos de los módulos
+        data = []
         for modulo in modulos:
-            writer.writerow([modulo.id, modulo.Nombre])
-        
+            data.append([modulo.id, modulo.Nombre])
+
+        df = pd.DataFrame(data, columns=['Id', 'Nombre'])
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="modulos_seleccionados.xlsx"'
+
+        df.to_excel(response, index=False)
+
         return response
 
     # Si no es POST, redirige a la página de tablas

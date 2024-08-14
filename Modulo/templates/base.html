@@ -18,49 +18,39 @@
     </head>
     <body>
         <nav class="navbar navbar-expand navbar-light bg-light">
-            <div class="nav navbar-nav">
-                <a class="nav-item nav-link active" href="{% url 'inicio' %}">Inicio</a> 
-                <a class="nav-item nav-link" href="{% url 'Tablas' %}">Tablas</a>
-            </div>
         </nav>
         <div class="d-flex">
             <!-- Menú lateral -->
-            <nav id="sidebar" class="bg-light text-black">
+            <nav id="sidebar" class="bg-light text-black" style="width: 250px; padding: 10px;">
                 <div class="sidebar-header">
                     <h3>Mi Aplicación</h3>
                 </div>
-        
+
                 <ul class="list-unstyled components">
                     <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-                        <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle" style="color: black; text-decoration: none;">
-                            <i class="fas fa-home" style="color: black;"></i> Inicio
+                        <a class="nav-item nav-link" href="{% url 'inicio' %}" style="color: black; text-decoration: none;">
+                            <i class="fas fa-compass" style="color: black;"></i> Inicio
+                        </a>
+                    </li>
+                </ul>
+                <ul class="list-unstyled components">
+                    <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+                        <a href="#homeSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle" style="color: black; text-decoration: none;">
+                            <i class="fas fa-home" style="color: black;"></i> Datos Maestros
                         </a>
                         <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li><a href="#">Subitem 1</a></li>
-                            <li><a href="#">Subitem 2</a></li>
-                            <li><a href="#">Subitem 3</a></li>
+                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                                <a class="nav-item nav-link" href="{% url 'Tablas' %}" style="color: black; text-decoration: none;">
+                                    <i class="fas fa-table" style="color: black;"></i> Modulo
+                                </a>
+                            </li>
                         </ul>
                     </li>                    
-                    <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-                        <a href="#dashboardSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle" style="color: black; text-decoration: none;">
-                            <i class="fas fa-tachometer-alt" style="color: black;"></i> Dashboard
-                        </a>
-                    </li>
-                    
-                    <li>
-                        <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Páginas</a>
-                        <ul class="collapse list-unstyled" id="pageSubmenu">
-                            <li><a href="#">Subitem 1</a></li>
-                            <li><a href="#">Subitem 2</a></li>
-                            <li><a href="#">Subitem 3</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="#">Contactos</a></li>
-                </ul>
+                </ul>                
             </nav>
         
             <!-- Contenido de la página -->
-            <div class="container" id="content">
+            <div class="container" id="content" style="margin-left: 260px;">
                 <div class="row">
                     <div class="col-12">
                         {% block contenido %}{% endblock %}
