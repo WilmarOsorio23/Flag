@@ -3,6 +3,8 @@
 {% block titulo %} Lista de Tablas {% endblock %}
 
 {% block contenido %}
+
+
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center"> 
         <h4 class="card-title">Módulos</h4>
@@ -24,6 +26,18 @@
         </div>
     </div>
     <div class="card-footer text-muted">
+            <style> .table-responsive {
+                    max-height: 200px; 
+                    max-width: 100%;   
+                    overflow-y: scroll;    
+                    overflow-x: scroll;  
+                    display: block;
+                }
+                .table {
+                    width: 100%;
+                    table-layout: auto;  
+                }   
+            </style>
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'eliminar' %}">
                 {% csrf_token %}

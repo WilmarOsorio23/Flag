@@ -55,18 +55,16 @@ def descargar_excel(request):
         item_ids = request.POST.getlist('items_to_delete')
         modulos = Modulo.objects.filter(id__in=item_ids)
 
-        # Crear un DataFrame con los datos de los módulos
+
         data = []
         for modulo in modulos:
             data.append([modulo.id, modulo.Nombre])
 
         df = pd.DataFrame(data, columns=['Id', 'Nombre'])
 
-        # Crear una respuesta HTTP con el tipo de contenido de Excel
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="modulos_seleccionados.xlsx"'
 
-        # Exportar el DataFrame a un archivo Excel
         df.to_excel(response, index=False)
 
         return response
