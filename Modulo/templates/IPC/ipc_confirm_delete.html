@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block titulo %} Confirmar Eliminación {% endblock %}
+
+{% block contenido %}
+    <h2>¿Estás seguro de que deseas eliminar el registro de IPC del año "{{ ipc.anio }}" y mes "{{ ipc.mes }}"?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+        <a href="{% url 'ipc_index' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+{% endblock %}

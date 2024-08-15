@@ -4,6 +4,8 @@ from django.http import HttpResponse
 from django.db import models
 from .models import Modulo
 from .forms import ModuloForm
+from .models import IPC
+from .forms import IPCForm
 
 def inicio(request):
     return render(request, 'paginas/Inicio.html')
@@ -63,10 +65,72 @@ def descargar_excel(request):
         df = pd.DataFrame(data, columns=['Id', 'Nombre'])
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="modulos_seleccionados.xlsx"'
+        response['Content-Disposition'] = 'attachment; filename="Modulos.xlsx"'
 
         df.to_excel(response, index=False)
 
         return response
 
     return redirect('Tablas')
+
+# Vista para la tabla IPC
+def ipc_index(request):
+    ipc_data = IPC.objects.all()
+    return render(request, 'ipc/ipc_index.html', {'ipc_data': ipc_data})
+
+def ipc_crear(request):
+    if request.method == 'POST':
+        form = IPCForm(request.POST)
+        if form.is_valid():
+            max_id = IPC.objects.all().aggregate(max_id=models.Max('id'))['max_id']
+            new_id = max_id + 1 if max_id is not None else 1
+            nuevo_ipc = form.save(commit=False)
+            nuevo_ipc.id = new_id
+            nuevo_ipc.save()
+            return redirect('ipc_index')
+    else:
+        form = IPCForm()
+    return render(request, 'ipc/ipc_form.html', {'form': form})
+
+def ipc_editar(request, id):
+    ipc = get_object_or_404(IPC, id=id)
+
+    if request.method == 'POST':
+        form = IPCForm(request.POST, instance=ipc)
+        if form.is_valid():
+            ipc = form.save(commit=False)
+            ipc.anio = ipc.anio
+            ipc.mes = ipc.mes
+            ipc.save()
+            return redirect('ipc_index')
+    else:
+        form = IPCForm(instance=ipc)
+
+    return render(request, 'ipc/ipc_form.html', {'form': form})
+
+def ipc_eliminar(request):
+    if request.method == 'POST':
+        item_ids = request.POST.getlist('items_to_delete')
+        IPC.objects.filter(id__in=item_ids).delete()
+        return redirect('ipc_index')
+    return redirect('ipc_index')
+
+def ipc_descargar_excel(request):
+    if request.method == 'POST':
+        item_ids = request.POST.getlist('items_to_delete')
+        ipc_data = IPC.objects.filter(id__in=item_ids)
+
+        data = []
+        for ipc in ipc_data:
+            data.append([ipc.id, ipc.anio, ipc.mes, ipc.campo_numerico])
+
+        df = pd.DataFrame(data, columns=['Id', 'Año', 'Mes', 'Campo Numérico'])
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="ipc.xlsx"'
+
+        df.to_excel(response, index=False)
+
+        return response
+
+    return redirect('ipc_index')
