@@ -45,19 +45,30 @@ def eliminar(request):
         return redirect('Tablas')
     return redirect('Tablas')
 
-def descargar_excel(request):
+def descargar_csv(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':
-        # Obtén los IDs seleccionados del formulario
         item_ids = request.POST.getlist('items_to_delete')
-
-        # Filtra los módulos seleccionados
         modulos = Modulo.objects.filter(id__in=item_ids)
         
         # Crea una respuesta HTTP con el tipo de contenido de CSV
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="modulos_seleccionados.csv"'
 
+<<<<<<<<< Temporary merge branch 1
+
+        data = []
+        for modulo in modulos:
+            data.append([modulo.id, modulo.Nombre])
+
+        df = pd.DataFrame(data, columns=['Id', 'Nombre'])
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="modulos_seleccionados.xlsx"'
+
+        df.to_excel(response, index=False)
+
+=========
         # Crea un escritor CSV
         writer = csv.writer(response)
         
@@ -66,19 +77,11 @@ def descargar_excel(request):
 
         # Escribe los datos de los módulos
         for modulo in modulos:
-            data.append([modulo.id, modulo.Nombre])
-
-        df = pd.DataFrame(data, columns=['Id', 'Nombre'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="Modulos.xlsx"'
-
-        df.to_excel(response, index=False)
-
-
+            writer.writerow([modulo.id, modulo.Nombre])
+        
+>>>>>>>>> Temporary merge branch 2
         return response
 
-    # Si no es POST, redirige a la página de tablas
     return redirect('Tablas')
 
 # Vista para la tabla IPC
