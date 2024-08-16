@@ -55,7 +55,7 @@ def descargar_csv(request):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="modulos_seleccionados.csv"'
 
-<<<<<<<<< Temporary merge branch 1
+
 
         data = []
         for modulo in modulos:
@@ -68,7 +68,6 @@ def descargar_csv(request):
 
         df.to_excel(response, index=False)
 
-=========
         # Crea un escritor CSV
         writer = csv.writer(response)
         
@@ -79,7 +78,6 @@ def descargar_csv(request):
         for modulo in modulos:
             writer.writerow([modulo.id, modulo.Nombre])
         
->>>>>>>>> Temporary merge branch 2
         return response
 
     return redirect('Tablas')
