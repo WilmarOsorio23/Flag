@@ -43,15 +43,10 @@ def eliminar(request):
         return redirect('Tablas')
     return redirect('Tablas')
 
-def descargar_csv(request):
-    # Verifica si la solicitud es POST
+def descargar_excel(request):
     if request.method == 'POST':
-        # Obtén los IDs seleccionados del formulario
         item_ids = request.POST.getlist('items_to_delete')
-
-        # Filtra los módulos seleccionados
         modulos = Modulo.objects.filter(id__in=item_ids)
-
 
         data = []
         for modulo in modulos:
@@ -66,5 +61,4 @@ def descargar_csv(request):
 
         return response
 
-    # Si no es POST, redirige a la página de tablas
     return redirect('Tablas')
