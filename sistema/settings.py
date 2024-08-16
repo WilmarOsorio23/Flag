@@ -30,7 +30,7 @@ ALLOWED_HOSTS = []
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    os.path.join(BASE_DIR, 'Modulo', 'static'),
 ]
 # Application definition
 
@@ -59,7 +59,7 @@ ROOT_URLCONF = 'sistema.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Usando Path en lugar de os.path.join
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Usando Path en lugar de os.path.join
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
