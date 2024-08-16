@@ -45,7 +45,7 @@ def eliminar(request):
         return redirect('Tablas')
     return redirect('Tablas')
 
-def descargar_csv(request):
+def descargar_excel(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':
         # Obtén los IDs seleccionados del formulario
@@ -66,10 +66,6 @@ def descargar_csv(request):
 
         # Escribe los datos de los módulos
         for modulo in modulos:
-<<<<<<< HEAD
-            writer.writerow([modulo.id, modulo.Nombre])
-        
-=======
             data.append([modulo.id, modulo.Nombre])
 
         df = pd.DataFrame(data, columns=['Id', 'Nombre'])
@@ -79,7 +75,7 @@ def descargar_csv(request):
 
         df.to_excel(response, index=False)
 
->>>>>>> f42476379d64129f500ea4be4843f8f54e73b001
+
         return response
 
     # Si no es POST, redirige a la página de tablas
