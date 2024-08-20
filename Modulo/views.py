@@ -1,6 +1,7 @@
-import csv
+import pandas as pd
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
+from django.db import models
 from .models import Modulo
 from .forms import ModuloForm
 from .models import IPC
@@ -45,7 +46,7 @@ def eliminar(request):
         return redirect('Tablas')
     return redirect('Tablas')
 
-def descargar_csv(request):
+def descargar_excel(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
