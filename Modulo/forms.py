@@ -1,5 +1,6 @@
 from django import forms
-from .models import Modulo, IPC
+from .models import Modulo, IPC, Clientes
+
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -40,4 +41,33 @@ class IPCForm(forms.ModelForm):
             'campo_numerico': 'Indice',
         }
 
+class ClientesForm(forms.ModelForm):
+    class Meta:
+        model = Clientes
+        fields = '__all__'
+        widgets = {
+            'TipoDocumentoID': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Tipo de Documento'
+                }),
+            'DocumentoId': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Documento ID'
+                }),
+            'Nombre_Cliente': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Nombre del Cliente'
+                }),
+            'Activo': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+                }),
+            'Fecha_Inicio': forms.DateInput(attrs={
+                'class': 'form-control', 
+                'type': 'date'
+                }),
+            'Fecha_Retiro': forms.DateInput(attrs={
+                'class': 'form-control', 
+                'type': 'date'
+                }),
+        }
 
