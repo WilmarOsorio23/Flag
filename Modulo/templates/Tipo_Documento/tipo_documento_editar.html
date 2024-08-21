@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block titulo %} Editar Tipo de documento {% endblock %}
+{% block titulo %} Editar Tipo Documento {% endblock %}
 
 {% block contenido %}
-<h2>Editar Tipo de Documento</h2>
+<h2>Editar Tipo Documento</h2>
 <form method="POST">
     {% csrf_token %}
     {{ form.as_p }}
