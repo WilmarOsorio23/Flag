@@ -1,6 +1,9 @@
 import pandas as pd
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 from .models import Modulo
 from .forms import ModuloForm
@@ -158,18 +161,25 @@ def clientes_crear(request):
     return render(request, 'clientes/clientes_form.html', {'form': form})
 
 
+@csrf_exempt
 def clientes_editar(request, tipo_documento_id, documento_id):
-    cliente = get_object_or_404(Clientes, TipoDocumentoID=tipo_documento_id, DocumentoId=documento_id)
-    
     if request.method == 'POST':
-        form = ClientesForm(request.POST, instance=cliente)
-        if form.is_valid():
-            form.save()
-            return redirect('clientes_index')
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            cliente = Clientes.objects.get(TipoDocumentoID=tipo_documento_id, DocumentoId=documento_id)
+            form = ClientesForm(data, instance=cliente)
+
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Clientes.DoesNotExist:
+            return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
     else:
-        form = ClientesForm(instance=cliente)
-    
-    return render(request, 'clientes/clientes_form.html', {'form': form})
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def clientes_eliminar(request):
     if request.method == 'POST':

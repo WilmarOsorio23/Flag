@@ -7,6 +7,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         
+        <!-- CSRF Token -->
+        <meta name="csrf-token" content="{{ csrf_token }}">
+
         <!-- Enlace al archivo styles.css -->
         <link rel="stylesheet" href="{% static 'styles.css' %}">  
 
@@ -15,6 +18,19 @@
 
         <!-- Incluye FontAwesome para los iconos -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+        <style>
+            #sidebar {
+                width: 250px;
+                padding: 10px;
+                background-color: #f8f9fa;
+                height: 100vh; /* Altura del 100% de la ventana */
+                overflow-y: auto; /* Habilita el scroll vertical */
+            }
+    
+            .sidebar-header h3 {
+                margin: 0;
+            }
+        </style>
     </head>
     <body>
         <nav class="navbar navbar-expand navbar-light bg-light">
@@ -56,6 +72,13 @@
                             <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
                                 <a class="nav-item nav-link" href="{% url 'clientes_index' %}" style="color: black; text-decoration: none;">
                                     <i class="fas fa-user" style="color: black;"></i> Clientes
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="collapse list-unstyled" id="homeSubmenu">
+                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                                <a class="nav-item nav-link" href="" style="color: black; text-decoration: none;">
+                                    <i class="fas fa-file-alt" style="color: black;"></i> Conceptos
                                 </a>
                             </li>
                         </ul>
