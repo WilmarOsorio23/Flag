@@ -39,7 +39,7 @@
                 }   
             </style>
         <div class="table-responsive">
-            <form id="delete-form" method="POST" action="{% url 'eliminar' %}">
+            <form id="delete-form" method="POST" action="{% url 'perfil_eliminar' %}">
                 {% csrf_token %}
                 <table class="table table-primary">
                     <thead>
@@ -50,11 +50,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for modulo in modulos %}
-                        <tr class="">
+                        {% for perfil in perfil_data %}
+                        <tr>
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ perfil.id }}"></td>
                             <td>{{ perfil.id }}</td>
-                            <td>{{ perfil.Nombre }}</td>
+                            <td>{{ perfil.nombre }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

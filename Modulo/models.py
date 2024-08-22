@@ -70,7 +70,7 @@ class TipoDocumento(models.Model):
     descripcion = models.TextField()
 
     def __str__(self):
-        return f"Nombre: {self.nombre}, Descripción: {self.descripcion}"
+        return f"Nombre: {self.nombre}"
 
     def delete(self, using=None, keep_parents=False):
         super().delete(using=using, keep_parents=keep_parents)

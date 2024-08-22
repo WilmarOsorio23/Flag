@@ -77,14 +77,9 @@ class LineaForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ingrese el nombre de la línea'
             }),
-            'descripcion': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese la descripción'
-            }),
         }
         labels = {
             'nombre': 'Nombre',
-            'descripcion': 'Descripción',
         }
 
 
@@ -111,14 +106,9 @@ class TipoDocumentoForm(forms.ModelForm):
             'nombre': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
-                'placeholder': 'Ingrese el nombre del tipo de documento'
-            }),
-            'descripcion': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese la descripción'
+                'placeholder': 'Ingrese el nombre'
             }),
         }
         labels = {
             'nombre': 'Nombre',
-            'descripcion': 'Descripción',
         }

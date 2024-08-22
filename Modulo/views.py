@@ -340,7 +340,8 @@ def perfil_descargar_excel(request):
 # Vista Tipo Documento
 def tipo_documento_index(request):
     tipo_documentos = TipoDocumento.objects.all()
-    return render(request, 'tipo_documento_index.html', {'tipo_documentos': tipo_documentos})
+    return render(request, 'Tipo_Documento/tipo_documento_index.html', {'tipo_documentos': tipo_documentos})
+
 
 def tipo_documento_crear(request):
     if request.method == 'POST':
@@ -354,7 +355,7 @@ def tipo_documento_crear(request):
             return redirect('tipo_documento_index')
     else:
         form = TipoDocumentoForm()
-    return render(request, 'tipo_documento/tipo_documento_form.html', {'form': form})
+    return render(request, 'Tipo_Documento/tipo_documento_form.html', {'form': form})
 
 def tipo_documento_editar(request, id):
     tipo_documento = get_object_or_404(TipoDocumento, id=id)
