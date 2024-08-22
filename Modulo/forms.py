@@ -1,9 +1,5 @@
 from django import forms
-<<<<<<< HEAD
-from .models import Modulo, IPC, Clientes, Consultores
-=======
-from .models import Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes
->>>>>>> 1ea7e75aec1bd58adf7c2f4023e829b78f5b4544
+from .models import Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes, Consultores
 
 
 class ModuloForm(forms.ModelForm):
@@ -101,7 +97,6 @@ class INDForm(forms.ModelForm):
             'campo_numerico': 'Indice',
         }
 
-<<<<<<< HEAD
 class ConsultoresForm(forms.ModelForm):
     class Meta:
         model = Consultores
@@ -138,7 +133,8 @@ class ConsultoresForm(forms.ModelForm):
                 'class': 'form-control',
                 'type': 'date'
             }),
-=======
+        }
+        
 class LineaForm(forms.ModelForm):
     class Meta:
         model = Linea
@@ -183,5 +179,4 @@ class TipoDocumentoForm(forms.ModelForm):
         }
         labels = {
             'nombre': 'Nombre',
->>>>>>> 1ea7e75aec1bd58adf7c2f4023e829b78f5b4544
         }

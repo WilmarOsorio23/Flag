@@ -77,6 +77,7 @@ class TipoDocumento(models.Model):
 
     class Meta:
         db_table = 'TipoDocumento'
+        
 class Clientes(models.Model):
     ClienteId = models.AutoField(primary_key=True)
     TipoDocumentoID = models.CharField(max_length=10)
