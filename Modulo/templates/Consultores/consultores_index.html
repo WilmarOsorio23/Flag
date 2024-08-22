@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block titulo %} Lista de Consultores {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title">Consultores</h4>
+    </div>
+    <div class="card-body">
+        <div class="button-group" style="display: flex; align-items: center;">
+            <a name="" id="" class="fas fa-plus-circle" title="Crear" href="{% url 'consultores_crear' %}" role="button" style="color: rgb(7, 7, 7); margin-right: 10px;"></a>
+            <a id="edit-button" class="fas fa-edit" title="Editar" href="#" role="button" style="color: rgb(7, 7, 7); margin-right: 10px;" onclick="handleEditClick();"></a>
+            <i name="" id="" class="fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i>
+            <button type="submit" form="delete-form" class="fas fa-trash-alt" title="Eliminar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-right: 10px;" onclick="return confirmDelete();"></button>
+            <form id="download-form" method="POST" action="{% url 'consultores_descargar_excel' %}" style="display:inline;">
+                {% csrf_token %}
+                {% for consultor in consultores %}
+                    <input type="hidden" name="items_to_delete" value="{{ consultor.TipoDocumentoID }}-{{ consultor.DocumentoId }}">
+                {% endfor %}
+                <button type="submit" class="fas fa-download" title="Descargar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer;"></button>
+            </form>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        <div class="table-responsive">
+            <form id="delete-form" method="POST" action="{% url 'consultores_eliminar' %}">
+                {% csrf_token %}
+                <table class="table table-primary">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all"></th>
+                            <th scope="col">Tipo Documento ID</th>
+                            <th scope="col">Documento ID</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Empresa</th>
+                            <th scope="col">Profesión</th>
+                            <th scope="col">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for consultor in consultores %}
+                        <tr class="">
+                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ consultor.TipoDocumentoID }}-{{ consultor.DocumentoId }}"></td>
+                            <td>{{ consultor.TipoDocumentoID }}</td>
+                            <td>{{ consultor.DocumentoId }}</td>
+                            <td>{{ consultor.Nombre }}</td>
+                            <td>{{ consultor.Empresa }}</td>
+                            <td>{{ consultor.Profesion }}</td>
+                            <td>{{ consultor.Estado }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('select-all').addEventListener('click', function(event) {
+        let checkboxes = document.querySelectorAll('.row-select');
+        for (let checkbox of checkboxes) {
+            checkbox.checked = event.target.checked;
+        }
+    });
+
+    function confirmDelete() {
+        let selected = document.querySelectorAll('.row-select:checked').length;
+        if (selected === 0) {
+            alert('No has seleccionado ningún elemento para eliminar.');
+            return false;
+        }
+        return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
+    }
+
+    function handleEditClick() {
+        let selectedRows = document.querySelectorAll('.row-select:checked');
+        if (selectedRows.length === 0) {
+            alert('No has seleccionado ningún elemento para editar.');
+            return;
+        }
+        if (selectedRows.length > 1) {
+            alert('Solo puedes editar un elemento a la vez.');
+            return;
+        }
+        
+        let selectedValue = selectedRows[0].value.split('-');
+        let tipoDocumentoID = selectedValue[0];
+        let documentoID = selectedValue[1];
+        let url = "{% url 'consultores_editar' 'TIPO_DOCUMENTO_ID' 'DOCUMENTO_ID' %}"
+            .replace('TIPO_DOCUMENTO_ID', tipoDocumentoID)
+            .replace('DOCUMENTO_ID', documentoID);
+
+        window.location.href = url;
+    }
+</script>
+{% endblock %}
+

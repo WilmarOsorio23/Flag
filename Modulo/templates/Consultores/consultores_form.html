@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %} Formulario Consultor {% endblock %}
+
+{% block contenido %}
+    <h2>{{ form.instance.pk|yesno:"Editar Consultor,Crear Nuevo Consultor" }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'consultores_index' %}" class="btn btn-danger">Cancelar</a>
+    </form>
+{% endblock %}

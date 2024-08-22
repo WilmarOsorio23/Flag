@@ -49,3 +49,28 @@ class Clientes(models.Model):
             models.UniqueConstraint(fields=['TipoDocumentoID', 'DocumentoId'], name='unique_cliente')
         ]
 
+class Consultores(models.Model):
+    TipoDocumentoId = models.CharField(max_length=10)
+    Documento = models.AutoField(primary_key=True)
+    Nombre = models.CharField(max_length=100)
+    Empresa = models.CharField(max_length=100)
+    Profesion = models.CharField(max_length=100)
+    LineaId = models.CharField(max_length=50)  # Temporalmente como CharField
+    ModuloId = models.CharField(max_length=50)  # Temporalmente como CharField
+    Perfil = models.CharField(max_length=50)  # Temporalmente como CharField
+    Estado = models.BooleanField(default=True)
+    Fecha_Ingreso = models.DateField()
+    Fecha_Retiro = models.DateField(null=True, blank=True)
+    Direccion = models.CharField(max_length=255, null=True, blank=True)
+    Telefono = models.CharField(max_length=20, null=True, blank=True)
+    Fecha_Operacion = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.TipoDocumentoId} - {self.Documento} - {self.Nombre}'
+
+    class Meta:
+        db_table = 'Consultores'
+        constraints = [
+            models.UniqueConstraint(fields=['TipoDocumentoId', 'Documento'], name='unique_consultor')
+        ]
+

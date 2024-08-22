@@ -24,4 +24,12 @@ urlpatterns = [
     path('clientes/eliminar/', views.clientes_eliminar, name='clientes_eliminar'),
     path('clientes/descargar_excel/', views.clientes_descargar_excel, name='clientes_descargar_excel'),
 
+    # Rutas para la tabla Consultores
+    path('consultores/', views.consultores_index, name='consultores_index'),
+    path('consultores/crear/', views.consultores_crear, name='consultores_crear'),
+    path('consultores/editar/<str:tipo_documento_id>/<str:documento_id>/', views.consultores_editar, name='consultores_editar'),
+    path('consultores/eliminar/', views.consultores_eliminar, name='consultores_eliminar'),
+    path('consultores/descargar_excel/', views.consultores_descargar_excel, name='consultores_descargar_excel'),
+
+
 ]
