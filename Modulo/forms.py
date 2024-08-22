@@ -1,5 +1,9 @@
 from django import forms
+<<<<<<< HEAD
 from .models import Modulo, IPC, Clientes, Consultores
+=======
+from .models import Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes
+>>>>>>> 1ea7e75aec1bd58adf7c2f4023e829b78f5b4544
 
 
 class ModuloForm(forms.ModelForm):
@@ -70,7 +74,34 @@ class ClientesForm(forms.ModelForm):
                 'type': 'date'
                 }),
         }
+class INDForm(forms.ModelForm):
+    class Meta:
+        model = IND
+        fields = '__all__'
+        widgets = {
+            'anio': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el año'
+            }),
+            'mes': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el mes'
+            }),
+            'campo_numerico': forms.NumberInput(attrs={
+                'type': 'number',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el Indice'
+            }),
+        }
+        labels = {
+            'anio': 'Año',
+            'mes': 'Mes',
+            'campo_numerico': 'Indice',
+        }
 
+<<<<<<< HEAD
 class ConsultoresForm(forms.ModelForm):
     class Meta:
         model = Consultores
@@ -107,4 +138,50 @@ class ConsultoresForm(forms.ModelForm):
                 'class': 'form-control',
                 'type': 'date'
             }),
+=======
+class LineaForm(forms.ModelForm):
+    class Meta:
+        model = Linea
+        fields = '__all__'
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el nombre de la línea'
+            }),
+        }
+        labels = {
+            'nombre': 'Nombre',
+        }
+
+
+class PerfilForm(forms.ModelForm):
+    class Meta:
+        model = Perfil
+        fields = '__all__'
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el nombre'
+            }),
+        }
+        labels = {
+            'nombre': 'Nombre',
+        }
+
+class TipoDocumentoForm(forms.ModelForm):
+    class Meta:
+        model = TipoDocumento
+        fields = '__all__'
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el nombre'
+            }),
+        }
+        labels = {
+            'nombre': 'Nombre',
+>>>>>>> 1ea7e75aec1bd58adf7c2f4023e829b78f5b4544
         }
