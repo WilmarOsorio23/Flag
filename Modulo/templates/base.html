@@ -30,6 +30,31 @@
             .sidebar-header h3 {
                 margin: 0;
             }
+        </style><style>
+            #sidebar {
+                width: 250px;
+                padding: 10px;
+                background-color: #f8f9fa;
+                height: 100vh; /* Altura del 100% de la ventana */
+                overflow-y: auto; /* Habilita el scroll vertical */
+            }
+    
+            .sidebar-header h3 {
+                margin: 0;
+            }
+        </style>
+        <style>
+            #sidebar {
+                width: 250px;
+                padding: 10px;
+                background-color: #f8f9fa;
+                height: 100vh; /* Altura del 100% de la ventana */
+                overflow-y: auto; /* Habilita el scroll vertical */
+            }
+    
+            .sidebar-header h3 {
+                margin: 0;
+            }
         </style>
     </head>
     <body>
@@ -65,6 +90,34 @@
                             <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
                                 <a class="nav-item nav-link" href="{% url 'ipc_index' %}" style="color: black; text-decoration: none;">
                                     <i class="fas fa-table" style="color: black;"></i> IPC
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="collapse list-unstyled" id="homeSubmenu">
+                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                                <a class="nav-item nav-link" href="{% url 'tipo_documento_index' %}" style="color: black; text-decoration: none;">
+                                    <i class="fas fa-table" style="color: black;"></i> Tipo Documento
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="collapse list-unstyled" id="homeSubmenu">
+                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                                <a class="nav-item nav-link" href="{% url 'perfil_index' %}" style="color: black; text-decoration: none;">
+                                    <i class="fas fa-table" style="color: black;"></i> Perfil
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="collapse list-unstyled" id="homeSubmenu">
+                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                                <a class="nav-item nav-link" href="{% url 'linea_index' %}" style="color: black; text-decoration: none;">
+                                    <i class="fas fa-table" style="color: black;"></i> Línea
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="collapse list-unstyled" id="homeSubmenu">
+                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                                <a class="nav-item nav-link" href="{% url 'ind_index' %}" style="color: black; text-decoration: none;">
+                                    <i class="fas fa-table" style="color: black;"></i> IND
                                 </a>
                             </li>
                         </ul>
