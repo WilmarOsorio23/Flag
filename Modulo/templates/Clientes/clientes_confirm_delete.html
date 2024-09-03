@@ -8,7 +8,7 @@
     </div>
     <div class="card-body">
         <p>¿Estás seguro de que deseas eliminar al cliente <strong>{{ cliente.Nombre_Cliente }}</strong>?</p>
-        <form method="POST">
+        <form method="POST" action="{% url 'clientes_eliminar' cliente.TipoDocumentoID.TipoDocumentoID cliente.DocumentoId %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger">Eliminar</button>
             <a href="{% url 'clientes_index' %}" class="btn btn-secondary">Cancelar</a>

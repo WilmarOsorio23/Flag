@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.db import models
@@ -347,23 +348,24 @@ def tipo_documento_index(request):
     tipo_documentos = TipoDocumento.objects.all()
     return render(request, 'Tipo_Documento/tipo_documento_index.html', {'tipo_documentos': tipo_documentos})
 
-
 def tipo_documento_crear(request):
     if request.method == 'POST':
         form = TipoDocumentoForm(request.POST)
         if form.is_valid():
-            max_id = TipoDocumento.objects.all().aggregate(max_id=models.Max('id'))['max_id']
+            # Obtener el valor máximo actual de TipoDocumentoID
+            max_id = TipoDocumento.objects.all().aggregate(max_id=models.Max('TipoDocumentoID'))['max_id']
             new_id = max_id + 1 if max_id is not None else 1
+
             nuevo_tipo_documento = form.save(commit=False)
-            nuevo_tipo_documento.id = new_id
+            nuevo_tipo_documento.TipoDocumentoID = new_id  # Asignar manualmente el nuevo ID
             nuevo_tipo_documento.save()
             return redirect('tipo_documento_index')
     else:
         form = TipoDocumentoForm()
     return render(request, 'Tipo_Documento/tipo_documento_form.html', {'form': form})
 
-def tipo_documento_editar(request, id):
-    tipo_documento = get_object_or_404(TipoDocumento, id=id)
+def tipo_documento_editar(request, TipoDocumentoID):
+    tipo_documento = get_object_or_404(TipoDocumento, TipoDocumentoID=TipoDocumentoID)
 
     if request.method == 'POST':
         form = TipoDocumentoForm(request.POST, instance=tipo_documento)
@@ -373,25 +375,25 @@ def tipo_documento_editar(request, id):
     else:
         form = TipoDocumentoForm(instance=tipo_documento)
 
-    return render(request, 'tipo_documento/tipo_documento_form.html', {'form': form})
+    return render(request, 'Tipo_Documento/tipo_documento_form.html', {'form': form})
 
 def tipo_documento_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        TipoDocumento.objects.filter(id__in=item_ids).delete()
+        TipoDocumento.objects.filter(TipoDocumentoID__in=item_ids).delete()
         return redirect('tipo_documento_index')
     return redirect('tipo_documento_index')
 
 def tipo_documento_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        tipo_documento_data = TipoDocumento.objects.filter(id__in=item_ids)
+        tipo_documento_data = TipoDocumento.objects.filter(TipoDocumentoID__in=item_ids)
 
         data = []
         for tipo_documento in tipo_documento_data:
-            data.append([tipo_documento.id, tipo_documento.nombre, tipo_documento.descripcion])
+            data.append([tipo_documento.TipoDocumentoID, tipo_documento.Nombre])
 
-        df = pd.DataFrame(data, columns=['Id', 'Nombre', 'Descripción'])
+        df = pd.DataFrame(data, columns=['TipoDocumentoID', 'Nombre'])
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="tipo_documento.xlsx"'
@@ -457,14 +459,22 @@ def clientes_descargar_excel(request):
         # Obtener los IDs desde el formulario
         item_ids = request.POST.get('items_to_download', '').split(',')
         
-        # Filtrar los clientes con los IDs proporcionados
-        clientes_data = Clientes.objects.filter(ClienteId__in=item_ids)
+        # Crear una lista para almacenar las combinaciones de TipoDocumentoID y DocumentoId
+        filter_params = []
+        for item in item_ids:
+            tipo_documento_id, documento_id = item.split('-')
+            filter_params.append((tipo_documento_id, documento_id))
+        
+        # Filtrar los clientes usando las combinaciones
+        clientes_data = Clientes.objects.filter(
+            (Q(TipoDocumentoID=tipo_documento_id) & Q(DocumentoId=documento_id)) for tipo_documento_id, documento_id in filter_params
+        )
 
         # Preparar los datos para el DataFrame
         data = []
         for cliente in clientes_data:
             data.append([
-                cliente.TipoDocumentoID, 
+                cliente.TipoDocumentoID.Nombre,  # Asumiendo que quieres mostrar el nombre del tipo de documento
                 cliente.DocumentoId, 
                 cliente.Nombre_Cliente, 
                 cliente.Activo, 
@@ -474,7 +484,7 @@ def clientes_descargar_excel(request):
 
         # Crear el DataFrame y exportar a Excel
         df = pd.DataFrame(data, columns=[
-            'Tipo Documento ID', 
+            'Tipo Documento', 
             'Documento ID', 
             'Nombre Cliente', 
             'Activo', 
@@ -489,7 +499,10 @@ def clientes_descargar_excel(request):
 
         return response
 
-    return redirect('clientes_index')
+    return redirect('cliente_index')
+
+
+# Vista para la tabla Consultores
 
 def consultores_index(request):
     consultores = Consultores.objects.all()

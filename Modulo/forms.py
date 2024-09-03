@@ -46,8 +46,8 @@ class ClientesForm(forms.ModelForm):
         model = Clientes
         fields = '__all__'
         widgets = {
-            'TipoDocumentoID': forms.TextInput(attrs={
-                'class': 'form-control', 
+            'TipoDocumentoID': forms.Select(attrs={
+                'class': 'form-control',
                 'placeholder': 'Tipo de Documento'
                 }),
             'DocumentoId': forms.TextInput(attrs={
@@ -69,7 +69,7 @@ class ClientesForm(forms.ModelForm):
                 'class': 'form-control', 
                 'type': 'date'
                 }),
-        }
+        }  
 class INDForm(forms.ModelForm):
     class Meta:
         model = IND
@@ -134,7 +134,7 @@ class ConsultoresForm(forms.ModelForm):
                 'type': 'date'
             }),
         }
-        
+
 class LineaForm(forms.ModelForm):
     class Meta:
         model = Linea

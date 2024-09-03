@@ -66,21 +66,25 @@ class Perfil(models.Model):
         db_table = 'perfil'
 
 class TipoDocumento(models.Model):
-    nombre = models.CharField(max_length=100)
-    descripcion = models.TextField()
+    TipoDocumentoID = models.AutoField(primary_key=True)
+    Nombre = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"Nombre: {self.nombre}"
+        return f"{self.Nombre} {self.TipoDocumentoID}"
 
     def delete(self, using=None, keep_parents=False):
         super().delete(using=using, keep_parents=keep_parents)
 
     class Meta:
         db_table = 'TipoDocumento'
-        
+              
 class Clientes(models.Model):
     ClienteId = models.AutoField(primary_key=True)
-    TipoDocumentoID = models.CharField(max_length=10)
+    TipoDocumentoID = models.ForeignKey(
+        TipoDocumento, 
+        on_delete=models.CASCADE,
+        db_column='TipoDocumentoID'
+    )
     DocumentoId = models.CharField(max_length=20)
     Nombre_Cliente = models.CharField(max_length=50)
     Activo = models.BooleanField(default=True)
@@ -88,7 +92,7 @@ class Clientes(models.Model):
     Fecha_Retiro = models.DateField(null=True, blank=True)
 
     def __str__(self):
-        return f'{self.TipoDocumentoID} - {self.DocumentoId} - {self.Nombre_Cliente}'
+        return f'{self.TipoDocumentoID.Nombre} - {self.TipoDocumentoID.TipoDocumentoID} - {self.DocumentoId} - {self.Nombre_Cliente}'
 
     def delete(self, using=None, keep_parents=False):
         super().delete(using=using, keep_parents=keep_parents)
@@ -98,6 +102,7 @@ class Clientes(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['TipoDocumentoID', 'DocumentoId'], name='unique_cliente')
         ]
+
 
 class Consultores(models.Model):
     TipoDocumentoId = models.CharField(max_length=10)
@@ -123,4 +128,3 @@ class Consultores(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['TipoDocumentoId', 'Documento'], name='unique_consultor')
         ]
-
