@@ -59,5 +59,87 @@ urlpatterns = [
     path('consultores/eliminar/', views.consultores_eliminar, name='consultores_eliminar'),
     path('consultores/descargar_excel/', views.consultores_descargar_excel, name='consultores_descargar_excel'),
 
+    # Rutas para tabla Certificacion
+    path('certificacion/', views.certificacion_index, name='certificacion_index'),
+    path('certificacion/crear', views.certificacion_crear, name='certificacion_crear'),
+    path('certificacion/editar/<int:id>/', views.certificacion_editar, name='certificacion_editar'),
+    path('certificacion/eliminar', views.certificacion_eliminar, name='certificacion_eliminar'),
+    path('certificacion/descargar_excel', views.certificacion_descargar_excel, name='certificacion_descargar_excel'),
+    
+    # Rutas para tabla CostoIndirecto
+    path('costos_indirectos/', views.costos_indirectos_index, name='costos_indirectos_index'),
+    path('costos_indirectos/crear', views.costos_indirectos_crear, name='costos_indirectos_crear'),
+    path('costos_indirectos/editar/<int:id>/', views.costos_indirectos_editar, name='costos_indirectos_editar'),
+    path('costos_indirectos/eliminar', views.costos_indirectos_eliminar, name='costos_indirectos_eliminar'),
+    path('costos_indirectos/descargar_excel', views.costos_indirectos_descargar_excel, name='costos_indirectos_descargar_excel'),
 
+    # Rutas para la tabla Concepto
+    path('conceptos/', views.conceptos_index, name='conceptos_index'),
+    path('conceptos/crear', views.conceptos_crear, name='conceptos_crear'),
+    path('conceptos/editar/<int:id>/', views.conceptos_editar, name='conceptos_editar'),
+    path('conceptos/eliminar', views.conceptos_eliminar, name='conceptos_eliminar'),
+    path('conceptos/descargar_excel', views.conceptos_descargar_excel, name='conceptos_descargar_excel'),
+
+    # Rutas para tabla Gastos
+    path('gastos/', views.gasto_index, name='gastos_index'),
+    path('gastos/crear', views.gasto_crear, name='gastos_crear'),
+    path('gastos/editar/<int:id>/', views.gasto_editar, name='gastos_editar'),
+    path('gastos/eliminar', views.gasto_eliminar, name='gastos_eliminar'),
+    path('gastos/descargar_excel', views.gasto_descargar_excel, name='gastos_descargar_excel'),
+
+    # Rutas para tabla Detalle de Gastos
+    path('detalle_gastos/', views.detalle_gastos_index, name='detalle_gastos_index'),
+    path('detalle_gastos/crear', views.detalle_gastos_crear, name='detalle_gastos_crear'),
+    path('detalle_gastos/editar/<str:Anio>/<str:Mes>/<int:GastosId>/', views.detalle_gastos_editar, name='detalle_gastos_editar'),
+    path('detalle_gastos/eliminar', views.detalle_gastos_eliminar, name='detalle_gastos_eliminar'),
+    path('detalle_gastos/descargar_excel', views.detalle_gastos_descargar_excel, name='detalle_gastos_descargar_excel'),
+
+    # Rutas para tabla Total de Gastos
+    path('total_gastos/', views.total_gastos_index, name='total_gastos_index'),
+    path('total_gastos/crear', views.total_gastos_crear, name='total_gastos_crear'),
+    path('total_gastos/editar/<str:anio>/<str:mes>/', views.total_gastos_editar, name='total_gastos_editar'),
+    path('total_gastos/eliminar', views.total_gastos_eliminar, name='total_gastos_eliminar'),
+    path('total_gastos/descargar_excel', views.total_gastos_descargar_excel, name='total_gastos_descargar_excel'),
+
+    # Rutas para tabla Total Costos Indirectos
+    path('total_costos_indirectos/', views.total_costos_indirectos_index, name='total_costos_indirectos_index'),
+    path('total_costos_indirectos/crear/', views.total_costos_indirectos_crear, name='total_costos_indirectos_crear'),
+    path('total_costos_indirectos/editar/<str:anio>/<str:mes>/', views.total_costos_indirectos_editar, name='total_costos_indirectos_editar'),
+    path('total_costos_indirectos/eliminar/', views.total_costos_indirectos_eliminar, name='total_costos_indirectos_eliminar'),
+    path('total_costos_indirectos/descargar_excel/', views.total_costos_indirectos_descargar_excel, name='total_costos_indirectos_descargar_excel'),
+
+    # Rutas para tabla Detalle Costos Indirectos
+    path('detalle_costos_indirectos/', views.detalle_costos_indirectos_index, name='detalle_costos_indirectos_index'),
+    path('detalle_costos_indirectos/crear', views.detalle_costos_indirectos_crear, name='detalle_costos_indirectos_crear'),
+    path('detalle_costos_indirectos/editar/<int:id>/', views.detalle_costos_indirectos_editar, name='detalle_costos_indirectos_editar'),
+    path('detalle_costos_indirectos/eliminar', views.detalle_costos_indirectos_eliminar, name='detalle_costos_indirectos_eliminar'),
+    path('detalle_costos_indirectos/descargar_excel', views.detalle_costos_indirectos_descargar_excel, name='detalle_costos_indirectos_descargar_excel'),
+
+    # Rutas para tabla Tiempos Concepto
+    path('tiempos_concepto/', views.tiempos_concepto_index, name='tiempos_concepto_index'),
+    path('tiempos_concepto/crear', views.tiempos_concepto_crear, name='tiempos_concepto_crear'),
+    path('tiempos_concepto/editar/<str:id>/', views.tiempos_concepto_editar, name='tiempos_concepto_editar'),
+    path('tiempos_concepto/eliminar', views.tiempos_concepto_eliminar, name='tiempos_concepto_eliminar'),
+    path('tiempos_concepto/descargar_excel', views.tiempos_concepto_descargar_excel, name='tiempos_concepto_descargar_excel'),
+
+    # Rutas para tabla Tiempos Cliente
+    path('tiempos_cliente/', views.tiempos_cliente_index, name='tiempos_cliente_index'),
+    path('tiempos_cliente/crear', views.tiempos_cliente_crear, name='tiempos_cliente_crear'),
+    path('tiempos_cliente/editar/<int:id>/', views.tiempos_cliente_editar, name='tiempos_cliente_editar'),
+    path('tiempos_cliente/eliminar', views.tiempos_cliente_eliminar, name='tiempos_cliente_eliminar'),
+    path('tiempos_cliente/descargar_excel', views.tiempos_cliente_descargar_excel, name='tiempos_cliente_descargar_excel'),
+
+    # Rutas para tabla Nomina
+    path('nomina/', views.nomina_index, name='nomina_index'),
+    path('nomina/crear', views.nomina_crear, name='nomina_crear'),
+    path('nomina/editar/<str:anio>/<str:mes>/<str:documento>/', views.nomina_editar, name='nomina_editar'),
+    path('nomina/eliminar', views.nomina_eliminar, name='nomina_eliminar'),
+    path('nomina/descargar_excel', views.nomina_descargar_excel, name='nomina_descargar_excel'),
+
+    # Rutas para tabla Detalle Certificación
+    path('detalle_certificacion/', views.detalle_certificacion_index, name='detalle_certificacion_index'),
+    path('detalle_certificacion/crear/', views.detalle_certificacion_crear, name='detalle_certificacion_crear'),
+    path('detalle_certificacion/editar/<str:documentoId>/<str:certificacionId>/', views.detalle_certificacion_editar, name='detalle_certificacion_editar'),
+    path('detalle_certificacion/eliminar/', views.detalle_certificacion_eliminar, name='detalle_certificacion_eliminar'),
+    path('detalle_certificacion/descargar_excel/', views.detalle_certificacion_descargar_excel, name='detalle_certificacion_descargar_excel'),
 ]

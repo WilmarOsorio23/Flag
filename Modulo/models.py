@@ -1,69 +1,64 @@
 from django.db import models
 
+# Modelos base
 class Modulo(models.Model):
-    id = models.AutoField(primary_key=True)
+    ModuloId = models.AutoField(primary_key=True)
     Nombre = models.TextField(verbose_name="Descripcion", null=True)
 
     def __str__(self):
-        fila = "Nombre" + self.Nombre
-        return fila
-
-    def delete(self, using=None, Keep_parents=False):
-        super().delete()
+        return f"Nombre: {self.Nombre}"
 
     class Meta:
         db_table = 'Modulo'
 
+
 class IPC(models.Model):
-    anio = models.CharField(max_length=4)
-    mes = models.CharField(max_length=2)
-    campo_numerico = models.DecimalField(max_digits=10, decimal_places=2)
+    Anio = models.CharField(max_length=4)
+    Mes = models.CharField(max_length=2)
+    Indice = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"Año: {self.anio}, Mes: {self.mes}, Campo Numérico: {self.campo_numerico}"
-
-    def delete(self, using=None, keep_parents=False):
-        super().delete(using=using, keep_parents=keep_parents)
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Indice: {self.Indice}"
 
     class Meta:
         db_table = 'IPC'
+        unique_together = (('Anio', 'Mes'),)
+
 
 class IND(models.Model):
-    anio = models.CharField(max_length=4)
-    mes = models.CharField(max_length=2)
-    campo_numerico = models.DecimalField(max_digits=10, decimal_places=2)
+    Anio = models.CharField(max_length=4)
+    Mes = models.CharField(max_length=2)
+    Indice = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"Año: {self.anio}, Mes: {self.mes}, Campo Numérico: {self.campo_numerico}"
-
-    def delete(self, using=None, keep_parents=False):
-        super().delete(using=using, keep_parents=keep_parents)
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Indice: {self.Indice}"
 
     class Meta:
         db_table = 'IND'
+        unique_together = (('Anio', 'Mes'),)
+
 
 class Linea(models.Model):
-    nombre = models.CharField(max_length=100)
-    descripcion = models.TextField()
+    LineaId = models.CharField(max_length=100, primary_key=True)
+    Nombre = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"Nombre: {self.nombre}, Descripción: {self.descripcion}"
-
-    def delete(self, using=None, keep_parents=False):
-        super().delete(using=using, keep_parents=keep_parents)
+        return f"LineaId: {self.LineaId}, Nombre: {self.Nombre}"
 
     class Meta:
         db_table = 'Linea'
 
+
 class Perfil(models.Model):
-    id = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=100)
+    PerfilId = models.AutoField(primary_key=True)
+    Nombre = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"Nombre: {self.nombre}"
+        return f"PerfilId: {self.PerfilId}, Nombre: {self.Nombre}"
 
     class Meta:
-        db_table = 'perfil'
+        db_table = 'Perfil'
+
 
 class TipoDocumento(models.Model):
     TipoDocumentoID = models.AutoField(primary_key=True)
@@ -72,12 +67,11 @@ class TipoDocumento(models.Model):
     def __str__(self):
         return f"{self.Nombre} {self.TipoDocumentoID}"
 
-    def delete(self, using=None, keep_parents=False):
-        super().delete(using=using, keep_parents=keep_parents)
-
     class Meta:
         db_table = 'TipoDocumento'
-              
+
+
+# Modelos con relaciones
 class Clientes(models.Model):
     ClienteId = models.AutoField(primary_key=True)
     TipoDocumentoID = models.ForeignKey(
@@ -94,25 +88,51 @@ class Clientes(models.Model):
     def __str__(self):
         return f'{self.TipoDocumentoID.Nombre} - {self.TipoDocumentoID.TipoDocumentoID} - {self.DocumentoId} - {self.Nombre_Cliente}'
 
-    def delete(self, using=None, keep_parents=False):
-        super().delete(using=using, keep_parents=keep_parents)
-
     class Meta:
         db_table = 'Clientes'
         constraints = [
             models.UniqueConstraint(fields=['TipoDocumentoID', 'DocumentoId'], name='unique_cliente')
         ]
 
+class Tiempos_Cliente(models.Model):
+    Anio = models.CharField(max_length=4)
+    Mes = models.CharField(max_length=2)
+    Colaborador = models.CharField(max_length=100)
+    ClienteId = models.ForeignKey(Clientes, on_delete=models.CASCADE, db_column='ClienteId')
+    Horas = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Colaborador: {self.Colaborador}, Cliente: {self.ClienteId}, Horas: {self.Horas}"
+
+    class Meta:
+        db_table = 'Tiempos_Cliente'
+        unique_together = (('Anio', 'Mes', 'Colaborador', 'ClienteId'),)
 
 class Consultores(models.Model):
-    TipoDocumentoId = models.CharField(max_length=10)
-    Documento = models.AutoField(primary_key=True)
+    TipoDocumentoID = models.ForeignKey(
+        TipoDocumento, 
+        on_delete=models.CASCADE,
+        db_column='TipoDocumentoID'
+    )
+    Documento = models.CharField(max_length=20)
     Nombre = models.CharField(max_length=100)
     Empresa = models.CharField(max_length=100)
     Profesion = models.CharField(max_length=100)
-    LineaId = models.CharField(max_length=50)  # Temporalmente como CharField
-    ModuloId = models.CharField(max_length=50)  # Temporalmente como CharField
-    Perfil = models.CharField(max_length=50)  # Temporalmente como CharField
+    LineaId = models.ForeignKey(
+        Linea, 
+        on_delete=models.CASCADE,
+        db_column='LineaId'
+    )
+    ModuloId = models.ForeignKey(
+        Modulo, 
+        on_delete=models.CASCADE,
+        db_column='ModuloId'
+    )
+    PerfilId = models.ForeignKey(
+        Perfil,
+        on_delete=models.CASCADE,
+        db_column='PerfilId'
+    )
     Estado = models.BooleanField(default=True)
     Fecha_Ingreso = models.DateField()
     Fecha_Retiro = models.DateField(null=True, blank=True)
@@ -121,10 +141,175 @@ class Consultores(models.Model):
     Fecha_Operacion = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.TipoDocumentoId} - {self.Documento} - {self.Nombre}'
+        return f'{self.TipoDocumentoID} - {self.Documento} - {self.Nombre}'
 
     class Meta:
         db_table = 'Consultores'
         constraints = [
-            models.UniqueConstraint(fields=['TipoDocumentoId', 'Documento'], name='unique_consultor')
+            models.UniqueConstraint(fields=['TipoDocumentoID', 'Documento'], name='unique_consultor')
         ]
+
+class Certificacion(models.Model):
+    CertificacionId = models.AutoField(primary_key=True)
+    Certificacion = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.Certificacion}"
+
+    class Meta:
+        db_table = 'Certificacion'
+
+class Detalle_Certificacion(models.Model):
+    DocumentoId = models.CharField(max_length=50)
+    CertificacionId = models.CharField(max_length=50)
+    Fecha_Certificacion = models.DateField()
+
+    def __str__(self):
+        return f"Documento ID: {self.DocumentoId}, Certificación ID: {self.CertificacionId}, Fecha: {self.Fecha_Certificacion}"
+
+    class Meta:
+        db_table = 'Detalle_Certificacion'
+        unique_together = ('DocumentoId', 'CertificacionId')
+
+class Concepto(models.Model):
+    ConceptoId = models.AutoField(primary_key=True)
+    Descripcion = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.Descripcion}"
+
+    class Meta:
+        db_table = 'Concepto'
+
+class TiemposConcepto(models.Model):
+    Anio = models.CharField(max_length=4)
+    Mes = models.CharField(max_length=2)
+    Colaborador = models.CharField(max_length=100)
+    ConceptoId = models.ForeignKey(Concepto, on_delete=models.CASCADE, db_column='ConceptoId')
+    Horas = models.DecimalField(max_digits=5, decimal_places=2)
+
+    def __str__(self):
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Colaborador: {self.Colaborador}, Concepto: {self.ConceptoId}, Horas: {self.Horas}"
+
+    class Meta:
+        db_table = 'Tiempos_Concepto'
+        unique_together = (('Anio', 'Mes', 'Colaborador', 'ConceptoId'),)
+
+
+class Gastos(models.Model):
+    GastoId = models.AutoField(primary_key=True)
+    Gasto = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.Gasto}"
+
+    class Meta:
+        db_table = 'Gastos'
+
+
+class Detalle_Gastos(models.Model):
+    Anio = models.CharField(max_length=4)
+    Mes = models.CharField(max_length=2)
+    GastosId = models.ForeignKey(Gastos, on_delete=models.CASCADE, db_column='GastosId')
+    Valor = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Gasto ID: {self.GastosId}, Valor: {self.Valor}"
+
+    class Meta:
+        db_table = 'Detalle_Gastos'
+        unique_together = ('Anio', 'Mes', 'GastosId')
+
+
+class Total_Gastos(models.Model):
+    Anio = models.CharField(max_length=4)
+    Mes = models.CharField(max_length=2)
+    Total = models.DecimalField(max_digits=15, decimal_places=2)
+
+    def __str__(self):
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Total: {self.Total}"
+
+    class Meta:
+        db_table = 'Total_Gastos'
+        unique_together = ('Anio', 'Mes')
+
+class Costos_Indirectos(models.Model):
+    CostoId = models.AutoField(primary_key=True)
+    Costo = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.Costo}"
+
+    class Meta:
+        db_table = 'Costos_Indirectos'
+
+class Detalle_Costos_Indirectos(models.Model):
+    Anio = models.CharField(max_length=4)
+    Mes = models.CharField(max_length=2)
+    CostosId = models.ForeignKey(Costos_Indirectos, on_delete=models.CASCADE, db_column='CostosId')
+    Valor = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Costos ID: {self.CostosId}, Valor: {self.Valor}"
+
+    class Meta:
+        db_table = 'Detalle_Costos_Indirectos'
+        unique_together = ('Anio', 'Mes', 'CostosId')
+
+class Total_Costos_Indirectos(models.Model):
+    Anio = models.CharField(max_length=4)
+    Mes = models.CharField(max_length=2)
+    Total = models.DecimalField(max_digits=15, decimal_places=2)
+
+    def __str__(self):
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Total: {self.Total}"
+
+    class Meta:
+        db_table = 'Total_Costos_Indirectos'
+        unique_together = ('Anio', 'Mes')
+
+class Nomina(models.Model):
+    Anio = models.CharField(max_length=4)
+    Mes = models.CharField(max_length=2)
+    Documento = models.CharField(max_length=10)
+    Salario = models.DecimalField(max_digits=10, decimal_places=2)
+    Cliente = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
+
+    def __str__(self):
+        return f'Año: {self.Anio}, Mes: {self.Mes}, Documento: {self.Documento}, Salario: {self.Salario}'
+
+    class Meta:
+        db_table = 'Nomina'
+        unique_together = (('Anio', 'Mes', 'Documento'),)
+
+class Empleado(models.Model):
+    TipoDocumento = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE, db_column='TipoDocumento')
+    Documento = models.CharField(max_length=20)
+    Nombre = models.CharField(max_length=100)
+    FechaNacimiento = models.DateField()
+    FechaIngreso = models.DateField()
+    FechaOperacion = models.DateField()
+    PerfilNombre = models.CharField(max_length=100)
+    ModuloId = models.ForeignKey(Modulo, on_delete=models.CASCADE, db_column='ModuloId')
+    PerfilId = models.ForeignKey(Perfil, on_delete=models.CASCADE, db_column='PerfilId')
+    LineaId = models.ForeignKey(Linea, on_delete=models.CASCADE, db_column='LineaId')
+    Cargo = models.CharField(max_length=100)
+    TituloProfesional = models.CharField(max_length=100)
+    FechaGrado = models.DateField()
+    Universidad = models.CharField(max_length=100)
+    ProfesionRealizada = models.CharField(max_length=100)
+    TituloProfesionalActual = models.CharField(max_length=100)
+    UniversidadActual = models.CharField(max_length=100)
+    AcademiaSAP = models.CharField(max_length=100)
+    CertificadoSAP = models.CharField(max_length=100)
+    OtrasCertificaciones = models.TextField()
+    Postgrados = models.TextField()
+
+    class Meta:
+        db_table = 'Empleado'
+        unique_together = (('TipoDocumento', 'Documento'),)
+
+    def __str__(self):
+        return f"{self.Nombre} - {self.TipoDocumento} {self.Documento}"
+
+

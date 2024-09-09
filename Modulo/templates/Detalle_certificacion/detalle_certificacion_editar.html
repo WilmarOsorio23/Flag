@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %} Editar Detalle_Certificacion {% endblock %}
+
+{% block contenido %}
+<h2>Editar Detalle_Certificacion</h2>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a href="{% url 'detalle_certificacion_index' %}" class="btn btn-danger">Cancelar</a>
+</form>
+{% endblock %}

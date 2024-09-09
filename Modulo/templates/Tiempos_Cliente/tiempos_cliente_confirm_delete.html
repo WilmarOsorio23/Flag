@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block titulo %} Confirmar Eliminación {% endblock %}
+
+{% block contenido %}
+    <h2>¿Estás seguro de que deseas eliminar el registro de Tiempos_Cliente del año "{{ tiempos_cliente.anio }}" y mes "{{ tiempos_cliente.mes }}" para el colaborador "{{ tiempos_cliente.colaborador }}" y cliente "{{ tiempos_cliente.cliente_id }}"?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+        <a href="{% url 'tiempos_cliente_index' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+{% endblock %}

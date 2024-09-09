@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %} Crear Tiempos_Concepto {% endblock %}
+
+{% block contenido %}
+    <h2>Crear Nuevo Tiempos_Concepto</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'tiempos_concepto_index' %}" class="btn btn-danger">Cancelar</a>
+    </form>
+{% endblock %}

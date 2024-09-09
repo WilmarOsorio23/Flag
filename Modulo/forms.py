@@ -1,5 +1,7 @@
 from django import forms
-from .models import Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes, Consultores
+from .models import Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes, Consultores, Certificacion, Costos_Indirectos
+from .models import Concepto, Gastos, Detalle_Gastos, Total_Gastos, Total_Costos_Indirectos
+from .models import Detalle_Costos_Indirectos, TiemposConcepto, Tiempos_Cliente, Nomina, Detalle_Certificacion
 
 
 class ModuloForm(forms.ModelForm):
@@ -166,7 +168,7 @@ class PerfilForm(forms.ModelForm):
             'nombre': 'Nombre',
         }
 
-class TipoDocumentoForm(forms.ModelForm):
+class TipoDocumentoForm(forms.ModelForm):    
     class Meta:
         model = TipoDocumento
         fields = '__all__'
@@ -179,4 +181,328 @@ class TipoDocumentoForm(forms.ModelForm):
         }
         labels = {
             'nombre': 'Nombre',
+        }
+
+class CertificacionForm(forms.ModelForm):
+    class Meta:
+        model = Certificacion
+        fields = '__all__'
+        widgets = {
+            'Certificacion': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese la certificación'
+            }),
+        }
+        labels = {
+            'Certificacion': 'Certificación',
+        }
+
+class CostosIndirectosForm(forms.ModelForm):
+    class Meta:
+        model = Costos_Indirectos
+        fields = '__all__'
+        widgets = {
+            'Costo': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el costo'
+            }),
+        }
+        labels = {
+            'Costo': 'Costo',
+        }
+
+class ConceptoForm(forms.ModelForm):
+    class Meta:
+        model = Concepto
+        fields = '__all__'
+        widgets = {
+            'Descripcion': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese la descripción'
+            }),
+        }
+        labels = {
+            'Descripcion': 'Descripción',
+        }
+
+class GastoForm(forms.ModelForm):
+    class Meta:
+        model = Gastos
+        fields = '__all__'
+        widgets = {
+            'Gasto': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el gasto'
+            }),
+        }
+        labels = {
+            'Gasto': 'Gasto',
+        }
+
+class DetalleGastosForm(forms.ModelForm):
+    class Meta:
+        model = Detalle_Gastos
+        fields = '__all__'
+        widgets = {
+            'Anio': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el año'
+            }),
+            'Mes': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el mes'
+            }),
+            'GastosId': forms.NumberInput(attrs={
+                'type': 'number',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el ID del gasto'
+            }),
+            'Valor': forms.NumberInput(attrs={
+                'type': 'number',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el valor'
+            }),
+        }
+        labels = {
+            'Anio': 'Año',
+            'Mes': 'Mes',
+            'GastosId': 'Gasto ID',
+            'Valor': 'Valor',
+        }
+
+class TotalGastosForm(forms.ModelForm):
+    class Meta:
+        model = Total_Gastos
+        fields = '__all__'
+        widgets = {
+            'anio': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el año'
+            }),
+            'mes': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el mes'
+            }),
+            'total': forms.NumberInput(attrs={
+                'type': 'number',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el Total'
+            }),
+        }
+        labels = {
+            'anio': 'Año',
+            'mes': 'Mes',
+            'total': 'Total',
+        }
+
+class Total_Costos_IndirectosForm(forms.ModelForm):
+    class Meta:
+        model = Total_Costos_Indirectos
+        fields = '__all__'
+        widgets = {
+            'anio': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el año'
+            }),
+            'mes': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el mes'
+            }),
+            'total': forms.NumberInput(attrs={
+                'type': 'number',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el Total'
+            }),
+        }
+        labels = {
+            'anio': 'Año',
+            'mes': 'Mes',
+            'total': 'Total',
+        }
+
+class DetalleCostosIndirectosForm(forms.ModelForm):
+    class Meta:
+        model = Detalle_Costos_Indirectos
+        fields = '__all__'
+        widgets = {
+            'anio': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el año'
+            }),
+            'mes': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el mes'
+            }),
+            'costosid': forms.NumberInput(attrs={
+                'type': 'number',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el Costos ID'
+            }),
+            'valor': forms.NumberInput(attrs={
+                'type': 'number',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el Valor'
+            }),
+        }
+        labels = {
+            'anio': 'Año',
+            'mes': 'Mes',
+            'costosid': 'Costos ID',
+            'valor': 'Valor',
+        }
+
+class TiemposConceptoForm(forms.ModelForm):
+    class Meta:
+        model = TiemposConcepto
+        fields = '__all__'
+        widgets = {
+            'anio': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el año'
+            }),
+            'mes': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el mes'
+            }),
+            'colaborador': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el colaborador'
+            }),
+            'concepto_id': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el concepto'
+            }),
+            'horas': forms.NumberInput(attrs={
+                'type': 'number',
+                'class': 'form-control',
+                'placeholder': 'Ingrese las horas'
+            }),
+        }
+        labels = {
+            'anio': 'Año',
+            'mes': 'Mes',
+            'colaborador': 'Colaborador',
+            'concepto_id': 'Concepto',
+            'horas': 'Horas',
+        }
+
+class Tiempos_ClienteForm(forms.ModelForm):
+    class Meta:
+        model = Tiempos_Cliente
+        fields = '__all__'
+        widgets = {
+            'anio': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el año'
+            }),
+            'mes': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el mes'
+            }),
+            'colaborador': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el nombre del colaborador'
+            }),
+            'cliente_id': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el ID del cliente'
+            }),
+            'horas': forms.NumberInput(attrs={
+                'type': 'number',
+                'class': 'form-control',
+                'placeholder': 'Ingrese las horas trabajadas'
+            }),
+        }
+        labels = {
+            'anio': 'Año',
+            'mes': 'Mes',
+            'colaborador': 'Colaborador',
+            'cliente_id': 'Cliente ID',
+            'horas': 'Horas',
+        }
+
+class NominaForm(forms.ModelForm):
+    class Meta:
+        model = Nomina
+        fields = '__all__'
+        widgets = {
+            'anio': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el año'
+            }),
+            'mes': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el mes'
+            }),
+            'documento': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el documento'
+            }),
+            'salario': forms.NumberInput(attrs={
+                'type': 'number',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el salario'
+            }),
+            'cliente': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el cliente'
+            }),
+        }
+        labels = {
+            'anio': 'Año',
+            'mes': 'Mes',
+            'documento': 'Documento',
+            'salario': 'Salario',
+            'cliente': 'Cliente',
+        }
+
+class Detalle_CertificacionForm(forms.ModelForm):
+    class Meta:
+        model = Detalle_Certificacion
+        fields = '__all__'
+        widgets = {
+            'documentoId': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el Documento ID'
+            }),
+            'certificacionId': forms.Select(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese el Certificación ID'
+            }),
+            'fecha_certificacion': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control',
+                'placeholder': 'Ingrese la Fecha de Certificación'
+            }),
+        }
+        labels = {
+            'documentoId': 'Documento ID',
+            'certificacionId': 'Certificación ID',
+            'fecha_certificacion': 'Fecha de Certificación',
         }
