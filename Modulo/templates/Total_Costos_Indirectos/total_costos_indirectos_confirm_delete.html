@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block titulo %} Confirmar Eliminación {% endblock %}
+
+{% block contenido %}
+    <h2>¿Estás seguro de que deseas eliminar el registro de Total_Costos_Indirectos del año "{{ total_costos_indirectos.anio }}" y mes "{{ total_costos_indirectos.mes }}"?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+        <a href="{% url 'total_costos_indirectos_index' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+{% endblock %}
