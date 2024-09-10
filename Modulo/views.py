@@ -731,14 +731,14 @@ def costos_indirectos_descargar_excel(request):
 
 # Conceptos
 def conceptos_index(request):
-    conceptos = Conceptos.objects.all()
-    return render(request, 'Conceptos/conceptos_index.html', {'conceptos': conceptos})
+    concepto = Concepto.objects.all()
+    return render(request, 'Conceptos/conceptos_index.html', {'conceptos': concepto})
 
 def conceptos_crear(request):
     if request.method == 'POST':
         form = ConceptoForm(request.POST)
         if form.is_valid():
-            max_id = Conceptos.objects.all().aggregate(max_id=models.Max('id'))['max_id']
+            max_id = Concepto.objects.all().aggregate(max_id=models.Max('id'))['max_id']
             new_id = max_id + 1 if max_id is not None else 1
             nuevo_concepto = form.save(commit=False)
             nuevo_concepto.id = new_id
@@ -749,7 +749,7 @@ def conceptos_crear(request):
     return render(request, 'Conceptos/conceptos_form.html', {'form': form})
 
 def conceptos_editar(request, id):
-    concepto = get_object_or_404(Conceptos, id=id)
+    concepto = get_object_or_404(Concepto, id=id)
 
     if request.method == 'POST':
         form = ConceptoForm(request.POST, instance=concepto)
@@ -764,14 +764,14 @@ def conceptos_editar(request, id):
 def conceptos_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        Conceptos.objects.filter(id__in=item_ids).delete()
+        Concepto.objects.filter(id__in=item_ids).delete()
         return redirect('conceptos_index')
     return redirect('conceptos_index')
 
 def conceptos_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        concepto_data = Conceptos.objects.filter(id__in=item_ids)
+        concepto_data = Concepto.objects.filter(id__in=item_ids)
 
         data = []
         for concepto in concepto_data:
@@ -856,13 +856,16 @@ def detalle_gastos_crear(request):
     if request.method == 'POST':
         form = DetalleGastosForm(request.POST)
         if form.is_valid():
-            # No necesitas generar un ID, ya que Anio, Mes, y GastoId son parte de la clave primaria
+            max_id = Detalle_Gastos.objects.all().aggregate(max_id=models.Max('GastosId'))['max_id']
+            new_id = max_id + 1 if max_id is not None else 1
             nuevo_detalle_gasto = form.save(commit=False)
+            nuevo_detalle_gasto.GastosId = new_id
             nuevo_detalle_gasto.save()
-            return redirect('detalle_gastos_index')
+            return redirect('detalle_gasto_index')
     else:
         form = DetalleGastosForm()
     return render(request, 'Detalle_Gastos/detalle_gastos_form.html', {'form': form})
+
 
 def detalle_gastos_editar(request, Anio, Mes, GastosId):
     detalle = get_object_or_404(Detalle_Gastos, Anio=Anio, Mes=Mes, GastosId=GastosId)
@@ -972,7 +975,7 @@ def total_gastos_descargar_excel(request):
 # Total costos indirectos
 def total_costos_indirectos_index(request):
     total_costos_indirectos_data = Total_Costos_Indirectos.objects.all()
-    return render(request, 'total_costos_indirectos/index.html', {'total_costos_indirectos_data': total_costos_indirectos_data})
+    return render(request, 'total_costos_indirectos/total_costos_indirectos_index.html', {'total_costos_indirectos_data': total_costos_indirectos_data})
 
 def total_costos_indirectos_crear(request):
     if request.method == 'POST':
