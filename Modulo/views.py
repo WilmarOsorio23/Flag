@@ -731,14 +731,14 @@ def costos_indirectos_descargar_excel(request):
 
 # Conceptos
 def conceptos_index(request):
-    conceptos = Conceptos.objects.all()
-    return render(request, 'Conceptos/conceptos_index.html', {'conceptos': conceptos})
+    concepto = Concepto.objects.all()
+    return render(request, 'Conceptos/conceptos_index.html', {'conceptos': concepto})
 
 def conceptos_crear(request):
     if request.method == 'POST':
         form = ConceptoForm(request.POST)
         if form.is_valid():
-            max_id = Conceptos.objects.all().aggregate(max_id=models.Max('id'))['max_id']
+            max_id = Concepto.objects.all().aggregate(max_id=models.Max('id'))['max_id']
             new_id = max_id + 1 if max_id is not None else 1
             nuevo_concepto = form.save(commit=False)
             nuevo_concepto.id = new_id
@@ -749,7 +749,7 @@ def conceptos_crear(request):
     return render(request, 'Conceptos/conceptos_form.html', {'form': form})
 
 def conceptos_editar(request, id):
-    concepto = get_object_or_404(Conceptos, id=id)
+    concepto = get_object_or_404(Concepto, id=id)
 
     if request.method == 'POST':
         form = ConceptoForm(request.POST, instance=concepto)
@@ -764,14 +764,14 @@ def conceptos_editar(request, id):
 def conceptos_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        Conceptos.objects.filter(id__in=item_ids).delete()
+        Concepto.objects.filter(id__in=item_ids).delete()
         return redirect('conceptos_index')
     return redirect('conceptos_index')
 
 def conceptos_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        concepto_data = Conceptos.objects.filter(id__in=item_ids)
+        concepto_data = Concepto.objects.filter(id__in=item_ids)
 
         data = []
         for concepto in concepto_data:
@@ -857,13 +857,16 @@ def detalle_gastos_crear(request):
     if request.method == 'POST':
         form = DetalleGastosForm(request.POST)
         if form.is_valid():
-            # No necesitas generar un ID, ya que Anio, Mes, y GastoId son parte de la clave primaria
+            max_id = Detalle_Gastos.objects.all().aggregate(max_id=models.Max('GastosId'))['max_id']
+            new_id = max_id + 1 if max_id is not None else 1
             nuevo_detalle_gasto = form.save(commit=False)
+            nuevo_detalle_gasto.GastosId = new_id
             nuevo_detalle_gasto.save()
-            return redirect('detalle_gastos_index')
+            return redirect('detalle_gasto_index')
     else:
         form = DetalleGastosForm()
     return render(request, 'Detalle_Gastos/detalle_gastos_form.html', {'form': form})
+
 
 def detalle_gastos_editar(request, Anio, Mes, GastosId):
     detalle = get_object_or_404(Detalle_Gastos, Anio=Anio, Mes=Mes, GastosId=GastosId)
@@ -919,13 +922,15 @@ def total_gastos_crear(request):
     if request.method == 'POST':
         form = TotalGastosForm(request.POST)
         if form.is_valid():
-            # No necesitas generar un ID, ya que Anio y Mes son claves primarias
+            max_id = Total_Gastos.objects.all().aggregate(max_id=models.Max('id'))['max_id']
+            new_id = max_id + 1 if max_id is not None else 1
             nuevo_total_gasto = form.save(commit=False)
+            nuevo_total_gasto.id = new_id  # Asignar un nuevo ID
             nuevo_total_gasto.save()
-            return redirect('total_gastos_index')
+            return redirect('total_gasto_index')
     else:
         form = TotalGastosForm()
-    return render(request, 'Total_Gastos/total_gastos_form.html', {'form': form})
+    return render(request, 'Total_Gastos/total_gasto_form.html', {'form': form})
 
 def total_gastos_editar(request, anio, mes):
     total_gasto = get_object_or_404(Total_Gastos, anio=anio, mes=mes)
@@ -973,19 +978,26 @@ def total_gastos_descargar_excel(request):
 # Total costos indirectos
 def total_costos_indirectos_index(request):
     total_costos_indirectos_data = Total_Costos_Indirectos.objects.all()
+<<<<<<< HEAD
     return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_index.html', {'total_costos_indirectos_data': total_costos_indirectos_data})
+=======
+    return render(request, 'total_costos_indirectos/total_costos_indirectos_index.html', {'total_costos_indirectos_data': total_costos_indirectos_data})
+>>>>>>> 6a0be7ec129458396cd9f617b93b9544092cc998
 
 def total_costos_indirectos_crear(request):
     if request.method == 'POST':
         form = Total_Costos_IndirectosForm(request.POST)
         if form.is_valid():
-            # No necesitas generar un ID, ya que Anio y Mes son parte de la clave primaria
+            max_id = Total_Costos_Indirectos.objects.all().aggregate(max_id=models.Max('id'))['max_id']
+            new_id = max_id + 1 if max_id is not None else 1
             nuevo_total_costo_indirecto = form.save(commit=False)
+            nuevo_total_costo_indirecto.id = new_id  # Asignar un nuevo ID
             nuevo_total_costo_indirecto.save()
             return redirect('total_costos_indirectos_index')
     else:
         form = Total_Costos_IndirectosForm()
     return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_form.html', {'form': form})
+
 
 def total_costos_indirectos_editar(request, anio, mes):
     total_costos_indirectos = get_object_or_404(Total_Costos_Indirectos, anio=anio, mes=mes)
@@ -1036,7 +1048,10 @@ def detalle_costos_indirectos_crear(request):
     if request.method == 'POST':
         form = DetalleCostosIndirectosForm(request.POST)
         if form.is_valid():
+            max_id = Detalle_Costos_Indirectos.objects.all().aggregate(max_id=models.Max('CostoId'))['max_id']
+            new_id = max_id + 1 if max_id is not None else 1
             nuevo_detalle_costo_indirecto = form.save(commit=False)
+            nuevo_detalle_costo_indirecto.CostoId = new_id  # Asignar un nuevo CostoId
             nuevo_detalle_costo_indirecto.save()
             return redirect('detalle_costos_indirectos_index')
     else:
@@ -1092,7 +1107,10 @@ def tiempos_concepto_crear(request):
     if request.method == 'POST':
         form = TiemposConceptoForm(request.POST)
         if form.is_valid():
+            max_id = TiemposConcepto.objects.all().aggregate(max_id=models.Max('ConceptoId'))['max_id']
+            new_id = max_id + 1 if max_id is not None else 1
             nuevo_tiempo_concepto = form.save(commit=False)
+            nuevo_tiempo_concepto.ConceptoId = new_id  # Asignar un nuevo ConceptoId
             nuevo_tiempo_concepto.save()
             return redirect('tiempos_concepto_index')
     else:
@@ -1148,7 +1166,10 @@ def tiempos_cliente_crear(request):
     if request.method == 'POST':
         form = Tiempos_ClienteForm(request.POST)
         if form.is_valid():
+            max_id = Tiempos_Cliente.objects.all().aggregate(max_id=models.Max('ClienteId'))['max_id']
+            new_id = max_id + 1 if max_id is not None else 1
             nuevo_tiempo_cliente = form.save(commit=False)
+            nuevo_tiempo_cliente.ClienteId = new_id  # Asignar un nuevo ClienteId
             nuevo_tiempo_cliente.save()
             return redirect('tiempos_cliente_index')
     else:
@@ -1203,12 +1224,16 @@ def nomina_crear(request):
     if request.method == 'POST':
         form = NominaForm(request.POST)
         if form.is_valid():
+            max_id = Nomina.objects.all().aggregate(max_id=models.Max('Documento'))['max_id']
+            new_id = max_id + 1 if max_id is not None else 1
             nueva_nomina = form.save(commit=False)
+            nueva_nomina.Documento = new_id  # Asignar un nuevo Documento
             nueva_nomina.save()
             return redirect('nomina_index')
     else:
         form = NominaForm()
     return render(request, 'Nomina/nomina_form.html', {'form': form})
+
 
 def nomina_editar(request, anio, mes, documento):
     nomina = get_object_or_404(Nomina, anio=anio, mes=mes, documento=documento)
@@ -1263,7 +1288,10 @@ def detalle_certificacion_crear(request):
     if request.method == 'POST':
         form = Detalle_CertificacionForm(request.POST)
         if form.is_valid():
+            max_id = Detalle_Certificacion.objects.all().aggregate(max_id=models.Max('DocumentoId'))['max_id']
+            new_id = max_id + 1 if max_id is not None else 1
             nuevo_detalle_certificacion = form.save(commit=False)
+            nuevo_detalle_certificacion.DocumentoId = new_id  # Asignar un nuevo DocumentoId
             nuevo_detalle_certificacion.save()
             return redirect('detalle_certificacion_index')
     else:
