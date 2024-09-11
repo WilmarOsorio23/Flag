@@ -978,11 +978,8 @@ def total_gastos_descargar_excel(request):
 # Total costos indirectos
 def total_costos_indirectos_index(request):
     total_costos_indirectos_data = Total_Costos_Indirectos.objects.all()
-<<<<<<< HEAD
     return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_index.html', {'total_costos_indirectos_data': total_costos_indirectos_data})
-=======
-    return render(request, 'total_costos_indirectos/total_costos_indirectos_index.html', {'total_costos_indirectos_data': total_costos_indirectos_data})
->>>>>>> 6a0be7ec129458396cd9f617b93b9544092cc998
+
 
 def total_costos_indirectos_crear(request):
     if request.method == 'POST':
