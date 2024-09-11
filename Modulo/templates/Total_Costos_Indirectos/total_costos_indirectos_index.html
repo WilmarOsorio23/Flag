@@ -106,8 +106,12 @@
             return false;
         }
 
+        // Desglosar el valor en anio y mes
         let selectedId = selected[0].value;
-        let editUrl = "{% url 'total_costos_indirectos_editar' 0 %}".replace('0', selectedId);
+        let [anio, mes] = selectedId.split('-');  // Separar año y mes
+
+        // Generar la URL con los parámetros anio y mes
+        let editUrl = "{% url 'total_costos_indirectos_editar' 0 0 %}".replace('0', anio).replace('0', mes);
         window.location.href = editUrl;
     }
 </script>

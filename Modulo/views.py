@@ -672,7 +672,7 @@ def certificacion_descargar_excel(request):
 # Vista Costo Indirecto
 def costos_indirectos_index(request):
     costos_indirectos = Costos_Indirectos.objects.all()
-    return render(request, 'Costos_Indirectos/costos_indirectos_index.html', {'costos_indirectos': costos_indirectos})
+    return render(request, 'Costos_Indirectos/costos_indirecto_index.html', {'costos_indirectos': costos_indirectos})
 
 def costos_indirectos_crear(request):
     if request.method == 'POST':
@@ -850,6 +850,7 @@ def gasto_descargar_excel(request):
 # Detalle gastos
 def detalle_gastos_index(request):
     detalles = Detalle_Gastos.objects.all()
+    print("Buscando plantilla en: Detalle_Gastos/detalle_gastos_index.html")
     return render(request, 'Detalle_Gastos/detalle_gastos_index.html', {'detalles': detalles})
 
 def detalle_gastos_crear(request):
@@ -972,7 +973,7 @@ def total_gastos_descargar_excel(request):
 # Total costos indirectos
 def total_costos_indirectos_index(request):
     total_costos_indirectos_data = Total_Costos_Indirectos.objects.all()
-    return render(request, 'total_costos_indirectos/index.html', {'total_costos_indirectos_data': total_costos_indirectos_data})
+    return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_index.html', {'total_costos_indirectos_data': total_costos_indirectos_data})
 
 def total_costos_indirectos_crear(request):
     if request.method == 'POST':
@@ -995,7 +996,7 @@ def total_costos_indirectos_editar(request, anio, mes):
             return redirect('total_costos_indirectos_index')
     else:
         form = Total_Costos_IndirectosForm(instance=total_costos_indirectos)
-    return render(request, 'total_costos_indirectos/form.html', {'form': form})
+    return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_form.html', {'form': form})
 
 def total_costos_indirectos_eliminar(request):
     if request.method == 'POST':
@@ -1029,7 +1030,7 @@ def total_costos_indirectos_descargar_excel(request):
 # Detalle costos indirectos
 def detalle_costos_indirectos_index(request):
     detalle_data = Detalle_Costos_Indirectos.objects.all()
-    return render(request, 'detalle_costos_indirectos/index.html', {'detalle_data': detalle_data})
+    return render(request, 'detalle_costos_indirectos/detalle_costos_indirectos_index.html', {'detalle_data': detalle_data})
 
 def detalle_costos_indirectos_crear(request):
     if request.method == 'POST':
@@ -1254,8 +1255,9 @@ def nomina_descargar_excel(request):
 
 # Detalle certificacion
 def detalle_certificacion_index(request):
-    detalle_certificacion_data = Detalle_Certificacion.objects.all()
-    return render(request, 'detalle_certificacion/index.html', {'detalle_certificacion_data': detalle_certificacion_data})
+    detalles_certificacion = Detalle_Certificacion.objects.all()
+    return render(request, 'Detalle_Certificacion/detalle_certificacion_index.html', {'detalles_certificacion': detalles_certificacion})
+
 
 def detalle_certificacion_crear(request):
     if request.method == 'POST':
@@ -1279,7 +1281,7 @@ def detalle_certificacion_editar(request, documentoId, certificacionId):
     else:
         form = Detalle_CertificacionForm(instance=detalle_certificacion)
 
-    return render(request, 'detalle_certificacion/form.html', {'form': form})
+    return render(request, 'Detalle_Certificacion/detalle_certificacion_form.html', {'form': form})
 
 def detalle_certificacion_eliminar(request):
     if request.method == 'POST':

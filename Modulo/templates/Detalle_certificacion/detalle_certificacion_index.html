@@ -16,26 +16,27 @@
             <button type="submit" form="delete-form" class="fas fa-trash-alt" title="Eliminar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-right: 10px;" onclick="return confirmDelete();"></button> 
             <form id="download-form" method="POST" action="{% url 'detalle_certificacion_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
-                {% for detalle in detalle_certificacion_data %} 
-                    <input type="hidden" name="items_to_delete" value="{{ detalle.documentoid }}|{{ detalle.certificacionid }}">
+                {% for detalle in detalles_certificacion %} 
+                    <input type="hidden" name="items_to_delete" value="{{ detalle.documentoId }}|{{ detalle.certificacionId }}">
                 {% endfor %}
                 <button type="submit" class="fas fa-download" title="Descargar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer;"></button>
             </form>
         </div>
     </div>
     <div class="card-footer text-muted">
-            <style> .table-responsive {
-                    max-height: 200px; 
-                    max-width: 100%;   
-                    overflow-y: scroll;    
-                    overflow-x: scroll;  
-                    display: block;
-                }
-                .table {
-                    width: 100%;
-                    table-layout: auto;  
-                }   
-            </style>
+        <style> 
+            .table-responsive {
+                max-height: 200px; 
+                max-width: 100%;   
+                overflow-y: scroll;    
+                overflow-x: scroll;  
+                display: block;
+            }
+            .table {
+                width: 100%;
+                table-layout: auto;  
+            }   
+        </style>
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'detalle_certificacion_eliminar' %}">
                 {% csrf_token %}
@@ -49,11 +50,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for detalle in detalle_certificacion_data %}
+                        {% for detalle in detalles_certificacion %}
                         <tr class="">
-                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ detalle.documentoid }}|{{ detalle.certificacionid }}"></td>
-                            <td>{{ detalle.documentoid }}</td>
-                            <td>{{ detalle.certificacionid }}</td>
+                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ detalle.documentoId }}|{{ detalle.certificacionId }}"></td>
+                            <td>{{ detalle.documentoId }}</td>
+                            <td>{{ detalle.certificacionId }}</td>
                             <td>{{ detalle.fecha_certificacion }}</td>
                         </tr>
                         {% endfor %}
@@ -106,7 +107,8 @@
         }
 
         let selectedId = selected[0].value;
-        let editUrl = "{% url 'detalle_certificacion_editar' '0|0' %}".replace('0|0', selectedId);
+        let [documentoId, certificacionId] = selectedId.split('|');
+        let editUrl = "{% url 'detalle_certificacion_editar' '0' '0' %}".replace('0', documentoId).replace('0', certificacionId);
         window.location.href = editUrl;
     }
 </script>

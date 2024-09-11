@@ -66,7 +66,7 @@ urlpatterns = [
     path('certificacion/eliminar', views.certificacion_eliminar, name='certificacion_eliminar'),
     path('certificacion/descargar_excel', views.certificacion_descargar_excel, name='certificacion_descargar_excel'),
     
-    # Rutas para tabla CostoIndirecto
+    # Rutas para tabla Costos Indirecto
     path('costos_indirectos/', views.costos_indirectos_index, name='costos_indirectos_index'),
     path('costos_indirectos/crear', views.costos_indirectos_crear, name='costos_indirectos_crear'),
     path('costos_indirectos/editar/<int:id>/', views.costos_indirectos_editar, name='costos_indirectos_editar'),
