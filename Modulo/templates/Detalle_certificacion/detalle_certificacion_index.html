@@ -16,27 +16,26 @@
             <button type="submit" form="delete-form" class="fas fa-trash-alt" title="Eliminar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-right: 10px;" onclick="return confirmDelete();"></button> 
             <form id="download-form" method="POST" action="{% url 'detalle_certificacion_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
-                {% for detalle in detalles_certificacion %} 
-                    <input type="hidden" name="items_to_delete" value="{{ detalle.documentoId }}|{{ detalle.certificacionId }}">
+                {% for detalle in detalle_certificacion_data %} 
+                    <input type="hidden" name="items_to_delete" value="{{ detalle.documentoid }}|{{ detalle.certificacionid }}">
                 {% endfor %}
                 <button type="submit" class="fas fa-download" title="Descargar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer;"></button>
             </form>
         </div>
     </div>
     <div class="card-footer text-muted">
-        <style> 
-            .table-responsive {
-                max-height: 200px; 
-                max-width: 100%;   
-                overflow-y: scroll;    
-                overflow-x: scroll;  
-                display: block;
-            }
-            .table {
-                width: 100%;
-                table-layout: auto;  
-            }   
-        </style>
+            <style> .table-responsive {
+                    max-height: 200px; 
+                    max-width: 100%;   
+                    overflow-y: scroll;    
+                    overflow-x: scroll;  
+                    display: block;
+                }
+                .table {
+                    width: 100%;
+                    table-layout: auto;  
+                }   
+            </style>
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'detalle_certificacion_eliminar' %}">
                 {% csrf_token %}
@@ -50,12 +49,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for detalle in detalles_certificacion %}
+                        {% for detalle in detalle_certificacion_data %}
                         <tr class="">
-                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ detalle.documentoId }}|{{ detalle.certificacionId }}"></td>
-                            <td>{{ detalle.documentoId }}</td>
-                            <td>{{ detalle.certificacionId }}</td>
-                            <td>{{ detalle.fecha_certificacion }}</td>
+                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ detalle.documentoid }}|{{ detalle.certificacionid }}"></td>
+                            <td><input type="text" name="DocumentoId" class="form-control-plaintext" value="{{ detalle.DocumentoId.DocumentoId }} " data-val="{{ detalle.DocumentoId.DocumentoId}}" readonly>{{ detalle.documentoid }}</td>
+                            <td><input type="texto" name="CertificacionId" class="form-control-plaintext" value="{{ detalle.CertificacionId.CertificacionId }} " data-val="{{detalle.CertificacionId.CertificacionId}}" readonly>{{ detalle.certificacionid }}</td>
+                            <td><input type="date" name="Fecha_Certificacion" class="form-control-plaintext" value="{{ detalle.fecha_certificacion|date:'Y-m-d' }} " readonly></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -66,51 +65,117 @@
 </div>
 
 <script>
-    // Seleccionar todos los checkboxes
-    document.getElementById('select-all').addEventListener('click', function(event) {
-        let checkboxes = document.querySelectorAll('.row-select');
-        for (let checkbox of checkboxes) {
-            checkbox.checked = event.target.checked;
-        }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Seleccionar todos los checkboxes
+        document.getElementById('select-all').addEventListener('click', function(event) {
+            let checkboxes = document.querySelectorAll('.row-select');
+            for (let checkbox of checkboxes) {
+                checkbox.checked = event.target.checked;
+            }
     });
-
     // Confirmación antes de eliminar
-    function confirmDelete() {
+    window.confirmDelete = function() {
         let selected = document.querySelectorAll('.row-select:checked').length;
         if (selected === 0) {
             alert('No has seleccionado ningún elemento para eliminar.');
             return false;
         }
         return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
-    }
+    };
 
     // Confirmación antes de descargar
-    function confirmDownload() {
-        let selected = document.querySelectorAll('.row-select:checked').length;
-        if (selected === 0) {
+    window.confirmDownload = function() {
+        let selected = document.querySelectorAll('.row-select:checked');
+        if (selected.length === 0) {
             alert('No has seleccionado ningún elemento para descargar.');
             return false;
         }
-        return true;  // Permitir la descarga si hay elementos seleccionados
-    }
 
-    // Manejar el clic en el botón de editar
-    function handleEditClick() {
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length === 0) {
-            alert('No has seleccionado ningún Detalle Certificación para editar.');
-            return false;
-        }
-        if (selected.length > 1) {
-            alert('Solo puedes editar un Detalle Certificación a la vez.');
-            return false;
-        }
+        let itemIds = [];
+            selected.forEach(function(checkbox) {
+                itemIds.push(checkbox.value);
+            });
+            document.getElementById('items_to_download').value = itemIds.join(',');
 
-        let selectedId = selected[0].value;
-        let [documentoId, certificacionId] = selectedId.split('|');
-        let editUrl = "{% url 'detalle_certificacion_editar' '0' '0' %}".replace('0', documentoId).replace('0', certificacionId);
-        window.location.href = editUrl;
-    }
+            return true; // Permitir la descarga si hay elementos seleccionados
+        };
+
+        // Habilitar edición en la fila seleccionada
+        window.enableEdit = function() {
+            let selected = document.querySelectorAll('.row-select:checked');
+            if (selected.length === 0) {
+                alert('No has seleccionado ningún Cliente para editar.');
+                return false;
+            }     
+            if (selected.length > 1) {
+                alert('Solo puedes editar un Cliente a la vez.');
+                return false;
+            }
+
+            let row = selected[0].closest('tr');
+            let inputs = row.querySelectorAll('input.form-control-plaintext');
+            inputs.forEach(input => {
+                input.classList.remove('form-control-plaintext');
+                input.classList.add('form-control');
+                input.readOnly = false;
+            });
+
+            // Mostrar botón de guardar
+            document.getElementById('save-button').classList.remove('d-none');
+        };
+
+        // Guardar los cambios en la fila seleccionada
+        window.saveRow = function() {
+            let selected = document.querySelector('.row-select:checked');
+            if (!selected) {
+                alert('No has seleccionado ningún Cliente para guardar.');
+                return false;
+            }
+            let row = selected.closest('tr');
+            let inputs = row.querySelectorAll('input.form-control');
+            let data = {};
+
+            inputs.forEach(input => {
+                let name = input.getAttribute('name');
+                data[name] = input.value;
+            });
+
+            // Obtener el DocumentoId y la CertificacionId de los campos correctos
+            let documentoId = data['DocumentoId'];
+            let certificacionId = data['CertificacionId'];
+
+            // Enviar datos al servidor 
+            fetch(`/clientes/editar/${documentoId}/${certificacionId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Volver a modo de solo lectura
+                    inputs.forEach(input => {
+                        input.classList.add('form-control-plaintext');
+                        input.classList.remove('form-control');
+                        input.readOnly = true;
+                    });
+                    // Ocultar botón de guardar
+                    document.getElementById('save-button').classList.add('d-none');
+                } else {
+                    alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
+                }
+            })
+            .catch(error => {
+                alert('Error al enviar los datos: ' + error.message);
+            });
+
+            return false;
+        };
+    });
+        
 </script>
 
 {% endblock %}

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block titulo %} Editar IND {% endblock %}
+{% block titulo %} Editar Certificacion {% endblock %}
 
 {% block contenido %}
-<h2>Editar IND</h2>
+<h2>Editar Certificacion</h2>
 <form method="POST">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Guardar</button>
-    <a href="{% url 'ind_index' %}" class="btn btn-danger">Cancelar</a>
+    <a href="{% url 'certificacion_index' %}" class="btn btn-danger">Cancelar</a>
 </form>
 {% endblock %}
