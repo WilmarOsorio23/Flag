@@ -22,7 +22,9 @@ class IPC(models.Model):
 
     class Meta:
         db_table = 'IPC'
-        unique_together = (('Anio', 'Mes'),)
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes'], name='primary_key_IPC')
+        ]
 
 
 class IND(models.Model):
@@ -35,11 +37,13 @@ class IND(models.Model):
 
     class Meta:
         db_table = 'IND'
-        unique_together = (('Anio', 'Mes'),)
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes'], name='primary_key_IND')
+        ]
 
 
 class Linea(models.Model):
-    LineaId = models.CharField(max_length=100, primary_key=True)
+    LineaId = models.AutoField(primary_key=True)
     Nombre = models.CharField(max_length=100)
 
     def __str__(self):
@@ -106,7 +110,9 @@ class Tiempos_Cliente(models.Model):
 
     class Meta:
         db_table = 'Tiempos_Cliente'
-        unique_together = (('Anio', 'Mes', 'Colaborador', 'ClienteId'),)
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'Colaborador', 'ClienteId'], name='unique_tiempos_cliente')
+        ]
 
 class Consultores(models.Model):
     TipoDocumentoID = models.ForeignKey(
@@ -169,7 +175,9 @@ class Detalle_Certificacion(models.Model):
 
     class Meta:
         db_table = 'Detalle_Certificacion'
-        unique_together = ('DocumentoId', 'CertificacionId')
+        constraints = [
+            models.UniqueConstraint(fields=['DocumentoId', 'CertificacionId'], name='unique_detalle_certificacion')
+        ]
 
 class Concepto(models.Model):
     ConceptoId = models.AutoField(primary_key=True)
@@ -193,7 +201,9 @@ class TiemposConcepto(models.Model):
 
     class Meta:
         db_table = 'Tiempos_Concepto'
-        unique_together = (('Anio', 'Mes', 'Colaborador', 'ConceptoId'),)
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'Colaborador', 'ConceptoId'], name='unique_tiempos_concepto')
+        ]
 
 
 class Gastos(models.Model):
@@ -218,7 +228,9 @@ class Detalle_Gastos(models.Model):
 
     class Meta:
         db_table = 'Detalle_Gastos'
-        unique_together = ('Anio', 'Mes', 'GastosId')
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'GastosId'], name='unique_detalle_gastos')
+        ]
 
 
 class Total_Gastos(models.Model):
@@ -231,7 +243,9 @@ class Total_Gastos(models.Model):
 
     class Meta:
         db_table = 'Total_Gastos'
-        unique_together = ('Anio', 'Mes')
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes'], name='unique_total_gastos')
+        ]
 
 class Costos_Indirectos(models.Model):
     CostoId = models.AutoField(primary_key=True)
@@ -254,7 +268,9 @@ class Detalle_Costos_Indirectos(models.Model):
 
     class Meta:
         db_table = 'Detalle_Costos_Indirectos'
-        unique_together = ('Anio', 'Mes', 'CostosId')
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'CostosId'], name='unique_detalle_costos_indirectos')
+        ]
 
 class Total_Costos_Indirectos(models.Model):
     Anio = models.CharField(max_length=4)
@@ -266,7 +282,9 @@ class Total_Costos_Indirectos(models.Model):
 
     class Meta:
         db_table = 'Total_Costos_Indirectos'
-        unique_together = ('Anio', 'Mes')
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes'], name='unique_total_costos_indirectos')
+        ]
 
 class Nomina(models.Model):
     Anio = models.CharField(max_length=4)
@@ -280,7 +298,9 @@ class Nomina(models.Model):
 
     class Meta:
         db_table = 'Nomina'
-        unique_together = (('Anio', 'Mes', 'Documento'),)
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento'], name='unique_nomina')
+        ]
 
 class Empleado(models.Model):
     TipoDocumento = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE, db_column='TipoDocumento')
