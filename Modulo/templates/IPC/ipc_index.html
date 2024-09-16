@@ -24,18 +24,19 @@
         </div>
     </div>
     <div class="card-footer text-muted">
-            <style> .table-responsive {
-                    max-height: 200px; 
-                    max-width: 100%;   
-                    overflow-y: scroll;    
-                    overflow-x: scroll;  
-                    display: block;
-                }
-                .table {
-                    width: 100%;
-                    table-layout: auto;  
-                }   
-            </style>
+        <style> 
+            .table-responsive {
+                max-height: 200px; 
+                max-width: 100%;   
+                overflow-y: scroll;    
+                overflow-x: scroll;  
+                display: block;
+            }
+            .table {
+                width: 100%;
+                table-layout: auto;  
+            }   
+        </style>
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'ipc_eliminar' %}">
                 {% csrf_token %}
@@ -45,16 +46,20 @@
                             <th><input type="checkbox" id="select-all"></th>
                             <th scope="col">Año</th>
                             <th scope="col">Mes</th>
-                            <th scope="col">IPC</th>
+                            <th scope="col">Índice</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for ipc in ipc_data %}
-                        <tr class="">
+                        <tr>
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ ipc.id }}"></td>
-                            <td>{{ ipc.anio }}</td>
-                            <td>{{ ipc.mes }}</td>
-                            <td>{{ ipc.campo_numerico }}</td>
+                            <td>{{ ipc.Anio }}</td>
+                            <td>{{ ipc.Mes }}</td>
+                            <td>{{ ipc.Indice }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">No hay datos disponibles.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -83,8 +88,8 @@
         return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
     }
 
-     // Confirmación antes de descargar
-     function confirmDownload() {
+    // Confirmación antes de descargar
+    function confirmDownload() {
         let selected = document.querySelectorAll('.row-select:checked').length;
         if (selected === 0) {
             alert('No has seleccionado ningún elemento para descargar.');
@@ -92,6 +97,7 @@
         }
         return true;  // Permitir la descarga si hay elementos seleccionados
     }
+
     // Manejar el clic en el botón de editar
     function handleEditClick() {
         let selected = document.querySelectorAll('.row-select:checked');

@@ -46,6 +46,8 @@ from .models import Nomina
 from .forms import NominaForm
 from .models import Detalle_Certificacion
 from .forms import Detalle_CertificacionForm
+from .models import Empleado
+from .forms import EmpleadoForm
 
 
 def inicio(request):
@@ -1337,3 +1339,95 @@ def detalle_certificacion_descargar_excel(request):
         return response
 
     return redirect('detalle_certificacion_index')
+
+# Vista para listar empleados
+def empleado_index(request):
+    empleados = Empleado.objects.all()
+    return render(request, 'empleado/empleado_index.html', {'empleados': empleados})
+
+# Vista para crear un nuevo empleado
+def empleado_crear(request):
+    if request.method == 'POST':
+        form = EmpleadoForm(request.POST)
+        if form.is_valid():
+            max_id = Empleado.objects.all().aggregate(max_id=models.Max('Documento'))['max_id']
+            new_id = max_id + 1 if max_id is not None else 1
+            nuevo_empleado = form.save(commit=False)
+            nuevo_empleado.Documento = new_id
+            nuevo_empleado.save()
+
+            return redirect('empleado_index')
+    else:
+        form = EmpleadoForm()
+    
+    return render(request, 'empleado/empleado_form.html', {'form': form})
+
+# Vista para editar un empleado
+@csrf_exempt
+def empleado_editar(request, tipo_documento_id, documento_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            empleado = Empleado.objects.get(TipoDocumento=tipo_documento_id, Documento=documento_id)
+            form = EmpleadoForm(data, instance=empleado)
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Empleado.DoesNotExist:
+            return JsonResponse({'error': 'Empleado no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+# Vista para eliminar empleados
+def empleado_eliminar(request):
+    if request.method == 'POST':
+        empleado_ids = request.POST.getlist('empleado_ids')
+        for id_pair in empleado_ids:
+            tipo_documento_id, documento_id = id_pair.split('-')
+            Empleado.objects.filter(TipoDocumento=tipo_documento_id, Documento=documento_id).delete()
+        return redirect('empleado_index')
+    return redirect('empleado_index')
+
+# Vista para descargar datos de empleados en Excel
+def empleado_descargar_excel(request):
+    if request.method == 'POST':
+        # Obtener los IDs desde el formulario
+        item_ids = request.POST.get('items_to_download', '').split(',')
+        filter_params = []
+        for item in item_ids:
+            tipo_documento_id, documento_id = item.split('-')
+            filter_params.append((tipo_documento_id, documento_id))
+
+        empleados_data = Empleado.objects.filter(
+            (Q(TipoDocumento=tipo_documento_id) & Q(Documento=documento_id)) for tipo_documento_id, documento_id in filter_params
+        )
+
+        data = []
+        for empleado in empleados_data:
+            data.append([
+                empleado.TipoDocumento.Nombre, 
+                empleado.Documento, 
+                empleado.Nombre, 
+                empleado.FechaIngreso, 
+                empleado.FechaOperacion
+            ])
+
+        df = pd.DataFrame(data, columns=[
+            'Tipo Documento', 
+            'Documento ID', 
+            'Nombre Empleado', 
+            'Fecha Ingreso', 
+            'Fecha Operación'
+        ])
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="empleados.xlsx"'
+
+        df.to_excel(response, index=False)
+        return response
+
+    return redirect('empleado_index')

@@ -309,7 +309,6 @@ class Empleado(models.Model):
     FechaNacimiento = models.DateField()
     FechaIngreso = models.DateField()
     FechaOperacion = models.DateField()
-    PerfilNombre = models.CharField(max_length=100)
     ModuloId = models.ForeignKey(Modulo, on_delete=models.CASCADE, db_column='ModuloId')
     PerfilId = models.ForeignKey(Perfil, on_delete=models.CASCADE, db_column='PerfilId')
     LineaId = models.ForeignKey(Linea, on_delete=models.CASCADE, db_column='LineaId')

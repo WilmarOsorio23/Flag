@@ -142,4 +142,11 @@ urlpatterns = [
     path('detalle_certificacion/editar/<str:documentoId>/<str:certificacionId>/', views.detalle_certificacion_editar, name='detalle_certificacion_editar'),
     path('detalle_certificacion/eliminar/', views.detalle_certificacion_eliminar, name='detalle_certificacion_eliminar'),
     path('detalle_certificacion/descargar_excel/', views.detalle_certificacion_descargar_excel, name='detalle_certificacion_descargar_excel'),
+
+    # Rutas para la tabla Empleado
+    path('empleado/', views.empleado_index, name='empleado_index'),
+    path('empleado/crear/', views.empleado_crear, name='empleado_crear'),
+    path('empleado/editar/<str:tipo_documento_id>/<str:documento_id>/', views.empleado_editar, name='empleado_editar'),
+    path('empleado/eliminar/', views.empleado_eliminar, name='empleado_eliminar'),
+    path('empleado/descargar_excel/', views.empleado_descargar_excel, name='empleado_descargar_excel'),
 ]
