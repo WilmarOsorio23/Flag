@@ -688,7 +688,7 @@ def costos_indirectos_crear(request):
             return redirect('costos_indirectos_index')
     else:
         form = CostosIndirectosForm()
-    return render(request, 'Costos_Indirectos/costos_indirectos_form.html', {'form': form})
+    return render(request, 'Costos_Indirectos/costos_indirecto_forms.html', {'form': form})
 
 def costos_indirectos_editar(request, id):
     costo = get_object_or_404(Costos_Indirectos, CostoId=id)
@@ -701,7 +701,7 @@ def costos_indirectos_editar(request, id):
     else:
         form = CostosIndirectosForm(instance=costo)
 
-    return render(request, 'Costos_Indirectos/costos_indirectos_form.html', {'form': form})
+    return render(request, 'Costos_Indirectos/costos_indirecto_forms.html', {'form': form})
 
 def costos_indirectos_eliminar(request):
     if request.method == 'POST':
@@ -995,7 +995,7 @@ def total_costos_indirectos_crear(request):
             return redirect('total_costos_indirectos_index')
     else:
         form = Total_Costos_IndirectosForm()
-    return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_form.html', {'form': form})
+    return render(request, 'Costos_Indirectos/costos_indirecto_forms.html', context)
 
 
 def total_costos_indirectos_editar(request, anio, mes):
@@ -1055,7 +1055,7 @@ def detalle_costos_indirectos_crear(request):
             return redirect('detalle_costos_indirectos_index')
     else:
         form = DetalleCostosIndirectosForm()
-    return render(request, 'Detalle_Costos_Indirectos/detalle_costos_indirectos_form.html', {'form': form})
+    return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_form.html', {'form': form})
 
 def detalle_costos_indirectos_editar(request, id):
     detalle = get_object_or_404(Detalle_Costos_Indirectos, id=id)
@@ -1280,6 +1280,7 @@ def nomina_descargar_excel(request):
 # Detalle certificacion
 def detalle_certificacion_index(request):
     detalles_certificacion = Detalle_Certificacion.objects.all()
+    #print(detalles_certificacion) 
     return render(request, 'Detalle_Certificacion/detalle_certificacion_index.html', {'detalles_certificacion': detalles_certificacion})
 
 
@@ -1288,9 +1289,15 @@ def detalle_certificacion_crear(request):
         form = Detalle_CertificacionForm(request.POST)
         if form.is_valid():
             max_id = Detalle_Certificacion.objects.all().aggregate(max_id=models.Max('DocumentoId'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
+            if max_id is not None:
+                try:
+                    new_id = str(int(max_id) + 1)  
+                except ValueError:
+                    new_id = '1' 
+            else:
+                new_id = '1'
             nuevo_detalle_certificacion = form.save(commit=False)
-            nuevo_detalle_certificacion.DocumentoId = new_id  # Asignar un nuevo DocumentoId
+            nuevo_detalle_certificacion.DocumentoId = new_id 
             nuevo_detalle_certificacion.save()
             return redirect('detalle_certificacion_index')
     else:

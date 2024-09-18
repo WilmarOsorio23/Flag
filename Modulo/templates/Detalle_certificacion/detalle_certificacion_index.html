@@ -43,18 +43,21 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Documento</th>
-                            <th scope="col">Certificación</th>
+                            <th scope="col">Documento ID</th>
+                            <th scope="col">Certificación ID</th>
                             <th scope="col">Fecha de Certificación</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for detalle in detalle_certificacion_data %}
-                        <tr class="">
+                        {% for detalle in detalles_certificacion %}
+                        <tr>
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ detalle.documentoid }}|{{ detalle.certificacionid }}"></td>
-                            <td><input type="text" name="DocumentoId" class="form-control-plaintext" value="{{ detalle.DocumentoId.DocumentoId }} " data-val="{{ detalle.DocumentoId.DocumentoId}}" readonly>{{ detalle.documentoid }}</td>
-                            <td><input type="texto" name="CertificacionId" class="form-control-plaintext" value="{{ detalle.CertificacionId.CertificacionId }} " data-val="{{detalle.CertificacionId.CertificacionId}}" readonly>{{ detalle.certificacionid }}</td>
-                            <td><input type="date" name="Fecha_Certificacion" class="form-control-plaintext" value="{{ detalle.fecha_certificacion|date:'Y-m-d' }} " readonly></td>
+                            <!-- Campo editable para DocumentoId -->
+                            <td><input type="text" name="DocumentoId_{{ forloop.counter }}" class="form-control" value="{{ detalle.DocumentoId }}"></td>
+                            <!-- Campo editable para CertificacionId -->
+                            <td><input type="text" name="CertificacionId_{{ forloop.counter }}" class="form-control" value="{{ detalle.CertificacionId }}"></td>
+                            <!-- Campo editable para Fecha de Certificación -->
+                            <td><input type="date" name="Fecha_Certificacion_{{ forloop.counter }}" class="form-control" value="{{ detalle.Fecha_Certificacion|date:'Y-m-d' }}"></td>
                         </tr>
                         {% endfor %}
                     </tbody>

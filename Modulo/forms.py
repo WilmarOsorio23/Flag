@@ -496,7 +496,7 @@ class Detalle_CertificacionForm(forms.ModelForm):
                 'placeholder': 'Ingrese el Certificación ID'
             }),
             'fecha_certificacion': forms.DateInput(attrs={
-                'type': 'date',
+                'type': 'date', 
                 'class': 'form-control',
                 'placeholder': 'Ingrese la Fecha de Certificación'
             }),

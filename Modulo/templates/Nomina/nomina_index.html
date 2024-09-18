@@ -54,11 +54,11 @@
                         {% for nomina in nomina_data %}
                         <tr class="">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ nomina.anio }}|{{ nomina.mes }}|{{ nomina.documento }}"></td>
-                            <td>{{ nomina.anio }}</td>
-                            <td>{{ nomina.mes }}</td>
-                            <td>{{ nomina.documento }}</td>
-                            <td>{{ nomina.salario }}</td>
-                            <td>{{ nomina.cliente }}</td>
+                            <td>{{ nomina.Anio }}</td>
+                            <td>{{ nomina.Mes }}</td>
+                            <td>{{ nomina.Documento }}</td>
+                            <td>{{ nomina.Salario }}</td>
+                            <td>{{ nomina.ClienteId }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

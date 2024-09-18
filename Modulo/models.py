@@ -6,7 +6,7 @@ class Modulo(models.Model):
     Nombre = models.TextField(verbose_name="Descripcion", null=True)
 
     def __str__(self):
-        return f"Nombre: {self.Nombre}"
+        return f"{self.Nombre}"
 
     class Meta:
         db_table = 'Modulo'
@@ -47,7 +47,7 @@ class Linea(models.Model):
     Nombre = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"LineaId: {self.LineaId}, Nombre: {self.Nombre}"
+        return f"{self.Nombre}"
 
     class Meta:
         db_table = 'Linea'
@@ -58,7 +58,7 @@ class Perfil(models.Model):
     Nombre = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"PerfilId: {self.PerfilId}, Nombre: {self.Nombre}"
+        return f"{self.Nombre}"
 
     class Meta:
         db_table = 'Perfil'
