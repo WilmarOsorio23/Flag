@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block titulo %} Filtrar Certificados {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Filtrar Certificados</h4>
+    </div>
+    <div class="card-body">
+        <!-- Formulario de búsqueda -->
+        <form method="GET" class="form-inline">
+            <div class="form-group mr-3 col-md-3">
+                {{ form.Nombre.label_tag }}
+                {{ form.Nombre }}
+            </div>
+            <div class="form-group mr-3 col-md-3">
+                {{ form.Certificacion.label_tag }}
+                {{ form.Certificacion }}
+            </div>
+            <div class="form-group mr-3 col-md-3">
+                {{ form.LineaId.label_tag }}
+                {{ form.LineaId }}
+            </div>
+            <div class="form-group mr-3 col-md-3">
+                {{ form.ModuloId.label_tag }}
+                {{ form.ModuloId }}
+            </div>
+            <div class="form-group mr-3 col-md-3">
+                {{ form.Fecha_Certificacion.label_tag }}
+                {{ form.Fecha_Certificacion }}
+            </div>
+            <div class="form-group mr-3 col-md-3">
+                <button type="submit" name="buscar" class="btn btn-primary">Buscar</button>
+            </div>            
+        </form>
+
+        <!-- Resultados -->
+        {% if show_data and empleados %}
+        <div class="mt-4">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Línea</th>
+                        <th>Documento</th>
+                        <th>Nombre Empleado</th>
+                        <th>Cargo Empleado</th>
+                        <th>Perfil Empleado</th>
+                        <th>Módulo</th>
+                        <th>Nombre Certificación</th>
+                        <th>Fecha Certificación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for empleado in empleados %}
+                        <tr>
+                            <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.LineaId }}</td>
+                            <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.Documento }}</td>
+                            <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.Nombre }}</td>
+                            <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.Cargo }}</td>
+                            <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.PerfilId }}</td>
+                            <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.ModuloId }}</td>    
+
+                            <td>
+                                <ul>
+                                    {% if empleado_info.certificaciones != 'No se encontró información' %}
+                                    <ul>
+                                        {% if empleado_info %}
+                                            <ul>
+                                                {% for cert in empleado_info.certificaciones %}
+                                                    <li>{{ cert.certificacion }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </ul>
+                                    {% else %}
+                                    <p>{{ empleado_info.certificaciones }}</p>
+                                    {% endif %}
+                                </ul>    
+                            </td> 
+                                               
+                            <td>
+                                <ul>                           
+                                    {% if empleado_info.certificaciones != 'No se encontró información' %}
+                                    <ul>
+                                        {% for cert in empleado_info.certificaciones %}
+                                        <li>
+                                            {% if cert.fecha_certificacion %}
+                                                {{ cert.fecha_certificacion }}
+                                            {% else %}
+                                                - Fecha: No disponible
+                                            {% endif %}
+                                        </li>                                        
+                                        {% endfor %}
+                                    </ul>
+                                    {% else %}
+                                    <p>{{ empleado_info.certificaciones }}</p>
+                                    {% endif %}
+                                </ul>    
+                            </td>                   
+                        </tr>                  
+                    {% empty %}
+                        <tr>
+                            <td colspan="11">No se encontraron empleados con los filtros seleccionados.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>                
+            </table>
+
+            <!-- Botón de descarga de Excel -->
+            <a href="{% url 'descargar_excel' %}" class="btn btn-success">Descargar Excel</a>
+        </div>
+        {% elif show_data %}
+            <p>No se encontraron resultados.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

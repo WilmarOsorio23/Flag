@@ -622,3 +622,48 @@ class EmpleadoForm(forms.ModelForm):
             'OtrasCertificaciones': 'Otras Certificaciones',
             'Postgrados': 'Postgrados',
         }
+
+# Forms para filtro informe certificacion
+class EmpleadoFilterForm(forms.Form):
+    Nombre = forms.ChoiceField(
+        choices=[],  
+        required=False, 
+        label='Colaborador',
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'placeholder': 'Seleccione el colaborador'  # El placeholder solo aplica a campos de texto, lo eliminé aquí ya que es un campo Select.
+        })  
+    )
+
+    Certificacion = forms.ChoiceField(
+        choices=[],  
+        required=False, 
+        label='Certificación',        
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        })
+    )
+
+    LineaId = forms.ChoiceField(
+        choices=[],  
+        required=False, 
+        label='Línea',
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        })
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super(EmpleadoFilterForm, self).__init__(*args, **kwargs)
+        
+        # Rellenar las opciones de Línea
+        lineas = Empleado.objects.values_list('LineaId', flat=True).distinct()
+        self.fields['LineaId'].choices = [('', 'Seleccione la línea')] + [(linea, linea) for linea in lineas]
+
+        # Rellenar las opciones de Certificación
+        certificaciones = Certificacion.objects.values_list('Certificacion', flat=True).distinct()
+        self.fields['Certificacion'].choices = [('', 'Seleccione la certificación')] + [(certificacion, certificacion) for certificacion in certificaciones]
+
+        # Rellenar las opciones de Colaboradores (Nombre)
+        nombres = Empleado.objects.values_list('Nombre', flat=True).distinct()
+        self.fields['Nombre'].choices = [('', 'Seleccione el colaborador')] + [(nombre, nombre) for nombre in nombres]

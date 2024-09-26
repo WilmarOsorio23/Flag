@@ -149,4 +149,8 @@ urlpatterns = [
     path('empleado/editar/<str:tipo_documento_id>/<str:documento_id>/', views.empleado_editar, name='empleado_editar'),
     path('empleado/eliminar/', views.empleado_eliminar, name='empleado_eliminar'),
     path('empleado/descargar_excel/', views.empleado_descargar_excel, name='empleado_descargar_excel'),
+
+    # Rutas para informe de certificación
+    path('informes/', views.empleado_filtrado, name='informe_certificacion_index'),
+    path('descargar_excel/', views.descargar_excel, name='descargar_excel'),
 ]
