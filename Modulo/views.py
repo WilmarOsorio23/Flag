@@ -1503,11 +1503,6 @@ def empleado_filtrado(request):
                         'nombre': nombre,
                         'certificaciones': 'No se encontró información',
                     }
-            
-                certificacion_info = {
-                    'certificacion': certificacion,
-                    'empleados': 'No se encontraron empleados con esa certificación',
-                }
         show_data = True
     else:
         form = EmpleadoFilterForm()

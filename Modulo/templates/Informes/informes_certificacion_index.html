@@ -60,7 +60,7 @@
                             <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.Cargo }}</td>
                             <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.PerfilId }}</td>
                             <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.ModuloId }}</td>    
-
+                            
                             <td>
                                 <ul>
                                     {% if empleado_info.certificaciones != 'No se encontró información' %}
@@ -76,11 +76,10 @@
                                     {% else %}
                                     <p>{{ empleado_info.certificaciones }}</p>
                                     {% endif %}
-                                </ul>    
-                            </td> 
-                                               
+                                </ul>       
+                            </td>         
                             <td>
-                                <ul>                           
+                                <ul>
                                     {% if empleado_info.certificaciones != 'No se encontró información' %}
                                     <ul>
                                         {% for cert in empleado_info.certificaciones %}
@@ -104,7 +103,7 @@
                             <td colspan="11">No se encontraron empleados con los filtros seleccionados.</td>
                         </tr>
                     {% endfor %}
-                </tbody>                
+                </tbody>                         
             </table>
 
             <!-- Botón de descarga de Excel -->
