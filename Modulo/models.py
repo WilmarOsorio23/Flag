@@ -167,7 +167,7 @@ class Certificacion(models.Model):
 
 class Detalle_Certificacion(models.Model):
     DocumentoId = models.CharField(max_length=50)
-    CertificacionId = models.CharField(max_length=50)
+    CertificacionId = models.ForeignKey(Certificacion, on_delete=models.CASCADE, db_column='CertificacionId')
     Fecha_Certificacion = models.DateField()
 
     def __str__(self):

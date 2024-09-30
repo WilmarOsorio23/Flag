@@ -623,7 +623,6 @@ class EmpleadoForm(forms.ModelForm):
             'Postgrados': 'Postgrados',
         }
 
-# Forms para filtro informe certificacion
 class EmpleadoFilterForm(forms.Form):
     Nombre = forms.ChoiceField(
         choices=[],  
@@ -631,7 +630,6 @@ class EmpleadoFilterForm(forms.Form):
         label='Colaborador',
         widget=forms.Select(attrs={
             'class': 'form-control',
-            'placeholder': 'Seleccione el colaborador'  # El placeholder solo aplica a campos de texto, lo eliminé aquí ya que es un campo Select.
         })  
     )
 
@@ -654,6 +652,9 @@ class EmpleadoFilterForm(forms.Form):
     )
     
     def __init__(self, *args, **kwargs):
+        # Se recibe la certificación actual seleccionada para filtrar empleados.
+        certificacion_seleccionada = kwargs.pop('certificacion_seleccionada', None)
+        
         super(EmpleadoFilterForm, self).__init__(*args, **kwargs)
         
         # Rellenar las opciones de Línea
@@ -664,6 +665,10 @@ class EmpleadoFilterForm(forms.Form):
         certificaciones = Certificacion.objects.values_list('Certificacion', flat=True).distinct()
         self.fields['Certificacion'].choices = [('', 'Seleccione la certificación')] + [(certificacion, certificacion) for certificacion in certificaciones]
 
-        # Rellenar las opciones de Colaboradores (Nombre)
-        nombres = Empleado.objects.values_list('Nombre', flat=True).distinct()
-        self.fields['Nombre'].choices = [('', 'Seleccione el colaborador')] + [(nombre, nombre) for nombre in nombres]
+        # Filtrar los colaboradores según la certificación seleccionada
+        if certificacion_seleccionada:
+            empleados = Empleado.objects.filter(certificacion__Certificacion=certificacion_seleccionada).values_list('Nombre', flat=True).distinct()
+        else:
+            empleados = Empleado.objects.values_list('Nombre', flat=True).distinct()
+        
+        self.fields['Nombre'].choices = [('', 'Seleccione el colaborador')] + [(empleado, empleado) for empleado in empleados]

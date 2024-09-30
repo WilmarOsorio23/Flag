@@ -11,20 +11,19 @@
         <!-- CRUD Icons -->
         <div class="button-group" style="display: flex; align-items: center;">
             <a name="" id="" class="fas fa-plus-circle" title="Crear" href="{% url 'linea_crear' %}" role="button" style="color: rgb(7, 7, 7); margin-right: 10px;"></a> 
-            <a id="edit-button" class="fas fa-edit" title="Editar" href="#" role="button" style="color: rgb(7, 7, 7); margin-right: 10px;" onclick="handleEditClick();"></a> 
+            <a id="edit-button" class="fas fa-edit" title="Editar" href="#" role="button" style="color: rgb(7, 7, 7); margin-right: 10px;" onclick="enableEdit();"></a>
+            <button id="save-button" class="fas fa-save d-none" title="Guardar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-left: 10px;" onclick="saveRow();"></button>
             <i name="" id="" class="fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
             <button type="submit" form="delete-form" class="fas fa-trash-alt" title="Eliminar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-right: 10px;" onclick="return confirmDelete();"></button> 
             <form id="download-form" method="POST" action="{% url 'linea_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
-                {% for linea in lineas %} 
-                    <input type="hidden" name="items_to_delete" value="{{ linea.id }}">
-                {% endfor %}
                 <button type="submit" class="fas fa-download" title="Descargar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer;"></button>
             </form>
         </div>
     </div>
     <div class="card-footer text-muted">
-        <style> .table-responsive {
+        <style> 
+            .table-responsive {
                 max-height: 200px; 
                 max-width: 100%;   
                 overflow-y: scroll;    
@@ -49,10 +48,14 @@
                     </thead>
                     <tbody>
                         {% for linea in lineas %}
-                        <tr class="">
+                        <tr id="row-{{ linea.id }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ linea.id }}"></td>
                             <td>{{ linea.LineaId }}</td>
-                            <td>{{ linea.Nombre }}</td> 
+                            <td><input type="text" name="Nombre" class="form-control-plaintext" value="{{ linea.Nombre }}" readonly></td> 
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">No hay datos disponibles.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -81,18 +84,8 @@
         return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
     }
 
-    // Confirmación antes de descargar
-    function confirmDownload() {
-        let selected = document.querySelectorAll('.row-select:checked').length;
-        if (selected === 0) {
-            alert('No has seleccionado ningún elemento para descargar.');
-            return false;
-        }
-        return true;  // Permitir la descarga si hay elementos seleccionados
-    }
-
-    // Manejar el clic en el botón de editar
-    function handleEditClick() {
+    // Habilitar edición en la fila seleccionada
+    function enableEdit() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length === 0) {
             alert('No has seleccionado ninguna línea para editar.');
@@ -103,9 +96,67 @@
             return false;
         }
 
-        let selectedId = selected[0].value;
-        let editUrl = "{% url 'linea_editar' 0 %}".replace('0', selectedId);
-        window.location.href = editUrl;
+        let row = selected[0].closest('tr');
+        let inputs = row.querySelectorAll('input.form-control-plaintext');
+        inputs.forEach(input => {
+            input.classList.remove('form-control-plaintext');
+            input.classList.add('form-control');
+            input.readOnly = false;
+        });
+
+        // Mostrar botón de guardar
+        document.getElementById('save-button').classList.remove('d-none');
+    }
+
+    // Guardar los cambios en la fila seleccionada
+    function saveRow() {
+        let selected = document.querySelector('.row-select:checked');
+        if (!selected) {
+            alert('No has seleccionado ninguna línea para guardar.');
+            return false;
+        }
+
+        let row = selected.closest('tr');
+        let inputs = row.querySelectorAll('input.form-control');
+        let data = {};
+
+        inputs.forEach(input => {
+            let name = input.getAttribute('name');
+            data[name] = input.value;
+        });
+
+        let lineaId = selected.value;
+
+        // Enviar datos al servidor
+        fetch(`/linea/editar/${lineaId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Volver a modo de solo lectura
+                inputs.forEach(input => {
+                    input.classList.add('form-control-plaintext');
+                    input.classList.remove('form-control');
+                    input.readOnly = true;
+                });
+
+                // Ocultar botón de guardar
+                document.getElementById('save-button').classList.add('d-none');
+            } else {
+                alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
+            }
+        })
+        .catch(error => {
+            alert('Error al enviar los datos: ' + error.message);
+        });
+
+        return false;
     }
 </script>
 {% endblock %}

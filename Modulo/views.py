@@ -149,8 +149,8 @@ def ipc_editar(request, id):
         form = IPCForm(request.POST, instance=ipc)
         if form.is_valid():
             ipc = form.save(commit=False)
-            ipc.anio = ipc.anio
-            ipc.mes = ipc.mes
+            ipc.anio = ipc.Año
+            ipc.mes = ipc.Mes
             ipc.save()
             return redirect('ipc_index')
     else:
@@ -749,7 +749,7 @@ def conceptos_crear(request):
             return redirect('conceptos_index')
     else:
         form = ConceptoForm()
-    return render(request, 'Conceptos/conceptos_form.html', {'form': form})
+    return render(request, 'conceptos/conceptos_form.html', {'form': form})
 
 def conceptos_editar(request, id):
     concepto = get_object_or_404(Concepto, id=id)
@@ -933,7 +933,7 @@ def total_gastos_crear(request):
             return redirect('total_gasto_index')
     else:
         form = TotalGastosForm()
-    return render(request, 'Total_Gastos/total_gasto_form.html', {'form': form})
+    return render(request, 'total_gastos/total_gastos_form.html', {'form': form})
 
 def total_gastos_editar(request, anio, mes):
     total_gasto = get_object_or_404(Total_Gastos, anio=anio, mes=mes)
@@ -996,7 +996,7 @@ def total_costos_indirectos_crear(request):
             return redirect('total_costos_indirectos_index')
     else:
         form = Total_Costos_IndirectosForm()
-    return render(request, 'Costos_Indirectos/costos_indirecto_forms.html', context)
+    return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_form.html', {'form': form})
 
 
 def total_costos_indirectos_editar(request, anio, mes):
@@ -1456,13 +1456,13 @@ def empleado_filtrado(request):
             # Obtiene los valores del formulario
             nombre = form.cleaned_data.get('Nombre')
             certificacion = form.cleaned_data.get('Certificacion')
-            linea = form.cleaned_data.get('Linea')
+            linea = form.cleaned_data.get('LineaId')
             modulo_id = form.cleaned_data.get('ModuloId')
             fecha_certificacion = form.cleaned_data.get('Fecha_Certificacion')
 
             # Filtrar los empleados
             if linea:
-                empleados = empleados.filter(Linea=Linea.Nombre)
+                empleados = empleados.filter(Linea=Linea)  # Se ajustó para que filtre por el ID o nombre de línea, dependiendo del caso
             if modulo_id:
                 empleados = empleados.filter(ModuloId=modulo_id)
             if nombre:
@@ -1485,19 +1485,19 @@ def empleado_filtrado(request):
 
                     # Filtrar por certificación (si es necesario)
                     if certificacion:
-                       certificaciones = certificaciones.filter(Certificacion__Certificacion=certificacion)
+                        certificaciones = certificaciones.filter(Certificacion__Certificacion=certificacion)
 
                     # Obtener todas las certificaciones del empleado
                     if detalles_certificacion.exists():
                         empleado_info = {
-                        'nombre': empleado.Nombre,
-                        'certificaciones': []
-                    }
-                    for detalle_certificacion in detalles_certificacion:
-                        empleado_info['certificaciones'].append({
-                            'certificacion': detalle_certificacion.CertificacionId,  # Acceder al campo de certificación a través de la clave foránea
-                            'fecha_certificacion': detalle_certificacion.Fecha_Certificacion
-                    })
+                            'nombre': empleado.Nombre,
+                            'certificaciones': []
+                        }
+                        for detalle_certificacion in detalles_certificacion:
+                            empleado_info['certificaciones'].append({
+                                'certificacion': detalle_certificacion.CertificacionId,  # Acceder al campo de certificación a través de la clave foránea
+                                'fecha_certificacion': detalle_certificacion.Fecha_Certificacion
+                            })
                 else:
                     empleado_info = {
                         'nombre': nombre,
@@ -1518,6 +1518,7 @@ def empleado_filtrado(request):
     }
 
     return render(request, 'informes/informes_certificacion_index.html', context)
+
 
 # Funcionalidad para descargar los resultados en Excel
 def exportar_excel(request):
