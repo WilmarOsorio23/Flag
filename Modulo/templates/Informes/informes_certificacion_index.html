@@ -23,14 +23,6 @@
                 {{ form.LineaId }}
             </div>
             <div class="form-group mr-3 col-md-3">
-                {{ form.ModuloId.label_tag }}
-                {{ form.ModuloId }}
-            </div>
-            <div class="form-group mr-3 col-md-3">
-                {{ form.Fecha_Certificacion.label_tag }}
-                {{ form.Fecha_Certificacion }}
-            </div>
-            <div class="form-group mr-3 col-md-3">
                 <button type="submit" name="buscar" class="btn btn-primary">Buscar</button>
             </div>            
         </form>
@@ -52,58 +44,35 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for empleado in empleados %}
+                    {% for item in empleado_info %}
                         <tr>
-                            <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.LineaId }}</td>
-                            <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.Documento }}</td>
-                            <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.Nombre }}</td>
-                            <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.Cargo }}</td>
-                            <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.PerfilId }}</td>
-                            <td rowspan="{{ empleado.certificaciones.count }}">{{ empleado.ModuloId }}</td>    
-                            
+                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.LineaId }}</td>
+                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.Documento }}</td>
+                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.Nombre }}</td>
+                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.Cargo }}</td>
+                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.PerfilId }}</td>
+                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.ModuloId }}</td>
                             <td>
                                 <ul>
-                                    {% if empleado_info.certificaciones != 'No se encontró información' %}
-                                    <ul>
-                                        {% if empleado_info %}
-                                            <ul>
-                                                {% for cert in empleado_info.certificaciones %}
-                                                    <li>{{ cert.certificacion }}</li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% endif %}
-                                    </ul>
-                                    {% else %}
-                                    <p>{{ empleado_info.certificaciones }}</p>
-                                    {% endif %}
-                                </ul>       
-                            </td>         
+                                    {% for cert in item.certificaciones %}
+                                        <li>{{ cert.CertificacionId }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
                             <td>
                                 <ul>
-                                    {% if empleado_info.certificaciones != 'No se encontró información' %}
-                                    <ul>
-                                        {% for cert in empleado_info.certificaciones %}
-                                        <li>
-                                            {% if cert.fecha_certificacion %}
-                                                {{ cert.fecha_certificacion }}
-                                            {% else %}
-                                                - Fecha: No disponible
-                                            {% endif %}
-                                        </li>                                        
-                                        {% endfor %}
-                                    </ul>
-                                    {% else %}
-                                    <p>{{ empleado_info.certificaciones }}</p>
-                                    {% endif %}
-                                </ul>    
-                            </td>                   
-                        </tr>                  
+                                    {% for cert in item.certificaciones %}
+                                        <li>{{ cert.Fecha_Certificacion|date:"d/m/Y" }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="11">No se encontraron empleados con los filtros seleccionados.</td>
+                            <td colspan="8">No se encontraron empleados con los filtros seleccionados.</td>
                         </tr>
                     {% endfor %}
-                </tbody>                         
+                </tbody>                 
             </table>
 
             <!-- Botón de descarga de Excel -->

@@ -1440,13 +1440,14 @@ def empleado_descargar_excel(request):
 
     return redirect('empleado_index')
 
-#Informes
+# Informe de Certificación de Empleados
 def empleado_filtrado(request):
     empleados = Empleado.objects.all()
     certificaciones = Certificacion.objects.all()
     detalles_certificacion = Detalle_Certificacion.objects.all()
 
     empleado_info = None
+    show_data = False  # Solo mostramos resultados si hay filtros aplicados
 
     # Verifica si se han enviado parámetros de búsqueda (GET)
     if request.method == 'GET':
@@ -1460,53 +1461,46 @@ def empleado_filtrado(request):
             modulo_id = form.cleaned_data.get('ModuloId')
             fecha_certificacion = form.cleaned_data.get('Fecha_Certificacion')
 
-            # Filtrar los empleados
-            if linea:
-                empleados = empleados.filter(Linea=Linea)  # Se ajustó para que filtre por el ID o nombre de línea, dependiendo del caso
-            if modulo_id:
-                empleados = empleados.filter(ModuloId=modulo_id)
+            # Filtrar empleados con los valores del formulario
             if nombre:
                 empleados = empleados.filter(Nombre__icontains=nombre)
+            if linea:
+                empleados = empleados.filter(LineaId=linea)
+            if modulo_id:
+                empleados = empleados.filter(ModuloId=modulo_id)
 
-            # Filtrar certificaciones
+            # Imprimir empleados después de aplicar filtros de nombre, línea y módulo
+            print("Empleados después de aplicar filtros:", empleados)
+
+            # Filtrar detalles de certificación por los empleados encontrados
+            if empleados.exists():
+                detalles_certificacion = detalles_certificacion.filter(DocumentoId__in=empleados.values_list('Documento', flat=True))
+                print("Detalles de certificación después de filtrar por empleados:", detalles_certificacion.query)
+
+            # Filtrar por certificación
             if certificacion:
-                certificaciones = certificaciones.filter(Certificacion=certificacion)
+                detalles_certificacion = detalles_certificacion.filter(CertificacionId=certificacion)
+                print("Detalles de certificación después de aplicar filtros de certificación:", detalles_certificacion.query)
 
-            # Filtrar detalles de certificación
+            # Filtrar por fecha de certificación
             if fecha_certificacion:
                 detalles_certificacion = detalles_certificacion.filter(Fecha_Certificacion=fecha_certificacion)
+                print("Detalles de certificación después de aplicar filtros de certificación y fecha:", detalles_certificacion.query)
 
-            # Si se busca un nombre específico de empleado
-            if nombre:
-                empleado = empleados.first()  # Obtener el primer empleado que coincida
-                if empleado:
-                    # Filtrar Detalle_Certificacion por el documento del empleado
-                    detalles_certificacion = Detalle_Certificacion.objects.filter(DocumentoId=empleado.Documento)
+            # Crear la estructura de empleado_info solo si hay detalles de certificación encontrados
+            if detalles_certificacion.exists():
+                empleado_info = []
+                for empleado in empleados:
+                    certs = detalles_certificacion.filter(DocumentoId=empleado.Documento)
+                    if certs.exists():
+                        empleado_info.append({
+                            'empleado': empleado,
+                            'certificaciones': certs
+                        })
 
-                    # Filtrar por certificación (si es necesario)
-                    if certificacion:
-                        certificaciones = certificaciones.filter(Certificacion__Certificacion=certificacion)
-
-                    # Obtener todas las certificaciones del empleado
-                    if detalles_certificacion.exists():
-                        empleado_info = {
-                            'nombre': empleado.Nombre,
-                            'certificaciones': []
-                        }
-                        for detalle_certificacion in detalles_certificacion:
-                            empleado_info['certificaciones'].append({
-                                'certificacion': detalle_certificacion.CertificacionId,  # Acceder al campo de certificación a través de la clave foránea
-                                'fecha_certificacion': detalle_certificacion.Fecha_Certificacion
-                            })
-                else:
-                    empleado_info = {
-                        'nombre': nombre,
-                        'certificaciones': 'No se encontró información',
-                    }
-        show_data = True
+            show_data = True
     else:
         form = EmpleadoFilterForm()
-        show_data = False
 
     context = {
         'form': form,

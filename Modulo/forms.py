@@ -650,25 +650,44 @@ class EmpleadoFilterForm(forms.Form):
             'class': 'form-control',
         })
     )
-    
+
+    ModuloId = forms.ChoiceField(
+        choices=[],  
+        required=False, 
+        label='Módulo',
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        })
+    )
+
+    Fecha_Certificacion = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date',
+        })
+    )
+
     def __init__(self, *args, **kwargs):
-        # Se recibe la certificación actual seleccionada para filtrar empleados.
         certificacion_seleccionada = kwargs.pop('certificacion_seleccionada', None)
-        
         super(EmpleadoFilterForm, self).__init__(*args, **kwargs)
-        
+
+        # Actualizando para usar CertificacionId en lugar de id
+        certificaciones = Certificacion.objects.values_list('CertificacionId', 'Certificacion').distinct()
+        self.fields['Certificacion'].choices = [('', 'Seleccione la certificación')] + [(certificacion[0], certificacion[1]) for certificacion in certificaciones]
+
         # Rellenar las opciones de Línea
         lineas = Empleado.objects.values_list('LineaId', flat=True).distinct()
         self.fields['LineaId'].choices = [('', 'Seleccione la línea')] + [(linea, linea) for linea in lineas]
 
-        # Rellenar las opciones de Certificación
-        certificaciones = Certificacion.objects.values_list('Certificacion', flat=True).distinct()
-        self.fields['Certificacion'].choices = [('', 'Seleccione la certificación')] + [(certificacion, certificacion) for certificacion in certificaciones]
-
         # Filtrar los colaboradores según la certificación seleccionada
         if certificacion_seleccionada:
-            empleados = Empleado.objects.filter(certificacion__Certificacion=certificacion_seleccionada).values_list('Nombre', flat=True).distinct()
+            empleados = Empleado.objects.filter(certificacion__CertificacionId=certificacion_seleccionada).values_list('Nombre', flat=True).distinct()
         else:
             empleados = Empleado.objects.values_list('Nombre', flat=True).distinct()
         
         self.fields['Nombre'].choices = [('', 'Seleccione el colaborador')] + [(empleado, empleado) for empleado in empleados]
+
+        # Rellenar las opciones de Módulo
+        modulos = Empleado.objects.values_list('ModuloId', flat=True).distinct()
+        self.fields['ModuloId'].choices = [('', 'Seleccione el módulo')] + [(modulo, modulo) for modulo in modulos]
