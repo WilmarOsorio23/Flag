@@ -3,10 +3,10 @@ from django.db import models
 # Modelos base
 class Modulo(models.Model):
     ModuloId = models.AutoField(primary_key=True)
-    Nombre = models.TextField(verbose_name="Descripcion", null=True)
+    Modulo = models.TextField(verbose_name="Descripcion", null=True)
 
     def __str__(self):
-        return f"{self.Nombre}"
+        return f"{self.Modulo}"
 
     class Meta:
         db_table = 'Modulo'
@@ -44,10 +44,10 @@ class IND(models.Model):
 
 class Linea(models.Model):
     LineaId = models.AutoField(primary_key=True)
-    Nombre = models.CharField(max_length=100)
+    Linea = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.Nombre}"
+        return f"{self.Linea}"
 
     class Meta:
         db_table = 'Linea'
@@ -55,10 +55,10 @@ class Linea(models.Model):
 
 class Perfil(models.Model):
     PerfilId = models.AutoField(primary_key=True)
-    Nombre = models.CharField(max_length=100)
+    Perfil = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.Nombre}"
+        return f"{self.Perfil}"
 
     class Meta:
         db_table = 'Perfil'

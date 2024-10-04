@@ -51,28 +51,28 @@
                             <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.Nombre }}</td>
                             <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.Cargo }}</td>
                             <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.PerfilId }}</td>
-                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.ModuloId }}</td>
+                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.ModuloId }}</td>   
                             <td>
                                 <ul>
                                     {% for cert in item.certificaciones %}
                                         <li>{{ cert.CertificacionId }}</li>
                                     {% endfor %}
-                                </ul>
-                            </td>
+                                </ul>       
+                            </td>         
                             <td>
                                 <ul>
                                     {% for cert in item.certificaciones %}
                                         <li>{{ cert.Fecha_Certificacion|date:"d/m/Y" }}</li>
                                     {% endfor %}
                                 </ul>
-                            </td>
-                        </tr>
+                            </td>                   
+                        </tr>                  
                     {% empty %}
                         <tr>
                             <td colspan="8">No se encontraron empleados con los filtros seleccionados.</td>
                         </tr>
                     {% endfor %}
-                </tbody>                 
+                </tbody>                         
             </table>
 
             <!-- Botón de descarga de Excel -->

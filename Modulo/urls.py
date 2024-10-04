@@ -152,5 +152,6 @@ urlpatterns = [
 
     # Rutas para informe de certificación
     path('informes/', views.empleado_filtrado, name='informes_certificacion_index'),
+    path('informes/salarios/', views.empleado_nomina_filtrado, name='informes_salarios_index'),
     path('descargar_excel/', views.descargar_excel, name='descargar_excel'),
 ]

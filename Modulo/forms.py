@@ -642,13 +642,11 @@ class EmpleadoFilterForm(forms.Form):
         })
     )
 
-    LineaId = forms.ChoiceField(
-        choices=[],  
-        required=False, 
-        label='Línea',
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-        })
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     ModuloId = forms.ChoiceField(
@@ -672,15 +670,12 @@ class EmpleadoFilterForm(forms.Form):
         certificacion_seleccionada = kwargs.pop('certificacion_seleccionada', None)
         super(EmpleadoFilterForm, self).__init__(*args, **kwargs)
 
-        # Actualizando para usar CertificacionId en lugar de id
         certificaciones = Certificacion.objects.values_list('CertificacionId', 'Certificacion').distinct()
         self.fields['Certificacion'].choices = [('', 'Seleccione la certificación')] + [(certificacion[0], certificacion[1]) for certificacion in certificaciones]
 
-        # Rellenar las opciones de Línea
-        lineas = Empleado.objects.values_list('LineaId', flat=True).distinct()
-        self.fields['LineaId'].choices = [('', 'Seleccione la línea')] + [(linea, linea) for linea in lineas]
+        lineas = Linea.objects.values_list('LineaId', 'Linea').distinct()
+        self.fields['LineaId'].choices = [('', 'Seleccione la línea')] + [(linea[0], linea[1]) for linea in lineas]
 
-        # Filtrar los colaboradores según la certificación seleccionada
         if certificacion_seleccionada:
             empleados = Empleado.objects.filter(certificacion__CertificacionId=certificacion_seleccionada).values_list('Nombre', flat=True).distinct()
         else:
@@ -688,6 +683,5 @@ class EmpleadoFilterForm(forms.Form):
         
         self.fields['Nombre'].choices = [('', 'Seleccione el colaborador')] + [(empleado, empleado) for empleado in empleados]
 
-        # Rellenar las opciones de Módulo
         modulos = Empleado.objects.values_list('ModuloId', flat=True).distinct()
         self.fields['ModuloId'].choices = [('', 'Seleccione el módulo')] + [(modulo, modulo) for modulo in modulos]

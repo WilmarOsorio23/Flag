@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block titulo %} Filtrar Salarios {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Filtrar Salarios</h4>
+    </div>
+    <div class="card-body">
+        <!-- Formulario de búsqueda -->
+        <form method="GET" class="form-inline">
+            <div class="form-group mr-3 col-md-3">
+                {{ form.Nombre.label_tag }}
+                {{ form.Nombre }}
+            </div>
+            <div class="form-group mr-3 col-md-3">
+                {{ form.LineaId.label_tag }}
+                {{ form.LineaId }}
+            </div>
+            <div class="form-group mr-3 col-md-3">
+                {{ form.Anio.label_tag }}
+                {{ form.Anio }}
+            </div>
+            <div class="form-group mr-3 col-md-3">
+                {{ form.PerfilId.label_tag }}
+                {{ form.PerfilId }}
+            </div>
+            <div class="form-group mr-3 col-md-3">
+                <button type="submit" name="buscar" class="btn btn-primary">Buscar</button>
+            </div>            
+        </form>
+
+        <!-- Resultados -->
+        {% if show_data and empleado_info %}
+        <div class="mt-4">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Línea</th>
+                        <th>Documento</th>
+                        <th>Nombre Empleado</th>
+                        <th>Cargo Empleado</th>
+                        <th>Perfil Empleado</th>
+                        <th>Módulo</th>
+                        <th>Salarios</th>
+                        {% for mes in meses %}
+                        <th>Salario {{ mes }}</th>
+                        <th>Cliente {{ mes }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in empleado_info %}
+                        <tr>
+                            <td rowspan="{{ item.salarios.count }}">{{ item.empleado.LineaId }}</td>
+                            <td rowspan="{{ item.salarios.count }}">{{ item.empleado.Documento }}</td>
+                            <td rowspan="{{ item.salarios.count }}">{{ item.empleado.Nombre }}</td>
+                            <td rowspan="{{ item.salarios.count }}">{{ item.empleado.Cargo }}</td>
+                            <td rowspan="{{ item.salarios.count }}">{{ item.empleado.PerfilId }}</td>
+                            <td rowspan="{{ item.salarios.count }}">{{ item.empleado.ModuloId }}</td>   
+                            <td>
+                                <ul>
+                                    {% for salario in item.salarios %}
+                                        <li>{{ salario.Salario }}</li>
+                                    {% endfor %}
+                                </ul>       
+                            </td>
+                            <!-- Otros datos de salario por mes y cliente -->
+                        </tr>                  
+                    {% endfor %}
+                </tbody>                         
+            </table>
+
+            <!-- Botón de descarga de Excel -->
+            <a href="{% url 'descargar_salarios_excel' %}" class="btn btn-success">Descargar Excel</a>
+        </div>
+        {% elif show_data %}
+            <p>No se encontraron resultados.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
