@@ -628,18 +628,14 @@ class EmpleadoFilterForm(forms.Form):
         choices=[],  
         required=False, 
         label='Colaborador',
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-        })  
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     Certificacion = forms.ChoiceField(
         choices=[],  
         required=False, 
         label='Certificación',        
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-        })
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     LineaId = forms.ModelChoiceField(
@@ -653,17 +649,19 @@ class EmpleadoFilterForm(forms.Form):
         choices=[],  
         required=False, 
         label='Módulo',
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-        })
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
 
-    Fecha_Certificacion = forms.DateField(
+    Anio = forms.ChoiceField(
+        choices=[],
         required=False,
-        widget=forms.DateInput(attrs={
-            'class': 'form-control',
-            'type': 'date',
-        })
+        label='Año',  # Añadido etiqueta para el año
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    Mes = forms.IntegerField(
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
     )
 
     def __init__(self, *args, **kwargs):
@@ -676,12 +674,12 @@ class EmpleadoFilterForm(forms.Form):
         lineas = Linea.objects.values_list('LineaId', 'Linea').distinct()
         self.fields['LineaId'].choices = [('', 'Seleccione la línea')] + [(linea[0], linea[1]) for linea in lineas]
 
-        if certificacion_seleccionada:
-            empleados = Empleado.objects.filter(certificacion__CertificacionId=certificacion_seleccionada).values_list('Nombre', flat=True).distinct()
-        else:
-            empleados = Empleado.objects.values_list('Nombre', flat=True).distinct()
-        
+        empleados = Empleado.objects.values_list('Nombre', flat=True).distinct()
         self.fields['Nombre'].choices = [('', 'Seleccione el colaborador')] + [(empleado, empleado) for empleado in empleados]
 
         modulos = Empleado.objects.values_list('ModuloId', flat=True).distinct()
         self.fields['ModuloId'].choices = [('', 'Seleccione el módulo')] + [(modulo, modulo) for modulo in modulos]
+
+        # Llenar las opciones para Anio
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]  # Ajustado para incluir "Seleccione el año"
+# Ajusta los años según sea necesario
