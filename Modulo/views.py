@@ -1538,10 +1538,10 @@ def exportar_excel(request):
 
 # Informe de Nómina de Empleados
 def empleado_nomina_filtrado(request):
-    empleados = Empleado.objects.all()  # Todos los empleados
-    nominas = Nomina.objects.all()  # Todos los registros de nómina
-    empleado_info = None  # Inicializamos sin información de empleados
-    show_data = False  # No mostramos datos hasta que se aplique el filtro
+    empleados = Empleado.objects.all()  
+    nominas = Nomina.objects.all()  
+    empleado_info = None  
+    show_data = False  
 
     if request.method == 'GET':
         form = EmpleadoFilterForm(request.GET)
@@ -1551,10 +1551,10 @@ def empleado_nomina_filtrado(request):
             nombre = form.cleaned_data.get('Nombre')
             linea = form.cleaned_data.get('LineaId')
             modulo_id = form.cleaned_data.get('ModuloId')
-            anio = form.cleaned_data.get('Anio')  # Obtener el año del formulario
+            anio = form.cleaned_data.get('Anio')  
             mes = form.cleaned_data.get('Mes')
 
-            # Filtrar empleados basándonos en los valores del formulario
+            
             if nombre:
                 empleados = empleados.filter(Nombre__icontains=nombre)
             if linea:
@@ -1562,24 +1562,24 @@ def empleado_nomina_filtrado(request):
             if modulo_id:
                 empleados = empleados.filter(ModuloId=modulo_id)
 
-            # Filtrar la nómina por año
+            
             if anio:
                 nominas = nominas.filter(Anio=anio)
 
-            # Filtrar la nómina por mes
+            
             if mes:
                 nominas = nominas.filter(Mes=mes)
 
-            # Filtrar nómina por empleados usando el campo Documento
+            
             if empleados.exists():
                 documentos_empleados = empleados.values_list('Documento', flat=True)
                 nominas = nominas.filter(Documento__in=documentos_empleados)
 
-            # Si encontramos nóminas, preparamos la información
+            
             if nominas.exists():
                 empleado_info = []
                 for empleado in empleados:
-                    # Filtramos las nóminas para cada empleado específico
+                    
                     salarios = nominas.filter(Documento=empleado.Documento)
 
                     if salarios.exists():
@@ -1600,18 +1600,18 @@ def empleado_nomina_filtrado(request):
             else:
                 print(f"Datos encontrados para {len(empleado_info)} empleados.")
 
-            show_data = True  # Permitimos que los datos se muestren en la plantilla
+            show_data = True  
 
     else:
         form = EmpleadoFilterForm()
 
-    # Enviamos el contexto a la plantilla
+    
     context = {
         'form': form,
         'empleados': empleados,
         'nomina': nominas,
-        'empleado_info': empleado_info,  # Información de empleados, salarios y clientes
-        'show_data': show_data,  # Controla si se muestran los resultados
+        'empleado_info': empleado_info,  
+        'show_data': show_data,  
     }
 
     return render(request, 'informes/informes_salarios_index.html', context)

@@ -32,21 +32,37 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Empleado</th>
-                        <th>Salario</th>
-                        <th>Cliente</th>
+                        <th>Nombre Línea</th>
+                        <th>Documento Colaborador</th>
+                        <th>Nombre Colaborador</th>
+                        <th>Cargo</th>
+                        <th>Perfil</th>
+                        <th>Módulo</th>
+                        <th>Certificado</th>
+                        <th>Fecha Ingreso</th>
+                        <th>Título Profesional Actual</th>
                         <th>Año</th>
-                        <th>Mes</th>
+                        <th>Salario Enero </th>
+                        <th>Cliente Enero</th> 
                     </tr>
                 </thead>
                 <tbody>
                     {% for info in empleado_info %}
                     <tr>
+                        <td>{{ info.empleado.LineaId }}</td>
+                        <td>{{ info.empleado.Documento }}</td>
                         <td>{{ info.empleado.Nombre }}</td>
-                        <td>{{ info.salario }}</td>
-                        <td>{{ info.cliente.NombreCliente }}</td>
+                        <td>{{ info.empleado.Cargo }}</td>
+                        <td>{{ info.empleado.PerfilId }}</td>
+                        <td>{{ info.empleado.ModuloId }}</td>
+                        <td>
+                            <input type="checkbox" {% if info.empleado.CertificadoSAP == 1 %}checked{% endif %} disabled>
+                        </td>
+                        <td>{{ info.empleado.FechaIngreso }}</td>
+                        <td>{{ info.empleado.TituloProfesionalActual }}</td>
                         <td>{{ info.anio }}</td>
-                        <td>{{ info.mes }}</td>
+                        <td>{{ info.salario }}</td>
+                        <td>{{ info.cliente }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
