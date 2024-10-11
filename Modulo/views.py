@@ -168,11 +168,16 @@ def ipc_eliminar(request):
 def ipc_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
+        print(item_ids)  # Verifica qué valores se están enviando.
         ipc_data = IPC.objects.filter(id__in=item_ids)
+
+        if not ipc_data.exists():
+            messages.error(request, "No se encontraron datos para descargar.")
+            return redirect('ipc_index')
 
         data = []
         for ipc in ipc_data:
-            data.append([ipc.id, ipc.anio, ipc.mes, ipc.campo_numerico])
+            data.append([ipc.id, ipc.Anio, ipc.Mes, ipc.Indice])
 
         df = pd.DataFrame(data, columns=['Id', 'Año', 'Mes', 'Campo Numérico'])
 
@@ -184,6 +189,7 @@ def ipc_descargar_excel(request):
         return response
 
     return redirect('ipc_index')
+
 
 #vista para la IND
 
@@ -1553,35 +1559,34 @@ def empleado_nomina_filtrado(request):
             modulo_id = form.cleaned_data.get('ModuloId')
             anio = form.cleaned_data.get('Anio')  
             mes = form.cleaned_data.get('Mes')
+            cargo = form.cleaned_data.get('Cargo')  # Nuevo campo Cargo
 
-            
+            # Filtrar empleados
             if nombre:
                 empleados = empleados.filter(Nombre__icontains=nombre)
             if linea:
                 empleados = empleados.filter(LineaId=linea)
             if modulo_id:
                 empleados = empleados.filter(ModuloId=modulo_id)
+            if cargo:
+                empleados = empleados.filter(Cargo__icontains=cargo)  # Aplicar filtro por cargo
 
-            
+            # Filtrar nóminas por año y mes
             if anio:
                 nominas = nominas.filter(Anio=anio)
-
-            
             if mes:
                 nominas = nominas.filter(Mes=mes)
 
-            
+            # Filtrar nóminas por los empleados filtrados
             if empleados.exists():
                 documentos_empleados = empleados.values_list('Documento', flat=True)
                 nominas = nominas.filter(Documento__in=documentos_empleados)
 
-            
+            # Verificar si hay datos de nómina para los empleados filtrados
             if nominas.exists():
                 empleado_info = []
                 for empleado in empleados:
-                    
                     salarios = nominas.filter(Documento=empleado.Documento)
-
                     if salarios.exists():
                         for salario in salarios:
                             cliente = salario.Cliente
@@ -1592,20 +1597,11 @@ def empleado_nomina_filtrado(request):
                                 'anio': salario.Anio,
                                 'mes': salario.Mes,
                             })
-                    else:
-                        print(f"No se encontraron salarios para el empleado con Documento {empleado.Documento}.")
-
-            if not empleado_info:
-                print("No se encontraron datos de nómina para los empleados filtrados.")
-            else:
-                print(f"Datos encontrados para {len(empleado_info)} empleados.")
-
             show_data = True  
 
     else:
         form = EmpleadoFilterForm()
 
-    
     context = {
         'form': form,
         'empleados': empleados,
@@ -1615,6 +1611,7 @@ def empleado_nomina_filtrado(request):
     }
 
     return render(request, 'informes/informes_salarios_index.html', context)
+
 
 
 

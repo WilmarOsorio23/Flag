@@ -630,38 +630,39 @@ class EmpleadoFilterForm(forms.Form):
         label='Colaborador',
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-
     Certificacion = forms.ChoiceField(
         choices=[],  
         required=False, 
         label='Certificación',        
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-
     LineaId = forms.ModelChoiceField(
         queryset=Linea.objects.all(),
         required=False,
         label="Línea",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-
     ModuloId = forms.ChoiceField(
         choices=[],  
         required=False, 
         label='Módulo',
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-
     Anio = forms.ChoiceField(
         choices=[],
         required=False,
-        label='Año',  # Añadido etiqueta para el año
+        label='Año',  
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-
     Mes = forms.IntegerField(
         required=False,
         widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+    Cargo = forms.ChoiceField(
+        choices=[],  # Se llenará dinámicamente en el __init__
+        required=False,
+        label='Cargo',  
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     def __init__(self, *args, **kwargs):
@@ -680,6 +681,8 @@ class EmpleadoFilterForm(forms.Form):
         modulos = Empleado.objects.values_list('ModuloId', flat=True).distinct()
         self.fields['ModuloId'].choices = [('', 'Seleccione el módulo')] + [(modulo, modulo) for modulo in modulos]
 
-        # Llenar las opciones para Anio
-        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]  # Ajustado para incluir "Seleccione el año"
-# Ajusta los años según sea necesario
+        cargos = Empleado.objects.values_list('Cargo', flat=True).distinct()
+        self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo, cargo) for cargo in cargos]
+
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]
+
