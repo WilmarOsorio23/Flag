@@ -1,3 +1,4 @@
+from pyexpat.errors import messages
 import pandas as pd
 import json
 from django.shortcuts import render, redirect, get_object_or_404
@@ -57,71 +58,76 @@ def inicio(request):
 def nosotros(request):
     return render(request, 'paginas/nosotros.html')
 
-def Tablas(request):
+def modulo(request):
     # Ordenar los módulos por el campo 'id' en orden ascendente
-    modulos = Modulo.objects.all().order_by('id')
-    return render(request, 'Tablas/index.html', {'modulos': modulos})
+    lista_modulos  = Modulo.objects.all().order_by('ModuloId')
+    return render(request, 'Modulo/index.html', {'Modulo': lista_modulos})
 
-
+    
 def crear(request):
     if request.method == 'POST':
         form = ModuloForm(request.POST)
         if form.is_valid():
-            max_id = Modulo.objects.all().aggregate(max_id=models.Max('id'))['max_id']
+            max_id = Modulo.objects.all().aggregate(max_id=models.Max('ModuloId'))['max_id']
             new_id = max_id + 1 if max_id is not None else 1
             nuevo_modulo = form.save(commit=False)
             nuevo_modulo.id = new_id
             nuevo_modulo.save()
             
-            return redirect('Tablas')
+            return redirect('Modulo')
     else:
         form = ModuloForm()
-    return render(request, 'Tablas/crear.html', {'form': form})
+    return render(request, 'Modulo/crear.html', {'form': form})
 
+@csrf_exempt
 def editar(request, id):
-    modulo = get_object_or_404(Modulo, pk=id)
     if request.method == 'POST':
-        form = ModuloForm(request.POST, instance=modulo)
-        if form.is_valid():
-            form.save()
-            return redirect('Tablas')
-    else:
-        form = ModuloForm(instance=modulo)
-    return render(request, 'Tablas/editar.html', {'form': form})
+        try:
+            data = json.loads(request.body)
+            modulo = Modulo.objects.get(pk=id)
+            modulo.Modulo = data.get('Modulo', modulo.Modulo)
+            modulo.save()
+            return JsonResponse({'status': 'success'})
+        except Modulo.DoesNotExist:
+            return JsonResponse({'status': 'error', 'errors': ['Módulo no encontrado']})
+        except ValueError as ve:
+            return JsonResponse({'status': 'error', 'errors': ['Error al procesar los datos: ' + str(ve)]})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'errors': ['Error desconocido: ' + str(e)]})
+    return JsonResponse({'status': 'error', 'errors': ['Método no permitido']})
 
+    
 def eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        Modulo.objects.filter(id__in=item_ids).delete()
-        return redirect('Tablas')
-    return redirect('Tablas')
+        Modulo.objects.filter(ModuloId__in=item_ids).delete()
+        return redirect('Modulo')
+    
+    return redirect('Modulo')
 
 def descargar_excel(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        modulos = Modulo.objects.filter(id__in=item_ids)
-        
-        # Crea una respuesta HTTP con el tipo de contenido de CSV
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="modulos_seleccionados.csv"'
+        item_ids = request.POST.get('items_to_delete')  # Asegúrate de que este es el nombre correcto del campo
+        # Convierte la cadena de IDs en una lista de enteros
+    
+        item_ids = list(map(int, item_ids.split (',')))  # Cambiado aquí
+        modulos = Modulo.objects.filter(ModuloId__in=item_ids)
 
-
-
-        data = []
-        for modulo in modulos:
-            data.append([modulo.id, modulo.Nombre])
-
-        df = pd.DataFrame(data, columns=['Id', 'Nombre'])
-
+        # Crea una respuesta HTTP con el tipo de contenido de Excel
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="Modulos.xlsx"'
 
+        data = []
+        for modulo in modulos:
+            data.append([modulo.ModuloId, modulo.Modulo])
+
+        df = pd.DataFrame(data, columns=['Id', 'Nombre'])
         df.to_excel(response, index=False)
 
         return response
 
-    return redirect('Tablas')
+    return redirect('Modulo')
 
 # Vista para la tabla IPC
 def ipc_index(request):
@@ -397,18 +403,24 @@ def tipo_documento_crear(request):
         form = TipoDocumentoForm()
     return render(request, 'Tipo_Documento/tipo_documento_form.html', {'form': form})
 
-def tipo_documento_editar(request, TipoDocumentoID):
-    tipo_documento = get_object_or_404(TipoDocumento, TipoDocumentoID=TipoDocumentoID)
-
+def tipo_documento_editar(request):
     if request.method == 'POST':
-        form = TipoDocumentoForm(request.POST, instance=tipo_documento)
-        if form.is_valid():
-            form.save()
-            return redirect('tipo_documento_index')
-    else:
-        form = TipoDocumentoForm(instance=tipo_documento)
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            tipo_documento = TipoDocumento.objects.get(pk=id)
+            form = TipoDocumentoForm(data, instance=tipo_documento)
 
-    return render(request, 'Tipo_Documento/tipo_documento_form.html', {'form': form})
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except TipoDocumento.DoesNotExist:
+            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def tipo_documento_eliminar(request):
     if request.method == 'POST':
@@ -1542,6 +1554,9 @@ def exportar_excel(request):
     response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=empleados_certificaciones.xlsx'
 
+
+from datetime import date
+
 # Informe de Nómina de Empleados
 def empleado_nomina_filtrado(request):
     empleados = Empleado.objects.all()  
@@ -1587,15 +1602,26 @@ def empleado_nomina_filtrado(request):
                 empleado_info = []
                 for empleado in empleados:
                     salarios = nominas.filter(Documento=empleado.Documento)
+                    # Calcular años en Flag
+                    if empleado.FechaIngreso:
+                        hoy = date.today()
+                        anios_en_flag = hoy.year - empleado.FechaIngreso.year
+                         # Ajustar si aún no ha cumplido años este año
+                        if (hoy.month, hoy.day) < (empleado.FechaIngreso.month, empleado.FechaIngreso.day):
+                            anios_en_flag -= 1
+                    else:
+                        anios_en_flag = "N/A"  # Valor por defecto si no hay fecha de ingreso
                     if salarios.exists():
                         for salario in salarios:
                             cliente = salario.Cliente
+
                             empleado_info.append({
                                 'empleado': empleado,
                                 'salario': salario.Salario,
                                 'cliente': cliente, 
                                 'anio': salario.Anio,
                                 'mes': salario.Mes,
+                                'anios_en_flag': anios_en_flag,  # Nuevo campo
                             })
             show_data = True  
 
@@ -1611,9 +1637,6 @@ def empleado_nomina_filtrado(request):
     }
 
     return render(request, 'informes/informes_salarios_index.html', context)
-
-
-
 
 # Funcionalidad para descargar los resultados en Excel
 def exportar_nomina_excel(request):

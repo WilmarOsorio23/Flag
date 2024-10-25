@@ -9,32 +9,20 @@
     </div>
     <div class="card-body">
         <!-- CRUD Icons -->
-        <div class="button-group" style="display: flex; align-items: center;">
-            <a class="fas fa-plus-circle" title="Crear" href="{% url 'tipo_documento_crear' %}" role="button" style="color: rgb(7, 7, 7); margin-right: 10px;"></a> 
-            <a id="edit-button" class="fas fa-edit" title="Editar" href="#" role="button" style="color: rgb(7, 7, 7); margin-right: 10px;" onclick="enableEdit();"></a> 
-            <button id="save-button" class="fas fa-save d-none" title="Guardar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-left: 10px;" onclick="saveRow();"></button>
-            <i class="fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
-            <button type="submit" form="delete-form" class="fas fa-trash-alt" title="Eliminar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-right: 10px;" onclick="return confirmDelete();"></button> 
+        <div class="button-group" >
+            <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'tipo_documento_crear' %}" role="button" ></a> 
+            <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button"  onclick="enableEdit();"></a> 
+            <button id="save-button" class="btn btn-outline-success fas fa-save d-none" title="Guardar" onclick="saveRow();"></button>
+            <i class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
+            <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" ></button> 
             <form id="download-form" method="POST" action="{% url 'tipo_documento_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="fas fa-download" title="Descargar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer;"></button>
+                <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
             </form>
         </div>
     </div>
     <div class="card-footer text-muted">
-        <style> 
-            .table-responsive {
-                max-height: 200px; 
-                max-width: 100%;   
-                overflow-y: scroll;    
-                overflow-x: scroll;  
-                display: block;
-            }
-            .table {
-                width: 100%;
-                table-layout: auto;  
-            }   
-        </style>
+        
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'tipo_documento_eliminar' %}">
                 {% csrf_token %}
@@ -43,7 +31,7 @@
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
                             <th scope="col">Id</th>
-                            <th scope="col">Nombre Tipo Documento</th>
+                            <th scope="col">Tipo Documento</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -109,7 +97,7 @@
     }
 
     // Guardar los cambios en la fila seleccionada
-    function saveRow() {
+    window.saveRow=function() {
         let selected = document.querySelector('.row-select:checked');
         if (!selected) {
             alert('No has seleccionado ningún tipo de documento para guardar.');
@@ -117,16 +105,13 @@
         }
 
         let row = selected.closest('tr');
-        let inputs = row.querySelectorAll('input.form-control');
-        let data = {};
-
-        inputs.forEach(input => {
-            let name = input.getAttribute('name');
-            data[name] = input.value;
-        });
-
+        let data = {
+            'Nombre': row.querySelector('input[name ="Nombre"]').value
+        };        
+        console.log(data)
         let tipoDocumentoID = selected.value;
 
+        console.log(tipoDocumentoID)
         // Enviar datos al servidor
         fetch(`/tipo_documento/editar/${tipoDocumentoID}/`, {
             method: 'POST',
@@ -140,7 +125,8 @@
         .then(data => {
             if (data.status === 'success') {
                 // Volver a modo de solo lectura
-                inputs.forEach(input => {
+                //inputs.forEach(input => {
+                row.querySelectorAll('input').forEach(input => {
                     input.classList.add('form-control-plaintext');
                     input.classList.remove('form-control');
                     input.readOnly = true;
@@ -155,6 +141,7 @@
         .catch(error => {
             alert('Error al enviar los datos: ' + error.message);
         });
+
 
         return false;
     }
