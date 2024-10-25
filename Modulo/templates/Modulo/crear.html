@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block titulo %} Crear Módulo {% endblock %}
+
+{% block contenido %}
+    <div class="container mt-4">
+        <h2>Crear Nuevo Módulo</h2>
+        <form method="post">
+            {% csrf_token %}
+            <fieldset class="border p-4">
+                <div class="mb-3">
+                    <label for="id_Modulo" class="form-label">Nombre del Módulo</label>
+                    {{ form.Modulo }}
+                </div>
+            </fieldset>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a href="{% url 'Modulo' %}" class="btn btn-danger">Cancelar</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

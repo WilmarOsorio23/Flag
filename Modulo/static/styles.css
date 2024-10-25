@@ -60,7 +60,7 @@ a[aria-expanded="true"] {
 }
 
 
-/* Estilo general para las tablas */
+/* Estilo general para las Modulo */
 .table-responsive {
     max-height: 500px; 
     max-width: 50%;   
@@ -108,7 +108,7 @@ a[aria-expanded="true"] {
     color: #007bff;
 }
 
-/* Estilo para las entradas de formulario en las tablas */
+/* Estilo para las entradas de formulario en las Modulo */
 .table input[type="text"], 
 .table input[type="number"] {
     width: 100%;
