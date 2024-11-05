@@ -12,13 +12,13 @@
         <div class="button-group" style="display: flex; align-items: center;">
             <a name="" id="" class="fas fa-plus-circle" title="Crear" href="{% url 'ipc_crear' %}" role="button" style="color: rgb(7, 7, 7); margin-right: 10px;"></a> 
             <a id="edit-button" class="fas fa-edit" title="Editar" href="#" role="button" style="color: rgb(7, 7, 7); margin-right: 10px;" onclick="enableEdit();"></a> 
-            <button id="save-button" class="fas fa-save d-none" title="Guardar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-left: 10px;" onclick="saveRow();"></button>
             <i name="" id="" class="fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
             <button type="submit" form="delete-form" class="fas fa-trash-alt" title="Eliminar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-right: 10px;" onclick="return confirmDelete();"></button> 
             <form id="download-form" method="POST" action="{% url 'ipc_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="fas fa-download" title="Descargar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer;"></button>
             </form>
+            <button id="save-button" class="fas fa-save d-none" title="Guardar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-left: 10px;" onclick="saveRow();"></button>
         </div>
     </div>
     <div class="card-footer text-muted">
@@ -61,13 +61,14 @@
                         </tr>
                         {% endfor %}
                     </tbody>
-                </table>
+                </table>        
             </form>
         </div>
     </div>
 </div>
 
 <script>
+   
     // Seleccionar todos los checkboxes
     document.getElementById('select-all').addEventListener('click', function(event) {
         let checkboxes = document.querySelectorAll('.row-select');
@@ -112,23 +113,21 @@
 
     // Guardar los cambios en la fila seleccionada
     function saveRow() {
+    
         let selected = document.querySelector('.row-select:checked');
         if (!selected) {
             alert('No has seleccionado ningún IPC para guardar.');
             return false;
         }
-
         let row = selected.closest('tr');
-        let inputs = row.querySelectorAll('input.form-control');
-        let data = {};
-
-        inputs.forEach(input => {
-            let name = input.getAttribute('name');
-            data[name] = input.value;
-        });
-
+        let data={
+            'Anio': row.querySelector('input[name="Anio"]').value,
+            'Mes': row.querySelector('input[name ="Mes"]').value,
+            'Indice': row.querySelector('input[name ="Indice"]').value
+        }
+        console.log(data);
         let ipcId = selected.value;
-
+        console.log(`/ipc/editar/${ipcId}/`);
         // Enviar datos al servidor
         fetch(`/ipc/editar/${ipcId}/`, {
             method: 'POST',
@@ -138,11 +137,11 @@
             },
             body: JSON.stringify(data)
         })
-        .then(response => response.json())
+        .then((response) => response.json())
         .then(data => {
             if (data.status === 'success') {
                 // Volver a modo de solo lectura
-                inputs.forEach(input => {
+                row.querySelectorAll('input').forEach(input => {
                     input.classList.add('form-control-plaintext');
                     input.classList.remove('form-control');
                     input.readOnly = true;

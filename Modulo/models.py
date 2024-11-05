@@ -13,6 +13,7 @@ class Modulo(models.Model):
 
 
 class IPC(models.Model):
+    
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
     Indice = models.DecimalField(max_digits=10, decimal_places=2)

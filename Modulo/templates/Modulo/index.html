@@ -14,13 +14,14 @@
             <a id="edit-button" class="fas fa-edit" title="Editar" href="#" role="button" style="color: rgb(7, 7, 7); margin-right: 10px;" onclick="enableEdit();"></a>
             <i class="fas fa-eye" title="Visualizar" style="color: rgb(7, 7, 7); margin-right: 10px;"></i>
             <button type="submit" form="delete-form" class="fas fa-trash-alt" title="Eliminar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-right: 10px;" onclick="return confirmDelete();"></button>
+            <!-- Botón de Guardar -->
+            <button id="save-button" class="fas fa-save d-none" title="Guardar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-left: 10px;" onclick="saveRow();"></button>
             <form id="download-form" method="POST" action="{% url 'descargar_excel' %}" style="display:inline;" onsubmit="return confirmDownload();">
                 {% csrf_token %}
                 <input type="hidden" name="items_to_download" id="items_to_download">
                 <button type="submit" class="fas fa-download" title="Descargar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer;"></button>
             </form>
-            <!-- Botón de Guardar -->
-            <button id="save-button" class="fas fa-save d-none" title="Guardar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-left: 10px;" onclick="saveRow();"></button>
+            
         </div>
     </div>
     <div class="card-footer text-muted">

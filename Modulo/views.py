@@ -148,21 +148,26 @@ def ipc_crear(request):
         form = IPCForm()
     return render(request, 'ipc/ipc_form.html', {'form': form})
 
+@csrf_exempt
 def ipc_editar(request, id):
-    ipc = get_object_or_404(IPC, id=id)
-
     if request.method == 'POST':
-        form = IPCForm(request.POST, instance=ipc)
-        if form.is_valid():
-            ipc = form.save(commit=False)
-            ipc.anio = ipc.Año
-            ipc.mes = ipc.Mes
-            ipc.save()
-            return redirect('ipc_index')
-    else:
-        form = IPCForm(instance=ipc)
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            ipc = IPC.objects.get(pk=id)
+            form = IPCForm(data, instance=ipc)
 
-    return render(request, 'ipc/ipc_form.html', {'form': form})
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Modulo.DoesNotExist:
+            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 
 def ipc_eliminar(request):
     if request.method == 'POST':
