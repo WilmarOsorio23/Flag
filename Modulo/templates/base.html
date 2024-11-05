@@ -10,246 +10,169 @@
         <!-- CSRF Token -->
         <meta name="csrf-token" content="{{ csrf_token }}">
 
-        <!-- Enlace al archivo styles.css -->
-        <link rel="stylesheet" href="{% static 'styles.css' %}">  
-
         <!-- Bootstrap CSS v5.2.1 -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 
+        <!-- Enlace al archivo styles.css -->
+        <link rel="stylesheet" href="{% static 'styles.css' %}">  
+
         <!-- Incluye FontAwesome para los iconos -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
-        <style>
-            #sidebar {
-                width: 250px;
-                padding: 10px;
-                background-color: #f8f9fa;
-                height: 100vh; /* Altura del 100% de la ventana */
-                overflow-y: auto; /* Habilita el scroll vertical */
-            }
-    
-            .sidebar-header h3 {
-                margin: 0;
-            }
-        </style><style>
-            #sidebar {
-                width: 250px;
-                padding: 10px;
-                background-color: #f8f9fa;
-                height: 100vh; /* Altura del 100% de la ventana */
-                overflow-y: auto; /* Habilita el scroll vertical */
-            }
-    
-            .sidebar-header h3 {
-                margin: 0;
-            }
-        </style>
-        <style>
-            #sidebar {
-                width: 250px;
-                padding: 10px;
-                background-color: #f8f9fa;
-                height: 100vh; /* Altura del 100% de la ventana */
-                overflow-y: auto; /* Habilita el scroll vertical */
-            }
-    
-            .sidebar-header h3 {
-                margin: 0;
-            }
-        </style>
     </head>
     <body>
-        <nav class="navbar navbar-expand navbar-light bg-light">
-        </nav>
         <div class="d-flex">
             <!-- Menú lateral -->
-            <nav id="sidebar" class="bg-light text-black" style="width: 250px; padding: 10px;">
-                <div class="sidebar-header">
-                    <h3>Mi Aplicación</h3>
+            <nav id="sidebar">
+                <div class="content">
+                    <div class="sidebar-header">
+                        <img src="{% static 'resource/logo.png' %}" alt="Logo" class="img-fluid">
+                    </div>
+                    <!-- INICIO-->
+                    <ul class="list-unstyled components">
+                        <li>
+                            <a class="nav-item nav-link sidebar-item-principal" href="{% url 'inicio' %}">
+                                <i class="fas fa-compass"></i> Inicio
+                            </a>
+                        </li>
+                    </ul>
+                    <!-- DATOS MAESTROS -->
+                    <ul class="list-unstyled components">
+                        <li>
+                            <a href="#homeSubmenuDatosMaestros" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                                <i class="fas fa-home"></i> Datos Maestros
+                            </a>
+                            <ul class="collapse list-unstyled" id="homeSubmenuDatosMaestros">
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'Modulo' %}">
+                                        <i class="fas fa-table"></i> Modulo
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'ipc_index' %}">
+                                        <i class="fas fa-table"></i> IPC
+                                    </a>
+                                </li>
+                                <li >
+                                    <a class="nav-item nav-link" href="{% url 'tipo_documento_index' %}" >
+                                        <i class="fas fa-table"></i> Tipo Documento
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'perfil_index' %}">
+                                        <i class="fas fa-table"></i> Perfil
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'linea_index' %}">
+                                        <i class="fas fa-table" ></i> Línea
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'ind_index' %}">
+                                        <i class="fas fa-table" ></i> IND
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'clientes_index' %}" >
+                                        <i class="fas fa-user" ></i> Clientes
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'consultores_index' %}" >
+                                        <i class="fas fa-table" ></i> Consultores
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'costos_indirectos_index' %}" >
+                                        <i class="fas fa-table" ></i> Costos Indirectos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'detalle_certificacion_index' %}" >
+                                        <i class="fas fa-table" ></i> Detalle Certificacion
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'certificacion_index' %}" >
+                                        <i class="fas fa-table" ></i> Certificacion
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'detalle_costos_indirectos_index' %}" >
+                                        <i class="fas fa-table" ></i> Detalle Costos Indirectos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'detalle_gastos_index' %}" >
+                                        <i class="fas fa-table" ></i> Detalle Gastos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'gastos_index' %}" >
+                                        <i class="fas fa-table" ></i> Gastos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'nomina_index' %}" >
+                                        <i class="fas fa-table" ></i> Nomina
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'tiempos_cliente_index' %}" >
+                                        <i class="fas fa-table" ></i> Tiempos Cliente
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'tiempos_concepto_index' %}" >
+                                        <i class="fas fa-table" ></i> Tiempo Concepto
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'conceptos_index' %}" >
+                                        <i class="fas fa-table" ></i> Conceptos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'total_costos_indirectos_index' %}" >
+                                        <i class="fas fa-table" ></i> Total Costos Indirectos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'total_gastos_index' %}" >
+                                        <i class="fas fa-table" ></i> Total Gastos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'empleado_index' %}" >
+                                        <i class="fas fa-table" ></i> Empleados
+                                    </a>
+                                </li>
+                                <!-- Puedes añadir más elementos de "Datos Maestros" aquí -->
+                            </ul>
+                        </li>                   
+                    </ul> 
+                    <!-- INFORMES -->
+                    <ul class="list-unstyled components">
+                        <li>
+                            <a href="#homeSubmenuInformes" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle sidebar-item-principal" >
+                                <i class="fas fa-file-alt" ></i> Informes
+                            </a>
+                            <ul class="collapse list-unstyled" id="homeSubmenuInformes">
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'informes_certificacion_index' %}" >
+                                        <i class="fas fa-certificate" ></i> Informe Certificación
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'informes_salarios_index' %}" >
+                                        <i class="fas fa-money-bill" ></i> Informe Salarios
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul> 
                 </div>
-
-                <ul class="list-unstyled components">
-                    <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-                        <a class="nav-item nav-link" href="{% url 'inicio' %}" style="color: black; text-decoration: none;">
-                            <i class="fas fa-compass" style="color: black;"></i> Inicio
-                        </a>
-                    </li>
-                </ul>
-                <ul class="list-unstyled components">
-                    <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-                        <a href="#homeSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle" style="color: black; text-decoration: none;">
-                            <i class="fas fa-home" style="color: black;"></i> Datos Maestros
-                        </a>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'Modulo' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Modulo
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'ipc_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> IPC
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'tipo_documento_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Tipo Documento
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'perfil_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Perfil
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'linea_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Línea
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'ind_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> IND
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'clientes_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-user" style="color: black;"></i> Clientes
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'consultores_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Consultores
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'costos_indirectos_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Costos Indirectos
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'detalle_certificacion_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Detalle Certificacion
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'certificacion_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Certificacion
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'detalle_costos_indirectos_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Detalle Costos Indirectos
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'detalle_gastos_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Detalle Gastos
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'gastos_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Gastos
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'nomina_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Nomina
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'tiempos_cliente_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Tiempos Cliente
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'tiempos_concepto_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Tiempo Concepto
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'conceptos_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Conceptos
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'total_costos_indirectos_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Total Costos Indirectos
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'total_gastos_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Total Gastos
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'empleado_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-table" style="color: black;"></i> Empleados
-                                </a>
-                            </li>
-                        </ul>
-                    </li>                   
-                </ul>  
-                <ul class="list-unstyled components">
-                    <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-                        <a href="#homeSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle" style="color: black; text-decoration: none;">
-                            <i class="fas fa-file-alt" style="color: black;"></i> Informes
-                        </a>
-                        <ul class="collapse list-unstyled" id="homeSubmenu">
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'informes_certificacion_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-certificate" style="color: black;"></i> Informe Certificación
-                                </a>
-                            </li>
-                            <!-- Nuevo enlace para Informe Salarios -->
-                            <li style="border-radius: 10px; border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-                                <a class="nav-item nav-link" href="{% url 'informes_salarios_index' %}" style="color: black; text-decoration: none;">
-                                    <i class="fas fa-money-bill" style="color: black;"></i> Informe Salarios
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-                             
+                <!-- FO0TER-->     
             </nav>
         
             <!-- Contenido de la página -->
@@ -260,17 +183,19 @@
                     </div>
                 </div>
             </div>
+
         </div>
 
         <!-- Bootstrap JavaScript Libraries -->
-         
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5/5hb5p5YgW2f2dKTg3wV65O3h4Ig5hPrz1gVi1m" crossorigin="anonymous"></script>
 
         <script>
             $(document).ready(function() {
                 $('.table').DataTable();
             });
         </script>
+
     </body>
 </html>

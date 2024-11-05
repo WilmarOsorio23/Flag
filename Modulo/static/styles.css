@@ -1,150 +1,399 @@
-/* styles.css */
+/* ========================== */
+/*           GENERAL          */
+/* ========================== */
 
-/* Estilo para el sidebar */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    height: 100%; /* Asegura que el cuerpo ocupe toda la altura */
+    margin: 0; /* Elimina el margen por defecto */
+}
+
+/* Tarjetas */
+.card {
+    border: 2px solid #dee2e6;
+    border-radius: 0.5em;
+    box-shadow: 1px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Ajustes para evitar superposición con la navbar y el sidebar */
+#content {
+    margin-left: 21vw; /* Ajusta para que el contenido no se solape con el sidebar */
+    padding: 1em; /* Espacio alrededor del contenido */
+    position: relative;
+    max-width: calc(100% - 21vw); /* Deja espacio para el sidebar */
+}
+
+/* ========================== */
+/*         SIDEBAR            */
+/* ========================== */
+
 #sidebar {
-    min-width: 250px;
-    max-width: 250px;
+    width: 20.5vw;  
     height: 100vh;
     position: fixed;
-    top: 0;
-    left: 0;
-    background: #ffffff; /* Fondo blanco */
-    color: #000000; /* Texto negro */
-    transition: all 0.3s;
-    border-right: 1px solid #dddddd; /* Borde derecho para diferenciarlo del contenido */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+    overflow-y: scroll;
+    overflow-x: none;
+    padding: 0.5em;
+    box-sizing: border-box;
+    background: linear-gradient(to bottom, #ffffff, #007bff);  
+    margin-bottom: 1em; 
+
 }
 
-#sidebar .sidebar-header {
-    padding: 20px;
-    background: #ffffff; /* Fondo blanco */
-    color: #000000; /* Texto negro */
-    border-bottom: 1px solid #dddddd; /* Borde inferior */
+#sidebar .sidebar-header{
+    background-color: #ffffff;
+    border: #007bff60 solid 5px;
+    border-radius: 0.5em;
+    padding: 1em;
+    margin-top: 0.5em;
+    margin-bottom: 1.5em;
 }
 
-#sidebar ul.components {
-    padding: 20px 0;
-    border-bottom: 1px solid #dddddd;
+#sidebar::-webkit-scrollbar {
+    width: 10px;
 }
 
-#sidebar ul li a {
-    padding: 10px;
-    font-size: 1.1em;
+#sidebar::-webkit-scrollbar-thumb {
+    background: #007bff;
+    border-radius: 6px;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+    background: #0056b3;
+}
+
+#sidebar::-webkit-scrollbar-track {
+    background: #eaeaea;
+    border-radius: 6px;
+}
+
+/* Sidebar links */
+#sidebar a {
+    text-decoration: none;
+    color: #333;
     display: block;
-    color: #000000; /* Texto negro */
-    background: #ffffff; /* Fondo blanco */
-    border-radius: 5px; /* Bordes redondeados */
-    margin: 5px 10px; /* Margen para separar los elementos */
+    transition: background 0.3s;
 }
 
-#sidebar ul li a:hover {
-    color: #007bff; /* Texto azul al pasar el mouse */
-    background: #f0f0f0; /* Fondo gris claro al pasar el mouse */
+#sidebar a:hover {
+    background: #ddd;
+}
+
+/* Sidebar item styling */
+.sidebar-item, .submenu-item, .menu-item {
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.sidebar-item a, .submenu-item a, .menu-item a {
+    display: flex;
+    align-items: center;    
+    color: black;
     text-decoration: none;
 }
 
-#sidebar ul li.active > a, 
+#sidebar ul {
+    padding: 0;
+    list-style: none;
+}
+
+#sidebar ul li a {
+    padding: 0.5em;
+    font-size: 1.1em;
+    color: #000000;
+    background: #ffffff;
+    border-radius: 0.5em;
+    margin: 0.5em 1em;
+    transition: background 0.3s, color 0.3s;
+}
+
+#sidebar ul li a:hover {
+    color: #007bff;
+    background: #f0f0f0;
+}
+
+#sidebar ul li.active > a,
 a[aria-expanded="true"] {
     color: #ffffff;
-    background: #007bff; /* Fondo azul para el ítem activo o expandido */
+    background: #007bff;
 }
 
-#sidebar ul li ul {
-    padding-left: 20px;
+#sidebar ul li ul li {
+    padding-left: 1em;
+    padding-right: 1em;
 }
 
-#content {
-    width: calc(100% - 250px);
-    margin-left: 250px;
-    padding: 20px;
+/* Estilo para los componentes principales en la sidebar */
+.sidebar-item-principal {
+    height: auto;
+    border: #00000060 solid 5px; /* Borde azul claro */
+    background-color: #f0f8ff; /* Color de fondo claro (opcional) */
+    border-radius: 8px; /* Esquinas redondeadas */
+    margin-bottom: 10px; /* Margen inferior entre elementos */
 }
 
+.sidebar-item-principal:hover {
+    background-color: #e0f7fa; /* Color de fondo al pasar el mouse */
+    border-color: #007bff; /* Asegúrate de que el borde resalte */
+}
 
-/* Estilo general para las Modulo */
+/* ========================== */
+/*       NAVBAR STYLING       */
+/* ========================== */
+
+.navbar {
+    width: calc(100% - 17em);
+    position: fixed;
+    z-index: 1000;
+}
+
+.nav-item {
+    overflow: hidden; /* Oculta el texto que se desborda */
+    text-overflow: ellipsis; /* Añade "..." al final del texto truncado */
+    display: flex; /* Hacer de la nav-item un contenedor flex */
+    align-items: center; /* Centrar verticalmente el contenido */
+    justify-content: space-between; /* Distribuir espacio entre elementos */
+}
+
+.dropdown-toggle {
+    cursor: pointer;
+}
+
+/* ========================== */
+/*     COMPONENT STYLING      */
+/* ========================== */
+
+.components a {
+    display: block; /* Asegura que cada enlace ocupe todo el ancho */
+    width: auto; /* Ajusta para que el ancho sea el máximo posible */
+    overflow: hidden; /* Oculta el texto que se desborda */
+    text-overflow: ellipsis; /* Añade "..." al final del texto truncado */
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    align-items: center; /* Centrar verticalmente el contenido */
+}
+
+/* ========================== */
+/*       TABLE STYLING        */
+/* ========================== */
+
 .table-responsive {
-    max-height: 500px; 
-    max-width: 50%;   
-    overflow-y: auto;    
-    overflow-x: auto;  
-    display: block;
+    margin: 1em 0;
+    overflow-x: auto;
+    overflow-y: auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 0.5em;
 }
 
 .table {
-    width: 100%;
-    margin-bottom: 1rem;
-    color: #212529;
+    width: 100%; /* Ajustar el ancho de la tabla */
     border-collapse: collapse;
+    border-spacing: 0;
 }
 
-.table th, .table td {
-    padding: 0.75rem;
-    vertical-align: top;
-    border-top: 1px solid #dee2e6;
+.table-primary {
+    background-color: #f8f9fa; /* Cambia esto al color que prefieras */
 }
 
-.table thead th {
+.table th {
     position: sticky;
     top: 0;
-    background-color: #fff; /* Fondo blanco para que no se superpongan los datos */
+    background-color: #007bff;
+    color: #fff;
     z-index: 1;
+    padding: 0.8em;
+}
+
+.table td {
+    padding: 1em;
+    border-top: 1px solid #dee2e6;
+    transition: background 0.3s; /* Transición suave para el fondo */
+}
+
+.table th, .table td {  
+    max-width: 100em; /* Puedes ajustar el tamaño aquí */
+    vertical-align: middle; /* Centrar verticalmente el contenido */
+    text-align: center;
+    white-space: nowrap; /* Evita que el contenido se divida en varias líneas */
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap; /* Evita que el texto se extienda en varias líneas */
+}
+
+/* Ajuste de ancho de columnas de checkbox e ID */
+.table td:first-child, .table th:first-child {
+    width: 5em; /* Ajuste automático al contenido para checkbox */
+    white-space: nowrap; /* Evita que el contenido se expanda */
 }
 
 .table tbody + tbody {
     border-top: 2px solid #dee2e6;
 }
 
-/* Resaltado de filas al pasar el mouse */
-.table-hover tbody tr:hover {
-    background-color: #f5f5f5;
+.table tbody tr:nth-child(odd) {
+    background-color: #f9f9f9; /* Fondo alternante para filas */
 }
 
-/* Estilo para los iconos */
-.fa {
-    margin-right: 8px;
+.table tbody tr:nth-child(even) {
+    background-color: #ffffff; /* Fondo alternante para filas */
+}
+
+.table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+/* Inputs in tables */
+.table input[type="text"],
+.table input[type="number"] {
+    width: 100%;
+    border: 1px solid #ced4da;
+    border-radius: 0.25em;
+    padding: 0.5em;
+    transition: border-color 0.3s;
+}
+
+.table input[type="text"]:focus,
+.table input[type="number"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Estilo para los checkboxes */
+.table input[type="checkbox"] {
+    -webkit-appearance: none; /* Quitar estilo por defecto */
+    -moz-appearance: none;  
+    appearance: none;
+    padding: 0.8em;
+    border: 2px solid #007bff; /* Color del borde */
+    background-color: #ffffff;
+    border-radius: 4px; /* Esquinas redondeadas */  
+    cursor: pointer; /* Cursor tipo puntero */
+    outline: none; /* Sin borde de enfoque */
+    transition: background-color 0.2s ease, border-color 0.2s ease; /* Transiciones suaves */
+}
+
+.table input[type="checkbox"]:checked {
+    background-color: #007bff; /* Color de fondo al estar chequeado */
+    border-color: #0056b3; /* Color del borde al estar chequeado */
+}
+
+/* Scrollbar para tablas */
+.table-responsive::-webkit-scrollbar {
+    width: 8px; /* Ancho del scrollbar vertical */
+    height: 8px; /* Altura del scrollbar horizontal */
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #e0e0e0; /* Color de fondo del track */
+    border-radius: 5px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background-color: #007bff; /* Color de la barra */
+    border-radius: 5px; /* Bordes redondeados */
+    border: 2px solid #e0e0e0; /* Borde alrededor del thumb para espacio */
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background-color: #0056b3; /* Color al pasar el mouse */
+}
+
+/* ========================== */
+/*        BUTTONS STYLING     */
+/* ========================== */
+
+/* Estilo para los botones */
+button {
+    background-color: #007bff; /* Color de fondo */
+    color: white; /* Color del texto */
+    border: none; /* Sin borde */
+    border-radius: 4px; /* Esquinas redondeadas */
+    padding: 8px 12px; /* Espaciado interno */
+    cursor: pointer; /* Cursor tipo puntero */
+    transition: background-color 0.2s ease, transform 0.2s ease; /* Transiciones suaves */
+    margin-right: 0.2em;
+    margin-left: 0.2em;
+}
+
+button:hover {
+    background-color: #0056b3; /* Color al pasar el mouse */
+    transform: scale(1.05); /* Efecto de aumento */
+}
+
+button:disabled {
+    background-color: #ccc; /* Color cuando está deshabilitado */
+    cursor: not-allowed; /* Cursor tipo prohibido */
+}
+
+/* ========================== */
+/*        ICON STYLING        */
+/* ========================== */
+
+i.fas, .fa {
+    margin-right: 0.2em;
+    margin-left: 0.2em;
     cursor: pointer;
+}
+
+a.fas, .fa {
+    margin-right: 0.2em;
+    margin-left: 0.2em;
+    cursor: pointer;
+}
+
+.fas {
+    font-size: 1.5rem; /* O el tamaño que prefieras */
 }
 
 .fa:hover {
     color: #007bff;
 }
 
-/* Estilo para las entradas de formulario en las Modulo */
-.table input[type="text"], 
-.table input[type="number"] {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-}
-.menu-item {
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin: 10px 0;
-    transition: background-color 0.3s ease; 
+/* ========================== */
+/*        FORM STYLING        */
+/* ========================== */
+
+.form-control-plaintext {
+    border: none;
+    background-color: transparent;
 }
 
-.menu-item a {
-    color: black;
-    text-decoration: none;
+/* ========================== */
+/*     RESPONSIVE DESIGN      */
+/* ========================== */
+
+@media (max-width: 768px) {
+    #sidebar {
+        width: 20vw;
+    }
+    #content {
+        width: 70vw;
+        margin-left: 30vw;
+        padding: 1em;
+    }
+    .table {
+        font-size: 0.9em;
+    }
 }
 
-.menu-item:hover {
-    background-color: #ccc; 
+@media (max-width: 576px) {
+    #sidebar {
+        width: 100%;
+        position: relative;
+        box-shadow: none;
+    }
+    #sidebar ul li a {
+        font-size: 1em;
+        margin: 0.5em 0;
+        padding: 0.5em;
+    }
+    #content {
+        width: 100%;
+        margin-left: 0;
+    }
+    .table-responsive {
+        max-width: 100%;
+    }
 }
-
-.menu-item a:hover {
-    color: white; 
-}
-
-.menu-item i {
-    color: black;
-}
-
-.menu-item:hover i {
-    color: white; 
-}
-
