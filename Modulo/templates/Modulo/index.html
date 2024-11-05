@@ -16,7 +16,7 @@
             <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>
             <form id="download-form" method="POST" action="{% url 'descargar_excel' %}" style="display:inline;" onsubmit="return confirmDownload();">
                 {% csrf_token %}
-                <input type="hidden" name="items_to_download" id="items_to_download">
+                <input type="hidden" name="items_to_delete" id="items_to_delete">
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
             </form>
             <!-- Botón de Guardar -->   
@@ -107,7 +107,7 @@
             selected.forEach(function(checkbox) {
                 itemIds.push(checkbox.value);
             });
-            document.getElementById('items_to_download').value = itemIds.join(',');
+            document.getElementById('items_to_delete').value = itemIds.join(',');
 
             return true;
         };
@@ -120,7 +120,7 @@
                 return false;
             }
             if (selected.length > 1) {
-                alert('Solo puedes editar un módulo a la vez.');
+                alert('Selecciona un solo módulo para editar.');
                 return false;
             }
 
@@ -170,7 +170,7 @@
                     // Ocultar botón de guardar
                     document.getElementById('save-button').classList.add('d-none');
                 } else {
-                    alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
+                    alert('Error al guardar los cambios: ' + data.errors.join(', '));
                 }
             })
             .catch(error => {
