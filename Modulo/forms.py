@@ -4,17 +4,19 @@ from .models import Concepto, Gastos, Detalle_Gastos, Total_Gastos, Total_Costos
 from .models import Detalle_Costos_Indirectos, TiemposConcepto, Tiempos_Cliente, Nomina, Detalle_Certificacion, Empleado
 
 
+from django import forms
+from .models import Modulo
+
 class ModuloForm(forms.ModelForm):
     class Meta:
         model = Modulo
         fields = '__all__'
         widgets = {
-            'Nombre': forms.TextInput(attrs={
-                'type': 'text',
+            'Modulo': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ingrese el nombre del módulo'
+                'placeholder': 'Ingrese la descripción del módulo'
             }),
-        }
+        }   
 
 class IPCForm(forms.ModelForm):
     class Meta:
@@ -678,8 +680,8 @@ class EmpleadoFilterForm(forms.Form):
         empleados = Empleado.objects.values_list('Nombre', flat=True).distinct()
         self.fields['Nombre'].choices = [('', 'Seleccione el colaborador')] + [(empleado, empleado) for empleado in empleados]
 
-        modulos = Empleado.objects.values_list('ModuloId', flat=True).distinct()
-        self.fields['ModuloId'].choices = [('', 'Seleccione el módulo')] + [(modulo, modulo) for modulo in modulos]
+        Modulo = Empleado.objects.values_list('ModuloId', flat=True).distinct()
+        self.fields['ModuloId'].choices = [('', 'Seleccione el módulo')] + [(modulo, modulo) for modulo in Modulo]
 
         cargos = Empleado.objects.values_list('Cargo', flat=True).distinct()
         self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo, cargo) for cargo in cargos]

@@ -57,71 +57,77 @@ def inicio(request):
 def nosotros(request):
     return render(request, 'paginas/nosotros.html')
 
-def Tablas(request):
+def modulo(request):
     # Ordenar los módulos por el campo 'id' en orden ascendente
-    modulos = Modulo.objects.all().order_by('id')
-    return render(request, 'Tablas/index.html', {'modulos': modulos})
+    lista_modulos  = Modulo.objects.all().order_by('ModuloId')
+    return render(request, 'Modulo/index.html', {'Modulo': lista_modulos})
 
-
+    
 def crear(request):
     if request.method == 'POST':
         form = ModuloForm(request.POST)
         if form.is_valid():
-            max_id = Modulo.objects.all().aggregate(max_id=models.Max('id'))['max_id']
+            max_id = Modulo.objects.all().aggregate(max_id=models.Max('ModuloId'))['max_id']
             new_id = max_id + 1 if max_id is not None else 1
             nuevo_modulo = form.save(commit=False)
             nuevo_modulo.id = new_id
             nuevo_modulo.save()
             
-            return redirect('Tablas')
+            return redirect('Modulo')
     else:
         form = ModuloForm()
-    return render(request, 'Tablas/crear.html', {'form': form})
+    return render(request, 'Modulo/crear.html', {'form': form})
 
+@csrf_exempt
 def editar(request, id):
-    modulo = get_object_or_404(Modulo, pk=id)
     if request.method == 'POST':
-        form = ModuloForm(request.POST, instance=modulo)
-        if form.is_valid():
-            form.save()
-            return redirect('Tablas')
-    else:
-        form = ModuloForm(instance=modulo)
-    return render(request, 'Tablas/editar.html', {'form': form})
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            modulo = Modulo.objects.get(pk=id)
+            form = ModuloForm(data, instance=modulo)
 
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Modulo.DoesNotExist:
+            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
 def eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        Modulo.objects.filter(id__in=item_ids).delete()
-        return redirect('Tablas')
-    return redirect('Tablas')
+        Modulo.objects.filter(ModuloId__in=item_ids).delete()
+        return redirect('Modulo')
+    
+    return redirect('Modulo')
 
 def descargar_excel(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        modulos = Modulo.objects.filter(id__in=item_ids)
-        
-        # Crea una respuesta HTTP con el tipo de contenido de CSV
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="modulos_seleccionados.csv"'
+        item_ids = request.POST.get('items_to_download')  # Asegúrate de que este es el nombre correcto del campo
+        # Convierte la cadena de IDs en una lista de enteros
+        item_ids = list(map(int, item_ids.split(',')))  # Cambiado aquí
+        modulos = Modulo.objects.filter(ModuloId__in=item_ids)
 
-
-
-        data = []
-        for modulo in modulos:
-            data.append([modulo.id, modulo.Nombre])
-
-        df = pd.DataFrame(data, columns=['Id', 'Nombre'])
-
+        # Crea una respuesta HTTP con el tipo de contenido de Excel
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="Modulos.xlsx"'
 
+        data = []
+        for modulo in modulos:
+            data.append([modulo.ModuloId, modulo.Modulo])
+
+        df = pd.DataFrame(data, columns=['Id', 'Nombre'])
         df.to_excel(response, index=False)
 
         return response
 
-    return redirect('Tablas')
+    return redirect('Modulo')
 
 # Vista para la tabla IPC
 def ipc_index(request):
