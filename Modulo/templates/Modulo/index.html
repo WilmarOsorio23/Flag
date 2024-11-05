@@ -9,18 +9,18 @@
     </div>  
     <div class="card-body">
         <!-- CRUD Icons -->
-        <div class="button-group" style="display: flex; align-items: center;">
-            <a class="fas fa-plus-circle" title="Crear" href="{% url 'crear' %}" role="button" style="color: rgb(7, 7, 7); margin-right: 10px;"></a>
-            <a id="edit-button" class="fas fa-edit" title="Editar" href="#" role="button" style="color: rgb(7, 7, 7); margin-right: 10px;" onclick="enableEdit();"></a>
-            <i class="fas fa-eye" title="Visualizar" style="color: rgb(7, 7, 7); margin-right: 10px;"></i>
-            <button type="submit" form="delete-form" class="fas fa-trash-alt" title="Eliminar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-right: 10px;" onclick="return confirmDelete();"></button>
+        <div class="button-group">
+            <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'crear' %}" role="button"></a>
+            <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button" onclick="enableEdit();"></a>
+            <i class="btn btn-outline-primary fas fa-eye" title="Visualizar"></i>
+            <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>
             <form id="download-form" method="POST" action="{% url 'descargar_excel' %}" style="display:inline;" onsubmit="return confirmDownload();">
                 {% csrf_token %}
                 <input type="hidden" name="items_to_download" id="items_to_download">
-                <button type="submit" class="fas fa-download" title="Descargar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer;"></button>
+                <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
             </form>
-            <!-- Botón de Guardar -->
-            <button id="save-button" class="fas fa-save d-none" title="Guardar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-left: 10px;" onclick="saveRow();"></button>
+            <!-- Botón de Guardar -->   
+            <button id="save-button" class="btn btn-outline-success fas fa-save d-none" title="Guardar" onclick="saveRow();"></button>
         </div>
     </div>
     <div class="card-footer text-muted">
@@ -40,13 +40,19 @@
                         <tr id="row-{{ modulo.ModuloId }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ modulo.ModuloId }}"></td>
                             <td>{{ modulo.ModuloId }}</td>
-                            <td><input type="text" name="nombre" class="form-control-plaintext" value="{{ modulo.Modulo }}" readonly></td>
+                            <td>
+                                <input type="text" name="nombre" class="form-control-plaintext" value="{{ modulo.Modulo }}" readonly>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">No hay datos disponibles.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </form>
-        </div>
+        </div>        
     </div>
 </div>
 
@@ -62,32 +68,32 @@
 
         // Confirmación antes de eliminar
         async function confirmDelete() {
-        let selectedElements = document.querySelectorAll('.row-select:checked');
-        let selectedIds = Array.from(selectedElements).map(el => el.value);
+            let selectedElements = document.querySelectorAll('.row-select:checked');
+            let selectedIds = Array.from(selectedElements).map(el => el.value);
 
-        if (selectedIds.length === 0) {
-            alert('No has seleccionado ningún elemento para eliminar.');
-            return false;
+            if (selectedIds.length === 0) {
+                alert('No has seleccionado ningún elemento para eliminar.');
+                return false;
+            }
+
+            let isRelated = await fetch('/verificar-relaciones/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ ids: selectedIds })
+            })
+            .then(response => response.json())
+            .then(data => data.isRelated);
+
+            if (isRelated) {
+                alert('No puedes eliminar estos elementos, ya que están siendo utilizados en otra tabla.');
+                return false;
+            }
+
+            return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
         }
-
-        let isRelated = await fetch('/verificar-relaciones/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({ ids: selectedIds })
-        })
-        .then(response => response.json())
-        .then(data => data.isRelated);
-
-        if (isRelated) {
-            alert('No puedes eliminar estos elementos, ya que están siendo utilizados en otra tabla.');
-            return false;
-        }
-
-        return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
-    }
 
         // Confirmación antes de descargar
         window.confirmDownload = function() {
@@ -139,8 +145,6 @@
             }
             let row = selected.closest('tr');
             let data = {
-                'nombre': row.querySelector('input[name="nombre"]').value,
-                // Suponiendo que el nombre del campo para el módulo es "nombre_modulo"
                 'Modulo': row.querySelector('input[name="nombre"]').value // Cambia 'nombre' a 'Modulo' si corresponde
             };
             let moduloId = selected.value;
@@ -175,7 +179,6 @@
 
             return false;
         };
-
     });
 </script>
 {% endblock %}
