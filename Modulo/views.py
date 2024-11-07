@@ -403,7 +403,7 @@ def tipo_documento_crear(request):
         form = TipoDocumentoForm()
     return render(request, 'Tipo_Documento/tipo_documento_form.html', {'form': form})
 
-def tipo_documento_editar(request):
+def tipo_documento_editar(request, id):
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
