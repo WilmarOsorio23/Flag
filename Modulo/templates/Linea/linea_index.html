@@ -16,7 +16,7 @@
             <button type="submit" form="delete-form" class="fas fa-trash-alt" title="Eliminar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-right: 10px;" onclick="return confirmDelete();"></button> 
             <form id="download-form" method="POST" action="{% url 'linea_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="fas fa-download" title="Descargar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer;"></button>
+                <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
             </form>
         </div>
     </div>
