@@ -22,15 +22,15 @@
                 {{ form.LineaId.label_tag }}
                 {{ form.LineaId }}
             </div>
-            <div class="form-group mr-3 col-md-3">
+            <div class="form-group mt-3     mr-3 col-md-3">
                 <button type="submit" name="buscar" class="btn btn-primary">Buscar</button>
             </div>            
         </form>
 
         <!-- Resultados -->
         {% if show_data and empleados %}
-        <div class="mt-4">
-            <table class="table table-striped">
+        <div class="table-responsive">
+            <table class="table">
                 <thead>
                     <tr>
                         <th>Línea</th>
