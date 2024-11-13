@@ -31,7 +31,7 @@
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
                             <th scope="col">Id</th>
-                            <th scope="col">Nombre Tipo Documento</th>
+                            <th scope="col">Tipo Documento</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -97,7 +97,7 @@
     }
 
     // Guardar los cambios en la fila seleccionada
-    function saveRow() {
+    window.saveRow=function() {
         let selected = document.querySelector('.row-select:checked');
         if (!selected) {
             alert('No has seleccionado ningún tipo de documento para guardar.');
@@ -105,16 +105,13 @@
         }
 
         let row = selected.closest('tr');
-        let inputs = row.querySelectorAll('input.form-control');
-        let data = {};
-
-        inputs.forEach(input => {
-            let name = input.getAttribute('name');
-            data[name] = input.value;
-        });
-
+        let data = {
+            'Nombre': row.querySelector('input[name ="Nombre"]').value
+        };        
+        console.log(data)
         let tipoDocumentoID = selected.value;
 
+        console.log(tipoDocumentoID)
         // Enviar datos al servidor
         fetch(`/tipo_documento/editar/${tipoDocumentoID}/`, {
             method: 'POST',
@@ -128,7 +125,8 @@
         .then(data => {
             if (data.status === 'success') {
                 // Volver a modo de solo lectura
-                inputs.forEach(input => {
+                //inputs.forEach(input => {
+                row.querySelectorAll('input').forEach(input => {
                     input.classList.add('form-control-plaintext');
                     input.classList.remove('form-control');
                     input.readOnly = true;
@@ -143,6 +141,7 @@
         .catch(error => {
             alert('Error al enviar los datos: ' + error.message);
         });
+
 
         return false;
     }

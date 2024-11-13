@@ -1,3 +1,4 @@
+from pyexpat.errors import messages
 import pandas as pd
 import json
 from django.shortcuts import render, redirect, get_object_or_404
@@ -109,9 +110,10 @@ def eliminar(request):
 def descargar_excel(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':
-        item_ids = request.POST.get('items_to_download')  # Asegúrate de que este es el nombre correcto del campo
+        item_ids = request.POST.get('items_to_delete')  # Asegúrate de que este es el nombre correcto del campo
         # Convierte la cadena de IDs en una lista de enteros
-        item_ids = list(map(int, item_ids.split(',')))  # Cambiado aquí
+    
+        item_ids = list(map(int, item_ids.split (',')))  # Cambiado aquí
         modulos = Modulo.objects.filter(ModuloId__in=item_ids)
 
         # Crea una respuesta HTTP con el tipo de contenido de Excel
@@ -408,18 +410,24 @@ def tipo_documento_crear(request):
         form = TipoDocumentoForm()
     return render(request, 'Tipo_Documento/tipo_documento_form.html', {'form': form})
 
-def tipo_documento_editar(request, TipoDocumentoID):
-    tipo_documento = get_object_or_404(TipoDocumento, TipoDocumentoID=TipoDocumentoID)
-
+def tipo_documento_editar(request):
     if request.method == 'POST':
-        form = TipoDocumentoForm(request.POST, instance=tipo_documento)
-        if form.is_valid():
-            form.save()
-            return redirect('tipo_documento_index')
-    else:
-        form = TipoDocumentoForm(instance=tipo_documento)
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            tipo_documento = TipoDocumento.objects.get(pk=id)
+            form = TipoDocumentoForm(data, instance=tipo_documento)
 
-    return render(request, 'Tipo_Documento/tipo_documento_form.html', {'form': form})
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except TipoDocumento.DoesNotExist:
+            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def tipo_documento_eliminar(request):
     if request.method == 'POST':
