@@ -20,6 +20,19 @@
                 <input type="hidden" name="items_to_delete" id="items_to_delete">
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
             </form>
+            <!-- Botones de Guardar y Cancelar -->
+            <button id="save-button" 
+                    class="btn btn-outline-success fas fa-save d-none" 
+                    title="Guardar" 
+                    type="button" 
+                    onclick="saveRow();">
+            </button>
+            <button id="cancel-button" 
+                    class="btn btn-outline-danger fas fa-times d-none" 
+                    title="Cancelar" 
+                    type="button"
+                    onclick="cancelEdit();">
+            </button>
         </div>
     </div>
     <div class="card-footer text-muted">
@@ -32,7 +45,6 @@
                             <th><input type="checkbox" id="select-all"></th>
                             <th scope="col">Id</th>
                             <th scope="col">Nombre módulo</th>
-                            <th>Guardar</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -42,22 +54,6 @@
                             <td>{{ modulo.ModuloId }}</td>
                             <td>
                                 <input type="text" name="nombre" class="form-control-plaintext" value="{{ modulo.Modulo }}" readonly>
-                            </td>
-                            <td>
-                                <!-- Botón de Guardar, identificado con ModuloId -->
-                                <button id="save-button-{{ modulo.ModuloId }}" 
-                                        class="btn btn-outline-success fas fa-save disabled" 
-                                        title="Guardar"
-                                        type="button" 
-                                        onclick="saveRow({{ modulo.ModuloId }});">  
-                                </button>
-                                <!-- Botón de Cancelar -->
-                                <button id="cancel-button-{{ modulo.ModuloId }}" 
-                                        class="btn btn-outline-danger fas fa-times disabled" 
-                                        title="Cancelar" 
-                                        type="button"
-                                        onclick="cancelEdit({{ modulo.ModuloId }});">  
-                                </button>
                             </td>
                         </tr>
                         {% empty %}
@@ -74,6 +70,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        
         // Seleccionar todos los checkboxes
         document.getElementById('select-all').addEventListener('click', function(event) {
             let checkboxes = document.querySelectorAll('.row-select');
@@ -141,12 +138,12 @@
             }
 
             let row = selected[0].closest('tr');
-            let moduloId = selected[0].value;
             let inputs = row.querySelectorAll('input.form-control-plaintext');
 
             // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
             document.getElementById('select-all').disabled = true;
             document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
+            document.getElementById('edit-button').disabled = true;
 
             // Convertir inputs en editables
             inputs.forEach(input => {
@@ -155,40 +152,39 @@
                 input.readOnly = false;
             });
 
-            // Mostrar botón de guardar
-            document.getElementById(`save-button-${moduloId}`).classList.remove("disabled");
-            document.getElementById(`cancel-button-${ moduloId }`).classList.remove("disabled");
+            // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
+            document.getElementById('save-button').classList.remove('d-none');
+            document.getElementById('cancel-button').classList.remove('d-none');
+
         };
 
-        window.cancelEdit = function(moduloId) {
-            let row = document.getElementById(`row-${moduloId}`);
-            showMessage('Cambios cancelados', 'danger');
-            
-            // Cambiar inputs a solo lectura
-            row.querySelectorAll('input.form-control').forEach(input => {
-                input.classList.add('form-control-plaintext');
-                input.classList.remove('form-control');
-                input.readOnly = true;
-            });
+        window.cancelEdit = function() {
+            let selected = document.querySelectorAll('.row-select:checked');
+            if (selected.length === 1) {
+                let row = selected[0].closest('tr');
 
-            // Deshabilitar el botón de guardar
-            document.getElementById(`save-button-${moduloId}`).classList.add('disabled');
-            document.getElementById(`cancel-button-${ moduloId }`).classList.add("disabled");
+                // Cambiar inputs a solo lectura
+                row.querySelectorAll('input.form-control').forEach(input => {
+                    input.classList.add('form-control-plaintext');
+                    input.classList.remove('form-control');
+                    input.readOnly = true;
+                });
 
-            // Desmarcar el checkbox
-            let checkbox = row.querySelector('.row-select');
-            if (checkbox) {
-                checkbox.checked = false; // Desmarcar el checkbox
-                checkbox.disabled = false; // Habilitar el checkbox nuevamente
+                // Desmarcar y habilitar el checkbox de la fila
+                selected[0].checked = false;
+                selected[0].disabled = false;
             }
 
-            // Deshabilitar todos los checkboxes y el botón de edición nuevamente
-            document.querySelectorAll('.row-select').forEach(checkbox => {
-                checkbox.disabled = false; // Habilitar todos los checkboxes
-            });
+            // Habilitar todos los checkboxes y el botón de edición
+            document.getElementById('select-all').disabled = false;
+            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+            document.getElementById('edit-button').disabled = false;
 
-            document.getElementById('select-all').disabled = false; // Habilitar el botón de edición
-            document.getElementById('edit-button').disabled = false; // Habilitar el botón de edición
+            // Ocultar los botones de guardar y cancelar
+            document.getElementById('save-button').classList.add('d-none');
+            document.getElementById('cancel-button').classList.add('d-none');
+
+            showMessage('Cambios cancelados.', 'danger');
         };
 
         
@@ -207,8 +203,15 @@
         }
 
 
-        window.saveRow = function(moduloId) {
-            let row = document.getElementById(`row-${moduloId}`);
+        window.saveRow = function() {
+            let selected = document.querySelectorAll('.row-select:checked');
+            if (selected.length !== 1) {
+                showMessage('Error al guardar: No hay un módulo seleccionado.', 'danger');
+                return;
+            }
+
+            let row = selected[0].closest('tr');
+            let moduloId = selected[0].value;
             let data = {
                 'Modulo': row.querySelector('input[name="nombre"]').value
             };
@@ -241,26 +244,24 @@
                         input.classList.remove('form-control');
                         input.readOnly = true;
                     });
-                    document.getElementById(`save-button-${moduloId}`).classList.add('disabled');
+
+                    // Desmarcar y habilitar el checkbox de la fila
+                    selected[0].checked = false;
+                    selected[0].disabled = false;
+                    
+                    // Habilitar todos los checkboxes y botón de edición
+                    document.getElementById('select-all').disabled = false;
+                    document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+                    document.getElementById('edit-button').disabled = false;
+
+                    // Ocultar los botones de guardar y cancelar
+                    document.getElementById('save-button').classList.add('d-none');
+                    document.getElementById('cancel-button').classList.add('d-none');
+
                 } else {
                     showMessage('Error al guardar los cambios: ' + data.errors.join(', '), 'danger');
                 }
 
-                // Habilitar checkboxes y botón de edición nuevamente
-                document.getElementById('select-all').disabled = false; 
-                document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
-                document.getElementById('edit-button').disabled = false;
-
-                // Deshabilitar el botón de guardar
-                document.getElementById(`save-button-${moduloId}`).classList.add('disabled');
-                document.getElementById(`cancel-button-${ moduloId }`).classList.add("disabled");
-
-                // Desmarcar el checkbox
-                let checkbox = row.querySelector('.row-select');
-                if (checkbox) {
-                    checkbox.checked = false; // Desmarcar el checkbox
-                    checkbox.disabled = false; // Habilitar el checkbox nuevamente
-                }
             })
             .catch(error => {
                 showMessage('Error al enviar los datos: ' + error.message, 'danger');
@@ -270,9 +271,9 @@
                 document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
                 document.getElementById('edit-button').disabled = false;
 
-                // Deshabilitar el botón de guardar
-                document.getElementById(`save-button-${moduloId}`).classList.add('disabled');
-                document.getElementById(`cancel-button-${ moduloId }`).classList.add("disabled");
+                // Ocultar los botones de guardar y cancelar
+                document.getElementById('save-button').classList.add('d-none');
+                document.getElementById('cancel-button').classList.add('d-none');
 
                 // Desmarcar el checkbox
                 let checkbox = row.querySelector('.row-select');
@@ -281,8 +282,6 @@
                     checkbox.disabled = false; // Habilitar el checkbox nuevamente
                 }
             });
-
-            return false;
         };
 
     });
