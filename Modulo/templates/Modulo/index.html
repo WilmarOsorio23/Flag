@@ -4,6 +4,7 @@
 
 {% block contenido %}
 <div class="card">
+    <div id="message-box" class="alert" style="display: none;"></div>
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Módulos</h4>
     </div>  
@@ -19,8 +20,19 @@
                 <input type="hidden" name="items_to_delete" id="items_to_delete">
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
             </form>
-            <!-- Botón de Guardar -->   
-            <button id="save-button" class="btn btn-outline-success fas fa-save d-none" title="Guardar" onclick="saveRow();"></button>
+            <!-- Botones de Guardar y Cancelar -->
+            <button id="save-button" 
+                    class="btn btn-outline-success fas fa-save d-none" 
+                    title="Guardar" 
+                    type="button" 
+                    onclick="saveRow();">
+            </button>
+            <button id="cancel-button" 
+                    class="btn btn-outline-danger fas fa-times d-none" 
+                    title="Cancelar" 
+                    type="button"
+                    onclick="cancelEdit();">
+            </button>
         </div>
     </div>
     <div class="card-footer text-muted">
@@ -49,7 +61,7 @@
                             <td colspan="4">No hay datos disponibles.</td>
                         </tr>
                         {% endfor %}
-                    </tbody>
+                    </tbody>                    
                 </table>
             </form>
         </div>        
@@ -58,6 +70,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        
         // Seleccionar todos los checkboxes
         document.getElementById('select-all').addEventListener('click', function(event) {
             let checkboxes = document.querySelectorAll('.row-select');
@@ -72,7 +85,7 @@
             let selectedIds = Array.from(selectedElements).map(el => el.value);
 
             if (selectedIds.length === 0) {
-                alert('No has seleccionado ningún elemento para eliminar.');
+                showMessage('No has seleccionado ningún elemento para eliminar.', 'danger');
                 return false;
             }
 
@@ -88,7 +101,7 @@
             .then(data => data.isRelated);
 
             if (isRelated) {
-                alert('No puedes eliminar estos elementos, ya que están siendo utilizados en otra tabla.');
+                showMessage('No puedes eliminar estos elementos, ya que están siendo utilizados en otra tabla.', 'danger');
                 return false;
             }
 
@@ -99,7 +112,7 @@
         window.confirmDownload = function() {
             let selected = document.querySelectorAll('.row-select:checked');
             if (selected.length === 0) {
-                alert('No has seleccionado ningún elemento para descargar.');
+                showMessage('No has seleccionado ningún elemento para descargar.', 'danger');
                 return false;
             }
 
@@ -116,40 +129,97 @@
         window.enableEdit = function() {
             let selected = document.querySelectorAll('.row-select:checked');
             if (selected.length === 0) {
-                alert('No has seleccionado ningún módulo para editar.');
+                showMessage('Por favor, selecciona al menos un módulo.', 'danger');
                 return false;
             }
             if (selected.length > 1) {
-                alert('Selecciona un solo módulo para editar.');
+                showMessage('Por favor, Selecciona un solo módulo para editar.', 'danger');
                 return false;
             }
 
             let row = selected[0].closest('tr');
             let inputs = row.querySelectorAll('input.form-control-plaintext');
+
+            // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
+            document.getElementById('select-all').disabled = true;
+            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
+            document.getElementById('edit-button').disabled = true;
+
+            // Convertir inputs en editables
             inputs.forEach(input => {
                 input.classList.remove('form-control-plaintext');
                 input.classList.add('form-control');
                 input.readOnly = false;
             });
 
-            // Mostrar botón de guardar
+            // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
             document.getElementById('save-button').classList.remove('d-none');
-        };
-        
-        // Guardar los cambios en la fila seleccionada
-        window.saveRow = function() {
-            let selected = document.querySelector('.row-select:checked');
-            if (!selected) {
-                alert('No has seleccionado ningún módulo para guardar.');
-                return false;
-            }
-            let row = selected.closest('tr');
-            let data = {
-                'Modulo': row.querySelector('input[name="nombre"]').value // Cambia 'nombre' a 'Modulo' si corresponde
-            };
-            let moduloId = selected.value;
+            document.getElementById('cancel-button').classList.remove('d-none');
 
-            // Enviar datos al servidor
+        };
+
+        window.cancelEdit = function() {
+            let selected = document.querySelectorAll('.row-select:checked');
+            if (selected.length === 1) {
+                let row = selected[0].closest('tr');
+
+                // Cambiar inputs a solo lectura
+                row.querySelectorAll('input.form-control').forEach(input => {
+                    input.classList.add('form-control-plaintext');
+                    input.classList.remove('form-control');
+                    input.readOnly = true;
+                });
+
+                // Desmarcar y habilitar el checkbox de la fila
+                selected[0].checked = false;
+                selected[0].disabled = false;
+            }
+
+            // Habilitar todos los checkboxes y el botón de edición
+            document.getElementById('select-all').disabled = false;
+            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+            document.getElementById('edit-button').disabled = false;
+
+            // Ocultar los botones de guardar y cancelar
+            document.getElementById('save-button').classList.add('d-none');
+            document.getElementById('cancel-button').classList.add('d-none');
+
+            showMessage('Cambios cancelados.', 'danger');
+        };
+
+        
+        function showMessage(message, type) {
+            const messageBox = document.getElementById('message-box');
+            messageBox.textContent = message;
+            messageBox.className = `alert alert-${type} show`;
+            messageBox.style.display = 'block';
+
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                }, 300);    
+            }, 3000);
+        }
+
+
+        window.saveRow = function() {
+            let selected = document.querySelectorAll('.row-select:checked');
+            if (selected.length !== 1) {
+                showMessage('Error al guardar: No hay un módulo seleccionado.', 'danger');
+                return;
+            }
+
+            let row = selected[0].closest('tr');
+            let moduloId = selected[0].value;
+            let data = {
+                'Modulo': row.querySelector('input[name="nombre"]').value
+            };
+
+            // Deshabilitar los checkboxes y el botón de edición
+            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
+            document.getElementById('edit-button').disabled = true;
+
             fetch(`/Modulo/editar/${moduloId}/`, {
                 method: 'POST',
                 headers: {
@@ -161,24 +231,59 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    // Volver a modo de solo lectura
+                    showMessage('Cambios guardados correctamente.', 'success');
+
+                    row.querySelectorAll('input.form-control').forEach(input => {
+                        input.classList.add('highlighted');
+                        setTimeout(() => input.classList.remove('highlighted'), 2000);
+                    });
+
+                    // Cambiar inputs a solo lectura
                     row.querySelectorAll('input.form-control').forEach(input => {
                         input.classList.add('form-control-plaintext');
                         input.classList.remove('form-control');
                         input.readOnly = true;
                     });
-                    // Ocultar botón de guardar
+
+                    // Desmarcar y habilitar el checkbox de la fila
+                    selected[0].checked = false;
+                    selected[0].disabled = false;
+                    
+                    // Habilitar todos los checkboxes y botón de edición
+                    document.getElementById('select-all').disabled = false;
+                    document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+                    document.getElementById('edit-button').disabled = false;
+
+                    // Ocultar los botones de guardar y cancelar
                     document.getElementById('save-button').classList.add('d-none');
+                    document.getElementById('cancel-button').classList.add('d-none');
+
                 } else {
-                    alert('Error al guardar los cambios: ' + data.errors.join(', '));
+                    showMessage('Error al guardar los cambios: ' + data.errors.join(', '), 'danger');
                 }
+
             })
             .catch(error => {
-                alert('Error al enviar los datos: ' + error.message);
-            });
+                showMessage('Error al enviar los datos: ' + error.message, 'danger');
+                
+                // Habilitar checkboxes y botón de edición en caso de error
+                document.getElementById('select-all').disabled = false; 
+                document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+                document.getElementById('edit-button').disabled = false;
 
-            return false;
+                // Ocultar los botones de guardar y cancelar
+                document.getElementById('save-button').classList.add('d-none');
+                document.getElementById('cancel-button').classList.add('d-none');
+
+                // Desmarcar el checkbox
+                let checkbox = row.querySelector('.row-select');
+                if (checkbox) {
+                    checkbox.checked = false; // Desmarcar el checkbox
+                    checkbox.disabled = false; // Habilitar el checkbox nuevamente
+                }
+            });
         };
+
     });
 </script>
 {% endblock %}
