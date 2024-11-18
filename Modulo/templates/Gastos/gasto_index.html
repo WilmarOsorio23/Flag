@@ -4,6 +4,7 @@
 
 {% block contenido %}
 <div class="card">
+    <div id="message-box" class="alert" style="display: none;"></div>
     <div class="card-header d-flex justify-content-between align-items-center"> 
         <h4 class="card-title">Gastos</h4>
     </div>
@@ -11,13 +12,26 @@
         <div class="button-group" >
             <a name="" id="" class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'gastos_crear' %}" role="button" ></a> 
             <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button"  onclick="enableEdit();"></a>
-            <button id="save-button" class="btn btn-outline-success fas fa-save d-none" title="Guardar" onclick="saveRow();"></button>
-            <i name="" id="" class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
-            <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" ></button> 
-            <form id="download-form" method="POST" action="{% url 'gastos_descargar_excel' %}" style="display:inline;">
+            <i name="" id="" class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button"></i> 
+            <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button> 
+            <form id="download-form" method="POST" action="{% url 'gastos_descargar_excel' %}" style="display:inline;" onsubmit="return confirmDownload();">
                 {% csrf_token %}
+                <input type="hidden" name="items_to_delete" id="items_to_delete">
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
             </form>
+            <!-- Botones de Guardar y Cancelar -->
+            <button id="save-button" 
+                    class="btn btn-outline-success fas fa-save d-none" 
+                    title="Guardar" 
+                    type="button" 
+                    onclick="saveRow();">
+            </button>
+            <button id="cancel-button" 
+                    class="btn btn-outline-danger fas fa-times d-none" 
+                    title="Cancelar" 
+                    type="button"
+                    onclick="cancelEdit();">
+            </button>
         </div>
     </div>
     <div class="card-footer text-muted">
@@ -37,8 +51,12 @@
                         {% for gasto in gastos %}
                         <tr id="row-{{ gasto.GastoId }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ gasto.GastoId }}"></td>
-                            <td><input type="text" name="GastoId" class="form-control-plaintext" value="{{ gasto.GastoId }}" readonly></td>
+                            <td>{{ gasto.GastoId }}</td>
                             <td><input type="text" name="Gasto" class="form-control-plaintext" value="{{ gasto.Gasto }}" readonly></td> 
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">No hay datos disponibles.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -49,99 +67,227 @@
 </div>
 
 <script>
-    // Seleccionar todos los checkboxes
-    document.getElementById('select-all').addEventListener('click', function(event) {
-        let checkboxes = document.querySelectorAll('.row-select');
-        for (let checkbox of checkboxes) {
-            checkbox.checked = event.target.checked;
-        }
-    });
-
-    // Confirmación antes de eliminar
-    function confirmDelete() {
-        let selected = document.querySelectorAll('.row-select:checked').length;
-        if (selected === 0) {
-            alert('No has seleccionado ningún elemento para eliminar.');
-            return false;
-        }
-        return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
-    }
-
-    // Habilitar edición en la fila seleccionada
-    function enableEdit() {
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length === 0) {
-            alert('No has seleccionado ningún gasto para editar.');
-            return false;
-        }
-        if (selected.length > 1) {
-            alert('Solo puedes editar un gasto a la vez.');
-            return false;
-        }
-
-        let row = selected[0].closest('tr');
-        let inputs = row.querySelectorAll('input.form-control-plaintext');
-        inputs.forEach(input => {
-            input.classList.remove('form-control-plaintext');
-            input.classList.add('form-control');
-            input.readOnly = false;
+    document.addEventListener('DOMContentLoaded', function() {
+        // Seleccionar todos los checkboxes
+        document.getElementById('select-all').addEventListener('click', function(event) {
+            let checkboxes = document.querySelectorAll('.row-select');
+            for (let checkbox of checkboxes) {
+                checkbox.checked = event.target.checked;
+            }
         });
 
-        // Mostrar botón de guardar
-        document.getElementById('save-button').classList.remove('d-none');
-    }
+        // Confirmación antes de eliminar
+        async function confirmDelete() {
+            let selectedElements = document.querySelectorAll('.row-select:checked');
+            let selectedIds = Array.from(selectedElements).map(el => el.value);
 
-    // Guardar los cambios en la fila seleccionada
-    function saveRow() {
-        let selected = document.querySelector('.row-select:checked');
-        if (!selected) {
-            alert('No has seleccionado ningún gasto para guardar.');
-            return false;
+            if (selectedIds.length === 0) {
+                showMessage('No has seleccionado ningún elemento para eliminar.', 'danger');
+                return false;
+            }
+
+            let isRelated = await fetch('/verificar-relaciones/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ ids: selectedIds })
+            })
+            .then(response => response.json())
+            .then(data => data.isRelated);
+
+            if (isRelated) {
+                showMessage('No puedes eliminar estos elementos, ya que están siendo utilizados en otra tabla.', 'danger');
+                return false;
+            }
+            
+            return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
+
         }
 
-        let row = selected.closest('tr');
-        let inputs = row.querySelectorAll('input.form-control');
-        let data = {};
+        // Confirmación antes de descargar
+        window.confirmDownload = function() {
+            let selected = document.querySelectorAll('.row-select:checked');
+            if (selected.length === 0) {
+                showMessage('No has seleccionado ningún elemento para descargar.', 'danger');
+                return false;
+            }
 
-        inputs.forEach(input => {
-            let name = input.getAttribute('name');
-            data[name] = input.value;
-        });
+            let itemIds = [];
+            selected.forEach(function(checkbox) {
+                itemIds.push(checkbox.value);
+            });
+            document.getElementById('items_to_delete').value = itemIds.join(',');
 
-        let gastoId = selected.value;
-        let editUrl = `/gastos/editar/${gastoId}/`;
+            // Desmarcar el checkbox
+            let checkbox = row.querySelector('.row-select');
+                if (checkbox) {
+                    checkbox.checked = false; // Desmarcar el checkbox
+                    checkbox.disabled = false; // Habilitar el checkbox nuevamente
+                }
 
-        // Enviar datos al servidor
-        fetch(editUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                // Volver a modo de solo lectura
-                inputs.forEach(input => {
+            return true;
+        };
+
+        // Habilitar edición en la fila seleccionada
+        window.enableEdit = function() {
+            let selected = document.querySelectorAll('.row-select:checked');
+            if (selected.length === 0) {
+                showMessage('Por favor, selecciona al menos un módulo.', 'danger');
+                return false;
+            }
+            if (selected.length > 1) {
+                showMessage('Por favor, Selecciona un solo módulo para editar.', 'danger');
+                return false;
+            }
+
+            let row = selected[0].closest('tr');
+            let inputs = row.querySelectorAll('input.form-control-plaintext');
+
+            // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
+            document.getElementById('select-all').disabled = true;
+            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
+            document.getElementById('edit-button').disabled = true;
+
+            // Convertir inputs en editables
+            inputs.forEach(input => {
+                input.classList.remove('form-control-plaintext');
+                input.classList.add('form-control');
+                input.readOnly = false;
+            });
+
+            // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
+            document.getElementById('save-button').classList.remove('d-none');
+            document.getElementById('cancel-button').classList.remove('d-none');
+
+        };
+
+        window.cancelEdit = function() {
+            let selected = document.querySelectorAll('.row-select:checked');
+            if (selected.length === 1) {
+                let row = selected[0].closest('tr');
+
+                // Cambiar inputs a solo lectura
+                row.querySelectorAll('input.form-control').forEach(input => {
                     input.classList.add('form-control-plaintext');
                     input.classList.remove('form-control');
                     input.readOnly = true;
                 });
 
-                // Ocultar botón de guardar
-                document.getElementById('save-button').classList.add('d-none');
-            } else {
-                alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
+                // Desmarcar y habilitar el checkbox de la fila
+                selected[0].checked = false;
+                selected[0].disabled = false;
             }
-        })
-        .catch(error => {
-            alert('Error al enviar los datos: ' + error.message);
-        });
 
-        return false;
-    }
+            // Habilitar todos los checkboxes y el botón de edición
+            document.getElementById('select-all').disabled = false;
+            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+            document.getElementById('edit-button').disabled = false;
+
+            // Ocultar los botones de guardar y cancelar
+            document.getElementById('save-button').classList.add('d-none');
+            document.getElementById('cancel-button').classList.add('d-none');
+
+            showMessage('Cambios cancelados.', 'danger');
+        };
+
+        function showMessage(message, type) {
+            const messageBox = document.getElementById('message-box');
+            messageBox.textContent = message;
+            messageBox.className = `alert alert-${type} show`;
+            messageBox.style.display = 'block';
+
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                }, 300);    
+            }, 3000);
+        }
+
+        // Guardar los cambios en la fila seleccionada
+        window.saveRow = function() {
+            let selected = document.querySelectorAll('.row-select:checked');
+            if (selected.length !== 1) {
+                showMessage('Error al guardar: No hay un módulo seleccionado.', 'danger');
+                return;
+            }
+
+            let row = selected[0].closest('tr');
+            let gastoId = selected[0].value;
+            let data = {
+                    'Gasto': row.querySelector('input[name="Gasto"]').value
+                };
+
+            // Deshabilitar los checkboxes y el botón de edición
+            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
+            document.getElementById('edit-button').disabled = true;
+
+            fetch(`/gastos/editar/${gastoId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showMessage('Cambios guardados correctamente.', 'success');
+
+                    row.querySelectorAll('input.form-control').forEach(input => {
+                        input.classList.add('highlighted');
+                        setTimeout(() => input.classList.remove('highlighted'), 2000);
+                    });
+
+                    // Cambiar inputs a solo lectura
+                    row.querySelectorAll('input.form-control').forEach(input => {
+                        input.classList.add('form-control-plaintext');
+                        input.classList.remove('form-control');
+                        input.readOnly = true;
+                    });
+
+                    // Desmarcar y habilitar el checkbox de la fila
+                    selected[0].checked = false;
+                    selected[0].disabled = false;
+                        
+                    // Habilitar todos los checkboxes y botón de edición
+                    document.getElementById('select-all').disabled = false;
+                    document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+                    document.getElementById('edit-button').disabled = false;
+
+                    // Ocultar los botones de guardar y cancelar
+                    document.getElementById('save-button').classList.add('d-none');
+                    document.getElementById('cancel-button').classList.add('d-none');
+
+                } else {
+                    showMessage('Error al guardar los cambios: ' + data.errors.join(', '), 'danger');
+                }
+            })
+            .catch(error => {
+                showMessage('Error al enviar los datos: ' + error.message, 'danger');
+                    
+                // Habilitar checkboxes y botón de edición en caso de error
+                document.getElementById('select-all').disabled = false; 
+                document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+                document.getElementById('edit-button').disabled = false;
+
+                // Ocultar los botones de guardar y cancelar
+                document.getElementById('save-button').classList.add('d-none');
+                document.getElementById('cancel-button').classList.add('d-none');
+
+                // Desmarcar el checkbox
+                let checkbox = row.querySelector('.row-select');
+                if (checkbox) {
+                    checkbox.checked = false; // Desmarcar el checkbox
+                    checkbox.disabled = false; // Habilitar el checkbox nuevamente
+                }
+            });
+        }
+    });
+
 </script>
 
 {% endblock %}

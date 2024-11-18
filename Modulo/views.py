@@ -828,23 +828,27 @@ def gasto_crear(request):
             nuevo_gasto = form.save(commit=False)
             nuevo_gasto.GastoId = new_id
             nuevo_gasto.save()
-            return redirect('gasto_index')
+            return redirect('gastos_index')
     else:
         form = GastoForm()
     return render(request, 'Gastos/gasto_form.html', {'form': form})
 
+@csrf_exempt
 def gasto_editar(request, id):
-    gasto = get_object_or_404(Gastos, GastoId=id)
-
     if request.method == 'POST':
-        form = GastoForm(request.POST, instance=gasto)
-        if form.is_valid():
-            form.save()
-            return redirect('gastos_index')
-    else:
-        form = GastoForm(instance=gasto)
-
-    return render(request, 'Gastos/gastos_form.html', {'form': form})
+        try:
+            data = json.loads(request.body)
+            gastos = Gastos.objects.get(pk=id)
+            gastos.Gasto = data.get('Gasto', gastos.Gasto)
+            gastos.save()
+            return JsonResponse({'status': 'success'})
+        except Gastos.DoesNotExist:
+            return JsonResponse({'status': 'error', 'errors': ['Gasto no encontrado']})
+        except ValueError as ve:
+            return JsonResponse({'status': 'error', 'errors': ['Error al procesar los datos: ' + str(ve)]})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'errors': ['Error desconocido: ' + str(e)]})
+    return JsonResponse({'status': 'error', 'errors': ['Método no permitido']})
 
 def gasto_eliminar(request):
     if request.method == 'POST':
@@ -855,8 +859,15 @@ def gasto_eliminar(request):
 
 def gasto_descargar_excel(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
+        item_ids = request.POST.get('items_to_delete')  # Asegúrate de que este es el nombre correcto del campo
+        # Convierte la cadena de IDs en una lista de enteros
+    
+        item_ids = list(map(int, item_ids.split (',')))  # Cambiado aquí
+        
         gasto_data = Gastos.objects.filter(GastoId__in=item_ids)
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="gastos.xlsx"'
 
         data = []
         for gasto in gasto_data:
@@ -864,8 +875,6 @@ def gasto_descargar_excel(request):
 
         df = pd.DataFrame(data, columns=['GastoId', 'Gasto'])
 
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="gastos.xlsx"'
 
         df.to_excel(response, index=False)
 
