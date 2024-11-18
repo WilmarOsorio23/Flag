@@ -759,10 +759,11 @@ def conceptos_crear(request):
     if request.method == 'POST':
         form = ConceptoForm(request.POST)
         if form.is_valid():
-            max_id = Concepto.objects.all().aggregate(max_id=models.Max('id'))['max_id']
+            # Obtener el valor máximo actual de ConceptoID
+            max_id = Concepto.objects.all().aggregate(max_id=models.Max('ConceptoId'))['max_id']
             new_id = max_id + 1 if max_id is not None else 1
             nuevo_concepto = form.save(commit=False)
-            nuevo_concepto.id = new_id
+            nuevo_concepto.ConceptoId = new_id  # Asignar manualmente el nuevo ID
             nuevo_concepto.save()
             return redirect('conceptos_index')
     else:
@@ -770,17 +771,23 @@ def conceptos_crear(request):
     return render(request, 'conceptos/conceptos_form.html', {'form': form})
 
 def conceptos_editar(request, id):
-    concepto = get_object_or_404(Concepto, id=id)
-
     if request.method == 'POST':
-        form = ConceptoForm(request.POST, instance=concepto)
-        if form.is_valid():
-            form.save()
-            return redirect('conceptos_index')
-    else:
-        form = ConceptoForm(instance=concepto)
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            concepto = Concepto.objects.get(pk=id)
+            form = ConceptoForm(data, instance=concepto)
 
-    return render(request, 'Conceptos/conceptos_form.html', {'form': form})
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Concepto.DoesNotExist:
+            return JsonResponse({'error': 'Concepto no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def conceptos_eliminar(request):
     if request.method == 'POST':
