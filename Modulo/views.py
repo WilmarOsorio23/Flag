@@ -6,6 +6,7 @@ from django.db import models
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
+from django.contrib import messages
 from .models import Modulo
 from .forms import ModuloForm
 from .models import IPC
@@ -431,23 +432,38 @@ def tipo_documento_eliminar(request):
 
 def tipo_documento_descargar_excel(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
+        item_ids = request.POST.getlist('items_to_delete')  
+        print(item_ids) 
+
+        # Filtra los datos de la tabla TipoDocumento según los IDs seleccionados
         tipo_documento_data = TipoDocumento.objects.filter(TipoDocumentoID__in=item_ids)
 
+        # Verifica si existen datos seleccionados
+        if not tipo_documento_data.exists():
+            messages.error(request, "No se encontraron datos para descargar.")  # Aquí usas messages
+            return redirect('tipo_documento_index')
+
+        # Prepara los datos para exportar
         data = []
         for tipo_documento in tipo_documento_data:
             data.append([tipo_documento.TipoDocumentoID, tipo_documento.Nombre])
 
+        # Crea un DataFrame con los datos obtenidos
         df = pd.DataFrame(data, columns=['TipoDocumentoID', 'Nombre'])
 
+        # Configura la respuesta HTTP para enviar el archivo Excel
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="tipo_documento.xlsx"'
+        response['Content-Disposition'] = 'attachment; filename="tipo_documentos.xlsx"'
 
+        # Escribe el DataFrame al archivo Excel
         df.to_excel(response, index=False)
 
+        # Retorna el archivo al cliente para descargar
         return response
 
+    # Redirige a la página principal si no es un método POST
     return redirect('tipo_documento_index')
+   
 
 # Vista para la tabla Clientes
 def clientes_index(request):
@@ -651,17 +667,24 @@ def certificacion_crear(request):
     return render(request, 'Certificacion/certificacion_form.html', {'form': form})
 
 def certificacion_editar(request, id):
-    certificacion = get_object_or_404(Certificacion, CertificacionId=id)
-
     if request.method == 'POST':
-        form = CertificacionForm(request.POST, instance=certificacion)
-        if form.is_valid():
-            form.save()
-            return redirect('certificacion_index')
-    else:
-        form = CertificacionForm(instance=certificacion)
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            certificacion = Certificacion.objects.get(pk=id)
+            form = CertificacionForm(data, instance=certificacion)
 
-    return render(request, 'Certificacion/certificacion_form.html', {'form': form})
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Certificacion.DoesNotExist:
+            return JsonResponse({'error': 'Certificación no encontrada'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 
 def certificacion_eliminar(request):
     if request.method == 'POST':
