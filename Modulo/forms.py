@@ -23,26 +23,26 @@ class IPCForm(forms.ModelForm):
         model = IPC
         fields = '__all__'
         widgets = {
-            'anio': forms.TextInput(attrs={
+            'Anio': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el año'
             }),
-            'mes': forms.TextInput(attrs={
+            'Mes': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'campo_numerico': forms.NumberInput(attrs={
+            'Indice': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el Indice'
             }),
         }
         labels = {
-            'anio': 'Año',
-            'mes': 'Mes',
-            'campo_numerico': 'Indice',
+            'Anio':'Año',
+            'Mes': 'Mes',
+            'Indice': 'Índice',
         }
 
 class ClientesForm(forms.ModelForm):
@@ -79,26 +79,26 @@ class INDForm(forms.ModelForm):
         model = IND
         fields = '__all__'
         widgets = {
-            'anio': forms.TextInput(attrs={
+            'Anio': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el año'
             }),
-            'mes': forms.TextInput(attrs={
+            'Mes': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'campo_numerico': forms.NumberInput(attrs={
+            'Indice': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el Indice'
             }),
         }
         labels = {
-            'anio': 'Año',
-            'mes': 'Mes',
-            'campo_numerico': 'Indice',
+            'Anio': 'Año',
+            'Mes': 'Mes',
+            'Indice': 'Índice',
         }
 
 class ConsultoresForm(forms.ModelForm):

@@ -1,4 +1,8 @@
+from django.http import HttpResponse
+import pandas as pd
+import io
 from pyexpat.errors import messages
+from django.contrib import messages
 import pandas as pd
 import json
 from django.shortcuts import render, redirect, get_object_or_404
@@ -131,7 +135,7 @@ def descargar_excel(request):
 
 # Vista para la tabla IPC
 def ipc_index(request):
-    ipc_data = IPC.objects.all()
+    ipc_data = IPC.objects.all().order_by('-Anio','Mes')
     return render(request, 'ipc/ipc_index.html', {'ipc_data': ipc_data})
 
 def ipc_crear(request):
@@ -223,20 +227,24 @@ def ind_crear(request):
     return render(request, 'ind/ind_form.html', {'form': form})
 
 def ind_editar(request, id):
-    ind = get_object_or_404(IND, id=id)
-
     if request.method == 'POST':
-        form = INDForm(request.POST, instance=ind)
-        if form.is_valid():
-            ind = form.save(commit=False)
-            ind.anio = ind.anio
-            ind.mes = ind.mes
-            ind.save()
-            return redirect('ind_index')
-    else:
-        form = INDForm(instance=ind)
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            ind = IND.objects.get(pk=id)
+            form = INDForm(data, instance=ind)
 
-    return render(request, 'ind/ind_form.html', {'form': form})
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Modulo.DoesNotExist:
+            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 
 def ind_eliminar(request):
     if request.method == 'POST':
@@ -248,11 +256,16 @@ def ind_eliminar(request):
 def ind_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
+        print(item_ids)
         ind_data = IND.objects.filter(id__in=item_ids)
 
+        if not ind_data.exists():
+            messages.error(request, "No se encontraron datos para descargar.")
+            return redirect('ind_index')
+        
         data = []
-        for ind in ind_data:
-            data.append([ind.id, ind.anio, ind.mes, ind.campo_numerico])
+        for ind in ind_data:    
+            data.append([ind.id, ind.Anio, ind.Mes, ind.Indice])
 
         df = pd.DataFrame(data, columns=['Id', 'Año', 'Mes', 'Campo Numérico'])
 
