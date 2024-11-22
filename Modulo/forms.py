@@ -23,26 +23,26 @@ class IPCForm(forms.ModelForm):
         model = IPC
         fields = '__all__'
         widgets = {
-            'Anio': forms.TextInput(attrs={
+            'anio': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el año'
             }),
-            'Mes': forms.TextInput(attrs={
+            'mes': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'Indice': forms.NumberInput(attrs={
+            'campo_numerico': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el Indice'
             }),
         }
         labels = {
-            'Anio':'Año',
-            'Mes': 'Mes',
-            'Indice': 'Índice',
+            'anio': 'Año',
+            'mes': 'Mes',
+            'campo_numerico': 'Indice',
         }
 
 class ClientesForm(forms.ModelForm):
@@ -79,26 +79,26 @@ class INDForm(forms.ModelForm):
         model = IND
         fields = '__all__'
         widgets = {
-            'Anio': forms.TextInput(attrs={
+            'anio': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el año'
             }),
-            'Mes': forms.TextInput(attrs={
+            'mes': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'Indice': forms.NumberInput(attrs={
+            'campo_numerico': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el Indice'
             }),
         }
         labels = {
-            'Anio': 'Año',
-            'Mes': 'Mes',
-            'Indice': 'Índice',
+            'anio': 'Año',
+            'mes': 'Mes',
+            'campo_numerico': 'Indice',
         }
 
 class ConsultoresForm(forms.ModelForm):
@@ -687,3 +687,4 @@ class EmpleadoFilterForm(forms.Form):
         self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo, cargo) for cargo in cargos]
 
         self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]
+
