@@ -43,8 +43,58 @@
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuDatosMaestros">
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'Modulo' %}">
-                                        <i class="fas fa-table"></i> Modulo
+                                    <a class="nav-item nav-link" href="{% url 'certificacion_index' %}">
+                                        <i class="fas fa-table"></i> Certificacion
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'clientes_index' %}">
+                                        <i class="fas fa-user"></i> Clientes
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'conceptos_index' %}">
+                                        <i class="fas fa-table"></i> Conceptos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'consultores_index' %}">
+                                        <i class="fas fa-table"></i> Consultores
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'costos_indirectos_index' %}">
+                                        <i class="fas fa-table"></i> Costos Indirectos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'detalle_certificacion_index' %}">
+                                        <i class="fas fa-table"></i> Detalle Certificacion
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'detalle_costos_indirectos_index' %}">
+                                        <i class="fas fa-table"></i> Detalle Costos Indirectos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'detalle_gastos_index' %}">
+                                        <i class="fas fa-table"></i> Detalle Gastos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'empleado_index' %}">
+                                        <i class="fas fa-table"></i> Empleados
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'gastos_index' %}">
+                                        <i class="fas fa-table"></i> Gastos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'ind_index' %}">
+                                        <i class="fas fa-table"></i> IND
                                     </a>
                                 </li>
                                 <li>
@@ -52,9 +102,19 @@
                                         <i class="fas fa-table"></i> IPC
                                     </a>
                                 </li>
-                                <li >
-                                    <a class="nav-item nav-link" href="{% url 'tipo_documento_index' %}" >
-                                        <i class="fas fa-table"></i> Tipo Documento
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'linea_index' %}">
+                                        <i class="fas fa-table"></i> Línea
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'Modulo' %}">
+                                        <i class="fas fa-table"></i> Modulo
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'nomina_index' %}">
+                                        <i class="fas fa-table"></i> Nomina
                                     </a>
                                 </li>
                                 <li>
@@ -63,90 +123,30 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'linea_index' %}">
-                                        <i class="fas fa-table" ></i> Línea
+                                    <a class="nav-item nav-link" href="{% url 'tiempos_cliente_index' %}">
+                                        <i class="fas fa-table"></i> Tiempos Cliente
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'ind_index' %}">
-                                        <i class="fas fa-table" ></i> IND
+                                    <a class="nav-item nav-link" href="{% url 'tiempos_concepto_index' %}">
+                                        <i class="fas fa-table"></i> Tiempo Concepto
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'clientes_index' %}" >
-                                        <i class="fas fa-user" ></i> Clientes
+                                    <a class="nav-item nav-link" href="{% url 'tipo_documento_index' %}">
+                                        <i class="fas fa-table"></i> Tipo Documento
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'consultores_index' %}" >
-                                        <i class="fas fa-table" ></i> Consultores
+                                    <a class="nav-item nav-link" href="{% url 'total_costos_indirectos_index' %}">
+                                        <i class="fas fa-table"></i> Total Costos Indirectos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'costos_indirectos_index' %}" >
-                                        <i class="fas fa-table" ></i> Costos Indirectos
+                                    <a class="nav-item nav-link" href="{% url 'total_gastos_index' %}">
+                                        <i class="fas fa-table"></i> Total Gastos
                                     </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'detalle_certificacion_index' %}" >
-                                        <i class="fas fa-table" ></i> Detalle Certificacion
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'certificacion_index' %}" >
-                                        <i class="fas fa-table" ></i> Certificacion
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'detalle_costos_indirectos_index' %}" >
-                                        <i class="fas fa-table" ></i> Detalle Costos Indirectos
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'detalle_gastos_index' %}" >
-                                        <i class="fas fa-table" ></i> Detalle Gastos
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'gastos_index' %}" >
-                                        <i class="fas fa-table" ></i> Gastos
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'nomina_index' %}" >
-                                        <i class="fas fa-table" ></i> Nomina
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'tiempos_cliente_index' %}" >
-                                        <i class="fas fa-table" ></i> Tiempos Cliente
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'tiempos_concepto_index' %}" >
-                                        <i class="fas fa-table" ></i> Tiempo Concepto
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'conceptos_index' %}" >
-                                        <i class="fas fa-table" ></i> Conceptos
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'total_costos_indirectos_index' %}" >
-                                        <i class="fas fa-table" ></i> Total Costos Indirectos
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'total_gastos_index' %}" >
-                                        <i class="fas fa-table" ></i> Total Gastos
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'empleado_index' %}" >
-                                        <i class="fas fa-table" ></i> Empleados
-                                    </a>
-                                </li>
+                                </li>                                
                                 <!-- Puedes añadir más elementos de "Datos Maestros" aquí -->
                             </ul>
                         </li>                   

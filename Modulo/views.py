@@ -1,3 +1,8 @@
+from django.http import HttpResponse
+import pandas as pd
+import io
+from pyexpat.errors import messages
+from django.contrib import messages
 import pandas as pd
 import json
 from django.shortcuts import render, redirect, get_object_or_404
@@ -83,21 +88,19 @@ def crear(request):
 def editar(request, id):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body.decode('utf-8'))
+            data = json.loads(request.body)
             modulo = Modulo.objects.get(pk=id)
-            form = ModuloForm(data, instance=modulo)
-
-            if form.is_valid():
-                form.save()
-                return JsonResponse({'status': 'success'})
-            else:
-                return JsonResponse({'errors': form.errors}, status=400)
+            modulo.Modulo = data.get('Modulo', modulo.Modulo)
+            modulo.save()
+            return JsonResponse({'status': 'success'})
         except Modulo.DoesNotExist:
-            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-    else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
+            return JsonResponse({'status': 'error', 'errors': ['Módulo no encontrado']})
+        except ValueError as ve:
+            return JsonResponse({'status': 'error', 'errors': ['Error al procesar los datos: ' + str(ve)]})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'errors': ['Error desconocido: ' + str(e)]})
+    return JsonResponse({'status': 'error', 'errors': ['Método no permitido']})
+
     
 def eliminar(request):
     if request.method == 'POST':
@@ -110,9 +113,10 @@ def eliminar(request):
 def descargar_excel(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':
-        item_ids = request.POST.get('items_to_download')  # Asegúrate de que este es el nombre correcto del campo
+        item_ids = request.POST.get('items_to_delete')  # Asegúrate de que este es el nombre correcto del campo
         # Convierte la cadena de IDs en una lista de enteros
-        item_ids = list(map(int, item_ids.split(',')))  # Cambiado aquí
+    
+        item_ids = list(map(int, item_ids.split (',')))  # Cambiado aquí
         modulos = Modulo.objects.filter(ModuloId__in=item_ids)
 
         # Crea una respuesta HTTP con el tipo de contenido de Excel
@@ -132,7 +136,7 @@ def descargar_excel(request):
 
 # Vista para la tabla IPC
 def ipc_index(request):
-    ipc_data = IPC.objects.all()
+    ipc_data = IPC.objects.all().order_by('-Anio','Mes')
     return render(request, 'ipc/ipc_index.html', {'ipc_data': ipc_data})
 
 def ipc_crear(request):
@@ -149,21 +153,26 @@ def ipc_crear(request):
         form = IPCForm()
     return render(request, 'ipc/ipc_form.html', {'form': form})
 
+@csrf_exempt
 def ipc_editar(request, id):
-    ipc = get_object_or_404(IPC, id=id)
-
     if request.method == 'POST':
-        form = IPCForm(request.POST, instance=ipc)
-        if form.is_valid():
-            ipc = form.save(commit=False)
-            ipc.anio = ipc.Año
-            ipc.mes = ipc.Mes
-            ipc.save()
-            return redirect('ipc_index')
-    else:
-        form = IPCForm(instance=ipc)
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            ipc = IPC.objects.get(pk=id)
+            form = IPCForm(data, instance=ipc)
 
-    return render(request, 'ipc/ipc_form.html', {'form': form})
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Modulo.DoesNotExist:
+            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 
 def ipc_eliminar(request):
     if request.method == 'POST':
@@ -219,20 +228,24 @@ def ind_crear(request):
     return render(request, 'ind/ind_form.html', {'form': form})
 
 def ind_editar(request, id):
-    ind = get_object_or_404(IND, id=id)
-
     if request.method == 'POST':
-        form = INDForm(request.POST, instance=ind)
-        if form.is_valid():
-            ind = form.save(commit=False)
-            ind.anio = ind.anio
-            ind.mes = ind.mes
-            ind.save()
-            return redirect('ind_index')
-    else:
-        form = INDForm(instance=ind)
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            ind = IND.objects.get(pk=id)
+            form = INDForm(data, instance=ind)
 
-    return render(request, 'ind/ind_form.html', {'form': form})
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Modulo.DoesNotExist:
+            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 
 def ind_eliminar(request):
     if request.method == 'POST':
@@ -244,11 +257,16 @@ def ind_eliminar(request):
 def ind_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
+        print(item_ids)
         ind_data = IND.objects.filter(id__in=item_ids)
 
+        if not ind_data.exists():
+            messages.error(request, "No se encontraron datos para descargar.")
+            return redirect('ind_index')
+        
         data = []
-        for ind in ind_data:
-            data.append([ind.id, ind.anio, ind.mes, ind.campo_numerico])
+        for ind in ind_data:    
+            data.append([ind.id, ind.Anio, ind.Mes, ind.Indice])
 
         df = pd.DataFrame(data, columns=['Id', 'Año', 'Mes', 'Campo Numérico'])
 
@@ -1584,6 +1602,9 @@ def exportar_excel(request):
     response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=empleados_certificaciones.xlsx'
 
+
+from datetime import date
+
 # Informe de Nómina de Empleados
 def empleado_nomina_filtrado(request):
     empleados = Empleado.objects.all()  
@@ -1629,15 +1650,26 @@ def empleado_nomina_filtrado(request):
                 empleado_info = []
                 for empleado in empleados:
                     salarios = nominas.filter(Documento=empleado.Documento)
+                    # Calcular años en Flag
+                    if empleado.FechaIngreso:
+                        hoy = date.today()
+                        anios_en_flag = hoy.year - empleado.FechaIngreso.year
+                         # Ajustar si aún no ha cumplido años este año
+                        if (hoy.month, hoy.day) < (empleado.FechaIngreso.month, empleado.FechaIngreso.day):
+                            anios_en_flag -= 1
+                    else:
+                        anios_en_flag = "N/A"  # Valor por defecto si no hay fecha de ingreso
                     if salarios.exists():
                         for salario in salarios:
                             cliente = salario.Cliente
+
                             empleado_info.append({
                                 'empleado': empleado,
                                 'salario': salario.Salario,
                                 'cliente': cliente, 
                                 'anio': salario.Anio,
                                 'mes': salario.Mes,
+                                'anios_en_flag': anios_en_flag,  # Nuevo campo
                             })
             show_data = True  
 
@@ -1653,9 +1685,6 @@ def empleado_nomina_filtrado(request):
     }
 
     return render(request, 'informes/informes_salarios_index.html', context)
-
-
-
 
 # Funcionalidad para descargar los resultados en Excel
 def exportar_nomina_excel(request):
