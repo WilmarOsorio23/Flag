@@ -57,55 +57,6 @@ def inicio(request):
 
 def nosotros(request):
     return render(request, 'paginas/nosotros.html')
-
-def modulo(request):
-    # Ordenar los módulos por el campo 'id' en orden ascendente
-    lista_modulos  = Modulo.objects.all().order_by('ModuloId')
-    return render(request, 'Modulo/index.html', {'Modulo': lista_modulos})
-
-    
-def crear(request):
-    if request.method == 'POST':
-        form = ModuloForm(request.POST)
-        if form.is_valid():
-            max_id = Modulo.objects.all().aggregate(max_id=models.Max('ModuloId'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_modulo = form.save(commit=False)
-            nuevo_modulo.id = new_id
-            nuevo_modulo.save()
-            
-            return redirect('Modulo')
-    else:
-        form = ModuloForm()
-    return render(request, 'Modulo/crear.html', {'form': form})
-
-@csrf_exempt
-def editar(request, id):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            modulo = Modulo.objects.get(pk=id)
-            modulo.Modulo = data.get('Modulo', modulo.Modulo)
-            modulo.save()
-            return JsonResponse({'status': 'success'})
-        except Modulo.DoesNotExist:
-            return JsonResponse({'status': 'error', 'errors': ['Módulo no encontrado']})
-        except ValueError as ve:
-            return JsonResponse({'status': 'error', 'errors': ['Error al procesar los datos: ' + str(ve)]})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'errors': ['Error desconocido: ' + str(e)]})
-    return JsonResponse({'status': 'error', 'errors': ['Método no permitido']})
-
-    
-def eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        Modulo.objects.filter(ModuloId__in=item_ids).delete()
-        return redirect('Modulo')
-    
-    return redirect('Modulo')
-
-def descargar_excel(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':
         item_ids = request.POST.get('items_to_delete')  # Asegúrate de que este es el nombre correcto del campo

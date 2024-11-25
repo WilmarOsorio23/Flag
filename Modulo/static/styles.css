@@ -37,6 +37,7 @@ html, body {
 }
 
 
+
 /* ========================== */
 /*           ALERTAS          */
 /* ========================== */
@@ -55,28 +56,52 @@ html, body {
 }
 
 .alert {
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
+    padding: 1.2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease-in-out;
 }
 
-.alert.show {
-    opacity: 1;
+.alert-icon {
+    font-size: 1.5rem;
 }
 
 .alert-success {
-    background-color: #d4edda;
-    color: #155724;
+    background-color: #e7f5e4;
+    color: #2e7d32;
+    border-left: 5px solid #2e7d32;
 }
 
 .alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
+    background-color: #fdecea;
+    color: #c62828;
+    border-left: 5px solid #c62828;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 5px solid #856404;
 }
 
 .alert-info {
-    background-color: #cce5ff;
-    color: #004085;
+    background-color: #d9f0fc;
+    color: #0275d8;
+    border-left: 5px solid #0275d8;
 }
+
+.alert.fade {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.alert.fade.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 
 
 /* ========================== */

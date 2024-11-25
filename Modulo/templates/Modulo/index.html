@@ -1,10 +1,16 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block titulo %} Lista de Módulos {% endblock %}
 
 {% block contenido %}
 <div class="card">
-    <div id="message-box" class="alert" style="display: none;"></div>
+    <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
+        <span id="alert-icon" class="alert-heading"></span>
+        <span id="alert-message"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Módulos</h4>
     </div>  
@@ -14,7 +20,7 @@
             <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'crear' %}" role="button"></a>
             <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button" onclick="enableEdit();"></a>
             <i class="btn btn-outline-primary fas fa-eye" title="Visualizar"></i>
-            <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>
+            <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>
             <form id="download-form" method="POST" action="{% url 'descargar_excel' %}" style="display:inline;" onsubmit="return confirmDownload();">
                 {% csrf_token %}
                 <input type="hidden" name="items_to_delete" id="items_to_delete">
@@ -66,224 +72,26 @@
             </form>
         </div>        
     </div>
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            ¿Estás seguro de que deseas eliminar este módulo?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+            <button id="confirm-delete-btn" type="button" class="btn btn-danger">Sí</button>
+            </div>
+        </div>
+        </div>
+    </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        
-        // Seleccionar todos los checkboxes
-        document.getElementById('select-all').addEventListener('click', function(event) {
-            let checkboxes = document.querySelectorAll('.row-select');
-            for (let checkbox of checkboxes) {
-                checkbox.checked = event.target.checked;
-            }
-        });
+<script src="{% static 'JS/modulo.js' %}"></script>
 
-        // Confirmación antes de eliminar
-        async function confirmDelete() {
-            let selectedElements = document.querySelectorAll('.row-select:checked');
-            let selectedIds = Array.from(selectedElements).map(el => el.value);
-
-            if (selectedIds.length === 0) {
-                showMessage('No has seleccionado ningún elemento para eliminar.', 'danger');
-                return false;
-            }
-
-            let isRelated = await fetch('/verificar-relaciones/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({ ids: selectedIds })
-            })
-            .then(response => response.json())
-            .then(data => data.isRelated);
-
-            if (isRelated) {
-                showMessage('No puedes eliminar estos elementos, ya que están siendo utilizados en otra tabla.', 'danger');
-                return false;
-            }
-
-            return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
-        }
-
-        // Confirmación antes de descargar
-        window.confirmDownload = function() {
-            let selected = document.querySelectorAll('.row-select:checked');
-            if (selected.length === 0) {
-                showMessage('No has seleccionado ningún elemento para descargar.', 'danger');
-                return false;
-            }
-
-            let itemIds = [];
-            selected.forEach(function(checkbox) {
-                itemIds.push(checkbox.value);
-            });
-            document.getElementById('items_to_delete').value = itemIds.join(',');
-
-            return true;
-        };
-
-        // Habilitar edición en la fila seleccionada
-        window.enableEdit = function() {
-            let selected = document.querySelectorAll('.row-select:checked');
-            if (selected.length === 0) {
-                showMessage('Por favor, selecciona al menos un módulo.', 'danger');
-                return false;
-            }
-            if (selected.length > 1) {
-                showMessage('Por favor, Selecciona un solo módulo para editar.', 'danger');
-                return false;
-            }
-
-            let row = selected[0].closest('tr');
-            let inputs = row.querySelectorAll('input.form-control-plaintext');
-
-            // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
-            document.getElementById('select-all').disabled = true;
-            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
-            document.getElementById('edit-button').disabled = true;
-
-            // Convertir inputs en editables
-            inputs.forEach(input => {
-                input.classList.remove('form-control-plaintext');
-                input.classList.add('form-control');
-                input.readOnly = false;
-            });
-
-            // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
-            document.getElementById('save-button').classList.remove('d-none');
-            document.getElementById('cancel-button').classList.remove('d-none');
-
-        };
-
-        window.cancelEdit = function() {
-            let selected = document.querySelectorAll('.row-select:checked');
-            if (selected.length === 1) {
-                let row = selected[0].closest('tr');
-
-                // Cambiar inputs a solo lectura
-                row.querySelectorAll('input.form-control').forEach(input => {
-                    input.classList.add('form-control-plaintext');
-                    input.classList.remove('form-control');
-                    input.readOnly = true;
-                });
-
-                // Desmarcar y habilitar el checkbox de la fila
-                selected[0].checked = false;
-                selected[0].disabled = false;
-            }
-
-            // Habilitar todos los checkboxes y el botón de edición
-            document.getElementById('select-all').disabled = false;
-            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
-            document.getElementById('edit-button').disabled = false;
-
-            // Ocultar los botones de guardar y cancelar
-            document.getElementById('save-button').classList.add('d-none');
-            document.getElementById('cancel-button').classList.add('d-none');
-
-            showMessage('Cambios cancelados.', 'danger');
-        };
-
-        
-        function showMessage(message, type) {
-            const messageBox = document.getElementById('message-box');
-            messageBox.textContent = message;
-            messageBox.className = `alert alert-${type} show`;
-            messageBox.style.display = 'block';
-
-            setTimeout(() => {
-                messageBox.classList.remove('show');
-                setTimeout(() => {
-                    messageBox.style.display = 'none';
-                }, 300);    
-            }, 3000);
-        }
-
-
-        window.saveRow = function() {
-            let selected = document.querySelectorAll('.row-select:checked');
-            if (selected.length !== 1) {
-                showMessage('Error al guardar: No hay un módulo seleccionado.', 'danger');
-                return;
-            }
-
-            let row = selected[0].closest('tr');
-            let moduloId = selected[0].value;
-            let data = {
-                'Modulo': row.querySelector('input[name="nombre"]').value
-            };
-
-            // Deshabilitar los checkboxes y el botón de edición
-            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
-            document.getElementById('edit-button').disabled = true;
-
-            fetch(`/Modulo/editar/${moduloId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    showMessage('Cambios guardados correctamente.', 'success');
-
-                    row.querySelectorAll('input.form-control').forEach(input => {
-                        input.classList.add('highlighted');
-                        setTimeout(() => input.classList.remove('highlighted'), 2000);
-                    });
-
-                    // Cambiar inputs a solo lectura
-                    row.querySelectorAll('input.form-control').forEach(input => {
-                        input.classList.add('form-control-plaintext');
-                        input.classList.remove('form-control');
-                        input.readOnly = true;
-                    });
-
-                    // Desmarcar y habilitar el checkbox de la fila
-                    selected[0].checked = false;
-                    selected[0].disabled = false;
-                    
-                    // Habilitar todos los checkboxes y botón de edición
-                    document.getElementById('select-all').disabled = false;
-                    document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
-                    document.getElementById('edit-button').disabled = false;
-
-                    // Ocultar los botones de guardar y cancelar
-                    document.getElementById('save-button').classList.add('d-none');
-                    document.getElementById('cancel-button').classList.add('d-none');
-
-                } else {
-                    showMessage('Error al guardar los cambios: ' + data.errors.join(', '), 'danger');
-                }
-
-            })
-            .catch(error => {
-                showMessage('Error al enviar los datos: ' + error.message, 'danger');
-                
-                // Habilitar checkboxes y botón de edición en caso de error
-                document.getElementById('select-all').disabled = false; 
-                document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
-                document.getElementById('edit-button').disabled = false;
-
-                // Ocultar los botones de guardar y cancelar
-                document.getElementById('save-button').classList.add('d-none');
-                document.getElementById('cancel-button').classList.add('d-none');
-
-                // Desmarcar el checkbox
-                let checkbox = row.querySelector('.row-select');
-                if (checkbox) {
-                    checkbox.checked = false; // Desmarcar el checkbox
-                    checkbox.disabled = false; // Habilitar el checkbox nuevamente
-                }
-            });
-        };
-
-    });
-</script>
 {% endblock %}
