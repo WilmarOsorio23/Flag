@@ -38,7 +38,7 @@
                         {% for certificacion in certificaciones %}
                         <tr id="row-{{ certificacion.CertificacionId }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ certificacion.CertificacionId }}"></td>
-                            <td><input type="text" name="CertificacionId" class="form-control-plaintext" value="{{ certificacion.CertificacionId }}" readonly></td>
+                            <td><input type="text" name="CertificacionId" class="form-control-plaintext" value="{{ certificacion.CertificacionId }}" disabled></td>
                             <td><input type="text" name="Certificacion" class="form-control-plaintext" value="{{ certificacion.Certificacion }}" readonly></td>
                         </tr>
                         {% empty %}
