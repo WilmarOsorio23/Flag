@@ -44,6 +44,7 @@ urlpatterns = [
     path('tipo_documento/', views.tipo_documento_index, name='tipo_documento_index'),
     path('tipo_documento/crear', views.tipo_documento_crear, name='tipo_documento_crear'),
     path('tipo_documento/editar/<int:id>/', views.tipo_documento_editar, name='tipo_documento_editar'),
+    path('verificar-relaciones/', views.verificar_relaciones, name='verificar_relaciones'),
     path('tipo_documento/eliminar', views.tipo_documento_eliminar, name='tipo_documento_eliminar'),
     path('tipo_documento/descargar_excel', views.tipo_documento_descargar_excel, name='tipo_documento_descargar_excel'),
 

@@ -179,7 +179,15 @@
             <div class="container" id="content">
                 <div class="row">
                     <div class="col-12">
-                        {% block contenido %}{% endblock %}
+                        {% block contenido %}
+                            {% if messages %}
+                                <ul>
+                                    {% for message in messages %}
+                                        <li class="{{ message.tags }}">{{ message }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% endblock %}
                     </div>
                 </div>
             </div>
@@ -210,5 +218,6 @@
                 }
             });
         </script>
+        
     </body>
 </html>

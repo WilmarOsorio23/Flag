@@ -430,6 +430,30 @@ def tipo_documento_eliminar(request):
         return redirect('tipo_documento_index')
     return redirect('tipo_documento_index')
 
+def verificar_relaciones(request):
+    if request.method == 'POST':
+        import json
+        data = json.loads(request.body)
+        ids = data.get('ids', [])
+
+        # Verifica si los módulos están relacionados
+        relacionados = []
+        for id in ids:
+            if (
+                Empleado.objects.filter(TipoDocumentoId=id).exists() or
+                Clientes.objects.filter(TipoDocumentoId=id).exists()
+            ): 
+                relacionados.append(id)
+
+        if relacionados:
+            return JsonResponse({
+                'isRelated': True,
+                'ids': relacionados
+            })
+        else:
+            return JsonResponse({'isRelated': False})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 def tipo_documento_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')  
