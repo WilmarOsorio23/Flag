@@ -172,6 +172,11 @@ document.addEventListener('DOMContentLoaded', function() {
         let row = selected[0].closest('tr');
         let inputs = row.querySelectorAll('input.form-control-plaintext');
 
+         // Guardar valores originales en un atributo personalizado
+        inputs.forEach(input => {
+            input.setAttribute('data-original-value', input.value);
+        });
+
         // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
         document.getElementById('select-all').disabled = true;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
@@ -194,6 +199,13 @@ document.addEventListener('DOMContentLoaded', function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 1) {
             let row = selected[0].closest('tr');
+
+            // Restaurar los valores originales desde el atributo personalizado
+            row.querySelectorAll('input.form-control').forEach(input => {
+                if (input.hasAttribute('data-original-value')) {
+                    input.value = input.getAttribute('data-original-value');
+                }
+            });
             
             disableEditMode(selected,row);
         }
