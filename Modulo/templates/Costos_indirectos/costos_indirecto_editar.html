@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block titulo %} Editar Costo Indirecto {% endblock %}
+{% block titulo %} Editar Concepto {% endblock %}
 
 {% block contenido %}
-<h2>Editar Costo Indirecto</h2>
+<h2>Editar Concepto</h2>
 <form method="POST">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Guardar</button>
-    <a href="{% url 'costos_indirectos_index' %}" class="btn btn-danger">Cancelar</a>
+    <a href="{% url 'conceptos_index' %}" class="btn btn-danger">Cancelar</a>
 </form>
 {% endblock %}

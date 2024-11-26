@@ -426,9 +426,9 @@ def tipo_documento_editar(request, id):
 def tipo_documento_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        TipoDocumento.objects.filter(TipoDocumentoID__in=item_ids).delete()
-        return redirect('tipo_documento_index')
-    return redirect('tipo_documento_index')
+        Concepto.objects.filter(ConceptoId__in=item_ids).delete()
+        return redirect('conceptos_index')
+    return redirect('conceptos_index')
 
 def verificar_relaciones(request):
     if request.method == 'POST':
@@ -830,56 +830,53 @@ def conceptos_crear(request):
 def conceptos_editar(request, id):
     if request.method == 'POST':
         try:
-            # Cargar los datos enviados en el cuerpo de la solicitud
+            # Cargar los datos enviados como JSON
             data = json.loads(request.body.decode('utf-8'))
-            
-            # Obtener el concepto por su ID
-            concepto = Concepto.objects.get(pk=id)
-            
-            # Pasar los datos y la instancia al formulario
+            # Obtener el objeto correspondiente
+            concepto = get_object_or_404(Concepto, pk=id)
+            # Instanciar el formulario con los datos y el objeto a editar
             form = ConceptoForm(data, instance=concepto)
 
-            # Validar y guardar si es válido
+            # Validar y guardar el formulario
             if form.is_valid():
                 form.save()
                 return JsonResponse({'status': 'success'})
             else:
-                # Devolver los errores del formulario
                 return JsonResponse({'errors': form.errors}, status=400)
-        
-        # Manejar excepciones si el concepto no existe
         except Concepto.DoesNotExist:
             return JsonResponse({'error': 'Concepto no encontrado'}, status=404)
-        
-        # Manejar excepciones de JSON mal formateado
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-    
-    # Manejar métodos no permitidos
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def conceptos_eliminar(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        Concepto.objects.filter(id__in=item_ids).delete()
+        concepto_ids = request.POST.getlist('concepto_ids')  # Lista de IDs en el formato requerido
+        for id_pair in concepto_ids:
+            concepto_id, descripcion_id = id_pair.split('-')  # Divide los pares separados por '-'
+            Concepto.objects.filter(ConceptoId=concepto_id, Descripcion=descripcion_id).delete()
         return redirect('conceptos_index')
     return redirect('conceptos_index')
 
 def conceptos_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        concepto_data = Concepto.objects.filter(id__in=item_ids)
+        conceptos_data = Concepto.objects.filter(ConceptoId__in=item_ids)
 
+        # Preparar los datos para el DataFrame
         data = []
-        for concepto in concepto_data:
-            data.append([concepto.id, concepto.descripcion])
+        for concepto in conceptos_data:
+            data.append([concepto.ConceptoId, concepto.Descripcion])
 
-        df = pd.DataFrame(data, columns=['Id', 'Descripción'])
+        # Crear el DataFrame con las columnas adecuadas
+        df = pd.DataFrame(data, columns=['ConceptoId', 'Descripcion'])
 
+        # Configurar la respuesta HTTP para descargar el archivo Excel
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="conceptos.xlsx"'
 
+        # Escribir el DataFrame en el archivo Excel
         df.to_excel(response, index=False)
 
         return response
