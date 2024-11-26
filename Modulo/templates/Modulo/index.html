@@ -1,9 +1,16 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block titulo %} Lista de Módulos {% endblock %}
 
 {% block contenido %}
 <div class="card">
+    <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
+        <span id="alert-icon" class="alert-heading"></span>
+        <span id="alert-message"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Módulos</h4>
     </div>  
@@ -13,7 +20,7 @@
             <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'crear' %}" role="button"></a>
             <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button" onclick="enableEdit();"></a>
             <i class="btn btn-outline-primary fas fa-eye" title="Visualizar"></i>
-            <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>
+            <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>
             <form id="download-form" method="POST" action="{% url 'descargar_excel' %}" style="display:inline;" onsubmit="return confirmDownload();">
                 {% csrf_token %}
                 <input type="hidden" name="items_to_download" id="items_to_download">
@@ -54,7 +61,27 @@
             </form>
         </div>        
     </div>
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            ¿Estás seguro de que deseas eliminar este módulo?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+            <button id="confirm-delete-btn" type="button" class="btn btn-danger">Sí</button>
+            </div>
+        </div>
+        </div>
+    </div>
 </div>
+
+<script src="{% static 'JS/modulo.js' %}"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

@@ -1,16 +1,19 @@
 from django.urls import path
+from Modulo.Views import modulo
 from . import views
+
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
     path('nosotros', views.nosotros, name='nosotros'),
 
     # Rutas para tabla Modulo
-    path('Modulo', views.modulo, name='Modulo'),
-    path('Modulo/crear', views.crear, name='crear'),
-    path('Modulo/editar/<int:id>/', views.editar, name='editar'),
-    path('Modulo/eliminar', views.eliminar, name='eliminar'),
-    path('Modulo/descargar_excel', views.descargar_excel, name='descargar_excel'),
+    path('Modulo', modulo.modulo, name='Modulo'),
+    path('Modulo/crear', modulo.crear, name='crear'),
+    path('Modulo/editar/<int:id>/', modulo.editar, name='editar'),
+    path('Modulo/eliminar', modulo.eliminar, name='eliminar'),
+    path('verificar-relaciones/', modulo.verificar_relaciones, name='verificar_relaciones'),
+    path('Modulo/descargar_excel', modulo.descargar_excel, name='descargar_excel'),
 
     # Rutas para la tabla IPC
     path('ipc/', views.ipc_index, name='ipc_index'),
@@ -156,5 +159,5 @@ urlpatterns = [
     # Rutas para informe de certificación
     path('informes/', views.empleado_filtrado, name='informes_certificacion_index'),
     path('informes/salarios/', views.empleado_nomina_filtrado, name='informes_salarios_index'),
-    path('descargar_excel/', views.descargar_excel, name='descargar_excel'),
+    path('descargar_excel/', modulo.descargar_excel, name='descargar_excel'),
 ]

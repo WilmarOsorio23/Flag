@@ -24,6 +24,77 @@ body {
     max-width: calc(100% - 21vw); /* Deja espacio para el sidebar */
 }
 
+<<<<<<< HEAD
+
+
+/* ========================== */
+/*           ALERTAS          */
+/* ========================== */
+
+#message-box {
+    position: fixed; /* Posiciona el div de manera fija en la pantalla */
+    z-index: 1050; /* Asegura que el div esté encima de otros elementos */
+    width: 80%; /* Puedes ajustar el ancho según tus necesidades */
+    margin-left: 28em;
+    max-width: 20em; /* El ancho máximo del mensaje */
+    margin-top: 15em;
+    display: none; /* Inicialmente oculto */
+    border-radius: 5px; /* Bordes redondeados */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra para dar profundidad */
+    transition: opacity 0.5s ease, top 0.5s ease; /* Transiciones suaves */
+}
+
+.alert {
+    padding: 1.2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease-in-out;
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+}
+
+.alert-success {
+    background-color: #e7f5e4;
+    color: #2e7d32;
+    border-left: 5px solid #2e7d32;
+}
+
+.alert-danger {
+    background-color: #fdecea;
+    color: #c62828;
+    border-left: 5px solid #c62828;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 5px solid #856404;
+}
+
+.alert-info {
+    background-color: #d9f0fc;
+    color: #0275d8;
+    border-left: 5px solid #0275d8;
+}
+
+.alert.fade {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.alert.fade.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+
+=======
+>>>>>>> desarrollo_den
 /* ========================== */
 /*         SIDEBAR            */
 /* ========================== */
