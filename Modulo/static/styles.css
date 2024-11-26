@@ -2,23 +2,15 @@
 /*           GENERAL          */
 /* ========================== */
 
-
-/* Reinicio de márgenes y paddings */
-html, body {
+body {
     font-family: Arial, sans-serif;
     background-color: #f8f9fa;
-    margin: 0;
-    padding: 0;
-    height: 100%; /* Asegura que html y body ocupen el 100% de la pantalla */
-    box-sizing: border-box;
-    user-select: none;
+    height: 100%; /* Asegura que el cuerpo ocupe toda la altura */
+    margin: 0; /* Elimina el margen por defecto */
 }
 
 /* Tarjetas */
 .card {
-    min-height: auto; /* Ocupa al menos el 100% de la altura de la ventana */
-    display: flex;     /* Flexbox para manejar el contenido */
-    flex-direction: column; /* Acomoda el contenido en una columna */
     border: 2px solid #dee2e6;
     border-radius: 0.5em;
     box-shadow: 1px 4px 6px rgba(0, 0, 0, 0.1);
@@ -26,15 +18,13 @@ html, body {
 
 /* Ajustes para evitar superposición con la navbar y el sidebar */
 #content {
-    min-height: 100vh; /* Ocupa al menos el 100% de la altura de la ventana */
-    display: flex;     /* Flexbox para manejar el contenido */
-    flex-direction: column; /* Acomoda el contenido en una columna */
-    margin-left: 20.7vw; /* Ajusta para que el contenido no se solape con el sidebar */
+    margin-left: 21vw; /* Ajusta para que el contenido no se solape con el sidebar */
     padding: 1em; /* Espacio alrededor del contenido */
     position: relative;
-    max-width: calc(100% - 20.7vw); /* Deja espacio para el sidebar */
-    height: 100%;
+    max-width: calc(100% - 21vw); /* Deja espacio para el sidebar */
 }
+
+<<<<<<< HEAD
 
 
 /* ========================== */
@@ -55,30 +45,56 @@ html, body {
 }
 
 .alert {
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
+    padding: 1.2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease-in-out;
 }
 
-.alert.show {
-    opacity: 1;
+.alert-icon {
+    font-size: 1.5rem;
 }
 
 .alert-success {
-    background-color: #d4edda;
-    color: #155724;
+    background-color: #e7f5e4;
+    color: #2e7d32;
+    border-left: 5px solid #2e7d32;
 }
 
 .alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
+    background-color: #fdecea;
+    color: #c62828;
+    border-left: 5px solid #c62828;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 5px solid #856404;
 }
 
 .alert-info {
-    background-color: #cce5ff;
-    color: #004085;
+    background-color: #d9f0fc;
+    color: #0275d8;
+    border-left: 5px solid #0275d8;
+}
+
+.alert.fade {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.alert.fade.show {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 
+
+=======
+>>>>>>> desarrollo_den
 /* ========================== */
 /*         SIDEBAR            */
 /* ========================== */
@@ -91,12 +107,14 @@ html, body {
     overflow-x: none;
     padding: 0.5em;
     box-sizing: border-box;
-    background: linear-gradient(to bottom, #ffffff,#ffffff, #007bff8c,#007bff,#007bffc7,#007bffe1);  
+    background: linear-gradient(to bottom, #ffffff, #007bff);  
     margin-bottom: 1em; 
 
 }
 
 #sidebar .sidebar-header{
+    background-color: #ffffff;
+    border: #007bff60 solid 5px;
     border-radius: 0.5em;
     padding: 1em;
     margin-top: 0.5em;
@@ -242,7 +260,6 @@ a[aria-expanded="true"] {
 
 .table {
     width: 100%; /* Ajustar el ancho de la tabla */
-    height: auto;
     border-collapse: collapse;
     border-spacing: 0;
 }
@@ -333,11 +350,6 @@ a[aria-expanded="true"] {
     border-color: #0056b3; /* Color del borde al estar chequeado */
 }
 
-input[type="checkbox"]:disabled {
-    background-color: #b5b7cf;
-    cursor: not-allowed; /* Cambia el cursor para indicar que no se puede interactuar */
-}
-
 /* Scrollbar para tablas */
 .table-responsive::-webkit-scrollbar {
     width: 8px; /* Ancho del scrollbar vertical */
@@ -379,7 +391,6 @@ button {
 button:hover {
     background-color: #0056b3; /* Color al pasar el mouse */
     transform: scale(1.05); /* Efecto de aumento */
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 button:disabled {
@@ -424,68 +435,36 @@ a.fas, .fa {
 /*     RESPONSIVE DESIGN      */
 /* ========================== */
 
-/* Ajustes para pantallas medianas */
-@media (max-width: 992px) {
+@media (max-width: 768px) {
     #sidebar {
-        width: 25vw; /* Reduce el ancho de la sidebar */
+        width: 20vw;
     }
     #content {
-        margin-left: 25vw; /* Ajusta el margen del contenido en consecuencia */
-        max-width: calc(100% - 25vw);
+        width: 70vw;
+        margin-left: 30vw;
+        padding: 1em;
     }
     .table {
-        font-size: 0.95em; /* Reduce un poco el tamaño de texto en tablas */
+        font-size: 0.9em;
     }
 }
 
-/* Ajustes para pantallas pequeñas */
-@media (max-width: 768px) {
+@media (max-width: 576px) {
     #sidebar {
-        width: 100%; /* Sidebar ocupa todo el ancho en pantallas pequeñas */
+        width: 100%;
         position: relative;
-        height: auto; /* Deja que la altura se ajuste al contenido */
-        padding-bottom: 1em; /* Espacio adicional al final */
+        box-shadow: none;
+    }
+    #sidebar ul li a {
+        font-size: 1em;
+        margin: 0.5em 0;
+        padding: 0.5em;
     }
     #content {
-        margin-left: 0; /* Elimina margen izquierdo */
-        padding: 1em; /* Añade un padding para el contenido */
         width: 100%;
+        margin-left: 0;
     }
     .table-responsive {
         max-width: 100%;
-        overflow-x: auto; /* Habilita el desplazamiento horizontal */
-    }
-    .table {
-        font-size: 0.9em; /* Reduce el tamaño de la tabla */
-    }
-}
-
-/* Ajustes para pantallas extra pequeñas (móviles) */
-@media (max-width: 576px) {
-    #sidebar {
-        display: none; /* Oculta el sidebar en pantallas muy pequeñas */
-    }
-    #content {
-        width: 100%; /* El contenido ocupa todo el ancho */
-        margin-left: 0;
-        padding: 1em;
-    }
-    .navbar {
-        width: 100%; /* Navbar ocupa todo el ancho */
-        position: relative;
-    }
-    .table {
-        font-size: 0.85em; /* Tamaño más pequeño en tablas */
-    }
-    .table td, .table th {
-        padding: 0.5em; /* Menos padding en las celdas */
-    }
-    /* Ajusta botones y otros elementos interactivos */
-    button {
-        font-size: 0.9em;
-        padding: 6px 10px;
-    }
-    i.fas, .fa {
-        font-size: 1.2em; /* Tamaño de iconos más pequeño */
     }
 }
