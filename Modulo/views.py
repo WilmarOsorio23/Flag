@@ -806,19 +806,32 @@ def conceptos_crear(request):
 def conceptos_editar(request, id):
     if request.method == 'POST':
         try:
+            # Cargar los datos enviados en el cuerpo de la solicitud
             data = json.loads(request.body.decode('utf-8'))
+            
+            # Obtener el concepto por su ID
             concepto = Concepto.objects.get(pk=id)
+            
+            # Pasar los datos y la instancia al formulario
             form = ConceptoForm(data, instance=concepto)
 
+            # Validar y guardar si es válido
             if form.is_valid():
                 form.save()
                 return JsonResponse({'status': 'success'})
             else:
+                # Devolver los errores del formulario
                 return JsonResponse({'errors': form.errors}, status=400)
+        
+        # Manejar excepciones si el concepto no existe
         except Concepto.DoesNotExist:
             return JsonResponse({'error': 'Concepto no encontrado'}, status=404)
+        
+        # Manejar excepciones de JSON mal formateado
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    
+    # Manejar métodos no permitidos
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
