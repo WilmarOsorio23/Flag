@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function preventFormSubmissionOnEnter() {
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('keydown', function (event) {
-                if (event.key === "Enter") {
+                if (event.key == "Enter") {
                     event.preventDefault(); // Prevenir la acción predeterminada de la tecla Enter
                 }
             });
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
         event.preventDefault(); // Prevenir la acción predeterminada del evento
 
         const selectedIds = getSelectedIds(); // Obtener los IDs de los elementos seleccionados
-        if (selectedIds.length === 0) {
+        if (selectedIds.length == 0) {
             showMessage('No has seleccionado ningún elemento para eliminar.', 'danger'); // Mostrar mensaje si no hay elementos seleccionados
             return;
         }
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Confirmación antes de descargar
     window.confirmDownload = function() {
         let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length === 0) {
+        if (selected.length == 0) {
             showMessage('No has seleccionado ningún elemento para descargar.', 'danger');
             return false;
         }
@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Habilitar edición en la fila seleccionada
     window.enableEdit = function() {
         let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length === 0) {
+        if (selected.length == 0) {
             showMessage('Por favor, selecciona al menos un módulo.', 'danger');
             return false;
         }
@@ -171,6 +171,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let row = selected[0].closest('tr');
         let inputs = row.querySelectorAll('input.form-control-plaintext');
+
+         // Guardar valores originales en un atributo personalizado
+        inputs.forEach(input => {
+            input.setAttribute('data-original-value', input.value);
+        });
 
         // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
         document.getElementById('select-all').disabled = true;
@@ -192,8 +197,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.cancelEdit = function() {
         let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length === 1) {
+        if (selected.length == 1) {
             let row = selected[0].closest('tr');
+
+            // Restaurar los valores originales desde el atributo personalizado
+            row.querySelectorAll('input.form-control').forEach(input => {
+                if (input.hasAttribute('data-original-value')) {
+                    input.value = input.getAttribute('data-original-value');
+                }
+            });
             
             disableEditMode(selected,row);
         }
@@ -203,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.saveRow = function() {
         let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length !== 1) {
+        if (selected.length != 1) {
             showMessage('Error al guardar: No hay un módulo seleccionado.', 'danger');
             return;
         }
@@ -233,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(data => {
-            if (data.status === 'success') {
+            if (data.status == 'success') {
                 showMessage('Cambios guardados correctamente.', 'success');
 
                 row.querySelectorAll('input.form-control').forEach(input => {

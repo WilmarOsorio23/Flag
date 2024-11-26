@@ -1,4 +1,3 @@
-from pyexpat.errors import messages
 import pandas as pd
 import json
 from django.shortcuts import render, redirect, get_object_or_404
@@ -66,7 +65,7 @@ def verificar_relaciones(request):
         for id in ids:
             if (
                 Empleado.objects.filter(ModuloId=id).exists() or
-                Consultores.objects.filter(ModuloId=modulo).exists()
+                Consultores.objects.filter(ModuloId=id).exists()
             ): 
                 relacionados.append(id)
 
