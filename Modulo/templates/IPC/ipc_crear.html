@@ -1,23 +1,13 @@
 {% extends "base.html" %}
 
-{% block titulo %} Crear Módulo {% endblock %}
+{% block titulo %} Crear IPC {% endblock %}
 
 {% block contenido %}
-    <div class="container mt-4">
-        <h2>Crear ipc</h2>
-        <form method="post">
-            {% csrf_token %}
-            <fieldset class="border p-4">
-                <div class="mb-3">
-                    <label for="id_ipc" class="form-label">Nombre del IPC</label>
-                    {{ form.Modulo }}
-                </div>
-            </fieldset>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Guardar</button>
-                <a href="{% url 'ipc_index' %}" class="btn btn-danger">Cancelar</a>
-            </div>
-        </form>
-    </div>
+    <h2>Crear Nuevo IPC</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'ipc_index' %}" class="btn btn-danger">Cancelar</a>
+    </form>
 {% endblock %}
-
