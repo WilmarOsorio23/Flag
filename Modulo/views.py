@@ -209,7 +209,7 @@ def ipc_descargar_excel(request):
 #vista para la IND
 
 def ind_index(request):
-    ind_data = IND.objects.all()
+    ind_data = IND.objects.all().order_by('-Anio','Mes')
     return render(request, 'ind/ind_index.html', {'ind_data': ind_data})
 
 def ind_crear(request):
@@ -254,6 +254,7 @@ def ind_eliminar(request):
     return redirect('ind_index')
 
 def ind_descargar_excel(request):
+    print("inicio descarga")
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
         print(item_ids)
@@ -267,7 +268,7 @@ def ind_descargar_excel(request):
         for ind in ind_data:    
             data.append([ind.id, ind.Anio, ind.Mes, ind.Indice])
 
-        df = pd.DataFrame(data, columns=['Id', 'Año', 'Mes', 'Campo Numérico'])
+        df = pd.DataFrame(data, columns=['Id', 'Año', 'Mes', 'Incice'])
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="ind.xlsx"'
