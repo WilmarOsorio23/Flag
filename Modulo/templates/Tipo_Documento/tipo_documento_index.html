@@ -4,6 +4,11 @@
 
 {% block contenido %}
 <div class="card">
+    <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
+        <span id="alert-icon" class="alert-heading"></span>
+        <span id="alert-message"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     <div class="card-header d-flex justify-content-between align-items-center"> 
         <h4 class="card-title">Tipos de Documentos</h4>
     </div>
@@ -14,7 +19,7 @@
             <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button"  onclick="enableEdit();"></a> 
             <button id="save-button" class="btn btn-outline-success fas fa-save d-none" title="Guardar" onclick="saveRow();"></button>
             <i class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
-            <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" ></button> 
+            <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>	
             <form id="download-form" method="POST" action="{% url 'tipo_documento_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
@@ -50,6 +55,24 @@
                 </table>
             </form>
         </div>
+    </div>
+</div>
+<!-- Modal de confirmación -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar este tipo de documento?
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+        <button id="confirm-delete-btn" type="button" class="btn btn-danger">Sí</button>
+        </div>
+    </div>
     </div>
 </div>
 
@@ -155,5 +178,6 @@
             });
         });
     });
+
 </script>
 {% endblock %}
