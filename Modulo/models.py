@@ -13,16 +13,15 @@ class Modulo(models.Model):
 
 
 class IPC(models.Model):
-    
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
     Indice = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"Año:{self.Anio}, Mes: {self.Mes}, Indice: {self.Indice}"
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Indice: {self.Indice}"
 
     class Meta:
-        db_table = 'IPC'    
+        db_table = 'IPC'
         constraints = [
             models.UniqueConstraint(fields=['Anio', 'Mes'], name='primary_key_IPC')
         ]
