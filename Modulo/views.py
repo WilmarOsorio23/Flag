@@ -733,17 +733,27 @@ def costos_indirectos_crear(request):
     return render(request, 'Costos_Indirectos/costos_indirecto_forms.html', {'form': form})
 
 def costos_indirectos_editar(request, id):
-    costo = get_object_or_404(Costos_Indirectos, CostoId=id)
-
     if request.method == 'POST':
-        form = CostosIndirectosForm(request.POST, instance=costo)
-        if form.is_valid():
-            form.save()
-            return redirect('costos_indirectos_index')
-    else:
-        form = CostosIndirectosForm(instance=costo)
+        try:
+            # Cargar los datos enviados como JSON
+            data = json.loads(request.body.decode('utf-8'))
+            # Obtener el objeto correspondiente
+            costo = get_object_or_404(Costos_Indirectos, pk=id)
+            # Instanciar el formulario con los datos y el objeto a editar
+            form = CostosIndirectosForm(data, instance=costo)
 
-    return render(request, 'Costos_Indirectos/costos_indirecto_forms.html', {'form': form})
+            # Validar y guardar el formulario
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Costos_Indirectos.DoesNotExist:
+            return JsonResponse({'error': 'Costo indirecto no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def costos_indirectos_eliminar(request):
     if request.method == 'POST':
