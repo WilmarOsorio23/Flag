@@ -488,4 +488,16 @@ a.fas, .fa {
     i.fas, .fa {
         font-size: 1.2em; /* Tamaño de iconos más pequeño */
     }
+
+}
+
+.errorlist li{
+  width: max-content;
+  padding: 1em;
+  background-color:rgba(255, 0, 0, 0.795) ;
+  color: white;
+  border-radius: 0.5em;
+  border: solid 1px black;
+  top: 15vh;
+  left:20vw;
 }
