@@ -17,6 +17,7 @@
             <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" ></button> 
             <form id="download-form" method="POST" action="{% url 'ind_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
+                
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
             </form>
         </div>
@@ -62,6 +63,21 @@
         for (let checkbox of checkboxes) {
             checkbox.checked = event.target.checked;
         }
+    });
+    
+    document.getElementById('download-form').addEventListener('submit', function(event) {
+        let selectedCheckboxes = document.querySelectorAll('.row-select:checked');
+        if (selectedCheckboxes.length === 0) {
+            alert('No has seleccionado ningún elemento para descargar.');
+            event.preventDefault(); // Evita el envío si no hay elementos seleccionados
+            return;
+        }
+
+        selectedCheckboxes.forEach(function(checkbox) {
+            let clonedCheckbox = checkbox.cloneNode();
+            clonedCheckbox.setAttribute('type', 'hidden'); // Ocultarlo en el formulario
+            document.getElementById('download-form').appendChild(clonedCheckbox);
+        });
     });
 
     // Confirmación antes de eliminar

@@ -4,6 +4,21 @@
 
 {% block contenido %}
 <div class="card">
+    <script>
+        // Prevenir la acción predeterminada al presionar Enter en cualquier parte de la página
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                // Verifica si el foco está en un botón o enlace específico
+                let isButtonOrLink = event.target.tagName === 'BUTTON' || event.target.tagName === 'A';
+                
+                // Si no es un botón o enlace, previene el envío del formulario
+                if (!isButtonOrLink) {
+                    event.preventDefault();
+                }
+            }
+        });
+    </script>
+    
     <div class="card-header d-flex justify-content-between align-items-center"> 
         <h4 class="card-title">Costos Indirectos</h4>
     </div>
@@ -147,4 +162,5 @@
         return false;
     }
 </script>
+
 {% endblock %}
