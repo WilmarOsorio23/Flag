@@ -1,8 +1,3 @@
-from django.http import HttpResponse
-import pandas as pd
-import io
-from pyexpat.errors import messages
-from django.contrib import messages
 import pandas as pd
 import json
 from django.shortcuts import render, redirect, get_object_or_404
@@ -11,6 +6,7 @@ from django.db import models
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
+from django.contrib import messages
 from .models import Modulo
 from .forms import ModuloForm
 from .models import IPC
@@ -61,77 +57,6 @@ def inicio(request):
 
 def nosotros(request):
     return render(request, 'paginas/nosotros.html')
-
-def modulo(request):
-    # Ordenar los módulos por el campo 'id' en orden ascendente
-    lista_modulos  = Modulo.objects.all().order_by('ModuloId')
-    return render(request, 'Modulo/index.html', {'Modulo': lista_modulos})
-
-    
-def crear(request):
-    if request.method == 'POST':
-        form = ModuloForm(request.POST)
-        if form.is_valid():
-            max_id = Modulo.objects.all().aggregate(max_id=models.Max('ModuloId'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_modulo = form.save(commit=False)
-            nuevo_modulo.id = new_id
-            nuevo_modulo.save()
-            
-            return redirect('Modulo')
-    else:
-        form = ModuloForm()
-    return render(request, 'Modulo/crear.html', {'form': form})
-
-@csrf_exempt
-def editar(request, id):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            modulo = Modulo.objects.get(pk=id)
-            modulo.Modulo = data.get('Modulo', modulo.Modulo)
-            modulo.save()
-            return JsonResponse({'status': 'success'})
-        except Modulo.DoesNotExist:
-            return JsonResponse({'status': 'error', 'errors': ['Módulo no encontrado']})
-        except ValueError as ve:
-            return JsonResponse({'status': 'error', 'errors': ['Error al procesar los datos: ' + str(ve)]})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'errors': ['Error desconocido: ' + str(e)]})
-    return JsonResponse({'status': 'error', 'errors': ['Método no permitido']})
-
-    
-def eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        Modulo.objects.filter(ModuloId__in=item_ids).delete()
-        return redirect('Modulo')
-    
-    return redirect('Modulo')
-
-def descargar_excel(request):
-    # Verifica si la solicitud es POST
-    if request.method == 'POST':
-        item_ids = request.POST.get('items_to_delete')  # Asegúrate de que este es el nombre correcto del campo
-        # Convierte la cadena de IDs en una lista de enteros
-    
-        item_ids = list(map(int, item_ids.split (',')))  # Cambiado aquí
-        modulos = Modulo.objects.filter(ModuloId__in=item_ids)
-
-        # Crea una respuesta HTTP con el tipo de contenido de Excel
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="Modulos.xlsx"'
-
-        data = []
-        for modulo in modulos:
-            data.append([modulo.ModuloId, modulo.Modulo])
-
-        df = pd.DataFrame(data, columns=['Id', 'Nombre'])
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('Modulo')
 
 # Vista para la tabla IPC
 def ipc_index(request):
@@ -245,7 +170,7 @@ def ind_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
+    
 def ind_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -422,7 +347,7 @@ def tipo_documento_crear(request):
         form = TipoDocumentoForm()
     return render(request, 'Tipo_Documento/tipo_documento_form.html', {'form': form})
 
-def tipo_documento_editar(request):
+def tipo_documento_editar(request, id):
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
@@ -448,25 +373,64 @@ def tipo_documento_eliminar(request):
         return redirect('tipo_documento_index')
     return redirect('tipo_documento_index')
 
+def verificar_relaciones(request):
+    if request.method == 'POST':
+        import json
+        data = json.loads(request.body)
+        ids = data.get('ids', [])
+
+        # Verifica si los módulos están relacionados
+        relacionados = []
+        for id in ids:
+            if (
+                Empleado.objects.filter(TipoDocumentoId=id).exists() or
+                Clientes.objects.filter(TipoDocumentoId=id).exists()
+            ): 
+                relacionados.append(id)
+
+        if relacionados:
+            return JsonResponse({
+                'isRelated': True,
+                'ids': relacionados
+            })
+        else:
+            return JsonResponse({'isRelated': False})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 def tipo_documento_descargar_excel(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
+        item_ids = request.POST.getlist('items_to_delete')  
+        print(item_ids) 
+
+        # Filtra los datos de la tabla TipoDocumento según los IDs seleccionados
         tipo_documento_data = TipoDocumento.objects.filter(TipoDocumentoID__in=item_ids)
 
+        # Verifica si existen datos seleccionados
+        if not tipo_documento_data.exists():
+            messages.error(request, "No se encontraron datos para descargar.")  # Aquí usas messages
+            return redirect('tipo_documento_index')
+
+        # Prepara los datos para exportar
         data = []
         for tipo_documento in tipo_documento_data:
             data.append([tipo_documento.TipoDocumentoID, tipo_documento.Nombre])
 
+        # Crea un DataFrame con los datos obtenidos
         df = pd.DataFrame(data, columns=['TipoDocumentoID', 'Nombre'])
 
+        # Configura la respuesta HTTP para enviar el archivo Excel
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="tipo_documento.xlsx"'
+        response['Content-Disposition'] = 'attachment; filename="tipo_documentos.xlsx"'
 
+        # Escribe el DataFrame al archivo Excel
         df.to_excel(response, index=False)
 
+        # Retorna el archivo al cliente para descargar
         return response
 
+    # Redirige a la página principal si no es un método POST
     return redirect('tipo_documento_index')
+   
 
 # Vista para la tabla Clientes
 def clientes_index(request):
@@ -670,17 +634,24 @@ def certificacion_crear(request):
     return render(request, 'Certificacion/certificacion_form.html', {'form': form})
 
 def certificacion_editar(request, id):
-    certificacion = get_object_or_404(Certificacion, CertificacionId=id)
-
     if request.method == 'POST':
-        form = CertificacionForm(request.POST, instance=certificacion)
-        if form.is_valid():
-            form.save()
-            return redirect('certificacion_index')
-    else:
-        form = CertificacionForm(instance=certificacion)
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            certificacion = Certificacion.objects.get(pk=id)
+            form = CertificacionForm(data, instance=certificacion)
 
-    return render(request, 'Certificacion/certificacion_form.html', {'form': form})
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Certificacion.DoesNotExist:
+            return JsonResponse({'error': 'Certificación no encontrada'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 
 def certificacion_eliminar(request):
     if request.method == 'POST':
@@ -729,17 +700,27 @@ def costos_indirectos_crear(request):
     return render(request, 'Costos_Indirectos/costos_indirecto_forms.html', {'form': form})
 
 def costos_indirectos_editar(request, id):
-    costo = get_object_or_404(Costos_Indirectos, CostoId=id)
-
     if request.method == 'POST':
-        form = CostosIndirectosForm(request.POST, instance=costo)
-        if form.is_valid():
-            form.save()
-            return redirect('costos_indirectos_index')
-    else:
-        form = CostosIndirectosForm(instance=costo)
+        try:
+            # Cargar los datos enviados como JSON
+            data = json.loads(request.body.decode('utf-8'))
+            # Obtener el objeto correspondiente
+            costo = get_object_or_404(Costos_Indirectos, pk=id)
+            # Instanciar el formulario con los datos y el objeto a editar
+            form = CostosIndirectosForm(data, instance=costo)
 
-    return render(request, 'Costos_Indirectos/costos_indirecto_forms.html', {'form': form})
+            # Validar y guardar el formulario
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Costos_Indirectos.DoesNotExist:
+            return JsonResponse({'error': 'Costo indirecto no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def costos_indirectos_eliminar(request):
     if request.method == 'POST':
@@ -778,10 +759,11 @@ def conceptos_crear(request):
     if request.method == 'POST':
         form = ConceptoForm(request.POST)
         if form.is_valid():
-            max_id = Concepto.objects.all().aggregate(max_id=models.Max('id'))['max_id']
+            # Obtener el valor máximo actual de ConceptoID
+            max_id = Concepto.objects.all().aggregate(max_id=models.Max('ConceptoId'))['max_id']
             new_id = max_id + 1 if max_id is not None else 1
             nuevo_concepto = form.save(commit=False)
-            nuevo_concepto.id = new_id
+            nuevo_concepto.ConceptoId = new_id  # Asignar manualmente el nuevo ID
             nuevo_concepto.save()
             return redirect('conceptos_index')
     else:
@@ -789,17 +771,36 @@ def conceptos_crear(request):
     return render(request, 'conceptos/conceptos_form.html', {'form': form})
 
 def conceptos_editar(request, id):
-    concepto = get_object_or_404(Concepto, id=id)
-
     if request.method == 'POST':
-        form = ConceptoForm(request.POST, instance=concepto)
-        if form.is_valid():
-            form.save()
-            return redirect('conceptos_index')
-    else:
-        form = ConceptoForm(instance=concepto)
+        try:
+            # Cargar los datos enviados en el cuerpo de la solicitud
+            data = json.loads(request.body.decode('utf-8'))
+            
+            # Obtener el concepto por su ID
+            concepto = Concepto.objects.get(pk=id)
+            
+            # Pasar los datos y la instancia al formulario
+            form = ConceptoForm(data, instance=concepto)
 
-    return render(request, 'Conceptos/conceptos_form.html', {'form': form})
+            # Validar y guardar si es válido
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                # Devolver los errores del formulario
+                return JsonResponse({'errors': form.errors}, status=400)
+        
+        # Manejar excepciones si el concepto no existe
+        except Concepto.DoesNotExist:
+            return JsonResponse({'error': 'Concepto no encontrado'}, status=404)
+        
+        # Manejar excepciones de JSON mal formateado
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    
+    # Manejar métodos no permitidos
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def conceptos_eliminar(request):
     if request.method == 'POST':
@@ -1573,9 +1574,6 @@ def exportar_excel(request):
     response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=empleados_certificaciones.xlsx'
 
-
-from datetime import date
-
 # Informe de Nómina de Empleados
 def empleado_nomina_filtrado(request):
     empleados = Empleado.objects.all()  
@@ -1621,26 +1619,15 @@ def empleado_nomina_filtrado(request):
                 empleado_info = []
                 for empleado in empleados:
                     salarios = nominas.filter(Documento=empleado.Documento)
-                    # Calcular años en Flag
-                    if empleado.FechaIngreso:
-                        hoy = date.today()
-                        anios_en_flag = hoy.year - empleado.FechaIngreso.year
-                         # Ajustar si aún no ha cumplido años este año
-                        if (hoy.month, hoy.day) < (empleado.FechaIngreso.month, empleado.FechaIngreso.day):
-                            anios_en_flag -= 1
-                    else:
-                        anios_en_flag = "N/A"  # Valor por defecto si no hay fecha de ingreso
                     if salarios.exists():
                         for salario in salarios:
                             cliente = salario.Cliente
-
                             empleado_info.append({
                                 'empleado': empleado,
                                 'salario': salario.Salario,
                                 'cliente': cliente, 
                                 'anio': salario.Anio,
                                 'mes': salario.Mes,
-                                'anios_en_flag': anios_en_flag,  # Nuevo campo
                             })
             show_data = True  
 
@@ -1656,6 +1643,9 @@ def empleado_nomina_filtrado(request):
     }
 
     return render(request, 'informes/informes_salarios_index.html', context)
+
+
+
 
 # Funcionalidad para descargar los resultados en Excel
 def exportar_nomina_excel(request):

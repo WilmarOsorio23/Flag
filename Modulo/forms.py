@@ -100,7 +100,7 @@ class INDForm(forms.ModelForm):
             'Mes': 'Mes',
             'Indice': 'Índice',
         }
-
+        
 class ConsultoresForm(forms.ModelForm):
     class Meta:
         model = Consultores
@@ -687,3 +687,4 @@ class EmpleadoFilterForm(forms.Form):
         self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo, cargo) for cargo in cargos]
 
         self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]
+
