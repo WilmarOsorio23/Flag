@@ -2,15 +2,23 @@
 /*           GENERAL          */
 /* ========================== */
 
-body {
+
+/* Reinicio de márgenes y paddings */
+html, body {
     font-family: Arial, sans-serif;
     background-color: #f8f9fa;
-    height: 100%; /* Asegura que el cuerpo ocupe toda la altura */
-    margin: 0; /* Elimina el margen por defecto */
+    margin: 0;
+    padding: 0;
+    height: 100%; /* Asegura que html y body ocupen el 100% de la pantalla */
+    box-sizing: border-box;
+    user-select: none;
 }
 
 /* Tarjetas */
 .card {
+    min-height: auto; /* Ocupa al menos el 100% de la altura de la ventana */
+    display: flex;     /* Flexbox para manejar el contenido */
+    flex-direction: column; /* Acomoda el contenido en una columna */
     border: 2px solid #dee2e6;
     border-radius: 0.5em;
     box-shadow: 1px 4px 6px rgba(0, 0, 0, 0.1);
@@ -18,14 +26,15 @@ body {
 
 /* Ajustes para evitar superposición con la navbar y el sidebar */
 #content {
-    margin-left: 21vw; /* Ajusta para que el contenido no se solape con el sidebar */
+    min-height: 100vh; /* Ocupa al menos el 100% de la altura de la ventana */
+    display: flex;     /* Flexbox para manejar el contenido */
+    flex-direction: column; /* Acomoda el contenido en una columna */
+    margin-left: 20.7vw; /* Ajusta para que el contenido no se solape con el sidebar */
     padding: 1em; /* Espacio alrededor del contenido */
     position: relative;
-    max-width: calc(100% - 21vw); /* Deja espacio para el sidebar */
+    max-width: calc(100% - 20.7vw); /* Deja espacio para el sidebar */
+    height: 100%;
 }
-
-<<<<<<< HEAD
-
 
 /* ========================== */
 /*           ALERTAS          */
@@ -42,6 +51,17 @@ body {
     border-radius: 5px; /* Bordes redondeados */
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra para dar profundidad */
     transition: opacity 0.5s ease, top 0.5s ease; /* Transiciones suaves */
+}
+
+.errorlist li{
+    width: max-content;
+    padding: 1em;
+    background-color:rgba(255, 0, 0, 0.795) ;
+    color: white;
+    border-radius: 0.5em;
+    border: solid 1px black;
+    top: 15vh;
+    left:20vw;
 }
 
 .alert {
@@ -91,10 +111,6 @@ body {
     transform: translateY(0);
 }
 
-
-
-=======
->>>>>>> desarrollo_den
 /* ========================== */
 /*         SIDEBAR            */
 /* ========================== */
@@ -107,14 +123,12 @@ body {
     overflow-x: none;
     padding: 0.5em;
     box-sizing: border-box;
-    background: linear-gradient(to bottom, #ffffff, #007bff);  
+    background: linear-gradient(to bottom, #ffffff,#ffffff, #007bff8c,#007bff,#007bffc7,#007bffe1);  
     margin-bottom: 1em; 
 
 }
 
 #sidebar .sidebar-header{
-    background-color: #ffffff;
-    border: #007bff60 solid 5px;
     border-radius: 0.5em;
     padding: 1em;
     margin-top: 0.5em;
@@ -260,6 +274,7 @@ a[aria-expanded="true"] {
 
 .table {
     width: 100%; /* Ajustar el ancho de la tabla */
+    height: auto;
     border-collapse: collapse;
     border-spacing: 0;
 }
@@ -350,6 +365,11 @@ a[aria-expanded="true"] {
     border-color: #0056b3; /* Color del borde al estar chequeado */
 }
 
+input[type="checkbox"]:disabled {
+    background-color: #b5b7cf;
+    cursor: not-allowed; /* Cambia el cursor para indicar que no se puede interactuar */
+}
+
 /* Scrollbar para tablas */
 .table-responsive::-webkit-scrollbar {
     width: 8px; /* Ancho del scrollbar vertical */
@@ -391,6 +411,7 @@ button {
 button:hover {
     background-color: #0056b3; /* Color al pasar el mouse */
     transform: scale(1.05); /* Efecto de aumento */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 button:disabled {
@@ -435,36 +456,68 @@ a.fas, .fa {
 /*     RESPONSIVE DESIGN      */
 /* ========================== */
 
-@media (max-width: 768px) {
+/* Ajustes para pantallas medianas */
+@media (max-width: 992px) {
     #sidebar {
-        width: 20vw;
+        width: 25vw; /* Reduce el ancho de la sidebar */
     }
     #content {
-        width: 70vw;
-        margin-left: 30vw;
-        padding: 1em;
+        margin-left: 25vw; /* Ajusta el margen del contenido en consecuencia */
+        max-width: calc(100% - 25vw);
     }
     .table {
-        font-size: 0.9em;
+        font-size: 0.95em; /* Reduce un poco el tamaño de texto en tablas */
     }
 }
 
-@media (max-width: 576px) {
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
     #sidebar {
-        width: 100%;
+        width: 100%; /* Sidebar ocupa todo el ancho en pantallas pequeñas */
         position: relative;
-        box-shadow: none;
-    }
-    #sidebar ul li a {
-        font-size: 1em;
-        margin: 0.5em 0;
-        padding: 0.5em;
+        height: auto; /* Deja que la altura se ajuste al contenido */
+        padding-bottom: 1em; /* Espacio adicional al final */
     }
     #content {
+        margin-left: 0; /* Elimina margen izquierdo */
+        padding: 1em; /* Añade un padding para el contenido */
         width: 100%;
-        margin-left: 0;
     }
     .table-responsive {
         max-width: 100%;
+        overflow-x: auto; /* Habilita el desplazamiento horizontal */
+    }
+    .table {
+        font-size: 0.9em; /* Reduce el tamaño de la tabla */
+    }
+}
+
+/* Ajustes para pantallas extra pequeñas (móviles) */
+@media (max-width: 576px) {
+    #sidebar {
+        display: none; /* Oculta el sidebar en pantallas muy pequeñas */
+    }
+    #content {
+        width: 100%; /* El contenido ocupa todo el ancho */
+        margin-left: 0;
+        padding: 1em;
+    }
+    .navbar {
+        width: 100%; /* Navbar ocupa todo el ancho */
+        position: relative;
+    }
+    .table {
+        font-size: 0.85em; /* Tamaño más pequeño en tablas */
+    }
+    .table td, .table th {
+        padding: 0.5em; /* Menos padding en las celdas */
+    }
+    /* Ajusta botones y otros elementos interactivos */
+    button {
+        font-size: 0.9em;
+        padding: 6px 10px;
+    }
+    i.fas, .fa {
+        font-size: 1.2em; /* Tamaño de iconos más pequeño */
     }
 }

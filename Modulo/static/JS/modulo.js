@@ -54,11 +54,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isRelated) {
                 showMessage('Algunos elementos no pueden ser eliminados porque están relacionados con otras tablas.', 'danger'); // Mensaje de error si hay relaciones
                 modal.hide(); // Ocultar el modal
+                document.getElementById('select-all').checked = false;
+                document.querySelectorAll('.row-select').forEach(checkbox => checkbox.checked = false);
                 return;
             }
 
             document.getElementById('items_to_delete').value = selectedIds.join(','); // Asignar los IDs seleccionados al formulario
             form.submit(); // Enviar el formulario para realizar la eliminación
+
         };
     }
 
@@ -172,9 +175,9 @@ document.addEventListener('DOMContentLoaded', function() {
         let row = selected[0].closest('tr');
         let inputs = row.querySelectorAll('input.form-control-plaintext');
 
-         // Guardar valores originales en un atributo personalizado
-        inputs.forEach(input => {
-            input.setAttribute('data-original-value', input.value);
+        // Guardar valores originales en un atributo personalizado 
+        inputs.forEach(input => { 
+        input.setAttribute('data-original-value', input.value);
         });
 
         // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
@@ -208,14 +211,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             disableEditMode(selected,row);
+            showMessage('Cambios cancelados.', 'danger');
         }
-
-        showMessage('Cambios cancelados.', 'danger');
     };
 
     window.saveRow = function() {
         let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length != 1) {
+        if (selected.length !== 1) {
             showMessage('Error al guardar: No hay un módulo seleccionado.', 'danger');
             return;
         }
