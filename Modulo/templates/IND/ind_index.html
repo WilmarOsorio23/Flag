@@ -5,7 +5,7 @@
 {% block contenido %}
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center"> 
-        <h4 class="card-title">IND</h4>
+        <h4 class="card-title">Indice Prestacional</h4>
     </div>
     <div class="card-body">
         <!-- CRUD Icons -->
@@ -103,12 +103,11 @@
         }
 
         let row = selected[0].closest('tr');
-        let inputs = row.querySelectorAll('input.form-control-plaintext');
-        inputs.forEach(input => {
-            input.classList.remove('form-control-plaintext');
-            input.classList.add('form-control');
-            input.readOnly = false;
-        });
+        let input = row.querySelector('[name ="Indice"]');
+         input.classList.remove('form-control-plaintext');
+         input.classList.add('form-control');
+         input.readOnly = false;
+       
 
         // Mostrar botón de guardar
         document.getElementById('save-button').classList.remove('d-none');
@@ -124,13 +123,11 @@
 
         let row = selected.closest('tr');
         let inputs = row.querySelectorAll('input.form-control');
-        let data = {};
-
-        inputs.forEach(input => {
-            let name = input.getAttribute('name');
-            data[name] = input.value;
-        });
-
+        let data = {
+            'Anio': row.querySelector('input[name ="Anio"]').value,
+            'Mes': row.querySelector('input[name ="Mes"]').value,
+            'Indice': row.querySelector('input[name ="Indice"]').value
+        };
         let indId = selected.value;
 
         // Enviar datos al servidor
