@@ -24,8 +24,6 @@ body {
     max-width: calc(100% - 21vw); /* Deja espacio para el sidebar */
 }
 
-
-
 /* ========================== */
 /*           ALERTAS          */
 /* ========================== */
@@ -100,8 +98,6 @@ body {
     opacity: 1;
     transform: translateY(0);
 }
-
-
 
 /* ========================== */
 /*         SIDEBAR            */
