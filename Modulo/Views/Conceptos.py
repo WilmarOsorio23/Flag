@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from Modulo import models
+from django.db import models
 from Modulo.forms import ConceptoForm
 from Modulo.models import Concepto
 

@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from Modulo import models
+from django.db import models
 from Modulo.forms import CostosIndirectosForm
 from Modulo.models import Costos_Indirectos
 

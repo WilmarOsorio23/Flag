@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 import pandas as pd
 from Modulo import models
+from django.db import models
 from Modulo.forms import CertificacionForm
 from Modulo.models import Certificacion
 

@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect, render
 import pandas as pd
 from Modulo import models
+from django.db import models
 from Modulo.forms import TipoDocumentoForm
 from Modulo.models import Clientes, Empleado, TipoDocumento
 
