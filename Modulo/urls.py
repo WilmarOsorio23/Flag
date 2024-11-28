@@ -1,5 +1,10 @@
 from django.urls import path
 from Modulo.Views import modulo
+from Modulo.Views import TipoDocumento
+from Modulo.Views import Certificacion
+from Modulo.Views import Conceptos
+from Modulo.Views import Clientes
+from Modulo.Views import CostosIndirectos
 from . import views
 
 
@@ -44,19 +49,19 @@ urlpatterns = [
     path('perfil/descargar_excel', views.perfil_descargar_excel, name='perfil_descargar_excel'),
 
      # Rutas para tabla TipoDocumento
-    path('tipo_documento/', views.tipo_documento_index, name='tipo_documento_index'),
-    path('tipo_documento/crear', views.tipo_documento_crear, name='tipo_documento_crear'),
-    path('tipo_documento/editar/<int:id>/', views.tipo_documento_editar, name='tipo_documento_editar'),
-    path('verificar-relaciones/', views.verificar_relaciones, name='verificar_relaciones'),
-    path('tipo_documento/eliminar', views.tipo_documento_eliminar, name='tipo_documento_eliminar'),
-    path('tipo_documento/descargar_excel', views.tipo_documento_descargar_excel, name='tipo_documento_descargar_excel'),
+    path('tipo_documento/', TipoDocumento.tipo_documento_index, name='tipo_documento_index'),
+    path('tipo_documento/crear', TipoDocumento.tipo_documento_crear, name='tipo_documento_crear'),
+    path('tipo_documento/editar/<int:id>/', TipoDocumento.tipo_documento_editar, name='tipo_documento_editar'),
+    path('verificar-relaciones/', TipoDocumento.verificar_relaciones, name='verificar_relaciones'),
+    path('tipo_documento/eliminar', TipoDocumento.tipo_documento_eliminar, name='tipo_documento_eliminar'),
+    path('tipo_documento/descargar_excel', TipoDocumento.tipo_documento_descargar_excel, name='tipo_documento_descargar_excel'),
 
     # Rutas para la tabla Clientes
-    path('clientes/', views.clientes_index, name='clientes_index'),
-    path('clientes/crear/', views.clientes_crear, name='clientes_crear'),
-    path('clientes/editar/<str:tipo_documento_id>/<str:documento_id>/', views.clientes_editar, name='clientes_editar'),
-    path('clientes/eliminar/', views.clientes_eliminar, name='clientes_eliminar'),
-    path('clientes/descargar_excel/', views.clientes_descargar_excel, name='clientes_descargar_excel'),
+    path('clientes/', Clientes.clientes_index, name='clientes_index'),
+    path('clientes/crear/', Clientes.clientes_crear, name='clientes_crear'),
+    path('clientes/editar/<str:tipo_documento_id>/<str:documento_id>/', Clientes.clientes_editar, name='clientes_editar'),
+    path('clientes/eliminar/', Clientes.clientes_eliminar, name='clientes_eliminar'),
+    path('clientes/descargar_excel/', Clientes.clientes_descargar_excel, name='clientes_descargar_excel'),
 
     # Rutas para la tabla Consultores
     path('consultores/', views.consultores_index, name='consultores_index'),
@@ -66,25 +71,25 @@ urlpatterns = [
     path('consultores/descargar_excel/', views.consultores_descargar_excel, name='consultores_descargar_excel'),
 
     # Rutas para tabla Certificacion
-    path('certificacion/', views.certificacion_index, name='certificacion_index'),
-    path('certificacion/crear', views.certificacion_crear, name='certificacion_crear'),
-    path('certificacion/editar/<int:id>/', views.certificacion_editar, name='certificacion_editar'),
-    path('certificacion/eliminar', views.certificacion_eliminar, name='certificacion_eliminar'),
-    path('certificacion/descargar_excel', views.certificacion_descargar_excel, name='certificacion_descargar_excel'),
+    path('certificacion/', Certificacion.certificacion_index, name='certificacion_index'),
+    path('certificacion/crear', Certificacion.certificacion_crear, name='certificacion_crear'),
+    path('certificacion/editar/<int:id>/', Certificacion.certificacion_editar, name='certificacion_editar'),
+    path('certificacion/eliminar', Certificacion.certificacion_eliminar, name='certificacion_eliminar'),
+    path('certificacion/descargar_excel', Certificacion.certificacion_descargar_excel, name='certificacion_descargar_excel'),
     
     # Rutas para tabla Costos Indirecto
-    path('costos_indirectos/', views.costos_indirectos_index, name='costos_indirectos_index'),
-    path('costos_indirectos/crear', views.costos_indirectos_crear, name='costos_indirectos_crear'),
-    path('costos_indirectos/editar/<int:id>/', views.costos_indirectos_editar, name='costos_indirectos_editar'),
-    path('costos_indirectos/eliminar', views.costos_indirectos_eliminar, name='costos_indirectos_eliminar'),
-    path('costos_indirectos/descargar_excel', views.costos_indirectos_descargar_excel, name='costos_indirectos_descargar_excel'),
+    path('costos_indirectos/', CostosIndirectos.costos_indirectos_index, name='costos_indirectos_index'),
+    path('costos_indirectos/crear', CostosIndirectos.costos_indirectos_crear, name='costos_indirectos_crear'),
+    path('costos_indirectos/editar/<int:id>/', CostosIndirectos.costos_indirectos_editar, name='costos_indirectos_editar'),
+    path('costos_indirectos/eliminar', CostosIndirectos.costos_indirectos_eliminar, name='costos_indirectos_eliminar'),
+    path('costos_indirectos/descargar_excel', CostosIndirectos.costos_indirectos_descargar_excel, name='costos_indirectos_descargar_excel'),
 
     # Rutas para la tabla Concepto
-    path('conceptos/', views.conceptos_index, name='conceptos_index'),
-    path('conceptos/crear', views.conceptos_crear, name='conceptos_crear'),
-    path('conceptos/editar/<int:id>/', views.conceptos_editar, name='conceptos_editar'),
-    path('conceptos/eliminar', views.conceptos_eliminar, name='conceptos_eliminar'),
-    path('conceptos/descargar_excel', views.conceptos_descargar_excel, name='conceptos_descargar_excel'),
+    path('conceptos/', Conceptos.conceptos_index, name='conceptos_index'),
+    path('conceptos/crear', Conceptos.conceptos_crear, name='conceptos_crear'),
+    path('conceptos/editar/<int:id>/', Conceptos.conceptos_editar, name='conceptos_editar'),
+    path('conceptos/eliminar', Conceptos.conceptos_eliminar, name='conceptos_eliminar'),
+    path('conceptos/descargar_excel', Conceptos.conceptos_descargar_excel, name='conceptos_descargar_excel'),
 
     # Rutas para tabla Gastos
     path('gastos/', views.gasto_index, name='gastos_index'),
