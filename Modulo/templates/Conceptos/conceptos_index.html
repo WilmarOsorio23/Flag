@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block titulo %} Lista de Conceptos {% endblock %}
 
@@ -50,37 +51,6 @@
     </div>
 </div>
 
-<script>
-    document.getElementById('select-all').addEventListener('click', function(event) {
-        let checkboxes = document.querySelectorAll('.row-select');
-        for (let checkbox of checkboxes) {
-            checkbox.checked = event.target.checked;
-        }
-    });
+<script src="{% static 'JS/Conceptos.js' %}"></script>
 
-    function confirmDelete() {
-        let selected = document.querySelectorAll('.row-select:checked').length;
-        if (selected === 0) {
-            alert('No has seleccionado ningún elemento para eliminar.');
-            return false;
-        }
-        return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
-    }
-
-    function handleEditClick() {
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length === 0) {
-            alert('No has seleccionado ningún concepto para editar.');
-            return false;
-        }
-        if (selected.length > 1) {
-            alert('Solo puedes editar un concepto a la vez.');
-            return false;
-        }
-
-        let selectedId = selected[0].value;
-        let editUrl = "{% url 'conceptos_editar' 0 %}".replace('0', selectedId);
-        window.location.href = editUrl;
-    }
-</script>
 {% endblock %}

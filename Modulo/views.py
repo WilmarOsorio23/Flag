@@ -1,4 +1,3 @@
-from pyexpat.errors import messages
 import pandas as pd
 import json
 from django.shortcuts import render, redirect, get_object_or_404
@@ -7,6 +6,7 @@ from django.db import models
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
+from django.contrib import messages
 from .models import Modulo
 from .forms import ModuloForm
 from .models import IPC
@@ -58,82 +58,9 @@ def inicio(request):
 def nosotros(request):
     return render(request, 'paginas/nosotros.html')
 
-def modulo(request):
-    # Ordenar los módulos por el campo 'id' en orden ascendente
-    lista_modulos  = Modulo.objects.all().order_by('ModuloId')
-    return render(request, 'Modulo/index.html', {'Modulo': lista_modulos})
-
-    
-def crear(request):
-    if request.method == 'POST':
-        form = ModuloForm(request.POST)
-        if form.is_valid():
-            max_id = Modulo.objects.all().aggregate(max_id=models.Max('ModuloId'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_modulo = form.save(commit=False)
-            nuevo_modulo.id = new_id
-            nuevo_modulo.save()
-            
-            return redirect('Modulo')
-    else:
-        form = ModuloForm()
-    return render(request, 'Modulo/crear.html', {'form': form})
-
-@csrf_exempt
-def editar(request, id):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body.decode('utf-8'))
-            modulo = Modulo.objects.get(pk=id)
-            form = ModuloForm(data, instance=modulo)
-
-            if form.is_valid():
-                form.save()
-                return JsonResponse({'status': 'success'})
-            else:
-                return JsonResponse({'errors': form.errors}, status=400)
-        except Modulo.DoesNotExist:
-            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-    else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-    
-def eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        Modulo.objects.filter(ModuloId__in=item_ids).delete()
-        return redirect('Modulo')
-    
-    return redirect('Modulo')
-
-def descargar_excel(request):
-    # Verifica si la solicitud es POST
-    if request.method == 'POST':
-        item_ids = request.POST.get('items_to_delete')  # Asegúrate de que este es el nombre correcto del campo
-        # Convierte la cadena de IDs en una lista de enteros
-    
-        item_ids = list(map(int, item_ids.split (',')))  # Cambiado aquí
-        modulos = Modulo.objects.filter(ModuloId__in=item_ids)
-
-        # Crea una respuesta HTTP con el tipo de contenido de Excel
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="Modulos.xlsx"'
-
-        data = []
-        for modulo in modulos:
-            data.append([modulo.ModuloId, modulo.Modulo])
-
-        df = pd.DataFrame(data, columns=['Id', 'Nombre'])
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('Modulo')
-
 # Vista para la tabla IPC
 def ipc_index(request):
-    ipc_data = IPC.objects.all()
+    ipc_data = IPC.objects.all().order_by('-Anio','Mes')
     return render(request, 'ipc/ipc_index.html', {'ipc_data': ipc_data})
 
 def ipc_crear(request):
@@ -150,21 +77,26 @@ def ipc_crear(request):
         form = IPCForm()
     return render(request, 'ipc/ipc_form.html', {'form': form})
 
+@csrf_exempt
 def ipc_editar(request, id):
-    ipc = get_object_or_404(IPC, id=id)
-
     if request.method == 'POST':
-        form = IPCForm(request.POST, instance=ipc)
-        if form.is_valid():
-            ipc = form.save(commit=False)
-            ipc.anio = ipc.Año
-            ipc.mes = ipc.Mes
-            ipc.save()
-            return redirect('ipc_index')
-    else:
-        form = IPCForm(instance=ipc)
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            ipc = IPC.objects.get(pk=id)
+            form = IPCForm(data, instance=ipc)
 
-    return render(request, 'ipc/ipc_form.html', {'form': form})
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Modulo.DoesNotExist:
+            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 
 def ipc_eliminar(request):
     if request.method == 'POST':
@@ -202,7 +134,7 @@ def ipc_descargar_excel(request):
 #vista para la IND
 
 def ind_index(request):
-    ind_data = IND.objects.all()
+    ind_data = IND.objects.all().order_by('-Anio','Mes')
     return render(request, 'ind/ind_index.html', {'ind_data': ind_data})
 
 def ind_crear(request):
@@ -220,21 +152,25 @@ def ind_crear(request):
     return render(request, 'ind/ind_form.html', {'form': form})
 
 def ind_editar(request, id):
-    ind = get_object_or_404(IND, id=id)
-
     if request.method == 'POST':
-        form = INDForm(request.POST, instance=ind)
-        if form.is_valid():
-            ind = form.save(commit=False)
-            ind.anio = ind.anio
-            ind.mes = ind.mes
-            ind.save()
-            return redirect('ind_index')
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            ind = IND.objects.get(pk=id)
+            form = INDForm(data, instance=ind)
+
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Modulo.DoesNotExist:
+            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
     else:
-        form = INDForm(instance=ind)
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-    return render(request, 'ind/ind_form.html', {'form': form})
-
+    
 def ind_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -243,15 +179,21 @@ def ind_eliminar(request):
     return redirect('ind_index')
 
 def ind_descargar_excel(request):
+    print("inicio descarga")
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
+        print(item_ids)
         ind_data = IND.objects.filter(id__in=item_ids)
 
+        if not ind_data.exists():
+            messages.error(request, "No se encontraron datos para descargar.")
+            return redirect('ind_index')
+        
         data = []
-        for ind in ind_data:
-            data.append([ind.id, ind.anio, ind.mes, ind.campo_numerico])
+        for ind in ind_data:    
+            data.append([ind.id, ind.Anio, ind.Mes, ind.Indice])
 
-        df = pd.DataFrame(data, columns=['Id', 'Año', 'Mes', 'Campo Numérico'])
+        df = pd.DataFrame(data, columns=['Id', 'Año', 'Mes', 'Incice'])
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="ind.xlsx"'
@@ -386,170 +328,7 @@ def perfil_descargar_excel(request):
 
         return response
 
-    return redirect('perfil_index')
-
-# Vista Tipo Documento
-def tipo_documento_index(request):
-    tipo_documentos = TipoDocumento.objects.all()
-    return render(request, 'Tipo_Documento/tipo_documento_index.html', {'tipo_documentos': tipo_documentos})
-
-def tipo_documento_crear(request):
-    if request.method == 'POST':
-        form = TipoDocumentoForm(request.POST)
-        if form.is_valid():
-            # Obtener el valor máximo actual de TipoDocumentoID
-            max_id = TipoDocumento.objects.all().aggregate(max_id=models.Max('TipoDocumentoID'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_tipo_documento = form.save(commit=False)
-            nuevo_tipo_documento.TipoDocumentoID = new_id  # Asignar manualmente el nuevo ID
-            nuevo_tipo_documento.save()
-            return redirect('tipo_documento_index')
-    else:
-        form = TipoDocumentoForm()
-    return render(request, 'Tipo_Documento/tipo_documento_form.html', {'form': form})
-
-def tipo_documento_editar(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body.decode('utf-8'))
-            tipo_documento = TipoDocumento.objects.get(pk=id)
-            form = TipoDocumentoForm(data, instance=tipo_documento)
-
-            if form.is_valid():
-                form.save()
-                return JsonResponse({'status': 'success'})
-            else:
-                return JsonResponse({'errors': form.errors}, status=400)
-        except TipoDocumento.DoesNotExist:
-            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-    else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-
-def tipo_documento_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        TipoDocumento.objects.filter(TipoDocumentoID__in=item_ids).delete()
-        return redirect('tipo_documento_index')
-    return redirect('tipo_documento_index')
-
-def tipo_documento_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        tipo_documento_data = TipoDocumento.objects.filter(TipoDocumentoID__in=item_ids)
-
-        data = []
-        for tipo_documento in tipo_documento_data:
-            data.append([tipo_documento.TipoDocumentoID, tipo_documento.Nombre])
-
-        df = pd.DataFrame(data, columns=['TipoDocumentoID', 'Nombre'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="tipo_documento.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('tipo_documento_index')
-
-# Vista para la tabla Clientes
-def clientes_index(request):
-    clientes = Clientes.objects.all()
-    return render(request, 'clientes/clientes_index.html', {'clientes': clientes})
-
-def clientes_crear(request):
-    if request.method == 'POST':
-        form = ClientesForm(request.POST)
-        if form.is_valid():
-            max_id = Clientes.objects.all().aggregate(max_id=models.Max('ClienteId'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_cliente = form.save(commit=False)
-            nuevo_cliente.ClienteId = new_id
-            nuevo_cliente.save()
-            return redirect('clientes_index')
-    else:
-        form = ClientesForm()
-    
-    return render(request, 'clientes/clientes_form.html', {'form': form})
-
-
-@csrf_exempt
-def clientes_editar(request, tipo_documento_id, documento_id):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body.decode('utf-8'))
-            cliente = Clientes.objects.get(TipoDocumentoID=tipo_documento_id, DocumentoId=documento_id)
-            form = ClientesForm(data, instance=cliente)
-
-            if form.is_valid():
-                form.save()
-                return JsonResponse({'status': 'success'})
-            else:
-                return JsonResponse({'errors': form.errors}, status=400)
-        except Clientes.DoesNotExist:
-            return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-    else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-
-def clientes_eliminar(request):
-    if request.method == 'POST':
-        cliente_ids = request.POST.getlist('cliente_ids')
-        for id_pair in cliente_ids:
-            tipo_documento_id, documento_id = id_pair.split('-')
-            Clientes.objects.filter(TipoDocumentoID=tipo_documento_id, DocumentoId=documento_id).delete()
-        return redirect('clientes_index')
-    return redirect('clientes_index')
-
-def clientes_descargar_excel(request):
-    if request.method == 'POST':
-        # Obtener los IDs desde el formulario
-        item_ids = request.POST.get('items_to_download', '').split(',')
-        
-        # Crear una lista para almacenar las combinaciones de TipoDocumentoID y DocumentoId
-        filter_params = []
-        for item in item_ids:
-            tipo_documento_id, documento_id = item.split('-')
-            filter_params.append((tipo_documento_id, documento_id))
-        
-        # Filtrar los clientes usando las combinaciones
-        clientes_data = Clientes.objects.filter(
-            (Q(TipoDocumentoID=tipo_documento_id) & Q(DocumentoId=documento_id)) for tipo_documento_id, documento_id in filter_params
-        )
-
-        # Preparar los datos para el DataFrame
-        data = []
-        for cliente in clientes_data:
-            data.append([
-                cliente.TipoDocumentoID.Nombre,  # Asumiendo que quieres mostrar el nombre del tipo de documento
-                cliente.DocumentoId, 
-                cliente.Nombre_Cliente, 
-                cliente.Activo, 
-                cliente.Fecha_Inicio, 
-                cliente.Fecha_Retiro
-            ])
-
-        # Crear el DataFrame y exportar a Excel
-        df = pd.DataFrame(data, columns=[
-            'Tipo Documento', 
-            'Documento ID', 
-            'Nombre Cliente', 
-            'Activo', 
-            'Fecha Inicio', 
-            'Fecha Retiro'
-        ])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="clientes.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('cliente_index')
+    return redirect('perfil_index') 
 
 
 # Vista para la tabla Consultores
@@ -636,183 +415,6 @@ def consultores_descargar_excel(request):
 
     return redirect('consultores_index')
 
-# Vista Certificacion
-def certificacion_index(request):
-    certificaciones = Certificacion.objects.all()
-    return render(request, 'Certificacion/certificacion_index.html', {'certificaciones': certificaciones})
-
-def certificacion_crear(request):
-    if request.method == 'POST':
-        form = CertificacionForm(request.POST)
-        if form.is_valid():
-            max_id = Certificacion.objects.all().aggregate(max_id=models.Max('CertificacionId'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nueva_certificacion = form.save(commit=False)
-            nueva_certificacion.CertificacionId = new_id
-            nueva_certificacion.save()
-            return redirect('certificacion_index')
-    else:
-        form = CertificacionForm()
-    return render(request, 'Certificacion/certificacion_form.html', {'form': form})
-
-def certificacion_editar(request, id):
-    certificacion = get_object_or_404(Certificacion, CertificacionId=id)
-
-    if request.method == 'POST':
-        form = CertificacionForm(request.POST, instance=certificacion)
-        if form.is_valid():
-            form.save()
-            return redirect('certificacion_index')
-    else:
-        form = CertificacionForm(instance=certificacion)
-
-    return render(request, 'Certificacion/certificacion_form.html', {'form': form})
-
-def certificacion_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        Certificacion.objects.filter(CertificacionId__in=item_ids).delete()
-        return redirect('certificacion_index')
-    return redirect('certificacion_index')
-
-def certificacion_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        certificacion_data = Certificacion.objects.filter(CertificacionId__in=item_ids)
-
-        data = []
-        for certificacion in certificacion_data:
-            data.append([certificacion.CertificacionId, certificacion.Certificacion])
-
-        df = pd.DataFrame(data, columns=['Id Certificación', 'Certificación'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="certificaciones.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('certificacion_index')
-
-# Vista Costo Indirecto
-def costos_indirectos_index(request):
-    costos_indirectos = Costos_Indirectos.objects.all()
-    return render(request, 'Costos_Indirectos/costos_indirecto_index.html', {'costos_indirectos': costos_indirectos})
-
-def costos_indirectos_crear(request):
-    if request.method == 'POST':
-        form = CostosIndirectosForm(request.POST)
-        if form.is_valid():
-            max_id = Costos_Indirectos.objects.all().aggregate(max_id=models.Max('CostoId'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_costo = form.save(commit=False)
-            nuevo_costo.CostoId = new_id
-            nuevo_costo.save()
-            return redirect('costos_indirectos_index')
-    else:
-        form = CostosIndirectosForm()
-    return render(request, 'Costos_Indirectos/costos_indirecto_forms.html', {'form': form})
-
-def costos_indirectos_editar(request, id):
-    costo = get_object_or_404(Costos_Indirectos, CostoId=id)
-
-    if request.method == 'POST':
-        form = CostosIndirectosForm(request.POST, instance=costo)
-        if form.is_valid():
-            form.save()
-            return redirect('costos_indirectos_index')
-    else:
-        form = CostosIndirectosForm(instance=costo)
-
-    return render(request, 'Costos_Indirectos/costos_indirecto_forms.html', {'form': form})
-
-def costos_indirectos_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        Costos_Indirectos.objects.filter(CostoId__in=item_ids).delete()
-        return redirect('costos_indirectos_index')
-    return redirect('costos_indirectos_index')
-
-def costos_indirectos_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        costos_data = Costos_Indirectos.objects.filter(CostoId__in=item_ids)
-
-        data = []
-        for costo in costos_data:
-            data.append([costo.CostoId, costo.Costo])
-
-        df = pd.DataFrame(data, columns=['CostoId', 'Costo'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="costos_indirectos.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('costos_indirectos_index')
-
-
-# Conceptos
-def conceptos_index(request):
-    concepto = Concepto.objects.all()
-    return render(request, 'Conceptos/conceptos_index.html', {'conceptos': concepto})
-
-def conceptos_crear(request):
-    if request.method == 'POST':
-        form = ConceptoForm(request.POST)
-        if form.is_valid():
-            max_id = Concepto.objects.all().aggregate(max_id=models.Max('id'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_concepto = form.save(commit=False)
-            nuevo_concepto.id = new_id
-            nuevo_concepto.save()
-            return redirect('conceptos_index')
-    else:
-        form = ConceptoForm()
-    return render(request, 'conceptos/conceptos_form.html', {'form': form})
-
-def conceptos_editar(request, id):
-    concepto = get_object_or_404(Concepto, id=id)
-
-    if request.method == 'POST':
-        form = ConceptoForm(request.POST, instance=concepto)
-        if form.is_valid():
-            form.save()
-            return redirect('conceptos_index')
-    else:
-        form = ConceptoForm(instance=concepto)
-
-    return render(request, 'Conceptos/conceptos_form.html', {'form': form})
-
-def conceptos_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        Concepto.objects.filter(id__in=item_ids).delete()
-        return redirect('conceptos_index')
-    return redirect('conceptos_index')
-
-def conceptos_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        concepto_data = Concepto.objects.filter(id__in=item_ids)
-
-        data = []
-        for concepto in concepto_data:
-            data.append([concepto.id, concepto.descripcion])
-
-        df = pd.DataFrame(data, columns=['Id', 'Descripción'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="conceptos.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('conceptos_index')
 
 # Vista Gastos
 def gasto_index(request):

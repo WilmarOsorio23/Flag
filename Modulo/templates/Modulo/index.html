@@ -1,9 +1,26 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block titulo %} Lista de Módulos {% endblock %}
 
 {% block contenido %}
 <div class="card">
+    <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
+        <span id="alert-icon" class="alert-heading"></span>
+        <span id="alert-message"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% if messages %}
+    <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Módulos</h4>
     </div>  
@@ -13,14 +30,25 @@
             <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'crear' %}" role="button"></a>
             <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button" onclick="enableEdit();"></a>
             <i class="btn btn-outline-primary fas fa-eye" title="Visualizar"></i>
-            <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>
+            <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>
             <form id="download-form" method="POST" action="{% url 'descargar_excel' %}" style="display:inline;" onsubmit="return confirmDownload();">
                 {% csrf_token %}
                 <input type="hidden" name="items_to_delete" id="items_to_delete">
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
             </form>
-            <!-- Botón de Guardar -->   
-            <button id="save-button" class="btn btn-outline-success fas fa-save d-none" title="Guardar" onclick="saveRow();"></button>
+            <!-- Botones de Guardar y Cancelar -->
+            <button id="save-button" 
+                    class="btn btn-outline-success fas fa-save d-none" 
+                    title="Guardar" 
+                    type="button" 
+                    onclick="saveRow();">
+            </button>
+            <button id="cancel-button" 
+                    class="btn btn-outline-danger fas fa-times d-none" 
+                    title="Cancelar" 
+                    type="button"
+                    onclick="cancelEdit();">
+            </button>
         </div>
     </div>
     <div class="card-footer text-muted">
@@ -49,136 +77,31 @@
                             <td colspan="4">No hay datos disponibles.</td>
                         </tr>
                         {% endfor %}
-                    </tbody>
+                    </tbody>                    
                 </table>
             </form>
         </div>        
     </div>
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            ¿Estás seguro de que deseas eliminar este módulo?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+            <button id="confirm-delete-btn" type="button" class="btn btn-danger">Sí</button>
+            </div>
+        </div>
+        </div>
+    </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Seleccionar todos los checkboxes
-        document.getElementById('select-all').addEventListener('click', function(event) {
-            let checkboxes = document.querySelectorAll('.row-select');
-            for (let checkbox of checkboxes) {
-                checkbox.checked = event.target.checked;
-            }
-        });
+<script src="{% static 'JS/modulo.js' %}"></script>
 
-        // Confirmación antes de eliminar
-        async function confirmDelete() {
-            let selectedElements = document.querySelectorAll('.row-select:checked');
-            let selectedIds = Array.from(selectedElements).map(el => el.value);
-
-            if (selectedIds.length === 0) {
-                alert('No has seleccionado ningún elemento para eliminar.');
-                return false;
-            }
-
-            let isRelated = await fetch('/verificar-relaciones/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({ ids: selectedIds })
-            })
-            .then(response => response.json())
-            .then(data => data.isRelated);
-
-            if (isRelated) {
-                alert('No puedes eliminar estos elementos, ya que están siendo utilizados en otra tabla.');
-                return false;
-            }
-
-            return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
-        }
-
-        // Confirmación antes de descargar
-        window.confirmDownload = function() {
-            let selected = document.querySelectorAll('.row-select:checked');
-            if (selected.length === 0) {
-                alert('No has seleccionado ningún elemento para descargar.');
-                return false;
-            }
-
-            let itemIds = [];
-            selected.forEach(function(checkbox) {
-                itemIds.push(checkbox.value);
-            });
-            document.getElementById('items_to_delete').value = itemIds.join(',');
-
-            return true;
-        };
-
-        // Habilitar edición en la fila seleccionada
-        window.enableEdit = function() {
-            let selected = document.querySelectorAll('.row-select:checked');
-            if (selected.length === 0) {
-                alert('No has seleccionado ningún módulo para editar.');
-                return false;
-            }
-            if (selected.length > 1) {
-                alert('Selecciona un solo módulo para editar.');
-                return false;
-            }
-
-            let row = selected[0].closest('tr');
-            let inputs = row.querySelectorAll('input.form-control-plaintext');
-            inputs.forEach(input => {
-                input.classList.remove('form-control-plaintext');
-                input.classList.add('form-control');
-                input.readOnly = false;
-            });
-
-            // Mostrar botón de guardar
-            document.getElementById('save-button').classList.remove('d-none');
-        };
-        
-        // Guardar los cambios en la fila seleccionada
-        window.saveRow = function() {
-            let selected = document.querySelector('.row-select:checked');
-            if (!selected) {
-                alert('No has seleccionado ningún módulo para guardar.');
-                return false;
-            }
-            let row = selected.closest('tr');
-            let data = {
-                'Modulo': row.querySelector('input[name="nombre"]').value // Cambia 'nombre' a 'Modulo' si corresponde
-            };
-            let moduloId = selected.value;
-
-            // Enviar datos al servidor
-            fetch(`/Modulo/editar/${moduloId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Volver a modo de solo lectura
-                    row.querySelectorAll('input.form-control').forEach(input => {
-                        input.classList.add('form-control-plaintext');
-                        input.classList.remove('form-control');
-                        input.readOnly = true;
-                    });
-                    // Ocultar botón de guardar
-                    document.getElementById('save-button').classList.add('d-none');
-                } else {
-                    alert('Error al guardar los cambios: ' + data.errors.join(', '));
-                }
-            })
-            .catch(error => {
-                alert('Error al enviar los datos: ' + error.message);
-            });
-
-            return false;
-        };
-    });
-</script>
 {% endblock %}
