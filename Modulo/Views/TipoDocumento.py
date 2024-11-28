@@ -2,10 +2,11 @@
 import json
 from pyexpat.errors import messages
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect, render
+from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from Modulo import models
+from django.db import models
 from Modulo.forms import TipoDocumentoForm
 from Modulo.models import Clientes, Empleado, TipoDocumento
 
