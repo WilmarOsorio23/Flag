@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.saveRow = function() {
         let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length !== 1) {
+        if (selected.length != 1) {
             showMessage('Error al guardar: No hay un módulo seleccionado.', 'danger');
             return;
         }

@@ -33,11 +33,22 @@
             <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>
             <form id="download-form" method="POST" action="{% url 'descargar_excel' %}" style="display:inline;" onsubmit="return confirmDownload();">
                 {% csrf_token %}
-                <input type="hidden" name="items_to_download" id="items_to_download">
+                <input type="hidden" name="items_to_delete" id="items_to_delete">
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
             </form>
-            <!-- Botón de Guardar -->   
-            <button id="save-button" class="btn btn-outline-success fas fa-save d-none" title="Guardar" onclick="saveRow();"></button>
+            <!-- Botones de Guardar y Cancelar -->
+            <button id="save-button" 
+                    class="btn btn-outline-success fas fa-save d-none" 
+                    title="Guardar" 
+                    type="button" 
+                    onclick="saveRow();">
+            </button>
+            <button id="cancel-button" 
+                    class="btn btn-outline-danger fas fa-times d-none" 
+                    title="Cancelar" 
+                    type="button"
+                    onclick="cancelEdit();">
+            </button>
         </div>
     </div>
     <div class="card-footer text-muted">
@@ -66,7 +77,7 @@
                             <td colspan="4">No hay datos disponibles.</td>
                         </tr>
                         {% endfor %}
-                    </tbody>
+                    </tbody>                    
                 </table>
             </form>
         </div>        
