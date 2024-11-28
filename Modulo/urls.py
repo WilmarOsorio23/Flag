@@ -37,7 +37,7 @@ urlpatterns = [
     # Rutas para tabla Línea
     path('linea/', views.linea_index, name='linea_index'),
     path('linea/crear', views.linea_crear, name='linea_crear'),
-    path('linea/editar/<int:id>/', views.linea_editar, name='linea_editar'),
+    path('linea/editar/<int:LineaId>/', views.linea_editar, name='linea_editar'),
     path('linea/eliminar', views.linea_eliminar, name='linea_eliminar'),
     path('linea/descargar_excel', views.linea_descargar_excel, name='linea_descargar_excel'),
 

@@ -204,7 +204,7 @@ def ind_descargar_excel(request):
 
     return redirect('ind_index')
 
-# Vista para linea
+# Vista para listar líneas
 def linea_index(request):
     linea_data = Linea.objects.all()
     return render(request, 'linea/linea_index.html', {'lineas': linea_data})
@@ -223,8 +223,9 @@ def linea_crear(request):
         form = LineaForm()
     return render(request, 'linea/linea_form.html', {'form': form})
 
-def linea_editar(request, id):
-    linea = get_object_or_404(Linea, id=id)
+# Vista para editar una línea existente
+def linea_editar(request, LineaId):
+    linea = get_object_or_404(Linea, LineaId=LineaId)
 
     if request.method == 'POST':
         form = LineaForm(request.POST, instance=linea)
@@ -236,23 +237,25 @@ def linea_editar(request, id):
 
     return render(request, 'linea/linea_form.html', {'form': form})
 
+# Vista para eliminar líneas seleccionadas
 def linea_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        Linea.objects.filter(id__in=item_ids).delete()
+        Linea.objects.filter(LineaId__in=item_ids).delete()
         return redirect('linea_index')
     return redirect('linea_index')
 
+# Vista para descargar líneas seleccionadas en Excel
 def linea_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        linea_data = Linea.objects.filter(id__in=item_ids)
+        linea_data = Linea.objects.filter(LineaId__in=item_ids)
 
         data = []
         for linea in linea_data:
-            data.append([linea.id, linea.nombre, linea.descripcion])
+            data.append([linea.LineaId, linea.Linea])
 
-        df = pd.DataFrame(data, columns=['Id', 'Nombre', 'Descripción'])
+        df = pd.DataFrame(data, columns=['LineaId', 'Nombre'])
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="linea.xlsx"'
