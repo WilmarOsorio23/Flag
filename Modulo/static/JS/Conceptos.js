@@ -177,6 +177,32 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('save-button').classList.remove('d-none');
     }
 
+    async function handleDeleteConfirmation(event, modal, confirmButton, form, csrfToken) {
+        // Habilitar edición en la fila seleccionada
+        window.handleEditClick = function () {
+            let selected = document.querySelectorAll('.row-select:checked');
+            if (selected.length === 0) {
+                alert('No has seleccionado ningún concepto para editar.');
+                return false;
+            }
+            if (selected.length > 1) {
+                alert('Solo puedes editar un concepto a la vez.');
+                return false;
+            }
+
+            let row = selected[0].closest('tr');
+            let inputs = row.querySelectorAll('input.form-control-plaintext');
+            inputs.forEach(input => {
+                input.classList.remove('form-control-plaintext');
+                input.classList.add('form-control');
+                input.readOnly = false;
+            });
+
+            // Mostrar botón de guardar
+            document.getElementById('save-button').classList.remove('d-none');
+        }
+    }
+
     // Guardar los cambios en la fila seleccionada
     window.saveConceptRow = function () {
         let selected = document.querySelector('.row-select:checked');
@@ -260,5 +286,5 @@ document.addEventListener('DOMContentLoaded', function () {
         return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
     }
 
-   
+
 });
