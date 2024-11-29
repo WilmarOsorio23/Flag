@@ -8,6 +8,6 @@
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="btn btn-primary">Guardar</button>
-        <a href="{% url 'gastos_index' %}" class="btn btn-danger">Cancelar</a>
+        <a href="{% url 'gasto_index' %}" class="btn btn-danger">Cancelar</a>
     </form>
 {% endblock %}

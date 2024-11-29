@@ -413,65 +413,6 @@ def consultores_descargar_excel(request):
     return redirect('consultores_index')
 
 
-# Vista Gastos
-def gasto_index(request):
-    gastos = Gastos.objects.all()
-    return render(request, 'Gastos/gasto_index.html', {'gastos': gastos})
-
-def gasto_crear(request):
-    if request.method == 'POST':
-        form = GastoForm(request.POST)
-        if form.is_valid():
-            max_id = Gastos.objects.all().aggregate(max_id=models.Max('GastoId'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_gasto = form.save(commit=False)
-            nuevo_gasto.GastoId = new_id
-            nuevo_gasto.save()
-            return redirect('gasto_index')
-    else:
-        form = GastoForm()
-    return render(request, 'Gastos/gasto_form.html', {'form': form})
-
-def gasto_editar(request, id):
-    gasto = get_object_or_404(Gastos, GastoId=id)
-
-    if request.method == 'POST':
-        form = GastoForm(request.POST, instance=gasto)
-        if form.is_valid():
-            form.save()
-            return redirect('gastos_index')
-    else:
-        form = GastoForm(instance=gasto)
-
-    return render(request, 'Gastos/gastos_form.html', {'form': form})
-
-def gasto_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        Gastos.objects.filter(GastoId__in=item_ids).delete()
-        return redirect('gastos_index')
-    return redirect('gastos_index')
-
-def gasto_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        gasto_data = Gastos.objects.filter(GastoId__in=item_ids)
-
-        data = []
-        for gasto in gasto_data:
-            data.append([gasto.GastoId, gasto.Gasto])
-
-        df = pd.DataFrame(data, columns=['GastoId', 'Gasto'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="gastos.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('gastos_index')
-
 # Detalle gastos
 def detalle_gastos_index(request):
     detalles = Detalle_Gastos.objects.all()

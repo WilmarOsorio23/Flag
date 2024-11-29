@@ -5,6 +5,7 @@ from Modulo.Views import Certificacion
 from Modulo.Views import Conceptos
 from Modulo.Views import Clientes
 from Modulo.Views import CostosIndirectos
+from Modulo.Views import gastos
 from . import views
 
 
@@ -92,11 +93,12 @@ urlpatterns = [
     path('conceptos/descargar_excel', Conceptos.conceptos_descargar_excel, name='conceptos_descargar_excel'),
 
     # Rutas para tabla Gastos
-    path('gastos/', views.gasto_index, name='gastos_index'),
-    path('gastos/crear', views.gasto_crear, name='gastos_crear'),
-    path('gastos/editar/<int:id>/', views.gasto_editar, name='gastos_editar'),
-    path('gastos/eliminar', views.gasto_eliminar, name='gastos_eliminar'),
-    path('gastos/descargar_excel', views.gasto_descargar_excel, name='gastos_descargar_excel'),
+    path('gastos/', gastos.gasto_index, name='gastos_index'),
+    path('gastos/crear', gastos.gasto_crear, name='gastos_crear'),
+    path('gastos/editar/<int:id>/', gastos.gasto_editar, name='gastos_editar'),
+    path('gastos/eliminar', gastos.gasto_eliminar, name='gastos_eliminar'),
+    path('gastos/verificar-relaciones/', gastos.verificar_relaciones, name='gastos_verificar_relaciones'),
+    path('gastos/descargar_excel', gastos.gasto_descargar_excel, name='gastos_descargar_excel'),
 
     # Rutas para tabla Detalle de Gastos
     path('detalle_gastos/', views.detalle_gastos_index, name='detalle_gastos_index'),
