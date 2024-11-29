@@ -1,6 +1,7 @@
 from django.urls import path
 from Modulo.Views import modulo
 from Modulo.Views import ipc
+from Modulo.Views import ind
 from Modulo.Views import TipoDocumento
 from Modulo.Views import Certificacion
 from Modulo.Views import Conceptos
@@ -29,11 +30,11 @@ urlpatterns = [
     path('ipc/descargar_excel', ipc.ipc_descargar_excel, name='ipc_descargar_excel'),
 
     # Rutas para tabla IND
-    path('ind/', views.ind_index, name='ind_index'),
-    path('ind/crear', views.ind_crear, name='ind_crear'),
-    path('ind/editar/<int:id>/', views.ind_editar, name='ind_editar'),
-    path('ind/eliminar', views.ind_eliminar, name='ind_eliminar'),
-    path('ind/descargar_excel', views.ind_descargar_excel, name='ind_descargar_excel'),
+    path('ind/', ind.ind_index, name='ind_index'),
+    path('ind/crear', ind.ind_crear, name='ind_crear'),
+    path('ind/editar/<int:id>/', ind.ind_editar, name='ind_editar'),
+    path('ind/eliminar', ind.ind_eliminar, name='ind_eliminar'),
+    path('ind/descargar_excel', ind.ind_descargar_excel, name='ind_descargar_excel'),
 
     # Rutas para tabla Línea
     path('linea/', views.linea_index, name='linea_index'),
