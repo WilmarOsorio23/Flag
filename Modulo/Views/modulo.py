@@ -1,3 +1,4 @@
+from django.contrib import messages
 import pandas as pd
 import json
 from django.shortcuts import render, redirect, get_object_or_404
@@ -51,6 +52,7 @@ def eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
         Modulo.objects.filter(ModuloId__in=item_ids).delete()
+        messages.success(request, 'Los módulos seleccionados se han eliminado correctamente.')
         return redirect('Modulo')
     return redirect('Modulo')
 

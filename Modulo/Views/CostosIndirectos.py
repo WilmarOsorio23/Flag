@@ -1,0 +1,79 @@
+# Vista Costo Indirecto
+import json
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.csrf import csrf_exempt
+import pandas as pd
+from Modulo import models
+from Modulo.forms import CostosIndirectosForm
+from Modulo.models import Costos_Indirectos
+
+
+def costos_indirectos_index(request):
+    costos_indirectos = Costos_Indirectos.objects.all()
+    return render(request, 'Costos_Indirectos/costos_indirecto_index.html', {'costos_indirectos': costos_indirectos})
+
+def costos_indirectos_crear(request):
+    if request.method == 'POST':
+        form = CostosIndirectosForm(request.POST)
+        if form.is_valid():
+            max_id = Costos_Indirectos.objects.all().aggregate(max_id=models.Max('CostoId'))['max_id']
+            new_id = max_id + 1 if max_id is not None else 1
+            nuevo_costo = form.save(commit=False)
+            nuevo_costo.CostoId = new_id
+            nuevo_costo.save()
+            return redirect('costos_indirectos_index')
+    else:
+        form = CostosIndirectosForm()
+    return render(request, 'Costos_Indirectos/costos_indirecto_forms.html', {'form': form})
+
+@csrf_exempt
+def costos_indirectos_editar(request, id):
+    if request.method == 'POST':
+        try:
+            # Cargar los datos enviados como JSON
+            data = json.loads(request.body.decode('utf-8'))
+            # Obtener el objeto correspondiente
+            costo = get_object_or_404(Costos_Indirectos, pk=id)
+            # Instanciar el formulario con los datos y el objeto a editar
+            form = CostosIndirectosForm(data, instance=costo)
+
+            # Validar y guardar el formulario
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'errors': form.errors}, status=400)
+        except Costos_Indirectos.DoesNotExist:
+            return JsonResponse({'error': 'Costo indirecto no encontrado'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+def costos_indirectos_eliminar(request):
+    if request.method == 'POST':
+        item_ids = request.POST.getlist('items_to_delete')
+        Costos_Indirectos.objects.filter(CostoId__in=item_ids).delete()
+        return redirect('costos_indirectos_index')
+    return redirect('costos_indirectos_index')
+
+def costos_indirectos_descargar_excel(request):
+    if request.method == 'POST':
+        item_ids = request.POST.getlist('items_to_delete')
+        costos_data = Costos_Indirectos.objects.filter(CostoId__in=item_ids)
+
+        data = []
+        for costo in costos_data:
+            data.append([costo.CostoId, costo.Costo])
+
+        df = pd.DataFrame(data, columns=['CostoId', 'Costo'])
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="costos_indirectos.xlsx"'
+
+        df.to_excel(response, index=False)
+
+        return response
+
+    return redirect('costos_indirectos_index')
