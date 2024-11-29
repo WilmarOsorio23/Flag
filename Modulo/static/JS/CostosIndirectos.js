@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Confirmación antes de eliminar
-    function confirmDelete() {
+    window.confirmDelete = function() {
         let selected = document.querySelectorAll('.row-select:checked').length;
         if (selected === 0) {
             alert('No has seleccionado ningún elemento para eliminar.');
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Habilitar edición en la fila seleccionada
-    function handleEditClick() {
+    window.handleEditClick = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length === 0) {
             alert('No has seleccionado ningún costo indirecto para editar.');
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Guardar los cambios en la fila seleccionada
-    function saveRow() {
+    window.saveRow = function() {
         let selected = document.querySelector('.row-select:checked');
         if (!selected) {
             alert('No has seleccionado ningún costo indirecto para guardar.');
