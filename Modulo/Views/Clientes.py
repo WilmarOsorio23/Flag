@@ -1,9 +1,11 @@
 # Vista para la tabla Clientes
 import json
+from pyexpat.errors import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
+from django.db.models import Q
 from Modulo import models
 from django.db import models
 from Modulo.forms import ClientesForm
@@ -61,47 +63,57 @@ def clientes_eliminar(request):
 
 def clientes_descargar_excel(request):
     if request.method == 'POST':
-        # Obtener los IDs desde el formulario
-        item_ids = request.POST.get('items_to_download', '').split(',')
+        # Obtener los IDs desde el formulario y verificar si no está vacío
+        item_ids = request.POST.get('items_to_download', '').strip()
         
-        # Crear una lista para almacenar las combinaciones de TipoDocumentoID y DocumentoId
+        if not item_ids:
+            messages.error(request, "No se seleccionaron clientes para descargar.")
+            return redirect('cliente_index')
+        
+        # Crear una lista de combinaciones de TipoDocumentoID y DocumentoId
         filter_params = []
-        for item in item_ids:
-            tipo_documento_id, documento_id = item.split('-')
-            filter_params.append((tipo_documento_id, documento_id))
-        
-        # Filtrar los clientes usando las combinaciones
-        clientes_data = Clientes.objects.filter(
-            (Q(TipoDocumentoID=tipo_documento_id) & Q(DocumentoId=documento_id)) for tipo_documento_id, documento_id in filter_params
-        )
+        try:
+            for item in item_ids.split(','):
+                tipo_documento_id, documento_id = item.split('-')
+                filter_params.append(Q(TipoDocumentoID=tipo_documento_id, DocumentoId=documento_id))
+        except ValueError:
+            messages.error(request, "El formato de los datos es incorrecto.")
+            return redirect('cliente_index')
+
+        # Filtrar los clientes utilizando las combinaciones
+        clientes_data = Clientes.objects.filter(*filter_params)
+
+        # Verificar si existen clientes seleccionados
+        if not clientes_data.exists():
+            messages.error(request, "No se encontraron clientes para descargar.")
+            return redirect('cliente_index')
 
         # Preparar los datos para el DataFrame
-        data = []
-        for cliente in clientes_data:
-            data.append([
-                cliente.TipoDocumentoID.Nombre,  # Asumiendo que quieres mostrar el nombre del tipo de documento
-                cliente.DocumentoId, 
-                cliente.Nombre_Cliente, 
-                cliente.Activo, 
-                cliente.Fecha_Inicio, 
+        data = [
+            [
+                cliente.TipoDocumentoID.Nombre,  # Ajusta esto según el modelo relacionado si es necesario
+                cliente.DocumentoId,
+                cliente.Nombre_Cliente,
+                cliente.Activo,
+                cliente.Fecha_Inicio,
                 cliente.Fecha_Retiro
-            ])
+            ]
+            for cliente in clientes_data
+        ]
 
         # Crear el DataFrame y exportar a Excel
         df = pd.DataFrame(data, columns=[
-            'Tipo Documento', 
-            'Documento ID', 
-            'Nombre Cliente', 
-            'Activo', 
-            'Fecha Inicio', 
-            'Fecha Retiro'
+            'Tipo Documento', 'Documento ID', 'Nombre Cliente', 'Activo', 'Fecha Inicio', 'Fecha Retiro'
         ])
 
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        # Configurar la respuesta para enviar el archivo Excel
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
         response['Content-Disposition'] = 'attachment; filename="clientes.xlsx"'
-
         df.to_excel(response, index=False)
 
         return response
 
+    # Redirigir si no es un método POST
     return redirect('cliente_index')
