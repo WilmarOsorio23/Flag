@@ -31,7 +31,6 @@ def clientes_crear(request):
     
     return render(request, 'clientes/clientes_form.html', {'form': form})
 
-
 @csrf_exempt
 def clientes_editar(request, tipo_documento_id, documento_id):
     if request.method == 'POST':

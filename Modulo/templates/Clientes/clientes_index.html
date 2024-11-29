@@ -43,8 +43,8 @@
                     <tbody>
                         {% for cliente in clientes %}
                         <tr id="row-{{ cliente.TipoDocumentoID.TipoDocumentoID }}-{{ cliente.DocumentoId }}">
-                            <td><input type="checkbox" class="row-select" name="cliente_ids" value="{{ cliente.TipoDocumentoID.TipoDocumentoID }}-{{ cliente.DocumentoId }}"></td>
-                            <td><input type="text" name="TipoDocumentoID" class="form-control-plaintext" value="{{ cliente.TipoDocumentoID.Nombre }}" data-val="{{ cliente.TipoDocumentoID.TipoDocumentoID }}" readonly></td>
+                            <td><input type="checkbox" class="row-select" name="cliente_ids" value="{{ cliente.TipoDocumentoID.TipoDocumentoID }}-{{ cliente.DocumentoId }}" ></td>
+                            <td><input type="text" name="TipoDocumentoID" class="form-control-plaintext" value="{{ cliente.TipoDocumentoID.Nombre }}" data-val="{{ cliente.TipoDocumentoID.TipoDocumentoID }}" disabled></td>
                             <td><input type="text" name="DocumentoId" class="form-control-plaintext" value="{{ cliente.DocumentoId }}" readonly></td>
                             <td><input type="text" name="Nombre_Cliente" class="form-control-plaintext" value="{{ cliente.Nombre_Cliente }}" readonly></td>
                             <td><input type="text" name="Activo" class="form-control-plaintext" value="{{ cliente.Activo }}" readonly></td>

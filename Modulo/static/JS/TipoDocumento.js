@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let data = {
             'Nombre': row.querySelector('input[name ="Nombre"]').value
         };
+        
         console.log(data)
         let tipoDocumentoID = selected.value;
 
