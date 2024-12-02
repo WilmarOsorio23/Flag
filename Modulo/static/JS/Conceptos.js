@@ -139,10 +139,6 @@ document.addEventListener('DOMContentLoaded', function () {
             input.readOnly = true;
         });
 
-        // Desmarcar y habilitar el checkbox de la fila
-        selected[0].checked = false;
-        selected[0].disabled = false;
-
         // Habilitar todos los checkboxes y el botón de edición
         document.getElementById('select-all').disabled = false;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);

@@ -139,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function () {
             input.classList.remove('form-control');
             input.readOnly = true;
         });
-
      
         // Habilitar todos los checkboxes y el botón de edición
         document.getElementById('select-all').disabled = false;
