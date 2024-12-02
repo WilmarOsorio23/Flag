@@ -140,10 +140,6 @@ document.addEventListener('DOMContentLoaded', function () {
             input.readOnly = true;
         });
 
-        // Desmarcar y habilitar el checkbox de la fila
-        selected[0].checked = false;
-        selected[0].disabled = false;
-
         // Habilitar todos los checkboxes y el botón de edición
         document.getElementById('select-all').disabled = false;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
@@ -210,6 +206,66 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
 
+    // Confirmación antes de eliminar
+    window.confirmDelete = function() {
+        let selected = document.querySelectorAll('.row-select:checked').length;
+        if (selected === 0) {
+            alert('No has seleccionado ningún elemento para eliminar.');
+            return false;
+        }
+        return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
+    }
+   
+    // Guardar los cambios en la fila seleccionada
+    window.saveRow = function() {
+        let selected = document.querySelector('.row-select:checked');
+        if (!selected) {
+            alert('No has seleccionado ninguna certificación para guardar.');
+            return false;
+        }
+
+        let row = selected.closest('tr');
+        let data = {
+            'Certificacion': row.querySelector('input[name ="Certificacion"]').value
+        };
+
+        console.log(data)
+        let certificacionId = selected.value;
+        console.log(certificacionId)
+
+        // Enviar datos al servidor
+        fetch(`/certificacion/editar/${certificacionId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Volver a modo de solo lectura
+                    //inputs.forEach(input => {
+                    row.querySelectorAll('input').forEach(input => {
+                        input.classList.add('form-control-plaintext');
+                        input.classList.remove('form-control');
+                        input.readOnly = true;
+                    });
+
+                    // Ocultar botón de guardar
+                    document.getElementById('save-button').classList.add('d-none');
+                } else {
+                    alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
+                }
+            })
+            .catch(error => {
+                alert('Error al enviar los datos: ' + error.message);
+            });
+
+        return false;
+    }
+
     // Clonar checkboxes seleccionados en el formulario de descarga
     document.getElementById('download-form').addEventListener('submit', function (event) {
         let selectedCheckboxes = document.querySelectorAll('.row-select:checked');
@@ -233,67 +289,4 @@ document.addEventListener('DOMContentLoaded', function () {
             checkbox.checked = event.target.checked;
         }
     });
-
-    // Confirmación antes de eliminar
-    function confirmDelete() {
-        let selected = document.querySelectorAll('.row-select:checked').length;
-        if (selected === 0) {
-            alert('No has seleccionado ningún elemento para eliminar.');
-            return false;
-        }
-        return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
-    }
-
-   
-    // Guardar los cambios en la fila seleccionada
-    window.saveRow = function() {
-        let selected = document.querySelector('.row-select:checked');
-        if (!selected) {
-            alert('No has seleccionado ninguna certificación para guardar.');
-            return false;
-        }
-
-        let row = selected.closest('tr');
-        let inputs = row.querySelectorAll('input.form-control');
-        let data = {};
-
-        inputs.forEach(input => {
-            let name = input.getAttribute('name');
-            data[name] = input.value;
-        });
-
-        let certificacionId = selected.value;
-
-        // Enviar datos al servidor
-        fetch(`/certificacion/editar/${certificacionId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify(data)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Volver a modo de solo lectura
-                    inputs.forEach(input => {
-                        input.classList.add('form-control-plaintext');
-                        input.classList.remove('form-control');
-                        input.readOnly = true;
-                    });
-
-                    // Ocultar botón de guardar
-                    document.getElementById('save-button').classList.add('d-none');
-                } else {
-                    alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
-                }
-            })
-            .catch(error => {
-                alert('Error al enviar los datos: ' + error.message);
-            });
-
-        return false;
-    }
-
 });

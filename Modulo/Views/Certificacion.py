@@ -2,6 +2,7 @@
 import json
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
+from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from Modulo import models
 from django.db import models
@@ -27,6 +28,7 @@ def certificacion_crear(request):
         form = CertificacionForm()
     return render(request, 'Certificacion/certificacion_form.html', {'form': form})
 
+@csrf_exempt
 def certificacion_editar(request, id):
     if request.method == 'POST':
         try:
