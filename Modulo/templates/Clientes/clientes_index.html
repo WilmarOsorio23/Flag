@@ -36,8 +36,9 @@
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
             </form>
             <!-- Botón de Guardar -->
-            <button id="save-button" class="btn btn-outline-success fas fa-save d-none" title="Guardar" onclick="saveRow();"></button>
-        </div>
+            <button id="save-button" class="btn btn-outline-success fas fa-save d-none" title="Guardar" type="button" onclick="saveRow();"></button>
+            <button id="cancel-button" class="btn btn-outline-danger fas fa-times d-none" title="Cancelar" type="button" onclick="cancelEdit();"></button>
+        </div> 
     </div>
     <div class="card-footer text-muted">
         <div class="table-responsive">

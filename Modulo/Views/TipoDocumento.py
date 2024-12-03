@@ -1,6 +1,7 @@
 # Vista Tipo Documento
 import json
 from pyexpat.errors import messages
+from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
@@ -53,7 +54,8 @@ def tipo_documento_editar(request, id):
 def tipo_documento_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        TipoDocumento.objects.filter(TipoDocumentoId__in=item_ids).delete()
+        TipoDocumento.objects.filter(TipoDocumentoID__in=item_ids).delete()
+        messages.success(request, 'Los tipo documento seleccionados se han eliminado correctamente.')
         return redirect('tipo_documento_index')
     return redirect('tipo_documento_index')
 

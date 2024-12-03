@@ -103,6 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
     
         // Mostrar botón de guardar
         document.getElementById('save-button').classList.remove('d-none');
+        document.getElementById('cancel-button').classList.remove('d-none');
     };
     
 
@@ -115,10 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         let row = selected.closest('tr');
-        let inputs = row.querySelectorAll('input');
-
         let data = {
-            'Nombre': row.querySelector('input[name ="Nombre"]').value,
             'TipoDocumentoID': row.querySelector('input[name ="TipoDocumentoID"]').value,
             'DocumentoId': row.querySelector('input[name ="DocumentoId"]').value,
             'Nombre_Cliente': row.querySelector('input[name ="Nombre_Cliente"]').value,
@@ -127,18 +125,23 @@ document.addEventListener('DOMContentLoaded', function () {
             'Fecha_Retiro': row.querySelector('input[name ="Fecha_Retiro"]').value,
         };
 
-        fetch(`/clientes/editar/${data['TipoDocumentoID']}/${data['DocumentoId']}/`, {
+        console.log(data)
+        let tipoDocumentoID = selected.value;
+        let documentoId = selected.value;
+
+        fetch(`/clientes/editar/${tipoDocumentoID}/${documentoId}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken, // Asegura que sea dinámico y no del backend
+                'X-CSRFToken': '{{ csrf_token }}', // Asegura que sea dinámico y no del backend
             },
             body: JSON.stringify(data)
         })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    inputs.forEach(input => {
+                    //inputs.forEach(input => {
+                    row.querySelectorAll('input').forEach(input => {
                         input.classList.add('form-control-plaintext');
                         input.classList.remove('form-control');
                         input.readOnly = true;

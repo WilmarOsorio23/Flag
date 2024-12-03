@@ -3,6 +3,7 @@ import json
 from pyexpat.errors import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from django.db.models import Q
@@ -35,15 +36,18 @@ def clientes_crear(request):
 def clientes_editar(request, tipo_documento_id, documento_id):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body.decode('utf-8'))
-            cliente = Clientes.objects.get(TipoDocumentoID=tipo_documento_id, DocumentoId=documento_id)
-            form = ClientesForm(data, instance=cliente)
+            data = json.loads(request.body)
+            cliente = get_object_or_404( Clientes, pk=id)
+            cliente.TipoDocumentoID = data.get('TipoDocumentoID', cliente.TipoDocumentoID)
+            cliente.DocumentoId = data.get('DocumentoId', cliente.DocumentoId)
+            cliente.Nombre_Cliente = data.get('Nombre_Cliente', cliente.Nombre_Cliente)
+            cliente.Activo = data.get('Activo', cliente.Activo)
+            cliente.Fecha_Inicio= data.get('Fecha_Inicio', cliente.Fecha_Inicio)
+            cliente.Fecha_Retiro = data.get('Fecha_Retiro', cliente.Fecha_Retiro)
+            cliente.save()
 
-            if form.is_valid():
-                form.save()
-                return JsonResponse({'status': 'success'})
-            else:
-                return JsonResponse({'errors': form.errors}, status=400)
+            print(JsonResponse({'status': 'success'}))
+            return JsonResponse({'status': 'success'})
         except Clientes.DoesNotExist:
             return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
         except json.JSONDecodeError:

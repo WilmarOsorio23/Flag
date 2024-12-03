@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Obtener el valor del token CSRF para ser utilizado en las solicitudes POST
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
     // Inhabilitar la tecla Enter para evitar que envíen formularios accidentalmente
     preventFormSubmissionOnEnter();
 
@@ -15,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
         handleDeleteConfirmation(event, confirmDeleteModal, confirmDeleteButton, deleteForm, csrfToken);
     });
 
+    // Funciones reutilizables
     // Prevenir el envío del formulario al presionar la tecla Enter
     function preventFormSubmissionOnEnter() {
         document.querySelectorAll('form').forEach(form => {
@@ -207,11 +211,11 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         
         console.log(data)
-        let tipoDocumentoID = selected.value;
+        let TipoDocumentoId = selected.value;
 
-        console.log(tipoDocumentoID)
+        console.log(TipoDocumentoId)
         // Enviar datos al servidor
-        fetch(`/tipo_documento/editar/${tipoDocumentoID}/`, {
+        fetch(`/tipo_documento/editar/${TipoDocumentoId}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

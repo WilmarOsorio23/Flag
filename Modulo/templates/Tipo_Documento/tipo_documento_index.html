@@ -30,10 +30,11 @@
       <div class="button-group">
         <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'tipo_documento_crear' %}" role="button"></a>
         <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button" onclick="enableEdit();"></a>
-        <i class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i>
+        <i class="btn btn-outline-primary fas fa-eye" title="Visualizar"></i>
         <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>
         <form id="download-form" method="POST" action="{% url 'tipo_documento_descargar_excel' %}" style="display:inline;">
           {% csrf_token %}
+          <input type="hidden" name="items_to_delete" id="items_to_delete">
           <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
         </form>
         <!-- Botones de Guardar y Cancelar -->
