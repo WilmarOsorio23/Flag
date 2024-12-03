@@ -1,5 +1,7 @@
 # Vista Certificacion
 import json
+from pyexpat.errors import messages
+from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
@@ -7,7 +9,7 @@ import pandas as pd
 from Modulo import models
 from django.db import models
 from Modulo.forms import CertificacionForm
-from Modulo.models import Certificacion
+from Modulo.models import Certificacion, Detalle_Certificacion
 
 
 def certificacion_index(request):
@@ -53,8 +55,32 @@ def certificacion_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
         Certificacion.objects.filter(CertificacionId__in=item_ids).delete()
+        messages.success(request, 'Las certificaciones seleccionadas se han eliminado correctamente.')
         return redirect('certificacion_index')
     return redirect('certificacion_index')
+
+def verificar_relaciones(request):
+    if request.method == 'POST':
+        import json
+        data = json.loads(request.body)
+        ids = data.get('ids', [])
+
+        # Verifica si los módulos están relacionados
+        relacionados = []
+        for id in ids:
+            if (
+                Detalle_Certificacion.objects.filter(TipoDocumentoId=id).exists() 
+            ): 
+                relacionados.append(id)
+
+        if relacionados:
+            return JsonResponse({
+                'isRelated': True,
+                'ids': relacionados
+            })
+        else:
+            return JsonResponse({'isRelated': False})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def certificacion_descargar_excel(request):
     if request.method == 'POST':

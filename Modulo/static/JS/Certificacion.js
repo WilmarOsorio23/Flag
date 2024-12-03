@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Obtener el valor del token CSRF para ser utilizado en las solicitudes POST
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
     // Inhabilitar la tecla Enter para evitar que envíen formularios accidentalmente
     preventFormSubmissionOnEnter();
 
