@@ -1,7 +1,7 @@
 import json
 from pyexpat.errors import messages
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
 from Modulo import models
 import Modulo
@@ -28,25 +28,25 @@ def ind_crear(request):
         form = INDForm()
     return render(request, 'ind/ind_form.html', {'form': form})
 
+@csrf_exempt
 def ind_editar(request, id):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body.decode('utf-8'))
-            ind = IND.objects.get(pk=id)
-            form = INDForm(data, instance=ind)
-
-            if form.is_valid():
-                form.save()
-                return JsonResponse({'status': 'success'})
-            else:
-                return JsonResponse({'errors': form.errors}, status=400)
+            data = json.loads(request.body)
+            ind = get_object_or_404( IND, pk=id)
+            ind.Anio = data.get('Anio', ind.Anio) 
+            ind.Mes = data.get('Mes', ind.Mes) 
+            ind.Indice = data.get('Indice', ind.Indice)
+            ind.save()
+            print(JsonResponse({'status': 'success'}))
+            return JsonResponse({'status': 'success'})
         except Modulo.DoesNotExist:
-            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-    else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-
+            return JsonResponse({'status': 'error', 'errors': ['Ind no encontrado']})
+        except ValueError as ve:
+            return JsonResponse({'status': 'error', 'errors': ['Error al procesar los datos: ' + str(ve)]})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'errors': ['Error desconocido: ' + str(e)]})
+    return JsonResponse({'status': 'error', 'error': 'Método no permitido'})
     
 def ind_eliminar(request):
     if request.method == 'POST':

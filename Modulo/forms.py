@@ -74,6 +74,7 @@ class ClientesForm(forms.ModelForm):
                 'type': 'date'
                 }),
         }  
+        
 class INDForm(forms.ModelForm):
     class Meta:
         model = IND

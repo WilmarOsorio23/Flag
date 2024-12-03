@@ -89,22 +89,26 @@
         })
         .then((response) => response.json())
         .then(data => {
-            if (data.status === 'success') {
-                // Volver a modo de solo lectura
-               const input = row.querySelector('input[name="Indice"]')
+            if (data.status == 'success') {
+                showMessage('Cambios guardados correctamente.', 'success');
 
-               input.classList.add('form-control-plaintext');
-               input.classList.remove('form-control');
-               
+                row.querySelectorAll('input.form-control').forEach(input => {
+                    input.classList.add('highlighted');
+                    setTimeout(() => input.classList.remove('highlighted'), 2000);
+                });
 
-                // Ocultar botón de guardar 
-                document.getElementById('save-button').classList.add('d-none');
+                disableEditMode(selected,row);
+
             } else {
-                alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
+                showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger');
             }
+
         })
         .catch(error => {
-            alert('Error al enviar los datos: ' + error.message);
+            console.error('Error al guardar los cambios:', error);
+            showMessage('Error al guardar los cambios: ' + error.message, 'danger');
+
+            disableEditMode(selected,row);
         });
 
         return false;

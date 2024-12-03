@@ -1,3 +1,4 @@
+from openpyxl import Workbook
 import pandas as pd
 import json
 from django.shortcuts import render, redirect, get_object_or_404
@@ -987,7 +988,7 @@ def empleado_filtrado(request):
 # Funcionalidad para descargar los resultados en Excel
 def exportar_excel(request):
     empleados = Empleado.objects.all().select_related('LineaId', 'ModuloId', 'PerfilId').prefetch_related(
-        Prefetch('detallecertificacion_set', queryset=Detalle_Certificacion.objects.select_related('CertificacionId'))
+        Prefetch('detallecertificacion_set', queryset=Detalle_Certificacion.objects.select_related('CertificacionId')) # type: ignore
     )
 
     wb = Workbook()
@@ -1009,7 +1010,7 @@ def exportar_excel(request):
                 empleado.PerfilId.Nombre if empleado.PerfilId else '',
             ])
 
-    response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') # type: ignore
     response['Content-Disposition'] = 'attachment; filename=empleados_certificaciones.xlsx'
 
 # Informe de Nómina de Empleados
@@ -1088,7 +1089,7 @@ def empleado_nomina_filtrado(request):
 # Funcionalidad para descargar los resultados en Excel
 def exportar_nomina_excel(request):
     empleados = Empleado.objects.all().select_related('LineaId', 'ModuloId', 'PerfilId').prefetch_related(
-        Prefetch('nomina_set', queryset=Nomina.objects.select_related('Cliente'))
+        Prefetch('nomina_set', queryset=Nomina.objects.select_related('Cliente')) # type: ignore
     )
 
     wb = Workbook()
@@ -1113,7 +1114,7 @@ def exportar_nomina_excel(request):
                 nomina.Mes
             ])
 
-    response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') # type: ignore
     response['Content-Disposition'] = 'attachment; filename=empleados_nomina.xlsx'
 
     return response
