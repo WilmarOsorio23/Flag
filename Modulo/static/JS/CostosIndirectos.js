@@ -193,7 +193,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    
 
     // Confirmación antes de eliminar
     window.confirmDelete = function() {

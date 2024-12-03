@@ -1,5 +1,7 @@
 # Vista Costo Indirecto
 import json
+from pyexpat.errors import messages
+from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
@@ -56,6 +58,7 @@ def costos_indirectos_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
         Costos_Indirectos.objects.filter(CostoId__in=item_ids).delete()
+        messages.success(request, 'Los costos indirectos seleccionados se han eliminado correctamente.')
         return redirect('costos_indirectos_index')
     return redirect('costos_indirectos_index')
 
