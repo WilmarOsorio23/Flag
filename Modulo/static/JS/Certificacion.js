@@ -143,6 +143,9 @@ document.addEventListener('DOMContentLoaded', function () {
             input.readOnly = true;
         });
 
+        selected.disabled = false;
+        selected.checked = false;
+        
         // Habilitar todos los checkboxes y el botón de edición
         document.getElementById('select-all').disabled = false;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);

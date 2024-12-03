@@ -1,5 +1,7 @@
 # Conceptos
 import json
+from pyexpat.errors import messages
+from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
@@ -7,7 +9,7 @@ import pandas as pd
 from Modulo import models
 from django.db import models
 from Modulo.forms import ConceptoForm
-from Modulo.models import Concepto
+from Modulo.models import Concepto, TiemposConcepto
 
 
 def conceptos_index(request):
@@ -53,13 +55,36 @@ def conceptos_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+def verificar_relaciones(request):
+    if request.method == 'POST':
+        import json
+        data = json.loads(request.body)
+        ids = data.get('ids', [])
+
+        # Verifica si los módulos están relacionados
+        relacionados = []
+        for id in ids:
+            if (
+                TiemposConcepto.objects.filter(CostoId=id).exists() 
+            ): 
+                relacionados.append(id)
+
+        if relacionados:
+            return JsonResponse({
+                'isRelated': True,
+                'ids': relacionados
+            })
+        else:
+            return JsonResponse({'isRelated': False})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
 def conceptos_eliminar(request):
     if request.method == 'POST':
-        concepto_ids = request.POST.getlist('concepto_ids')  # Lista de IDs en el formato requerido
-        for id_pair in concepto_ids:
-            concepto_id, descripcion_id = id_pair.split('-')  # Divide los pares separados por '-'
-            Concepto.objects.filter(ConceptoId=concepto_id, Descripcion=descripcion_id).delete()
-        return redirect('conceptos_index')
+        item_ids = request.POST.getlist('items_to_delete')  # Obtener los IDs seleccionados
+        Concepto.objects.filter(ConceptoId__in=item_ids).delete()  # Filtrar y eliminar los conceptos seleccionados
+        messages.success(request, 'Los conceptos seleccionados se han eliminado correctamente.')
+        return redirect('conceptos_index')  # Cambia 'conceptos_index' al nombre de tu vista de listado si es diferente
     return redirect('conceptos_index')
 
 def conceptos_descargar_excel(request):

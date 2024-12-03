@@ -182,6 +182,45 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
+    window.cancelEdit = function() {
+        let selected = document.querySelectorAll('.row-select:checked');
+        if (selected.length == 1) {
+            let row = selected[0].closest('tr');
+
+            // Restaurar los valores originales desde el atributo personalizado
+            row.querySelectorAll('input.form-control').forEach(input => {
+                if (input.hasAttribute('data-original-value')) {
+                    input.value = input.getAttribute('data-original-value');
+                }
+            });
+            
+            disableEditMode(selected,row);
+            showMessage('Cambios cancelados.', 'danger');
+        }
+    };
+
+    // Deshabilitar modo edición
+    function disableEditMode(selected, row) {
+        // Cambiar inputs a solo lectura
+        row.querySelectorAll('input.form-control').forEach(input => {
+            input.classList.add('form-control-plaintext');
+            input.classList.remove('form-control');
+            input.readOnly = true;
+        });
+
+        selected.disabled = false;
+        selected.checked = false;
+        
+        // Habilitar todos los checkboxes y el botón de edición
+        document.getElementById('select-all').disabled = false;
+        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+        document.getElementById('edit-button').disabled = false;
+
+        // Ocultar los botones de guardar y cancelar
+        document.getElementById('save-button').classList.add('d-none');
+        document.getElementById('cancel-button').classList.add('d-none');
+    }
+
     function getSelectedIds() {
         return Array.from(document.querySelectorAll('.row-select:checked')).map(el => el.value);
     }

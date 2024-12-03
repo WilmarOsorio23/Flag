@@ -141,6 +141,9 @@ document.addEventListener('DOMContentLoaded', function () {
             input.readOnly = true;
         });
      
+        selected.disabled = false;
+        selected.checked = false;
+        
         // Habilitar todos los checkboxes y el botón de edición
         document.getElementById('select-all').disabled = false;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
@@ -176,9 +179,10 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('cancel-button').classList.remove('d-none');
     }    
 
-    window.cancelEdit = function() {
+    window.cancelEdit = function () {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 1) {
+
             let row = selected[0].closest('tr');
 
             // Restaurar los valores originales desde el atributo personalizado
@@ -188,7 +192,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
             
-            disableEditMode(selected,row);
+            selected.disabled = false;
+            selected.checked = false;
+            window.location.reload();
+            disableEditMode(selected, row);
             showMessage('Cambios cancelados.', 'danger');
         }
     };
@@ -265,8 +272,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         input.readOnly = true;
                     });
 
+                    showMessage('Costo indirecto guardado con éxito.', 'success');
                     // Ocultar botón de guardar
                     document.getElementById('save-button').classList.add('d-none');
+                    disableEditMode(selected, row);
                 } else {
                     alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
                 }

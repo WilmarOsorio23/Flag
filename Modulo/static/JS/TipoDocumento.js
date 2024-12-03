@@ -36,6 +36,25 @@ document.addEventListener('DOMContentLoaded', function () {
         checkboxes.forEach(checkbox => checkbox.checked = event.target.checked);
     }
 
+    // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
+    async function verifyRelations(ids, csrfToken) {
+        try {
+            const response = await fetch('/verificar-relaciones/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({ ids }), // Enviar los IDs en el cuerpo de la solicitud
+            });
+            const data = await response.json(); // Obtener la respuesta como JSON
+            return data.isRelated || false; // Si la respuesta indica que están relacionados, retornar true
+        } catch (error) {
+            console.error('Error verificando relaciones:', error);
+            return true; // Asumir que están relacionados en caso de error
+        }
+    }
+
     // Manejar la confirmación de eliminación
     async function handleDeleteConfirmation(event, modal, confirmButton, form, csrfToken) {
         event.preventDefault(); // Prevenir la acción predeterminada del evento
@@ -119,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Confirmación antes de descargar
-    window.confirmDownload = function() {
+    window.confirmDownload = function () {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 0) {
             showMessage('No has seleccionado ningún elemento para descargar.', 'danger');
@@ -127,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         let itemIds = [];
-        selected.forEach(function(checkbox) {
+        selected.forEach(function (checkbox) {
             itemIds.push(checkbox.value);
         });
         document.getElementById('items_to_delete').value = itemIds.join(',');
@@ -135,27 +154,9 @@ document.addEventListener('DOMContentLoaded', function () {
         return true;
     };
 
-    // Deshabilitar modo edición
-    function disableEditMode(selected,row) {
-        // Cambiar inputs a solo lectura
-        row.querySelectorAll('input.form-control').forEach(input => {
-            input.classList.add('form-control-plaintext');
-            input.classList.remove('form-control');
-            input.readOnly = true;
-        });
-     
-        // Habilitar todos los checkboxes y el botón de edición
-        document.getElementById('select-all').disabled = false;
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
-        document.getElementById('edit-button').disabled = false;
-
-        // Ocultar los botones de guardar y cancelar
-        document.getElementById('save-button').classList.add('d-none');
-        document.getElementById('cancel-button').classList.add('d-none');
-    }
 
     // Habilitar edición en la fila seleccionada
-    window.enableEdit = function() {
+    window.enableEdit = function () {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length === 0) {
             alert('No has seleccionado ningún tipo de documento para editar.');
@@ -179,10 +180,32 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('cancel-button').classList.remove('d-none');
     }
 
-    
-    window.cancelEdit = function() {
+    // Deshabilitar modo edición
+    function disableEditMode(selected, row) {
+        // Cambiar inputs a solo lectura
+        row.querySelectorAll('input.form-control').forEach(input => {
+            input.classList.add('form-control-plaintext');
+            input.classList.remove('form-control');
+            input.readOnly = true;
+        });
+
+        selected.disabled = false;
+        selected.checked = false;
+
+        // Habilitar todos los checkboxes y el botón de edición
+        document.getElementById('select-all').disabled = false;
+        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+        document.getElementById('edit-button').disabled = false;
+
+        // Ocultar los botones de guardar y cancelar
+        document.getElementById('save-button').classList.add('d-none');
+        document.getElementById('cancel-button').classList.add('d-none');
+    }
+
+    window.cancelEdit = function () {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 1) {
+
             let row = selected[0].closest('tr');
 
             // Restaurar los valores originales desde el atributo personalizado
@@ -191,8 +214,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     input.value = input.getAttribute('data-original-value');
                 }
             });
-            
-            disableEditMode(selected,row);
+
+            selected.disabled = false;
+            selected.checked = false;
+            window.location.reload();
+            disableEditMode(selected, row);
             showMessage('Cambios cancelados.', 'danger');
         }
     };
@@ -209,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let data = {
             'Nombre': row.querySelector('input[name ="Nombre"]').value
         };
-        
+
         console.log(data)
         let TipoDocumentoId = selected.value;
 
@@ -236,6 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     // Ocultar botón de guardar
                     document.getElementById('save-button').classList.add('d-none');
+                    disableEditMode(selected, row);
                 } else {
                     alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
                 }
@@ -263,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('download-form').appendChild(clonedCheckbox);
         });
     });
-    
+
     // Seleccionar todos los checkboxes
     document.getElementById('select-all').addEventListener('click', function (event) {
         let checkboxes = document.querySelectorAll('.row-select');
@@ -271,5 +298,5 @@ document.addEventListener('DOMContentLoaded', function () {
             checkbox.checked = event.target.checked;
         }
     });
-    
+
 });
