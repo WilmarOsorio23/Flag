@@ -8,6 +8,7 @@ import Modulo
 from Modulo.forms import INDForm
 from Modulo.models import IND
 from django.views.decorators.csrf import csrf_exempt
+from django.db import models
 
 
 def ind_index(request):

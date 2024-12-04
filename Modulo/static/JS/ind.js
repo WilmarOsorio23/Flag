@@ -16,6 +16,7 @@ function confirmDelete() {
     return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
 }
 
+
 // Habilitar edición en la fila seleccionada
 window.enableEdit = function() {
     let selected = document.querySelectorAll('.row-select:checked');
@@ -96,7 +97,8 @@ window.saveRow= function() {
             });
 
             disableEditMode(selected,row);
-            
+
+            window.location.reload();
 
         } else {
             showMessage('Error guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger');
@@ -145,7 +147,7 @@ document.addEventListener('keydown', (event) => {
 window.cancelEdit = function() {
     let selected = document.querySelectorAll('.row-select:checked');
     if (selected.length == 1) {
-       
+      
         let row = selected[0].closest('tr');
 
         // Restaurar los valores originales desde el atributo personalizado
@@ -154,12 +156,15 @@ window.cancelEdit = function() {
                 input.value = input.getAttribute('data-original-value');
             }
         });
-        
+        selected.disabled = false;
+        selected.checked = false;
+        window.location.reload();
         disableEditMode(selected,row);
         showMessage('Cambios cancelados.', 'danger');
     }
 };
 
+       
 
     // Deshabilitar modo edición
 function disableEditMode(selected,row) {
@@ -172,7 +177,8 @@ function disableEditMode(selected,row) {
     });
 
     // Desmarcar y habilitar el checkbox de la fila
-    
+    selected.disabled = false;
+    selected.checked = false;
 
     // Habilitar todos los checkboxes y el botón de edición
     document.getElementById('select-all').disabled = false;
@@ -230,3 +236,4 @@ window.confirmDownload = function() {
 
     return true;
 };
+

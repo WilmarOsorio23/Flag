@@ -8,6 +8,7 @@ import Modulo
 from Modulo.forms import IPCForm
 from Modulo.models import IPC
 from django.views.decorators.csrf import csrf_exempt
+from django.db import models
 
 def ipc_index(request):
     ipc_data = IPC.objects.all().order_by('-Anio','Mes')

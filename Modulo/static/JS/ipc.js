@@ -98,6 +98,7 @@
                 });
 
                 disableEditMode(selected,row);
+                window.location.reload();
 
             } else {
                 showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger');
@@ -147,21 +148,22 @@
     window.cancelEdit = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 1) {
-           
+          
             let row = selected[0].closest('tr');
-
+    
             // Restaurar los valores originales desde el atributo personalizado
             row.querySelectorAll('input.form-control').forEach(input => {
                 if (input.hasAttribute('data-original-value')) {
                     input.value = input.getAttribute('data-original-value');
                 }
             });
-            
+            selected.disabled = false;
+            selected.checked = false;
+            window.location.reload();
             disableEditMode(selected,row);
             showMessage('Cambios cancelados.', 'danger');
         }
     };
-
     
         // Deshabilitar modo edición
     function disableEditMode(selected,row) {
@@ -174,9 +176,9 @@
         });
 
         // Desmarcar y habilitar el checkbox de la fila
-        selected[0].checked = false;
-        selected[0].disabled = false;
-
+        selected.disabled=false;
+        selected.checked=false;
+       
         // Habilitar todos los checkboxes y el botón de edición
         document.getElementById('select-all').disabled = false;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
