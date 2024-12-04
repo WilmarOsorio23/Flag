@@ -13,7 +13,7 @@ from Modulo.models import Consultores, Empleado,Cargos
 def cargos_index(request):
     # Ordenar los módulos por el campo 'id' en orden ascendente
     lista  = Cargos.objects.all().order_by('CargoId')
-    return render(request, 'Cargos/cargos_index.html', {'Cargo': lista})
+    return render(request, 'Cargos/cargos_index.html', {'Cargos': lista})
 
     
 def crear(request):
@@ -86,15 +86,15 @@ def descargar_excel(request):
         # Convierte la cadena de IDs en una lista de enteros
     
         item_ids = list(map(int, item_ids.split (',')))  # Cambiado aquí
-        modulos = Cargos.objects.filter(CargoId__in=item_ids)
+        Datos = Cargos.objects.filter(CargoId__in=item_ids)
 
         # Crea una respuesta HTTP con el tipo de contenido de Excel
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="Cargos.xlsx"'
 
         data = []
-        for modulo in modulos:
-            data.append([modulo.CargoId, modulo.Cargo])
+        for dato in Datos:
+            data.append([dato.CargoId, dato.Cargo])
 
         df = pd.DataFrame(data, columns=['Id', 'Nombre'])
         df.to_excel(response, index=False)

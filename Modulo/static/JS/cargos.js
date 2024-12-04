@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
     async function verifyRelations(ids, csrfToken) {
         try {
-            const response = await fetch('/cargos/verificar-relaciones/', {
+            const response = await fetch('/Cargos/verificar-relaciones/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -225,14 +225,14 @@ document.addEventListener('DOMContentLoaded', function() {
         let row = selected[0].closest('tr');
         let id = selected[0].value;
         let data = {
-            'Modulo': row.querySelector('input[name="nombre"]').value
+            'Cargo': row.querySelector('input[name="cargo"]').value
         };
 
         // Deshabilitar los checkboxes y el botón de edición
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
 
-        fetch(`/Modulo/editar/${id}/`, {
+        fetch(`/Cargos/editar/${id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
