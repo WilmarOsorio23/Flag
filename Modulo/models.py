@@ -74,6 +74,15 @@ class TipoDocumento(models.Model):
     class Meta:
         db_table = 'TipoDocumento'
 
+class Cargos(models.Model):
+    CargoId = models.AutoField(primary_key=True)
+    Cargo = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.Cargo}"
+
+    class Meta:
+        db_table = 'Cargos'
 
 # Modelos con relaciones
 class Clientes(models.Model):
@@ -312,7 +321,7 @@ class Empleado(models.Model):
     ModuloId = models.ForeignKey(Modulo, on_delete=models.CASCADE, db_column='ModuloId')
     PerfilId = models.ForeignKey(Perfil, on_delete=models.CASCADE, db_column='PerfilId')
     LineaId = models.ForeignKey(Linea, on_delete=models.CASCADE, db_column='LineaId')
-    Cargo = models.CharField(max_length=100)
+    CargoId = models.ForeignKey(Cargos, on_delete=models.CASCADE, db_column='CargoId')  # Cambiado aquí
     TituloProfesional = models.CharField(max_length=100)
     FechaGrado = models.DateField()
     Universidad = models.CharField(max_length=100)

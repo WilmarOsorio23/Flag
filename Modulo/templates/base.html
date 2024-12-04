@@ -43,6 +43,11 @@
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuDatosMaestros">
                                 <li>
+                                    <a class="nav-item nav-link" href="{% url 'cargos_index' %}">
+                                        <i class="fas fa-table"></i> Cargos
+                                    </a>
+                                </li>
+                                <li>
                                     <a class="nav-item nav-link" href="{% url 'certificacion_index' %}">
                                         <i class="fas fa-table"></i> Certificacion
                                     </a>
@@ -189,7 +194,7 @@
                             {% endif %}
                         {% endblock %}
                     </div>
-                </div>
+                </div> 
             </div>
 
         </div>
