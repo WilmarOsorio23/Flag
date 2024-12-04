@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
     async function verifyRelations(ids, csrfToken) {
         try {
-            const response = await fetch('/verificar-relaciones/', {
+            const response = await fetch('/gastos/verificar-relaciones/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -164,11 +164,11 @@ document.addEventListener('DOMContentLoaded', function() {
     window.enableEdit = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 0) {
-            showMessage('Por favor, selecciona al menos un módulo.', 'danger');
+            showMessage('Por favor, selecciona al menos un gasto.', 'danger');
             return false;
         }
         if (selected.length > 1) {
-            showMessage('Por favor, Selecciona un solo módulo para editar.', 'danger');
+            showMessage('Por favor, Selecciona un solo gasto para editar.', 'danger');
             return false;
         }
 
@@ -218,21 +218,21 @@ document.addEventListener('DOMContentLoaded', function() {
     window.saveRow = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length != 1) {
-            showMessage('Error al guardar: No hay un módulo seleccionado.', 'danger');
+            showMessage('Error al guardar: No hay un gasto seleccionado.', 'danger');
             return;
         }
 
         let row = selected[0].closest('tr');
         let id = selected[0].value;
         let data = {
-            'Modulo': row.querySelector('input[name="nombre"]').value
+            'Gasto': row.querySelector('input[name="Gasto"]').value
         };
 
         // Deshabilitar los checkboxes y el botón de edición
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
 
-        fetch(`/Modulo/editar/${id}/`, {
+        fetch(`/gastos/editar/${id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

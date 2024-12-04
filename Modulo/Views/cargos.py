@@ -7,54 +7,54 @@ from django.db import models
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
-from Modulo.forms import ModuloForm
-from Modulo.models import Consultores, Empleado, Modulo
+from Modulo.forms import CargosForm
+from Modulo.models import Consultores, Empleado,Cargos
 
-def modulo(request):
+def cargos_index(request):
     # Ordenar los módulos por el campo 'id' en orden ascendente
-    lista_modulos  = Modulo.objects.all().order_by('ModuloId')
-    return render(request, 'Modulo/index.html', {'Modulo': lista_modulos})
+    lista  = Cargos.objects.all().order_by('CargoId')
+    return render(request, 'Cargos/cargos_index.html', {'Cargos': lista})
 
     
 def crear(request):
     if request.method == 'POST':
-        form = ModuloForm(request.POST)
+        form = CargosForm(request.POST)
         if form.is_valid():
-            max_id = Modulo.objects.all().aggregate(max_id=models.Max('ModuloId'))['max_id']
+            max_id = Cargos.objects.all().aggregate(max_id=models.Max('CargoId'))['max_id']
             new_id = max_id + 1 if max_id is not None else 1
             nuevo_modulo = form.save(commit=False)
-            nuevo_modulo.ModuloId = new_id
+            nuevo_modulo.CargoId = new_id
             nuevo_modulo.save()
             
-            return redirect('Modulo')
+            return redirect('cargos_index')
     else:
-        form = ModuloForm()
-    return render(request, 'Modulo/crear.html', {'form': form})
+        form = CargosForm()
+    return render(request, 'Cargos/cargos_crear.html', {'form': form})
 
 @csrf_exempt
 def editar(request, id):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            modulo = get_object_or_404(Modulo, pk=id)
-            modulo.Modulo = data.get('Modulo', modulo.Modulo)  # Actualiza solo si está presente
+            modulo = get_object_or_404(Cargos, pk=id)
+            modulo.Cargo = data.get('Cargo', modulo.Cargo)  # Actualiza solo si está presente
             modulo.save()
             return JsonResponse({'status': 'success'})
-        except Modulo.DoesNotExist:
-            return JsonResponse({'status': 'error', 'errors': ['Módulo no encontrado']})
+        except Cargos.DoesNotExist:
+            return JsonResponse({'status': 'error', 'errors': ['Cargo no encontrado']})
         except ValueError as ve:
             return JsonResponse({'status': 'error', 'errors': ['Error al procesar los datos: ' + str(ve)]})
         except Exception as e:
             return JsonResponse({'status': 'error', 'errors': ['Error desconocido: ' + str(e)]})
-    return JsonResponse({'status': 'error', 'error': 'Método no permitido'})
+    return JsonResponse({'status': 'error', 'error': 'Cargo no permitido'})
     
 def eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        Modulo.objects.filter(ModuloId__in=item_ids).delete()
-        messages.success(request, 'Los módulos seleccionados se han eliminado correctamente.')
-        return redirect('Modulo')
-    return redirect('Modulo')
+        Cargos.objects.filter(CargoId__in=item_ids).delete()
+        messages.success(request, 'Los cargos seleccionados se han eliminado correctamente.')
+        return redirect('cargos_index')
+    return redirect('cargos_index')
 
 def verificar_relaciones(request):
     if request.method == 'POST':
@@ -66,8 +66,7 @@ def verificar_relaciones(request):
         relacionados = []
         for id in ids:
             if (
-                Empleado.objects.filter(ModuloId=id).exists() or
-                Consultores.objects.filter(ModuloId=id).exists()
+                Empleado.objects.filter(CargoId=id).exists()
             ): 
                 relacionados.append(id)
 
@@ -78,7 +77,7 @@ def verificar_relaciones(request):
             })
         else:
             return JsonResponse({'isRelated': False})
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
+    return JsonResponse({'error': 'Cargo no permitido'}, status=405)
 
 def descargar_excel(request):
     # Verifica si la solicitud es POST
@@ -87,19 +86,19 @@ def descargar_excel(request):
         # Convierte la cadena de IDs en una lista de enteros
     
         item_ids = list(map(int, item_ids.split (',')))  # Cambiado aquí
-        modulos = Modulo.objects.filter(ModuloId__in=item_ids)
+        Datos = Cargos.objects.filter(CargoId__in=item_ids)
 
         # Crea una respuesta HTTP con el tipo de contenido de Excel
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="Modulos.xlsx"'
+        response['Content-Disposition'] = 'attachment; filename="Cargos.xlsx"'
 
         data = []
-        for modulo in modulos:
-            data.append([modulo.ModuloId, modulo.Modulo])
+        for dato in Datos:
+            data.append([dato.CargoId, dato.Cargo])
 
         df = pd.DataFrame(data, columns=['Id', 'Nombre'])
         df.to_excel(response, index=False)
 
         return response
 
-    return redirect('Modulo')
+    return redirect('cargos_index')

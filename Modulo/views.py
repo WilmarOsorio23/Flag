@@ -1,3 +1,4 @@
+from openpyxl import Workbook
 import pandas as pd
 import json
 from django.shortcuts import render, redirect, get_object_or_404
@@ -58,153 +59,7 @@ def inicio(request):
 def nosotros(request):
     return render(request, 'paginas/nosotros.html')
 
-# Vista para la tabla IPC
-def ipc_index(request):
-    ipc_data = IPC.objects.all().order_by('-Anio','Mes')
-    return render(request, 'ipc/ipc_index.html', {'ipc_data': ipc_data})
-
-def ipc_crear(request):
-    if request.method == 'POST':
-        form = IPCForm(request.POST)
-        if form.is_valid():
-            max_id = IPC.objects.all().aggregate(max_id=models.Max('id'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_ipc = form.save(commit=False)
-            nuevo_ipc.id = new_id
-            nuevo_ipc.save()
-            return redirect('ipc_index')
-    else:
-        form = IPCForm()
-    return render(request, 'ipc/ipc_form.html', {'form': form})
-
-@csrf_exempt
-def ipc_editar(request, id):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body.decode('utf-8'))
-            ipc = IPC.objects.get(pk=id)
-            form = IPCForm(data, instance=ipc)
-
-            if form.is_valid():
-                form.save()
-                return JsonResponse({'status': 'success'})
-            else:
-                return JsonResponse({'errors': form.errors}, status=400)
-        except Modulo.DoesNotExist:
-            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-    else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-
-
-def ipc_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        IPC.objects.filter(id__in=item_ids).delete()
-        return redirect('ipc_index')
-    return redirect('ipc_index')
-
-def ipc_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        print(item_ids)  # Verifica qué valores se están enviando.
-        ipc_data = IPC.objects.filter(id__in=item_ids)
-
-        if not ipc_data.exists():
-            messages.error(request, "No se encontraron datos para descargar.")
-            return redirect('ipc_index')
-
-        data = []
-        for ipc in ipc_data:
-            data.append([ipc.id, ipc.Anio, ipc.Mes, ipc.Indice])
-
-        df = pd.DataFrame(data, columns=['Id', 'Año', 'Mes', 'Campo Numérico'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="ipc.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('ipc_index')
-
-
-#vista para la IND
-
-def ind_index(request):
-    ind_data = IND.objects.all().order_by('-Anio','Mes')
-    return render(request, 'ind/ind_index.html', {'ind_data': ind_data})
-
-def ind_crear(request):
-    if request.method == 'POST':
-        form = INDForm(request.POST)
-        if form.is_valid():
-            max_id = IND.objects.all().aggregate(max_id=models.Max('id'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_ind = form.save(commit=False)
-            nuevo_ind.id = new_id
-            nuevo_ind.save()
-            return redirect('ind_index')
-    else:
-        form = INDForm()
-    return render(request, 'ind/ind_form.html', {'form': form})
-
-def ind_editar(request, id):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body.decode('utf-8'))
-            ind = IND.objects.get(pk=id)
-            form = INDForm(data, instance=ind)
-
-            if form.is_valid():
-                form.save()
-                return JsonResponse({'status': 'success'})
-            else:
-                return JsonResponse({'errors': form.errors}, status=400)
-        except Modulo.DoesNotExist:
-            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-    else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-
-    
-def ind_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        IND.objects.filter(id__in=item_ids).delete()
-        return redirect('ind_index')
-    return redirect('ind_index')
-
-def ind_descargar_excel(request):
-    print("inicio descarga")
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        print(item_ids)
-        ind_data = IND.objects.filter(id__in=item_ids)
-
-        if not ind_data.exists():
-            messages.error(request, "No se encontraron datos para descargar.")
-            return redirect('ind_index')
-        
-        data = []
-        for ind in ind_data:    
-            data.append([ind.id, ind.Anio, ind.Mes, ind.Indice])
-
-        df = pd.DataFrame(data, columns=['Id', 'Año', 'Mes', 'Incice'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="ind.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('ind_index')
-
-# Vista para listar líneas
+# Vista para linea
 def linea_index(request):
     linea_data = Linea.objects.all()
     return render(request, 'linea/linea_index.html', {'lineas': linea_data})
@@ -415,65 +270,6 @@ def consultores_descargar_excel(request):
 
     return redirect('consultores_index')
 
-
-# Vista Gastos
-def gasto_index(request):
-    gastos = Gastos.objects.all()
-    return render(request, 'Gastos/gasto_index.html', {'gastos': gastos})
-
-def gasto_crear(request):
-    if request.method == 'POST':
-        form = GastoForm(request.POST)
-        if form.is_valid():
-            max_id = Gastos.objects.all().aggregate(max_id=models.Max('GastoId'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_gasto = form.save(commit=False)
-            nuevo_gasto.GastoId = new_id
-            nuevo_gasto.save()
-            return redirect('gasto_index')
-    else:
-        form = GastoForm()
-    return render(request, 'Gastos/gasto_form.html', {'form': form})
-
-def gasto_editar(request, id):
-    gasto = get_object_or_404(Gastos, GastoId=id)
-
-    if request.method == 'POST':
-        form = GastoForm(request.POST, instance=gasto)
-        if form.is_valid():
-            form.save()
-            return redirect('gastos_index')
-    else:
-        form = GastoForm(instance=gasto)
-
-    return render(request, 'Gastos/gastos_form.html', {'form': form})
-
-def gasto_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        Gastos.objects.filter(GastoId__in=item_ids).delete()
-        return redirect('gastos_index')
-    return redirect('gastos_index')
-
-def gasto_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        gasto_data = Gastos.objects.filter(GastoId__in=item_ids)
-
-        data = []
-        for gasto in gasto_data:
-            data.append([gasto.GastoId, gasto.Gasto])
-
-        df = pd.DataFrame(data, columns=['GastoId', 'Gasto'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="gastos.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('gastos_index')
 
 # Detalle gastos
 def detalle_gastos_index(request):
@@ -1136,7 +932,7 @@ def empleado_filtrado(request):
 # Funcionalidad para descargar los resultados en Excel
 def exportar_excel(request):
     empleados = Empleado.objects.all().select_related('LineaId', 'ModuloId', 'PerfilId').prefetch_related(
-        Prefetch('detallecertificacion_set', queryset=Detalle_Certificacion.objects.select_related('CertificacionId'))
+        Prefetch('detallecertificacion_set', queryset=Detalle_Certificacion.objects.select_related('CertificacionId')) # type: ignore
     )
 
     wb = Workbook()
@@ -1158,7 +954,7 @@ def exportar_excel(request):
                 empleado.PerfilId.Nombre if empleado.PerfilId else '',
             ])
 
-    response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') # type: ignore
     response['Content-Disposition'] = 'attachment; filename=empleados_certificaciones.xlsx'
 
 # Informe de Nómina de Empleados
@@ -1237,7 +1033,7 @@ def empleado_nomina_filtrado(request):
 # Funcionalidad para descargar los resultados en Excel
 def exportar_nomina_excel(request):
     empleados = Empleado.objects.all().select_related('LineaId', 'ModuloId', 'PerfilId').prefetch_related(
-        Prefetch('nomina_set', queryset=Nomina.objects.select_related('Cliente'))
+        Prefetch('nomina_set', queryset=Nomina.objects.select_related('Cliente')) # type: ignore
     )
 
     wb = Workbook()
@@ -1262,7 +1058,7 @@ def exportar_nomina_excel(request):
                 nomina.Mes
             ])
 
-    response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') # type: ignore
     response['Content-Disposition'] = 'attachment; filename=empleados_nomina.xlsx'
 
     return response

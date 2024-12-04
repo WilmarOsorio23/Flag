@@ -2,7 +2,7 @@ from django import forms
 from .models import Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes, Consultores, Certificacion, Costos_Indirectos
 from .models import Concepto, Gastos, Detalle_Gastos, Total_Gastos, Total_Costos_Indirectos
 from .models import Detalle_Costos_Indirectos, TiemposConcepto, Tiempos_Cliente, Nomina, Detalle_Certificacion, Empleado
-
+from .models import Cargos
 
 from django import forms
 from .models import Modulo
@@ -45,6 +45,20 @@ class IPCForm(forms.ModelForm):
             'Indice': 'Índice',
         }
 
+class CargosForm(forms.ModelForm):
+    class Meta:
+        model = Cargos
+        fields = '__all__'
+        widgets = {
+            'Cargo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ingrese el Cargo'
+            }),
+        }
+        labels = {
+            'Cargo': 'Cargo',
+        } 
+
 class ClientesForm(forms.ModelForm):
     class Meta:
         model = Clientes
@@ -74,6 +88,7 @@ class ClientesForm(forms.ModelForm):
                 'type': 'date'
                 }),
         }  
+        
 class INDForm(forms.ModelForm):
     class Meta:
         model = IND
