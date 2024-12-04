@@ -1,82 +1,99 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block titulo %} Lista de Tipos de Documentos {% endblock %}
+{% block titulo %}
+  Lista de Tipos de Documentos
+{% endblock %}
 
 {% block contenido %}
-<div class="card">
+  <div class="card">
     <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
-        <span id="alert-icon" class="alert-heading"></span>
-        <span id="alert-message"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <span id="alert-icon" class="alert-heading"></span>
+      <span id="alert-message"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <div class="card-header d-flex justify-content-between align-items-center"> 
-        <h4 class="card-title">Tipos de Documentos</h4>
+    {% if messages %}
+      <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4 class="card-title">Tipos de Documentos</h4>
     </div>
     <div class="card-body">
-        <!-- CRUD Icons -->
-        <div class="button-group" >
-            <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'tipo_documento_crear' %}" role="button" ></a> 
-            <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button"  onclick="enableEdit();"></a> 
-            <button id="save-button" class="btn btn-outline-success fas fa-save d-none" title="Guardar" onclick="saveRow();"></button>
-            <i class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
-            <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>	
-            <form id="download-form" method="POST" action="{% url 'tipo_documento_descargar_excel' %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
-            </form>
-        </div>
+      <!-- CRUD Icons -->
+      <div class="button-group">
+        <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'tipo_documento_crear' %}" role="button"></a>
+        <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button" onclick="enableEdit();"></a>
+        <i class="btn btn-outline-primary fas fa-eye" title="Visualizar"></i>
+        <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>
+        <form id="download-form" method="POST" action="{% url 'tipo_documento_descargar_excel' %}" style="display:inline;">
+          {% csrf_token %}
+          <input type="hidden" name="items_to_delete" id="items_to_delete">
+          <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
+        </form>
+        <!-- Botones de Guardar y Cancelar -->
+        <button id="save-button" class="btn btn-outline-success fas fa-save d-none" title="Guardar" type="button" onclick="saveRow();"></button>
+        <button id="cancel-button" class="btn btn-outline-danger fas fa-times d-none" title="Cancelar" type="button" onclick="cancelEdit();"></button>
+      </div>
     </div>
     <div class="card-footer text-muted">
-        
-        <div class="table-responsive">
-            <form id="delete-form" method="POST" action="{% url 'tipo_documento_eliminar' %}">
-                {% csrf_token %}
-                <table class="table table-primary">
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Id</th>
-                            <th scope="col">Tipo Documento</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for tipo_documento in tipo_documentos %}
-                        <tr id="row-{{ tipo_documento.TipoDocumentoID }}">
-                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ tipo_documento.TipoDocumentoID }}"></td>
-                            <td>{{ tipo_documento.TipoDocumentoID }}</td>
-                            <td><input type="text" name="Nombre" class="form-control-plaintext" value="{{ tipo_documento.Nombre }}" readonly></td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="3">No hay datos disponibles.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </form>
-        </div>
+      <div class="table-responsive">
+        <form id="delete-form" method="POST" action="{% url 'tipo_documento_eliminar' %}">
+          {% csrf_token %}
+          <table class="table table-primary">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" id="select-all" />
+                </th>
+                <th scope="col">Id</th>
+                <th scope="col">Tipo Documento</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for tipo_documento in tipo_documentos %}
+                <tr id="row-{{ tipo_documento.TipoDocumentoID }}">
+                  <td>
+                    <input type="checkbox" class="row-select" name="items_to_delete" value="{{ tipo_documento.TipoDocumentoID }}" />
+                  </td>
+                  <td>{{ tipo_documento.TipoDocumentoID }}</td>
+                  <td>
+                    <input type="text" name="Nombre" class="form-control-plaintext" value="{{ tipo_documento.Nombre }}" readonly />
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="3">No hay datos disponibles.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
     </div>
-</div>
-<!-- Modal de confirmación -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+  </div>
+  <!-- Modal de confirmación -->
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-            <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-            ¿Estás seguro de que deseas eliminar este tipo de documento?
-            </div>
-            <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-            <button id="confirm-delete-btn" type="button" class="btn btn-danger">Sí</button>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+        <div class="modal-body">¿Estás seguro de que deseas eliminar este tipo de documento?</div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+          <button id="confirm-delete-btn" type="button" class="btn btn-danger">Sí</button>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
 <script src="{% static 'JS/TipoDocumento.js' %}"></script>
-
 {% endblock %}

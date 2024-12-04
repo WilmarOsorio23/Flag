@@ -1,12 +1,15 @@
 # Vista Costo Indirecto
 import json
+from pyexpat.errors import messages
+from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from Modulo import models
+from django.db import models
 from Modulo.forms import CostosIndirectosForm
-from Modulo.models import Costos_Indirectos
+from Modulo.models import Costos_Indirectos, Detalle_Costos_Indirectos
 
 
 def costos_indirectos_index(request):
@@ -55,8 +58,32 @@ def costos_indirectos_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
         Costos_Indirectos.objects.filter(CostoId__in=item_ids).delete()
+        messages.success(request, 'Los costos indirectos seleccionados se han eliminado correctamente.')
         return redirect('costos_indirectos_index')
     return redirect('costos_indirectos_index')
+
+def verificar_relaciones(request):
+    if request.method == 'POST':
+        import json
+        data = json.loads(request.body)
+        ids = data.get('ids', [])
+
+        # Verifica si los módulos están relacionados
+        relacionados = []
+        for id in ids:
+            if (
+                Detalle_Costos_Indirectos.objects.filter(CostoId=id).exists() 
+            ): 
+                relacionados.append(id)
+
+        if relacionados:
+            return JsonResponse({
+                'isRelated': True,
+                'ids': relacionados
+            })
+        else:
+            return JsonResponse({'isRelated': False})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def costos_indirectos_descargar_excel(request):
     if request.method == 'POST':
