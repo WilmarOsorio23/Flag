@@ -6,6 +6,7 @@ from Modulo.Views import Conceptos
 from Modulo.Views import Clientes
 from Modulo.Views import CostosIndirectos
 from Modulo.Views import gastos
+from Modulo.Views import cargos
 from . import views
 
 
@@ -56,6 +57,14 @@ urlpatterns = [
     path('verificar-relaciones/', TipoDocumento.verificar_relaciones, name='verificar_relaciones'),
     path('tipo_documento/eliminar', TipoDocumento.tipo_documento_eliminar, name='tipo_documento_eliminar'),
     path('tipo_documento/descargar_excel', TipoDocumento.tipo_documento_descargar_excel, name='tipo_documento_descargar_excel'),
+
+    # Rutas para tabla Modulo
+    path('Cargos/', cargos.cargos_index, name='cargos_index'),
+    path('Cargos/crear', cargos.crear, name='cargos_crear'),
+    path('Cargos/editar/<int:id>/', cargos.editar, name='cargos_editar'),
+    path('Cargos/eliminar', cargos.eliminar, name='cargos_eliminar'),
+    path('Cargos/verificar-relaciones/', cargos.verificar_relaciones, name='cargos_verificar_relaciones'),
+    path('Cargos/descargar_excel', cargos.descargar_excel, name='cargos_descargar_excel'),
 
     # Rutas para la tabla Clientes
     path('clientes/', Clientes.clientes_index, name='clientes_index'),
