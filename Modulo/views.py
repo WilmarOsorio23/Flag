@@ -7,6 +7,7 @@ from django.db import models
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
+from django.db.models import Q
 from django.contrib import messages
 from .models import Modulo
 from .forms import ModuloForm
