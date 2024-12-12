@@ -7,6 +7,7 @@ from Modulo.Views import Certificacion
 from Modulo.Views import Conceptos
 from Modulo.Views import Clientes
 from Modulo.Views import CostosIndirectos
+from Modulo.Views import Nomina
 from . import views
 
 
@@ -143,11 +144,11 @@ urlpatterns = [
     path('tiempos_cliente/descargar_excel', views.tiempos_cliente_descargar_excel, name='tiempos_cliente_descargar_excel'),
 
     # Rutas para tabla Nomina
-    path('nomina/', views.nomina_index, name='nomina_index'),
-    path('nomina/crear', views.nomina_crear, name='nomina_crear'),
-    path('nomina/editar/<str:anio>/<str:mes>/<str:documento>/', views.nomina_editar, name='nomina_editar'),
-    path('nomina/eliminar', views.nomina_eliminar, name='nomina_eliminar'),
-    path('nomina/descargar_excel', views.nomina_descargar_excel, name='nomina_descargar_excel'),
+    path('nomina/', Nomina.nomina_index, name='nomina_index'),
+    path('nomina/crear', Nomina.nomina_crear, name='nomina_crear'),
+    path('nomina/editar/<str:anio>/<str:mes>/<str:documento>/', Nomina.nomina_editar, name='nomina_editar'),
+    path('nomina/eliminar', Nomina.nomina_eliminar, name='nomina_eliminar'),
+    path('nomina/descargar_excel', Nomina.nomina_descargar_excel, name='nomina_descargar_excel'),
 
     # Rutas para tabla Detalle Certificación
     path('detalle_certificacion/', views.detalle_certificacion_index, name='detalle_certificacion_index'),
