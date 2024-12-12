@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block titulo %} Informe de Certificaciones {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Informe de Empleados</h4>
+    </div>
+    <div class="card-body">
+        <!-- Formulario de búsqueda -->
+        <form method="GET" class="form-inline">
+            <div class="form-group mr-3 col-md-3">
+                {{ form.Documento.label_tag }}
+                {{ form.Documento }}
+            </div>
+            <div class="form-group mr-3 col-md-3">
+                {{ form.LineaId.label_tag }}
+                {{ form.LineaId }}
+            </div>
+            <div class="form-group mr-3 col-md-3">
+                {{ form.Cargo.label_tag }}
+                {{ form.Cargo }}
+            </div>
+            <div class="form-group mr-3 col-md-3">
+                {{ form.Perfil.label_tag }}
+                {{ form.Perfil }}
+            </div>
+            <div class="form-group mr-3 col-md-3">
+                {{ form.Certificacion.label_tag }}
+                {{ form.Certificacion }}
+            </div>
+            <div class="form-group mt-3 col-md-3">
+                <button type="submit" name="buscar" class="btn btn-primary">Buscar</button>
+            </div>
+        </form>
+
+        <!-- Resultados -->
+        {% if show_data and empleados %}
+        <div class="table-responsive mt-4">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Tipo Documento</th>
+                        <th>Documento</th>
+                        <th>Nombre</th>
+                        <th>Fecha Nacimiento</th>
+                        <th>Fecha Ingreso</th>
+                        <th>Fecha Operación</th>
+                        <th>Módulo</th>
+                        <th>Perfil</th>
+                        <th>Línea</th>
+                        <th>Cargo</th>
+                        <th>Título Profesional</th>
+                        <th>Fecha Grado</th>
+                        <th>Universidad</th>
+                        <th>Profesión Realizada</th>
+                        <th>Título Profesional Actual</th>
+                        <th>Universidad Actual</th>
+                        <th>Academia SAP</th>
+                        <th>Certificado SAP</th>
+                        <th>Otras Certificaciones</th>
+                        <th>Postgrados</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for empleado in empleados %}
+                    <tr>
+                        <td>{{ empleado.TipoDocumento.codigo }} - {{ empleado.TipoDocumento.descripcion }}</td>
+                        <td>{{ empleado.Documento }}</td>
+                        <td>{{ empleado.Nombre }}</td>
+                        <td>{{ empleado.Fecha_Nacimiento|date:"d/m/Y" }}</td>
+                        <td>{{ empleado.Fecha_Ingreso|date:"d/m/Y" }}</td>
+                        <td>{{ empleado.Fecha_Operacion|date:"d/m/Y" }}</td>
+                        <td>{{ empleado.Modulo.codigo }} - {{ empleado.Modulo.descripcion }}</td>
+                        <td>{{ empleado.Perfil.codigo }} - {{ empleado.Perfil.descripcion }}</td>
+                        <td>{{ empleado.Linea.codigo }} - {{ empleado.Linea.descripcion }}</td>
+                        <!--  <td>{{ empleado.Cargo }}</td>-->
+                        <td>{{ empleado.Titulo_Profesional }}</td>
+                        <td>{{ empleado.Fecha_Grado|date:"d/m/Y" }}</td>
+                        <td>{{ empleado.Universidad }}</td>
+                        <td>{{ empleado.Profesion_Realizada }}</td>
+                        <td>{{ empleado.Titulo_Profesional_Actual }}</td>
+                        <td>{{ empleado.Universidad_Actual }}</td>
+                        <td>{{ empleado.Academia_SAP }}</td>
+                        <td>{{ empleado.Certificado_SAP }}</td>
+                        <td>{{ empleado.Otras_Certificaciones }}</td>
+                        <td>{{ empleado.Postgrados }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="20">No se encontraron resultados con los filtros seleccionados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Botón para descargar el informe -->
+            <a href="{% url 'descargar_informe_excel' %}" class="btn btn-success">Descargar Excel</a>
+        </div>
+        {% elif show_data %}
+            <p>No se encontraron resultados.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
