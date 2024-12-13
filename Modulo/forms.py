@@ -449,38 +449,38 @@ class NominaForm(forms.ModelForm):
         model = Nomina
         fields = '__all__'
         widgets = {
-            'anio': forms.TextInput(attrs={
+            'Anio': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el año'
             }),
-            'mes': forms.TextInput(attrs={
+            'Mes': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'documento': forms.TextInput(attrs={
+            'Documento': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el documento'
             }),
-            'salario': forms.NumberInput(attrs={
+            'Salario': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el salario'
             }),
-            'cliente': forms.TextInput(attrs={
+            'Cliente': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el cliente'
             }),
         }
         labels = {
-            'anio': 'Año',
-            'mes': 'Mes',
-            'documento': 'Documento',
-            'salario': 'Salario',
-            'cliente': 'Cliente',
+            'Anio': 'Año',
+            'Mes': 'Mes',
+            'Documento': 'Documento',
+            'Salario': 'Salario',
+            'Cliente': 'Cliente',
         }
 
 class Detalle_CertificacionForm(forms.ModelForm):

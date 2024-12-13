@@ -299,31 +299,31 @@ class Nomina(models.Model):
 
     class Meta:
         db_table = 'Nomina'
-        
+
 
 class Empleado(models.Model):
-    Documento = models.CharField(max_length=20)
-    TipoDocumento = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE, db_column='TipoDocumento')
-    Nombre = models.CharField(max_length=100)
-    FechaNacimiento = models.DateField()
-    FechaIngreso = models.DateField()
-    FechaOperacion = models.DateField()
-    ModuloId = models.ForeignKey(Modulo, on_delete=models.CASCADE, db_column='ModuloId')
-    PerfilId = models.ForeignKey(Perfil, on_delete=models.CASCADE, db_column='PerfilId')
-    LineaId = models.ForeignKey(Linea, on_delete=models.CASCADE, db_column='LineaId')
-    Cargo = models.CharField(max_length=100)
-    TituloProfesional = models.CharField(max_length=100)
-    FechaGrado = models.DateField()
-    Universidad = models.CharField(max_length=100)
-    ProfesionRealizada = models.CharField(max_length=100)
-    TituloProfesionalActual = models.CharField(max_length=100)
-    UniversidadActual = models.CharField(max_length=100)
-    AcademiaSAP = models.CharField(max_length=100)
-    CertificadoSAP = models.CharField(max_length=100)
-    OtrasCertificaciones = models.TextField()
-    Postgrados = models.TextField()
+     Documento = models.CharField(max_length=20, primary_key=True) 
+     TipoDocumento = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE, db_column='TipoDocumento')
+     Nombre = models.CharField(max_length=100)
+     FechaNacimiento = models.DateField()
+     FechaIngreso = models.DateField()
+     FechaOperacion = models.DateField()
+     ModuloId = models.ForeignKey(Modulo, on_delete=models.CASCADE, db_column='ModuloId')
+     PerfilId = models.ForeignKey(Perfil, on_delete=models.CASCADE, db_column='PerfilId')
+     LineaId = models.ForeignKey(Linea, on_delete=models.CASCADE, db_column='LineaId')
+     Cargoid= models.CharField(max_length=100)
+     TituloProfesional = models.CharField(max_length=100)
+     FechaGrado = models.DateField()
+     Universidad = models.CharField(max_length=100)
+     ProfesionRealizada = models.CharField(max_length=100)
+     TituloProfesionalActual = models.CharField(max_length=100)
+     UniversidadActual = models.CharField(max_length=100)
+     AcademiaSAP = models.CharField(max_length=100)
+     CertificadoSAP = models.CharField(max_length=100)
+     OtrasCertificaciones = models.TextField()
+     Postgrados = models.TextField()
 
-    class Meta:
+     class Meta:
         db_table = 'Empleado'
         unique_together = (('TipoDocumento', 'Documento'),)
 

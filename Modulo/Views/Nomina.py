@@ -9,22 +9,21 @@ from django.db import models
 
 
 def nomina_index(request):
-    nomina_data = Nomina.objects.all()
+    nomina_data = Nomina.objects.all().order_by('-Anio','Mes')
+    
     return render(request, 'nomina/nomina_index.html', {'nomina_data': nomina_data})
 
 def nomina_crear(request):
     if request.method == 'POST':
         form = NominaForm(request.POST)
         if form.is_valid():
-            max_id = Nomina.objects.all().aggregate(max_id=models.Max('Documento'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
             nueva_nomina = form.save(commit=False)
-            nueva_nomina.Documento = new_id  # Asignar un nuevo Documento
-            nueva_nomina.save()
+            nueva_nomina.save()  # Guardar directamente el registro con el Documento proporcionado
             return redirect('nomina_index')
     else:
         form = NominaForm()
     return render(request, 'Nomina/nomina_form.html', {'form': form})
+
 
 
 def nomina_editar(request, anio, mes, documento):
@@ -69,3 +68,4 @@ def nomina_descargar_excel(request):
         return response
 
     return redirect('nomina_index')
+    

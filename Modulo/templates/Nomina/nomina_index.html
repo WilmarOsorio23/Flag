@@ -28,7 +28,7 @@
             <a name="" id="" class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'nomina_crear' %}" role="button" ></a> 
             <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button"  onclick="enableEdit();"></a> 
             <i name="" id="" class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
-            <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" ></button> 
+            <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar"  onclick="return confirmDelete();"></button> 
             <form id="download-form" method="POST" action="{% url 'nomina_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
@@ -63,16 +63,17 @@
                             <th scope="col">Cliente</th>
                         </tr>
                     </thead>
+                    
                     <tbody>
                         {% for nomina in nomina_data %}
-                        <tr id="row-{nomina.NominaID}">
+                         <tr id="row-{nomina.NominaID}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{ nomina.NominaID }"></td>
                             <td><input type="text" name="anio" class="form-control-plaintext" value="{{ nomina.Anio }}" readonly></td>
                             <td><input type="text" name="mes" class="form-control-plaintext" value="{{ nomina.Mes }}" readonly></td>
                             <td><input type="text" name="documento" class="form-control-plaintext" value="{{nomina.Documento}}" readonly></td>
                             <td><input type="text" name="salario" class="form-control-plaintext" value="{{nomina.Salario}}" readonly></td>
-                            <td><input type="text" name="cliente" class="form-control-plaintext" value="{{nomina.cliente}}" readonly></td>
-                        </tr>
+                            <td><input type="text" name="cliente" class="form-control-plaintext" value="{{nomina.Cliente}}" readonly></td>
+                         </tr>   
                         {% endfor %}
                     </tbody>
                 </table>
