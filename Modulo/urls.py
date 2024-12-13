@@ -9,6 +9,7 @@ from Modulo.Views import Clientes
 from Modulo.Views import CostosIndirectos
 from Modulo.Views import gastos
 from Modulo.Views import cargos
+from Modulo.Views import empleado_nomina_filtrado
 from . import views
 
 
@@ -176,6 +177,10 @@ urlpatterns = [
 
     # Rutas para informe de certificación
     path('informes/', views.empleado_filtrado, name='informes_certificacion_index'),
-    path('informes/salarios/', views.empleado_nomina_filtrado, name='informes_salarios_index'),
     path('descargar_excel/', modulo.descargar_excel, name='descargar_excel'),
+
+    # Rutas para informe de salario
+    path('informes/salarios/', empleado_nomina_filtrado.empleado_nomina_filtrado, name='informes_salarios_index'),
+    path('informes/salarios/exportar_nomina_excel', empleado_nomina_filtrado.exportar_nomina_excel, name='exportar_nomina_excel'),
+       
 ]

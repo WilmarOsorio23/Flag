@@ -312,8 +312,8 @@ class Nomina(models.Model):
         ]
 
 class Empleado(models.Model):
+    Documento = models.CharField(max_length=20, primary_key=True)
     TipoDocumento = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE, db_column='TipoDocumento')
-    Documento = models.CharField(max_length=20)
     Nombre = models.CharField(max_length=100)
     FechaNacimiento = models.DateField()
     FechaIngreso = models.DateField()

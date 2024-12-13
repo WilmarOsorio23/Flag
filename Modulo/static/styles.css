@@ -453,6 +453,77 @@ a.fas, .fa {
 }
 
 /* ========================== */
+/*     FILTROS DESIGN      */
+/* ========================== */
+
+/* Estilos para los encabezados ordenables */
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: all 0.3s ease;
+    padding: 8px;
+}
+
+.sortable:hover {
+    background-color: #0153ac;
+    color: #ffffff;
+}
+
+.sort-icon {
+    display: inline-block;
+    margin-left: 6px;
+    opacity: 0.4;
+    transition: all 0.3s ease;
+}
+
+/* Ocultar inicialmente todos los íconos específicos */
+.sort-icon-asc,
+.sort-icon-desc {
+    display: none;
+}
+
+/* Mostrar el ícono por defecto cuando data-direction es 'default' */
+.sortable[data-direction="default"] .sort-icon-default {
+    display: inline-block;
+}
+.sortable[data-direction="default"] .sort-icon-asc,
+.sortable[data-direction="default"] .sort-icon-desc {
+    display: none;
+}
+
+/* Cuando está en orden ascendente */
+.sortable[data-direction="asc"] .sort-icon-default,
+.sortable[data-direction="asc"] .sort-icon-desc {
+    display: none;
+}
+.sortable[data-direction="asc"] .sort-icon-asc {
+    display: inline-block;
+    opacity: 1;
+}
+
+/* Cuando está en orden descendente */
+.sortable[data-direction="desc"] .sort-icon-default,
+.sortable[data-direction="desc"] .sort-icon-asc {
+    display: none;
+}
+.sortable[data-direction="desc"] .sort-icon-desc {
+    display: inline-block;
+    opacity: 1;
+}
+
+/* Efecto muy sutil al hacer clic */
+.sortable:active {
+    transform: scale(0.99);
+    transition: transform 0.1s ease;
+}
+
+/* Mejora el aspecto de los iconos de ordenamiento */
+.sort-icon i {
+    vertical-align: middle;
+}
+
+/* ========================== */
 /*     RESPONSIVE DESIGN      */
 /* ========================== */
 
@@ -521,15 +592,4 @@ a.fas, .fa {
         font-size: 1.2em; /* Tamaño de iconos más pequeño */
     }
 
-}
-
-.errorlist li{
-  width: max-content;
-  padding: 1em;
-  background-color:rgba(255, 0, 0, 0.795) ;
-  color: white;
-  border-radius: 0.5em;
-  border: solid 1px black;
-  top: 15vh;
-  left:20vw;
 }

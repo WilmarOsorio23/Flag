@@ -776,10 +776,7 @@ def empleado_crear(request):
     if request.method == 'POST':
         form = EmpleadoForm(request.POST)
         if form.is_valid():
-            max_id = Empleado.objects.all().aggregate(max_id=models.Max('Documento'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
             nuevo_empleado = form.save(commit=False)
-            nuevo_empleado.Documento = new_id
             nuevo_empleado.save()
 
             return redirect('empleado_index')
@@ -926,7 +923,7 @@ def empleado_filtrado(request):
     return render(request, 'informes/informes_certificacion_index.html', context)
 
 
-# Funcionalidad para descargar los resultados en Excel
+# Funcionalidad para descargar los resultados Certificado en Excel
 def exportar_excel(request):
     empleados = Empleado.objects.all().select_related('LineaId', 'ModuloId', 'PerfilId').prefetch_related(
         Prefetch('detallecertificacion_set', queryset=Detalle_Certificacion.objects.select_related('CertificacionId')) # type: ignore
@@ -954,108 +951,3 @@ def exportar_excel(request):
     response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') # type: ignore
     response['Content-Disposition'] = 'attachment; filename=empleados_certificaciones.xlsx'
 
-# Informe de Nómina de Empleados
-def empleado_nomina_filtrado(request):
-    empleados = Empleado.objects.all()  
-    nominas = Nomina.objects.all()  
-    empleado_info = None  
-    show_data = False  
-
-    if request.method == 'GET':
-        form = EmpleadoFilterForm(request.GET)
-
-        if form.is_valid():
-            # Obtener los valores del formulario
-            nombre = form.cleaned_data.get('Nombre')
-            linea = form.cleaned_data.get('LineaId')
-            modulo_id = form.cleaned_data.get('ModuloId')
-            anio = form.cleaned_data.get('Anio')  
-            mes = form.cleaned_data.get('Mes')
-            cargo = form.cleaned_data.get('Cargo')  # Nuevo campo Cargo
-
-            # Filtrar empleados
-            if nombre:
-                empleados = empleados.filter(Nombre__icontains=nombre)
-            if linea:
-                empleados = empleados.filter(LineaId=linea)
-            if modulo_id:
-                empleados = empleados.filter(ModuloId=modulo_id)
-            if cargo:
-                empleados = empleados.filter(Cargo__icontains=cargo)  # Aplicar filtro por cargo
-
-            # Filtrar nóminas por año y mes
-            if anio:
-                nominas = nominas.filter(Anio=anio)
-            if mes:
-                nominas = nominas.filter(Mes=mes)
-
-            # Filtrar nóminas por los empleados filtrados
-            if empleados.exists():
-                documentos_empleados = empleados.values_list('Documento', flat=True)
-                nominas = nominas.filter(Documento__in=documentos_empleados)
-
-            # Verificar si hay datos de nómina para los empleados filtrados
-            if nominas.exists():
-                empleado_info = []
-                for empleado in empleados:
-                    salarios = nominas.filter(Documento=empleado.Documento)
-                    if salarios.exists():
-                        for salario in salarios:
-                            cliente = salario.Cliente
-                            empleado_info.append({
-                                'empleado': empleado,
-                                'salario': salario.Salario,
-                                'cliente': cliente, 
-                                'anio': salario.Anio,
-                                'mes': salario.Mes,
-                            })
-            show_data = True  
-
-    else:
-        form = EmpleadoFilterForm()
-
-    context = {
-        'form': form,
-        'empleados': empleados,
-        'nomina': nominas,
-        'empleado_info': empleado_info,  
-        'show_data': show_data,  
-    }
-
-    return render(request, 'informes/informes_salarios_index.html', context)
-
-
-
-
-# Funcionalidad para descargar los resultados en Excel
-def exportar_nomina_excel(request):
-    empleados = Empleado.objects.all().select_related('LineaId', 'ModuloId', 'PerfilId').prefetch_related(
-        Prefetch('nomina_set', queryset=Nomina.objects.select_related('Cliente')) # type: ignore
-    )
-
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Nómina de Empleados"
-    ws.append([
-         'Nombre', 'Línea', 'Módulo', 'Documento', 'Cargo', 'Perfil', 'Salario', 'Cliente', 'Año', 'Mes'
-    ])
-
-    for empleado in empleados:
-        for nomina in empleado.nomina_set.all():
-            ws.append([
-                empleado.Nombre,
-                empleado.LineaId.Nombre if empleado.LineaId else '',
-                empleado.ModuloId.Nombre if empleado.ModuloId else '',
-                empleado.Documento,
-                empleado.Cargo,
-                empleado.PerfilId.Nombre if empleado.PerfilId else '',
-                nomina.Salario,
-                nomina.Cliente.Nombre if nomina.Cliente else '',
-                nomina.Anio,
-                nomina.Mes
-            ])
-
-    response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') # type: ignore
-    response['Content-Disposition'] = 'attachment; filename=empleados_nomina.xlsx'
-
-    return response
