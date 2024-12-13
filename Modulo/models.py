@@ -296,6 +296,7 @@ class Total_Costos_Indirectos(models.Model):
         ]
 
 class Nomina(models.Model):
+    NominaId = models.AutoField(primary_key=True)
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
     Documento = models.CharField(max_length=10)
@@ -312,8 +313,8 @@ class Nomina(models.Model):
         ]
 
 class Empleado(models.Model):
+    Documento = models.CharField(max_length=20, primary_key=True)
     TipoDocumento = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE, db_column='TipoDocumento')
-    Documento = models.CharField(max_length=20)
     Nombre = models.CharField(max_length=100)
     FechaNacimiento = models.DateField()
     FechaIngreso = models.DateField()

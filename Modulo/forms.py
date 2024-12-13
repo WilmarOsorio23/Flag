@@ -568,7 +568,7 @@ class EmpleadoForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Seleccione la línea'
             }),
-            'Cargo': forms.TextInput(attrs={
+            'CargoId': forms.Select(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ingrese el cargo'
             }),
@@ -601,10 +601,15 @@ class EmpleadoForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ingrese la academia SAP'
             }),
-            'CertificadoSAP': forms.TextInput(attrs={
+            'CertificadoSAP': forms.Select(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ingrese el certificado SAP'
-            }),
+            }, choices=[
+                ('', 'Seleccione una opción'),  # Opción vacía inicial
+                ('1', 'Sí'),
+                ('0', 'No'),
+            ]
+            ),
             'OtrasCertificaciones': forms.Textarea(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ingrese otras certificaciones',
@@ -627,7 +632,7 @@ class EmpleadoForm(forms.ModelForm):
             'ModuloId': 'Módulo',
             'PerfilId': 'Perfil',
             'LineaId': 'Línea',
-            'Cargo': 'Cargo',
+            'CargoId': 'Cargo',
             'TituloProfesional': 'Título Profesional',
             'FechaGrado': 'Fecha de Grado',
             'Universidad': 'Universidad',
@@ -698,8 +703,8 @@ class EmpleadoFilterForm(forms.Form):
         Modulo = Empleado.objects.values_list('ModuloId', flat=True).distinct()
         self.fields['ModuloId'].choices = [('', 'Seleccione el módulo')] + [(modulo, modulo) for modulo in Modulo]
 
-        cargos = Empleado.objects.values_list('Cargo', flat=True).distinct()
-        self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo, cargo) for cargo in cargos]
+        cargos = Cargos.objects.values_list('CargoId', 'Cargo').distinct()
+        self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo[0], cargo[1]) for cargo in cargos]
 
         self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]
 

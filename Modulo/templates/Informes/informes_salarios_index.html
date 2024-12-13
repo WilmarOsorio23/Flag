@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block titulo %} Filtrar Nomina {% endblock %}
 
@@ -8,74 +9,153 @@
         <h4 class="card-title">Filtrar Nomina</h4>
     </div>
     <div class="card-body">
-        <!-- Formulario de búsqueda -->
-        <form method="GET" class="form-inline">
-            <div class="form-group mr-3 col-md-3">
-                {{ form.Nombre.label_tag }}
-                {{ form.Nombre }}
+        <div class="container-fluid mb-3">
+            <!-- Formulario principal -->
+            <form method="GET">
+                <!-- Filtros en la parte superior -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label for="colaborador">{{ form.Nombre.label }}</label>
+                        {{ form.Nombre }}
+                    </div>
+                    <div class="col-md-3">
+                        <label for="linea">{{ form.LineaId.label }}</label>
+                        {{ form.LineaId }}
+                    </div>
+                    <div class="col-md-3">
+                        <label for="cargo">{{ form.Cargo.label }}</label>
+                        {{ form.Cargo }}
+                    </div>
+                    <div class="col-md-3">
+                        <label for="anio">{{ form.Anio.label }}</label>
+                        {{ form.Anio }}
+                    </div>
+                </div>
+        
+                <!-- Botones en la parte inferior -->
+                <div class="row">
+                    <div class="col-md-6 text-start">
+                        <button type="submit" name="buscar" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        
+            <!-- Botón de Descargar Excel -->
+            <div class="row">
+                <div class="col-md-6 text-end offset-md-6">
+                    <form id="download-form" method="GET" action="{% url 'exportar_nomina_excel' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}">
+                        <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}">
+                        <input type="hidden" name="Cargo" value="{{ form.Cargo.value }}">
+                        <input type="hidden" name="Anio" value="{{ form.Anio.value }}">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </button>
+                    </form>
+                </div>
             </div>
-            <div class="form-group mr-3 col-md-3">
-                {{ form.LineaId.label_tag }}
-                {{ form.LineaId }}
-            </div>
-            <div class="form-group mr-3 col-md-3"> 
-                {{ form.Cargo.label_tag }} 
-                {{ form.Cargo }}
-            </div>
-            <div class="form-group mr-3 col-md-3">
-                {{ form.Anio.label_tag }} 
-                {{ form.Anio }} 
-            </div>
-            <div class="form-group mt-3     mr-3 col-md-3">
-                <button type="submit" name="buscar">Buscar</button>
-            </div>            
-        </form>
+        </div> 
 
-        <!-- Resultados -->
         {% if show_data %}
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Nombre Línea</th>
-                            <th>Documento Colaborador</th>
-                            <th>Nombre Colaborador</th>
-                            <th>Cargo</th>
-                            <th>Perfil</th>
-                            <th>Módulo</th>
-                            <th>Certificado</th>
-                            <th>Fecha Ingreso</th>
-                            <th>Años en Flag</th>
-                            <th>Título Profesional Actual</th>
-                            <th>Año</th>
-                            <th>Salario Enero</th>
-                            <!-- Puedes continuar con las demás columnas -->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Aquí iteras sobre los datos -->
-                        {% for item in data %}
-                        <tr>
-                            <td>{{ item.nombre_linea }}</td>
-                            <td>{{ item.documento_colaborador }}</td>
-                            <td>{{ item.nombre_colaborador }}</td>
-                            <td>{{ item.cargo }}</td>
-                            <td>{{ item.perfil }}</td>
-                            <td>{{ item.modulo }}</td>
-                            <td>{{ item.certificado }}</td>
-                            <td>{{ item.fecha_ingreso }}</td>
-                            <td>{{ item.fecha_ingreso }} - fecha_actual</td>
-                            <td>{{ item.titulo_profesional_actual }}</td>
-                            <td>{{ item.anio }}</td>
-                            <td>{{ item.salario_enero }}</td>
-                            <!-- Continua con los demás campos -->
-                        </tr>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-primary" id="nominaTable">
+                <thead>
+                    <tr>
+                        <th data-sort="nombre_linea" class="sortable" data-direction="default">
+                            Nombre Línea 
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="documento_colaborador" class="sortable" data-direction="default">
+                            Documento Colaborador 
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="nombre_colaborador" class="sortable" data-direction="default">
+                            Nombre Colaborador 
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="cargo" class="sortable" data-direction="default">
+                            Cargo 
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="perfil" class="sortable" data-direction="default">
+                            Perfil 
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th>Módulo</th>
+                        <th>Certificado</th>
+                        <th>Fecha Ingreso</th>
+                        <th>Años en Flag</th>
+                        <th>Título Profesional Actual</th>
+                        <th data-sort="año" class="sortable" data-direction="default">
+                            Año 
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        {% for mes in meses %}
+                            <th>Salario {{ mes }}</th>
+                            <th>Cliente {{ mes }}</th>
                         {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for empleado in empleado_info %}
+                        <tr>
+                            <td>{{ empleado.nombre_linea }}</td>
+                            <td>{{ empleado.documento_colaborador }}</td>
+                            <td>{{ empleado.nombre_colaborador }}</td>
+                            <td>{{ empleado.cargo }}</td>
+                            <td>{{ empleado.perfil }}</td>
+                            <td>{{ empleado.modulo }}</td>
+                            <td>{{ empleado.certificado }}</td>
+                            <td>{{ empleado.fecha_ingreso }}</td>
+                            <td>{{ empleado.años_en_flag }}</td>
+                            <td>{{ empleado.titulo_profesional_actual }}</td>
+                            <td>{{ empleado.año }}</td>
+                            {% for mes_data in empleado.meses %}
+                                <td>{{ mes_data.salario }}</td>
+                                <td>{{ mes_data.cliente }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">No hay datos disponibles.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif not empleado_info %}
+        <div class="alert alert-warning" role="alert">
+            {{ mensaje }}
+        </div>
         {% endif %}
     </div>
 </div>
+<script src="{% static 'JS/informes_salarios.js' %}"></script>
 {% endblock %}
-    
