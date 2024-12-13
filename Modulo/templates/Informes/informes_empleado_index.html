@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block titulo %} Informe de Certificaciones {% endblock %}
+{% block titulo %} Informe de Empleados {% endblock %}
 
 {% block contenido %}
 <div class="card">
@@ -75,7 +75,7 @@
                         <td>{{ empleado.Modulo.codigo }} - {{ empleado.Modulo.descripcion }}</td>
                         <td>{{ empleado.Perfil.codigo }} - {{ empleado.Perfil.descripcion }}</td>
                         <td>{{ empleado.Linea.codigo }} - {{ empleado.Linea.descripcion }}</td>
-                        <!--  <td>{{ empleado.Cargo }}</td>-->
+
                         <td>{{ empleado.Titulo_Profesional }}</td>
                         <td>{{ empleado.Fecha_Grado|date:"d/m/Y" }}</td>
                         <td>{{ empleado.Universidad }}</td>

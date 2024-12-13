@@ -303,8 +303,8 @@ class Nomina(models.Model):
         ]
 
 class Empleado(models.Model):
+    Documento = models.CharField(max_length=20, primary_key=True)
     TipoDocumento = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE, db_column='TipoDocumento')
-    Documento = models.CharField(max_length=20)
     Nombre = models.CharField(max_length=100)
     FechaNacimiento = models.DateField()
     FechaIngreso = models.DateField()
@@ -312,7 +312,7 @@ class Empleado(models.Model):
     ModuloId = models.ForeignKey(Modulo, on_delete=models.CASCADE, db_column='ModuloId')
     PerfilId = models.ForeignKey(Perfil, on_delete=models.CASCADE, db_column='PerfilId')
     LineaId = models.ForeignKey(Linea, on_delete=models.CASCADE, db_column='LineaId')
-    Cargo = models.CharField(max_length=100)
+    CargoId = models.ForeignKey(Cargos, on_delete=models.CASCADE, db_column='CargoId')  # Cambiado aquí
     TituloProfesional = models.CharField(max_length=100)
     FechaGrado = models.DateField()
     Universidad = models.CharField(max_length=100)
@@ -330,5 +330,4 @@ class Empleado(models.Model):
 
     def __str__(self):
         return f"{self.Nombre} - {self.TipoDocumento} {self.Documento}"
-
 
