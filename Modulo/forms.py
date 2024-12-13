@@ -2,7 +2,7 @@ from django import forms
 from .models import Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes, Consultores, Certificacion, Costos_Indirectos
 from .models import Concepto, Gastos, Detalle_Gastos, Total_Gastos, Total_Costos_Indirectos
 from .models import Detalle_Costos_Indirectos, TiemposConcepto, Tiempos_Cliente, Nomina, Detalle_Certificacion, Empleado
-
+from .models import Cargos
 
 from django import forms
 from .models import Modulo
@@ -45,6 +45,20 @@ class IPCForm(forms.ModelForm):
             'Indice': 'Índice',
         }
 
+class CargosForm(forms.ModelForm):
+    class Meta:
+        model = Cargos
+        fields = '__all__'
+        widgets = {
+            'Cargo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ingrese el Cargo'
+            }),
+        }
+        labels = {
+            'Cargo': 'Cargo',
+        } 
+
 class ClientesForm(forms.ModelForm):
     class Meta:
         model = Clientes
@@ -74,6 +88,7 @@ class ClientesForm(forms.ModelForm):
                 'type': 'date'
                 }),
         }  
+        
 class INDForm(forms.ModelForm):
     class Meta:
         model = IND
@@ -553,7 +568,7 @@ class EmpleadoForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Seleccione la línea'
             }),
-            'Cargo': forms.TextInput(attrs={
+            'CargoId': forms.Select(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ingrese el cargo'
             }),
@@ -586,10 +601,15 @@ class EmpleadoForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ingrese la academia SAP'
             }),
-            'CertificadoSAP': forms.TextInput(attrs={
+            'CertificadoSAP': forms.Select(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ingrese el certificado SAP'
-            }),
+            }, choices=[
+                ('', 'Seleccione una opción'),  # Opción vacía inicial
+                ('1', 'Sí'),
+                ('0', 'No'),
+            ]
+            ),
             'OtrasCertificaciones': forms.Textarea(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ingrese otras certificaciones',
@@ -612,7 +632,7 @@ class EmpleadoForm(forms.ModelForm):
             'ModuloId': 'Módulo',
             'PerfilId': 'Perfil',
             'LineaId': 'Línea',
-            'Cargo': 'Cargo',
+            'CargoId': 'Cargo',
             'TituloProfesional': 'Título Profesional',
             'FechaGrado': 'Fecha de Grado',
             'Universidad': 'Universidad',
@@ -683,8 +703,8 @@ class EmpleadoFilterForm(forms.Form):
         Modulo = Empleado.objects.values_list('ModuloId', flat=True).distinct()
         self.fields['ModuloId'].choices = [('', 'Seleccione el módulo')] + [(modulo, modulo) for modulo in Modulo]
 
-        cargos = Empleado.objects.values_list('Cargo', flat=True).distinct()
-        self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo, cargo) for cargo in cargos]
+        cargos = Cargos.objects.values_list('CargoId', 'Cargo').distinct()
+        self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo[0], cargo[1]) for cargo in cargos]
 
         self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]
 

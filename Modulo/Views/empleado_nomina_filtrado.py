@@ -1,0 +1,214 @@
+from django.shortcuts import render
+from datetime import date
+from datetime import datetime
+from collections import defaultdict
+from dateutil.relativedelta import relativedelta
+from Modulo.forms import EmpleadoFilterForm
+from Modulo.models import Empleado, Nomina
+from django.http import HttpResponse
+import pandas as pd
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side
+
+# Función para filtrar empleados y nóminas
+def filtrar_empleados_y_nominas(form, empleados, nominas):
+    empleados = empleados.order_by('Documento')  # Orden descendente por Documento (ajustar si otro campo es clave)
+    nominas = nominas.order_by('-Anio')  # Orden ascendente por Año
+
+    nombre = form.cleaned_data.get('Nombre')    
+    linea = form.cleaned_data.get('LineaId')
+    anio = form.cleaned_data.get('Anio')
+    cargo = form.cleaned_data.get('Cargo')
+
+    if nombre:
+        empleados = empleados.filter(Nombre__icontains=nombre)
+    if linea:
+        empleados = empleados.filter(LineaId=linea)
+    if cargo:
+        empleados = empleados.filter(CargoId=cargo)
+
+    if anio:
+        nominas = nominas.filter(Anio=anio)
+
+    documentos_nominas = nominas.values_list('Documento', flat=True)
+    empleados = empleados.filter(Documento__in=documentos_nominas)
+
+    return empleados, nominas
+
+# Función para calcular la información del empleado
+def obtener_empleado_info(empleados, nominas, meses):
+    empleado_info = []
+    nominas_por_documento_y_mes = defaultdict(dict)
+
+    # Organizar las nóminas por Documento, Año y Mes para optimizar consultas
+    for nomina in nominas:
+        nominas_por_documento_y_mes[(nomina.Documento, nomina.Anio)][nomina.Mes] = nomina
+
+    for empleado in empleados:
+        # Obtener años únicos de nómina para el empleado
+        anios_nominas = nominas.filter(Documento=empleado.Documento).values_list('Anio', flat=True).distinct()
+
+        for anio in anios_nominas:
+            # Salarios y clientes mes a mes para el año específico
+            salarios_meses = []
+            for mes in range(1, 13):
+                mes_nomina = nominas_por_documento_y_mes.get((empleado.Documento, anio), {}).get(str(mes).zfill(2))
+                if mes_nomina:
+                    salario = mes_nomina.Salario
+                    cliente = mes_nomina.Cliente.Nombre_Cliente
+                else:
+                    salario = cliente = "-"
+                salarios_meses.append({'salario': salario, 'cliente': cliente})
+
+            # Calcular "Años en Flag"
+            fecha_actual = date.today()
+            años_en_flag = relativedelta(fecha_actual, empleado.FechaIngreso).years
+
+            # Agregar datos a la lista
+            empleado_info.append({
+                'nombre_linea': empleado.LineaId.Linea,
+                'documento_colaborador': empleado.Documento,
+                'nombre_colaborador': empleado.Nombre,
+                'cargo': empleado.CargoId.Cargo,
+                'perfil': empleado.PerfilId.Perfil,
+                'modulo': empleado.ModuloId.Modulo,
+                'certificado': 'SI' if empleado.CertificadoSAP else 'NO',
+                'fecha_ingreso': empleado.FechaIngreso,
+                'años_en_flag': años_en_flag,
+                'año': anio,
+                'titulo_profesional_actual': empleado.TituloProfesionalActual,
+                'meses': salarios_meses,
+            })
+    return empleado_info
+
+# Informe de Nómina de Empleados
+def empleado_nomina_filtrado(request):
+    meses = "Enero Febrero Marzo Abril Mayo Junio Julio Agosto Septiembre Octubre Noviembre Diciembre".split()
+    empleado_info = []  
+    show_data = False  
+
+    if request.method == 'GET':
+        form = EmpleadoFilterForm(request.GET)
+
+        if form.is_valid():
+            # Inicializar empleados y nominas
+            empleados = Empleado.objects.all()
+            nominas = Nomina.objects.all()
+
+            # Obtener información de los empleados filtrada
+            empleados, nominas = filtrar_empleados_y_nominas(form, empleados, nominas)
+            
+            # Obtener información de los empleados
+            empleado_info = obtener_empleado_info(empleados, nominas, meses)
+            show_data = bool(empleado_info)  # Mostrar datos si hay resultados
+
+    else: 
+        form = EmpleadoFilterForm()
+
+    context = {
+        "meses": meses,
+        'form': form,
+        'empleado_info': empleado_info,      
+        'show_data': show_data,
+        'mensaje': "No se encontraron resultados para los filtros aplicados." if not empleado_info else ""
+    }
+
+    return render(request, 'informes/informes_salarios_index.html', context)
+
+# Funcionalidad para descargar los resultados en Excel
+def exportar_nomina_excel(request):
+    # Recuperar los mismos datos de filtrado
+    meses = "Enero Febrero Marzo Abril Mayo Junio Julio Agosto Septiembre Octubre Noviembre Diciembre".split()
+    empleado_info = []  
+    
+    # Reutilizar la lógica de filtrado de tu vista actual
+    if request.method == 'GET':
+        form = EmpleadoFilterForm(request.GET)
+
+        if form.is_valid():
+            # Inicializar empleados y nominas
+            empleados = Empleado.objects.all()
+            nominas = Nomina.objects.all()
+
+            # Obtener información de los empleados filtrada
+            empleados, nominas = filtrar_empleados_y_nominas(form, empleados, nominas)
+            
+            # Obtener información de los empleados
+            empleado_info = obtener_empleado_info(empleados, nominas, meses)
+
+        if not empleado_info:
+            return HttpResponse("No se encontraron datos para exportar.", status=404)
+        
+        if not form.is_valid(): 
+            return HttpResponse("Filtros no válidos. Por favor, revisa los criterios ingresados.", status=400)
+
+    # Preparar datos para Excel
+    data = []
+    for empleado in empleado_info:
+        fila = {
+            'Nombre Línea': empleado['nombre_linea'],
+            'Documento Colaborador': empleado['documento_colaborador'],
+            'Nombre Colaborador': empleado['nombre_colaborador'],
+            'Cargo': empleado['cargo'],
+            'Perfil': empleado['perfil'],
+            'Módulo': empleado['modulo'],
+            'Certificado SAP': empleado['certificado'],
+            'Fecha Ingreso': empleado['fecha_ingreso'],
+            'Años en Flag': empleado['años_en_flag'],
+            'Título Profesional Actual': empleado['titulo_profesional_actual'],
+            'Año': empleado['año']
+        }
+
+        # Agregar salarios y clientes por mes
+        for i, mes_data in enumerate(empleado['meses'], 1):
+            fila[f'Salario {meses[i-1]}'] = mes_data['salario']
+            fila[f'Cliente {meses[i-1]}'] = mes_data['cliente']
+
+        data.append(fila)
+
+    # Crear un libro de trabajo y una hoja
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Informe de Nómina"
+
+    # Agregar encabezados
+    for col in data[0].keys():
+        cell = ws.cell(row=1, column=list(data[0].keys()).index(col) + 1, value=col)
+        cell.font = Font(bold=True)
+        cell.alignment = Alignment(horizontal='center')
+
+    # Agregar datos del DataFrame a la hoja
+    for r_idx, row in enumerate(data, 2):
+        for c_idx, value in enumerate(row.values(), 1):
+            cell = ws.cell(row=r_idx, column=c_idx, value=value)
+            cell.alignment = Alignment(horizontal='center')  # Centrar datos
+
+    # Ajustar el ancho de las columnas
+    for column in ws.columns:
+        max_length = 0
+        column = [cell for cell in column]
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column[0].column_letter].width = adjusted_width
+    
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'),
+                     top=Side(style='thin'), bottom=Side(style='thin'))
+
+    for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
+        for cell in row:
+            cell.border = thin_border
+
+    # Crear respuesta de Excel
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    filename = f"nomina_Empleados_reporte_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+     # Guardar el libro de trabajo en la respuesta  
+    wb.save(response)
+
+    return response
