@@ -3,3 +3,4 @@
 /Modulo/__pycache__
 /Modulo/migrations
 *.log
+*.pyc
