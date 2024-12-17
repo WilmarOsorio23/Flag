@@ -52,7 +52,7 @@ def gasto_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
         Gastos.objects.filter(GastoId__in=item_ids).delete()
-        messages.success(request, 'Los módulos seleccionados se han eliminado correctamente.')
+        messages.success(request, 'Los Gastos seleccionados se han eliminado correctamente.')
         return redirect('gastos_index')
     return redirect('gastos_index')
 

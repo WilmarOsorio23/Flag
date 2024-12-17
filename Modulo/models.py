@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import ValidationError
 
 # Modelos base
 class Modulo(models.Model):
@@ -330,15 +331,19 @@ class Empleado(models.Model):
     TituloProfesionalActual = models.CharField(max_length=100)
     UniversidadActual = models.CharField(max_length=100)
     AcademiaSAP = models.CharField(max_length=100)
-    CertificadoSAP = models.CharField(max_length=100)
-    OtrasCertificaciones = models.TextField()
-    Postgrados = models.TextField()
+    CertificadoSAP = models.BooleanField()  # tinyint(1) => BooleanField
+    OtrasCertificaciones = models.CharField(max_length=100)  # Cambiado a CharField
+    Postgrados = models.CharField(max_length=100)  # Cambiado a CharField
 
     class Meta:
         db_table = 'Empleado'
-        unique_together = (('TipoDocumento', 'Documento'),)
 
     def __str__(self):
         return f"{self.Nombre} - {self.TipoDocumento} {self.Documento}"
+    
+     
+    def clean(self):
+        if self.FechaIngreso < self.FechaNacimiento:
+            raise ValidationError('La fecha de ingreso no puede ser anterior a la fecha de nacimiento.')
 
 

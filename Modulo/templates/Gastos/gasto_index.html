@@ -30,7 +30,7 @@
             <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'gastos_crear' %}" role="button" ></a> 
             <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button"  onclick="enableEdit();"></a>
             <i class="btn btn-outline-primary fas fa-eye" title="Visualizar"></i>            
-            <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button> 
+                    <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar"></button> 
             <form id="download-form" method="POST" action="{% url 'gastos_descargar_excel' %}" style="display:inline;" onsubmit="return confirmDownload();">
                 {% csrf_token %}
                 <input type="hidden" name="items_to_delete" id="items_to_delete">

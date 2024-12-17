@@ -529,97 +529,26 @@ class EmpleadoForm(forms.ModelForm):
         model = Empleado
         fields = '__all__'
         widgets = {
-            'TipoDocumento': forms.Select(attrs={
-                'class': 'form-control',
-                'placeholder': 'Seleccione el tipo de documento'
-            }),
-            'Documento': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese el número de documento'
-            }),
-            'Nombre': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese el nombre del empleado'
-            }),
-            'FechaNacimiento': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date',
-                'placeholder': 'Seleccione la fecha de nacimiento'
-            }),
-            'FechaIngreso': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date',
-                'placeholder': 'Seleccione la fecha de ingreso'
-            }),
-            'FechaOperacion': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date',
-                'placeholder': 'Seleccione la fecha de operación'
-            }),
-            'ModuloId': forms.Select(attrs={
-                'class': 'form-control',
-                'placeholder': 'Seleccione el módulo'
-            }),
-            'PerfilId': forms.Select(attrs={
-                'class': 'form-control',
-                'placeholder': 'Seleccione el perfil'
-            }),
-            'LineaId': forms.Select(attrs={
-                'class': 'form-control',
-                'placeholder': 'Seleccione la línea'
-            }),
-            'CargoId': forms.Select(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese el cargo'
-            }),
-            'TituloProfesional': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese el título profesional'
-            }),
-            'FechaGrado': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date',
-                'placeholder': 'Seleccione la fecha de grado'
-            }),
-            'Universidad': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese la universidad'
-            }),
-            'ProfesionRealizada': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese la profesión realizada'
-            }),
-            'TituloProfesionalActual': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese el título profesional actual'
-            }),
-            'UniversidadActual': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese la universidad actual'
-            }),
-            'AcademiaSAP': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese la academia SAP'
-            }),
-            'CertificadoSAP': forms.Select(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese el certificado SAP'
-            }, choices=[
-                ('', 'Seleccione una opción'),  # Opción vacía inicial
-                ('1', 'Sí'),
-                ('0', 'No'),
-            ]
-            ),
-            'OtrasCertificaciones': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese otras certificaciones',
-                'rows': 3
-            }),
-            'Postgrados': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ingrese los postgrados',
-                'rows': 3
-            }),
+            'TipoDocumento': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Seleccione el tipo de documento'}),
+            'Documento': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el número de documento'}),
+            'Nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre del empleado'}),
+            'FechaNacimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'placeholder': 'Seleccione la fecha de nacimiento'}),
+            'FechaIngreso': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'placeholder': 'Seleccione la fecha de ingreso'}),
+            'FechaOperacion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'placeholder': 'Seleccione la fecha de operación'}),
+            'ModuloId': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Seleccione el módulo'}),
+            'PerfilId': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Seleccione el perfil'}),
+            'LineaId': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Seleccione la línea'}),
+            'CargoId': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Ingrese el cargo'}),
+            'TituloProfesional': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el título profesional'}),
+            'FechaGrado': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'placeholder': 'Seleccione la fecha de grado'}),
+            'Universidad': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la universidad'}),
+            'ProfesionRealizada': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la profesión realizada'}),
+            'TituloProfesionalActual': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el título profesional actual'}),
+            'UniversidadActual': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la universidad actual'}),
+            'AcademiaSAP': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la academia SAP'}),
+            'CertificadoSAP': forms.Select(attrs={'class': 'form-control'}, choices=[('', 'Seleccione una opción'), ('1', 'Sí'), ('0', 'No')]),
+            'OtrasCertificaciones': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ingrese otras certificaciones', 'rows': 3}),
+            'Postgrados': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ingrese los postgrados', 'rows': 3}),
         }
         labels = {
             'TipoDocumento': 'Tipo de Documento',
@@ -628,7 +557,6 @@ class EmpleadoForm(forms.ModelForm):
             'FechaNacimiento': 'Fecha de Nacimiento',
             'FechaIngreso': 'Fecha de Ingreso',
             'FechaOperacion': 'Fecha de Operación',
-            'PerfilNombre': 'Nombre del Perfil',
             'ModuloId': 'Módulo',
             'PerfilId': 'Perfil',
             'LineaId': 'Línea',

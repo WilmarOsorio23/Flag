@@ -2,6 +2,9 @@
 /*           GENERAL          */
 /* ========================== */
 
+*, *::before, *::after {
+    box-sizing: border-box;
+}
 
 /* Reinicio de márgenes y paddings */
 html, body {
@@ -198,6 +201,7 @@ html, body {
 #sidebar ul li a:hover {
     color: #007bff;
     background: #f0f0f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 #sidebar ul li.active > a,
@@ -273,10 +277,8 @@ a[aria-expanded="true"] {
 }
 
 .table {
-    width: 100%; /* Ajustar el ancho de la tabla */
-    height: auto;
-    border-collapse: collapse;
-    border-spacing: 0;
+    table-layout: auto;     /* Permite que las celdas se ajusten automáticamente */
+    width: 100%;  
 }
 
 .table-primary {
@@ -293,8 +295,7 @@ a[aria-expanded="true"] {
 }
 
 .table td {
-    padding: 1em;
-    border-top: 1px solid #dee2e6;
+    border: #3d7db465 solid 1px; /* Cambia esto al color que prefieras */
     transition: background 0.3s; /* Transición suave para el fondo */
 }
 
@@ -306,6 +307,10 @@ a[aria-expanded="true"] {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap; /* Evita que el texto se extienda en varias líneas */
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f2f2f2; /* Color más claro para filas alternas */
 }
 
 /* Ajuste de ancho de columnas de checkbox e ID */

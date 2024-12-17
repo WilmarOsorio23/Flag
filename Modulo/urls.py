@@ -10,6 +10,7 @@ from Modulo.Views import CostosIndirectos
 from Modulo.Views import gastos
 from Modulo.Views import cargos
 from Modulo.Views import empleado_nomina_filtrado
+from Modulo.Views import empleado
 from . import views
 
 
@@ -169,11 +170,12 @@ urlpatterns = [
     path('detalle_certificacion/descargar_excel/', views.detalle_certificacion_descargar_excel, name='detalle_certificacion_descargar_excel'),
 
     # Rutas para la tabla Empleado
-    path('empleado/', views.empleado_index, name='empleado_index'),
-    path('empleado/crear/', views.empleado_crear, name='empleado_crear'),
-    path('empleado/editar/<str:tipo_documento_id>/<str:documento_id>/', views.empleado_editar, name='empleado_editar'),
-    path('empleado/eliminar/', views.empleado_eliminar, name='empleado_eliminar'),
-    path('empleado/descargar_excel/', views.empleado_descargar_excel, name='empleado_descargar_excel'),
+    path('empleado/', empleado.empleado_index, name='empleado_index'),
+    path('empleado/crear/', empleado.empleado_crear, name='empleado_crear'),
+    path('empleado/editar/<str:id>/', empleado.empleado_editar, name='empleado_editar'),
+    path('empleado/eliminar/', empleado.empleado_eliminar, name='empleado_eliminar'),
+    path('empleado/verificar-relaciones/', empleado.verificar_relaciones, name='empleado_verificar_relaciones'),
+    path('empleado/descargar_excel/', empleado.empleado_descargar_excel, name='empleado_descargar_excel'),
 
     # Rutas para informe de certificación
     path('informes/', views.empleado_filtrado, name='informes_certificacion_index'),
