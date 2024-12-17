@@ -66,13 +66,13 @@
                     
                     <tbody>
                         {% for nomina in nomina_data %}
-                         <tr id="row-{nomina.NominaID}">
-                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{ nomina.NominaID }"></td>
+                         <tr id="row-{{nomina.NominaId}}">
+                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{nomina.NominaId}}"></td>
                             <td><input type="text" name="anio" class="form-control-plaintext" value="{{ nomina.Anio }}" readonly></td>
                             <td><input type="text" name="mes" class="form-control-plaintext" value="{{ nomina.Mes }}" readonly></td>
-                            <td><input type="text" name="documento" class="form-control-plaintext" value="{{nomina.Documento}}" readonly></td>
+                            <td><input type="text" name="documento" class="form-control-plaintext" value="{{nomina.Documento.Documento}}" readonly></td>
                             <td><input type="text" name="salario" class="form-control-plaintext" value="{{nomina.Salario}}" readonly></td>
-                            <td><input type="text" name="cliente" class="form-control-plaintext" value="{{nomina.Cliente}}" readonly></td>
+                            <td><input type="text" name="cliente" class="form-control-plaintext" value="{{nomina.Cliente.ClienteId}}" readonly></td>
                          </tr>   
                         {% endfor %}
                     </tbody>

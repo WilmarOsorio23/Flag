@@ -146,7 +146,7 @@ urlpatterns = [
     # Rutas para tabla Nomina
     path('nomina/', Nomina.nomina_index, name='nomina_index'),
     path('nomina/crear', Nomina.nomina_crear, name='nomina_crear'),
-    path('nomina/editar/<str:anio>/<str:mes>/<str:documento>/', Nomina.nomina_editar, name='nomina_editar'),
+    path('nomina/editar/<str:id>/', Nomina.nomina_editar, name='nomina_editar'),
     path('nomina/eliminar', Nomina.nomina_eliminar, name='nomina_eliminar'),
     path('nomina/descargar_excel', Nomina.nomina_descargar_excel, name='nomina_descargar_excel'),
 

@@ -295,7 +295,7 @@ class Nomina(models.Model):
     Cliente = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
 
     def __str__(self):
-        return f'Año: {self.Anio}, Mes: {self.Mes}, Documento: {self.Documento}, Salario: {self.Salario}, Cliente: {self.Cliente}'
+        return f'NominaId:{self.NominaId} Año: {self.Anio}, Mes: {self.Mes}, Documento: {self.Documento}, Salario: {self.Salario}, Cliente: {self.Cliente}'
 
     class Meta:
         db_table = 'Nomina'
@@ -327,7 +327,7 @@ class Empleado(models.Model):
         db_table = 'Empleado'
         unique_together = (('TipoDocumento', 'Documento'),)
 
-    def __str__(self):
-        return f"{self.Nombre} - {self.TipoDocumento} {self.Documento}"
+     def __str__(self):
+        return f"{self.Nombre}|{self.TipoDocumento} {self.Documento}"
 
 
