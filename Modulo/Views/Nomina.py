@@ -1,5 +1,6 @@
 # Nomina
 import json
+from pyexpat.errors import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
@@ -47,16 +48,16 @@ def nomina_editar(request, id):
         return JsonResponse({'error': 'Método no permitido'}, status=405)
    
 def nomina_eliminar(request):
+    print("llego hasta nomina eliminar")
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
-        for item_id in item_ids:
-            anio, mes, documento = item_id.split('|')
-            Nomina.objects.filter(anio=anio, mes=mes, documento=documento).delete()
-        return redirect('nomina_index')
+        print(item_ids)
+    for item_id in item_ids:
+            Nomina.objects.filter(pk=item_id).delete()
     return redirect('nomina_index')
-
+  
 def verificar_relaciones(request):
-    if request.method == 'POST':
+   if request.method == 'POST':
         import json
         data = json.loads(request.body)
         ids = data.get('ids', [])
@@ -77,7 +78,7 @@ def verificar_relaciones(request):
             })
         else:
             return JsonResponse({'isRelated': False})
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
     
 
 def nomina_descargar_excel(request):

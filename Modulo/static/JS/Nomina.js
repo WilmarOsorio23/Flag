@@ -53,9 +53,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return response.json();
         })
-        .then(data => {
+        .then(data => { 
             if (data.status == 'success') {
                 showMessage('Cambios guardados correctamente.', 'success');
+                window.location.reload()
 
                 row.querySelectorAll('input.form-control').forEach(input => {
                     input.classList.add('highlighted');
