@@ -1,4 +1,24 @@
 document.addEventListener('DOMContentLoaded', function() {
+
+    window.cancelEdit = function() {
+        console.log("esta en cancel")
+        let selected = document.querySelectorAll('.row-select:checked');
+        if (selected.length == 1) {
+            let row = selected[0].closest('tr');
+            // Restaurar los valores originales desde el atributo personalizado
+            row.querySelectorAll('input.form-control').forEach(input => {
+                if (input.hasAttribute('data-original-value')) {
+                    input.value = input.getAttribute('data-original-value');
+                }
+            });
+            selected.disabled = false;
+            selected.checked = false;
+            window.location.reload();
+            disableEditMode(selected,row);
+            showMessage('Cambios cancelados.', 'danger');
+        }
+    };
+
     // Clonar checkboxes seleccionados en el formulario de descarga
     document.getElementById('download-form').addEventListener('submit', function(event) {
     let selectedCheckboxes = document.querySelectorAll('.row-select:checked');
@@ -284,28 +304,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Ocultar los botones de guardar y cancelar
         document.getElementById('save-button').classList.add('d-none');
         document.getElementById('cancel-button').classList.add('d-none');
+        
     }
 
+   
     
-    
-
-
-    window.cancelEdit = function() {
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length == 1) {
-            let row = selected[0].closest('tr');
-
-            // Restaurar los valores originales desde el atributo personalizado
-            row.querySelectorAll('input.form-control').forEach(input => {
-                if (input.hasAttribute('data-original-value')) {
-                    input.value = input.getAttribute('data-original-value');
-                }
-            });
-            
-            disableEditMode(selected,row);
-            showMessage('Cambios cancelados.', 'danger');
-        }
-    };
 
     
 });
