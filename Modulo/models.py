@@ -300,18 +300,15 @@ class Nomina(models.Model):
     NominaId = models.AutoField(primary_key=True)
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
-    Documento = models.CharField(max_length=10)
+    Documento = models.ForeignKey('Empleado', on_delete=models.CASCADE, db_column='Documento')
     Salario = models.DecimalField(max_digits=10, decimal_places=2)
     Cliente = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
 
     def __str__(self):
-        return f'Año: {self.Anio}, Mes: {self.Mes}, Documento: {self.Documento}, Salario: {self.Salario}'
+        return f'NominaId:{self.NominaId} Año: {self.Anio}, Mes: {self.Mes}, Documento: {self.Documento}, Salario: {self.Salario}, Cliente: {self.Cliente}'
 
     class Meta:
         db_table = 'Nomina'
-        constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento'], name='unique_nomina')
-        ]
 
 class Empleado(models.Model):
     Documento = models.CharField(max_length=20, primary_key=True)
