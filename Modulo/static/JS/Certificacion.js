@@ -160,11 +160,11 @@ document.addEventListener('DOMContentLoaded', function () {
     window.enableEdit = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 0) {
-            showMessage('Por favor, selecciona al menos un módulo.', 'danger');
+            showMessage('Por favor, selecciona al menos un certificado.', 'danger');
             return false;
         }
         if (selected.length > 1) {
-            showMessage('Por favor, Selecciona un solo módulo para editar.', 'danger');
+            showMessage('Por favor, Selecciona un solo certificado para editar.', 'danger');
             return false;
         }
 
