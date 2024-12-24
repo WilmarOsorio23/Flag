@@ -21,10 +21,10 @@ def perfil_crear(request):
         if form.is_valid():
             nuevo_perfil = form.save(commit=False)
             nuevo_perfil.save()  # Guardar directamente el registro con el Documento proporcionado
-            return redirect('nomina_index')
+            return redirect('perfil_index')
      else:
         form = PerfilForm()
-     return render(request, 'Nomina/nomina_form.html', {'form': form})
+     return render(request, 'Perfil/perfil_form.html', {'form': form})
 
 def perfil_editar(request,id):
      print("llego hasta views")
