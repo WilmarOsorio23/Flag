@@ -27,7 +27,6 @@ def perfil_crear(request):
      return render(request, 'Perfil/perfil_form.html', {'form': form})
 
 def perfil_editar(request,id):
-     print("llego hasta views")
      if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
