@@ -242,7 +242,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function showMessage(message, type) {
         const alertBox = document.getElementById('message-box');
         const alertIcon = document.getElementById('alert-icon');
-        const alertMessage = document.getElementById('alert-message');
 
         // Asignar el mensaje y el tipo de alerta
         alertMessage.textContent = message;
@@ -266,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 alertBox.style.display = 'none';
             }, 300); // Tiempo para que la transición termine
-        }, 3000);
+        }, 800);
     }
 
     // Confirmación antes de descargar
