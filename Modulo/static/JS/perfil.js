@@ -206,7 +206,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            document.getElementById('items_to_delete').value = selectedIds.join(','); // Asignar los IDs seleccionados al formulario
+            const itemsToDelete = document.getElementById('items_to_delete');
+            if (itemsToDelete) {
+                itemsToDelete.value = selectedIds.join(',');
+            } else {
+                console.error("El elemento con ID 'items_to_delete' no se encuentra en el DOM.");
+            }
+                   
             form.submit(); // Enviar el formulario para realizar la eliminación
 
         };
