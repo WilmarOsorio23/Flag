@@ -9,7 +9,7 @@ from Modulo.Views import Clientes
 from Modulo.Views import CostosIndirectos
 from Modulo.Views import Nomina
 from . import views
-
+from Modulo.Views import perfil
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -45,11 +45,12 @@ urlpatterns = [
     path('linea/descargar_excel', views.linea_descargar_excel, name='linea_descargar_excel'),
 
     # Rutas para tabla Perfil
-    path('perfil/', views.perfil_index, name='perfil_index'),
-    path('perfil/crear', views.perfil_crear, name='perfil_crear'),
-    path('perfil/editar/<int:id>/', views.perfil_editar, name='perfil_editar'),
-    path('perfil/eliminar', views.perfil_eliminar, name='perfil_eliminar'),
-    path('perfil/descargar_excel', views.perfil_descargar_excel, name='perfil_descargar_excel'),
+    path('perfil/', perfil.perfil_index, name='perfil_index'),
+    path('perfil/crear', perfil.perfil_crear, name='perfil_crear'),
+    path('perfil/editar/<int:id>/', perfil.perfil_editar, name='perfil_editar'),
+    path('verificar-relaciones/', perfil.verificar_relaciones, name='verificar_relaciones'),
+    path('perfil/eliminar', perfil.perfil_eliminar, name='perfil_eliminar'),
+    path('perfil/descargar_excel', perfil.perfil_descargar_excel, name='perfil_descargar_excel'),
 
      # Rutas para tabla TipoDocumento
     path('tipo_documento/', TipoDocumento.tipo_documento_index, name='tipo_documento_index'),
