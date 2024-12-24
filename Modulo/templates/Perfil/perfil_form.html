@@ -1,17 +1,13 @@
-<form enctype="multipart/form-data" method="post">
-    {% csrf_token %}
-    {% for campo in formulario %}
+{% extends "base.html" %}
 
-        <div class="mb-3">
-            <label for="" class="form-label">Nombre</label>
-            <input
-                type="text"
-                class="form-control"
-                name=""
-                id=""
-                aria-describedby="helpId"
-                placeholder="Nombre"
-            />
-        </div>
-    {% endfor %}
-</form>
+{% block titulo %} Crear Nomina {% endblock %}
+
+{% block contenido %}
+    <h2>Crear Nuevo Perfil</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'perfil_index' %}" class="btn btn-danger">Cancelar</a>
+    </form>
+{% endblock %}

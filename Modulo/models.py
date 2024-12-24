@@ -59,7 +59,7 @@ class Perfil(models.Model):
     Perfil = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.Perfil}"
+        return f"{self.PerfilId} {self.Perfil}"
 
     class Meta:
         db_table = 'Perfil'
