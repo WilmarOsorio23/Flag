@@ -47,7 +47,7 @@ class Linea(models.Model):
     Linea = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.Linea}"
+        return f"{self.LineaId} {self.Linea} "
 
     class Meta:
         db_table = 'Linea'

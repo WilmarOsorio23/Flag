@@ -59,64 +59,6 @@ def inicio(request):
 def nosotros(request):
     return render(request, 'paginas/nosotros.html')
 
-# Vista para linea
-def linea_index(request):
-    linea_data = Linea.objects.all()
-    return render(request, 'linea/linea_index.html', {'lineas': linea_data})
-
-def linea_crear(request):
-    if request.method == 'POST':
-        form = LineaForm(request.POST)
-        if form.is_valid():
-            max_id = Linea.objects.all().aggregate(max_id=models.Max('id'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nueva_linea = form.save(commit=False)
-            nueva_linea.id = new_id
-            nueva_linea.save()
-            return redirect('linea_index')
-    else:
-        form = LineaForm()
-    return render(request, 'linea/linea_form.html', {'form': form})
-
-def linea_editar(request, id):
-    linea = get_object_or_404(Linea, id=id)
-
-    if request.method == 'POST':
-        form = LineaForm(request.POST, instance=linea)
-        if form.is_valid():
-            form.save()
-            return redirect('linea_index')
-    else:
-        form = LineaForm(instance=linea)
-
-    return render(request, 'linea/linea_form.html', {'form': form})
-
-def linea_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        Linea.objects.filter(id__in=item_ids).delete()
-        return redirect('linea_index')
-    return redirect('linea_index')
-
-def linea_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        linea_data = Linea.objects.filter(id__in=item_ids)
-
-        data = []
-        for linea in linea_data:
-            data.append([linea.id, linea.nombre, linea.descripcion])
-
-        df = pd.DataFrame(data, columns=['Id', 'Nombre', 'Descripción'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="linea.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('linea_index')
 
 # Vista para la tabla Consultores
 
