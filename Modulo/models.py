@@ -302,6 +302,16 @@ class Nomina(models.Model):
             models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento'], name='unique_nomina')
         ]
 
+class Cargos(models.Model):
+    CargoId = models.AutoField(primary_key=True)
+    Cargo = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.Cargo}"
+
+    class Meta:
+        db_table = 'Cargos'
+        
 class Empleado(models.Model):
     Documento = models.CharField(max_length=20, primary_key=True)
     TipoDocumento = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE, db_column='TipoDocumento')

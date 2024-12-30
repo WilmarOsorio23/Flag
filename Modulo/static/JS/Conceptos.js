@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return true; // Asumir que están relacionados en caso de error
         }
     }
+
     function showMessage(message, type) {
         const alertBox = document.getElementById('message-box');
         const alertIcon = document.getElementById('alert-icon');
@@ -115,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 alertBox.style.display = 'none';
             }, 300); // Tiempo para que la transición termine
-        }, 3000);
+        }, 800);
     }
 
     // Habilitar edición de conceptos
@@ -185,6 +186,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+    // Confirmación antes de descargar
+    window.confirmDownload = function() {
+        let selected = document.querySelectorAll('.row-select:checked');
+        if (selected.length == 0) {
+            showMessage('No has seleccionado ningún elemento para descargar.', 'danger');
+            return false;
+        }
+
+        let itemIds = [];
+        selected.forEach(function(checkbox) {
+            itemIds.push(checkbox.value);
+        });
+        document.getElementById('items_to_delete').value = itemIds.join(',');
+
+        return true;
+    };
+
     // Guardar cambios del concepto
     window.saveRow = function () {
         let selected = document.querySelector('.row-select:checked');
@@ -228,4 +246,5 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return false;
     };
+
 });

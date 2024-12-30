@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 alertBox.style.display = 'none';
             }, 300); // Tiempo para que la transición termine
-        }, 3000);
+        }, 800);
     }
 
     // Confirmación antes de descargar
@@ -153,7 +153,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return true;
     };
-
 
     // Habilitar edición en la fila seleccionada
     window.enableEdit = function () {
@@ -260,6 +259,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         input.readOnly = true;
                     });
 
+                    showMessage('Concepto guardado con éxito.', 'success');
                     // Ocultar botón de guardar
                     document.getElementById('save-button').classList.add('d-none');
                     disableEditMode(selected, row);
@@ -275,22 +275,40 @@ document.addEventListener('DOMContentLoaded', function () {
         return false;
     }
 
+    // Confirmación antes de descargar
+    Window.confirmDownload = function () {
+        // Selecciona todos los checkboxes marcados
+        const selectedItems = Array.from(document.querySelectorAll('.row-select:checked'))
+            .map(checkbox => checkbox.value);
+
+        if (selectedItems.length === 0) {
+            alert("Por favor, selecciona al menos un tipo de documento para descargar.");
+            return false; // Evita que el formulario se envíe
+        }
+
+        // Llena el campo oculto con los IDs seleccionados separados por comas
+        document.getElementById('items_to_delete').value = selectedItems.join(',');
+
+        return true; // Permite que el formulario se envíe
+    }
+
     // Clonar checkboxes seleccionados en el formulario de descarga
     document.getElementById('download-form').addEventListener('submit', function (event) {
         let selectedCheckboxes = document.querySelectorAll('.row-select:checked');
+        
         if (selectedCheckboxes.length === 0) {
             alert('No has seleccionado ningún elemento para descargar.');
             event.preventDefault(); // Evita el envío si no hay elementos seleccionados
             return;
         }
-
-        selectedCheckboxes.forEach(function (checkbox) {
-            let clonedCheckbox = checkbox.cloneNode();
-            clonedCheckbox.setAttribute('type', 'hidden'); // Ocultarlo en el formulario
-            document.getElementById('download-form').appendChild(clonedCheckbox);
-        });
+    
+        // Captura los valores de los checkboxes seleccionados
+        let selectedValues = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+    
+        // Asigna los valores seleccionados al campo oculto
+        document.getElementById('items_to_delete').value = selectedValues.join(',');
     });
-
+    
     // Seleccionar todos los checkboxes
     document.getElementById('select-all').addEventListener('click', function (event) {
         let checkboxes = document.querySelectorAll('.row-select');

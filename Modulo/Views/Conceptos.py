@@ -88,25 +88,24 @@ def conceptos_eliminar(request):
     return redirect('conceptos_index')
 
 def conceptos_descargar_excel(request):
+    # Verifica si la solicitud es POST
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        conceptos_data = Concepto.objects.filter(ConceptoId__in=item_ids)
+        itemIds= request.POST.get('items_to_delete', '').split(',')
 
-        # Preparar los datos para el DataFrame
+        # Convierte la cadena de IDs en una lista de enteros
+        conceptos = Concepto.objects.filter(ConceptoId__in=itemIds)
+
+        # Crea una respuesta HTTP con el tipo de contenido de Excel
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Conceptos.xlsx"'
+
         data = []
-        for concepto in conceptos_data:
+        for concepto in conceptos:
             data.append([concepto.ConceptoId, concepto.Descripcion])
 
-        # Crear el DataFrame con las columnas adecuadas
-        df = pd.DataFrame(data, columns=['ConceptoId', 'Descripcion'])
-
-        # Configurar la respuesta HTTP para descargar el archivo Excel
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="conceptos.xlsx"'
-
-        # Escribir el DataFrame en el archivo Excel
+        df = pd.DataFrame(data, columns=['Id', 'Nombre'])
         df.to_excel(response, index=False)
 
         return response
 
-    return redirect('conceptos_index')
+    return redirect('Conceptos_index')
