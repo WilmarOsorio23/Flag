@@ -242,6 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function showMessage(message, type) {
         const alertBox = document.getElementById('message-box');
         const alertIcon = document.getElementById('alert-icon');
+        const alertMessage = document.getElementById('alert-message');
   
 
         // Asignar el mensaje y el tipo de alerta
