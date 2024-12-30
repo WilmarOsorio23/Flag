@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         let row = selected[0].closest('tr');
-        let moduloId = selected[0].value;
+        let id = selected[0].value;
         let data = {
             'Modulo': row.querySelector('input[name="nombre"]').value
         };
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
 
-        fetch(`/Modulo/editar/${moduloId}/`, {
+        fetch(`/Modulo/editar/${id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

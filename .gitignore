@@ -1,0 +1,5 @@
+
+*.pyc
+/Modulo/__pycache__
+/Modulo/migrations
+*.log

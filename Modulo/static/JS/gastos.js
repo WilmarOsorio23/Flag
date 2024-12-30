@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     // Obtener el valor del token CSRF para ser utilizado en las solicitudes POST
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('.btn-outline-danger.fas.fa-trash-alt').addEventListener('click', function (event) {
         handleDeleteConfirmation(event, confirmDeleteModal, confirmDeleteButton, deleteForm, csrfToken);
     });
+    
+    // Funciones reutilizables
 
     // Prevenir el envío del formulario al presionar la tecla Enter
     function preventFormSubmissionOnEnter() {
@@ -71,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
     async function verifyRelations(ids, csrfToken) {
         try {
-            const response = await fetch('/verificar-relaciones/', {
+            const response = await fetch('/gastos/verificar-relaciones/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -118,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Confirmación antes de descargar
-    window.confirmDownload = function () {
+    window.confirmDownload = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 0) {
             showMessage('No has seleccionado ningún elemento para descargar.', 'danger');
@@ -126,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         let itemIds = [];
-        selected.forEach(function (checkbox) {
+        selected.forEach(function(checkbox) {
             itemIds.push(checkbox.value);
         });
         document.getElementById('items_to_delete').value = itemIds.join(',');
@@ -134,8 +136,9 @@ document.addEventListener('DOMContentLoaded', function () {
         return true;
     };
 
+
     // Deshabilitar modo edición
-    function disableEditMode(selected, row) {
+    function disableEditMode(selected,row) {
         // Cambiar inputs a solo lectura
         row.querySelectorAll('input.form-control').forEach(input => {
             input.classList.add('form-control-plaintext');
@@ -143,9 +146,10 @@ document.addEventListener('DOMContentLoaded', function () {
             input.readOnly = true;
         });
 
-        selected.disabled = false;
-        selected.checked = false;
-        
+        // Desmarcar y habilitar el checkbox de la fila
+        selected[0].checked = false;
+        selected[0].disabled = false;
+
         // Habilitar todos los checkboxes y el botón de edición
         document.getElementById('select-all').disabled = false;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
@@ -160,11 +164,11 @@ document.addEventListener('DOMContentLoaded', function () {
     window.enableEdit = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 0) {
-            showMessage('Por favor, selecciona al menos un certificado.', 'danger');
+            showMessage('Por favor, selecciona al menos un gasto.', 'danger');
             return false;
         }
         if (selected.length > 1) {
-            showMessage('Por favor, Selecciona un solo certificado para editar.', 'danger');
+            showMessage('Por favor, Selecciona un solo gasto para editar.', 'danger');
             return false;
         }
 
@@ -211,36 +215,24 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-
-    // Confirmación antes de eliminar
-    window.confirmDelete = function() {
-        let selected = document.querySelectorAll('.row-select:checked').length;
-        if (selected === 0) {
-            alert('No has seleccionado ningún elemento para eliminar.');
-            return false;
-        }
-        return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
-    }
-   
-    // Guardar los cambios en la fila seleccionada
     window.saveRow = function() {
-        let selected = document.querySelector('.row-select:checked');
-        if (!selected) {
-            alert('No has seleccionado ninguna certificación para guardar.');
-            return false;
+        let selected = document.querySelectorAll('.row-select:checked');
+        if (selected.length != 1) {
+            showMessage('Error al guardar: No hay un gasto seleccionado.', 'danger');
+            return;
         }
 
-        let row = selected.closest('tr');
+        let row = selected[0].closest('tr');
+        let id = selected[0].value;
         let data = {
-            'Certificacion': row.querySelector('input[name ="Certificacion"]').value
+            'Gasto': row.querySelector('input[name="Gasto"]').value
         };
 
-        console.log(data)
-        let certificacionId = selected.value;
-        console.log(certificacionId)
+        // Deshabilitar los checkboxes y el botón de edición
+        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
+        document.getElementById('edit-button').disabled = true;
 
-        // Enviar datos al servidor
-        fetch(`/certificacion/editar/${certificacionId}/`, {
+        fetch(`/gastos/editar/${id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -248,53 +240,33 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             body: JSON.stringify(data)
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Volver a modo de solo lectura
-                    //inputs.forEach(input => {
-                    row.querySelectorAll('input').forEach(input => {
-                        input.classList.add('form-control-plaintext');
-                        input.classList.remove('form-control');
-                        input.readOnly = true;
-                    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al guardar los cambios');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status == 'success') {
+                showMessage('Cambios guardados correctamente.', 'success');
 
-                    // Ocultar botón de guardar
-                    document.getElementById('save-button').classList.add('d-none');
-                } else {
-                    alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
-                }
-            })
-            .catch(error => {
-                alert('Error al enviar los datos: ' + error.message);
-            });
+                row.querySelectorAll('input.form-control').forEach(input => {
+                    input.classList.add('highlighted');
+                    setTimeout(() => input.classList.remove('highlighted'), 2000);
+                });
 
-        return false;
-    }
+                disableEditMode(selected,row);
 
-    // Clonar checkboxes seleccionados en el formulario de descarga
-    document.getElementById('download-form').addEventListener('submit', function (event) {
-        let selectedCheckboxes = document.querySelectorAll('.row-select:checked');
-        
-        if (selectedCheckboxes.length === 0) {
-            alert('No has seleccionado ningún elemento para descargar.');
-            event.preventDefault(); // Evita el envío si no hay elementos seleccionados
-            return;
-        }
-    
-        // Captura los valores de los checkboxes seleccionados
-        let selectedValues = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
-    
-        // Asigna los valores seleccionados al campo oculto
-        document.getElementById('items_to_delete').value = selectedValues.join(',');
-    });
-    
-    // Seleccionar todos los checkboxes
-    document.getElementById('select-all').addEventListener('click', function (event) {
-        let checkboxes = document.querySelectorAll('.row-select');
-        for (let checkbox of checkboxes) {
-            checkbox.checked = event.target.checked;
-        }
-    });
-    
+            } else {
+                showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger');
+            }
+
+        })
+        .catch(error => {
+            console.error('Error al guardar los cambios:', error);
+            showMessage('Error al guardar los cambios: ' + error.message, 'danger');
+
+            disableEditMode(selected,row);
+        });
+    };
 });

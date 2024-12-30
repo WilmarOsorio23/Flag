@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block titulo %} Lista de Módulos {% endblock %}
+{% block titulo %} Lista de Cargos {% endblock %}
 
 {% block contenido %}
 <div class="card">
@@ -22,16 +22,16 @@
     {% endif %}
     
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="card-title">Módulos</h4>
+        <h4 class="card-title">Cargos</h4>
     </div>  
     <div class="card-body">
         <!-- CRUD Icons -->
         <div class="button-group">
-            <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'crear' %}" role="button"></a>
+            <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'cargos_crear' %}" role="button"></a>
             <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button" onclick="enableEdit();"></a>
             <i class="btn btn-outline-primary fas fa-eye" title="Visualizar"></i>
             <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>
-            <form id="download-form" method="POST" action="{% url 'descargar_excel' %}" style="display:inline;" onsubmit="return confirmDownload();">
+            <form id="download-form" method="POST" action="{% url 'cargos_descargar_excel' %}" style="display:inline;" onsubmit="return confirmDownload();">
                 {% csrf_token %}
                 <input type="hidden" name="items_to_delete" id="items_to_delete">
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
@@ -53,23 +53,23 @@
     </div>
     <div class="card-footer text-muted">
         <div class="table-responsive">
-            <form id="delete-form" method="POST" action="{% url 'eliminar' %}">
+            <form id="delete-form" method="POST" action="{% url 'cargos_eliminar' %}">
                 {% csrf_token %}
                 <table class="table table-primary">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
                             <th scope="col">ID</th>
-                            <th scope="col">Nombre Módulo</th>
+                            <th scope="col">Nombre Cargo</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for modulo in Modulo %}
-                        <tr id="row-{{ modulo.ModuloId }}">
-                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ modulo.ModuloId }}"></td>
-                            <td>{{ modulo.ModuloId }}</td>
+                        {% for cargo in Cargos %}
+                        <tr id="row-{{ cargo.CargoId }}">
+                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ cargo.CargoId }}"></td>
+                            <td>{{ cargo.CargoId }}</td>
                             <td>
-                                <input type="text" name="nombre" class="form-control-plaintext" value="{{ modulo.Modulo }}" readonly>
+                                <input type="text" name="cargo" class="form-control-plaintext" value="{{ cargo.Cargo }}" readonly>
                             </td>
                         </tr>
                         {% empty %}
@@ -91,7 +91,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-            ¿Estás seguro de que deseas eliminar este módulo?
+            ¿Estás seguro de que deseas eliminar este cargo?
             </div>
             <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
@@ -102,6 +102,6 @@
     </div>
 </div>
 
-<script src="{% static 'JS/modulo.js' %}"></script>
+<script src="{% static 'JS/cargos.js' %}"></script>
 
 {% endblock %}

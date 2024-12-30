@@ -74,6 +74,15 @@ class TipoDocumento(models.Model):
     class Meta:
         db_table = 'TipoDocumento'
 
+class Cargos(models.Model):
+    CargoId = models.AutoField(primary_key=True)
+    Cargo = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.Cargo}"
+
+    class Meta:
+        db_table = 'Cargos'
 
 # Modelos con relaciones
 class Clientes(models.Model):
@@ -287,6 +296,7 @@ class Total_Costos_Indirectos(models.Model):
         ]
 
 class Nomina(models.Model):
+    NominaId = models.AutoField(primary_key=True)
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
     Documento = models.CharField(max_length=10)
