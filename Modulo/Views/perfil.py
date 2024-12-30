@@ -70,6 +70,7 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+
 def perfil_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')

@@ -14,6 +14,7 @@ from Modulo.Views import empleado
 from Modulo.Views import Nomina
 from . import views
 from Modulo.Views import perfil
+from Modulo.Views import linea
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -42,11 +43,12 @@ urlpatterns = [
     path('ind/descargar_excel', ind.ind_descargar_excel, name='ind_descargar_excel'),
 
     # Rutas para tabla Línea
-    path('linea/', views.linea_index, name='linea_index'),
-    path('linea/crear', views.linea_crear, name='linea_crear'),
-    path('linea/editar/<int:LineaId>/', views.linea_editar, name='linea_editar'),
-    path('linea/eliminar', views.linea_eliminar, name='linea_eliminar'),
-    path('linea/descargar_excel', views.linea_descargar_excel, name='linea_descargar_excel'),
+    path('linea/', linea.linea_index, name='linea_index'),
+    path('linea/crear', linea.linea_crear, name='linea_crear'),
+    path('linea/editar/<int:id>/', linea.linea_editar, name='linea_editar'),
+    path('linea/verificar-relaciones/', linea.verificar_relaciones, name='verificar_relaciones'),
+    path('linea/eliminar', linea.linea_eliminar, name='linea_eliminar'),
+    path('linea/descargar_excel', linea.linea_descargar_excel, name='linea_descargar_excel'),
 
     # Rutas para tabla Perfil
     path('perfil/', perfil.perfil_index, name='perfil_index'),

@@ -1,4 +1,19 @@
 document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('download-form').addEventListener('submit', function(event) {
+        // Espera unos milisegundos tras la descarga
+        setTimeout(() => {
+            // Deseleccionar todos los checkboxes
+            const checkboxes = document.querySelectorAll('.row-select');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+    
+            // Deseleccionar el checkbox principal
+            const selectAll = document.getElementById('select-all');
+            if (selectAll) selectAll.checked = false;
+        }, 100);
+    });
+    
 
     window.cancelEdit = function() {
         console.log("esta en cancel")
@@ -48,8 +63,8 @@ document.addEventListener('DOMContentLoaded', function() {
         let row = selected[0].closest('tr');
        
         let data = {
-            'PerfilId': row.querySelector('input[name="items_to_delete"]').value,
-            'Perfil': row.querySelector('input[name="Nombre"]').value
+            'LineaId': row.querySelector('input[name="items_to_delete"]').value,
+            'Linea': row.querySelector('input[name="Nombre"]').value
         };
         let id = selected[0].value;
         // Deshabilitar los checkboxes y el botón de edición
@@ -58,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
        console.log(id)
        console.log(data)
-       fetch(`/perfil/editar/${id}/`, {
+       fetch(`/linea/editar/${id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -160,6 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
         handleDeleteConfirmation(event, confirmDeleteModal, confirmDeleteButton, deleteForm, csrfToken);
     });
     
+ 
     // Funciones reutilizables
 
     // Prevenir el envío del formulario al presionar la tecla Enter
@@ -223,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
     async function verifyRelations(ids, csrfToken) {
         try {
-            const response = await fetch('/verificar-relaciones/', {
+            const response = await fetch('verificar-relaciones/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -242,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function showMessage(message, type) {
         const alertBox = document.getElementById('message-box');
         const alertIcon = document.getElementById('alert-icon');
+        const alertMessage = document.getElementById('alert-message');
   
 
         // Asignar el mensaje y el tipo de alerta
@@ -268,6 +285,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300); // Tiempo para que la transición termine
         }, 800);
     }
+
 
     // Confirmación antes de descargar
     window.confirmDownload = function() {
@@ -312,6 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
    
+    
     
 
     
