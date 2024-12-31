@@ -11,6 +11,7 @@ from Modulo.Views import gastos
 from Modulo.Views import cargos
 from Modulo.Views import empleado_nomina_filtrado
 from Modulo.Views import empleado
+from Modulo.Views import consultores
 from . import views
 
 
@@ -78,11 +79,12 @@ urlpatterns = [
     path('clientes/descargar_excel/', Clientes.clientes_descargar_excel, name='clientes_descargar_excel'),
 
     # Rutas para la tabla Consultores
-    path('consultores/', views.consultores_index, name='consultores_index'),
-    path('consultores/crear/', views.consultores_crear, name='consultores_crear'),
-    path('consultores/editar/<str:tipo_documento_id>/<str:documento_id>/', views.consultores_editar, name='consultores_editar'),
-    path('consultores/eliminar/', views.consultores_eliminar, name='consultores_eliminar'),
-    path('consultores/descargar_excel/', views.consultores_descargar_excel, name='consultores_descargar_excel'),
+    path('consultores/', consultores.consultores_index, name='consultores_index'),
+    path('consultores/crear/', consultores.consultores_crear, name='consultores_crear'),
+    path('consultores/editar/<str:id>/', consultores.consultores_editar, name='consultores_editar'),
+    path('consultores/eliminar/', consultores.consultores_eliminar, name='consultores_eliminar'),
+    path('consultores/verificar-relaciones/', consultores.verificar_relaciones, name='consultores_verificar_relaciones'),
+    path('consultores/descargar_excel/', consultores.consultores_descargar_excel, name='consultores_descargar_excel'),
 
     # Rutas para tabla Certificacion
     path('certificacion/', Certificacion.certificacion_index, name='certificacion_index'),
