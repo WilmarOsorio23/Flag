@@ -121,13 +121,13 @@ class ConsultoresForm(forms.ModelForm):
         model = Consultores
         fields = '__all__'
         widgets = {
-            'TipoDocumentoID': forms.TextInput(attrs={
+            'TipoDocumentoID': forms.Select(attrs={
                 'class': 'form-control',
                 'placeholder': 'Tipo de Documento'
             }),
-            'DocumentoId': forms.TextInput(attrs={
+            'Documento': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Documento ID'
+                'placeholder': 'Documento'
             }),
             'Nombre': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -141,18 +141,61 @@ class ConsultoresForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Profesión'
             }),
-            'Estado': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
+            'LineaId': forms.Select(attrs={
+                'class': 'form-control',
+                'placeholder': 'Selecciona Línea'
             }),
+            'ModuloId': forms.Select(attrs={
+                'class': 'form-control',
+                'placeholder': 'Selecciona Módulo'
+            }),
+            'PerfilId': forms.Select(attrs={
+                'class': 'form-control',
+                'placeholder': 'Selecciona Perfil'
+            }),
+            'Estado': forms.Select(
+                choices=[
+                    (True, 'Activo'),
+                    (False, 'Inactivo'),
+                ],
+                attrs={ 
+                    'class': 'form-control'
+                }
+            ),
             'Fecha_Ingreso': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
             }),
             'Fecha_Retiro': forms.DateInput(attrs={
                 'class': 'form-control',
-                'type': 'date'
+                'type': 'date',
+                'placeholder': 'Fecha de Retiro (opcional)',
+            }),
+            'Direccion': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Dirección (opcional)'
+            }),
+            'Telefono': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Teléfono (opcional)',
+                'type': 'number'
+            }),
+            'Fecha_Operacion': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Fecha de Operacion (opcional)',
+                'type': 'number'
             }),
         }
+    def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields['Fecha_Retiro'].required = False  # Campo no obligatorio
+            self.fields['Fecha_Retiro'].label = "Fecha de Retiro (opcional)"    
+            self.fields['LineaId'].empty_label = "Selecciona una Línea"
+            self.fields['ModuloId'].empty_label = "Selecciona un Módulo"
+            self.fields['PerfilId'].empty_label = "Selecciona un Perfil"
+            self.fields['Telefono'].required = False  # Permitir campo vacío
+            self.fields['Direccion'].required = False  # Permitir campo vacío
+            self.fields['Fecha_Retiro'].required = False  # Permitir campo vacío
 
 class LineaForm(forms.ModelForm):
     class Meta:
@@ -168,7 +211,6 @@ class LineaForm(forms.ModelForm):
         labels = {
             'nombre': 'Nombre',
         }
-
 
 class PerfilForm(forms.ModelForm):
     class Meta:

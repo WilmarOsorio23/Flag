@@ -264,6 +264,7 @@ a[aria-expanded="true"] {
     align-items: center; /* Centrar verticalmente el contenido */
 }
 
+
 /* ========================== */
 /*       TABLE STYLING        */
 /* ========================== */
@@ -309,9 +310,6 @@ a[aria-expanded="true"] {
     white-space: nowrap; /* Evita que el texto se extienda en varias líneas */
 }
 
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: #f2f2f2; /* Color más claro para filas alternas */
-}
 
 /* Ajuste de ancho de columnas de checkbox e ID */
 .table td:first-child, .table th:first-child {
@@ -323,16 +321,31 @@ a[aria-expanded="true"] {
     border-top: 2px solid #dee2e6;
 }
 
-.table tbody tr:nth-child(odd) {
-    background-color: #f9f9f9; /* Fondo alternante para filas */
-}
-
-.table tbody tr:nth-child(even) {
-    background-color: #ffffff; /* Fondo alternante para filas */
-}
 
 .table tbody tr:hover {
     background-color: #e9ecef;
+}
+
+/* Selects in tables */
+.table select {
+    width: 100%; /* Ocupa todo el ancho disponible */
+    border: 1px solid #ced4da; /* Borde igual al de los inputs */
+    border-radius: 0.25em; /* Bordes redondeados */
+    padding: 0.5em; /* Espaciado interno igual a los inputs */
+    transition: border-color 0.3s; /* Transición suave */
+    appearance: none; /* Elimina estilos predeterminados */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 20 110 110'%3E%3Cpath fill='black' d='M35 60l35 35 35-35z'/%3E%3C/svg%3E");    background-repeat: no-repeat;
+    background-position: right 0.75em center; /* Posición de la flecha */
+    background-size: 0.65em auto; /* Tamaño de la flecha */
+}
+
+.table select:focus {
+    border-color: #007bff; /* Color del borde en estado de foco */
+    outline: none; /* Sin contorno adicional */
+}
+
+.table select option {
+    color: #495057; /* Color del texto de las opciones */
 }
 
 /* Inputs in tables */

@@ -125,45 +125,26 @@ class Tiempos_Cliente(models.Model):
         ]
 
 class Consultores(models.Model):
-    TipoDocumentoID = models.ForeignKey(
-        TipoDocumento, 
-        on_delete=models.CASCADE,
-        db_column='TipoDocumentoID'
-    )
-    Documento = models.CharField(max_length=20)
+    Documento = models.CharField(max_length=20, primary_key=True)
+    TipoDocumentoID = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE, db_column='TipoDocumentoID')
     Nombre = models.CharField(max_length=100)
     Empresa = models.CharField(max_length=100)
     Profesion = models.CharField(max_length=100)
-    LineaId = models.ForeignKey(
-        Linea, 
-        on_delete=models.CASCADE,
-        db_column='LineaId'
-    )
-    ModuloId = models.ForeignKey(
-        Modulo, 
-        on_delete=models.CASCADE,
-        db_column='ModuloId'
-    )
-    PerfilId = models.ForeignKey(
-        Perfil,
-        on_delete=models.CASCADE,
-        db_column='PerfilId'
-    )
+    LineaId = models.ForeignKey(Linea, on_delete=models.CASCADE, db_column='LineaId')
+    ModuloId = models.ForeignKey(Modulo, on_delete=models.CASCADE, db_column='ModuloId')
+    PerfilId = models.ForeignKey(Perfil, on_delete=models.CASCADE, db_column='PerfilId')
     Estado = models.BooleanField(default=True)
     Fecha_Ingreso = models.DateField()
     Fecha_Retiro = models.DateField(null=True, blank=True)
-    Direccion = models.CharField(max_length=255, null=True, blank=True)
-    Telefono = models.CharField(max_length=20, null=True, blank=True)
+    Direccion = models.CharField(max_length=255, null=True, blank=True, verbose_name="Dirección")
+    Telefono = models.CharField(max_length=20, null=True, blank=True, verbose_name="Teléfono")
     Fecha_Operacion = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.TipoDocumentoID} - {self.Documento} - {self.Nombre}'
+        return f'{self.TipoDocumentoID} - {self.Documento} - {self.Nombre}' 
 
     class Meta:
         db_table = 'Consultores'
-        constraints = [
-            models.UniqueConstraint(fields=['TipoDocumentoID', 'Documento'], name='unique_consultor')
-        ]
 
 class Certificacion(models.Model):
     CertificacionId = models.AutoField(primary_key=True)
@@ -215,7 +196,6 @@ class TiemposConcepto(models.Model):
             models.UniqueConstraint(fields=['Anio', 'Mes', 'Colaborador', 'ConceptoId'], name='unique_tiempos_concepto')
         ]
 
-
 class Gastos(models.Model):
     GastoId = models.AutoField(primary_key=True)
     Gasto = models.CharField(max_length=255)
@@ -225,7 +205,6 @@ class Gastos(models.Model):
 
     class Meta:
         db_table = 'Gastos'
-
 
 class Detalle_Gastos(models.Model):
     Anio = models.CharField(max_length=4)
@@ -241,7 +220,6 @@ class Detalle_Gastos(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['Anio', 'Mes', 'GastosId'], name='unique_detalle_gastos')
         ]
-
 
 class Total_Gastos(models.Model):
     Anio = models.CharField(max_length=4)
@@ -342,5 +320,3 @@ class Empleado(models.Model):
     def clean(self):
         if self.FechaIngreso < self.FechaNacimiento:
             raise ValidationError('La fecha de ingreso no puede ser anterior a la fecha de nacimiento.')
-
-
