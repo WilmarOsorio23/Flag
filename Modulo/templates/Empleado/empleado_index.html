@@ -69,11 +69,10 @@
                         <tr id="row-{{ empleado.Documento }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ empleado.Documento }}"></td>
                             <td>
-                                <!-- Modo estático: Mostrar el valor del tipo documento actual -->
-                                <input class="static-mode form-control-plaintext" value="{{ empleado.TipoDocumento.Nombre }}" readonly>
-                            
+                                {{ empleado.TipoDocumento.Nombre }}
+
                                 <!-- Modo edición: Select de TipoDocumento -->
-                                <select name="TipoDocumento" class="edit-mode form-select d-none">
+                                <select name="TipoDocumento" class="form-select d-none">
                                     {% for tipo_doc in form.fields.TipoDocumento.queryset %}
                                         <option value="{{ tipo_doc.TipoDocumentoID }}" {% if empleado.TipoDocumento.Nombre == tipo_doc.Nombre %}selected{% endif %}>
                                             {{ tipo_doc.Nombre }}
@@ -81,16 +80,25 @@
                                     {% endfor %}
                                 </select>
                             </td>                            
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;"><input type="text" name="Documento" class="form-control-plaintext" value="{{ empleado.Documento }}" readonly></td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;"><input type="text" name="Nombre" class="form-control-plaintext" value="{{ empleado.Nombre }}" readonly></td>
-                            <td><input type="date" name="FechaNacimiento" class="form-control-plaintext" value="{{ empleado.FechaNacimiento|date:'Y-m-d' }}" readonly></td>
-                            <td><input type="date" name="FechaIngreso" class="form-control-plaintext" value="{{ empleado.FechaIngreso|date:'Y-m-d' }}" readonly></td>
-                            <td><input type="date" name="FechaOperacion" class="form-control-plaintext" value="{{ empleado.FechaOperacion|date:'Y-m-d' }}" readonly></td>
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                <!-- Modo estático -->
-                                <input class="static-mode form-control-plaintext" value="{{ empleado.ModuloId }}" readonly>
-                                <!-- Modo edición -->
-                                <select name="ModuloId" class="edit-mode form-select d-none">
+                                {{ empleado.Documento }}
+                                <input type="text" name="Documento" class="form-control-plaintext d-none" value="{{ empleado.Documento }}" readonly>
+                            </td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                <input type="text" name="Nombre" class="form-control-plaintext" value="{{ empleado.Nombre }}" readonly>
+                            </td>
+                            <td>
+                                <input type="date" name="FechaNacimiento" class="form-control-plaintext" value="{{ empleado.FechaNacimiento|date:'Y-m-d' }}" readonly>
+                            </td>
+                            <td>
+                                <input type="date" name="FechaIngreso" class="form-control-plaintext" value="{{ empleado.FechaIngreso|date:'Y-m-d' }}" readonly>
+                            </td>
+                            <td>
+                                <input type="date" name="FechaOperacion" class="form-control-plaintext" value="{{ empleado.FechaOperacion|date:'Y-m-d' }}" readonly>
+                            </td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+
+                                <select name="ModuloId" class="form-control-plaintext" disabled>
                                     {% for modulo in form.fields.ModuloId.queryset %}
                                         <option value="{{ modulo.ModuloId }}" {% if empleado.ModuloId == modulo.id %}selected{% endif %}>
                                             {{ modulo.Modulo }}
@@ -99,10 +107,8 @@
                                 </select>
                             </td>
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                <!-- Modo estático -->
-                                <input class="static-mode form-control-plaintext" value="{{ empleado.PerfilId }}" readonly>
-                                <!-- Modo edición -->
-                                <select name="PerfilId" class="edit-mode form-select d-none">
+
+                                <select name="PerfilId" class="form-control-plaintext" disabled>
                                     {% for perfil in form.fields.PerfilId.queryset %}
                                         <option value="{{ perfil.PerfilId }}" {% if empleado.PerfilId == perfil.id %}selected{% endif %}>
                                             {{ perfil.Perfil }}
@@ -111,10 +117,8 @@
                                 </select>
                             </td>
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                <!-- Modo estático -->
-                                <input class="static-mode form-control-plaintext" value="{{ empleado.LineaId }}" readonly>
-                                <!-- Modo edición -->
-                                <select name="LineaId" class="edit-mode form-select d-none">
+
+                                <select name="LineaId" class="form-control-plaintext" disabled>
                                     {% for linea in form.fields.LineaId.queryset %}
                                         <option value="{{ linea.LineaId }}" {% if empleado.LineaId == linea.id %}selected{% endif %}>
                                             {{ linea.Linea }}
@@ -123,10 +127,8 @@
                                 </select>
                             </td>
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                <!-- Modo estático -->
-                                <input class="static-mode form-control-plaintext" value="{{ empleado.CargoId }}" readonly>
-                                <!-- Modo edición -->
-                                <select name="CargoId" class="edit-mode form-select d-none">
+
+                                <select name="CargoId" class="form-control-plaintext" disabled>
                                     {% for cargo in form.fields.CargoId.queryset %}
                                         <option value="{{ cargo.CargoId }}" {% if empleado.CargoId == cargo.id %}selected{% endif %}>
                                             {{ cargo.Cargo }}
@@ -142,13 +144,7 @@
                             <td><input type="text" name="UniversidadActual" class="form-control-plaintext" value="{{ empleado.UniversidadActual }}" readonly></td>
                             <td><input type="text" name="AcademiaSAP" class="form-control-plaintext" value="{{ empleado.AcademiaSAP }}" readonly></td>
                             <td>
-                                <!-- Modo estático: Mostrar el valor del CertificadoSAP -->
-                                <input class="static-mode form-control-plaintext" 
-                                        value="{% if empleado.CertificadoSAP == 1 %}Sí{% else %}No{% endif %}" 
-                                        readonly>
-
-                                <!-- Modo edición: Select de CertificadoSAP -->
-                                <select name="CertificadoSAP" class="edit-mode form-select d-none">
+                                <select name="CertificadoSAP" class="form-control-plaintext" disabled>
                                     <option value="1" {% if empleado.CertificadoSAP == 1 %}selected{% endif %}>Sí</option>
                                     <option value="0" {% if empleado.CertificadoSAP == 0 %}selected{% endif %}>No</option>
                                 </select>

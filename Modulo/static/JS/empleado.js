@@ -151,6 +151,13 @@ document.addEventListener('DOMContentLoaded', function() {
             input.readOnly = true;
         });
 
+        // Cambiar inputs a solo lectura
+        row.querySelectorAll('select.form-control').forEach(selects => {
+            selects.classList.add('form-control-plaintext');
+            selects.classList.remove('form-control');
+            selects.disabled = true;
+        });
+
         // Desmarcar y habilitar el checkbox de la fila
         selected[0].checked = false;
         selected[0].disabled = false;
@@ -159,10 +166,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('select-all').disabled = false;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
         document.getElementById('edit-button').disabled = false;
-
-        // Restaurar valores estáticos y ocultar inputs select
-        document.querySelectorAll('.edit-mode').forEach(el => el.classList.add('d-none'));
-        document.querySelectorAll('.static-mode').forEach(el => el.classList.remove('d-none'));
 
         // Ocultar los botones de guardar y cancelar
         document.getElementById('save-button').classList.add('d-none');
@@ -183,12 +186,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let row = selected[0].closest('tr');
         let inputs = row.querySelectorAll('input.form-control-plaintext');
-        let selects = row.querySelectorAll('select.edit-mode.form-select');
-        let staticValues = row.querySelectorAll('.static-mode');
+        let selects = row.querySelectorAll('select.form-control-plaintext');
 
         // Guardar valores originales en un atributo personalizado 
         inputs.forEach(input => { 
             input.setAttribute('data-original-value', input.value);
+        });
+
+        selects.forEach(select => {
+            select.setAttribute('data-original-value', select.value);
         });
 
         // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
@@ -196,21 +202,17 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
 
-        // Convertir selects en editables
-        selects.forEach(select => {
-            select.classList.remove('d-none');
-        });
-
-        // Convertir staticValues en no editables
-        staticValues.forEach(staticValue => {
-            staticValue.classList.add('d-none');
-        });
-
         // Convertir inputs en editables
         inputs.forEach(input => {
             input.classList.remove('form-control-plaintext');
             input.classList.add('form-control');
             input.readOnly = false;
+        });
+
+        selects.forEach(select => {
+            select.classList.remove("form-control-plaintext");
+            select.classList.add("form-control");
+            select.removeAttribute("disabled");
         });
 
         // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
@@ -228,6 +230,13 @@ document.addEventListener('DOMContentLoaded', function() {
             row.querySelectorAll('input.form-control').forEach(input => {
                 if (input.hasAttribute('data-original-value')) {
                     input.value = input.getAttribute('data-original-value');
+                }
+            });
+
+            // Restaurar los valores originales desde el atributo personalizado
+            row.querySelectorAll('select.form-control').forEach(select => {
+                if (select.hasAttribute('data-original-value')) {
+                    select.value = select.getAttribute('data-original-value');
                 }
             });
             
