@@ -83,21 +83,27 @@ def verificar_relaciones(request):
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def certificacion_descargar_excel(request):
+    # Verifica si la solicitud es POST
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        certificacion_data = Certificacion.objects.filter(CertificacionId__in=item_ids)
+        certificacion_ids = request.POST.get('items_to_delete')  
+        
+        # Convierte la cadena de IDs en una lista de enteros
+        certificacion_ids = list(map(int, certificacion_ids.split (',')))  # Cambiado aquí
+        certificacion = Certificacion.objects.filter(CertificacionId__in=certificacion_ids)
+
+        # Crea una respuesta HTTP con el tipo de contenido de Excel
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Certificaciones.xlsx"'
 
         data = []
-        for certificacion in certificacion_data:
-            data.append([certificacion.CertificacionId, certificacion.Certificacion])
+        for certificaciones in certificacion:
+            data.append([certificaciones.CertificacionId, certificaciones.Certificacion])
 
-        df = pd.DataFrame(data, columns=['Id Certificación', 'Certificación'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="certificaciones.xlsx"'
-
+        df = pd.DataFrame(data, columns=['Id', 'Nombre'])
         df.to_excel(response, index=False)
 
         return response
 
-    return redirect('certificacion_index')
+    return redirect('Certificacion')
+       
+

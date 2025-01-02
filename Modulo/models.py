@@ -288,6 +288,16 @@ class Nomina(models.Model):
     class Meta:
         db_table = 'Nomina'
 
+class Cargos(models.Model):
+    CargoId = models.AutoField(primary_key=True)
+    Cargo = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.Cargo}"
+
+    class Meta:
+        db_table = 'Cargos'
+        
 class Empleado(models.Model):
     Documento = models.CharField(max_length=20, primary_key=True)
     TipoDocumento = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE, db_column='TipoDocumento')
@@ -320,3 +330,4 @@ class Empleado(models.Model):
     def clean(self):
         if self.FechaIngreso < self.FechaNacimiento:
             raise ValidationError('La fecha de ingreso no puede ser anterior a la fecha de nacimiento.')
+

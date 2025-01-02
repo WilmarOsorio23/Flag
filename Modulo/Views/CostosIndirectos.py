@@ -86,19 +86,31 @@ def verificar_relaciones(request):
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def costos_indirectos_descargar_excel(request):
+    # Verifica si la solicitud es POST
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        costos_data = Costos_Indirectos.objects.filter(CostoId__in=item_ids)
+        # Obtén los IDs enviados desde el formulario
+        costos_ids = request.POST.get('items_to_delete')
 
+        # Convierte la cadena de IDs en una lista de enteros
+        try:
+            costos_ids = list(map(int, costos_ids.split(',')))  # Asegúrate de manejar excepciones aquí
+        except (ValueError, AttributeError):
+            return HttpResponse("Error al procesar los datos enviados.", status=400)
+
+        # Filtra los objetos correspondientes
+        costos = Costos_Indirectos.objects.filter(CostoId__in=costos_ids)
+
+        # Crea una respuesta HTTP con el tipo de contenido de Excel
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="CostosIndirectos.xlsx"'
+
+        # Prepara los datos para exportar
         data = []
-        for costo in costos_data:
+        for costo in costos:
             data.append([costo.CostoId, costo.Costo])
 
-        df = pd.DataFrame(data, columns=['CostoId', 'Costo'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="costos_indirectos.xlsx"'
-
+        # Convierte los datos a un DataFrame de pandas y luego a Excel
+        df = pd.DataFrame(data, columns=['ID', 'Costo'])
         df.to_excel(response, index=False)
 
         return response

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %} Informe de Empleados {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Informe de Empleados</h4>
+    </div>
+    <div class="card-body">
+        <div class="container-fluid mb-3">
+            <!-- Botón de Descargar Excel -->
+            <div class="row">
+                <div class="col-md-12 text-end">
+                    <form id="download-form" method="GET" action="{% url 'exportar_empleados_excel' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Informe de Empleados -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-primary" id="empleadosTable">
+                <thead>
+                    <tr>
+                        <th>Tipo Documento</th>
+                        <th>Documento</th>
+                        <th>Nombre</th>
+                        <th>Fecha Nacimiento</th>
+                        <th>Fecha Ingreso</th>
+                        <th>Fecha Operación</th>
+                        <th>Módulo</th>
+                        <th>Perfil</th>
+                        <th>Línea</th>
+                        <th>Título Profesional</th>
+                        <th>Fecha Grado</th>
+                        <th>Universidad</th>
+                        <th>Profesión Realizada</th>
+                        <th>Título Profesional Actual</th>
+                        <th>Universidad Actual</th>
+                        <th>Academia SAP</th>
+                        <th>Certificado SAP</th>
+                        <th>Otras Certificaciones</th>
+                        <th>Postgrados</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for empleado in empleados %}
+                    <tr>
+                        <td>{{ empleado.TipoDocumento.codigo }} - {{ empleado.TipoDocumento.descripcion }}</td>
+                        <td>{{ empleado.Documento }}</td>
+                        <td>{{ empleado.Nombre }}</td>
+                        <td>{{ empleado.Fecha_Nacimiento|date:"d/m/Y" }}</td>
+                        <td>{{ empleado.Fecha_Ingreso|date:"d/m/Y" }}</td>
+                        <td>{{ empleado.Fecha_Operacion|date:"d/m/Y" }}</td>
+                        <td>{{ empleado.Modulo.codigo }} - {{ empleado.Modulo.descripcion }}</td>
+                        <td>{{ empleado.Perfil.codigo }} - {{ empleado.Perfil.descripcion }}</td>
+                        <td>{{ empleado.Linea.codigo }} - {{ empleado.Linea.descripcion }}</td>
+                        <td>{{ empleado.Titulo_Profesional }}</td>
+                        <td>{{ empleado.Fecha_Grado|date:"d/m/Y" }}</td>
+                        <td>{{ empleado.Universidad }}</td>
+                        <td>{{ empleado.Profesion_Realizada }}</td>
+                        <td>{{ empleado.Titulo_Profesional_Actual }}</td>
+                        <td>{{ empleado.Universidad_Actual }}</td>
+                        <td>{{ empleado.Academia_SAP }}</td>
+                        <td>{{ empleado.Certificado_SAP }}</td>
+                        <td>{{ empleado.Otras_Certificaciones }}</td>
+                        <td>{{ empleado.Postgrados }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="19">No hay datos disponibles.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="{% static 'JS/informe_empleados.js' %}"></script>
+{% endblock %}

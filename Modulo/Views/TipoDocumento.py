@@ -85,8 +85,12 @@ def verificar_relaciones(request):
 
 def tipo_documento_descargar_excel(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')  
-        print(item_ids) 
+        # Obtiene los IDs de los documentos seleccionados
+        item_ids = request.POST.get('items_to_delete', '')  # Obtén el valor como cadena
+        item_ids = item_ids.split(',')  # Divide los valores si están concatenados
+        item_ids = [int(item) for item in item_ids if item.isdigit()]  # Convierte a enteros
+        
+        print(item_ids)  # Depuración: Verifica que ahora tienes una lista de enteros
 
         # Filtra los datos de la tabla TipoDocumento según los IDs seleccionados
         tipo_documento_data = TipoDocumento.objects.filter(TipoDocumentoID__in=item_ids)

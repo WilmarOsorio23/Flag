@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 alertBox.style.display = 'none';
             }, 300); // Tiempo para que la transición termine
-        }, 3000);
+        }, 800);
     }
 
     // Confirmación antes de descargar
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function () {
         selected.forEach(function(checkbox) {
             itemIds.push(checkbox.value);
         });
-        document.getElementById('items_to_delete').value = itemIds.join(',');
+        document.getElementById('items_to_delete').value = JSON.stringify(itemIds);
 
         return true;
     };
@@ -290,19 +290,20 @@ document.addEventListener('DOMContentLoaded', function () {
     // Clonar checkboxes seleccionados en el formulario de descarga
     document.getElementById('download-form').addEventListener('submit', function (event) {
         let selectedCheckboxes = document.querySelectorAll('.row-select:checked');
+        
         if (selectedCheckboxes.length === 0) {
             alert('No has seleccionado ningún elemento para descargar.');
             event.preventDefault(); // Evita el envío si no hay elementos seleccionados
             return;
         }
-
-        selectedCheckboxes.forEach(function (checkbox) {
-            let clonedCheckbox = checkbox.cloneNode();
-            clonedCheckbox.setAttribute('type', 'hidden'); // Ocultarlo en el formulario
-            document.getElementById('download-form').appendChild(clonedCheckbox);
-        });
+    
+        // Captura los valores de los checkboxes seleccionados
+        let selectedValues = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+    
+        // Asigna los valores seleccionados al campo oculto
+        document.getElementById('items_to_delete').value = selectedValues.join(',');
     });
-
+    
     // Seleccionar todos los checkboxes
     document.getElementById('select-all').addEventListener('click', function (event) {
         let checkboxes = document.querySelectorAll('.row-select');

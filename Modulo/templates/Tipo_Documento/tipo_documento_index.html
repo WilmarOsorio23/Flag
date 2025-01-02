@@ -10,7 +10,6 @@
     <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
       <span id="alert-icon" class="alert-heading"></span>
       <span id="alert-message"></span>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% if messages %}
       <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
@@ -32,7 +31,7 @@
         <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button" onclick="enableEdit();"></a>
         <i class="btn btn-outline-primary fas fa-eye" title="Visualizar"></i>
         <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button>
-        <form id="download-form" method="POST" action="{% url 'tipo_documento_descargar_excel' %}" style="display:inline;">
+        <form id="download-form" method="POST" action="{% url 'tipo_documento_descargar_excel' %}" style="display:inline;" onsubmit="return confirmDownload();">
           {% csrf_token %}
           <input type="hidden" name="items_to_delete" id="items_to_delete">
           <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
@@ -59,13 +58,10 @@
             <tbody>
               {% for tipo_documento in tipo_documentos %}
                 <tr id="row-{{ tipo_documento.TipoDocumentoID }}">
-                  <td>
-                    <input type="checkbox" class="row-select" name="items_to_delete" value="{{ tipo_documento.TipoDocumentoID }}" />
-                  </td>
-                  <td>{{ tipo_documento.TipoDocumentoID }}</td>
-                  <td>
-                    <input type="text" name="Nombre" class="form-control-plaintext" value="{{ tipo_documento.Nombre }}" readonly />
-                  </td>
+                  <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ tipo_documento.TipoDocumentoID }}" /></td>
+                  <!-- <td>{{ tipo_documento.TipoDocumentoID }}</td> -->
+                  <td><input type="text" name="TipoDocumentoID" class="form-control-plaintext" value="{{ tipo_documento.TipoDocumentoID }}" disabled /></td>
+                  <td><input type="text" name="Nombre" class="form-control-plaintext" value="{{ tipo_documento.Nombre }}" readonly /></td>
                 </tr>
               {% empty %}
                 <tr>
