@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block titulo %} Informe de Empleados {% endblock %}
 
@@ -8,37 +9,23 @@
         <h4 class="card-title">Informe de Empleados</h4>
     </div>
     <div class="card-body">
-        <!-- Formulario de búsqueda -->
-        <form method="GET" class="form-inline">
-            <div class="form-group mr-3 col-md-3">
-                {{ form.Documento.label_tag }}
-                {{ form.Documento }}
+        <div class="container-fluid mb-3">
+            <!-- Botón de Descargar Excel -->
+            <div class="row">
+                <div class="col-md-12 text-end">
+                    <form id="download-form" method="GET" action="{% url 'exportar_empleados_excel' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </button>
+                    </form>
+                </div>
             </div>
-            <div class="form-group mr-3 col-md-3">
-                {{ form.LineaId.label_tag }}
-                {{ form.LineaId }}
-            </div>
-            <div class="form-group mr-3 col-md-3">
-                {{ form.Cargo.label_tag }}
-                {{ form.Cargo }}
-            </div>
-            <div class="form-group mr-3 col-md-3">
-                {{ form.Perfil.label_tag }}
-                {{ form.Perfil }}
-            </div>
-            <div class="form-group mr-3 col-md-3">
-                {{ form.Certificacion.label_tag }}
-                {{ form.Certificacion }}
-            </div>
-            <div class="form-group mt-3 col-md-3">
-                <button type="submit" name="buscar" class="btn btn-primary">Buscar</button>
-            </div>
-        </form>
+        </div>
 
-        <!-- Resultados -->
-        {% if show_data and empleados %}
-        <div class="table-responsive mt-4">
-            <table class="table">
+        <!-- Tabla de Informe de Empleados -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-primary" id="empleadosTable">
                 <thead>
                     <tr>
                         <th>Tipo Documento</th>
@@ -50,7 +37,6 @@
                         <th>Módulo</th>
                         <th>Perfil</th>
                         <th>Línea</th>
-                        <th>Cargo</th>
                         <th>Título Profesional</th>
                         <th>Fecha Grado</th>
                         <th>Universidad</th>
@@ -75,7 +61,6 @@
                         <td>{{ empleado.Modulo.codigo }} - {{ empleado.Modulo.descripcion }}</td>
                         <td>{{ empleado.Perfil.codigo }} - {{ empleado.Perfil.descripcion }}</td>
                         <td>{{ empleado.Linea.codigo }} - {{ empleado.Linea.descripcion }}</td>
-
                         <td>{{ empleado.Titulo_Profesional }}</td>
                         <td>{{ empleado.Fecha_Grado|date:"d/m/Y" }}</td>
                         <td>{{ empleado.Universidad }}</td>
@@ -89,18 +74,13 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="20">No se encontraron resultados con los filtros seleccionados.</td>
+                        <td colspan="19">No hay datos disponibles.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-
-            <!-- Botón para descargar el informe -->
-            <a href="{% url 'descargar_informe_excel' %}" class="btn btn-success">Descargar Excel</a>
         </div>
-        {% elif show_data %}
-            <p>No se encontraron resultados.</p>
-        {% endif %}
     </div>
 </div>
+<script src="{% static 'JS/informe_empleados.js' %}"></script>
 {% endblock %}

@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
         selected.forEach(function (checkbox) {
             itemIds.push(checkbox.value);
         });
-        document.getElementById('items_to_download').value = itemIds.join(',');
+        document.getElementById('items_to_delete').value = itemIds.join(',');
 
         return true; // Permitir la descarga si hay elementos seleccionados
     };
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 alertBox.style.display = 'none';
             }, 300);
-        }, 3000);
+        }, 800);
     }
 
 });

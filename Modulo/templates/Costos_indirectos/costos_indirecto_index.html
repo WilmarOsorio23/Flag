@@ -8,7 +8,6 @@
     <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
         <span id="alert-icon" class="alert-heading"></span>
         <span id="alert-message"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% if messages %}
     <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
@@ -30,7 +29,7 @@
             <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button"  onclick="enableEdit();"></a> 
             <i name="" id="" class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
             <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="confirmDelete();"></button> 
-            <form id="download-form" method="POST" action="{% url 'costos_indirectos_descargar_excel' %}" style="display:inline;">
+            <form id="download-form" method="POST" action="{% url 'costos_indirectos_descargar_excel' %}" style="display:inline;" onsubmit="return confirmDownload();">
                 {% csrf_token %}
                 <input type="hidden" name="items_to_delete" id="items_to_delete">
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>

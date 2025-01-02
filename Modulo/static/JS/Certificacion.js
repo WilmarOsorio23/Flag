@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 alertBox.style.display = 'none';
             }, 300); // Tiempo para que la transición termine
-        }, 3000);
+        }, 800);
     }
 
     // Confirmación antes de descargar
