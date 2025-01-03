@@ -10,19 +10,46 @@
     </div>
     <div class="card-body">
         <div class="container-fluid mb-3">
-            <!-- Botón de Descargar Excel -->
-            <div class="row">
-                <div class="col-md-12 text-end">
-                    <form id="download-form" method="GET" action="{% url 'exportar_empleados_excel' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-file-excel"></i> Descargar Excel
-                        </button>
-                    </form>
+            <!-- Formulario principal -->
+            <form method="GET">
+                <!-- Filtros en la parte superior -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label for="documento">{{ form.Documento.label }}</label>
+                        {{ form.Documento }}
+                    </div>
+                    <div class="col-md-3">
+                        <label for="linea">{{ form.LineaId.label }}</label>
+                        {{ form.LineaId }}
+                    </div>
+                    <div class="col-md-3">
+                        <label for="cargo">{{ form.Cargo.label }}</label>
+                        {{ form.Cargo }}
+                    </div>
+                    <div class="col-md-3">
+                        <label for="certificados">{{ form.Certificados.label }}</label>
+                        {{ form.Certificados }}
+                    </div>
                 </div>
-            </div>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label for="perfil">{{ form.PerfilId.label }}</label>
+                        {{ form.PerfilId }}
+                    </div>
+                </div>
+
+                <!-- Botones en la parte inferior -->
+                <div class="row">
+                    <div class="col-md-6 text-start">
+                        <button type="submit" name="buscar" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
 
+        {% if empleados %}
         <!-- Tabla de Informe de Empleados -->
         <div class="table-responsive">
             <table class="table table-bordered table-hover table-primary" id="empleadosTable">
@@ -72,15 +99,17 @@
                         <td>{{ empleado.Otras_Certificaciones }}</td>
                         <td>{{ empleado.Postgrados }}</td>
                     </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="19">No hay datos disponibles.</td>
-                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No hay datos disponibles para los filtros aplicados.
+        </div>
+        {% endif %}
     </div>
 </div>
+
 <script src="{% static 'JS/informe_empleados.js' %}"></script>
 {% endblock %}

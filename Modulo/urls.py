@@ -185,7 +185,7 @@ urlpatterns = [
     path('informes/salarios/exportar_nomina_excel', empleado_nomina_filtrado.exportar_nomina_excel, name='exportar_nomina_excel'),
        
     # Rutas para informe de empleados
-    path('informes/empleados/', views.empleado_filtrado, name='informes_empleado_index'),
+    path('informes/empleados/', informe_empleados.informe_empleados, name='informes_empleado_index'),
     #path('informes/empleados/exportar_empleados_excel', informe_empleados, name='exportar_empleados_excel'),
 
 ]

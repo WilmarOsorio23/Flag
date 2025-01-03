@@ -55,7 +55,7 @@
                         {% for concepto in conceptos %}
                         <tr id="row-{{ concepto.ConceptoId }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ concepto.ConceptoId }}"></td>
-                            <td><input type="text" class="form-control-plaintext" name="ConceptoId" value="{{ concepto.ConceptoId }}"></td>
+                            <td><input type="text" class="form-control-plaintext" name="ConceptoId" value="{{ concepto.ConceptoId }}" disabled></td>
                             <td><input type="text" name='Descripcion' class="form-control-plaintext" value="{{ concepto.Descripcion }}"> </td> 
                         </tr>
                         {% endfor %}
