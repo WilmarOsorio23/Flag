@@ -47,6 +47,19 @@
                     </div>
                 </div>
             </form>
+            <!-- Botón de Descargar Excel -->
+            <div class="row">
+                <div class="col-md-6 text-end offset-md-6">
+                    <form id="download-form" method="GET" action="{% url 'exportar_empleados_excel' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}">
+                        <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
 
         {% if empleados %}
@@ -79,15 +92,15 @@
                 <tbody>
                     {% for empleado in empleados %}
                     <tr>
-                        <td>{{ empleado.TipoDocumento.codigo }} - {{ empleado.TipoDocumento.descripcion }}</td>
+                        <td>{{ empleado.TipoDocumento.codigo }}</td>
                         <td>{{ empleado.Documento }}</td>
                         <td>{{ empleado.Nombre }}</td>
                         <td>{{ empleado.Fecha_Nacimiento|date:"d/m/Y" }}</td>
                         <td>{{ empleado.Fecha_Ingreso|date:"d/m/Y" }}</td>
                         <td>{{ empleado.Fecha_Operacion|date:"d/m/Y" }}</td>
-                        <td>{{ empleado.Modulo.codigo }} - {{ empleado.Modulo.descripcion }}</td>
-                        <td>{{ empleado.Perfil.codigo }} - {{ empleado.Perfil.descripcion }}</td>
-                        <td>{{ empleado.Linea.codigo }} - {{ empleado.Linea.descripcion }}</td>
+                        <td>{{ empleado.ModuloId.codigo }} </td>
+                        <td>{{ empleado.PerfilId.codigo }} </td>
+                        <td>{{ empleado.LineaId.codigo }} </td>
                         <td>{{ empleado.Titulo_Profesional }}</td>
                         <td>{{ empleado.Fecha_Grado|date:"d/m/Y" }}</td>
                         <td>{{ empleado.Universidad }}</td>
