@@ -157,18 +157,17 @@ class Certificacion(models.Model):
         db_table = 'Certificacion'
 
 class Detalle_Certificacion(models.Model):
-    DocumentoId = models.CharField(max_length=50)
-    CertificacionId = models.ForeignKey(Certificacion, on_delete=models.CASCADE, db_column='CertificacionId')
-    Fecha_Certificacion = models.DateField()
+    Id = models.AutoField(primary_key=True)
+    Documento= models.ForeignKey('Empleado', on_delete=models.CASCADE, db_column='Documento')
+    CertificacionId= models.ForeignKey(Certificacion, on_delete=models.CASCADE, db_column='CertificacionId')
+    Fecha_Certificacion=models.DateField()
 
     def __str__(self):
-        return f"Documento ID: {self.DocumentoId}, Certificación ID: {self.CertificacionId}, Fecha: {self.Fecha_Certificacion}"
+        return f"Id: {self.Id}, Documento: {self.Documento}, CertificaciónId: {self.CertificacionId}, Fecha_Certificacion: {self.Fecha_Certificacion}"
 
     class Meta:
         db_table = 'Detalle_Certificacion'
-        constraints = [
-            models.UniqueConstraint(fields=['DocumentoId', 'CertificacionId'], name='unique_detalle_certificacion')
-        ]
+     
 
 class Concepto(models.Model):
     ConceptoId = models.AutoField(primary_key=True)
@@ -246,19 +245,17 @@ class Costos_Indirectos(models.Model):
         db_table = 'Costos_Indirectos'
 
 class Detalle_Costos_Indirectos(models.Model):
+    Id = models.AutoField(primary_key=True)
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
     CostosId = models.ForeignKey(Costos_Indirectos, on_delete=models.CASCADE, db_column='CostosId')
     Valor = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"Año: {self.Anio}, Mes: {self.Mes}, Costos ID: {self.CostosId}, Valor: {self.Valor}"
+        return f"id: {self.Id}, Año:{self.Anio}, Mes: {self.Mes}, Costo ID: {self.CostosId}, Valor: {self.Valor}"
 
     class Meta:
         db_table = 'Detalle_Costos_Indirectos'
-        constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'CostosId'], name='unique_detalle_costos_indirectos')
-        ]
 
 class Total_Costos_Indirectos(models.Model):
     Anio = models.CharField(max_length=4)

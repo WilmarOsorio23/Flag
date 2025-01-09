@@ -40,15 +40,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length != 1) {
-            showMessage('Error al guardar: No hay un Perfil seleccionado.', 'danger');
+            showMessage('Error al guardar: No hay un detalle seleccionado.', 'danger');
             return;
         }
 
         let row = selected[0].closest('tr');
        
         let data = {
-            'LineaId': row.querySelector('input[name="items_to_delete"]').value,
-            'Linea': row.querySelector('input[name="Nombre"]').value
+            'FechaCertificacion': row.querySelector('input[name="Fecha_Certificacion"]').value
         };
         let id = selected[0].value;
         // Deshabilitar los checkboxes y el botón de edición
@@ -57,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
        console.log(id)
        console.log(data)
-       fetch(`/linea/editar/${id}/`, {
+       fetch(`/detalle_certificacion/editar/${id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -122,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit-button').disabled = true;
 
         // Convertir inputs en editables
-        let input = row.querySelector(`[name="Nombre"]`);
+        let input = row.querySelector(`[name="Fecha_Certificacion"]`);
         input.classList.remove('form-control-plaintext');
         input.classList.add('form-control');
         input.readOnly = false;
@@ -197,15 +196,6 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.show(); // Mostrar el modal de confirmación de eliminación
 
         confirmButton.onclick = async function () {
-            const isRelated = await verifyRelations(selectedIds, csrfToken); // Verificar si hay relaciones con otros elementos
-            if (isRelated) {
-                showMessage('Algunos elementos no pueden ser eliminados porque están relacionados con otras tablas.', 'danger'); // Mensaje de error si hay relaciones
-                modal.hide(); // Ocultar el modal
-                document.getElementById('select-all').checked = false;
-                document.querySelectorAll('.row-select').forEach(checkbox => checkbox.checked = false);
-                return;
-            }
-
             const itemsToDelete = document.getElementById('items_to_delete');
             if (itemsToDelete) {
                 itemsToDelete.value = selectedIds.join(',');

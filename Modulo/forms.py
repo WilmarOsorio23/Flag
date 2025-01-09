@@ -394,32 +394,32 @@ class DetalleCostosIndirectosForm(forms.ModelForm):
         model = Detalle_Costos_Indirectos
         fields = '__all__'
         widgets = {
-            'anio': forms.TextInput(attrs={
+            'Anio': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el año'
             }),
-            'mes': forms.TextInput(attrs={
+            'Mes': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'costosid': forms.NumberInput(attrs={
-                'type': 'number',
+           'CostosId': forms.NumberInput(attrs={
+                'type': 'text',
                 'class': 'form-control',
-                'placeholder': 'Ingrese el Costos ID'
+                'placeholder': 'Ingrese el costo indirecto'
             }),
-            'valor': forms.NumberInput(attrs={
+            'Valor': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el Valor'
             }),
         }
         labels = {
-            'anio': 'Año',
-            'mes': 'Mes',
-            'costosid': 'Costos ID',
-            'valor': 'Valor',
+            'Anio': 'Año',
+            'Mes': 'Mes',
+            'Costosid':'CostosId',
+            'Valor': 'Valor',
         }
 
 class TiemposConceptoForm(forms.ModelForm):
@@ -544,26 +544,21 @@ class Detalle_CertificacionForm(forms.ModelForm):
         model = Detalle_Certificacion
         fields = '__all__'
         widgets = {
-            'documentoId': forms.TextInput(attrs={
+             'Documento': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
-                'placeholder': 'Ingrese el Documento ID'
+                'placeholder': 'Ingrese el documento'
             }),
-            'certificacionId': forms.Select(attrs={
+            'CertificacionId':forms.NumberInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
-                'placeholder': 'Ingrese el Certificación ID'
             }),
-            'fecha_certificacion': forms.DateInput(attrs={
-                'type': 'date', 
-                'class': 'form-control',
-                'placeholder': 'Ingrese la Fecha de Certificación'
-            }),
+            'Fecha_Certificacion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'placeholder': 'Seleccione la fecha de nacimiento'}),
         }
         labels = {
-            'documentoId': 'Documento ID',
-            'certificacionId': 'Certificación ID',
-            'fecha_certificacion': 'Fecha de Certificación',
+            'Documento':'Documento',
+            'CertificacionId':'Certificacion id',
+            'Fecha_Certificacion':'Fecha de Certificación',
         }
 
 class EmpleadoForm(forms.ModelForm):

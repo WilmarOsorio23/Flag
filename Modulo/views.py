@@ -249,64 +249,6 @@ def total_costos_indirectos_descargar_excel(request):
 
     return redirect('total_costos_indirectos_index')
 
-# Detalle costos indirectos
-def detalle_costos_indirectos_index(request):
-    detalle_data = Detalle_Costos_Indirectos.objects.all()
-    return render(request, 'detalle_costos_indirectos/detalle_costos_indirectos_index.html', {'detalle_data': detalle_data})
-
-def detalle_costos_indirectos_crear(request):
-    if request.method == 'POST':
-        form = DetalleCostosIndirectosForm(request.POST)
-        if form.is_valid():
-            max_id = Detalle_Costos_Indirectos.objects.all().aggregate(max_id=models.Max('CostoId'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_detalle_costo_indirecto = form.save(commit=False)
-            nuevo_detalle_costo_indirecto.CostoId = new_id  # Asignar un nuevo CostoId
-            nuevo_detalle_costo_indirecto.save()
-            return redirect('detalle_costos_indirectos_index')
-    else:
-        form = DetalleCostosIndirectosForm()
-    return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_form.html', {'form': form})
-
-def detalle_costos_indirectos_editar(request, id):
-    detalle = get_object_or_404(Detalle_Costos_Indirectos, id=id)
-
-    if request.method == 'POST':
-        form = DetalleCostosIndirectosForm(request.POST, instance=detalle)
-        if form.is_valid():
-            form.save()
-            return redirect('detalle_costos_indirectos_index')
-    else:
-        form = DetalleCostosIndirectosForm(instance=detalle)
-
-    return render(request, 'detalle_costos_indirectos/form.html', {'form': form})
-
-def detalle_costos_indirectos_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        Detalle_Costos_Indirectos.objects.filter(id__in=item_ids).delete()
-        return redirect('detalle_costos_indirectos_index')
-    return redirect('detalle_costos_indirectos_index')
-
-def detalle_costos_indirectos_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        detalle_data = Detalle_Costos_Indirectos.objects.filter(id__in=item_ids)
-
-        data = []
-        for detalle in detalle_data:
-            data.append([detalle.id, detalle.anio, detalle.mes, detalle.costosid, detalle.valor])
-
-        df = pd.DataFrame(data, columns=['Id', 'Año', 'Mes', 'Costos ID', 'Valor'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="detalle_costos_indirectos.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('detalle_costos_indirectos_index')
 
 # Tiempos concepto
 def tiempos_concepto_index(request):
@@ -426,75 +368,7 @@ def tiempos_cliente_descargar_excel(request):
     return response
 
 
-# Detalle certificacion
-def detalle_certificacion_index(request):
-    detalles_certificacion = Detalle_Certificacion.objects.all()
-    #print(detalles_certificacion) 
-    return render(request, 'Detalle_Certificacion/detalle_certificacion_index.html', {'detalles_certificacion': detalles_certificacion})
 
-
-def detalle_certificacion_crear(request):
-    if request.method == 'POST':
-        form = Detalle_CertificacionForm(request.POST)
-        if form.is_valid():
-            max_id = Detalle_Certificacion.objects.all().aggregate(max_id=models.Max('DocumentoId'))['max_id']
-            if max_id is not None:
-                try:
-                    new_id = str(int(max_id) + 1)  
-                except ValueError:
-                    new_id = '1' 
-            else:
-                new_id = '1'
-            nuevo_detalle_certificacion = form.save(commit=False)
-            nuevo_detalle_certificacion.DocumentoId = new_id 
-            nuevo_detalle_certificacion.save()
-            return redirect('detalle_certificacion_index')
-    else:
-        form = Detalle_CertificacionForm()
-    return render(request, 'Detalle_Certificacion/detalle_certificacion_form.html', {'form': form})
-
-def detalle_certificacion_editar(request, documentoId, certificacionId):
-    detalle_certificacion = get_object_or_404(Detalle_Certificacion, documentoId=documentoId, certificacionId=certificacionId)
-
-    if request.method == 'POST':
-        form = Detalle_CertificacionForm(request.POST, instance=detalle_certificacion)
-        if form.is_valid():
-            form.save()
-            return redirect('detalle_certificacion_index')
-    else:
-        form = Detalle_CertificacionForm(instance=detalle_certificacion)
-
-    return render(request, 'Detalle_Certificacion/detalle_certificacion_form.html', {'form': form})
-
-def detalle_certificacion_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        for item_id in item_ids:
-            documentoId, certificacionId = item_id.split('|')
-            Detalle_Certificacion.objects.filter(documentoId=documentoId, certificacionId=certificacionId).delete()
-        return redirect('detalle_certificacion_index')
-    return redirect('detalle_certificacion_index')
-
-def detalle_certificacion_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        detalles = []
-        for item_id in item_ids:
-            documentoId, certificacionId = item_id.split('|')
-            detalle_certificacion = Detalle_Certificacion.objects.filter(documentoId=documentoId, certificacionId=certificacionId).first()
-            if detalle_certificacion:
-                detalles.append([detalle_certificacion.documentoId, detalle_certificacion.certificacionId, detalle_certificacion.fecha_certificacion])
-
-        df = pd.DataFrame(detalles, columns=['Documento ID', 'Certificación ID', 'Fecha de Certificación'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="detalle_certificacion.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('detalle_certificacion_index')
 
 # Informe de Certificación de Empleados
 def empleado_filtrado(request):

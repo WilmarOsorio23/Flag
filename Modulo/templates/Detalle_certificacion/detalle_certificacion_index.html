@@ -1,9 +1,23 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block titulo %} Lista de Detalle Certificación {% endblock %}
 
 {% block contenido %}
 <div class="card">
+    <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
+        <span id="alert-icon" class="alert-heading"></span>
+        <span id="alert-message"></span>
+    </div>
+    {% if messages %}
+    <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <div class="card-header d-flex justify-content-between align-items-center"> 
         <h4 class="card-title">Detalle Certificación</h4>
     </div>
@@ -12,7 +26,6 @@
         <div class="button-group" >
             <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'detalle_certificacion_crear' %}" role="button" ></a> 
             <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button"  onclick="enableEdit();"></a> 
-            <button id="save-button" class="btn btn-outline-success fas fa-save d-none" title="Guardar" style="background:none; border:none; color:rgb(7, 7, 7); cursor:pointer; margin-right: 10px;" onclick="saveRow();"></button>
             <i class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
             <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" ></button> 
             <form id="download-form" method="POST" action="{% url 'detalle_certificacion_descargar_excel' %}" style="display:inline;">
@@ -22,6 +35,19 @@
                 {% endfor %}
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
             </form>
+             <!-- Botones de Guardar y Cancelar -->  
+             <button id="save-button" 
+             class="btn btn-outline-success fas fa-save d-none" 
+             title="Guardar" 
+             type="button" 
+             onclick="saveRow();">
+             </button>
+             <button id="cancel-button" 
+             class="btn btn-outline-danger fas fa-times d-none" 
+             title="Cancelar" 
+             type="button"
+             onclick="cancelEdit();">
+             </button>
         </div>
     </div>
     <div class="card-footer text-muted">
@@ -33,124 +59,42 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Documento ID</th>
-                            <th scope="col">Certificación ID</th>
+                            <th scope="col">Documento</th>
+                            <th scope="col">Certificación</th>
                             <th scope="col">Fecha de Certificación</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for detalle in detalles_certificacion %}
                         <tr>
-                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ detalle.documentoid }}|{{ detalle.certificacionid }}"></td>
-                            <td><input type="text" name="DocumentoId_{{ forloop.counter }}" class="form-control-plaintext" value="{{ detalle.DocumentoId }}" readonly></td>
-                            <td><input type="text" name="CertificacionId_{{ forloop.counter }}" class="form-control-plaintext" value="{{ detalle.CertificacionId }}" readonly></td>
-                            <td><input type="date" name="Fecha_Certificacion_{{ forloop.counter }}" class="form-control-plaintext" value="{{ detalle.Fecha_Certificacion|date:'Y-m-d' }}" readonly></td>
+                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ detalle.Id}}"></td>
+                            <td><input type="text" name="DocumentoId_{{ forloop.counter }}" class="form-control-plaintext" value="{{ detalle.Documento.Documento}}" readonly></td>
+                            <td><input type="text" name="CertificacionId" class="form-control-plaintext" value="{{detalle.CertificacionId}}" readonly></td>
+                            <td><input type="date" name="Fecha_Certificacion" class="form-control-plaintext" value="{{ detalle.Fecha_Certificacion|date:'Y-m-d' }}" readonly></td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </form>
+             <!-- Modal de confirmación -->
+             <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                <div class="modal-header">
+                 <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                 </div>
+                <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar este módulo?
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <button id="confirm-delete-btn" type="button" class="btn btn-danger">Sí</button>
+               </div>
         </div>
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Seleccionar todos los checkboxes
-        document.getElementById('select-all').addEventListener('click', function(event) {
-            let checkboxes = document.querySelectorAll('.row-select');
-            for (let checkbox of checkboxes) {
-                checkbox.checked = event.target.checked;
-            }
-        });
-
-        // Confirmación antes de eliminar
-        window.confirmDelete = function() {
-            let selected = document.querySelectorAll('.row-select:checked').length;
-            if (selected === 0) {
-                alert('No has seleccionado ningún elemento para eliminar.');
-                return false;
-            }
-            return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
-        };
-
-        // Habilitar edición en la fila seleccionada
-        window.enableEdit = function() {
-            let selected = document.querySelectorAll('.row-select:checked');
-            if (selected.length === 0) {
-                alert('No has seleccionado ningún elemento para editar.');
-                return false;
-            }     
-            if (selected.length > 1) {
-                alert('Solo puedes editar un elemento a la vez.');
-                return false;
-            }
-
-            let row = selected[0].closest('tr');
-            let inputs = row.querySelectorAll('input.form-control-plaintext');
-            inputs.forEach(input => {
-                input.classList.remove('form-control-plaintext');
-                input.classList.add('form-control');
-                input.readOnly = false;
-            });
-
-            // Mostrar botón de guardar
-            document.getElementById('save-button').classList.remove('d-none');
-        };
-
-        // Guardar los cambios en la fila seleccionada
-        window.saveRow = function() {
-            let selected = document.querySelector('.row-select:checked');
-            if (!selected) {
-                alert('No has seleccionado ningún elemento para guardar.');
-                return false;
-            }
-
-            let row = selected.closest('tr');
-            let inputs = row.querySelectorAll('input.form-control');
-            let data = {};
-
-            inputs.forEach(input => {
-                let name = input.getAttribute('name');
-                data[name] = input.value;
-            });
-
-            // Obtener el DocumentoId y CertificacionId
-            let documentoId = data['DocumentoId'];
-            let certificacionId = data['CertificacionId'];
-
-            // Enviar datos al servidor 
-            fetch(`/detalle_certificacion/editar/${documentoId}/${certificacionId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Volver a modo de solo lectura
-                    inputs.forEach(input => {
-                        input.classList.add('form-control-plaintext');
-                        input.classList.remove('form-control');
-                        input.readOnly = true;
-                    });
-
-                    // Ocultar botón de guardar
-                    document.getElementById('save-button').classList.add('d-none');
-                } else {
-                    alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
-                }
-            })
-            .catch(error => {
-                alert('Error al enviar los datos: ' + error.message);
-            });
-
-            return false;
-        };
-    });
-</script>
+<script src="{% static 'JS/detallesCertificacion.js' %}"></script>
 
 {% endblock %}

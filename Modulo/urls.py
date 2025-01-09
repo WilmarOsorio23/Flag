@@ -17,6 +17,8 @@ from Modulo.Views import Nomina
 from . import views
 from Modulo.Views import perfil
 from Modulo.Views import linea
+from Modulo.Views import detallesCostosIndirectos
+from Modulo.Views import detallesCertificacion
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -142,11 +144,11 @@ urlpatterns = [
     path('total_costos_indirectos/descargar_excel/', views.total_costos_indirectos_descargar_excel, name='total_costos_indirectos_descargar_excel'),
 
     # Rutas para tabla Detalle Costos Indirectos
-    path('detalle_costos_indirectos/', views.detalle_costos_indirectos_index, name='detalle_costos_indirectos_index'),
-    path('detalle_costos_indirectos/crear', views.detalle_costos_indirectos_crear, name='detalle_costos_indirectos_crear'),
-    path('detalle_costos_indirectos/editar/<int:id>/', views.detalle_costos_indirectos_editar, name='detalle_costos_indirectos_editar'),
-    path('detalle_costos_indirectos/eliminar', views.detalle_costos_indirectos_eliminar, name='detalle_costos_indirectos_eliminar'),
-    path('detalle_costos_indirectos/descargar_excel', views.detalle_costos_indirectos_descargar_excel, name='detalle_costos_indirectos_descargar_excel'),
+    path('detalle_costos_indirectos/', detallesCostosIndirectos.detalle_costos_indirectos_index, name='detalle_costos_indirectos_index'),
+    path('detalle_costos_indirectos/crear', detallesCostosIndirectos.detalle_costos_indirectos_crear, name='detalle_costos_indirectos_crear'),
+    path('detalle_costos_indirectos/editar/<int:id>/', detallesCostosIndirectos.detalle_costos_indirectos_editar, name='detalle_costos_indirectos_editar'),
+    path('detalle_costos_indirectos/eliminar',detallesCostosIndirectos.detalle_costos_indirectos_eliminar, name='detalle_costos_indirectos_eliminar'),
+    path('detalle_costos_indirectos/descargar_excel', detallesCostosIndirectos.detalle_costos_indirectos_descargar_excel, name='detalle_costos_indirectos_descargar_excel'),
 
     # Rutas para tabla Tiempos Concepto
     path('tiempos_concepto/', views.tiempos_concepto_index, name='tiempos_concepto_index'),
@@ -170,11 +172,11 @@ urlpatterns = [
     path('nomina/descargar_excel', Nomina.nomina_descargar_excel, name='nomina_descargar_excel'),
 
     # Rutas para tabla Detalle Certificación
-    path('detalle_certificacion/', views.detalle_certificacion_index, name='detalle_certificacion_index'),
-    path('detalle_certificacion/crear/', views.detalle_certificacion_crear, name='detalle_certificacion_crear'),
-    path('detalle_certificacion/editar/<str:documentoId>/<str:certificacionId>/', views.detalle_certificacion_editar, name='detalle_certificacion_editar'),
-    path('detalle_certificacion/eliminar/', views.detalle_certificacion_eliminar, name='detalle_certificacion_eliminar'),
-    path('detalle_certificacion/descargar_excel/', views.detalle_certificacion_descargar_excel, name='detalle_certificacion_descargar_excel'),
+    path('detalle_certificacion/', detallesCertificacion.detalle_certificacion_index, name='detalle_certificacion_index'),
+    path('detalle_certificacion/crear/', detallesCertificacion.detalle_certificacion_crear, name='detalle_certificacion_crear'),
+    path('detalle_certificacion/editar/<int:Id>/', detallesCertificacion.detalle_certificacion_editar, name='detalle_certificacion_editar'),
+    path('detalle_certificacion/eliminar/', detallesCertificacion.detalle_certificacion_eliminar, name='detalle_certificacion_eliminar'),
+    path('detalle_certificacion/descargar_excel/', detallesCertificacion.detalle_certificacion_descargar_excel, name='detalle_certificacion_descargar_excel'),
 
     # Rutas para la tabla Empleado
     path('empleado/', empleado.empleado_index, name='empleado_index'),
