@@ -12,60 +12,49 @@
         <div class="container-fluid mb-3">
             <!-- Formulario principal -->
             <form method="GET">
-                <!-- Filtros en la parte superior -->
                 <div class="row mb-3">
                     <div class="col-md-3">
                         <label for="documento">{{ form.Documento.label }}</label>
                         {{ form.Documento }}
                     </div>
                     <div class="col-md-3">
-                        <label for="linea">{{ form.LineaId.label }}</label>
-                        {{ form.LineaId }}
+                        <label for="linea">Línea</label>
+                        <select name="Linea" id="linea" class="form-control">
+                            <option value="">Seleccione la línea</option>
+                            {% for linea in form.fields.Linea.queryset %}
+                                <option value="{{ linea.id }}" {% if linea.id == form.cleaned_data.Linea %}selected{% endif %}>
+                                    {{ linea.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="col-md-3">
-                        <label for="cargo">{{ form.Cargo.label }}</label>
-                        {{ form.Cargo }}
-                    </div>
-                    <div class="col-md-3">
-                        <label for="certificados">{{ form.Certificados.label }}</label>
-                        {{ form.Certificados }}
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <label for="perfil">{{ form.PerfilId.label }}</label>
-                        {{ form.PerfilId }}
+                        <label for="cargo">Cargo</label>
+                        <select name="Cargo" id="cargo" class="form-control">
+                            <option value="">Seleccione el cargo</option>
+                            {% for cargo in form.fields.Cargo.queryset %}
+                                <option value="{{ cargo.id }}" {% if cargo.id == form.cleaned_data.Cargo %}selected{% endif %}>
+                                    {{ cargo.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
 
-                <!-- Botones en la parte inferior -->
                 <div class="row">
-                    <div class="col-md-6 text-start">
-                        <button type="submit" name="buscar" class="btn btn-primary">
+                    <div class="col-md-6">
+                        <button type="submit" class="btn btn-primary">
                             <i class="fas fa-search"></i> Buscar
                         </button>
                     </div>
                 </div>
             </form>
-            <!-- Botón de Descargar Excel -->
-            <div class="row">
-                <div class="col-md-6 text-end offset-md-6">
-                    <form id="download-form" method="GET" action="{% url 'exportar_empleados_excel' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}">
-                        <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-file-excel"></i> Descargar Excel
-                        </button>
-                    </form>
-                </div>
-            </div>
         </div>
 
-        {% if empleados %}
-        <!-- Tabla de Informe de Empleados -->
+        {% if show_data %}
+        <!-- Mostrar tabla de empleados -->
         <div class="table-responsive">
-            <table class="table table-bordered table-hover table-primary" id="empleadosTable">
+            <table class="table table-bordered table-hover table-primary">
                 <thead>
                     <tr>
                         <th>Tipo Documento</th>
@@ -74,55 +63,31 @@
                         <th>Fecha Nacimiento</th>
                         <th>Fecha Ingreso</th>
                         <th>Fecha Operación</th>
-                        <th>Módulo</th>
-                        <th>Perfil</th>
                         <th>Línea</th>
-                        <th>Título Profesional</th>
-                        <th>Fecha Grado</th>
-                        <th>Universidad</th>
-                        <th>Profesión Realizada</th>
-                        <th>Título Profesional Actual</th>
-                        <th>Universidad Actual</th>
-                        <th>Academia SAP</th>
-                        <th>Certificado SAP</th>
-                        <th>Otras Certificaciones</th>
-                        <th>Postgrados</th>
+                        <th>Cargo</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for empleado in empleados %}
                     <tr>
-                        <td>{{ empleado.TipoDocumento.codigo }}</td>
+                        <td>{{ empleado.TipoDocumento }}</td>
                         <td>{{ empleado.Documento }}</td>
                         <td>{{ empleado.Nombre }}</td>
-                        <td>{{ empleado.Fecha_Nacimiento|date:"d/m/Y" }}</td>
-                        <td>{{ empleado.Fecha_Ingreso|date:"d/m/Y" }}</td>
-                        <td>{{ empleado.Fecha_Operacion|date:"d/m/Y" }}</td>
-                        <td>{{ empleado.ModuloId.codigo }} </td>
-                        <td>{{ empleado.PerfilId.codigo }} </td>
-                        <td>{{ empleado.LineaId.codigo }} </td>
-                        <td>{{ empleado.Titulo_Profesional }}</td>
-                        <td>{{ empleado.Fecha_Grado|date:"d/m/Y" }}</td>
-                        <td>{{ empleado.Universidad }}</td>
-                        <td>{{ empleado.Profesion_Realizada }}</td>
-                        <td>{{ empleado.Titulo_Profesional_Actual }}</td>
-                        <td>{{ empleado.Universidad_Actual }}</td>
-                        <td>{{ empleado.Academia_SAP }}</td>
-                        <td>{{ empleado.Certificado_SAP }}</td>
-                        <td>{{ empleado.Otras_Certificaciones }}</td>
-                        <td>{{ empleado.Postgrados }}</td>
+                        <td>{{ empleado.FechaNacimiento|date:"d/m/Y" }}</td>
+                        <td>{{ empleado.FechaIngreso|date:"d/m/Y" }}</td>
+                        <td>{{ empleado.FechaOperacion|date:"d/m/Y" }}</td>
+                        <td>{{ empleado.Linea.nombre }}</td>
+                        <td>{{ empleado.Cargo.nombre }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         {% else %}
-        <div class="alert alert-warning" role="alert">
-            No hay datos disponibles para los filtros aplicados.
+        <div class="alert alert-warning">
+            {{ mensaje }}
         </div>
         {% endif %}
     </div>
 </div>
-
-<script src="{% static 'JS/informe_empleados.js' %}"></script>
 {% endblock %}

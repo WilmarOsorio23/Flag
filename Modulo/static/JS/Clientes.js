@@ -117,8 +117,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let row = selected.closest('tr');
         let data = {
-            'TipoDocumentoID': row.querySelector('input[name ="TipoDocumentoID"]').value,
-            'DocumentoId': row.querySelector('input[name ="DocumentoId"]').value,
             'Nombre_Cliente': row.querySelector('input[name ="Nombre_Cliente"]').value,
             'Activo': row.querySelector('input[name ="Activo"]').checked,
             'Fecha_Inicio': row.querySelector('input[name ="Fecha_Inicio"]').value,
@@ -126,10 +124,10 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         console.log(data)
-        let tipoDocumentoID = selected.value;
-        let documentoId = selected.value;
+        let ClienteId = selected.value;
+        console.log(ClienteId)
 
-        fetch(`/clientes/editar/${tipoDocumentoID}/${documentoId}/`, {
+        fetch(`/clientes/editar/${ClienteId}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

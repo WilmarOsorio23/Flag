@@ -40,13 +40,15 @@ document.addEventListener('DOMContentLoaded', function () {
         return Array.from(document.querySelectorAll('.row-select:checked')).map(el => el.value);
     }
 
+
+
     // Manejar la confirmación de eliminación
     async function handleDeleteConfirmation(event, modal, confirmButton, form, csrfToken) {
         event.preventDefault(); // Prevenir la acción predeterminada del evento
 
         const selectedIds = getSelectedIds(); // Obtener los IDs de los elementos seleccionados
         if (selectedIds.length == 0) {
-            showMessage('No has seleccionado ningún cliente para eliminar.', 'danger'); // Mostrar mensaje si no hay elementos seleccionados
+            showMessage('No has seleccionado ningún elemento para eliminar.', 'danger'); // Mostrar mensaje si no hay elementos seleccionados
             return;
         }
 
@@ -55,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmButton.onclick = async function () {
             const isRelated = await verifyRelations(selectedIds, csrfToken); // Verificar si hay relaciones con otros elementos
             if (isRelated) {
-                showMessage('Algunos clientes no pueden ser eliminados porque están relacionados con otras tablas.', 'danger'); // Mensaje de error si hay relaciones
+                showMessage('Algunos elementos no pueden ser eliminados porque están relacionados con otras tablas.', 'danger'); // Mensaje de error si hay relaciones
                 modal.hide(); // Ocultar el modal
                 document.getElementById('select-all').checked = false;
                 document.querySelectorAll('.row-select').forEach(checkbox => checkbox.checked = false);
@@ -71,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
     async function verifyRelations(ids, csrfToken) {
         try {
-            const response = await fetch('/clientes/verificar-relaciones/', {
+            const response = await fetch('/verificar-relaciones/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -117,15 +119,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 800);
     }
 
-    // Habilitar edición de clientes
+    // Habilitar edición de conceptos
     window.enableEdit = function () {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length === 0) {
-            showMessage('No has seleccionado ningún cliente para editar.', 'danger');
+            showMessage('No has seleccionado ningún concepto para editar.', 'danger');
             return false;
         }
         if (selected.length > 1) {
-            showMessage('Solo puedes editar un cliente a la vez.', 'danger');
+            showMessage('Solo puedes editar un concepto a la vez.', 'danger');
             return false;
         }
 
@@ -185,15 +187,15 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Confirmación antes de descargar
-    window.confirmDownload = function () {
+    window.confirmDownload = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 0) {
-            showMessage('No has seleccionado ningún cliente para descargar.', 'danger');
+            showMessage('No has seleccionado ningún elemento para descargar.', 'danger');
             return false;
         }
 
         let itemIds = [];
-        selected.forEach(function (checkbox) {
+        selected.forEach(function(checkbox) {
             itemIds.push(checkbox.value);
         });
         document.getElementById('items_to_delete').value = itemIds.join(',');
@@ -201,26 +203,25 @@ document.addEventListener('DOMContentLoaded', function () {
         return true;
     };
 
-    // Guardar cambios del cliente
+    // Guardar cambios del concepto
     window.saveRow = function () {
         let selected = document.querySelector('.row-select:checked');
         if (!selected) {
-            showMessage('No has seleccionado ningún cliente para guardar.', 'danger');
+            showMessage('No has seleccionado ningún concepto para guardar.', 'danger');
             return false;
         }
 
         let row = selected.closest('tr');
         let data = {
-            'NombreCliente': row.querySelector('input[name="NombreCliente"]').value,
-            'Direccion': row.querySelector('input[name="Direccion"]').value
+            'Descripcion': row.querySelector('input[name="Descripcion"]').value
         };
 
-        let ClienteId = selected.value;
-        fetch(`/clientes/editar/${ClienteId}/`, {
+        let ConceptoId = selected.value;
+        fetch(`/conceptos/editar/${ConceptoId}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
+                'X-CSRFToken': '{{ csrf_token }}'
             },
             body: JSON.stringify(data)
         })
@@ -232,11 +233,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         input.classList.remove('form-control');
                         input.readOnly = true;
                     });
-                    showMessage('Cliente guardado con éxito.', 'success');
+                    showMessage('Concepto guardado con éxito.', 'success');
                     document.getElementById('save-button').classList.add('d-none');
                     disableEditMode(selected, row);
                 } else {
-                    showMessage('Error al guardar el cliente.', 'danger');
+                    showMessage('Error al guardar el concepto.', 'danger');
                 }
             })
             .catch(error => {
