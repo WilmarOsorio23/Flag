@@ -60,71 +60,7 @@ def inicio(request):
 def nosotros(request):
     return render(request, 'paginas/nosotros.html')
 
-# Detalle gastos
-def detalle_gastos_index(request):
-    detalles = Detalle_Gastos.objects.all()
-    print("Buscando plantilla en: Detalle_Gastos/detalle_gastos_index.html")
-    return render(request, 'Detalle_Gastos/detalle_gastos_index.html', {'detalles': detalles})
 
-def detalle_gastos_crear(request):
-    if request.method == 'POST':
-        form = DetalleGastosForm(request.POST)
-        if form.is_valid():
-            max_id = Detalle_Gastos.objects.all().aggregate(max_id=models.Max('GastosId'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_detalle_gasto = form.save(commit=False)
-            nuevo_detalle_gasto.GastosId = new_id
-            nuevo_detalle_gasto.save()
-            return redirect('detalle_gasto_index')
-    else:
-        form = DetalleGastosForm()
-    return render(request, 'Detalle_Gastos/detalle_gastos_form.html', {'form': form})
-
-
-def detalle_gastos_editar(request, Anio, Mes, GastosId):
-    detalle = get_object_or_404(Detalle_Gastos, Anio=Anio, Mes=Mes, GastosId=GastosId)
-
-    if request.method == 'POST':
-        form = DetalleGastosForm(request.POST, instance=detalle)
-        if form.is_valid():
-            form.save()
-            return redirect('detalle_gastos_index')
-    else:
-        form = DetalleGastosForm(instance=detalle)
-
-    return render(request, 'Detalle_Gastos/detalle_gastos_form.html', {'form': form})
-
-def detalle_gastos_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        for item_id in item_ids:
-            Anio, Mes, GastosId = item_id.split('-')
-            Detalle_Gastos.objects.filter(Anio=Anio, Mes=Mes, GastosId=GastosId).delete()
-        return redirect('detalle_gastos_index')
-    return redirect('detalle_gastos_index')
-
-def detalle_gastos_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        detalles = []
-        for item_id in item_ids:
-            Anio, Mes, GastosId = item_id.split('-')
-            detalles.extend(Detalle_Gastos.objects.filter(Anio=Anio, Mes=Mes, GastosId=GastosId))
-
-        data = []
-        for detalle in detalles:
-            data.append([detalle.Anio, detalle.Mes, detalle.GastosId, detalle.Valor])
-
-        df = pd.DataFrame(data, columns=['Año', 'Mes', 'Gasto ID', 'Valor'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="detalle_gastos.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('detalle_gastos_index')
 
 # Total gastos
 def total_gastos_index(request):

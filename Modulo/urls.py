@@ -19,6 +19,7 @@ from Modulo.Views import perfil
 from Modulo.Views import linea
 from Modulo.Views import detallesCostosIndirectos
 from Modulo.Views import detallesCertificacion
+from Modulo.Views import detalleGastos
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -123,11 +124,11 @@ urlpatterns = [
     path('gastos/descargar_excel', gastos.gasto_descargar_excel, name='gastos_descargar_excel'),
 
     # Rutas para tabla Detalle de Gastos
-    path('detalle_gastos/', views.detalle_gastos_index, name='detalle_gastos_index'),
-    path('detalle_gastos/crear', views.detalle_gastos_crear, name='detalle_gastos_crear'),
-    path('detalle_gastos/editar/<str:Anio>/<str:Mes>/<int:GastosId>/', views.detalle_gastos_editar, name='detalle_gastos_editar'),
-    path('detalle_gastos/eliminar', views.detalle_gastos_eliminar, name='detalle_gastos_eliminar'),
-    path('detalle_gastos/descargar_excel', views.detalle_gastos_descargar_excel, name='detalle_gastos_descargar_excel'),
+    path('detalle_gastos/', detalleGastos.detalle_gastos_index, name='detalle_gastos_index'),
+    path('detalle_gastos/crear',detalleGastos.detalle_gastos_crear, name='detalle_gastos_crear'),
+    path('detalle_gastos/editar/<int:id>/', detalleGastos.detalle_gastos_editar, name='detalle_gastos_editar'),
+    path('detalle_gastos/eliminar', detalleGastos.detalle_gastos_eliminar, name='detalle_gastos_eliminar'),
+    path('detalle_gastos/descargar_excel', detalleGastos.detalle_gastos_descargar_excel, name='detalle_gastos_descargar_excel'),
 
     # Rutas para tabla Total de Gastos
     path('total_gastos/', views.total_gastos_index, name='total_gastos_index'),
