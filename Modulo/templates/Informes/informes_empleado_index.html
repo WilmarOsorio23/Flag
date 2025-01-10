@@ -1,93 +1,110 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block titulo %} Informe de Empleados {% endblock %}
+{% block titulo %}
+  Informe de Empleados
+{% endblock %}
 
 {% block contenido %}
-<div class="card">
+  <div class="card">
     <div class="card-header">
-        <h4 class="card-title">Informe de Empleados</h4>
+      <h4 class="card-title">Informe de Empleados</h4>
     </div>
     <div class="card-body">
-        <div class="container-fluid mb-3">
-            <!-- Formulario principal -->
-            <form method="GET">
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <label for="documento">{{ form.Documento.label }}</label>
-                        {{ form.Documento }}
-                    </div>
-                    <div class="col-md-3">
-                        <label for="linea">Línea</label>
-                        <select name="Linea" id="linea" class="form-control">
-                            <option value="">Seleccione la línea</option>
-                            {% for linea in form.fields.Linea.queryset %}
-                                <option value="{{ linea.id }}" {% if linea.id == form.cleaned_data.Linea %}selected{% endif %}>
-                                    {{ linea.nombre }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="cargo">Cargo</label>
-                        <select name="Cargo" id="cargo" class="form-control">
-                            <option value="">Seleccione el cargo</option>
-                            {% for cargo in form.fields.Cargo.queryset %}
-                                <option value="{{ cargo.id }}" {% if cargo.id == form.cleaned_data.Cargo %}selected{% endif %}>
-                                    {{ cargo.nombre }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
+      <div class="container-fluid mb-3">
+        <!-- Formulario principal -->
+        <form method="GET">
+          <!-- Filtros en la parte superior -->
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label for="documento">{{ form.Documento.label }}</label>
+              {{ form.Documento }}
+            </div>
+            <div class="col-md-3">
+              <label for="linea">{{ form.LineaId.label }}</label>
+              {{ form.LineaId }}
+            </div>
+            <div class="col-md-3">
+              <label for="cargo">{{ form.Cargo.label }}</label>
+              {{ form.Cargo }}
+            </div>
+            <div class="col-md-3">
+              <label for="certificados">{{ form.Certificacion.label }}</label>
+              {{ form.Certificacion }}
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label for="perfil">{{ form.PerfilId.label }}</label>
+              {{ form.PerfilId }}
+            </div>
+          </div>
+          <!-- Botones en la parte inferior -->
+          <div class="row">
+            <div class="col-md-6 text-start">
+              <button type="submit" name="buscar" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+          </div>
+        </form>
+      </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Buscar
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        {% if show_data %}
+      {% if show_data %}
         <!-- Mostrar tabla de empleados -->
         <div class="table-responsive">
-            <table class="table table-bordered table-hover table-primary">
-                <thead>
-                    <tr>
-                        <th>Tipo Documento</th>
-                        <th>Documento</th>
-                        <th>Nombre</th>
-                        <th>Fecha Nacimiento</th>
-                        <th>Fecha Ingreso</th>
-                        <th>Fecha Operación</th>
-                        <th>Línea</th>
-                        <th>Cargo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for empleado in empleados %}
-                    <tr>
-                        <td>{{ empleado.TipoDocumento }}</td>
-                        <td>{{ empleado.Documento }}</td>
-                        <td>{{ empleado.Nombre }}</td>
-                        <td>{{ empleado.FechaNacimiento|date:"d/m/Y" }}</td>
-                        <td>{{ empleado.FechaIngreso|date:"d/m/Y" }}</td>
-                        <td>{{ empleado.FechaOperacion|date:"d/m/Y" }}</td>
-                        <td>{{ empleado.Linea.nombre }}</td>
-                        <td>{{ empleado.Cargo.nombre }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+          <table class="table table-bordered table-hover table-primary">
+            <thead>
+              <tr>
+                <th>Tipo Documento</th>
+                <th>Documento</th>
+                <th>Nombre</th>
+                <th>Fecha Nacimiento</th>
+                <th>Fecha Ingreso</th>
+                <th>Fecha Operación</th>
+                <th>Módulo</th>
+                <th>Perfil</th>
+                <th>Línea</th>
+                <th>Título Profesional</th>
+                <th>Fecha Grado</th>
+                <th>Universidad</th>
+                <th>Profesión Realizada</th>
+                <th>Título Profesional Actual</th>
+                <th>Universidad Actual</th>
+                <th>Academia SAP</th>
+                <th>Certificado SAP</th>
+                <th>Otras Certificaciones</th>
+                <th>Postgrados</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for empleado in empleados_info %}
+                <tr>
+                  <td>{{ empleado.TipoDocumento }}</td>
+                  <td>{{ empleado.Documento }}</td>
+                  <td>{{ empleado.Nombre }}</td>
+                  <td>{{ empleado.FechaNacimiento }}</td>
+                  <td>{{ empleado.FechaIngreso }}</td>
+                  <td>{{ empleado.FechaOperacion }}</td>
+                  <td>{{ empleado.ModuloId }}</td>
+                  <td>{{ empleado.PerfilId }}</td>
+                  <td>{{ empleado.LineaId }}</td>
+                  <td>{{ empleado.TituloProfesional }}</td>
+                  <td>{{ empleado.FechaGrado }}</td>
+                  <td>{{ empleado.Universidad }}</td>
+                  <td>{{ empleado.ProfesionRealizada }}</td>
+                  <td>{{ empleado.TituloProfesionalActual }}</td>
+                  <td>{{ empleado.UniversidadActual }}</td>
+                  <td>{{ empleado.AcademiaSAP }}</td>
+                  <td>{{ empleado.CertificadoSAP }}</td>
+                  <td>{{ empleado.OtrasCertificaciones }}</td>
+                  <td>{{ empleado.Postgrados }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-        {% else %}
-        <div class="alert alert-warning">
-            {{ mensaje }}
-        </div>
-        {% endif %}
+      {% else %}
+        <div class="alert alert-warning">{{ mensaje }}</div>
+      {% endif %}
     </div>
-</div>
+  </div>
 {% endblock %}

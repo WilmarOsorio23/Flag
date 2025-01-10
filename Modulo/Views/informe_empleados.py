@@ -18,10 +18,10 @@ def filtrar_empleados(form, empleados):
     :param empleados: QuerySet de empleados.
     :return: QuerySet filtrado.
     """
-    documento = form.cleaned_data.get('Documento')
+    documento = form.cleaned_data.get('TipoDocumento')
     linea = form.cleaned_data.get('Linea')
     cargo = form.cleaned_data.get('Cargo')
-    certificados = form.cleaned_data.get('Certificados')
+    certificaciones = form.cleaned_data.get('Certificación')
     perfil = form.cleaned_data.get('Perfil')
 
     if documento:
@@ -30,8 +30,8 @@ def filtrar_empleados(form, empleados):
         empleados = empleados.filter(LineaId=linea)
     if cargo:
         empleados = empleados.filter(CargoId=cargo)
-    if certificados:
-        empleados = empleados.filter(Certificacion=certificados)
+    if certificaciones:
+        empleados = empleados.filter(Certificacion=certificaciones)
     if perfil:
         empleados = empleados.filter(PerfilId=perfil)
 
@@ -89,5 +89,3 @@ def informe_empleados(request):
     return render(request, 'informes/informes_empleado_index.html', context)
 
 
-
-    return HttpResponse("Error al procesar la solicitud.", status=400)
