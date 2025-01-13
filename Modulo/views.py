@@ -62,67 +62,7 @@ def nosotros(request):
 
 
 
-# Total gastos
-def total_gastos_index(request):
-    total_gastos_data = Total_Gastos.objects.all()
-    return render(request, 'total_gastos/total_gastos_index.html', {'total_gastos_data': total_gastos_data})
 
-def total_gastos_crear(request):
-    if request.method == 'POST':
-        form = TotalGastosForm(request.POST)
-        if form.is_valid():
-            max_id = Total_Gastos.objects.all().aggregate(max_id=models.Max('id'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_total_gasto = form.save(commit=False)
-            nuevo_total_gasto.id = new_id  # Asignar un nuevo ID
-            nuevo_total_gasto.save()
-            return redirect('total_gasto_index')
-    else:
-        form = TotalGastosForm()
-    return render(request, 'total_gastos/total_gastos_form.html', {'form': form})
-
-def total_gastos_editar(request, anio, mes):
-    total_gasto = get_object_or_404(Total_Gastos, anio=anio, mes=mes)
-
-    if request.method == 'POST':
-        form = TotalGastosForm(request.POST, instance=total_gasto)
-        if form.is_valid():
-            form.save()
-            return redirect('total_gastos_index')
-    else:
-        form = TotalGastosForm(instance=total_gasto)
-
-    return render(request, 'total_gastos/total_gastos_form.html', {'form': form})
-
-def total_gastos_eliminar(request):
-    if request.method == 'POST':
-        items_to_delete = request.POST.getlist('items_to_delete')
-        for item in items_to_delete:
-            anio, mes = item.split('-')
-            Total_Gastos.objects.filter(anio=anio, mes=mes).delete()
-        return redirect('total_gastos_index')
-    return redirect('total_gastos_index')
-
-def total_gastos_descargar_excel(request):
-    if request.method == 'POST':
-        items_to_delete = request.POST.getlist('items_to_delete')
-        total_gastos_data = []
-        for item in items_to_delete:
-            anio, mes = item.split('-')
-            total_gastos_data.extend(Total_Gastos.objects.filter(anio=anio, mes=mes))
-
-        data = [[tg.anio, tg.mes, tg.total] for tg in total_gastos_data]
-
-        df = pd.DataFrame(data, columns=['Año', 'Mes', 'Total'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="total_gastos.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('total_gastos_index')
 
 # Total costos indirectos
 def total_costos_indirectos_index(request):

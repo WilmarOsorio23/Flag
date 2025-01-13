@@ -20,6 +20,8 @@ from Modulo.Views import linea
 from Modulo.Views import detallesCostosIndirectos
 from Modulo.Views import detallesCertificacion
 from Modulo.Views import detalleGastos
+from Modulo.Views import totalGasto
+
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -131,11 +133,11 @@ urlpatterns = [
     path('detalle_gastos/descargar_excel', detalleGastos.detalle_gastos_descargar_excel, name='detalle_gastos_descargar_excel'),
 
     # Rutas para tabla Total de Gastos
-    path('total_gastos/', views.total_gastos_index, name='total_gastos_index'),
-    path('total_gastos/crear', views.total_gastos_crear, name='total_gastos_crear'),
-    path('total_gastos/editar/<str:anio>/<str:mes>/', views.total_gastos_editar, name='total_gastos_editar'),
-    path('total_gastos/eliminar', views.total_gastos_eliminar, name='total_gastos_eliminar'),
-    path('total_gastos/descargar_excel', views.total_gastos_descargar_excel, name='total_gastos_descargar_excel'),
+    path('total_gastos/', totalGasto.total_gastos_index, name='total_gastos_index'),
+    path('total_gastos/crear', totalGasto.total_gastos_crear, name='total_gastos_crear'),
+    path('total_gastos/editar/<int:id>/', totalGasto.total_gastos_editar, name='total_gastos_editar'),
+    path('total_gastos/eliminar', totalGasto.total_gastos_eliminar, name='total_gastos_eliminar'),
+    path('total_gastos/descargar_excel', totalGasto.total_gastos_descargar_excel, name='total_gastos_descargar_excel'),
 
     # Rutas para tabla Total Costos Indirectos
     path('total_costos_indirectos/', views.total_costos_indirectos_index, name='total_costos_indirectos_index'),

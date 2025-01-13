@@ -220,18 +220,17 @@ class Detalle_Gastos(models.Model):
         
 
 class Total_Gastos(models.Model):
+    id = models.AutoField(primary_key=True)
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
     Total = models.DecimalField(max_digits=15, decimal_places=2)
 
     def __str__(self):
-        return f"Año: {self.Anio}, Mes: {self.Mes}, Total: {self.Total}"
+        return f"id:{self.id}, Año: {self.Anio}, Mes: {self.Mes}, Total: {self.Total}"
 
     class Meta:
         db_table = 'Total_Gastos'
-        constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes'], name='unique_total_gastos')
-        ]
+        
 
 class Costos_Indirectos(models.Model):
     CostoId = models.AutoField(primary_key=True)
