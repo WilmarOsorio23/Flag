@@ -21,7 +21,7 @@ from Modulo.Views import detallesCostosIndirectos
 from Modulo.Views import detallesCertificacion
 from Modulo.Views import detalleGastos
 from Modulo.Views import totalGasto
-
+from Modulo.Views import totalCostos
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -140,11 +140,11 @@ urlpatterns = [
     path('total_gastos/descargar_excel', totalGasto.total_gastos_descargar_excel, name='total_gastos_descargar_excel'),
 
     # Rutas para tabla Total Costos Indirectos
-    path('total_costos_indirectos/', views.total_costos_indirectos_index, name='total_costos_indirectos_index'),
-    path('total_costos_indirectos/crear/', views.total_costos_indirectos_crear, name='total_costos_indirectos_crear'),
-    path('total_costos_indirectos/editar/<str:anio>/<str:mes>/', views.total_costos_indirectos_editar, name='total_costos_indirectos_editar'),
-    path('total_costos_indirectos/eliminar/', views.total_costos_indirectos_eliminar, name='total_costos_indirectos_eliminar'),
-    path('total_costos_indirectos/descargar_excel/', views.total_costos_indirectos_descargar_excel, name='total_costos_indirectos_descargar_excel'),
+    path('total_costos_indirectos/', totalCostos.total_costos_indirectos_index, name='total_costos_indirectos_index'),
+    path('total_costos_indirectos/crear/', totalCostos.total_costos_indirectos_crear, name='total_costos_indirectos_crear'),
+    path('total_costos_indirectos/editar/<int:id>/', totalCostos.total_costos_indirectos_editar, name='total_costos_indirectos_editar'),
+    path('total_costos_indirectos/eliminar/', totalCostos.total_costos_indirectos_eliminar, name='total_costos_indirectos_eliminar'),
+    path('total_costos_indirectos/descargar_excel/', totalCostos.total_costos_indirectos_descargar_excel, name='total_costos_indirectos_descargar_excel'),
 
     # Rutas para tabla Detalle Costos Indirectos
     path('detalle_costos_indirectos/', detallesCostosIndirectos.detalle_costos_indirectos_index, name='detalle_costos_indirectos_index'),

@@ -367,26 +367,26 @@ class Total_Costos_IndirectosForm(forms.ModelForm):
         model = Total_Costos_Indirectos
         fields = '__all__'
         widgets = {
-            'anio': forms.TextInput(attrs={
+            'Anio': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el año'
             }),
-            'mes': forms.TextInput(attrs={
+            'Mes': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'total': forms.NumberInput(attrs={
+            'Total': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el Total'
             }),
         }
         labels = {
-            'anio': 'Año',
-            'mes': 'Mes',
-            'total': 'Total',
+            'Anio': 'Año',
+            'Mes': 'Mes',
+            'Total': 'Total',
         }
 
 class DetalleCostosIndirectosForm(forms.ModelForm):
