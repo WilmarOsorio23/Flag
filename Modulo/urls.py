@@ -14,6 +14,7 @@ from Modulo.Views import informe_empleados
 from Modulo.Views import empleado
 from Modulo.Views import consultores
 from Modulo.Views import Nomina
+from Modulo.models import TiposContactos
 from . import views
 from Modulo.Views import perfil
 from Modulo.Views import linea
@@ -22,6 +23,7 @@ from Modulo.Views import detallesCertificacion
 from Modulo.Views import detalleGastos
 from Modulo.Views import totalGasto
 from Modulo.Views import totalCostos
+from Modulo.Views import tiposContactos
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -138,6 +140,12 @@ urlpatterns = [
     path('total_gastos/editar/<int:id>/', totalGasto.total_gastos_editar, name='total_gastos_editar'),
     path('total_gastos/eliminar', totalGasto.total_gastos_eliminar, name='total_gastos_eliminar'),
     path('total_gastos/descargar_excel', totalGasto.total_gastos_descargar_excel, name='total_gastos_descargar_excel'),
+
+    path('tipos_contactos/', tiposContactos.Tipos_contactos_index, name='tipos_contactos_index'),
+    path('tipos_contactos/crear', tiposContactos.Tipos_contactos_crear, name='tipos_contactos_crear'),
+    path('tipos_contactos/editar/<int:id>/', tiposContactos.Tipos_contactos_editar, name='tipos_contactos_editar'),
+    path('tipos_contactos/eliminar', tiposContactos.Tipos_contactos_eliminar, name='tipos_contactos_eliminar'),
+    path('tipos_contactos/descargar_excel', tiposContactos.Tipos_contactos_descargar_excel, name='tipos_contactos_descargar_excel'),
 
     # Rutas para tabla Total Costos Indirectos
     path('total_costos_indirectos/', totalCostos.total_costos_indirectos_index, name='total_costos_indirectos_index'),

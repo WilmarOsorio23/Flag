@@ -326,3 +326,28 @@ class Empleado(models.Model):
         if self.FechaIngreso < self.FechaNacimiento:
             raise ValidationError('La fecha de ingreso no puede ser anterior a la fecha de nacimiento.')
 
+
+class TiposContactos(models.Model):
+    contactoId= models.AutoField(primary_key=True)
+    Descripcion= models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"id:{self.contactoId}, descripcion:{self.Descripcion}"
+
+    class Meta:
+        db_table = 'Tipos_Contactos'
+
+class Contactos(models.Model):
+    id=models.AutoField(primary_key=True),
+    clienteId = models.ForeignKey(Clientes, on_delete=models.CASCADE, db_column='ClienteId')
+    contactoId = models.ForeignKey(TiposContactos, on_delete=models.CASCADE, db_column='contactoId')
+    Nombre = models.CharField(max_length=100)
+    Telefono = models.CharField(max_length=20, null=True, blank=True)
+    Direccion = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"Nombre: {self.Nombre}, ClientedId: {self.clienteId}, ContactoId: {self.contactoId}"
+
+    class Meta:
+        db_table = 'Contactos'
+

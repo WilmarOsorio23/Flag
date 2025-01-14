@@ -3,9 +3,9 @@ from .models import Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes, Co
 from .models import Concepto, Gastos, Detalle_Gastos, Total_Gastos, Total_Costos_Indirectos
 from .models import Detalle_Costos_Indirectos, TiemposConcepto, Tiempos_Cliente, Nomina, Detalle_Certificacion, Empleado
 from .models import Cargos
-
 from django import forms
 from .models import Modulo
+from .models import TiposContactos
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -116,6 +116,17 @@ class INDForm(forms.ModelForm):
             'Indice': 'Índice',
         }
         
+class TiposContactosForm(forms.ModelForm):
+    class Meta:
+        model = TiposContactos
+        fields = '__all__'
+        widgets = {
+            'Descripcion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la descripción'}),
+        }
+        labels = {
+            'Descripcion': 'Descripción',
+        }
+
 class ConsultoresForm(forms.ModelForm):
     class Meta:
         model = Consultores

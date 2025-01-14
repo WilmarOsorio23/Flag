@@ -52,7 +52,8 @@ from .forms import Detalle_CertificacionForm
 from .models import Empleado
 from .forms import EmpleadoForm
 from .forms import EmpleadoFilterForm
-
+from .models import TiposContactos
+from .forms import TiposContactosForm
 
 def inicio(request):
     return render(request, 'paginas/Inicio.html')
@@ -275,4 +276,5 @@ def exportar_excel(request):
 
     response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') # type: ignore
     response['Content-Disposition'] = 'attachment; filename=empleados_certificaciones.xlsx'
+
 
