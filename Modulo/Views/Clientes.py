@@ -34,16 +34,14 @@ def clientes_crear(request):
     return render(request, 'clientes/clientes_form.html', {'form': form})
 
 @csrf_exempt
-def clientes_editar(request, ClienteId):
-    print('aqui va bien')
+def clientes_editar(request, id):
+    print('aqui va bien', request)
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            cliente = get_object_or_404( Clientes, pk=ClienteId)
-            cliente.Nombre_Cliente = data.get('Nombre_Cliente', cliente.Nombre_Cliente)
-            cliente.Activo = data.get('Activo', cliente.Activo)
+            cliente = get_object_or_404( Clientes, pk=id)
+            cliente.Nombre_Cliente = data.get('Nombre_Cliente', cliente.Nombre_Cliente)           
             cliente.Fecha_Inicio= data.get('Fecha_Inicio', cliente.Fecha_Inicio)
-            cliente.Fecha_Retiro = data.get('Fecha_Retiro', cliente.Fecha_Retiro)
             cliente.save()
 
             print(JsonResponse({'status': 'success'}))

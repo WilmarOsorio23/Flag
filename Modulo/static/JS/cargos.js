@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let data = {
             'Cargo': row.querySelector('input[name="cargo"]').value
         };
-
+        
         // Deshabilitar los checkboxes y el botón de edición
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;

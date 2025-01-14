@@ -236,6 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     showMessage('Concepto guardado con éxito.', 'success');
                     document.getElementById('save-button').classList.add('d-none');
                     disableEditMode(selected, row);
+                    
                 } else {
                     showMessage('Error al guardar el concepto.', 'danger');
                 }

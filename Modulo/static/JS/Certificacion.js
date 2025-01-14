@@ -137,18 +137,21 @@ document.addEventListener('DOMContentLoaded', function () {
     // Deshabilitar modo edición
     function disableEditMode(selected, row) {
         // Cambiar inputs a solo lectura
-        row.querySelectorAll('input.form-control').forEach(input => {
-            input.classList.add('form-control-plaintext');
-            input.classList.remove('form-control');
-            input.readOnly = true;
+        row.querySelectorAll('input').forEach(input => {
+            if (input.classList.contains('form-control')) {  // Solo modificar los inputs editables
+                input.classList.add('form-control-plaintext');
+                input.classList.remove('form-control');
+                input.readOnly = true;
+            }
         });
 
-        selected.disabled = false;
-        selected.checked = false;
-        
         // Habilitar todos los checkboxes y el botón de edición
         document.getElementById('select-all').disabled = false;
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+        document.querySelectorAll('.row-select').forEach(checkbox => {
+            checkbox.disabled = false;
+            checkbox.checked = false;  // Desmarcar todos los checkboxes
+        });
+        
         document.getElementById('edit-button').disabled = false;
 
         // Ocultar los botones de guardar y cancelar
@@ -206,7 +209,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
             
-            disableEditMode(selected,row);
+            selected.disabled = false;
+            selected.checked = false;
+            window.location.reload();
+            disableEditMode(selected, row);
             showMessage('Cambios cancelados.', 'danger');
         }
     };
@@ -232,12 +238,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let row = selected.closest('tr');
         let data = {
-            'Certificacion': row.querySelector('input[name ="Certificacion"]').value
+            'Certificacion': row.querySelector('input[name="Certificacion"]').value
         };
 
-        console.log(data)
         let certificacionId = selected.value;
-        console.log(certificacionId)
 
         // Enviar datos al servidor
         fetch(`/certificacion/editar/${certificacionId}/`, {
@@ -248,26 +252,22 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             body: JSON.stringify(data)
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Volver a modo de solo lectura
-                    //inputs.forEach(input => {
-                    row.querySelectorAll('input').forEach(input => {
-                        input.classList.add('form-control-plaintext');
-                        input.classList.remove('form-control');
-                        input.readOnly = true;
-                    });
-
-                    // Ocultar botón de guardar
-                    document.getElementById('save-button').classList.add('d-none');
-                } else {
-                    alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
-                }
-            })
-            .catch(error => {
-                alert('Error al enviar los datos: ' + error.message);
-            });
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                disableEditMode(selected, row);  // Llamar a disableEditMode con los parámetros correctos
+                showMessage('Cambios guardados exitosamente.', 'success');
+                
+                // Asegurarse de que el checkbox esté desmarcado y habilitado
+                selected.checked = false;
+                selected.disabled = false;
+            } else {
+                showMessage('Error al guardar los cambios: ' + JSON.stringify(data.errors), 'danger');
+            }
+        })
+        .catch(error => {
+            showMessage('Error al enviar los datos: ' + error.message, 'danger');
+        });
 
         return false;
     }

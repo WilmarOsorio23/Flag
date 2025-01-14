@@ -33,6 +33,8 @@ def crear(request):
 
 @csrf_exempt
 def editar(request, id):
+    print(id)
+    print(request.body)
     if request.method == 'POST':
         try:
             data = json.loads(request.body)

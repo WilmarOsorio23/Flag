@@ -73,7 +73,7 @@ urlpatterns = [
     # Rutas para la tabla Clientes
     path('clientes/', Clientes.clientes_index, name='clientes_index'),
     path('clientes/crear/', Clientes.clientes_crear, name='clientes_crear'),
-    path('clientes/editar/<int:ClienteId>', Clientes.clientes_editar, name='clientes_editar'),
+    path('clientes/editar/<int:id>/', Clientes.clientes_editar, name='clientes_editar'),
     path('clientes/eliminar/', Clientes.clientes_eliminar, name='clientes_eliminar'),
     path('clientes/descargar_excel/', Clientes.clientes_descargar_excel, name='clientes_descargar_excel'),
 
