@@ -6,6 +6,7 @@ from .models import Cargos
 from django import forms
 from .models import Modulo
 from .models import TiposContactos
+from .models import Contactos
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -125,6 +126,27 @@ class TiposContactosForm(forms.ModelForm):
         }
         labels = {
             'Descripcion': 'Descripción',
+        }
+
+class ContactosForm(forms.ModelForm):
+    class Meta:
+        model = Contactos
+        fields = '__all__'
+        widgets = {
+            'contactoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el ID de Contacto'}),
+            'clienteId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el ID de Cliente'}),
+            'Nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre'}),
+            'Telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono'}),
+            'Direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la dirección'}),
+     
+        }
+        labels = {
+            'contactosID': 'ID de Contacto',
+            'clienteID': 'ID de Cliente',
+            'Nombre': 'Nombre',
+            'Telefono': 'Teléfono',
+            'Direccion': 'Dirección',
+           
         }
 
 class ConsultoresForm(forms.ModelForm):

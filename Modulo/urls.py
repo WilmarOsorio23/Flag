@@ -24,6 +24,7 @@ from Modulo.Views import detalleGastos
 from Modulo.Views import totalGasto
 from Modulo.Views import totalCostos
 from Modulo.Views import tiposContactos
+from Modulo.Views import contactos
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -119,6 +120,12 @@ urlpatterns = [
     path('conceptos/eliminar', Conceptos.conceptos_eliminar, name='conceptos_eliminar'),
     path('conceptos/descargar_excel', Conceptos.conceptos_descargar_excel, name='conceptos_descargar_excel'),
 
+    path('contactos/', contactos.contactos_index, name='contactos_index'),
+    path('contactos/crear', contactos.contactos_crear, name='contactos_crear'),
+    path('contactos/editar/<int:id>/', contactos.contactos_editar, name='contactos_editar'),
+    path('contactos/eliminar', contactos.contactos_eliminar, name='contactos_eliminar'),
+    path('contactos/descargar_excel', contactos.contactos_descargar_excel, name='contactos_descargar_excel'),
+
     # Rutas para tabla Gastos
     path('gastos/', gastos.gasto_index, name='gastos_index'),
     path('gastos/crear', gastos.gasto_crear, name='gastos_crear'),
@@ -144,6 +151,7 @@ urlpatterns = [
     path('tipos_contactos/', tiposContactos.Tipos_contactos_index, name='tipos_contactos_index'),
     path('tipos_contactos/crear', tiposContactos.Tipos_contactos_crear, name='tipos_contactos_crear'),
     path('tipos_contactos/editar/<int:id>/', tiposContactos.Tipos_contactos_editar, name='tipos_contactos_editar'),
+    path('tipos_contactos/verificar-relaciones/', tiposContactos.verificar_relaciones, name='verificar_relaciones'),
     path('tipos_contactos/eliminar', tiposContactos.Tipos_contactos_eliminar, name='tipos_contactos_eliminar'),
     path('tipos_contactos/descargar_excel', tiposContactos.Tipos_contactos_descargar_excel, name='tipos_contactos_descargar_excel'),
 

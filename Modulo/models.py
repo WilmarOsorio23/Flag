@@ -346,7 +346,7 @@ class Contactos(models.Model):
     Direccion = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
-        return f"Nombre: {self.Nombre}, ClientedId: {self.clienteId}, ContactoId: {self.contactoId}"
+        return f"id: {self.id}, ClientedId: {self.clienteId}, ContactoId: {self.contactoId}, Nombre: {self.Nombre}, telefono: {self.Telefono}, Direccion: {self.Direccion}"
 
     class Meta:
         db_table = 'Contactos'

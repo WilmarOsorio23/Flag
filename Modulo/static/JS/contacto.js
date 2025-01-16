@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-
     window.cancelEdit = function() {
         console.log("esta en cancel")
         let selected = document.querySelectorAll('.row-select:checked');
@@ -41,14 +40,16 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length != 1) {
-            showMessage('Error al guardar: No hay un Perfil seleccionado.', 'danger');
+            showMessage('Error al guardar: No hay un detalle seleccionado.', 'danger');
             return;
         }
 
         let row = selected[0].closest('tr');
        
         let data = {
-            'Descripcion': row.querySelector('input[name="descripcion"]').value,
+            'Nombre': row.querySelector('input[name="nombre"]').value,
+            'Telefono': row.querySelector('input[name="telefono"]').value,
+            'Direccion': row.querySelector('input[name="Direccion"]').value
         };
         let id = selected[0].value;
         // Deshabilitar los checkboxes y el botón de edición
@@ -57,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
        console.log(id)
        console.log(data)
-       fetch(`/tipos_contactos/editar/${id}/`, {
+       fetch(`/contactos/editar/${id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -122,12 +123,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit-button').disabled = true;
 
         // Convertir inputs en editables
-        let input = row.querySelector(`[name="descripcion"]`);
-        input.classList.remove('form-control-plaintext');
-        input.classList.add('form-control');
-        input.readOnly = false;
-      
-      
+        let editables = ["nombre", "telefono", "Direccion"];
+        
+        for (let i = 0; i < editables.length; i++) {
+            let edit = row.querySelector(`[name="${editables[i]}"]`);
+            edit.classList.remove('form-control-plaintext');
+            edit.classList.add('form-control');
+            edit.readOnly = false; // Corregido aquí
+        }
         // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
@@ -149,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Inicialización del modal de confirmación y botón de confirmación de eliminación
     const deleteForm = document.getElementById('delete-form');
-    const Modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+    const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
     const confirmDeleteButton = document.getElementById('confirm-delete-btn');
 
     // Asociar el evento de clic al botón de seleccionar/deseleccionar todos los checkboxes
@@ -160,6 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
         handleDeleteConfirmation(event, confirmDeleteModal, confirmDeleteButton, deleteForm, csrfToken);
     });
     
+ 
     // Funciones reutilizables
 
     // Prevenir el envío del formulario al presionar la tecla Enter
@@ -194,18 +198,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        Modal.show(); // Mostrar el modal de confirmación de eliminación
+        modal.show(); // Mostrar el modal de confirmación de eliminación
 
         confirmButton.onclick = async function () {
-            const isRelated = await verifyRelations(selectedIds, csrfToken); // Verificar si hay relaciones con otros elementos
-            if (isRelated) {
-                showMessage('Algunos elementos no pueden ser eliminados porque están relacionados con otras tablas.', 'danger'); // Mensaje de error si hay relaciones
-                Modal.hide(); // Ocultar el modal
-                document.getElementById('select-all').checked = false;
-                document.querySelectorAll('.row-select').forEach(checkbox => checkbox.checked = false);
-                return;
-            }
-
             const itemsToDelete = document.getElementById('items_to_delete');
             if (itemsToDelete) {
                 itemsToDelete.value = selectedIds.join(',');
@@ -223,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
     async function verifyRelations(ids, csrfToken) {
         try {
-            const response = await fetch('/verificar-relaciones/', {
+            const response = await fetch('verificar-relaciones/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -270,6 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 800);
     }
 
+
     // Confirmación antes de descargar
     window.confirmDownload = function() {
         let selected = document.querySelectorAll('.row-select:checked');
@@ -313,6 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
    
+    
     
 
     
