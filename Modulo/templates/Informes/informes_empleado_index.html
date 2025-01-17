@@ -17,25 +17,25 @@
           <!-- Filtros en la parte superior -->
           <div class="row mb-3">
             <div class="col-md-3">
-              <label for="documento">{{ form.Documento.label }}</label>
+              <label for="Documento">{{ form.Documento.label }}</label>
               {{ form.Documento }}
             </div>
             <div class="col-md-3">
-              <label for="linea">{{ form.LineaId.label }}</label>
+              <label for="Linea">{{ form.LineaId.label }}</label>
               {{ form.LineaId }}
             </div>
             <div class="col-md-3">
-              <label for="cargo">{{ form.Cargo.label }}</label>
+              <label for="Cargo">{{ form.Cargo.label }}</label>
               {{ form.Cargo }}
             </div>
             <div class="col-md-3">
-              <label for="certificados">{{ form.Certificacion.label }}</label>
+              <label for="Certificaciones">{{ form.Certificacion.label }}</label>
               {{ form.Certificacion }}
             </div>
           </div>
           <div class="row mb-3">
             <div class="col-md-3">
-              <label for="perfil">{{ form.PerfilId.label }}</label>
+              <label for="PerfilId">{{ form.PerfilId.label }}</label>
               {{ form.PerfilId }}
             </div>
           </div>
@@ -46,6 +46,19 @@
             </div>
           </div>
         </form>
+        <!-- Botón de Descargar Excel -->
+        <div class="row">
+          <div class="col-md-6 text-end offset-md-6">
+            <form id="download-form" method="GET" action="{% url 'exportar_empleados_excel' %}">
+              {% csrf_token %}
+              <input type="hidden" name="Documento" value="{{ form.Documento.value }}" />
+              <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}" />
+              <input type="hidden" name="Certificacion" value="{{ form.Certificacion.value }}" />
+              <input type="hidden" name="PerfilId" value="{{ form.PerfilId.value }}" />
+              <button type="submit" class="btn btn-success"><i class="fas fa-file-excel"></i> Descargar Excel</button>
+            </form>
+          </div>
+        </div>
       </div>
 
       {% if show_data %}

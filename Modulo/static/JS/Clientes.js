@@ -121,8 +121,6 @@ document.addEventListener('DOMContentLoaded', function () {
             'Fecha_Inicio': row.querySelector('input[name ="Fecha_Inicio"]').value,
         };
 
-
-
         let id = selected[0].value;
         // Deshabilitar los checkboxes y el botón de edición
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);

@@ -63,60 +63,42 @@ def clientes_eliminar(request):
     return redirect('clientes_index')
 
 def clientes_descargar_excel(request):
-    # Verifica si la solicitud es POST
     if request.method == 'POST':
-        cliente_ids = request.POST.get('items_to_delete')
-        print("IDs recibidos:", cliente_ids)
+        item_ids = request.POST.get('items_to_delete', '')
+        item_ids = item_ids.split(',')
+        item_ids = [int(item) for item in item_ids if item.isdigit()]
 
-        # Verifica si 'items_to_delete' no es None o una cadena vacía
-        if cliente_ids:
-            try:
-                # Procesa los IDs para extraer solo la parte numérica después del guion
-                cliente_ids = [
-                    id.split('-')[1] for id in cliente_ids.split(',') if '-' in id
-                ]
-                print("cliente_ids ", cliente_ids)
+        # Depuración: Verifica que ahora tienes una lista de enteros
+        print(item_ids)
 
-                # Filtra solo los clientes que existen en la base de datos
-                clientes = Clientes.objects.filter(DocumentoId__in=cliente_ids)
-
-                print("Lista de clientes ",clientes)
-
-                # Crea una respuesta HTTP con el tipo de contenido de Excel
-                response = HttpResponse(
-                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                )
-                response['Content-Disposition'] = 'attachment; filename="Clientes.xlsx"'
-
-                data = []
-                for cliente in clientes:
-                    # Ajusta los campos según tu modelo Cliente
-                    data.append([
-                        cliente.ClienteId,
-                        cliente.Nombre_Cliente,
-                        cliente.Activo,
-                        cliente.Fecha_Inicio,
-                        cliente.Fecha_Retiro,
-                    ])
-
-                # Crea un DataFrame de pandas para generar el archivo Excel
-                df = pd.DataFrame(data, columns=[
-                    'Cliente ID', 'Nombre', 'Activo', 'Fecha de Inicio', 'Fecha de Retiro'
-                ])
-                df.to_excel(response, index=False)
-
-                return response
-
-            except Exception as e:
-                # Si hay algún error, muestra un mensaje de error
-                print("Error al procesar los IDs:", str(e))
-                messages.error(request, 'Hubo un error al procesar la descarga.')
-                return redirect('clientes_index')
-
-        else:
-            # Si no hay datos en 'items_to_delete'
-            messages.error(request, 'No hay datos seleccionados para descargar.')
+        clientes = Clientes.objects.filter(ClienteId__in=item_ids)
+        
+        # Verificar si se recibieron IDs
+        if not clientes.exists():
+            messages.error(request, "No se encontraron datos para descargar.")
             return redirect('clientes_index')
-
-    # Redirige a la página principal si no es POST
+        
+        # Consultar las nóminas usando las IDs
+        data = []
+        for cliente in clientes:
+            data.append([
+                cliente.ClienteId,
+                cliente.Nombre_Cliente,
+                cliente.Activo,
+                cliente.Fecha_Inicio,
+                cliente.Fecha_Retiro,                   
+            ])
+        
+        # Crear DataFrame de pandas
+        df = pd.DataFrame(data, columns=['ClienteID', 'Nombre', 'Activo', 'Fecha de Inicio', 'Fecha de Retiro'])
+        
+        # Configurar la respuesta HTTP con el archivo Excel
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="Clientes.xlsx"'
+        
+        # Escribir el DataFrame en el archivo Excel
+        df.to_excel(response, index=False)
+        return response
     return redirect('clientes_index')

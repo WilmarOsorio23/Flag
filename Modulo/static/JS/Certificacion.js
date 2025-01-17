@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
     window.saveRow = function() {
         let selected = document.querySelector('.row-select:checked');
         if (!selected) {
-            alert('No has seleccionado ninguna certificación para guardar.');
+            showMessage('No has seleccionado ninguna certificación para guardar.', 'danger');
             return false;
         }
 
@@ -243,7 +243,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let certificacionId = selected.value;
 
-        // Enviar datos al servidor
         fetch(`/certificacion/editar/${certificacionId}/`, {
             method: 'POST',
             headers: {
@@ -255,12 +254,28 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                disableEditMode(selected, row);  // Llamar a disableEditMode con los parámetros correctos
-                showMessage('Cambios guardados exitosamente.', 'success');
+                // Ocultar botones de guardar y cancelar
+                document.getElementById('save-button').classList.add('d-none');
+                document.getElementById('cancel-button').classList.add('d-none');
                 
-                // Asegurarse de que el checkbox esté desmarcado y habilitado
-                selected.checked = false;
-                selected.disabled = false;
+                // Habilitar botón de edición
+                document.getElementById('edit-button').disabled = false;
+                
+                // Restaurar inputs a modo lectura
+                row.querySelectorAll('input.form-control').forEach(input => {
+                    input.classList.remove('form-control');
+                    input.classList.add('form-control-plaintext');
+                    input.readOnly = true;
+                });
+                
+                // Habilitar y desmarcar checkboxes
+                document.getElementById('select-all').disabled = false;
+                document.querySelectorAll('.row-select').forEach(checkbox => {
+                    checkbox.disabled = false;
+                    checkbox.checked = false;
+                });
+                
+                showMessage('Cambios guardados exitosamente.', 'success');
             } else {
                 showMessage('Error al guardar los cambios: ' + JSON.stringify(data.errors), 'danger');
             }

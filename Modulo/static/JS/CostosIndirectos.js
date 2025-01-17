@@ -201,15 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
 
-    // Confirmación antes de eliminar
-    window.confirmDelete = function() {
-        let selected = document.querySelectorAll('.row-select:checked').length;
-        if (selected === 0) {
-            alert('No has seleccionado ningún elemento para eliminar.');
-            return false;
-        }
-        return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
-    }
+   
 
     // Habilitar edición en la fila seleccionada
     window.handleEditClick = function() {

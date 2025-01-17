@@ -18,11 +18,11 @@ def filtrar_empleados(form, empleados):
     :param empleados: QuerySet de empleados.
     :return: QuerySet filtrado.
     """
-    documento = form.cleaned_data.get('TipoDocumento')
-    linea = form.cleaned_data.get('Linea')
+    documento = form.cleaned_data.get('Documento')
+    linea = form.cleaned_data.get('LineaId')
     cargo = form.cleaned_data.get('Cargo')
     certificaciones = form.cleaned_data.get('Certificación')
-    perfil = form.cleaned_data.get('Perfil')
+    perfil = form.cleaned_data.get('PerfilId')
 
     if documento:
         empleados = empleados.filter(Documento=documento)
@@ -83,9 +83,96 @@ def informe_empleados(request):
         'form': form,
         'empleados_info': empleados_info,
         'show_data': show_data,
-        'mensaje': "No se encontraron resultados para los filtros aplicados." if not show_data else ""
+        'mensaje': "No se encontraron resultados para los filtros aplicados." if not empleados_info else ""
     }
 
     return render(request, 'informes/informes_empleado_index.html', context)
 
+# Funcionalidad para descargar el informe de empleados en Excel
+def exportar_empleados_excel(request):
+    # Recuperar los mismos datos de filtrado
+    meses = "Enero Febrero Marzo Abril Mayo Junio Julio Agosto Septiembre Octubre Noviembre Diciembre".split()
+    empleado_info = []  
+    
+    # Reutilizar la lógica de filtrado de tu vista actual
+    if request.method == 'GET':
+        form = EmpleadoFilterForm(request.GET)
 
+        if form.is_valid():
+            # Inicializar empleados
+            empleados = Empleado.objects.all()
+
+            # Filtrar empleados
+            empleados = filtrar_empleados(form, Empleado.objects.all ())
+            
+            # Obtener información de los empleados
+            empleado_info = obtener_informe_empleados(empleados)
+
+        if not empleado_info:
+            return HttpResponse("No se encontraron datos para exportar.", status=404)
+        
+        if not form.is_valid(): 
+            return HttpResponse("Filtros no válidos. Por favor, revisa los criterios ingresados.", status=400)
+
+    # Preparar datos para Excel
+    data = []
+    for empleado in empleado_info:
+        fila = {
+            'Nombre Línea': empleado['LineaId'],
+            'Documento Colaborador': empleado['Documento'],
+            'Nombre Colaborador': empleado['Nombre'],
+            'Cargo': empleado['Cargo'],
+            'Perfil': empleado['PerfilId'],
+            'Módulo': empleado['ModuloId'],
+            'Certificado SAP': empleado['CertificadoSAP'],
+            'Fecha Ingreso': empleado['FechaIngreso'],
+            'Título Profesional Actual': empleado['TituloProfesionalActual']
+        }
+        data.append(fila)
+
+    # Crear un libro de trabajo y una hoja
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Informe de Empleados"
+
+    # Agregar encabezados
+    for col in data[0].keys():
+        cell = ws.cell(row=1, column=list(data[0].keys()).index(col) + 1, value=col)
+        cell.font = Font(bold=True)
+        cell.alignment = Alignment(horizontal='center')
+
+    # Agregar datos del DataFrame a la hoja
+    for r_idx, row in enumerate(data, 2):
+        for c_idx, value in enumerate(row.values(), 1):
+            cell = ws.cell(row=r_idx, column=c_idx, value=value)
+            cell.alignment = Alignment(horizontal='center')  # Centrar datos
+
+    # Ajustar el ancho de las columnas
+    for column in ws.columns:
+        max_length = 0
+        column = [cell for cell in column]
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column[0].column_letter].width = adjusted_width
+    
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'),
+                     top=Side(style='thin'), bottom=Side(style='thin'))
+
+    for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
+        for cell in row:
+            cell.border = thin_border
+
+    # Crear respuesta de Excel
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    filename = f"empleados_reporte_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    # Guardar el libro de trabajo en la respuesta  
+    wb.save(response)
+
+    return response
