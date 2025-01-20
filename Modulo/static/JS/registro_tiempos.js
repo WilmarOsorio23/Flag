@@ -2,6 +2,23 @@ document.addEventListener('DOMContentLoaded', function () {
     // Obtener el valor del token CSRF para ser utilizado en las solicitudes POST
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+    // Recuperar los valores de año y mes originales desde localStorage
+    let originalAnio = localStorage.getItem('originalAnio');
+    let originalMes = localStorage.getItem('originalMes');
+
+    // Si no hay valores en localStorage, obtenerlos de la URL y almacenarlos
+    if (!originalAnio || !originalMes) {
+        const urlParams = new URLSearchParams(window.location.search);
+        originalAnio = urlParams.get('Anio');
+        originalMes = urlParams.get('Mes');
+        localStorage.setItem('originalAnio', originalAnio);
+        localStorage.setItem('originalMes', originalMes);
+    }
+    // Mostrar los valores originales en la interfaz
+    document.querySelector('#anio-original').textContent = originalAnio;
+    document.querySelector('#mes-original').textContent = originalMes;
+
+
     // Inhabilitar la tecla Enter para evitar que envíen formularios accidentalmente
     preventFormSubmissionOnEnter();
 
@@ -52,10 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function saveAllRows() {
         const rows = document.querySelectorAll('tbody tr');
         const data = [];
-        // Obtener el año y el mes del filtro
-        const anio = document.querySelector('select[name="Anio"]').value;
-        const mes = document.querySelector('select[name="Mes"]').value;
-    
+
         rows.forEach((row, index) => {
             const rowData = {};
             const inputs = row.querySelectorAll('input');
@@ -76,8 +90,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Recopilar clientes y tiempos
                 row.querySelectorAll('input[name^="ClienteId_"]').forEach((input, i) => {
                     const cliente = input.value.trim();
-                    const tiempoCliente = row.querySelector(`input[name="Tiempo_Clientes_${i + 1}"]`).value.trim();
-                    if (cliente && tiempoCliente) {
+                    let tiempoCliente = row.querySelector(`input[name="Tiempo_Clientes_${i + 1}"]`).value.trim();
+                    tiempoCliente = tiempoCliente === '' ? '0' : tiempoCliente; // Si está vacío, asignar '0'
+                    if (cliente) {
                         clientes.push({ cliente, tiempoCliente });
                     }
                 });
@@ -85,8 +100,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Recopilar conceptos y tiempos
                 row.querySelectorAll('input[name^="ConceptoId_"]').forEach((input, i) => {
                     const concepto = input.value.trim();
-                    const tiempoConcepto = row.querySelector(`input[name="Tiempo_Conceptos_${i + 1}"]`).value.trim();
-                    if (concepto && tiempoConcepto) {
+                    let tiempoConcepto = row.querySelector(`input[name="Tiempo_Conceptos_${i + 1}"]`).value.trim();
+                    tiempoConcepto = tiempoConcepto == '' ? '0' : tiempoConcepto; // Si está vacío, asignar '0'
+                    if (concepto) {
                         conceptos.push({ concepto, tiempoConcepto });
                     }
                 });
@@ -97,8 +113,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         'Documento': rowData.Documento,
                         'ClienteId': cliente,
                         'Tiempo_Clientes': tiempoCliente,
-                        'Anio': anio,
-                        'Mes': mes
+                        'Anio': originalAnio,
+                        'Mes': originalMes
                     });
                 });
 
@@ -107,8 +123,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         'Documento': rowData.Documento,
                         'ConceptoId': concepto,
                         'Tiempo_Conceptos': tiempoConcepto,
-                        'Anio': anio,
-                        'Mes': mes
+                        'Anio': originalAnio,
+                        'Mes': originalMes
                     });
                 });
 

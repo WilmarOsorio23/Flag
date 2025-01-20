@@ -57,7 +57,6 @@ def guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas):
         raise ValidationError(f"Error al guardar los tiempos del concepto: {str(e)}")
 
 
-
 @transaction.atomic
 def registro_tiempos_guardar(request):
     if request.method == 'POST':
