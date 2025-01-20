@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %} Crear Historial_Cargos {% endblock %}
+
+{% block contenido %}
+    <h2>Crear Nuevo Historial_Cargos</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'historial_cargos_index' %}" class="btn btn-danger">Cancelar</a>
+    </form>
+{% endblock %}

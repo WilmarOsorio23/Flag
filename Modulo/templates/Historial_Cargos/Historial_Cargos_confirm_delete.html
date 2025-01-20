@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block titulo %} Confirmar Eliminación {% endblock %}
+
+{% block contenido %}
+    <h2>¿Estás seguro de que deseas eliminar el registro de Historial_Cargos del año "{{ historial_cargos.Año }}" y mes "{{ historial_cargos.Mes }}" con ID de cargo "{{ historial_cargos.CargosId }}"?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+        <a href="{% url 'historial_cargos_index' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+{% endblock %} 

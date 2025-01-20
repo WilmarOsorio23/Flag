@@ -25,6 +25,7 @@ from Modulo.Views import totalGasto
 from Modulo.Views import totalCostos
 from Modulo.Views import tiposContactos
 from Modulo.Views import contactos
+from Modulo.Views import historial_cargos
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -216,5 +217,12 @@ urlpatterns = [
     # Rutas para informe de empleados
     path('informes/empleados/', views.empleado_filtrado, name='informes_empleado_index'),
     #path('informes/empleados/exportar_empleados_excel', informe_empleados, name='exportar_empleados_excel'),
+
+    # Rutas para tabla Historial Cargos
+    path('historial_cargos/', historial_cargos.historial_cargos_index, name='historial_cargos_index'),
+    path('historial_cargos/crear/', historial_cargos.historial_cargos_crear, name='historial_cargos_crear'),
+    path('historial_cargos/editar/<int:id>/', historial_cargos.historial_cargos_editar, name='historial_cargos_editar'),
+    path('historial_cargos/eliminar/', historial_cargos.historial_cargos_eliminar, name='historial_cargos_eliminar'),
+    path('historial_cargos/descargar_excel/', historial_cargos.historial_cargos_descargar_excel, name='historial_cargos_descargar_excel'),
 
 ]

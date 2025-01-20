@@ -351,3 +351,16 @@ class Contactos(models.Model):
     class Meta:
         db_table = 'Contactos'
 
+class Historial_Cargos(models.Model):
+    id = models.AutoField(primary_key=True)
+    documentoId=models.ForeignKey('Empleado', on_delete=models.CASCADE, db_column='documentoId')
+    cargoId = models.ForeignKey('Cargos', on_delete=models.CASCADE, db_column='CargoId')
+    FechaInicio = models.DateField()
+    FechaFin = models.DateField(null=True)
+
+    def __str__(self):
+        return f"id: {self.id}, DocumentoId: {self.documentoId}, CargoId: {self.cargoId}, FechaInicio: {self.FechaInicio}, FechaFin: {self.FechaFin}"
+
+    class Meta:
+        db_table = 'Historial_Cargos'
+
