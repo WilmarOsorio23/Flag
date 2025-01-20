@@ -135,18 +135,20 @@ document.addEventListener('DOMContentLoaded', function () {
     // Deshabilitar modo edición
     function disableEditMode(selected,row) {
         // Cambiar inputs a solo lectura
-        row.querySelectorAll('input.form-control').forEach(input => {
-            input.classList.add('form-control-plaintext');
-            input.classList.remove('form-control');
-            input.readOnly = true;
+        row.querySelectorAll('input').forEach(input => {
+            if (input.classList.contains('form-control')) {  // Solo modificar los inputs editables
+                input.classList.add('form-control-plaintext');
+                input.classList.remove('form-control');
+                input.readOnly = true;
+            }
         });
-     
-        selected.disabled = false;
-        selected.checked = false;
         
         // Habilitar todos los checkboxes y el botón de edición
         document.getElementById('select-all').disabled = false;
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+        document.querySelectorAll('.row-select').forEach(checkbox => {
+            checkbox.disabled = false;
+            checkbox.checked = false;  // Desmarcar todos los checkboxes
+        });
         document.getElementById('edit-button').disabled = false;
 
         // Ocultar los botones de guardar y cancelar
@@ -158,16 +160,28 @@ document.addEventListener('DOMContentLoaded', function () {
     window.enableEdit = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length === 0) {
-            alert('No has seleccionado ningún tipo de documento para editar.');
+            showMessage('No has seleccionado ningún tipo de documento para editar.');
             return false;
         }
         if (selected.length > 1) {
-            alert('Solo puedes editar un tipo de documento a la vez.');
+            showMessage('Solo puedes editar un tipo de documento a la vez.');
             return false;
         }
 
         let row = selected[0].closest('tr');
         let inputs = row.querySelectorAll('input.form-control-plaintext');
+        
+        // Guardar valores originales en un atributo personalizado 
+        inputs.forEach(input => { 
+            input.setAttribute('data-original-value', input.value);
+        });
+        
+        // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
+        document.getElementById('select-all').disabled = true;
+        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
+        document.getElementById('edit-button').disabled = true;
+
+        // Convertir inputs en editables
         inputs.forEach(input => {
             input.classList.remove('form-control-plaintext');
             input.classList.add('form-control');
@@ -200,9 +214,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-
+    // Confirmación antes de eliminar
+    window.confirmDelete = function() {
+        let selected = document.querySelectorAll('.row-select:checked').length;
+        if (selected === 0) {
+            alert('No has seleccionado ningún elemento para eliminar.');
+            return false;
+        }
+        return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
+    }
    
-
     // Habilitar edición en la fila seleccionada
     window.handleEditClick = function() {
         let selected = document.querySelectorAll('.row-select:checked');
@@ -231,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function () {
     window.saveRow = function() {
         let selected = document.querySelector('.row-select:checked');
         if (!selected) {
-            alert('No has seleccionado ningún costo indirecto para guardar.');
+            showMessage('No has seleccionado ningún costo indirecto para guardar.');
             return false;
         }
 
@@ -256,18 +277,29 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
+                    // Ocultar botones de guardar y cancelar
+                    document.getElementById('save-button').classList.add('d-none');
+                    document.getElementById('cancel-button').classList.add('d-none');
+                    
+                    // Habilitar botón de edición
+                    document.getElementById('edit-button').disabled = false;
+                
                     // Volver a modo de solo lectura
-                    // inputs.forEach(input => {
-                    row.querySelectorAll('input').forEach(input =>{ 
+                    row.querySelectorAll('input.form-control').forEach(input =>{ 
                         input.classList.add('form-control-plaintext');
                         input.classList.remove('form-control');
                         input.readOnly = true;
                     });
 
+                    // Habilitar y desmarcar checkboxes
+                    document.getElementById('select-all').disabled = false;
+                    document.querySelectorAll('.row-select').forEach(checkbox => {
+                        checkbox.disabled = false;
+                        checkbox.checked = false;
+                    });
+
                     showMessage('Costo indirecto guardado con éxito.', 'success');
-                    // Ocultar botón de guardar
-                    document.getElementById('save-button').classList.add('d-none');
-                    disableEditMode(selected, row);
+                    
                 } else {
                     alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
                 }

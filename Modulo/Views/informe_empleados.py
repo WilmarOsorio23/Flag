@@ -121,7 +121,7 @@ def exportar_empleados_excel(request):
             'Nombre Línea': empleado['LineaId'],
             'Documento Colaborador': empleado['Documento'],
             'Nombre Colaborador': empleado['Nombre'],
-            'Cargo': empleado['Cargo'],
+            #'Cargo': empleado['CargoId__Cargos'],
             'Perfil': empleado['PerfilId'],
             'Módulo': empleado['ModuloId'],
             'Certificado SAP': empleado['CertificadoSAP'],

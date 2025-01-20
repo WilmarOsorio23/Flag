@@ -117,21 +117,42 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 800);
     }
 
-    // Confirmación antes de descargar
-    window.confirmDownload = function () {
+    // Habilitar edición en la fila seleccionada
+    window.enableEdit = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 0) {
-            showMessage('No has seleccionado ningún elemento para descargar.', 'danger');
+            showMessage('Por favor, selecciona al menos un certificado.', 'danger');
+            return false;
+        }
+        if (selected.length > 1) {
+            showMessage('Por favor, Selecciona un solo certificado para editar.', 'danger');
             return false;
         }
 
-        let itemIds = [];
-        selected.forEach(function (checkbox) {
-            itemIds.push(checkbox.value);
-        });
-        document.getElementById('items_to_delete').value = itemIds.join(',');
+        let row = selected[0].closest('tr');
+        let inputs = row.querySelectorAll('input.form-control-plaintext');
 
-        return true;
+        // Guardar valores originales en un atributo personalizado 
+        inputs.forEach(input => { 
+            input.setAttribute('data-original-value', input.value);
+        });
+
+        // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
+        document.getElementById('select-all').disabled = true;
+        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
+        document.getElementById('edit-button').disabled = true;
+
+        // Convertir inputs en editables
+        inputs.forEach(input => {
+            input.classList.remove('form-control-plaintext');
+            input.classList.add('form-control');
+            input.readOnly = false;
+        });
+
+        // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
+        document.getElementById('save-button').classList.remove('d-none');
+        document.getElementById('cancel-button').classList.remove('d-none');
+
     };
 
     // Deshabilitar modo edición
@@ -159,43 +180,24 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('cancel-button').classList.add('d-none');
     }
 
-    // Habilitar edición en la fila seleccionada
-    window.enableEdit = function() {
+    // Confirmación antes de descargar
+    window.confirmDownload = function () {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 0) {
-            showMessage('Por favor, selecciona al menos un certificado.', 'danger');
-            return false;
-        }
-        if (selected.length > 1) {
-            showMessage('Por favor, Selecciona un solo certificado para editar.', 'danger');
+            showMessage('No has seleccionado ningún elemento para descargar.', 'danger');
             return false;
         }
 
-        let row = selected[0].closest('tr');
-        let inputs = row.querySelectorAll('input.form-control-plaintext');
-
-        // Guardar valores originales en un atributo personalizado 
-        inputs.forEach(input => { 
-        input.setAttribute('data-original-value', input.value);
+        let itemIds = [];
+        selected.forEach(function (checkbox) {
+            itemIds.push(checkbox.value);
         });
+        document.getElementById('items_to_delete').value = itemIds.join(',');
 
-        // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
-        document.getElementById('select-all').disabled = true;
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
-        document.getElementById('edit-button').disabled = true;
-
-        // Convertir inputs en editables
-        inputs.forEach(input => {
-            input.classList.remove('form-control-plaintext');
-            input.classList.add('form-control');
-            input.readOnly = false;
-        });
-
-        // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
-        document.getElementById('save-button').classList.remove('d-none');
-        document.getElementById('cancel-button').classList.remove('d-none');
-
+        return true;
     };
+
+    
 
     window.cancelEdit = function() {
         let selected = document.querySelectorAll('.row-select:checked');
