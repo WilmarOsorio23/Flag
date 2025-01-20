@@ -26,6 +26,7 @@ from Modulo.Views import totalCostos
 from Modulo.Views import tiposContactos
 from Modulo.Views import contactos
 from Modulo.Views import historial_cargos
+from Modulo.Views import empleados_estudios
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -205,6 +206,13 @@ urlpatterns = [
     path('empleado/eliminar/', empleado.empleado_eliminar, name='empleado_eliminar'),
     path('empleado/verificar-relaciones/', empleado.verificar_relaciones, name='empleado_verificar_relaciones'),
     path('empleado/descargar_excel/', empleado.empleado_descargar_excel, name='empleado_descargar_excel'),
+
+    # Rutas para tabla Empleados Estudios
+    path('empleados_estudios/', empleados_estudios.empleados_estudios_index, name='empleados_estudios_index'),
+    path('empleados_estudios/crear/', empleados_estudios.empleados_estudios_crear, name='empleados_estudios_crear'),
+    path('empleados_estudios/editar/<int:id>/',empleados_estudios.empleados_estudios_editar, name='empleados_estudios_editar'),
+    path('empleados_estudios/eliminar/', empleados_estudios.empleados_estudios_eliminar, name='empleados_estudios_eliminar'),
+    path('empleados_estudios/descargar_excel/', empleados_estudios.empleados_estudios_descargarExcel, name='empleados_estudios_descargar_excel'),
 
     # Rutas para informe de certificación
     path('informes/', views.empleado_filtrado, name='informes_certificacion_index'),

@@ -8,6 +8,7 @@ from .models import Modulo
 from .models import TiposContactos
 from .models import Contactos
 from .models import Historial_Cargos
+from .models import Empleados_Estudios
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -723,5 +724,25 @@ class HistorialCargosForm(forms.ModelForm):
             'FechaInicio': 'Fecha de Inicio',
             'FechaFin': 'Fecha de Fin',
         }
-        
+
+class EmpleadosEstudiosForm(forms.ModelForm):
+    class Meta:
+        model = Empleados_Estudios
+        fields = '__all__'
+        widgets = {
+            'documentoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el documento'}),
+            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el titulo'}),
+            'institucion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la institucion'}),
+            'fecha_Inicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_Fin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_Graduacion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+        labels = {
+            'documentoId': 'Documento',
+            'titulo': 'Titulo',
+            'institucion': 'Institucion',
+            'fecha_Inicio': 'Fecha de Inicio',
+            'fecha_Fin': 'Fecha de Fin',
+            'fecha_Graduacion': 'Fecha de Graduacion',
+        }
 

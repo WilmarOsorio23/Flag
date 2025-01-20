@@ -364,3 +364,18 @@ class Historial_Cargos(models.Model):
     class Meta:
         db_table = 'Historial_Cargos'
 
+class Empleados_Estudios(models.Model):
+    id = models.AutoField(primary_key=True)
+    documentoId = models.ForeignKey('Empleado', on_delete=models.CASCADE, db_column='documentoId')
+    titulo = models.CharField(max_length=100)
+    institucion = models.CharField(max_length=100)
+    fecha_Inicio = models.DateField()
+    fecha_Fin = models.DateField()
+    fecha_Graduacion = models.DateField()
+
+    def __str__(self):
+        return f"id: {self.id}, DocumentoId: {self.documentoId}, Titulo: {self.titulo}, Institucion: {self.institucion}, FechaInicio: {self.fecha_Inicio}, FechaFin: {self.fecha_Fin}, FechaGraduacion: {self.fecha_Graduacion}"
+
+    class Meta:
+        db_table = 'Empleados_Estudios'
+
