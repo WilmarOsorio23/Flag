@@ -29,7 +29,7 @@ def guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas):
             defaults={'Horas': horas},
             ClienteId_id=cliente_id  # Usar `_id` para asignar directamente el ID de la relación
         )
-        if not creado:
+        if not creado and tiempo_cliente.Horas != tiempo_cliente:
             # Si el registro existe, actualizamos las horas
             tiempo_cliente.Horas = horas
             tiempo_cliente.save()
@@ -48,7 +48,7 @@ def guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas):
             defaults={'Horas': horas},
             ConceptoId_id=concepto_id  # Usar `_id` para asignar directamente el ID de la relación
         )
-        if not creado:
+        if not creado and tiempo_concepto.Horas != tiempo_concepto:
             # Si el registro existe, actualizamos las horas
             tiempo_concepto.Horas = horas
             tiempo_concepto.save()
@@ -57,7 +57,8 @@ def guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas):
         raise ValidationError(f"Error al guardar los tiempos del concepto: {str(e)}")
 
 
-@csrf_exempt
+
+@transaction.atomic
 def registro_tiempos_guardar(request):
     if request.method == 'POST':
         try:
@@ -71,13 +72,11 @@ def registro_tiempos_guardar(request):
                 if 'ClienteId' in row:
                     cliente_id = row.get('ClienteId')
                     horas = row.get('Tiempo_Clientes')
-                    if float(horas) != 0:
-                        guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas)
+                    guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas)
                 elif 'ConceptoId' in row:
                     concepto_id = row.get('ConceptoId')
                     horas = row.get('Tiempo_Conceptos')
-                    if float(horas) != 0:
-                        guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas)
+                    guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas)
             return JsonResponse({'status': 'success'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'error': str(e)})
