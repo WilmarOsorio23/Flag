@@ -20,6 +20,7 @@ from Modulo.Views import linea
 from Modulo.Views import detallesCostosIndirectos
 from Modulo.Views import detallesCertificacion
 from Modulo.Views import registro_tiempos
+from Modulo.Views import Horas_Habiles
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -186,6 +187,15 @@ urlpatterns = [
     path('empleado/eliminar/', empleado.empleado_eliminar, name='empleado_eliminar'),
     path('empleado/verificar-relaciones/', empleado.verificar_relaciones, name='empleado_verificar_relaciones'),
     path('empleado/descargar_excel/', empleado.empleado_descargar_excel, name='empleado_descargar_excel'),
+
+    # Rutas para la tabla Horas Habiles
+    path('horas_habiles/', Horas_Habiles.horas_habiles_index, name='horas_habiles_index'),
+    path('horas_habiles/crear/', Horas_Habiles.horas_habiles_crear, name='horas_habiles_crear'),
+    path('horas_habiles/editar/<str:id>/', Horas_Habiles.horas_habiles_editar, name='horas_habiles_editar'),
+    path('horas_habiles/eliminar/', Horas_Habiles.horas_habiles_eliminar, name='horas_habiles_eliminar'),
+    path('horas_habiles/verificar-relaciones/', Horas_Habiles.verificar_relaciones, name='Horas_Habiles_verificar_relaciones'),
+    path('horas_habiles/descargar_excel/', Horas_Habiles.horas_habiles_descargar_excel, name='horas_habiles_descargar_excel'),
+
 
     # Rutas para la tabla Registro Tiempos
     path('registro_tiempos/', registro_tiempos.registro_tiempos_index, name='registro_tiempos_index'),
