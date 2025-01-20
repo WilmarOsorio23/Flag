@@ -81,7 +81,7 @@ urlpatterns = [
     # Rutas para la tabla Clientes
     path('clientes/', Clientes.clientes_index, name='clientes_index'),
     path('clientes/crear/', Clientes.clientes_crear, name='clientes_crear'),
-    path('clientes/editar/<str:tipo_documento_id>/<str:documento_id>/', Clientes.clientes_editar, name='clientes_editar'),
+    path('clientes/editar/<int:id>/', Clientes.clientes_editar, name='clientes_editar'),
     path('clientes/eliminar/', Clientes.clientes_eliminar, name='clientes_eliminar'),
     path('clientes/descargar_excel/', Clientes.clientes_descargar_excel, name='clientes_descargar_excel'),
 
@@ -195,7 +195,7 @@ urlpatterns = [
     path('informes/salarios/exportar_nomina_excel', empleado_nomina_filtrado.exportar_nomina_excel, name='exportar_nomina_excel'),
        
     # Rutas para informe de empleados
-    path('informes/empleados/', views.empleado_filtrado, name='informes_empleado_index'),
-    #path('informes/empleados/exportar_empleados_excel', informe_empleados, name='exportar_empleados_excel'),
+    path('informes/empleados/', informe_empleados.informe_empleados, name='informes_empleado_index'),
+    path('informes/empleados/exportar_empleados_excel', informe_empleados.exportar_empleados_excel, name='exportar_empleados_excel'),
 
 ]

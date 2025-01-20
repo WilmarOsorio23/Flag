@@ -35,13 +35,6 @@ document.addEventListener('DOMContentLoaded', function () {
         checkboxes.forEach(checkbox => checkbox.checked = event.target.checked);
     }
 
-    // Obtener IDs seleccionados
-    function getSelectedIds() {
-        return Array.from(document.querySelectorAll('.row-select:checked')).map(el => el.value);
-    }
-
-
-
     // Manejar la confirmación de eliminación
     async function handleDeleteConfirmation(event, modal, confirmButton, form, csrfToken) {
         event.preventDefault(); // Prevenir la acción predeterminada del evento
@@ -68,6 +61,11 @@ document.addEventListener('DOMContentLoaded', function () {
             form.submit(); // Enviar el formulario para realizar la eliminación
 
         };
+    }
+
+    // Obtener IDs seleccionados
+    function getSelectedIds() {
+        return Array.from(document.querySelectorAll('.row-select:checked')).map(el => el.value);
     }
 
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
@@ -132,12 +130,26 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         let row = selected[0].closest('tr');
-        row.querySelectorAll('input.form-control-plaintext').forEach(input => {
+        let inputs = row.querySelectorAll('input.form-control-plaintext');
+        
+        // Guardar valores originales en un atributo personalizado
+        inputs.forEach(input => {
+            input.setAttribute('data-original-value', input.value);
+        });
+
+        // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
+        document.getElementById('select-all').disabled = true;
+        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
+        document.getElementById('edit-button').disabled = true;
+
+        // Convertir inputs en editables
+        inputs.forEach(input => {
             input.classList.remove('form-control-plaintext');
             input.classList.add('form-control');
             input.readOnly = false;
         });
 
+        // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
     };
@@ -145,18 +157,21 @@ document.addEventListener('DOMContentLoaded', function () {
     // Deshabilitar modo edición
     function disableEditMode(selected, row) {
         // Cambiar inputs a solo lectura
-        row.querySelectorAll('input.form-control').forEach(input => {
-            input.classList.add('form-control-plaintext');
-            input.classList.remove('form-control');
-            input.readOnly = true;
+        row.querySelectorAll('input').forEach(input => {
+            if (input.classList.contains('form-control')) {  // Solo modificar los inputs editables
+                input.classList.add('form-control-plaintext');
+                input.classList.remove('form-control');
+                input.readOnly = true;
+            }
         });
-
-        selected.disabled = false;
-        selected.checked = false;
+        
 
         // Habilitar todos los checkboxes y el botón de edición
         document.getElementById('select-all').disabled = false;
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+        document.querySelectorAll('.row-select').forEach(checkbox => {
+            checkbox.disabled = false;
+            checkbox.checked = false;  // Desmarcar todos los checkboxes
+        });
         document.getElementById('edit-button').disabled = false;
 
         // Ocultar los botones de guardar y cancelar
@@ -185,6 +200,16 @@ document.addEventListener('DOMContentLoaded', function () {
             showMessage('Cambios cancelados.', 'danger');
         }
     };
+
+    // Confirmación antes de eliminar
+    window.confirmDelete = function() {
+        let selected = document.querySelectorAll('.row-select:checked').length;
+        if (selected === 0) {
+            alert('No has seleccionado ningún elemento para eliminar.');
+            return false;
+        }
+        return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
+    }
 
     // Confirmación antes de descargar
     window.confirmDownload = function() {
@@ -228,14 +253,27 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
+                    // Ocultar botones de guardar y cancelar
+                    document.getElementById('save-button').classList.add('d-none');
+                    document.getElementById('cancel-button').classList.add('d-none');
+                    
+                    // Habilitar botón de edición
+                    document.getElementById('edit-button').disabled = false;
+                
                     row.querySelectorAll('input').forEach(input => {
-                        input.classList.add('form-control-plaintext');
                         input.classList.remove('form-control');
+                        input.classList.add('form-control-plaintext');                        
                         input.readOnly = true;
                     });
-                    showMessage('Concepto guardado con éxito.', 'success');
-                    document.getElementById('save-button').classList.add('d-none');
-                    disableEditMode(selected, row);
+
+                    // Habilitar y desmarcar checkboxes
+                    document.getElementById('select-all').disabled = false;
+                    document.querySelectorAll('.row-select').forEach(checkbox => {
+                        checkbox.disabled = false;
+                        checkbox.checked = false;
+                    });
+
+                    showMessage('Concepto guardado con éxito.', 'success');                                        
                 } else {
                     showMessage('Error al guardar el concepto.', 'danger');
                 }
@@ -246,5 +284,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return false;
     };
+
+    // Clonar checkboxes seleccionados en el formulario de descarga
+    document.getElementById('download-form').addEventListener('submit', function (event) {
+        let selectedCheckboxes = document.querySelectorAll('.row-select:checked');
+        
+        if (selectedCheckboxes.length === 0) {
+            alert('No has seleccionado ningún elemento para descargar.');
+            event.preventDefault(); // Evita el envío si no hay elementos seleccionados
+            return;
+        }
+    
+        // Captura los valores de los checkboxes seleccionados
+        let selectedValues = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+    
+        // Asigna los valores seleccionados al campo oculto
+        document.getElementById('items_to_delete').value = selectedValues.join(',');
+    });
+    
+    // Seleccionar todos los checkboxes
+    document.getElementById('select-all').addEventListener('click', function (event) {
+        let checkboxes = document.querySelectorAll('.row-select');
+        for (let checkbox of checkboxes) {
+            checkbox.checked = event.target.checked;
+        }
+    });
+    
 
 });

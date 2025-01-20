@@ -651,6 +651,18 @@ class EmpleadoFilterForm(forms.Form):
         label='Cargo',  
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+    PerfilId = forms.ModelChoiceField(
+        queryset=Perfil.objects.all(),
+        required=False,
+        label="Perfil",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    ) 
+    Documento = forms.ModelChoiceField(
+        queryset=TipoDocumento.objects.all(),
+        required=False,
+        label="TipoDocumento",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
 
     def __init__(self, *args, **kwargs):
         certificacion_seleccionada = kwargs.pop('certificacion_seleccionada', None)

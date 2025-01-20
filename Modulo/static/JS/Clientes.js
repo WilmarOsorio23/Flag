@@ -108,54 +108,65 @@ document.addEventListener('DOMContentLoaded', function () {
     
 
     // Guardar los cambios en la fila seleccionada
-    window.saveRow = function () {
-        let selected = document.querySelector('.row-select:checked');
-        if (!selected) {
-            alert('No has seleccionado ningún Cliente para guardar.');
-            return false;
+    window.saveRow = function() {        
+        let selected = document.querySelectorAll('.row-select:checked');
+        if (selected.length != 1) {
+            showMessage('Error al guardar: No hay un detalle seleccionado.', 'danger');
+            return;
         }
 
-        let row = selected.closest('tr');
+        let row = selected[0].closest('tr');       
         let data = {
-            'TipoDocumentoID': row.querySelector('input[name ="TipoDocumentoID"]').value,
-            'DocumentoId': row.querySelector('input[name ="DocumentoId"]').value,
             'Nombre_Cliente': row.querySelector('input[name ="Nombre_Cliente"]').value,
-            'Activo': row.querySelector('input[name ="Activo"]').checked,
             'Fecha_Inicio': row.querySelector('input[name ="Fecha_Inicio"]').value,
-            'Fecha_Retiro': row.querySelector('input[name ="Fecha_Retiro"]').value,
         };
 
-        console.log(data)
-        let tipoDocumentoID = selected.value;
-        let documentoId = selected.value;
+        let id = selected[0].value;
+        // Deshabilitar los checkboxes y el botón de edición
+        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
+        document.getElementById('edit-button').disabled = true;
 
-        fetch(`/clientes/editar/${tipoDocumentoID}/${documentoId}/`, {
+        console.log(id)
+        console.log(data)
+        console.log('URL de la petición:', `/clientes/editar/${id}/`); // Para debugging
+        fetch(`/clientes/editar/${id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}', // Asegura que sea dinámico y no del backend
+                'X-CSRFToken': '{{ csrf_token }}'
             },
             body: JSON.stringify(data)
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    //inputs.forEach(input => {
-                    row.querySelectorAll('input').forEach(input => {
-                        input.classList.add('form-control-plaintext');
-                        input.classList.remove('form-control');
-                        input.readOnly = true;
-                    });
-                    document.getElementById('save-button').classList.add('d-none');
-                } else {
-                    alert('Error al guardar los cambios: ' + JSON.stringify(data.errors));
-                }
-            })
-            .catch(error => {
-                alert('Error al enviar los datos: ' + error.message);
-            });
+        .then(response => {
+            console.log(response)
+            if (!response.ok) {
+                throw new Error('Error al guardar los cambios');
+            }
+            return response.json();
+        })
+        .then(data => { 
+            if (data.status == 'success') {
+                showMessage('Cambios guardados correctamente.', 'success');
+                window.location.reload()
 
-        return false;
+                row.querySelectorAll('input.form-control').forEach(input => {
+                    input.classList.add('highlighted');
+                    setTimeout(() => input.classList.remove('highlighted'), 2000);
+                });
+
+                disableEditMode(selected,row);
+
+            } else {
+                showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger');
+            }
+
+        })
+        .catch(error => {
+            console.error('Error al guardar los cambios:', error);
+            showMessage('Error al guardar los cambios: ' + error.message, 'danger');
+
+            disableEditMode(selected,row);
+        });
     };
 
     async function handleDeleteConfirmation(event, modal, confirmButton, form, csrfToken) {
