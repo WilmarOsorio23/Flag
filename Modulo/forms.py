@@ -197,6 +197,94 @@ class ConsultoresForm(forms.ModelForm):
             self.fields['Direccion'].required = False  # Permitir campo vacío
             self.fields['Fecha_Retiro'].required = False  # Permitir campo vacío
 
+class ColaboradorFilterForm(forms.Form):
+
+    Empleado = forms.ChoiceField(
+        choices=[],  
+        required=False, 
+        label='Empleado',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    Consultor = forms.ChoiceField(
+        choices=[],  
+        required=False, 
+        label='Consultor',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    ModuloId = forms.ChoiceField(
+        choices=[],
+        required=False, 
+        label='Módulo',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Año (Obligatorio)',  
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    Mes = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Mes (Obligatorio)',  
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    ClienteId = forms.ModelChoiceField(
+        queryset=Clientes.objects.all(), 
+        required=False, 
+        label='Cliente',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_empleado()
+        self.populate_consultor()
+        self.populate_cliente()
+        self.populate_anio()
+        self.populate_mes()
+        self.populate_linea()
+
+    def populate_empleado(self):
+        empleados = Empleado.objects.values_list('Documento', 'Nombre').distinct()
+        self.fields['Empleado'].choices = [('', 'Seleccione el Empleado')] + list(empleados)
+
+    def populate_consultor(self):
+        consultores = Consultores.objects.values_list('Documento', 'Nombre').distinct()
+        self.fields['Consultor'].choices = [('', 'Seleccione el Consultor')] + list(consultores)
+
+    def populate_cliente(self):
+        clientes = Clientes.objects.values_list('ClienteId', 'Nombre_Cliente').distinct()
+        self.fields['ClienteId'].choices = [('', 'Seleccione el cliente')] + list(clientes)
+
+    def populate_anio(self):
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = [('', 'Seleccione el mes')] + meses
+
+    def populate_linea(self):
+        # Si ModuloId necesita opciones dinámicas, añade lógica aquí.
+        linea = Linea.objects.values_list('LineaId', 'Linea').distinct()  # Ajusta según tus modelos
+        self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)
+
 class LineaForm(forms.ModelForm):
     class Meta:
         model = Linea

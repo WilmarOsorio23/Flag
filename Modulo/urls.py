@@ -19,6 +19,7 @@ from Modulo.Views import perfil
 from Modulo.Views import linea
 from Modulo.Views import detallesCostosIndirectos
 from Modulo.Views import detallesCertificacion
+from Modulo.Views import registro_tiempos
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -185,6 +186,11 @@ urlpatterns = [
     path('empleado/eliminar/', empleado.empleado_eliminar, name='empleado_eliminar'),
     path('empleado/verificar-relaciones/', empleado.verificar_relaciones, name='empleado_verificar_relaciones'),
     path('empleado/descargar_excel/', empleado.empleado_descargar_excel, name='empleado_descargar_excel'),
+
+    # Rutas para la tabla Registro Tiempos
+    path('registro_tiempos/', registro_tiempos.registro_tiempos_index, name='registro_tiempos_index'),
+    path('registro_tiempos/guardar/', registro_tiempos.registro_tiempos_guardar, name='registro_tiempos_guardar'),
+    path('registro_tiempos/horas_habiles/', registro_tiempos.obtener_horas_habiles_view, name='obtener_horas_habiles'),
 
     # Rutas para informe de certificación
     path('informes/', views.empleado_filtrado, name='informes_certificacion_index'),

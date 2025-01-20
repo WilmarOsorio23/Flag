@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %} Editar Registro Tiempo {% endblock %}
+
+{% block contenido %}
+    <h2>Editar Empleado</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'registro_tiempos_index' %}" class="btn btn-danger">Cancelar</a>
+    </form>
+{% endblock %}

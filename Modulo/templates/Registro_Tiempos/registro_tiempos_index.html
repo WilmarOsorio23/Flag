@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block titulo %} Lista de Registros de tiempos {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title">Registro de Tiempos</h4>
+    </div>
+    <div class="card-body">
+        <div class="container-fluid mb-3">
+            <!-- Formulario principal -->
+            <form method="GET">
+                <!-- Filtros en la parte superior -->
+                <div class="row mb-3">
+                    <div class="col-md-2">
+                        <label for="anio">{{ form.Anio.label }}</label>
+                        {{ form.Anio }}
+                    </div>
+                    <div class="col-md-2">
+                        <label for="mes">{{ form.Mes.label }}</label>
+                        {{ form.Mes }}
+                    </div>
+                    <div class="col-md-2">
+                        <label for="linea">{{ form.LineaId.label }}</label>
+                        {{ form.LineaId }}
+                    </div>
+                    <div class="col-md-2">
+                        <label for="empleado">{{ form.Empleado.label }}</label>
+                        {{ form.Empleado }}
+                    </div>
+                    <div class="col-md-2">
+                        <label for="consultor">{{ form.Consultor.label }}</label>
+                        {{ form.Consultor }}
+                    </div>
+                    <div class="col-md-2">
+                        <label for="cliente">{{ form.ClienteId.label }}</label>
+                        {{ form.ClienteId }}
+                    </div>
+                </div>
+        
+                <!-- Botones en la parte inferior -->
+                <div class="row container-fluid">
+                    <div class="col-md-6 text-start">
+                        <button type="submit" name="buscar" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <!-- Botón Guardar -->
+                    <button id="save-button" 
+                            class="btn btn-success btn-lg d-flex align-items-center" 
+                            title="Guardar" 
+                            type="button" 
+                            onclick="saveAllRows()">
+                        <i class="fas fa-save me-2"></i> Guardar
+                    </button>
+                </div>
+                <div class="col-md-6 d-flex justify-content-end">
+                    <!-- Textos con diseño mejorado -->
+                    <div class="text-end p-2 bg-light rounded shadow-sm">
+                        <p class="mb-1">
+                            <strong class="text-primary">Días Hábiles:</strong>
+                            <span id="dias-habiles" class="text-muted"></span>
+                        </p>
+                        <p class="mb-0">
+                            <strong class="text-primary">Horas Hábiles:</strong>
+                            <span id="horas-habiles" class="text-muted"></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    <div class="card-footer text-muted">
+        <div class="table-responsive">
+            <form id="delete-form" method="POST">
+
+                {% csrf_token %}
+                <table class="table table-primary">
+                    <thead>
+                        <tr>
+                            <th scope="col">Colaborador</th>
+                            <th scope="col">Línea</th>
+                            <th scope="col">Perfil</th>
+                            <th scope="col">Módulo</th>
+                            <th scope="col">Empresa</th>
+                            {% for cliente in Clientes %}
+                            <th>{{ cliente }}</th>
+                            {% endfor %}
+                            <th scope="col">Total Operación</th>
+                            {% for concepto in Conceptos %}
+                            <th>{{ concepto }}</th>
+                            {% endfor %}
+                            <th scope="col">Total Conceptos</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Dif. Horas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for empleado in colaborador_info %}
+                        <tr id="row-{{ empleado.Documento }}">
+                            <td>
+                                {{ empleado.Nombre }}
+                                <input type="text" name="Documento" class="form-control-plaintext d-none" value="{{ empleado.Documento }}" readonly>
+                            </td>
+
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                {{ empleado.Linea }}
+                            </td>
+                            
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                {{ empleado.Perfil }}
+                            </td>
+
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                {{ empleado.Modulo }}
+                            </td>
+
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                {{ empleado.Empresa}}
+                            </td>
+                            
+
+                            {% for cliente in empleado.Clientes.values %}
+                                <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                    <input type="text" name="ClienteId_{{ forloop.counter }}" class="form-control d-none" value="{{ cliente.ClienteId }}">
+                                    <input type="text" name="Tiempo_Clientes_{{ forloop.counter }}" class="form-control" value="{{ cliente.tiempo_clientes|floatformat:0 }}">
+                                </td>
+                            {% endfor %}
+                            
+
+                            <td data-total-clientes-row>
+                                {{ empleado.Total_Clientes|floatformat:0 }}
+                            </td>
+
+                            {% for concepto in empleado.Conceptos.values %}
+                                <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                    <input type="text" name="ConceptoId_{{ forloop.counter }}" class="form-control d-none" value="{{ concepto.ConceptoId }}">
+                                    <input type="text" name="Tiempo_Conceptos_{{ forloop.counter }}" class="form-control" value="{{ concepto.tiempo_conceptos|floatformat:0 }}">
+                                </td>
+                            {% endfor %}
+
+                            <td data-total-conceptos-row>
+                                {{ empleado.Total_Conceptos|floatformat:0 }}
+                            </td>
+                            <td data-total-horas-row>
+                                {{ empleado.Total_Horas|floatformat:0 }}
+                            </td>
+                            <td data-dif-horas-row>
+                                {{ Dif_Horas|floatformat:0 }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="50">No hay datos disponibles.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="5">Total Horas</th>
+                                {% for cliente in Clientes.values %}
+                                    <th data-cliente-id="{{ cliente.ClienteId }}">{{ Totales|get_item:cliente.ClienteId|floatformat:0 }}</th>
+                                {% endfor %}
+                            <th data-total-clientes>{{ Totales.Total_Clientes|floatformat:0 }}</th>
+                            {% for concepto in Conceptos.values %}
+                                <th data-concepto-id="{{ concepto.ConceptoId }}">{{ Totales|get_item:concepto.ConceptoId|floatformat:0 }}</th>
+                            {% endfor %}
+                            <th data-total-conceptos>{{ Totales.Total_Conceptos|floatformat:0 }}</th>
+                            <th data-total-horas>{{ Totales.Total_Horas|floatformat:0 }}</th>
+                            <th data-dif-horas>{{ Totales.Dif_horas|floatformat:0 }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </form>
+        </div>
+    </div>
+    <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
+        <span id="alert-icon" class="alert-heading"></span>
+        <span id="alert-message"></span>
+    </div>
+    <div id="saving-message" class="alert alert-info" role="alert" style="display: none;">
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        Guardando...
+    </div>
+    {% if messages %}
+    <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<script src="{% static 'JS/registro_tiempos.js' %}"></script>
+{% endblock %}
