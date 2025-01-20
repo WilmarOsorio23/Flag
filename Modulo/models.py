@@ -205,33 +205,31 @@ class Gastos(models.Model):
         db_table = 'Gastos'
 
 class Detalle_Gastos(models.Model):
+    id = models.AutoField(primary_key=True)
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
     GastosId = models.ForeignKey(Gastos, on_delete=models.CASCADE, db_column='GastosId')
     Valor = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"Año: {self.Anio}, Mes: {self.Mes}, Gasto ID: {self.GastosId}, Valor: {self.Valor}"
+        return f"Id:{self.id}, Año: {self.Anio}, Mes: {self.Mes}, Gasto ID: {self.GastosId}, Valor: {self.Valor}"
 
     class Meta:
         db_table = 'Detalle_Gastos'
-        constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'GastosId'], name='unique_detalle_gastos')
-        ]
+        
 
 class Total_Gastos(models.Model):
+    id = models.AutoField(primary_key=True)
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
     Total = models.DecimalField(max_digits=15, decimal_places=2)
 
     def __str__(self):
-        return f"Año: {self.Anio}, Mes: {self.Mes}, Total: {self.Total}"
+        return f"id:{self.id}, Año: {self.Anio}, Mes: {self.Mes}, Total: {self.Total}"
 
     class Meta:
         db_table = 'Total_Gastos'
-        constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes'], name='unique_total_gastos')
-        ]
+        
 
 class Costos_Indirectos(models.Model):
     CostoId = models.AutoField(primary_key=True)
@@ -326,6 +324,60 @@ class Empleado(models.Model):
     def clean(self):
         if self.FechaIngreso < self.FechaNacimiento:
             raise ValidationError('La fecha de ingreso no puede ser anterior a la fecha de nacimiento.')
+
+
+class TiposContactos(models.Model):
+    contactoId= models.AutoField(primary_key=True)
+    Descripcion= models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"id:{self.contactoId}, descripcion:{self.Descripcion}"
+
+    class Meta:
+        db_table = 'Tipos_Contactos'
+
+class Contactos(models.Model):
+    id=models.AutoField(primary_key=True),
+    clienteId = models.ForeignKey(Clientes, on_delete=models.CASCADE, db_column='ClienteId')
+    contactoId = models.ForeignKey(TiposContactos, on_delete=models.CASCADE, db_column='contactoId')
+    Nombre = models.CharField(max_length=100)
+    Telefono = models.CharField(max_length=20, null=True, blank=True)
+    Direccion = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"id: {self.id}, ClientedId: {self.clienteId}, ContactoId: {self.contactoId}, Nombre: {self.Nombre}, telefono: {self.Telefono}, Direccion: {self.Direccion}"
+
+    class Meta:
+        db_table = 'Contactos'
+
+class Historial_Cargos(models.Model):
+    id = models.AutoField(primary_key=True)
+    documentoId=models.ForeignKey('Empleado', on_delete=models.CASCADE, db_column='documentoId')
+    cargoId = models.ForeignKey('Cargos', on_delete=models.CASCADE, db_column='CargoId')
+    FechaInicio = models.DateField()
+    FechaFin = models.DateField(null=True)
+
+    def __str__(self):
+        return f"id: {self.id}, DocumentoId: {self.documentoId}, CargoId: {self.cargoId}, FechaInicio: {self.FechaInicio}, FechaFin: {self.FechaFin}"
+
+    class Meta:
+        db_table = 'Historial_Cargos'
+
+class Empleados_Estudios(models.Model):
+    id = models.AutoField(primary_key=True)
+    documentoId = models.ForeignKey('Empleado', on_delete=models.CASCADE, db_column='documentoId')
+    titulo = models.CharField(max_length=100)
+    institucion = models.CharField(max_length=100)
+    fecha_Inicio = models.DateField()
+    fecha_Fin = models.DateField()
+    fecha_Graduacion = models.DateField()
+
+    def __str__(self):
+        return f"id: {self.id}, DocumentoId: {self.documentoId}, Titulo: {self.titulo}, Institucion: {self.institucion}, FechaInicio: {self.fecha_Inicio}, FechaFin: {self.fecha_Fin}, FechaGraduacion: {self.fecha_Graduacion}"
+
+    class Meta:
+        db_table = 'Empleados_Estudios'
+
 
 class Horas_Habiles(models.Model):
     id = models.AutoField(primary_key=True)

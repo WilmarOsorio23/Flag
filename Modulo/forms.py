@@ -3,9 +3,12 @@ from .models import Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes, Co
 from .models import Concepto, Gastos, Detalle_Gastos, Total_Gastos, Total_Costos_Indirectos
 from .models import Detalle_Costos_Indirectos, TiemposConcepto, Tiempos_Cliente, Nomina, Detalle_Certificacion, Empleado
 from .models import Cargos
-
 from django import forms
 from .models import Modulo
+from .models import TiposContactos
+from .models import Contactos
+from .models import Historial_Cargos
+from .models import Empleados_Estudios
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -116,6 +119,38 @@ class INDForm(forms.ModelForm):
             'Indice': 'Índice',
         }
         
+class TiposContactosForm(forms.ModelForm):
+    class Meta:
+        model = TiposContactos
+        fields = '__all__'
+        widgets = {
+            'Descripcion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la descripción'}),
+        }
+        labels = {
+            'Descripcion': 'Descripción',
+        }
+
+class ContactosForm(forms.ModelForm):
+    class Meta:
+        model = Contactos
+        fields = '__all__'
+        widgets = {
+            'contactoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el ID de Contacto'}),
+            'clienteId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el ID de Cliente'}),
+            'Nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre'}),
+            'Telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono'}),
+            'Direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la dirección'}),
+     
+        }
+        labels = {
+            'contactosID': 'ID de Contacto',
+            'clienteID': 'ID de Cliente',
+            'Nombre': 'Nombre',
+            'Telefono': 'Teléfono',
+            'Direccion': 'Dirección',
+           
+        }
+
 class ConsultoresForm(forms.ModelForm):
     class Meta:
         model = Consultores
@@ -428,26 +463,26 @@ class TotalGastosForm(forms.ModelForm):
         model = Total_Gastos
         fields = '__all__'
         widgets = {
-            'anio': forms.TextInput(attrs={
+            'Anio': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el año'
             }),
-            'mes': forms.TextInput(attrs={
+            'Mes': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'total': forms.NumberInput(attrs={
+            'Total': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el Total'
             }),
         }
         labels = {
-            'anio': 'Año',
-            'mes': 'Mes',
-            'total': 'Total',
+            'Anio': 'Año',
+            'Mes': 'Mes',
+            'Total': 'Total',
         }
 
 class Total_Costos_IndirectosForm(forms.ModelForm):
@@ -455,26 +490,26 @@ class Total_Costos_IndirectosForm(forms.ModelForm):
         model = Total_Costos_Indirectos
         fields = '__all__'
         widgets = {
-            'anio': forms.TextInput(attrs={
+            'Anio': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el año'
             }),
-            'mes': forms.TextInput(attrs={
+            'Mes': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'total': forms.NumberInput(attrs={
+            'Total': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el Total'
             }),
         }
         labels = {
-            'anio': 'Año',
-            'mes': 'Mes',
-            'total': 'Total',
+            'Anio': 'Año',
+            'Mes': 'Mes',
+            'Total': 'Total',
         }
 
 class DetalleCostosIndirectosForm(forms.ModelForm):
@@ -772,4 +807,42 @@ class EmpleadoFilterForm(forms.Form):
         self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo[0], cargo[1]) for cargo in cargos]
 
         self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]
+
+class HistorialCargosForm(forms.ModelForm):
+    class Meta:
+        model = Historial_Cargos
+        fields = '__all__'
+        widgets = {
+            'documentoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el documento'}),
+            'cargoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el cargo'}),
+            'FechaInicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'FechaFin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+        labels = {  
+            'documentoId': 'Documento',
+            'cargoId': 'Cargo',
+            'FechaInicio': 'Fecha de Inicio',
+            'FechaFin': 'Fecha de Fin',
+        }
+
+class EmpleadosEstudiosForm(forms.ModelForm):
+    class Meta:
+        model = Empleados_Estudios
+        fields = '__all__'
+        widgets = {
+            'documentoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el documento'}),
+            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el titulo'}),
+            'institucion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la institucion'}),
+            'fecha_Inicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_Fin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_Graduacion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+        labels = {
+            'documentoId': 'Documento',
+            'titulo': 'Titulo',
+            'institucion': 'Institucion',
+            'fecha_Inicio': 'Fecha de Inicio',
+            'fecha_Fin': 'Fecha de Fin',
+            'fecha_Graduacion': 'Fecha de Graduacion',
+        }
 

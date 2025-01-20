@@ -14,11 +14,19 @@ from Modulo.Views import informe_empleados
 from Modulo.Views import empleado
 from Modulo.Views import consultores
 from Modulo.Views import Nomina
+from Modulo.models import TiposContactos
 from . import views
 from Modulo.Views import perfil
 from Modulo.Views import linea
 from Modulo.Views import detallesCostosIndirectos
 from Modulo.Views import detallesCertificacion
+from Modulo.Views import detalleGastos
+from Modulo.Views import totalGasto
+from Modulo.Views import totalCostos
+from Modulo.Views import tiposContactos
+from Modulo.Views import contactos
+from Modulo.Views import historial_cargos
+from Modulo.Views import empleados_estudios
 from Modulo.Views import registro_tiempos
 
 urlpatterns = [
@@ -115,6 +123,12 @@ urlpatterns = [
     path('conceptos/eliminar', Conceptos.conceptos_eliminar, name='conceptos_eliminar'),
     path('conceptos/descargar_excel', Conceptos.conceptos_descargar_excel, name='conceptos_descargar_excel'),
 
+    path('contactos/', contactos.contactos_index, name='contactos_index'),
+    path('contactos/crear', contactos.contactos_crear, name='contactos_crear'),
+    path('contactos/editar/<int:id>/', contactos.contactos_editar, name='contactos_editar'),
+    path('contactos/eliminar', contactos.contactos_eliminar, name='contactos_eliminar'),
+    path('contactos/descargar_excel', contactos.contactos_descargar_excel, name='contactos_descargar_excel'),
+
     # Rutas para tabla Gastos
     path('gastos/', gastos.gasto_index, name='gastos_index'),
     path('gastos/crear', gastos.gasto_crear, name='gastos_crear'),
@@ -124,25 +138,32 @@ urlpatterns = [
     path('gastos/descargar_excel', gastos.gasto_descargar_excel, name='gastos_descargar_excel'),
 
     # Rutas para tabla Detalle de Gastos
-    path('detalle_gastos/', views.detalle_gastos_index, name='detalle_gastos_index'),
-    path('detalle_gastos/crear', views.detalle_gastos_crear, name='detalle_gastos_crear'),
-    path('detalle_gastos/editar/<str:Anio>/<str:Mes>/<int:GastosId>/', views.detalle_gastos_editar, name='detalle_gastos_editar'),
-    path('detalle_gastos/eliminar', views.detalle_gastos_eliminar, name='detalle_gastos_eliminar'),
-    path('detalle_gastos/descargar_excel', views.detalle_gastos_descargar_excel, name='detalle_gastos_descargar_excel'),
+    path('detalle_gastos/', detalleGastos.detalle_gastos_index, name='detalle_gastos_index'),
+    path('detalle_gastos/crear',detalleGastos.detalle_gastos_crear, name='detalle_gastos_crear'),
+    path('detalle_gastos/editar/<int:id>/', detalleGastos.detalle_gastos_editar, name='detalle_gastos_editar'),
+    path('detalle_gastos/eliminar', detalleGastos.detalle_gastos_eliminar, name='detalle_gastos_eliminar'),
+    path('detalle_gastos/descargar_excel', detalleGastos.detalle_gastos_descargar_excel, name='detalle_gastos_descargar_excel'),
 
     # Rutas para tabla Total de Gastos
-    path('total_gastos/', views.total_gastos_index, name='total_gastos_index'),
-    path('total_gastos/crear', views.total_gastos_crear, name='total_gastos_crear'),
-    path('total_gastos/editar/<str:anio>/<str:mes>/', views.total_gastos_editar, name='total_gastos_editar'),
-    path('total_gastos/eliminar', views.total_gastos_eliminar, name='total_gastos_eliminar'),
-    path('total_gastos/descargar_excel', views.total_gastos_descargar_excel, name='total_gastos_descargar_excel'),
+    path('total_gastos/', totalGasto.total_gastos_index, name='total_gastos_index'),
+    path('total_gastos/crear', totalGasto.total_gastos_crear, name='total_gastos_crear'),
+    path('total_gastos/editar/<int:id>/', totalGasto.total_gastos_editar, name='total_gastos_editar'),
+    path('total_gastos/eliminar', totalGasto.total_gastos_eliminar, name='total_gastos_eliminar'),
+    path('total_gastos/descargar_excel', totalGasto.total_gastos_descargar_excel, name='total_gastos_descargar_excel'),
+
+    path('tipos_contactos/', tiposContactos.Tipos_contactos_index, name='tipos_contactos_index'),
+    path('tipos_contactos/crear', tiposContactos.Tipos_contactos_crear, name='tipos_contactos_crear'),
+    path('tipos_contactos/editar/<int:id>/', tiposContactos.Tipos_contactos_editar, name='tipos_contactos_editar'),
+    path('tipos_contactos/verificar-relaciones/', tiposContactos.verificar_relaciones, name='verificar_relaciones'),
+    path('tipos_contactos/eliminar', tiposContactos.Tipos_contactos_eliminar, name='tipos_contactos_eliminar'),
+    path('tipos_contactos/descargar_excel', tiposContactos.Tipos_contactos_descargar_excel, name='tipos_contactos_descargar_excel'),
 
     # Rutas para tabla Total Costos Indirectos
-    path('total_costos_indirectos/', views.total_costos_indirectos_index, name='total_costos_indirectos_index'),
-    path('total_costos_indirectos/crear/', views.total_costos_indirectos_crear, name='total_costos_indirectos_crear'),
-    path('total_costos_indirectos/editar/<str:anio>/<str:mes>/', views.total_costos_indirectos_editar, name='total_costos_indirectos_editar'),
-    path('total_costos_indirectos/eliminar/', views.total_costos_indirectos_eliminar, name='total_costos_indirectos_eliminar'),
-    path('total_costos_indirectos/descargar_excel/', views.total_costos_indirectos_descargar_excel, name='total_costos_indirectos_descargar_excel'),
+    path('total_costos_indirectos/', totalCostos.total_costos_indirectos_index, name='total_costos_indirectos_index'),
+    path('total_costos_indirectos/crear/', totalCostos.total_costos_indirectos_crear, name='total_costos_indirectos_crear'),
+    path('total_costos_indirectos/editar/<int:id>/', totalCostos.total_costos_indirectos_editar, name='total_costos_indirectos_editar'),
+    path('total_costos_indirectos/eliminar/', totalCostos.total_costos_indirectos_eliminar, name='total_costos_indirectos_eliminar'),
+    path('total_costos_indirectos/descargar_excel/', totalCostos.total_costos_indirectos_descargar_excel, name='total_costos_indirectos_descargar_excel'),
 
     # Rutas para tabla Detalle Costos Indirectos
     path('detalle_costos_indirectos/', detallesCostosIndirectos.detalle_costos_indirectos_index, name='detalle_costos_indirectos_index'),
@@ -187,6 +208,13 @@ urlpatterns = [
     path('empleado/verificar-relaciones/', empleado.verificar_relaciones, name='empleado_verificar_relaciones'),
     path('empleado/descargar_excel/', empleado.empleado_descargar_excel, name='empleado_descargar_excel'),
 
+    # Rutas para tabla Empleados Estudios
+    path('empleados_estudios/', empleados_estudios.empleados_estudios_index, name='empleados_estudios_index'),
+    path('empleados_estudios/crear/', empleados_estudios.empleados_estudios_crear, name='empleados_estudios_crear'),
+    path('empleados_estudios/editar/<int:id>/',empleados_estudios.empleados_estudios_editar, name='empleados_estudios_editar'),
+    path('empleados_estudios/eliminar/', empleados_estudios.empleados_estudios_eliminar, name='empleados_estudios_eliminar'),
+    path('empleados_estudios/descargar_excel/', empleados_estudios.empleados_estudios_descargarExcel, name='empleados_estudios_descargar_excel'),
+
     # Rutas para la tabla Registro Tiempos
     path('registro_tiempos/', registro_tiempos.registro_tiempos_index, name='registro_tiempos_index'),
     path('registro_tiempos/guardar/', registro_tiempos.registro_tiempos_guardar, name='registro_tiempos_guardar'),
@@ -203,5 +231,12 @@ urlpatterns = [
     # Rutas para informe de empleados
     path('informes/empleados/', informe_empleados.informe_empleados, name='informes_empleado_index'),
     path('informes/empleados/exportar_empleados_excel', informe_empleados.exportar_empleados_excel, name='exportar_empleados_excel'),
+
+    # Rutas para tabla Historial Cargos
+    path('historial_cargos/', historial_cargos.historial_cargos_index, name='historial_cargos_index'),
+    path('historial_cargos/crear/', historial_cargos.historial_cargos_crear, name='historial_cargos_crear'),
+    path('historial_cargos/editar/<int:id>/', historial_cargos.historial_cargos_editar, name='historial_cargos_editar'),
+    path('historial_cargos/eliminar/', historial_cargos.historial_cargos_eliminar, name='historial_cargos_eliminar'),
+    path('historial_cargos/descargar_excel/', historial_cargos.historial_cargos_descargar_excel, name='historial_cargos_descargar_excel'),
 
 ]

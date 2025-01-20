@@ -52,203 +52,18 @@ from .forms import Detalle_CertificacionForm
 from .models import Empleado
 from .forms import EmpleadoForm
 from .forms import EmpleadoFilterForm
-
+from .models import TiposContactos
+from .forms import TiposContactosForm
+from .models import Contactos
+from .forms import ContactosForm
+from .models import Historial_Cargos
+from .forms import HistorialCargosForm
 
 def inicio(request):
     return render(request, 'paginas/Inicio.html')
 
 def nosotros(request):
     return render(request, 'paginas/nosotros.html')
-
-# Detalle gastos
-def detalle_gastos_index(request):
-    detalles = Detalle_Gastos.objects.all()
-    print("Buscando plantilla en: Detalle_Gastos/detalle_gastos_index.html")
-    return render(request, 'Detalle_Gastos/detalle_gastos_index.html', {'detalles': detalles})
-
-def detalle_gastos_crear(request):
-    if request.method == 'POST':
-        form = DetalleGastosForm(request.POST)
-        if form.is_valid():
-            max_id = Detalle_Gastos.objects.all().aggregate(max_id=models.Max('GastosId'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_detalle_gasto = form.save(commit=False)
-            nuevo_detalle_gasto.GastosId = new_id
-            nuevo_detalle_gasto.save()
-            return redirect('detalle_gasto_index')
-    else:
-        form = DetalleGastosForm()
-    return render(request, 'Detalle_Gastos/detalle_gastos_form.html', {'form': form})
-
-
-def detalle_gastos_editar(request, Anio, Mes, GastosId):
-    detalle = get_object_or_404(Detalle_Gastos, Anio=Anio, Mes=Mes, GastosId=GastosId)
-
-    if request.method == 'POST':
-        form = DetalleGastosForm(request.POST, instance=detalle)
-        if form.is_valid():
-            form.save()
-            return redirect('detalle_gastos_index')
-    else:
-        form = DetalleGastosForm(instance=detalle)
-
-    return render(request, 'Detalle_Gastos/detalle_gastos_form.html', {'form': form})
-
-def detalle_gastos_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        for item_id in item_ids:
-            Anio, Mes, GastosId = item_id.split('-')
-            Detalle_Gastos.objects.filter(Anio=Anio, Mes=Mes, GastosId=GastosId).delete()
-        return redirect('detalle_gastos_index')
-    return redirect('detalle_gastos_index')
-
-def detalle_gastos_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        detalles = []
-        for item_id in item_ids:
-            Anio, Mes, GastosId = item_id.split('-')
-            detalles.extend(Detalle_Gastos.objects.filter(Anio=Anio, Mes=Mes, GastosId=GastosId))
-
-        data = []
-        for detalle in detalles:
-            data.append([detalle.Anio, detalle.Mes, detalle.GastosId, detalle.Valor])
-
-        df = pd.DataFrame(data, columns=['Año', 'Mes', 'Gasto ID', 'Valor'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="detalle_gastos.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('detalle_gastos_index')
-
-# Total gastos
-def total_gastos_index(request):
-    total_gastos_data = Total_Gastos.objects.all()
-    return render(request, 'total_gastos/total_gastos_index.html', {'total_gastos_data': total_gastos_data})
-
-def total_gastos_crear(request):
-    if request.method == 'POST':
-        form = TotalGastosForm(request.POST)
-        if form.is_valid():
-            max_id = Total_Gastos.objects.all().aggregate(max_id=models.Max('id'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_total_gasto = form.save(commit=False)
-            nuevo_total_gasto.id = new_id  # Asignar un nuevo ID
-            nuevo_total_gasto.save()
-            return redirect('total_gasto_index')
-    else:
-        form = TotalGastosForm()
-    return render(request, 'total_gastos/total_gastos_form.html', {'form': form})
-
-def total_gastos_editar(request, anio, mes):
-    total_gasto = get_object_or_404(Total_Gastos, anio=anio, mes=mes)
-
-    if request.method == 'POST':
-        form = TotalGastosForm(request.POST, instance=total_gasto)
-        if form.is_valid():
-            form.save()
-            return redirect('total_gastos_index')
-    else:
-        form = TotalGastosForm(instance=total_gasto)
-
-    return render(request, 'total_gastos/total_gastos_form.html', {'form': form})
-
-def total_gastos_eliminar(request):
-    if request.method == 'POST':
-        items_to_delete = request.POST.getlist('items_to_delete')
-        for item in items_to_delete:
-            anio, mes = item.split('-')
-            Total_Gastos.objects.filter(anio=anio, mes=mes).delete()
-        return redirect('total_gastos_index')
-    return redirect('total_gastos_index')
-
-def total_gastos_descargar_excel(request):
-    if request.method == 'POST':
-        items_to_delete = request.POST.getlist('items_to_delete')
-        total_gastos_data = []
-        for item in items_to_delete:
-            anio, mes = item.split('-')
-            total_gastos_data.extend(Total_Gastos.objects.filter(anio=anio, mes=mes))
-
-        data = [[tg.anio, tg.mes, tg.total] for tg in total_gastos_data]
-
-        df = pd.DataFrame(data, columns=['Año', 'Mes', 'Total'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="total_gastos.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('total_gastos_index')
-
-# Total costos indirectos
-def total_costos_indirectos_index(request):
-    total_costos_indirectos_data = Total_Costos_Indirectos.objects.all()
-    return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_index.html', {'total_costos_indirectos_data': total_costos_indirectos_data})
-
-
-def total_costos_indirectos_crear(request):
-    if request.method == 'POST':
-        form = Total_Costos_IndirectosForm(request.POST)
-        if form.is_valid():
-            max_id = Total_Costos_Indirectos.objects.all().aggregate(max_id=models.Max('id'))['max_id']
-            new_id = max_id + 1 if max_id is not None else 1
-            nuevo_total_costo_indirecto = form.save(commit=False)
-            nuevo_total_costo_indirecto.id = new_id  # Asignar un nuevo ID
-            nuevo_total_costo_indirecto.save()
-            return redirect('total_costos_indirectos_index')
-    else:
-        form = Total_Costos_IndirectosForm()
-    return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_form.html', {'form': form})
-
-
-def total_costos_indirectos_editar(request, anio, mes):
-    total_costos_indirectos = get_object_or_404(Total_Costos_Indirectos, anio=anio, mes=mes)
-    if request.method == 'POST':
-        form = Total_Costos_IndirectosForm(request.POST, instance=total_costos_indirectos)
-        if form.is_valid():
-            form.save()
-            return redirect('total_costos_indirectos_index')
-    else:
-        form = Total_Costos_IndirectosForm(instance=total_costos_indirectos)
-    return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_form.html', {'form': form})
-
-def total_costos_indirectos_eliminar(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        for item_id in item_ids:
-            anio, mes = item_id.split('-')
-            Total_Costos_Indirectos.objects.filter(anio=anio, mes=mes).delete()
-        return redirect('total_costos_indirectos_index')
-    return redirect('total_costos_indirectos_index')
-
-def total_costos_indirectos_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        total_costos_indirectos_data = []
-        for item_id in item_ids:
-            anio, mes = item_id.split('-')
-            item = get_object_or_404(Total_Costos_Indirectos, anio=anio, mes=mes)
-            total_costos_indirectos_data.append([item.anio, item.mes, item.total])
-
-        df = pd.DataFrame(total_costos_indirectos_data, columns=['Año', 'Mes', 'Total'])
-
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="total_costos_indirectos.xlsx"'
-
-        df.to_excel(response, index=False)
-
-        return response
-
-    return redirect('total_costos_indirectos_index')
-
 
 # Tiempos concepto
 def tiempos_concepto_index(request):
@@ -465,4 +280,23 @@ def exportar_excel(request):
 
     response = HttpResponse(content=save_virtual_workbook(wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') # type: ignore
     response['Content-Disposition'] = 'attachment; filename=empleados_certificaciones.xlsx'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

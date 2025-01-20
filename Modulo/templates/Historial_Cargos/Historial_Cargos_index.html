@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block titulo %} Lista de Total Gastos {% endblock %}
+{% block titulo %} Lista de Historial_Cargos {% endblock %}
 
 {% block contenido %}
 <div class="card">
@@ -19,16 +19,16 @@
     </div>
     {% endif %}
     <div class="card-header d-flex justify-content-between align-items-center"> 
-        <h4 class="card-title">Total Gastos</h4>
+        <h4 class="card-title">Historial de Cargos</h4>
     </div>
     <div class="card-body">
         <!-- CRUD Icons -->
         <div class="button-group" >
-            <a name="" id="" class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'total_gastos_crear' %}" role="button" ></a> 
-            <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button"  onclick="enableEdit();"></a> 
+            <a name="" id="" class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'historial_cargos_crear' %}" role="button" ></a> 
+            <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button"  onclick="enableEdit();"></a>
             <i name="" id="" class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
             <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" ></button> 
-            <form id="download-form" method="POST" action="{% url 'total_gastos_descargar_excel' %}" style="display:inline;">
+            <form id="download-form" method="POST" action="{% url 'historial_cargos_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
             </form>
@@ -50,24 +50,26 @@
     <div class="card-footer text-muted">
         
         <div class="table-responsive">
-            <form id="delete-form" method="POST" action="{% url 'total_gastos_eliminar' %}">
+            <form id="delete-form" method="POST" action="{% url 'historial_cargos_eliminar' %}">
                 {% csrf_token %}
                 <table class="table table-primary">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Año</th>
-                            <th scope="col">Mes</th>
-                            <th scope="col">Total</th>
+                            <th scope="col">Documento ID</th>
+                            <th scope="col">Cargo</th>
+                            <th scope="col">Fecha Inicio</th>
+                            <th scope="col">Fecha Fin</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for total_gasto in total_gastos_data %}
-                        <tr id="row-{{ total_gasto.id }}">
-                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ total_gasto.id }}"></td>
-                            <td><input type="text" name="anio" class="form-control-plaintext" value="{{ total_gasto.Anio}}" readonly></td>
-                            <td><input type="text" name="mes" class="form-control-plaintext" value="{{ total_gasto.Mes }}" readonly></td>
-                            <td><input type="text" name="total" class="form-control-plaintext" value="{{ total_gasto.Total }}" readonly></td>
+                        {% for cargo in historial_cargos_data %}
+                        <tr id="row-{{ cargo.id }}">
+                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ cargo.id }}"></td>
+                            <td><input type="text" name="documentoId" class="form-control-plaintext" value="{{ cargo.documentoId.Documento }}" readonly></td>
+                            <td><input type="text" name="cargoId" class="form-control-plaintext" value="{{ cargo.cargoId.Cargo }}" readonly></td>
+                            <td><input type="date" name="fecha_Inicio" class="form-control-plaintext" value="{{ cargo.FechaInicio|date:'Y-m-d' }}" readonly></td>
+                            <td><input type="date" name="Fecha_Fin" class="form-control-plaintext" value="{{ cargo.FechaFin|date:'Y-m-d' }}" readonly></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -88,9 +90,9 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
                 <button id="confirm-delete-btn" type="button" class="btn btn-danger">Sí</button>
                </div>
-            </div>
         </div>
     </div>
 </div>
-<script src="{% static 'JS/totalGastos.js' %}"></script>
+
+<script src="{% static 'JS/historialCargos.js' %}"></script>
 {% endblock %}
