@@ -47,8 +47,19 @@ html, body {
     position: fixed; /* Posiciona el div de manera fija en la pantalla */
     z-index: 1050; /* Asegura que el div esté encima de otros elementos */
     width: 80%; /* Puedes ajustar el ancho según tus necesidades */
-    margin-left: 28em;
+    margin-left: 20em;
     max-width: 20em; /* El ancho máximo del mensaje */
+    margin-top: 15em;
+    display: none; /* Inicialmente oculto */
+    border-radius: 5px; /* Bordes redondeados */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra para dar profundidad */
+    transition: opacity 0.5s ease, top 0.5s ease; /* Transiciones suaves */
+}
+
+#saving-message {
+    position: fixed; /* Posiciona el div de manera fija en la pantalla */
+    z-index: 1050; /* Asegura que el div esté encima de otros elementos */
+    margin-left: 26em;
     margin-top: 15em;
     display: none; /* Inicialmente oculto */
     border-radius: 5px; /* Bordes redondeados */

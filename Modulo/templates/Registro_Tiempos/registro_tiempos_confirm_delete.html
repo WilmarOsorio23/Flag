@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %} Confirmar Eliminación {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+        <h4>Eliminar Empleado</h4>
+    </div>
+    <div class="card-body">
+        <p>¿Estás seguro de que deseas eliminar al empleado <strong>{{ empleado.Nombre_Empleado }}</strong>?</p>
+        <form method="POST" action="{% url 'registro_tiempos_eliminar'%}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+            <a href="{% url 'registro_tiempos_index' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

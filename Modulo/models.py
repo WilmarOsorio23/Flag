@@ -111,17 +111,17 @@ class Clientes(models.Model):
 class Tiempos_Cliente(models.Model):
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
-    Colaborador = models.CharField(max_length=100)
-    ClienteId = models.ForeignKey(Clientes, on_delete=models.CASCADE, db_column='ClienteId')
+    Documento = models.CharField(max_length=20)
+    ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
     Horas = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"Año: {self.Anio}, Mes: {self.Mes}, Colaborador: {self.Colaborador}, Cliente: {self.ClienteId}, Horas: {self.Horas}"
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Documento: {self.Documento}, Cliente: {self.ClienteId}, Horas: {self.Horas}"
 
     class Meta:
         db_table = 'Tiempos_Cliente'
         constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'Colaborador', 'ClienteId'], name='unique_tiempos_cliente')
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento', 'ClienteId'], name='unique_tiempos_cliente')
         ]
 
 class Consultores(models.Model):
@@ -183,19 +183,18 @@ class Concepto(models.Model):
 class TiemposConcepto(models.Model):
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
-    Colaborador = models.CharField(max_length=100)
-    ConceptoId = models.ForeignKey(Concepto, on_delete=models.CASCADE, db_column='ConceptoId')
+    Documento = models.CharField(max_length=20)
+    ConceptoId = models.ForeignKey('Concepto', on_delete=models.CASCADE, db_column='ConceptoId')
     Horas = models.DecimalField(max_digits=5, decimal_places=2)
 
     def __str__(self):
-        return f"Año: {self.Anio}, Mes: {self.Mes}, Colaborador: {self.Colaborador}, Concepto: {self.ConceptoId}, Horas: {self.Horas}"
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Documento: {self.Documento}, Concepto: {self.ConceptoId}, Horas: {self.Horas}"
 
     class Meta:
         db_table = 'Tiempos_Concepto'
         constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'Colaborador', 'ConceptoId'], name='unique_tiempos_concepto')
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento', 'ConceptoId'], name='unique_tiempos_concepto')
         ]
-
 class Gastos(models.Model):
     GastoId = models.AutoField(primary_key=True)
     Gasto = models.CharField(max_length=255)
@@ -331,3 +330,18 @@ class Empleado(models.Model):
         if self.FechaIngreso < self.FechaNacimiento:
             raise ValidationError('La fecha de ingreso no puede ser anterior a la fecha de nacimiento.')
 
+class Horas_Habiles(models.Model):
+    id = models.AutoField(primary_key=True)
+    Anio = models.CharField(max_length=4)
+    Mes = models.CharField(max_length=2)
+    Dias_Habiles = models.IntegerField()
+    Horas_Laborales = models.DecimalField(max_digits=5, decimal_places=2)
+
+    def __str__(self):
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Días Hábiles: {self.Dias_Habiles}, Horas Laborales: {self.Horas_Laborales}"
+
+    class Meta:
+        db_table = 'Horas_Habiles'
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes'], name='unique_horas_habiles')
+        ]
