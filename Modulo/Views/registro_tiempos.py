@@ -1,22 +1,12 @@
 # Vista para listar empleados
 import json
-from django.contrib import messages
 from django.forms import ValidationError
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
-import pandas as pd
+from django.http import JsonResponse
+from django.shortcuts import render
 from Modulo.forms import ColaboradorFilterForm
 from Modulo.models import Clientes, Concepto, Consultores, Empleado, Horas_Habiles, Tiempos_Cliente, TiemposConcepto
-from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
-from datetime import date
-from datetime import datetime
 from collections import defaultdict
-from dateutil.relativedelta import relativedelta
-from django.http import HttpResponse
-import pandas as pd
-from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, Border, Side
 from django.db import transaction
 
 def guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas):

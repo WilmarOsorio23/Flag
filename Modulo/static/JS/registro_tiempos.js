@@ -2,27 +2,37 @@ document.addEventListener('DOMContentLoaded', function () {
     // Obtener el valor del token CSRF para ser utilizado en las solicitudes POST
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    // Recuperar los valores de año y mes originales desde localStorage
-    let originalAnio = localStorage.getItem('originalAnio');
-    let originalMes = localStorage.getItem('originalMes');
-
-    // Si no hay valores en localStorage, obtenerlos de la URL y almacenarlos
-    if (!originalAnio || !originalMes) {
-        const urlParams = new URLSearchParams(window.location.search);
-        originalAnio = urlParams.get('Anio');
-        originalMes = urlParams.get('Mes');
-        localStorage.setItem('originalAnio', originalAnio);
-        localStorage.setItem('originalMes', originalMes);
-    }
-    // Mostrar los valores originales en la interfaz
-    document.querySelector('#anio-original').textContent = originalAnio;
-    document.querySelector('#mes-original').textContent = originalMes;
-
+    // Recuperar los valores de año y mes originales desde la URL y almacenarlos en localStorage
+    updateAnioMesFromURL();
 
     // Inhabilitar la tecla Enter para evitar que envíen formularios accidentalmente
     preventFormSubmissionOnEnter();
 
     // Funciones reutilizables
+
+    // Actualizar los valores de año y mes desde la URL y mostrarlos en la interfaz
+    function updateAnioMesFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const anio = urlParams.get('Anio');
+        const mes = urlParams.get('Mes');
+        if (anio && mes) {
+            document.querySelector('#anio-original').textContent = anio;
+            document.querySelector('#mes-original').textContent = mes;
+            // Guardar los valores en variables globales
+            window.originalAnio = anio;
+            window.originalMes = mes;
+        }
+    }
+
+    // Mostrar los valores originales de año y mes en la interfaz
+    function displayOriginalAnioMes() {
+        const originalAnio = localStorage.getItem('originalAnio');
+        const originalMes = localStorage.getItem('originalMes');
+        if (originalAnio && originalMes) {
+            document.querySelector('#anio-original').textContent = originalAnio;
+            document.querySelector('#mes-original').textContent = originalMes;
+        }
+    }
 
     // Prevenir el envío del formulario al presionar la tecla Enter
     function preventFormSubmissionOnEnter() {
@@ -113,8 +123,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         'Documento': rowData.Documento,
                         'ClienteId': cliente,
                         'Tiempo_Clientes': tiempoCliente,
-                        'Anio': originalAnio,
-                        'Mes': originalMes
+                        'Anio': window.originalAnio,
+                        'Mes': window.originalMes
                     });
                 });
 
@@ -123,8 +133,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         'Documento': rowData.Documento,
                         'ConceptoId': concepto,
                         'Tiempo_Conceptos': tiempoConcepto,
-                        'Anio': originalAnio,
-                        'Mes': originalMes
+                        'Anio': window.originalAnio,
+                        'Mes': window.originalMes
                     });
                 });
 
