@@ -20,13 +20,14 @@ def horas_habiles_crear(request):
             max_id = Horas_Habiles.objects.all().aggregate(max_id=models.Max('id'))['max_id']
             new_id = max_id + 1 if max_id is not None else 1
             nuevo = form.save(commit=False)
-            nuevo.CargoId = new_id
+            nuevo.id = new_id  # Asignar el nuevo ID manualmente
             nuevo.save()
             return redirect('horas_habiles_index')
     else:
         form = HorasHabilesForm()
-    return render(request, 'Horas_Habiles/horas_habiles_index.html', {'form': form})
+    return render(request, 'Horas_Habiles/horas_habiles_crear.html', {'form': form})
 
+@csrf_exempt
 def horas_habiles_editar(request, id):
     if request.method == 'POST':
         try:
@@ -45,29 +46,35 @@ def horas_habiles_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-def horas_habiles_eliminar(request, id):
+@csrf_exempt
+def horas_habiles_eliminar(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        Horas_Habiles.objects.filter(id__in=item_ids).delete()
-        messages.success(request, 'Los Datos seleccionados se han eliminado correctamente.')
+        ids = request.POST.get('items_to_delete', '').split(',')
+        if ids:
+            Horas_Habiles.objects.filter(id__in=ids).delete()
+            messages.success(request, 'Los elementos seleccionados han sido eliminados correctamente.')
+        else:
+            messages.error(request, 'No se seleccionaron elementos para eliminar.')
         return redirect('horas_habiles_index')
-    return render('horas_habiles_index')
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@csrf_exempt
 def verificar_relaciones(request):
     if request.method == 'POST':
         import json
         data = json.loads(request.body)
-        ids = data.get('ids', [])
+        items = data.get('data', [])
 
         # Verifica si están relacionados
         relacionados = []
-        for id in ids:
-            anio, mes = id.split('-')
+        for item in items:
+            anio = item.get('anio')
+            mes = item.get('mes')
             if (
                 Tiempos_Cliente.objects.filter(Anio=anio, Mes=mes).exists() or
                 TiemposConcepto.objects.filter(Anio=anio, Mes=mes).exists()
             ):
-                relacionados.append(id)
+                relacionados.append(item.get('id'))
 
         if relacionados:
             return JsonResponse({
@@ -85,7 +92,7 @@ def horas_habiles_descargar_excel(request):
         # Convierte la cadena de IDs en una lista de enteros
     
         item_ids = list(map(int, item_ids.split (',')))  # Cambiado aquí
-        Datos = Horas_Habiles.objects.filter(Id__in=item_ids)
+        Datos = Horas_Habiles.objects.filter(id__in=item_ids)
 
         # Crea una respuesta HTTP con el tipo de contenido de Excel
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

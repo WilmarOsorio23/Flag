@@ -70,8 +70,14 @@
                         <tr id="row-{{ horas.id }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ horas.id }}"></td>
                             <td>{{ horas.id }}</td>
-                            <td><input type="number" name="Anio" class="form-control-plaintext" value="{{  horas.Anio }}" readonly></td>
-                            <td><input type="number" name="Mes" class="form-control-plaintext" value="{{  horas.Mes }}" readonly></td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                {{  horas.Anio }}
+                                <input type="number" name="Anio" class="form-control d-none" value="{{  horas.Anio }}" readonly>
+                            </td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                {{  horas.Mes }}
+                                <input type="number" name="Mes" class="form-control d-none" value="{{  horas.Mes }}" readonly>
+                            </td>
                             <td><input type="number" name="Dias_Habiles" class="form-control-plaintext" value="{{  horas.Dias_Habiles }}" readonly></td>
                             <td><input type="number" name="Horas_Laborales" class="form-control-plaintext" value="{{  horas.Horas_Laborales|floatformat:0 }}" readonly></td>
                         </tr>

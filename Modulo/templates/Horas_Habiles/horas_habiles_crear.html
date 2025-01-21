@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block titulo %} Crear Cargo {% endblock %}
+{% block titulo %} Crear Horas Habiles {% endblock %}
 
 {% block contenido %}
     <div class="container mt-4">
-        <h2>Crear Nuevo Cargo</h2>
+        <h2>Crear Nuevas Horas Habiles</h2>
         <form method="post">
             {% csrf_token %}
             <fieldset class="border p-4">
@@ -14,7 +14,7 @@
             </fieldset>
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary">Guardar</button>
-                <a href="{% url 'cargos_index' %}" class="btn btn-danger">Cancelar</a>
+                <a href="{% url 'horas_habiles_index' %}" class="btn btn-danger">Cancelar</a>
             </div>
         </form>
     </div>

@@ -51,10 +51,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        const selectedData = getSelectedData(); // Obtener los datos de los elementos seleccionados
+
         modal.show(); // Mostrar el modal de confirmación de eliminación
 
         confirmButton.onclick = async function () {
-            const isRelated = await verifyRelations(selectedIds, csrfToken); // Verificar si hay relaciones con otros elementos
+            const isRelated = await verifyRelations(selectedData, csrfToken); // Verificar si hay relaciones con otros elementos
             if (isRelated) {
                 console.log(isRelated)
                 showMessage('Algunos elementos no pueden ser eliminados porque están relacionados con otras tablas.', 'danger'); // Mensaje de error si hay relaciones
@@ -75,8 +77,20 @@ document.addEventListener('DOMContentLoaded', function() {
         return Array.from(document.querySelectorAll('.row-select:checked')).map(el => el.value);
     }
 
+    // Obtener los datos de los elementos seleccionados (anio y mes)
+    function getSelectedData() {
+        return Array.from(document.querySelectorAll('.row-select:checked')).map(el => {
+            const row = el.closest('tr');
+            return {
+                id: el.value,
+                anio: row.querySelector('input[name="Anio"]').value,
+                mes: row.querySelector('input[name="Mes"]').value
+            };
+        });
+    }
+
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
-    async function verifyRelations(ids, csrfToken) {
+    async function verifyRelations(data, csrfToken) {
         try {
             const response = await fetch('/horas_habiles/verificar-relaciones/', {
                 method: 'POST',
@@ -84,10 +98,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrfToken,
                 },
-                body: JSON.stringify({ ids }), // Enviar los IDs en el cuerpo de la solicitud
+                body: JSON.stringify({ data }), // Enviar los datos en el cuerpo de la solicitud
             });
-            const data = await response.json(); // Obtener la respuesta como JSON
-            return data.isRelated || false; // Si la respuesta indica que están relacionados, retornar true
+            const responseData = await response.json(); // Obtener la respuesta como JSON
+            return responseData.isRelated || false; // Si la respuesta indica que están relacionados, retornar true
         } catch (error) {
             console.error('Error verificando relaciones:', error);
             return true; // Asumir que están relacionados en caso de error
@@ -218,7 +232,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
-
     };
 
     window.cancelEdit = function() {
@@ -248,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.saveRow = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length != 1) {
-            showMessage('Error al guardar: No hay un Empleado seleccionado.', 'danger');
+            showMessage('Error al guardar: No hay un Dato seleccionado.', 'danger');
             return;
         }
 
@@ -257,33 +270,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Recopilar los valores de los inputs y selects dentro de la fila
         let data = {
-            'TipoDocumento': row.querySelector('select[name="TipoDocumento"]').value,
-            'Documento': row.querySelector('input[name="Documento"]').value,
-            'Nombre': row.querySelector('input[name="Nombre"]').value,
-            'FechaNacimiento': row.querySelector('input[name="FechaNacimiento"]').value,
-            'FechaIngreso': row.querySelector('input[name="FechaIngreso"]').value,
-            'FechaOperacion': row.querySelector('input[name="FechaOperacion"]').value,
-            'ModuloId': row.querySelector('select[name="ModuloId"]').value,
-            'PerfilId': row.querySelector('select[name="PerfilId"]').value,
-            'LineaId': row.querySelector('select[name="LineaId"]').value,
-            'CargoId': row.querySelector('select[name="CargoId"]').value,
-            'TituloProfesional': row.querySelector('input[name="TituloProfesional"]').value,
-            'FechaGrado': row.querySelector('input[name="FechaGrado"]').value,
-            'Universidad': row.querySelector('input[name="Universidad"]').value,
-            'ProfesionRealizada': row.querySelector('input[name="ProfesionRealizada"]').value,
-            'TituloProfesionalActual': row.querySelector('input[name="TituloProfesionalActual"]').value,
-            'UniversidadActual': row.querySelector('input[name="UniversidadActual"]').value,
-            'AcademiaSAP': row.querySelector('input[name="AcademiaSAP"]').value,
-            'CertificadoSAP': row.querySelector('select[name="CertificadoSAP"]').value,
-            'OtrasCertificaciones': row.querySelector('input[name="OtrasCertificaciones"]').value,
-            'Postgrados': row.querySelector('input[name="Postgrados"]').value
+            'Anio': row.querySelector('input[name="Anio"]').value,
+            'Mes': row.querySelector('input[name="Mes"]').value,
+            'Dias_Habiles': row.querySelector('input[name="Dias_Habiles"]').value,
+            'Horas_Laborales': row.querySelector('input[name="Horas_Laborales"]').value
         };
 
         // Deshabilitar los checkboxes y el botón de edición
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
 
-        fetch(`/empleado/editar/${id}/`, {
+        fetch(`/horas_habiles/editar/${id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
