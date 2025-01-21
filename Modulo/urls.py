@@ -107,6 +107,7 @@ urlpatterns = [
     path('certificacion/', Certificacion.certificacion_index, name='certificacion_index'),
     path('certificacion/crear', Certificacion.certificacion_crear, name='certificacion_crear'),
     path('certificacion/editar/<int:id>/', Certificacion.certificacion_editar, name='certificacion_editar'),
+    path('certificacion/verificar-relaciones/', Certificacion.verificar_relaciones, name='verificar_relaciones'),
     path('certificacion/eliminar', Certificacion.certificacion_eliminar, name='certificacion_eliminar'),
     path('certificacion/descargar_excel', Certificacion.certificacion_descargar_excel, name='certificacion_descargar_excel'),
     

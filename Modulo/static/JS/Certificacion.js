@@ -71,11 +71,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
     async function verifyRelations(ids, csrfToken) {
         try {
-            const response = await fetch('/verificar-relaciones/', {
+            const response = await fetch('/certificacion/verificar-relaciones/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken,
+                    'X-CSRFToken': csrfToken,   
                 },
                 body: JSON.stringify({ ids }), // Enviar los IDs en el cuerpo de la solicitud
             });
