@@ -1,5 +1,5 @@
 from django import forms
-from .models import Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes, Consultores, Certificacion, Costos_Indirectos
+from .models import Horas_Habiles, Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes, Consultores, Certificacion, Costos_Indirectos
 from .models import Concepto, Gastos, Detalle_Gastos, Total_Gastos, Total_Costos_Indirectos
 from .models import Detalle_Costos_Indirectos, TiemposConcepto, Tiempos_Cliente, Nomina, Detalle_Certificacion, Empleado
 from .models import Cargos
@@ -846,3 +846,32 @@ class EmpleadosEstudiosForm(forms.ModelForm):
             'fecha_Graduacion': 'Fecha de Graduacion',
         }
 
+
+class HorasHabilesForm(forms.ModelForm):
+    class Meta:
+        model = Horas_Habiles
+        fields = '__all__'
+        widgets = {
+            'Anio': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ingrese el año'
+            }),
+            'Mes': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ingrese el mes'
+            }),
+            'Dias_Habiles': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ingrese los días hábiles'
+            }),
+            'Horas_Laborales': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ingrese las horas laborales'
+            }),
+        }
+        labels = {
+            'Anio': 'Año',
+            'Mes': 'Mes',
+            'Dias_Habiles': 'Días Hábiles',
+            'Horas_Laborales': 'Horas Laborales',
+        }
