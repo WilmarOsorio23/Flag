@@ -662,26 +662,36 @@ class NominaForm(forms.ModelForm):
             'Cliente': 'Cliente',
         }
 
+from django import forms
+from .models import Detalle_Certificacion, Certificacion  # Asegúrate de importar el modelo correcto
+
 class Detalle_CertificacionForm(forms.ModelForm):
+    CertificacionId = forms.ModelChoiceField(
+        queryset=Certificacion.objects.all(),  # Ajusta el modelo según tu base de datos
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Certificacion id'
+    )
+
     class Meta:
         model = Detalle_Certificacion
         fields = '__all__'
         widgets = {
-             'Documento': forms.TextInput(attrs={
+            'Documento': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el documento'
             }),
-            'CertificacionId':forms.NumberInput(attrs={
-                'type': 'text',
+            'Fecha_Certificacion': forms.DateInput(attrs={
                 'class': 'form-control',
+                'type': 'date',
+                'placeholder': 'Seleccione la fecha de nacimiento'
             }),
-            'Fecha_Certificacion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'placeholder': 'Seleccione la fecha de nacimiento'}),
         }
         labels = {
-            'Documento':'Documento',
-            'CertificacionId':'Certificacion id',
-            'Fecha_Certificacion':'Fecha de Certificación',
+            'Documento': 'Documento',
+            'Fecha_Certificacion': 'Fecha de Certificación',
         }
 
 class EmpleadoForm(forms.ModelForm):
