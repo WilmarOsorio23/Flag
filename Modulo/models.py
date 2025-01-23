@@ -393,3 +393,22 @@ class Horas_Habiles(models.Model):
         db_table = 'Horas_Habiles'
         constraints = [
             models.UniqueConstraint(fields=['Anio', 'Mes'], name='unique_horas_habiles')
+        ]
+
+
+class Tarifa_Consultores(models.Model):
+    id = models.AutoField(primary_key=True)
+    documentoId = models.ForeignKey('Consultores', on_delete=models.CASCADE, db_column='documentoId')
+    anio = models.CharField(max_length=4, db_column='anio')
+    mes = models.CharField(max_length=2, db_column='mes')
+    clienteID = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='clienteID')
+    valorHora = models.DecimalField(max_digits=10, decimal_places=2, db_column='valorHora')
+    valorDia = models.DecimalField(max_digits=10, decimal_places=2, db_column='valorDia')
+    valorMes = models.DecimalField(max_digits=10, decimal_places=2, db_column='valorMes')
+
+    def __str__(self):
+        return f"id: {self.id}, DocumentoId: {self.documentoId}, Año: {self.anio}, Mes: {self.mes}, ClienteId: {self.clienteID}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}"
+
+    class Meta:
+        db_table = 'Tarifa_Consultores'
+
