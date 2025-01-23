@@ -667,6 +667,7 @@ from django import forms
 from .models import Detalle_Certificacion, Certificacion  # Asegúrate de importar el modelo correcto
 
 class Detalle_CertificacionForm(forms.ModelForm):
+
     CertificacionId = forms.ModelChoiceField(
         queryset=Certificacion.objects.all(),  
         widget=forms.Select(attrs={
@@ -678,7 +679,7 @@ class Detalle_CertificacionForm(forms.ModelForm):
     class Meta:
         model = Detalle_Certificacion
         fields = '__all__'
-        widgets = {
+        widgets = {  
             'Documento': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
@@ -690,6 +691,7 @@ class Detalle_CertificacionForm(forms.ModelForm):
                 'placeholder': 'Seleccione la fecha de nacimiento'
             }),
         }
+        
         labels = {
             'Documento': 'Documento',
             'Fecha_Certificacion': 'Fecha de Certificación',
@@ -912,3 +914,4 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             'valorDia': 'Valor Día',
             'valorMes': 'Valor Mes',
         }
+        
