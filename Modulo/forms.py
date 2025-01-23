@@ -9,6 +9,7 @@ from .models import TiposContactos
 from .models import Contactos
 from .models import Historial_Cargos
 from .models import Empleados_Estudios
+from .models import Tarifa_Consultores
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -667,7 +668,7 @@ from .models import Detalle_Certificacion, Certificacion  # Asegúrate de import
 
 class Detalle_CertificacionForm(forms.ModelForm):
     CertificacionId = forms.ModelChoiceField(
-        queryset=Certificacion.objects.all(),  # Ajusta el modelo según tu base de datos
+        queryset=Certificacion.objects.all(),  
         widget=forms.Select(attrs={
             'class': 'form-control'
         }),
@@ -884,4 +885,30 @@ class HorasHabilesForm(forms.ModelForm):
             'Mes': 'Mes',
             'Dias_Habiles': 'Días Hábiles',
             'Horas_Laborales': 'Horas Laborales',
+        }
+
+class Tarifa_ConsultoresForm(forms.ModelForm):
+
+
+    class Meta:
+        model = Tarifa_Consultores
+        fields = '__all__'
+        widgets = {
+            'documentoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el documento'}),
+            'anio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el año'}),
+            'mes': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el mes'}),
+            'clienteID': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el cliente'}),
+            'valorHora': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor hora'}),
+            'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día'}),
+            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes'}),
+        }
+
+        labels = {
+            'documentoId': 'Documento',
+            'anio': 'Año',
+            'mes': 'Mes',
+            'clienteID': 'Cliente',
+            'valorHora': 'Valor Hora',
+            'valorDia': 'Valor Día',
+            'valorMes': 'Valor Mes',
         }
