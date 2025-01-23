@@ -405,9 +405,10 @@ class Tarifa_Consultores(models.Model):
     valorHora = models.DecimalField(max_digits=10, decimal_places=2, db_column='valorHora')
     valorDia = models.DecimalField(max_digits=10, decimal_places=2, db_column='valorDia')
     valorMes = models.DecimalField(max_digits=10, decimal_places=2, db_column='valorMes')
+    moneda = models.CharField(max_length=10, db_column='moneda')
 
     def __str__(self):
-        return f"id: {self.id}, DocumentoId: {self.documentoId}, Año: {self.anio}, Mes: {self.mes}, ClienteId: {self.clienteID}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}"
+        return f"id: {self.id}, DocumentoId: {self.documentoId}, Año: {self.anio}, Mes: {self.mes}, ClienteId: {self.clienteID}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, Moneda: {self.moneda}"
 
     class Meta:
         db_table = 'Tarifa_Consultores'

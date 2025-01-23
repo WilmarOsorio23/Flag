@@ -10,6 +10,7 @@ from .models import Contactos
 from .models import Historial_Cargos
 from .models import Empleados_Estudios
 from .models import Tarifa_Consultores
+from django.core.exceptions import ValidationError
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -889,29 +890,63 @@ class HorasHabilesForm(forms.ModelForm):
             'Horas_Laborales': 'Horas Laborales',
         }
 
-class Tarifa_ConsultoresForm(forms.ModelForm):
 
+
+class Tarifa_ConsultoresForm(forms.ModelForm):
+    documentoId = forms.ModelChoiceField(
+        queryset=Consultores.objects.all(),  # Relación directa con el modelo Consultores
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Documento'
+    )
+
+    clienteID = forms.ModelChoiceField(
+        queryset=Clientes.objects.all(),  # Relación directa con el modelo Consultores
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Cliente'
+    )
 
     class Meta:
+        
         model = Tarifa_Consultores
         fields = '__all__'
         widgets = {
-            'documentoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el documento'}),
             'anio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el año'}),
             'mes': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el mes'}),
-            'clienteID': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el cliente'}),
-            'valorHora': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor hora'}),
-            'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día'}),
-            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes'}),
+            'valorHora': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor hora', 'step': '0.01'}),
+            'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día', 'step': '0.01'}),
+            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'}),
+            'moneda': forms.Select(attrs={'class': 'form-control'}, choices=[('COP','COP- Peso colombiano'),('USD','USD - Dolar americano')
+    ]),
         }
 
         labels = {
-            'documentoId': 'Documento',
             'anio': 'Año',
             'mes': 'Mes',
-            'clienteID': 'Cliente',
             'valorHora': 'Valor Hora',
             'valorDia': 'Valor Día',
             'valorMes': 'Valor Mes',
+            'moneda': 'Moneda',
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        documentoId = cleaned_data.get('documentoId')
+        anio = cleaned_data.get('anio')
+        mes = cleaned_data.get('mes')
+        clienteID = cleaned_data.get('clienteID')
+
+        if Tarifa_Consultores.objects.filter(
+            documentoId=documentoId,
+            anio=anio,
+            mes=mes,
+            clienteID=clienteID
+        ).exists():
+            raise ValidationError(
+                "Ya existe un registro con el mismo Documento, Año, Mes y Cliente."
+            )
         
+        return cleaned_data
