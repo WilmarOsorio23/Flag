@@ -664,7 +664,6 @@ class NominaForm(forms.ModelForm):
 
 class Detalle_CertificacionForm(forms.ModelForm):
     CertificacionId = forms.ModelChoiceField(
-        queryset=Certificacion.objects.all(),  # Ajusta el modelo según tu base de datos
         widget=forms.Select(attrs={
             'class': 'form-control'
         }),
@@ -882,4 +881,3 @@ class HorasHabilesForm(forms.ModelForm):
             'Mes': 'Mes',
             'Dias_Habiles': 'Días Hábiles',
             'Horas_Laborales': 'Horas Laborales',
-        }

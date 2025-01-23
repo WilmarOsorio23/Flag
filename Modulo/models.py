@@ -393,4 +393,3 @@ class Horas_Habiles(models.Model):
         db_table = 'Horas_Habiles'
         constraints = [
             models.UniqueConstraint(fields=['Anio', 'Mes'], name='unique_horas_habiles')
-        ]

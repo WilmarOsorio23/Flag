@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %} Crear Tarifa de Consultor {% endblock %}
+
+{% block contenido %}
+    <h2>Crear Nueva Tarifa de Consultor</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'tarifa_consultores_index' %}" class="btn btn-danger">Cancelar</a>
+    </form>
+{% endblock %}
