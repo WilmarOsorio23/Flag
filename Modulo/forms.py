@@ -11,6 +11,7 @@ from .models import Historial_Cargos
 from .models import Empleados_Estudios
 from .models import Tarifa_Consultores
 from django.core.exceptions import ValidationError
+from .models import Moneda
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -950,3 +951,16 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             )
         
         return cleaned_data
+
+class MonedaForm(forms.ModelForm):
+    class Meta:
+        model = Moneda
+        fields = '__all__'
+        widgets = {
+            'id': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el id'}),
+            'descripcion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la moneda'}),
+        }
+        labels = {
+            'id': 'Id',
+            'descripcion': 'Descripción',
+        }

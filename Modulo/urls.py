@@ -30,6 +30,7 @@ from Modulo.Views import empleados_estudios
 from Modulo.Views import registro_tiempos
 from Modulo.Views import Horas_Habiles
 from Modulo.Views import tarifa_consultores
+from Modulo.Views import moneda
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -42,6 +43,14 @@ urlpatterns = [
     path('Modulo/eliminar', modulo.eliminar, name='eliminar'),
     path('verificar-relaciones/', modulo.verificar_relaciones, name='verificar_relaciones'),
     path('Modulo/descargar_excel', modulo.descargar_excel, name='descargar_excel'),
+
+    # Rutas para tabla Moneda
+    path('moneda/', moneda.moneda_index, name='moneda_index'),
+    path('moneda/crear', moneda.moneda_crear, name='moneda_crear'),
+    path('moneda/editar/<int:id>/', moneda.moneda_editar, name='moneda_editar'),
+    path('verificar-relaciones/', moneda.verificar_relaciones, name='verificar_relaciones'),
+    path('moneda/eliminar', moneda.moneda_eliminar, name='moneda_eliminar'),
+    path('moneda/descargar_excel', moneda.moneda_descargar_excel, name='moneda_descargar_excel'),
 
     # Rutas para la tabla IPC
     path('ipc/', ipc.ipc_index, name='ipc_index'),
