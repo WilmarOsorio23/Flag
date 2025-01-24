@@ -910,6 +910,14 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
         label='Cliente'
     )
 
+    monedaId = forms.ModelChoiceField(
+        queryset=Moneda.objects.all(),  # Relación directa con el modelo Consultores
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Moneda'
+    )
+
     class Meta:
         
         model = Tarifa_Consultores
@@ -919,9 +927,7 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             'mes': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el mes'}),
             'valorHora': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor hora', 'step': '0.01'}),
             'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día', 'step': '0.01'}),
-            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'}),
-            'moneda': forms.Select(attrs={'class': 'form-control'}, choices=[('COP','COP- Peso colombiano'),('USD','USD - Dolar americano')
-    ]),
+            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'})
         }
 
         labels = {
@@ -930,7 +936,6 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             'valorHora': 'Valor Hora',
             'valorDia': 'Valor Día',
             'valorMes': 'Valor Mes',
-            'moneda': 'Moneda',
         }
 
     def clean(self):

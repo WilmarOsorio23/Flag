@@ -48,8 +48,8 @@ urlpatterns = [
     path('moneda/', moneda.moneda_index, name='moneda_index'),
     path('moneda/crear', moneda.moneda_crear, name='moneda_crear'),
     path('moneda/editar/<int:id>/', moneda.moneda_editar, name='moneda_editar'),
-    path('verificar-relaciones/', moneda.verificar_relaciones, name='verificar_relaciones'),
     path('moneda/eliminar', moneda.moneda_eliminar, name='moneda_eliminar'),
+    path('moneda/verificar-relaciones/', moneda.verificar_relaciones, name='verificar_relaciones'),
     path('moneda/descargar_excel', moneda.moneda_descargar_excel, name='moneda_descargar_excel'),
 
     # Rutas para la tabla IPC
