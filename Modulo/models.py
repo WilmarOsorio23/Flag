@@ -281,16 +281,6 @@ class Nomina(models.Model):
 
     class Meta:
         db_table = 'Nomina'
-
-class Cargos(models.Model):
-    CargoId = models.AutoField(primary_key=True)
-    Cargo = models.CharField(max_length=255)
-
-    def __str__(self):
-        return f"{self.Cargo}"
-
-    class Meta:
-        db_table = 'Cargos'
         
 class Empleado(models.Model):
     Documento = models.CharField(max_length=20, primary_key=True)
@@ -378,7 +368,6 @@ class Empleados_Estudios(models.Model):
     class Meta:
         db_table = 'Empleados_Estudios'
 
-
 class Horas_Habiles(models.Model):
     id = models.AutoField(primary_key=True)
     Anio = models.CharField(max_length=4)
@@ -393,4 +382,20 @@ class Horas_Habiles(models.Model):
         db_table = 'Horas_Habiles'
         constraints = [
             models.UniqueConstraint(fields=['Anio', 'Mes'], name='unique_horas_habiles')
+        ]
+
+class TiemposFacturables(models.Model):
+    Anio = models.CharField(max_length=4)
+    Mes = models.CharField(max_length=2)
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
+    Horas = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Linea: {self.LineaId}, Cliente: {self.ClienteId}, Horas: {self.Horas}"
+
+    class Meta:
+        db_table = 'Tiempos_Facturables'
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'LineaId', 'ClienteId'], name='unique_tiempos_facturables')
         ]

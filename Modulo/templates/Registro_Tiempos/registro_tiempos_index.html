@@ -199,6 +199,22 @@
                             <th data-total-horas>{{ Totales.Total_Horas|floatformat:0 }}</th>
                             <th data-dif-horas>{{ Totales.Dif_horas|floatformat:0 }}</th>
                         </tr>
+                        {% for linea in Tiempo_Lineas %}
+                        <tr>
+                            <th colspan="2">Horas Facturables</th>
+                            <td colspan="3">{{ linea.Linea }}</td>
+                            {% for cliente in linea.Clientes.values %}
+                            <td>
+                                <input type="text" name="Hora_Facturable_{{ forloop.counter }}" class="form-control" value="{{ cliente.horas_facturables|floatformat:0 }}">
+                                <input type="hidden" name="LineaId_{{ forloop.counter }}" value="{{ linea.LineaId }}">
+                                <input type="hidden" name="ClienteId_{{ forloop.counter }}" value="{{ cliente.ClienteId }}">
+                            </td>
+                            {% endfor %}
+                            <td data-total-facturable-linea-row>
+                                {{ linea.Total_Horas_Facturables|floatformat:0 }}
+                            </td>
+                        </tr>
+                        {% endfor %}
                     </tfoot>
                 </table>
             </form>
