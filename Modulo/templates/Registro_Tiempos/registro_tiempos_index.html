@@ -215,6 +215,15 @@
                             </td>
                         </tr>
                         {% endfor %}
+                        <tr>
+                            <th colspan="5">Total Horas Facturables</th>
+                            {% for cliente in Clientes.values %}
+                                <th data-cliente-facturables-id="{{ cliente.ClienteId }}">{{ TotalesFacturables|get_item:cliente.ClienteId|floatformat:0 }}</th>
+                            {% endfor %}
+                            <th data-total-clientes-facturables>{{ TotalesFacturables.Total_Clientes|floatformat:0 }}</th>
+                            <th colspan="{{ Conceptos.count }}"></th> <!-- Espacio para las columnas de conceptos -->
+                            <th data-total-horas-facturables>{{ TotalesFacturables.Total_Horas|floatformat:0 }}</th>
+                        </tr>
                     </tfoot>
                 </table>
             </form>

@@ -338,6 +338,15 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelector('tfoot th[data-total-clientes]').textContent = totals.totalClientes.toFixed(0);
         document.querySelector('tfoot th[data-total-conceptos]').textContent = totals.totalConceptos.toFixed(0);
         document.querySelector('tfoot th[data-total-horas]').textContent = totals.totalHoras.toFixed(0);
+    
+        // Update the totals for facturables in the footer
+        document.querySelectorAll('tfoot th[data-cliente-facturables-id]').forEach(th => {
+            const clienteId = th.getAttribute('data-cliente-facturables-id');
+            th.textContent = (totals.facturables[clienteId] || 0).toFixed(0);
+        });
+
+        document.querySelector('tfoot th[data-total-clientes-facturables]').textContent = totals.totalFacturables.toFixed(0);
+        document.querySelector('tfoot th[data-total-horas-facturables]').textContent = totals.totalFacturables.toFixed(0);
     }
 
     document.querySelectorAll('input[name^="Tiempo_Clientes_"], input[name^="Tiempo_Conceptos_"], input[name^="Hora_Facturable_"]').forEach(input => {
