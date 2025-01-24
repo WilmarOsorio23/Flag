@@ -9,6 +9,8 @@ from .models import TiposContactos
 from .models import Contactos
 from .models import Historial_Cargos
 from .models import Empleados_Estudios
+from .models import Tarifa_Consultores
+from django.core.exceptions import ValidationError
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -662,9 +664,13 @@ class NominaForm(forms.ModelForm):
             'Cliente': 'Cliente',
         }
 
+from django import forms
+from .models import Detalle_Certificacion, Certificacion  # Asegúrate de importar el modelo correcto
+
 class Detalle_CertificacionForm(forms.ModelForm):
+
     CertificacionId = forms.ModelChoiceField(
-        queryset=Certificacion.objects.all(),  # Ajusta el modelo según tu base de datos
+        queryset=Certificacion.objects.all(),  
         widget=forms.Select(attrs={
             'class': 'form-control'
         }),
@@ -674,7 +680,7 @@ class Detalle_CertificacionForm(forms.ModelForm):
     class Meta:
         model = Detalle_Certificacion
         fields = '__all__'
-        widgets = {
+        widgets = {  
             'Documento': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
@@ -686,11 +692,11 @@ class Detalle_CertificacionForm(forms.ModelForm):
                 'placeholder': 'Seleccione la fecha de nacimiento'
             }),
         }
+        
         labels = {
             'Documento': 'Documento',
             'Fecha_Certificacion': 'Fecha de Certificación',
         }
-
 
 class EmpleadoForm(forms.ModelForm):
     class Meta:
@@ -883,3 +889,64 @@ class HorasHabilesForm(forms.ModelForm):
             'Dias_Habiles': 'Días Hábiles',
             'Horas_Laborales': 'Horas Laborales',
         }
+
+
+
+class Tarifa_ConsultoresForm(forms.ModelForm):
+    documentoId = forms.ModelChoiceField(
+        queryset=Consultores.objects.all(),  # Relación directa con el modelo Consultores
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Documento'
+    )
+
+    clienteID = forms.ModelChoiceField(
+        queryset=Clientes.objects.all(),  # Relación directa con el modelo Consultores
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Cliente'
+    )
+
+    class Meta:
+        
+        model = Tarifa_Consultores
+        fields = '__all__'
+        widgets = {
+            'anio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el año'}),
+            'mes': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el mes'}),
+            'valorHora': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor hora', 'step': '0.01'}),
+            'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día', 'step': '0.01'}),
+            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'}),
+            'moneda': forms.Select(attrs={'class': 'form-control'}, choices=[('COP','COP- Peso colombiano'),('USD','USD - Dolar americano')
+    ]),
+        }
+
+        labels = {
+            'anio': 'Año',
+            'mes': 'Mes',
+            'valorHora': 'Valor Hora',
+            'valorDia': 'Valor Día',
+            'valorMes': 'Valor Mes',
+            'moneda': 'Moneda',
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        documentoId = cleaned_data.get('documentoId')
+        anio = cleaned_data.get('anio')
+        mes = cleaned_data.get('mes')
+        clienteID = cleaned_data.get('clienteID')
+
+        if Tarifa_Consultores.objects.filter(
+            documentoId=documentoId,
+            anio=anio,
+            mes=mes,
+            clienteID=clienteID
+        ).exists():
+            raise ValidationError(
+                "Ya existe un registro con el mismo Documento, Año, Mes y Cliente."
+            )
+        
+        return cleaned_data
