@@ -2,27 +2,37 @@ document.addEventListener('DOMContentLoaded', function () {
     // Obtener el valor del token CSRF para ser utilizado en las solicitudes POST
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    // Recuperar los valores de año y mes originales desde localStorage
-    let originalAnio = localStorage.getItem('originalAnio');
-    let originalMes = localStorage.getItem('originalMes');
-
-    // Si no hay valores en localStorage, obtenerlos de la URL y almacenarlos
-    if (!originalAnio || !originalMes) {
-        const urlParams = new URLSearchParams(window.location.search);
-        originalAnio = urlParams.get('Anio');
-        originalMes = urlParams.get('Mes');
-        localStorage.setItem('originalAnio', originalAnio);
-        localStorage.setItem('originalMes', originalMes);
-    }
-    // Mostrar los valores originales en la interfaz
-    document.querySelector('#anio-original').textContent = originalAnio;
-    document.querySelector('#mes-original').textContent = originalMes;
-
+    // Recuperar los valores de año y mes originales desde la URL y almacenarlos en localStorage
+    updateAnioMesFromURL();
 
     // Inhabilitar la tecla Enter para evitar que envíen formularios accidentalmente
     preventFormSubmissionOnEnter();
 
     // Funciones reutilizables
+
+    // Actualizar los valores de año y mes desde la URL y mostrarlos en la interfaz
+    function updateAnioMesFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const anio = urlParams.get('Anio');
+        const mes = urlParams.get('Mes');
+        if (anio && mes) {
+            document.querySelector('#anio-original').textContent = anio;
+            document.querySelector('#mes-original').textContent = mes;
+            // Guardar los valores en variables globales
+            window.originalAnio = anio;
+            window.originalMes = mes;
+        }
+    }
+
+    // Mostrar los valores originales de año y mes en la interfaz
+    function displayOriginalAnioMes() {
+        const originalAnio = localStorage.getItem('originalAnio');
+        const originalMes = localStorage.getItem('originalMes');
+        if (originalAnio && originalMes) {
+            document.querySelector('#anio-original').textContent = originalAnio;
+            document.querySelector('#mes-original').textContent = originalMes;
+        }
+    }
 
     // Prevenir el envío del formulario al presionar la tecla Enter
     function preventFormSubmissionOnEnter() {
@@ -81,40 +91,44 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
     
-            // Validar y parsear JSON para los clientes y conceptos
+            // Validar y parsear JSON para los clientes, conceptos y facturables
             try {
-                // Crear arrays para los clientes y conceptos, usando los nombres de los inputs con el índice
+                // Crear arrays para los clientes, conceptos y facturables, usando los nombres de los inputs con el índice
                 const clientes = [];
-                const conceptos = [];
-    
+                const conceptos = [];   
+
                 // Recopilar clientes y tiempos
                 row.querySelectorAll('input[name^="ClienteId_"]').forEach((input, i) => {
                     const cliente = input.value.trim();
-                    let tiempoCliente = row.querySelector(`input[name="Tiempo_Clientes_${i + 1}"]`).value.trim();
+                    const tiempoClienteInput = row.querySelector(`input[name="Tiempo_Clientes_${i + 1}"]`);
+                    let tiempoCliente = tiempoClienteInput.value.trim();
                     tiempoCliente = tiempoCliente === '' ? '0' : tiempoCliente; // Si está vacío, asignar '0'
-                    if (cliente) {
+                    const tiempoClienteOriginal = tiempoClienteInput.getAttribute('data-original') || '';
+                    if (cliente && tiempoCliente !== tiempoClienteOriginal) {
                         clientes.push({ cliente, tiempoCliente });
                     }
                 });
-    
+
                 // Recopilar conceptos y tiempos
                 row.querySelectorAll('input[name^="ConceptoId_"]').forEach((input, i) => {
                     const concepto = input.value.trim();
-                    let tiempoConcepto = row.querySelector(`input[name="Tiempo_Conceptos_${i + 1}"]`).value.trim();
-                    tiempoConcepto = tiempoConcepto == '' ? '0' : tiempoConcepto; // Si está vacío, asignar '0'
-                    if (concepto) {
+                    const tiempoConceptoInput = row.querySelector(`input[name="Tiempo_Conceptos_${i + 1}"]`);
+                    let tiempoConcepto = tiempoConceptoInput.value.trim();
+                    tiempoConcepto = tiempoConcepto === '' ? '0' : tiempoConcepto; // Si está vacío, asignar '0'
+                    const tiempoConceptoOriginal = tiempoConceptoInput.getAttribute('data-original') || '';
+                    if (concepto && tiempoConcepto !== tiempoConceptoOriginal) {
                         conceptos.push({ concepto, tiempoConcepto });
                     }
                 });
     
-                // Ahora procesamos los clientes y conceptos
+                // Ahora procesamos los clientes, conceptos y facturables
                 clientes.forEach(({ cliente, tiempoCliente }) => {
                     data.push({
                         'Documento': rowData.Documento,
                         'ClienteId': cliente,
                         'Tiempo_Clientes': tiempoCliente,
-                        'Anio': originalAnio,
-                        'Mes': originalMes
+                        'Anio': window.originalAnio,
+                        'Mes': window.originalMes
                     });
                 });
 
@@ -123,8 +137,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         'Documento': rowData.Documento,
                         'ConceptoId': concepto,
                         'Tiempo_Conceptos': tiempoConcepto,
-                        'Anio': originalAnio,
-                        'Mes': originalMes
+                        'Anio': window.originalAnio,
+                        'Mes': window.originalMes
                     });
                 });
 
@@ -133,6 +147,35 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        // Recopilar datos de las líneas facturables en el tfoot
+        const tfootRows = document.querySelectorAll('tfoot tr');
+        tfootRows.forEach((row, index) => {
+            const facturables = [];
+
+            row.querySelectorAll('input[name^="Hora_Facturable_"]').forEach((input, i) => {
+                const linea = row.querySelector(`input[name="LineaId_${i + 1}"]`).value.trim();
+                const cliente = row.querySelector(`input[name="ClienteId_${i + 1}"]`).value.trim();
+                const tiempoFacturableInput = input;
+                let tiempoFacturable = tiempoFacturableInput.value.trim();
+                tiempoFacturable = tiempoFacturable === '' ? '0' : tiempoFacturable; // Si está vacío, asignar '0'
+                const tiempoFacturableOriginal = tiempoFacturableInput.getAttribute('data-original') || '';
+                if (linea && cliente && tiempoFacturable !== tiempoFacturableOriginal) {
+                    facturables.push({ linea, cliente, tiempoFacturable });
+                }
+            });
+
+            facturables.forEach(({ linea, cliente, tiempoFacturable }) => {
+                data.push({
+                    'LineaId': linea,
+                    'ClienteId': cliente,
+                    'Horas_Facturables': tiempoFacturable,
+                    'Anio': window.originalAnio,
+                    'Mes': window.originalMes
+                });
+            });
+        });
+
+        console.log('Data:', data);
         showSavingMessage(true);
     
         // Realizar la petición para guardar los datos
@@ -174,8 +217,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const totals = {
             clientes: {},
             conceptos: {},
+            facturables: {},
             totalClientes: 0,
             totalConceptos: 0,
+            totalFacturables: 0,
             totalHoras: 0,
             difHoras: 0
         };
@@ -213,6 +258,29 @@ document.addEventListener('DOMContentLoaded', function () {
             row.querySelector('td[data-total-conceptos-row]').textContent = totalConceptosRow.toFixed(0);
             row.querySelector('td[data-total-horas-row]').textContent = (totalClientesRow + totalConceptosRow).toFixed(0);
             row.querySelector('td[data-dif-horas-row]').textContent = (0).toFixed(0);
+        });
+
+        // Recopilar datos de las líneas facturables en el tfoot
+        const tfootRows = document.querySelectorAll('tfoot tr');
+        tfootRows.forEach(row => {
+            let totalFacturablesRow = 0;
+            row.querySelectorAll('input[name^="Hora_Facturable_"]').forEach((input, i) => {
+                const clienteId = row.querySelector(`input[name="ClienteId_${i + 1}"]`).value;
+                const horas = parseFloat(input.value) || 0;
+                if (!totals.facturables[clienteId]) {
+                    totals.facturables[clienteId] = 0;
+                }
+                totals.facturables[clienteId] += horas;
+                totals.totalFacturables += horas;
+                totals.totalHoras += horas;
+                totalFacturablesRow += horas;
+            });
+    
+            // Actualizar las columnas de total en la fila actual
+            const totalFacturableCell = row.querySelector('td[data-total-facturable-linea-row]');
+            if (totalFacturableCell) {
+                totalFacturableCell.textContent = totalFacturablesRow.toFixed(0);
+            }
         });
 
         // Obtener el año y el mes del filtro
@@ -272,7 +340,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelector('tfoot th[data-total-horas]').textContent = totals.totalHoras.toFixed(0);
     }
 
-    document.querySelectorAll('input[name^="Tiempo_Clientes_"], input[name^="Tiempo_Conceptos_"]').forEach(input => {
+    document.querySelectorAll('input[name^="Tiempo_Clientes_"], input[name^="Tiempo_Conceptos_"], input[name^="Hora_Facturable_"]').forEach(input => {
+        input.setAttribute('data-original', input.value);
         input.addEventListener('input', recalculateTotals);
     });
 

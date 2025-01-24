@@ -69,7 +69,7 @@ def verificar_relaciones(request):
         relacionados = []
         for id in ids:
             if (
-                Detalle_Certificacion.objects.filter(TipoDocumentoId=id).exists() 
+                Detalle_Certificacion.objects.filter(CertificacionId=id).exists() 
             ): 
                 relacionados.append(id)
 

@@ -1,22 +1,12 @@
 # Vista para listar empleados
 import json
-from django.contrib import messages
 from django.forms import ValidationError
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
-import pandas as pd
-from Modulo.forms import ColaboradorFilterForm
-from Modulo.models import Clientes, Concepto, Consultores, Empleado, Horas_Habiles, Tiempos_Cliente, TiemposConcepto
-from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from django.shortcuts import render
-from datetime import date
-from datetime import datetime
+from Modulo.forms import ColaboradorFilterForm
+from Modulo.models import Clientes, Concepto, Consultores, Empleado, Horas_Habiles, Linea, Tiempos_Cliente, TiemposConcepto, TiemposFacturables
+from django.shortcuts import render
 from collections import defaultdict
-from dateutil.relativedelta import relativedelta
-from django.http import HttpResponse
-import pandas as pd
-from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, Border, Side
 from django.db import transaction
 
 def guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas):
@@ -29,10 +19,16 @@ def guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas):
             defaults={'Horas': horas},
             ClienteId_id=cliente_id  # Usar `_id` para asignar directamente el ID de la relación
         )
-        if not creado and tiempo_cliente.Horas != tiempo_cliente:
-            # Si el registro existe, actualizamos las horas
-            tiempo_cliente.Horas = horas
-            tiempo_cliente.save()
+        if creado:
+            if horas == '0':
+                tiempo_cliente.delete()        
+        else:
+            if horas == '0':
+                tiempo_cliente.delete()
+            elif tiempo_cliente.Horas != horas:
+                # Si el registro existe y las horas son diferentes, actualizamos las horas
+                tiempo_cliente.Horas = horas
+                tiempo_cliente.save()
         return tiempo_cliente
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos del cliente: {str(e)}")
@@ -48,13 +44,44 @@ def guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas):
             defaults={'Horas': horas},
             ConceptoId_id=concepto_id  # Usar `_id` para asignar directamente el ID de la relación
         )
-        if not creado and tiempo_concepto.Horas != tiempo_concepto:
-            # Si el registro existe, actualizamos las horas
-            tiempo_concepto.Horas = horas
-            tiempo_concepto.save()
+        if creado:
+            if horas == '0':
+                tiempo_concepto.delete()
+        else:
+            if horas == '0':
+                tiempo_concepto.delete()
+            elif tiempo_concepto.Horas != horas:
+                # Si el registro existe y las horas son diferentes, actualizamos las horas
+                tiempo_concepto.Horas = horas
+                tiempo_concepto.save()
         return tiempo_concepto
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos del concepto: {str(e)}")
+
+
+def guardar_tiempos_facturables(anio, mes, linea_id, cliente_id, horas):
+    try:
+        # Verificar si existe el registro
+        tiempo_facturable, creado = TiemposFacturables.objects.get_or_create(
+            Anio=anio,
+            Mes=mes,
+            LineaId_id=linea_id,
+            ClienteId_id=cliente_id,
+            defaults={'Horas': horas}
+        )
+        if creado:
+            if horas == '0':
+                tiempo_facturable.delete()
+        else:
+            if horas == '0':
+                tiempo_facturable.delete()
+            elif tiempo_facturable.Horas != horas:
+                # Si el registro existe y las horas son diferentes, actualizamos las horas
+                tiempo_facturable.Horas = horas
+                tiempo_facturable.save()
+        return tiempo_facturable
+    except Exception as e:
+        raise ValidationError(f"Error al guardar los tiempos facturables: {str(e)}")
 
 
 @transaction.atomic
@@ -68,14 +95,21 @@ def registro_tiempos_guardar(request):
                 documento = row.get('Documento')
                 anio = row.get('Anio')
                 mes = row.get('Mes')
-                if 'ClienteId' in row:
+                if 'ClienteId' in row and 'Tiempo_Clientes' in row:
                     cliente_id = row.get('ClienteId')
                     horas = row.get('Tiempo_Clientes')
                     guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas)
-                elif 'ConceptoId' in row:
+
+                elif 'ConceptoId' in row and 'Tiempo_Conceptos' in row:
                     concepto_id = row.get('ConceptoId')
                     horas = row.get('Tiempo_Conceptos')
                     guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas)
+
+                elif 'LineaId' in row and 'Horas_Facturables' in row:
+                    linea_id = row.get('LineaId')
+                    cliente_id = row.get('ClienteId')
+                    horas = row.get('Horas_Facturables')
+                    guardar_tiempos_facturables(anio, mes, linea_id, cliente_id, horas)
             return JsonResponse({'status': 'success'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'error': str(e)})
@@ -86,6 +120,7 @@ def registro_tiempos_guardar(request):
 def filtrar_colaboradores(form, empleados, consultores, clientes, tiempo_clientes, tiempo_conceptos):
     empleados = empleados.order_by('Documento')  # Orden descendente por Documento (ajustar si otro campo es clave)
     consultores = consultores.order_by('Documento')  # Orden descendente por Documento
+    
 
     # Recuperar los filtros del formulario
     anio = form.cleaned_data.get('Anio')
@@ -119,6 +154,32 @@ def filtrar_colaboradores(form, empleados, consultores, clientes, tiempo_cliente
         tiempo_clientes = tiempo_clientes.filter(ClienteId=cliente)
 
     return empleados, consultores, tiempo_clientes, tiempo_conceptos
+
+
+def filtrar_linea(form, tiempos_facturables, lineas, clientes): 
+    # Ordenar por Linea
+    tiempos_facturables = tiempos_facturables.order_by('LineaId')
+
+    # Recuperar los filtros del formulario
+    anio = form.cleaned_data.get('Anio')
+    mes = form.cleaned_data.get('Mes')
+    linea_id = form.cleaned_data.get('LineaId')
+    cliente_id = form.cleaned_data.get('ClienteId')
+
+    # Filtrar por los diferentes parámetros
+    if anio:
+        tiempos_facturables = tiempos_facturables.filter(Anio=anio)
+
+    if mes:
+        tiempos_facturables = tiempos_facturables.filter(Mes=mes)
+
+    if linea_id:
+        tiempos_facturables = tiempos_facturables.filter(LineaId=linea_id)
+
+    if cliente_id:
+        tiempos_facturables = tiempos_facturables.filter(ClienteId=cliente_id)
+
+    return tiempos_facturables, lineas, clientes
 
 
 # Función para calcular la información de los colaboradores (empleados y consultores)
@@ -183,6 +244,30 @@ def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes, 
     return colaborador_info
 
 
+def obtener_info_linea(linea, clientes, tiempo_facturables):
+    cliente_info = {cliente.ClienteId: cliente for cliente in clientes}
+
+    # Obtener horas facturables por cliente
+    horas_facturables_cliente = tiempo_facturables.filter(LineaId=linea)
+    clientes_linea = {cliente.ClienteId: 0 for cliente in clientes}  # Inicializamos las horas con 0
+    for tiempo_facturable in horas_facturables_cliente:
+        if tiempo_facturable.ClienteId_id in clientes_linea:
+            clientes_linea[tiempo_facturable.ClienteId_id] += tiempo_facturable.Horas
+
+    # Calcular el total de horas facturables por todos los clientes
+    total_horas_facturables = sum(clientes_linea.values())
+
+    # Crear un diccionario con la información de la línea
+    linea_info = {
+        'Linea': linea.Linea,
+        'LineaId': linea.LineaId,  # Incluir LineaId
+        'Clientes': {cliente_id: {'Cliente': cliente_info[cliente_id].Nombre_Cliente, 'ClienteId': cliente_id, 'horas_facturables': horas} for cliente_id, horas in clientes_linea.items()},
+        'Total_Horas_Facturables': total_horas_facturables
+    }
+
+    return linea_info
+
+
 # Vista para mostrar la información filtrada de los colaboradores
 def registro_tiempos_index(request):
     empleados = Empleado.objects.all()
@@ -191,9 +276,11 @@ def registro_tiempos_index(request):
     conceptos = Concepto.objects.all()
     tiempo_clientes = Tiempos_Cliente.objects.all()
     tiempo_conceptos = TiemposConcepto.objects.all()
-
+    horas_facturables = TiemposFacturables.objects.all()
+    lineas = Linea.objects.all()
 
     colaborador_info = []
+    lineas_info = []
     show_data = False  
 
     if request.method == 'GET':
@@ -207,12 +294,22 @@ def registro_tiempos_index(request):
             colaborador_info = obtener_colaborador_info(empleados, consultores, clientes, conceptos, tiempo_clientes, tiempo_conceptos)
             show_data = bool(colaborador_info)  # Mostrar datos si hay resultados
 
+            # Extraer líneas únicas de colaborador_info
+            lineas_unicas = list({colaborador['Linea'] for colaborador in colaborador_info})
+
+            # Filtrar líneas y clientes según los datos del formulario
+            tiempos_facturables, lineas, clientes = filtrar_linea(form, horas_facturables, lineas, clientes)
+
+            # Obtener información de las líneas
+            for linea in lineas:
+                if linea.Linea in lineas_unicas:
+                    lineas_info.append(obtener_info_linea(linea, clientes, tiempos_facturables))
+
     else: 
         form = ColaboradorFilterForm()
 
     # Calcular totales
     totales = calcular_totales(colaborador_info)
-
 
     context = {
         'form': form,
@@ -220,6 +317,8 @@ def registro_tiempos_index(request):
         'Clientes': clientes.values_list('Nombre_Cliente', flat=True),
         'Conceptos': conceptos.values_list('Descripcion', flat=True),
         'Totales': totales, 
+        'Horas_Facturables': horas_facturables,
+        'Tiempo_Lineas': lineas_info,
         'show_data': show_data,
         'mensaje': "No se encontraron resultados para los filtros aplicados." if not colaborador_info else ""
     }

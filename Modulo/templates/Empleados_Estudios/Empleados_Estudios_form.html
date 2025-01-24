@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %} Crear Empleados_Estudios {% endblock %}
+
+{% block contenido %}
+    <h2>Crear Nuevo Empleados Estudios</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'empleados_estudios_index' %}" class="btn btn-danger">Cancelar</a>
+    </form>
+{% endblock %}
