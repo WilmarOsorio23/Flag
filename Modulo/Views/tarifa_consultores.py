@@ -27,7 +27,7 @@ def tarifa_consultores_crear(request):
             return redirect('tarifa_consultores_index')
     else:
         form = Tarifa_ConsultoresForm()
-    return render(request, 'Tarifa_Consultores/tarifa_consultores_form.html', {'form': form})
+    return render(request, 'Tarifa_Consultores/tarifa_consultores_form.html', {'form': form})   
 
 def tarifa_consultores_editar(request, id):
      print("llego hasta editar")
