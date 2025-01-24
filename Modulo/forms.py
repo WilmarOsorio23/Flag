@@ -963,9 +963,11 @@ class MonedaForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'id': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el id'}),
-            'descripcion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la moneda'}),
+            'Nombre':forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese nombre de la moneda'}),
+            'descripcion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese descripcion de la moneda'}),
         }
         labels = {
             'id': 'Id',
+            'Nombre':'Nombre',
             'descripcion': 'Descripción',
         }

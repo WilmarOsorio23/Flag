@@ -33,6 +33,7 @@ def moneda_editar(request, id):
         try:
             data = json.loads(request.body)
             moneda = get_object_or_404( Moneda, pk=id)
+            moneda.Nombre= data.get('nombre',moneda.Nombre)
             moneda.descripcion = data.get('descripcion', moneda.descripcion)
             moneda.save()
 
@@ -86,23 +87,24 @@ def moneda_descargar_excel(request):
             return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
         
         # Consultar las nóminas usando las IDs
-        detalles_data = []
+        moneda_data = []
         for item_id in item_ids:
             try:
-                detalle = Moneda.objects.get(pk=item_id)
-                detalles_data.append([
-                    detalle.id,
-                    detalle.descripcion
+                moneda = Moneda.objects.get(pk=item_id)
+                moneda_data.append([
+                    moneda.id,
+                    moneda.Nombre,
+                    moneda.descripcion
                 ])
             except Moneda.DoesNotExist:
                 print(f"detalle con ID {item_id} no encontrada.")
         
         # Si no hay datos para exportar
-        if not detalles_data:
+        if not moneda_data:
             return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
 
         # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','Descripcion'])
+        df = pd.DataFrame(moneda_data, columns=['Id','Moneda','Descripcion'])
         
         # Configurar la respuesta HTTP con el archivo Excel
         response = HttpResponse(

@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let row = selected[0].closest('tr');
        
         let data = {
+            'nombre':row.querySelector('input[name="nombre"]').value,
             'descripcion': row.querySelector('input[name="descripcion"]').value,
         };
         let id = selected[0].value;
@@ -120,12 +121,18 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('select-all').disabled = true;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
+    
+        let editables=["nombre","descripcion"]
 
+        for (let i= 0; i < editables.length; i++) {
+            let edit = row.querySelector(`[name=${editables[i]}]`);
+           edit.classList.remove('form-control-plaintext');
+           edit.classList.add('form-control');
+           edit.readOnly = false;
+            
+        }
         // Convertir inputs en editables
-        let input = row.querySelector(`[name="descripcion"]`);
-        input.classList.remove('form-control-plaintext');
-        input.classList.add('form-control');
-        input.readOnly = false;
+        
       
       
         // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
