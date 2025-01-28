@@ -680,25 +680,26 @@ class Detalle_CertificacionForm(forms.ModelForm):
         label='Certificacion id'
     )
 
+    Documento = forms.ModelChoiceField(
+        queryset=Empleado.objects.all(),  
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Documento'
+    )
+
     class Meta:
         model = Detalle_Certificacion
         fields = '__all__'
         widgets = {  
-            'Documento': forms.TextInput(attrs={
-                'type': 'text',
-                'class': 'form-control',
-                'placeholder': 'Ingrese el documento'
-            }),
             'Fecha_Certificacion': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date',
                 'placeholder': 'Seleccione la fecha de nacimiento'
             }),
         }
-        
         labels = {
-            'Documento': 'Documento',
-            'Fecha_Certificacion': 'Fecha de Certificación',
+            'Fecha_Certificacion': 'Fecha de Certificación'
         }
 
 class EmpleadoForm(forms.ModelForm):
