@@ -474,3 +474,22 @@ class FacturacionClientes(models.Model):
 
     def __str__(self):
         return f"Facturación {self.ConsecutivoId} - Cliente {self.ClienteId} - Linea {self.LineaId}"
+    
+class Tarifa_Clientes(models.Model):
+    id = models.AutoField(primary_key=True)
+    clienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='clienteId')
+    lineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='lineaId')
+    moduloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='moduloId')  
+    anio = models.IntegerField()
+    mes = models.IntegerField()
+    valorHora = models.DecimalField(max_digits=10, decimal_places=2)
+    valorDia = models.DecimalField(max_digits=10, decimal_places=2)
+    valorMes = models.DecimalField(max_digits=10, decimal_places=2)
+    bolsaMes = models.DecimalField(max_digits=10, decimal_places=2)
+    monedaId = models.ForeignKey('Moneda', on_delete=models.CASCADE, db_column='monedaId')
+
+    def __str__(self):
+        return f"id: {self.id}, ClienteId: {self.clienteId}, LineaId: {self.lineaId}, ModuloId: {self.moduloId}, Anio: {self.anio}, Mes: {self.mes}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, BolsaMes: {self.bolsaMes}, MonedaId: {self.monedaId}"
+
+    class Meta:
+        db_table = 'Tarifa_Clientes'

@@ -13,6 +13,7 @@ from .models import Tarifa_Consultores
 from django.core.exceptions import ValidationError
 from .models import Moneda
 from .models import ClientesContratos
+from .models import Tarifa_Clientes
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -1032,6 +1033,58 @@ class ClientesContratosForm(forms.ModelForm):
                 "Ya existe un registro con el mismo Cliente, Línea, Fecha de Inicio."
             )  
         return cleaned_data
+    
+class Tarifa_ClientesForm(forms.ModelForm):
+    monedaId = forms.ModelChoiceField(
+        queryset=Moneda.objects.all(),  # Relación directa con el modelo Consultores
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Moneda'
+    )
+    class Meta:
+        model = Tarifa_Clientes
+        fields = '__all__'  
+        widgets = {
+            'clienteId': forms.Select(attrs={'class': 'form-control'}),
+            'lineaId': forms.Select(attrs={'class': 'form-control'}),
+            'moduloId': forms.Select(attrs={'class': 'form-control'}),
+            'anio': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el año'}),
+            'mes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el mes'}),
+            'valorHora': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor hora', 'step': '0.01'}),
+            'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día', 'step': '0.01'}),
+            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'}),
+            'bolsaMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor bolsa mes', 'step': '0.01'}),
+        }
+        labels = {
+            'clienteId': 'Cliente',
+            'lineaId': 'Línea',
+            'moduloId': 'Módulo',
+            'anio': 'Año',
+            'mes': 'Mes',
+            'ValorHora': 'Valor Hora',
+            'ValorDia': 'Valor Día',
+            'ValorMes': 'Valor Mes',
+            'BolsaMes': 'Bolsa Mes',
+        }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        clienteId = cleaned_data.get('clienteId')
+        lineaId = cleaned_data.get('lineaId')
+        moduloId = cleaned_data.get('moduloId')
+        anio = cleaned_data.get('anio')
+        mes = cleaned_data.get('mes')   
+
+        if Tarifa_Clientes.objects.filter(
+            clienteId=clienteId,
+            lineaId=lineaId,
+            moduloId=moduloId,
+            anio=anio,
+            mes=mes
+        ).exists():
+            raise ValidationError("Ya existe un registro con el mismo Cliente, Línea, Modulo, Año y Mes.")
+        return cleaned_data 
 
 
         

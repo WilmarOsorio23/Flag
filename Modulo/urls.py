@@ -32,7 +32,7 @@ from Modulo.Views import Horas_Habiles
 from Modulo.Views import tarifa_consultores
 from Modulo.Views import moneda
 from Modulo.Views import clientes_Contratos
-
+from Modulo.Views import tarifa_Clientes
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -213,6 +213,13 @@ urlpatterns = [
     path('tarifa_consultores/editar/<int:id>/', tarifa_consultores.tarifa_consultores_editar, name='tarifa_consultores_editar'),
     path('tarifa_consultores/eliminar', tarifa_consultores.tarifa_consultores_eliminar, name='tarifa_consultores_eliminar'),
     path('tarifa_consultores/descargar_excel', tarifa_consultores.tarifa_consultores_descargar_excel, name='tarifa_consultores_descargar_excel'),
+
+    # Rutas para tabla Tarifa de Clientes
+    path('tarifa_clientes/', tarifa_Clientes.tarifa_clientes_index, name='tarifa_clientes_index'),
+    path('tarifa_clientes/crear', tarifa_Clientes.tarifa_clientes_crear, name='tarifa_clientes_crear'),
+    path('tarifa_clientes/editar/<int:id>/', tarifa_Clientes.tarifa_clientes_editar, name='tarifa_clientes_editar'),
+    path('tarifa_clientes/eliminar', tarifa_Clientes.tarifa_clientes_eliminar, name='tarifa_clientes_eliminar'),
+    path('tarifa_clientes/descargar_excel', tarifa_Clientes.tarifa_clientes_descargar_excel, name='tarifa_clientes_descargar_excel'),
 
     # Rutas para tabla Nomina
     path('nomina/', Nomina.nomina_index, name='nomina_index'),
