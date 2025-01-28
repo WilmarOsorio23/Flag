@@ -518,6 +518,15 @@ class Total_Costos_IndirectosForm(forms.ModelForm):
         }
 
 class DetalleCostosIndirectosForm(forms.ModelForm):
+
+    CostosId = forms.ModelChoiceField(
+        queryset=Costos_Indirectos.objects.all(),  
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='CostosId'
+    )
+
     class Meta:
         model = Detalle_Costos_Indirectos
         fields = '__all__'
@@ -532,11 +541,6 @@ class DetalleCostosIndirectosForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-           'CostosId': forms.NumberInput(attrs={
-                'type': 'text',
-                'class': 'form-control',
-                'placeholder': 'Ingrese el costo indirecto'
-            }),
             'Valor': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
@@ -546,7 +550,6 @@ class DetalleCostosIndirectosForm(forms.ModelForm):
         labels = {
             'Anio': 'Año',
             'Mes': 'Mes',
-            'Costosid':'CostosId',
             'Valor': 'Valor',
         }
 
