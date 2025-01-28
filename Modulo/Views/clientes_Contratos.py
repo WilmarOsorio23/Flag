@@ -34,6 +34,10 @@ def clientes_contratos_editar(request, id):
             contrato.ContratoVigente = data.get('ContratoVigente', contrato.ContratoVigente)
             contrato.OC_Facturar = data.get('OC_Facturar', contrato.OC_Facturar)
             contrato.Parafiscales = data.get('Parafiscales', contrato.Parafiscales)
+            contrato.HorarioServicio = data.get('HorarioServicio', contrato.HorarioServicio)
+            contrato.FechaFacturacion = data.get('FechaFacturacion', contrato.FechaFacturacion)
+            contrato.TipoFacturacion = data.get('TipoFacturacion', contrato.TipoFacturacion)
+            contrato.Observaciones = data.get('Observaciones', contrato.Observaciones)
             contrato.save()
 
             print(JsonResponse({'status': 'success'}))
