@@ -31,6 +31,8 @@ from Modulo.Views import registro_tiempos
 from Modulo.Views import Horas_Habiles
 from Modulo.Views import tarifa_consultores
 from Modulo.Views import moneda
+from Modulo.Views import clientes_Contratos
+
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -140,6 +142,13 @@ urlpatterns = [
     path('contactos/editar/<int:id>/', contactos.contactos_editar, name='contactos_editar'),
     path('contactos/eliminar', contactos.contactos_eliminar, name='contactos_eliminar'),
     path('contactos/descargar_excel', contactos.contactos_descargar_excel, name='contactos_descargar_excel'),
+
+    # Rutas para tabla Clientes Contratos
+    path('clientes_contratos/', clientes_Contratos.clientes_contratos_index, name='clientes_contratos_index'),
+    path('clientes_contratos/crear', clientes_Contratos.clientes_contratos_crear, name='clientes_contratos_crear'),
+    path('clientes_contratos/editar/<int:id>/', clientes_Contratos.clientes_contratos_editar, name='clientes_contratos_editar'),
+    path('clientes_contratos/eliminar', clientes_Contratos.clientes_contratos_eliminar, name='clientes_contratos_eliminar'),
+    path('clientes_contratos/descargar_excel', clientes_Contratos.clientes_contratos_descargar_excel, name='clientes_contratos_descargar_excel'),
 
     # Rutas para tabla Gastos
     path('gastos/', gastos.gasto_index, name='gastos_index'),

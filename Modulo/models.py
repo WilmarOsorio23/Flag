@@ -435,12 +435,12 @@ class ClientesContratos(models.Model):
     ClientesContratosId = models.AutoField(primary_key=True)
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
     LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
-    FechaInicio = models.DateField()
+    FechaInicio = models.DateField(null=True, blank=True)
     FechaFin = models.DateField(null=True, blank=True)
-    Contrato = models.BooleanField(default=True)
+    Contrato = models.IntegerField()
     ContratoVigente = models.BooleanField(default=True)
-    OC_Facturar = models.BooleanField(default=True)
-    Parafiscales = models.BooleanField(default=True)
+    OC_Facturar =  models.BooleanField(default=True)
+    Parafiscales =  models.BooleanField(default=True)
     HorarioServicio = models.TextField(null=True, blank=True)
     FechaFacturacion = models.TextField(null=True, blank=True)
     TipoFacturacion = models.TextField(null=True, blank=True)
@@ -448,12 +448,9 @@ class ClientesContratos(models.Model):
 
     class Meta:
         db_table = 'Clientes_Contratos'
-        constraints = [
-            models.UniqueConstraint(fields=['ClienteId', 'LineaId', 'FechaInicio'], name='unique_cliente_linea_fecha')
-        ]
 
     def __str__(self):
-        return f"Contrato {self.ClientesContratosId} - Cliente {self.ClienteId} - Linea {self.LineaId}"
+        return f"ContratoId:{self.ClientesContratosId} - Cliente: {self.ClienteId} - Linea: {self.LineaId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - Contrato: {self.Contrato} - ContratoVigente: {self.ContratoVigente} - OC_Facturar: {self.OC_Facturar} - Parafiscales: {self.Parafiscales} - HorarioServicio: {self.HorarioServicio} - FechaFacturacion: {self.FechaFacturacion} - TipoFacturacion: {self.TipoFacturacion} - Observaciones: {self.Observaciones}"
     
     
 class FacturacionClientes(models.Model):

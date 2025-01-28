@@ -12,6 +12,7 @@ from .models import Empleados_Estudios
 from .models import Tarifa_Consultores
 from django.core.exceptions import ValidationError
 from .models import Moneda
+from .models import ClientesContratos
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -971,3 +972,66 @@ class MonedaForm(forms.ModelForm):
             'Nombre':'Nombre',
             'descripcion': 'Descripción',
         }
+
+class ClientesContratosForm(forms.ModelForm):
+    ClienteId = forms.ModelChoiceField(
+        queryset=Clientes.objects.all(),  # Relación directa con el modelo Consultores
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Cliente'
+    )
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),  # Relación directa con el modelo Consultores
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Línea'
+    )
+    class Meta:
+        model = ClientesContratos
+        fields = '__all__'
+        widgets = {
+            'FechaInicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'FechaFin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'Contrato': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el contrato'}),
+            'ContratoVigente': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'OC_Facturar': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'Parafiscales': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'HorarioServicio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el horario de servicio'}),
+            'FechaFacturacion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la fecha de facturacion'}),
+            'TipoFacturacion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el tipo de facturacion'}),
+            'Observaciones': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese las observaciones'}),
+        }
+
+        labels = {
+            'FechaInicio': 'Fecha de Inicio',
+            'FechaFin': 'Fecha de Fin',
+            'Contrato': 'Contrato',
+            'ContratoVigente': 'Contrato Vigente',
+            'OC_Facturar': 'OC Facturar',
+            'Parafiscales': 'Parafiscales',
+            'HorarioServicio': 'Horario de Servicio',
+            'FechaFacturacion': 'Fecha de Facturacion',
+            'TipoFacturacion': 'Tipo de Facturacion',
+            'Observaciones': 'Observaciones',
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        ClienteId = cleaned_data.get('ClienteId')
+        LineaId = cleaned_data.get('LineaId')
+        FechaInicio = cleaned_data.get('FechaInicio')
+
+        if ClientesContratos.objects.filter(
+            ClienteId=ClienteId,
+            LineaId=LineaId,
+            FechaInicio=FechaInicio
+        ).exists():
+            raise ValidationError(
+                "Ya existe un registro con el mismo Cliente, Línea, Fecha de Inicio."
+            )  
+        return cleaned_data
+
+
+        
