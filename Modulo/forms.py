@@ -875,11 +875,17 @@ class HistorialCargosForm(forms.ModelForm):
         }
 
 class EmpleadosEstudiosForm(forms.ModelForm):
+    documentoId=forms.ModelChoiceField(
+        queryset=Empleado.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Documento'
+    )
     class Meta:
         model = Empleados_Estudios
         fields = '__all__'
         widgets = {
-            'documentoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el documento'}),
             'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el titulo'}),
             'institucion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la institucion'}),
             'fecha_Inicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
@@ -887,7 +893,6 @@ class EmpleadosEstudiosForm(forms.ModelForm):
             'fecha_Graduacion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
         labels = {
-            'documentoId': 'Documento',
             'titulo': 'Titulo',
             'institucion': 'Institucion',
             'fecha_Inicio': 'Fecha de Inicio',
