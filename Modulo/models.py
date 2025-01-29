@@ -482,9 +482,9 @@ class Tarifa_Clientes(models.Model):
     moduloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='moduloId')  
     anio = models.IntegerField()
     mes = models.IntegerField()
-    valorHora = models.DecimalField(max_digits=10, decimal_places=2)
-    valorDia = models.DecimalField(max_digits=10, decimal_places=2)
-    valorMes = models.DecimalField(max_digits=10, decimal_places=2)
+    valorHora = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    valorDia = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    valorMes = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     bolsaMes = models.DecimalField(max_digits=10, decimal_places=2)
     monedaId = models.ForeignKey('Moneda', on_delete=models.CASCADE, db_column='monedaId')
 
