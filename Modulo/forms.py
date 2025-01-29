@@ -848,18 +848,28 @@ class EmpleadoFilterForm(forms.Form):
         self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]
 
 class HistorialCargosForm(forms.ModelForm):
+    documentoId= forms.ModelChoiceField(
+        queryset=Empleado.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Documento'
+    )
+    cargoId= forms.ModelChoiceField(
+        queryset=Cargos.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Cargo'
+    )
     class Meta:
         model = Historial_Cargos
         fields = '__all__'
         widgets = {
-            'documentoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el documento'}),
-            'cargoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el cargo'}),
             'FechaInicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'FechaFin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
         labels = {  
-            'documentoId': 'Documento',
-            'cargoId': 'Cargo',
             'FechaInicio': 'Fecha de Inicio',
             'FechaFin': 'Fecha de Fin',
         }
