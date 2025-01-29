@@ -632,6 +632,20 @@ class Tiempos_ClienteForm(forms.ModelForm):
         }
 
 class NominaForm(forms.ModelForm):
+    Documento=forms.ModelChoiceField(
+        queryset=Empleado.objects.all(),
+        widget= forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Documento'
+    )
+    Cliente=forms.ModelChoiceField(
+        queryset=Clientes.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Cliente'
+    )
     class Meta:
         model = Nomina
         fields = '__all__'
@@ -646,29 +660,33 @@ class NominaForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'Documento': forms.TextInput(attrs={
-                'type': 'text',
-                'class': 'form-control',
-                'placeholder': 'Ingrese el documento'
-            }),
             'Salario': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el salario'
-            }),
-            'Cliente': forms.TextInput(attrs={
-                'type': 'text',
-                'class': 'form-control',
-                'placeholder': 'Ingrese el cliente'
-            }),
+            })
         }
         labels = {
             'Anio': 'Año',
             'Mes': 'Mes',
-            'Documento': 'Documento',
-            'Salario': 'Salario',
-            'Cliente': 'Cliente',
+            'Salario': 'Salario'
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        Anio = cleaned_data.get('Anio')
+        Mes = cleaned_data.get('Mes')
+        Documento = cleaned_data.get('Documento')
+
+        if Nomina.objects.filter(
+            Anio=Anio,
+            Mes=Mes,
+            Documento=Documento
+        ).exists():
+            raise ValidationError(
+                "Ya existe un registro con el mismo Anio, Mes y Documento."
+            )  
+        return cleaned_data
 
 from django import forms
 from .models import Detalle_Certificacion, Certificacion  # Asegúrate de importar el modelo correcto
