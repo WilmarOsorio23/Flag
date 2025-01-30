@@ -431,6 +431,15 @@ class GastoForm(forms.ModelForm):
         }
 
 class DetalleGastosForm(forms.ModelForm):
+
+    GastosId=forms.ModelChoiceField(
+        queryset=Gastos.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Gastos'
+    )   
+
     class Meta:
         model = Detalle_Gastos
         fields = '__all__'
@@ -445,11 +454,6 @@ class DetalleGastosForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'GastosId': forms.NumberInput(attrs={
-                'type': 'number',
-                'class': 'form-control',
-                'placeholder': 'Ingrese el ID del gasto'
-            }),
             'Valor': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
@@ -459,9 +463,24 @@ class DetalleGastosForm(forms.ModelForm):
         labels = {
             'Anio': 'Año',
             'Mes': 'Mes',
-            'GastosId': 'Gasto ID',
             'Valor': 'Valor',
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        Anio = cleaned_data.get('Anio')
+        Mes = cleaned_data.get('Mes')
+        GastosId = cleaned_data.get('GastosId')
+
+        if Detalle_Gastos.objects.filter(
+            Anio=Anio,
+            Mes=Mes,
+            GastosId=GastosId
+        ).exists():
+            raise ValidationError(
+                "Ya existe este gasto dentro de este mes y año."
+            )  
+        return cleaned_data
 
 class TotalGastosForm(forms.ModelForm):
     class Meta:
