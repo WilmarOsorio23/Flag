@@ -1040,6 +1040,11 @@ class MonedaForm(forms.ModelForm):
             'Nombre':'Nombre',
             'descripcion': 'Descripción',
         }
+    def clean_Nombre(self):
+        nombre = self.cleaned_data.get('Nombre')
+        if Moneda.objects.filter(Nombre=nombre).exists():
+            raise ValidationError('Ya existe una moneda con ese nombre')
+        return nombre
 
 class ClientesContratosForm(forms.ModelForm):
     ClienteId = forms.ModelChoiceField(

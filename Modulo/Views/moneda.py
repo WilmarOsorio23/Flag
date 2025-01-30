@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
 from Modulo import models
 from Modulo.forms import MonedaForm
-from Modulo.models import Moneda
+from Modulo.models import Moneda, Tarifa_Clientes
 from Modulo.models import Tarifa_Consultores
 from django.contrib import messages
 from django.db import models
@@ -64,7 +64,8 @@ def verificar_relaciones(request):
         relacionados = []
         for id in ids:
             if (
-                Tarifa_Consultores.objects.filter(monedaId=id).exists()
+                Tarifa_Consultores.objects.filter(monedaId=id).exists() or
+                Tarifa_Clientes.objects.filter(monedaId=id).exists()
             ): 
                 relacionados.append(id)
 
