@@ -11,6 +11,9 @@ from .models import Historial_Cargos
 from .models import Empleados_Estudios
 from .models import Tarifa_Consultores
 from django.core.exceptions import ValidationError
+from .models import Moneda
+from .models import ClientesContratos
+from .models import Tarifa_Clientes
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -515,6 +518,15 @@ class Total_Costos_IndirectosForm(forms.ModelForm):
         }
 
 class DetalleCostosIndirectosForm(forms.ModelForm):
+
+    CostosId = forms.ModelChoiceField(
+        queryset=Costos_Indirectos.objects.all(),  
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='CostosId'
+    )
+
     class Meta:
         model = Detalle_Costos_Indirectos
         fields = '__all__'
@@ -529,11 +541,6 @@ class DetalleCostosIndirectosForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-           'CostosId': forms.NumberInput(attrs={
-                'type': 'text',
-                'class': 'form-control',
-                'placeholder': 'Ingrese el costo indirecto'
-            }),
             'Valor': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
@@ -543,7 +550,6 @@ class DetalleCostosIndirectosForm(forms.ModelForm):
         labels = {
             'Anio': 'Año',
             'Mes': 'Mes',
-            'Costosid':'CostosId',
             'Valor': 'Valor',
         }
 
@@ -626,6 +632,20 @@ class Tiempos_ClienteForm(forms.ModelForm):
         }
 
 class NominaForm(forms.ModelForm):
+    Documento=forms.ModelChoiceField(
+        queryset=Empleado.objects.all(),
+        widget= forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Documento'
+    )
+    Cliente=forms.ModelChoiceField(
+        queryset=Clientes.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Cliente'
+    )
     class Meta:
         model = Nomina
         fields = '__all__'
@@ -640,32 +660,33 @@ class NominaForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'Documento': forms.TextInput(attrs={
-                'type': 'text',
-                'class': 'form-control',
-                'placeholder': 'Ingrese el documento'
-            }),
             'Salario': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el salario'
-            }),
-            'Cliente': forms.TextInput(attrs={
-                'type': 'text',
-                'class': 'form-control',
-                'placeholder': 'Ingrese el cliente'
-            }),
+            })
         }
         labels = {
             'Anio': 'Año',
             'Mes': 'Mes',
-            'Documento': 'Documento',
-            'Salario': 'Salario',
-            'Cliente': 'Cliente',
+            'Salario': 'Salario'
         }
 
-from django import forms
-from .models import Detalle_Certificacion, Certificacion  # Asegúrate de importar el modelo correcto
+    def clean(self):
+        cleaned_data = super().clean()
+        Anio = cleaned_data.get('Anio')
+        Mes = cleaned_data.get('Mes')
+        Documento = cleaned_data.get('Documento')
+
+        if Nomina.objects.filter(
+            Anio=Anio,
+            Mes=Mes,
+            Documento=Documento
+        ).exists():
+            raise ValidationError(
+                "Ya existe un registro con el mismo Anio, Mes y Documento."
+            )  
+        return cleaned_data
 
 class Detalle_CertificacionForm(forms.ModelForm):
 
@@ -677,25 +698,26 @@ class Detalle_CertificacionForm(forms.ModelForm):
         label='Certificacion id'
     )
 
+    Documento = forms.ModelChoiceField(
+        queryset=Empleado.objects.all(),  
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Documento'
+    )
+
     class Meta:
         model = Detalle_Certificacion
         fields = '__all__'
         widgets = {  
-            'Documento': forms.TextInput(attrs={
-                'type': 'text',
-                'class': 'form-control',
-                'placeholder': 'Ingrese el documento'
-            }),
             'Fecha_Certificacion': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date',
                 'placeholder': 'Seleccione la fecha de nacimiento'
             }),
         }
-        
         labels = {
-            'Documento': 'Documento',
-            'Fecha_Certificacion': 'Fecha de Certificación',
+            'Fecha_Certificacion': 'Fecha de Certificación'
         }
 
 class EmpleadoForm(forms.ModelForm):
@@ -823,28 +845,44 @@ class EmpleadoFilterForm(forms.Form):
         self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]
 
 class HistorialCargosForm(forms.ModelForm):
+    documentoId= forms.ModelChoiceField(
+        queryset=Empleado.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Documento'
+    )
+    cargoId= forms.ModelChoiceField(
+        queryset=Cargos.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Cargo'
+    )
     class Meta:
         model = Historial_Cargos
         fields = '__all__'
         widgets = {
-            'documentoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el documento'}),
-            'cargoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el cargo'}),
             'FechaInicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'FechaFin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
         labels = {  
-            'documentoId': 'Documento',
-            'cargoId': 'Cargo',
             'FechaInicio': 'Fecha de Inicio',
             'FechaFin': 'Fecha de Fin',
         }
 
 class EmpleadosEstudiosForm(forms.ModelForm):
+    documentoId=forms.ModelChoiceField(
+        queryset=Empleado.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Documento'
+    )
     class Meta:
         model = Empleados_Estudios
         fields = '__all__'
         widgets = {
-            'documentoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el documento'}),
             'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el titulo'}),
             'institucion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la institucion'}),
             'fecha_Inicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
@@ -852,14 +890,12 @@ class EmpleadosEstudiosForm(forms.ModelForm):
             'fecha_Graduacion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
         labels = {
-            'documentoId': 'Documento',
             'titulo': 'Titulo',
             'institucion': 'Institucion',
             'fecha_Inicio': 'Fecha de Inicio',
             'fecha_Fin': 'Fecha de Fin',
             'fecha_Graduacion': 'Fecha de Graduacion',
         }
-
 
 class HorasHabilesForm(forms.ModelForm):
     class Meta:
@@ -890,8 +926,6 @@ class HorasHabilesForm(forms.ModelForm):
             'Horas_Laborales': 'Horas Laborales',
         }
 
-
-
 class Tarifa_ConsultoresForm(forms.ModelForm):
     documentoId = forms.ModelChoiceField(
         queryset=Consultores.objects.all(),  # Relación directa con el modelo Consultores
@@ -909,6 +943,14 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
         label='Cliente'
     )
 
+    monedaId = forms.ModelChoiceField(
+        queryset=Moneda.objects.all(),  # Relación directa con el modelo Consultores
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Moneda'
+    )
+
     class Meta:
         
         model = Tarifa_Consultores
@@ -918,9 +960,7 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             'mes': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el mes'}),
             'valorHora': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor hora', 'step': '0.01'}),
             'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día', 'step': '0.01'}),
-            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'}),
-            'moneda': forms.Select(attrs={'class': 'form-control'}, choices=[('COP','COP- Peso colombiano'),('USD','USD - Dolar americano')
-    ]),
+            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'})
         }
 
         labels = {
@@ -929,7 +969,6 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             'valorHora': 'Valor Hora',
             'valorDia': 'Valor Día',
             'valorMes': 'Valor Mes',
-            'moneda': 'Moneda',
         }
 
     def clean(self):
@@ -950,3 +989,188 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             )
         
         return cleaned_data
+
+class MonedaForm(forms.ModelForm):
+    class Meta:
+        model = Moneda
+        fields = '__all__'
+        widgets = {
+            'id': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el id'}),
+            'Nombre':forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese nombre de la moneda'}),
+            'descripcion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese descripcion de la moneda'}),
+        }
+        labels = {
+            'id': 'Id',
+            'Nombre':'Nombre',
+            'descripcion': 'Descripción',
+        }
+
+class ClientesContratosForm(forms.ModelForm):
+    ClienteId = forms.ModelChoiceField(
+        queryset=Clientes.objects.all(),  # Relación directa con el modelo Consultores
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Cliente'
+    )
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),  # Relación directa con el modelo Consultores
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Línea'
+    )
+    class Meta:
+        model = ClientesContratos
+        fields = '__all__'
+        widgets = {
+            'FechaInicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'FechaFin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'Contrato': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el contrato'}),
+            'ContratoVigente': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'OC_Facturar': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'Parafiscales': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'HorarioServicio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el horario de servicio'}),
+            'FechaFacturacion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la fecha de facturacion'}),
+            'TipoFacturacion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el tipo de facturacion'}),
+            'Observaciones': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese las observaciones'}),
+        }
+
+        labels = {
+            'FechaInicio': 'Fecha de Inicio',
+            'FechaFin': 'Fecha de Fin',
+            'Contrato': 'Contrato',
+            'ContratoVigente': 'Contrato Vigente',
+            'OC_Facturar': 'OC Facturar',
+            'Parafiscales': 'Parafiscales',
+            'HorarioServicio': 'Horario de Servicio',
+            'FechaFacturacion': 'Fecha de Facturacion',
+            'TipoFacturacion': 'Tipo de Facturacion',
+            'Observaciones': 'Observaciones',
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        ClienteId = cleaned_data.get('ClienteId')
+        LineaId = cleaned_data.get('LineaId')
+        FechaInicio = cleaned_data.get('FechaInicio')
+
+        if ClientesContratos.objects.filter(
+            ClienteId=ClienteId,
+            LineaId=LineaId,
+            FechaInicio=FechaInicio
+        ).exists():
+            raise ValidationError(
+                "Ya existe un registro con el mismo Cliente, Línea, Fecha de Inicio."
+            )  
+        return cleaned_data
+    
+class Tarifa_ClientesForm(forms.ModelForm):
+    monedaId = forms.ModelChoiceField(
+        queryset=Moneda.objects.all(),  # Relación directa con el modelo Consultores
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Moneda'
+    )
+    class Meta:
+        model = Tarifa_Clientes
+        fields = '__all__'  
+        widgets = {
+            'clienteId': forms.Select(attrs={'class': 'form-control'}),
+            'lineaId': forms.Select(attrs={'class': 'form-control'}),
+            'moduloId': forms.Select(attrs={'class': 'form-control'}),
+            'anio': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el año'}),
+            'mes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el mes'}),
+            'valorHora': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor hora', 'step': '0.01'}),
+            'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día', 'step': '0.01'}),
+            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'}),
+            'bolsaMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor bolsa mes', 'step': '0.01'}),
+        }
+        labels = {
+            'clienteId': 'Cliente',
+            'lineaId': 'Línea',
+            'moduloId': 'Módulo',
+            'anio': 'Año',
+            'mes': 'Mes',
+            'ValorHora': 'Valor Hora',
+            'ValorDia': 'Valor Día',
+            'ValorMes': 'Valor Mes',
+            'BolsaMes': 'Bolsa Mes',
+        }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        clienteId = cleaned_data.get('clienteId')
+        lineaId = cleaned_data.get('lineaId')
+        moduloId = cleaned_data.get('moduloId')
+        anio = cleaned_data.get('anio')
+        mes = cleaned_data.get('mes')   
+
+        if Tarifa_Clientes.objects.filter(
+            clienteId=clienteId,
+            lineaId=lineaId,
+            moduloId=moduloId,
+            anio=anio,
+            mes=mes
+        ).exists():
+            raise ValidationError("Ya existe un registro con el mismo Cliente, Línea, Modulo, Año y Mes.")
+        return cleaned_data 
+
+
+        
+
+class FacturacionFilterForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Año',  
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    Mes = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Mes',  
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    ClienteId = forms.ModelChoiceField(
+        queryset=Clientes.objects.all(), 
+        required=False, 
+        label='Cliente',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_anio()
+        self.populate_mes()
+        self.populate_cliente()
+        self.populate_linea()
+
+    def populate_anio(self):
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = [('', 'Seleccione el mes')] + meses
+
+    def populate_cliente(self):
+        clientes = Clientes.objects.values_list('ClienteId', 'Nombre_Cliente').distinct()
+        self.fields['ClienteId'].choices = [('', 'Seleccione el cliente')] + list(clientes)
+
+    def populate_linea(self):
+        linea = Linea.objects.values_list('LineaId', 'Linea').distinct()
+        self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)

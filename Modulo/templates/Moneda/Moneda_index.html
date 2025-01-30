@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block titulo %} Lista de Tarifas de Consultores {% endblock %}
+{% block titulo %} Lista de Monedas {% endblock %}
 
 {% block contenido %}
 <div class="card">
@@ -20,18 +20,18 @@
     </div>
     {% endif %}
     <div class="card-header d-flex justify-content-between align-items-center"> 
-        <h4 class="card-title">Tarifa de Consultores</h4>
+        <h4 class="card-title">Moneda</h4>
     </div>
     <div class="card-body">
         <!-- CRUD Icons -->
-        <div class="button-group" >
-            <a name="" id="" class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{%url 'tarifa_consultores_crear' %}" role="button" ></a> 
-            <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button"  onclick="enableEdit();"></a> 
+        <div class="button-group">
+            <a name="" id="" class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'moneda_crear' %}" role="button"></a> 
+            <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button" onclick="enableEdit();"></a> 
             <i name="" id="" class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
-            <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" ></button>
-            <form id="download-form" method="POST" action="{% url 'tarifa_consultores_descargar_excel' %}" style="display:inline;">
+            <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar"></button>
+            <form id="download-form" method="POST" action="{% url 'moneda_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
+                <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
             </form>
             <button id="save-button" 
             class="btn btn-outline-success fas fa-save d-none" 
@@ -48,37 +48,28 @@
         </div>
     </div>
     <div class="card-footer text-muted">
-        
         <div class="table-responsive">
-            <form id="delete-form" method="POST" action="{%url 'tarifa_consultores_eliminar'%}">
+            <form id="delete-form" method="POST" action="{% url 'moneda_eliminar' %}">
                 {% csrf_token %}
                 <table class="table table-primary">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Documento ID</th>
-                            <th scope="col">Año</th>
-                            <th scope="col">Mes</th>
-                            <th scope="col">Cliente ID</th>
-                            <th scope="col">Valor Hora</th>
-                            <th scope="col">Valor Día</th>
-                            <th scope="col">Valor Mes</th>
                             <th scope="col">Moneda</th>
+                            <th scope="col">descripcion</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for tarifa in tarifa_consultores %}
-                         <tr id="row-{{tarifa.id}}">
-                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{tarifa.id}}"></td>
-                            <td><input type="text" name="documentoId" class="form-control-plaintext" value="{{ tarifa.documentoId.Documento }}" readonly></td>
-                            <td><input type="text" name="anio" class="form-control-plaintext" value="{{ tarifa.anio }}" readonly></td>
-                            <td><input type="text" name="mes" class="form-control-plaintext" value="{{ tarifa.mes }}" readonly></td>
-                            <td><input type="text" name="clienteID" class="form-control-plaintext" value="{{ tarifa.clienteID.Nombre_Cliente }}" readonly></td>
-                            <td><input type="text" name="valorHora" class="form-control-plaintext" value="{{ tarifa.valorHora }}" readonly></td>
-                            <td><input type="text" name="valorDia" class="form-control-plaintext" value="{{ tarifa.valorDia }}" readonly></td>
-                            <td><input type="text" name="valorMes" class="form-control-plaintext" value="{{ tarifa.valorMes }}" readonly></td>
-                            <td><input type="text" name="moneda" class="form-control-plaintext" value="{{ tarifa.monedaId.Nombre }}" readonly></td>
-                         </tr>   
+                        {% for moneda in monedas %}
+                        <tr id="row-{{moneda.id}}">
+                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{moneda.id}}"></td>
+                            <td><input type="text" name="nombre" class="form-control-plaintext" value="{{moneda.Nombre}}" readonly></td>
+                            <td><input type="text" name="descripcion" class="form-control-plaintext" value="{{ moneda.descripcion}}" readonly></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">No hay datos disponibles.</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -94,7 +85,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-            ¿Estás seguro de que deseas eliminar este módulo?
+            ¿Estás seguro de que deseas eliminar esta moneda?
             </div>
             <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
@@ -105,5 +96,5 @@
     </div>
 </div>
 
-<script src="{% static 'JS/tarifa_consultor.js' %}"></script>
+<script src="{% static 'JS/moneda.js' %}"></script>
 {% endblock %}

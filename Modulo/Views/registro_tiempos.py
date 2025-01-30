@@ -309,7 +309,7 @@ def registro_tiempos_index(request):
         form = ColaboradorFilterForm()
 
     # Calcular totales
-    totales = calcular_totales(colaborador_info)
+    totales, totales_facturables = calcular_totales(colaborador_info, lineas_info)
 
     context = {
         'form': form,
@@ -317,6 +317,7 @@ def registro_tiempos_index(request):
         'Clientes': clientes.values_list('Nombre_Cliente', flat=True),
         'Conceptos': conceptos.values_list('Descripcion', flat=True),
         'Totales': totales, 
+        'TotalesFacturables': totales_facturables,
         'Horas_Facturables': horas_facturables,
         'Tiempo_Lineas': lineas_info,
         'show_data': show_data,
@@ -326,8 +327,9 @@ def registro_tiempos_index(request):
     return render(request, 'Registro_Tiempos/registro_tiempos_index.html', context)
 
 
-def calcular_totales(colaborador_info):
+def calcular_totales(colaborador_info, lineas_info):
     totales = defaultdict(int)
+    totales_facturables = defaultdict(int)
     
     # Sumar las horas por cada columna (clientes y conceptos)
     for empleado in colaborador_info:
@@ -341,7 +343,17 @@ def calcular_totales(colaborador_info):
     totales['Total_Clientes'] = sum(empleado['Total_Clientes'] for empleado in colaborador_info)
     totales['Total_Conceptos'] = sum(empleado['Total_Conceptos'] for empleado in colaborador_info)
     totales['Total_Horas'] = sum(empleado['Total_Horas'] for empleado in colaborador_info)
-    return totales
+
+    # Sumar las horas facturables por cada columna (clientes)
+    for linea in lineas_info:
+        for cliente in linea['Clientes'].values():
+            totales_facturables[cliente['ClienteId']] += cliente['horas_facturables']
+    
+    # Calcular los totales generales de horas facturables
+    totales_facturables['Total_Clientes'] = sum(linea['Total_Horas_Facturables'] for linea in lineas_info)
+    totales_facturables['Total_Horas'] = sum(linea['Total_Horas_Facturables'] for linea in lineas_info)
+    
+    return totales, totales_facturables
 
 
 def obtener_horas_habiles(anio, mes):

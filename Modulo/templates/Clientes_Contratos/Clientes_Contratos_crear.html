@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block titulo %} Editar Registro Tiempo {% endblock %}
+{% block titulo %} Crear Clientes_Contratos {% endblock %}
 
 {% block contenido %}
-    <h2>Editar Empleado</h2>
+    <h2>Crear Nuevo Clientes_Contratos</h2>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="btn btn-primary">Guardar</button>
-        <a href="{% url 'registro_tiempos_index' %}" class="btn btn-danger">Cancelar</a>
+        <a href="{% url 'clientes_contratos_index' %}" class="btn btn-danger">Cancelar</a>
     </form>
 {% endblock %}

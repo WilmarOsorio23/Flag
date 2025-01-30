@@ -1,5 +1,5 @@
 from django.urls import path
-from Modulo.Views import modulo
+from Modulo.Views import clientes_factura, modulo
 from Modulo.Views import ipc
 from Modulo.Views import ind
 from Modulo.Views import TipoDocumento
@@ -30,6 +30,9 @@ from Modulo.Views import empleados_estudios
 from Modulo.Views import registro_tiempos
 from Modulo.Views import Horas_Habiles
 from Modulo.Views import tarifa_consultores
+from Modulo.Views import moneda
+from Modulo.Views import clientes_Contratos
+from Modulo.Views import tarifa_Clientes
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -42,6 +45,14 @@ urlpatterns = [
     path('Modulo/eliminar', modulo.eliminar, name='eliminar'),
     path('verificar-relaciones/', modulo.verificar_relaciones, name='verificar_relaciones'),
     path('Modulo/descargar_excel', modulo.descargar_excel, name='descargar_excel'),
+
+    # Rutas para tabla Moneda
+    path('moneda/', moneda.moneda_index, name='moneda_index'),
+    path('moneda/crear', moneda.moneda_crear, name='moneda_crear'),
+    path('moneda/editar/<int:id>/', moneda.moneda_editar, name='moneda_editar'),
+    path('moneda/eliminar', moneda.moneda_eliminar, name='moneda_eliminar'),
+    path('moneda/verificar-relaciones/', moneda.verificar_relaciones, name='verificar_relaciones'),
+    path('moneda/descargar_excel', moneda.moneda_descargar_excel, name='moneda_descargar_excel'),
 
     # Rutas para la tabla IPC
     path('ipc/', ipc.ipc_index, name='ipc_index'),
@@ -132,6 +143,13 @@ urlpatterns = [
     path('contactos/eliminar', contactos.contactos_eliminar, name='contactos_eliminar'),
     path('contactos/descargar_excel', contactos.contactos_descargar_excel, name='contactos_descargar_excel'),
 
+    # Rutas para tabla Clientes Contratos
+    path('clientes_contratos/', clientes_Contratos.clientes_contratos_index, name='clientes_contratos_index'),
+    path('clientes_contratos/crear', clientes_Contratos.clientes_contratos_crear, name='clientes_contratos_crear'),
+    path('clientes_contratos/editar/<int:id>/', clientes_Contratos.clientes_contratos_editar, name='clientes_contratos_editar'),
+    path('clientes_contratos/eliminar', clientes_Contratos.clientes_contratos_eliminar, name='clientes_contratos_eliminar'),
+    path('clientes_contratos/descargar_excel', clientes_Contratos.clientes_contratos_descargar_excel, name='clientes_contratos_descargar_excel'),
+
     # Rutas para tabla Gastos
     path('gastos/', gastos.gasto_index, name='gastos_index'),
     path('gastos/crear', gastos.gasto_crear, name='gastos_crear'),
@@ -196,6 +214,13 @@ urlpatterns = [
     path('tarifa_consultores/eliminar', tarifa_consultores.tarifa_consultores_eliminar, name='tarifa_consultores_eliminar'),
     path('tarifa_consultores/descargar_excel', tarifa_consultores.tarifa_consultores_descargar_excel, name='tarifa_consultores_descargar_excel'),
 
+    # Rutas para tabla Tarifa de Clientes
+    path('tarifa_clientes/', tarifa_Clientes.tarifa_clientes_index, name='tarifa_clientes_index'),
+    path('tarifa_clientes/crear', tarifa_Clientes.tarifa_clientes_crear, name='tarifa_clientes_crear'),
+    path('tarifa_clientes/editar/<int:id>/', tarifa_Clientes.tarifa_clientes_editar, name='tarifa_clientes_editar'),
+    path('tarifa_clientes/eliminar', tarifa_Clientes.tarifa_clientes_eliminar, name='tarifa_clientes_eliminar'),
+    path('tarifa_clientes/descargar_excel', tarifa_Clientes.tarifa_clientes_descargar_excel, name='tarifa_clientes_descargar_excel'),
+
     # Rutas para tabla Nomina
     path('nomina/', Nomina.nomina_index, name='nomina_index'),
     path('nomina/crear', Nomina.nomina_crear, name='nomina_crear'),
@@ -258,4 +283,7 @@ urlpatterns = [
     path('historial_cargos/eliminar/', historial_cargos.historial_cargos_eliminar, name='historial_cargos_eliminar'),
     path('historial_cargos/descargar_excel/', historial_cargos.historial_cargos_descargar_excel, name='historial_cargos_descargar_excel'),
 
-]
+    # Rutas para la tabla Registro Tiempos
+    path('clientes_factura/', clientes_factura.clientes_factura_index, name='clientes_factura_index'),
+    path('clientes_factura/guardar/', clientes_factura.clientes_factura_guardar, name='clientes_factura_guardar'),
+    ]
