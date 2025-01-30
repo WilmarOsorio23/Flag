@@ -58,11 +58,6 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'clientes_factura_index' %}">
-                                        <i class="fas fa-table"></i> Clientes Factura
-                                    </a>
-                                </li>
-                                <li>
                                     <a class="nav-item nav-link" href="{% url 'conceptos_index' %}">
                                         <i class="fas fa-table"></i> Conceptos
                                     </a>
@@ -73,38 +68,13 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'costos_indirectos_index' %}">
-                                        <i class="fas fa-table"></i> Costos Indirectos
-                                    </a>
-                                </li>
-                                <li>
                                     <a class="nav-item nav-link" href="{% url 'contactos_index' %}">
                                         <i class="fas fa-table"></i> Contactos
                                     </a>
                                 </li>
-                                <li>  
-                                    <a class="nav-item nav-link" href="{% url 'clientes_contratos_index' %}">
-                                        <i class="fas fa-table"></i> Clientes Contratos
-                                    </a>
-                                </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'detalle_certificacion_index' %}">
-                                        <i class="fas fa-table"></i> Detalle Certificacion
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'detalle_costos_indirectos_index' %}">
-                                        <i class="fas fa-table"></i> Detalle Costos Indirectos
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'detalle_gastos_index' %}">
-                                        <i class="fas fa-table"></i> Detalle Gastos
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'horas_habiles_index' %}">
-                                        <i class="fas fa-table"></i> Horas Hábiles
+                                    <a class="nav-item nav-link" href="{% url 'costos_indirectos_index' %}">
+                                        <i class="fas fa-table"></i> Costos Indirectos
                                     </a>
                                 </li>
                                 <li>
@@ -116,10 +86,15 @@
                                     <a class="nav-item nav-link" href="{% url 'empleados_estudios_index' %}">
                                         <i class="fas fa-table"></i> Empleados Estudios
                                     </a>
-                                </li>   
+                                </li>
                                 <li>
                                     <a class="nav-item nav-link" href="{% url 'gastos_index' %}">
                                         <i class="fas fa-table"></i> Gastos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'horas_habiles_index' %}">
+                                        <i class="fas fa-table"></i> Horas Hábiles
                                     </a>
                                 </li>
                                 <li>
@@ -148,28 +123,8 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'nomina_index' %}">
-                                        <i class="fas fa-table"></i> Nomina
-                                    </a>
-                                </li>
-                                <li>
                                     <a class="nav-item nav-link" href="{% url 'perfil_index' %}">
                                         <i class="fas fa-table"></i> Perfil
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'registro_tiempos_index' %}">
-                                        <i class="fas fa-table"></i> Registro Tiempos
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'tiempos_cliente_index' %}">
-                                        <i class="fas fa-table"></i> Tiempos Cliente
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'tiempos_concepto_index' %}">
-                                        <i class="fas fa-table"></i> Tiempo Concepto
                                     </a>
                                 </li>
                                 <li>
@@ -178,18 +133,78 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'total_costos_indirectos_index' %}">
-                                        <i class="fas fa-table"></i> Total Costos Indirectos
+                                    <a class="nav-item nav-link" href="{% url 'tipos_contactos_index' %}">
+                                        <i class="fas fa-table"></i> Tipos Contactos
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>                   
+                    </ul> 
+                    <!-- INFORMES -->
+                    <ul class="list-unstyled components">
+                        <li>
+                            <a href="#homeSubmenuInformes" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                                <i class="fas fa-file-alt"></i> Informes
+                            </a>
+                            <ul class="collapse list-unstyled" id="homeSubmenuInformes">
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'informes_certificacion_index' %}">
+                                        <i class="fas fa-certificate"></i> Informe Certificación
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'total_gastos_index' %}">
-                                        <i class="fas fa-table"></i> Total Gastos
+                                    <a class="nav-item nav-link" href="{% url 'informes_empleado_index' %}">
+                                        <i class="fas fa-user"></i> Informe Empleados
                                     </a>
-                                </li> 
+                                </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'tipos_contactos_index' %}">
-                                        <i class="fas fa-table"></i> Tipos Contactos
+                                    <a class="nav-item nav-link" href="{% url 'informes_salarios_index' %}">
+                                        <i class="fas fa-money-bill"></i> Informe Salarios
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul> 
+                    <!-- MOVIMIENTOS -->
+                    <ul class="list-unstyled components">
+                        <li>
+                            <a href="#homeSubmenuMovimientos" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                                <i class="fa fa-exchange-alt"></i> Movimientos
+                            </a>
+                            <ul class="collapse list-unstyled" id="homeSubmenuMovimientos">
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'clientes_contratos_index' %}">
+                                        <i class="fas fa-table"></i> Clientes Contratos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'detalle_certificacion_index' %}">
+                                        <i class="fas fa-table"></i> Detalle Certificacion
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'detalle_costos_indirectos_index' %}">
+                                        <i class="fas fa-table"></i> Detalle Costos Indirectos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'detalle_gastos_index' %}">
+                                        <i class="fas fa-table"></i> Detalle Gastos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'historial_cargos_index' %}">
+                                        <i class="fas fa-table"></i> Historial Cargos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'nomina_index' %}">
+                                        <i class="fas fa-table"></i> Nomina
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'registro_tiempos_index' %}">
+                                        <i class="fas fa-table"></i> Registro Tiempos
                                     </a>
                                 </li>
                                 <li>
@@ -203,41 +218,36 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'historial_cargos_index' %}">
-                                        <i class="fas fa-table"></i> Historial Cargos
-                                    </a>
-                                </li>
-                                <!-- Puedes añadir más elementos de "Datos Maestros" aquí -->
-                            </ul>
-                        </li>                   
-                    </ul> 
-                    <!-- INFORMES -->
-                    <ul class="list-unstyled components">
-                        <li>
-                            <a href="#homeSubmenuInformes" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle sidebar-item-principal" >
-                                <i class="fas fa-file-alt" ></i> Informes
-                            </a>
-                            <ul class="collapse list-unstyled" id="homeSubmenuInformes">
-                                <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_certificacion_index' %}" >
-                                        <i class="fas fa-certificate" ></i> Informe Certificación
+                                    <a class="nav-item nav-link" href="{% url 'total_costos_indirectos_index' %}">
+                                        <i class="fas fa-table"></i> Total Costos Indirectos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_salarios_index' %}" >
-                                        <i class="fas fa-money-bill" ></i> Informe Salarios
+                                    <a class="nav-item nav-link" href="{% url 'total_gastos_index' %}">
+                                        <i class="fas fa-table"></i> Total Gastos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_empleado_index' %}" >
-                                        <i class="fas fa-user" ></i> Informe Empleados
+                                    <a class="nav-item nav-link" href="{% url 'clientes_factura_index' %}">
+                                        <i class="fas fa-table"></i> Facturación Clientes
                                     </a>
                                 </li>
                             </ul>
                         </li>
-                    </ul> 
+                    </ul>
+                    <!-- INDICADORES -->
+                    <ul class="list-unstyled components">
+                        <li>
+                            <a href="#homeSubmenuIndicadores" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                                <i class="fa fa-chart-line"></i> Indicadores
+                            </a>
+                            <ul class="collapse list-unstyled" id="homeSubmenuIndicadores">
+                                <!-- Añadir elementos de "Indicadores" aquí si es necesario -->
+                            </ul>
+                        </li>
+                    </ul>
                 </div>
-                <!-- FO0TER-->     
+                <!-- FOOTER -->     
             </nav>
         
             <!-- Contenido de la página -->
