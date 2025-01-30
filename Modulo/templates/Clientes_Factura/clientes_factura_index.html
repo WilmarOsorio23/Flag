@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block titulo %} Lista de Registros de tiempos {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title">Facturación de Clientes</h4>
+    </div>
+    <div class="card-body">
+        <div class="container-fluid mb-3">
+            <!-- Formulario principal -->
+            <form method="GET">
+                <!-- Filtros en la parte superior -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label for="anio">{{ form.Anio.label }}</label>
+                        {{ form.Anio }}
+                    </div>
+                    <div class="col-md-3">
+                        <label for="mes">{{ form.Mes.label }}</label>
+                        {{ form.Mes }}
+                    </div>
+                    <div class="col-md-3">
+                        <label for="cliente">{{ form.ClienteId.label }}</label>
+                        {{ form.ClienteId }}
+                    </div>
+                    <div class="col-md-3">
+                        <label for="linea">{{ form.LineaId.label }}</label>
+                        {{ form.LineaId }}
+                    </div>
+                </div>
+        
+                <!-- Botones en la parte inferior -->
+                <div class="row container-fluid">
+                    <div class="col-md-6 text-start">
+                        <button type="submit" name="buscar" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-6 d-flex justify-content-start">
+                    <!-- Botón Guardar -->
+                    <button id="save-button" 
+                            class="btn btn-success btn-lg d-flex align-items-center me-2" 
+                            title="Guardar" 
+                            type="button" 
+                            onclick="saveAllRows()" 
+                            disabled>
+                        <i class="fas fa-save me-2"></i> Guardar
+                    </button>
+                    <!-- Botón Agregar Línea -->
+                    <button id="add-line" 
+                            class="btn btn-success btn-lg d-flex align-items-center" 
+                            title="AddLine" 
+                            type="button" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#addLineModal" 
+                            disabled>
+                        <i class="fas fa-plus me-2"></i> Agregar Línea
+                    </button>
+                </div>
+                <div class="col-md-6 d-flex justify-content-end">
+                    <!-- Textos con diseño mejorado -->
+                    <div class="text-start p-2 bg-light rounded shadow-sm">
+                        <div class="row mb-2">
+                            <p class="mb-1">
+                                <strong class="text-primary">Año:</strong>
+                                <span id="anio-original" class="text-muted"></span>
+                            </p>
+                            <p class="mb-1">
+                                <strong class="text-primary">Mes:</strong>
+                                <span id="mes-original" class="text-muted"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-2">
+            <small class="text-muted">* El botón "Guardar" se habilita al filtrar por año y mes.</small><br>
+            <small class="text-muted">* El botón "Agregar Línea" se habilita al filtrar por año, mes y cliente.</small>
+        </div>
+        
+    </div>
+    <div class="card-footer text-muted">
+        <div class="table-responsive">
+            <form id="delete-form" method="POST">
+
+                {% csrf_token %}
+                <table class="table table-primary">
+                    <thead>
+                        <tr>
+                            <th scope="col">Cliente</th>
+                            <th scope="col">Línea</th>
+                            <th scope="col">Horas</th>
+                            <th scope="col">Días</th>
+                            <th scope="col">Meses</th>
+                            <th scope="col">Valor</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Número Factura</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cliente_info in facturacion_info %}
+                            {% for factura in cliente_info.Facturas %}
+                                <tr id="row-{{ factura.ConsecutivoId }}">
+                                    {% if forloop.first %}
+                                        <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                            <strong>{{ cliente_info.Cliente }}</strong>
+                                            <input type="text" name="ClienteId" class="form-control" value="{{ cliente_info.ClienteId }}" hidden>
+                                        </td>
+                                        <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                            {{ factura.Linea }}
+                                            <input type="text" name="LineaId" class="form-control" value="{{ factura.LineaId }}" hidden>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="Horas" class="form-control" value="{{ factura.Horas|floatformat:0 }}">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="Dias" class="form-control" value="{{ factura.Dias|floatformat:0 }}">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="Meses" class="form-control" value="{{ factura.Mes|floatformat:0 }}">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="Valor" class="form-control" value="{{ factura.Valor|floatformat:0 }}">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="Descripcion" class="form-control" value="{{ factura.Descripcion }}">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="Numero_Factura" class="form-control" value="{{ factura.NumeroFactura }}">
+                                        </td>
+                                    {% else %}
+                                        <tr id="row-{{ factura.ConsecutivoId }}">
+                                            <td>
+                                                <input type="text" name="ClienteId" class="form-control" value="{{ cliente_info.ClienteId }}" hidden>
+                                            </td>
+                                            <td>
+                                                {{ factura.Linea }}
+                                                <input type="text" name="LineaId" class="form-control" value="{{ factura.LineaId }}" hidden>
+                                            </td>
+                                            <td>
+                                                <input type="text" name="Horas" class="form-control" value="{{ factura.Horas|floatformat:0 }}">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="Dias" class="form-control" value="{{ factura.Dias|floatformat:0 }}">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="Meses" class="form-control" value="{{ factura.Mes|floatformat:0 }}">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="Valor" class="form-control" value="{{ factura.Valor|floatformat:0 }}">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="Descripcion" class="form-control" value="{{ factura.Descripcion }}">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="Numero_Factura" class="form-control" value="{{ factura.NumeroFactura }}">
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                        {% if not facturacion_info %}
+                        <tr>
+                            <td colspan="8">No hay datos disponibles.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="2">Total</th>
+                            <th data-total-horas>{{ TotalesFacturacion.Total_Horas|floatformat:0 }}</th>
+                            <th data-total-dias>{{ TotalesFacturacion.Total_Dias|floatformat:0 }}</th>
+                            <th></th>
+                            <th data-total-valor>{{ TotalesFacturacion.Total_Valor|floatformat:0 }}</th>
+                            <th colspan="3"></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </form>
+        </div>
+    </div>
+    <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
+        <span id="alert-icon" class="alert-heading"></span>
+        <span id="alert-message"></span>
+    </div>
+    <div id="saving-message" class="alert alert-info" role="alert" style="display: none;">
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        Guardando...
+    </div>
+    {% if messages %}
+    <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal para agregar línea -->
+<div class="modal fade" id="addLineModal" tabindex="-1" aria-labelledby="addLineModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addLineModalLabel">Agregar Línea</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="LineaIdModal" class="form-label">Seleccione la Línea</label>
+                        <select name="LineaIdModal" class="form-select">
+                            {% for linea in Lineas %}
+                                <option value="{{ linea.LineaId }}">{{ linea.Linea }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmAddLine()">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'JS/clientes_factura.js' %}"></script>
+{% endblock %}

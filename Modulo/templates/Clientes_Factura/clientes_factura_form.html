@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %} {% if form.instance.pk %}Editar{% else %}Crear{% endif %} Registro de Tiempo {% endblock %}
+
+{% block contenido %}
+    <h2>{% if form.instance.pk %}Editar{% else %}Crear{% endif %} Empleado</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'clientes_factura_index' %}" class="btn btn-danger">Cancelar</a>
+    </form>
+{% endblock %}

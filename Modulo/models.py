@@ -493,3 +493,50 @@ class Tarifa_Clientes(models.Model):
 
     class Meta:
         db_table = 'Tarifa_Clientes'
+
+
+class ClientesContratos(models.Model):
+    ClientesContratosId = models.AutoField(primary_key=True)
+    ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    FechaInicio = models.DateField()
+    FechaFin = models.DateField(null=True, blank=True)
+    Contrato = models.BooleanField(default=True)
+    ContratoVigente = models.BooleanField(default=True)
+    OC_Facturar = models.BooleanField(default=True)
+    Parafiscales = models.BooleanField(default=True)
+    HorarioServicio = models.TextField(null=True, blank=True)
+    FechaFacturacion = models.TextField(null=True, blank=True)
+    TipoFacturacion = models.TextField(null=True, blank=True)
+    Observaciones = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'Clientes_Contratos'
+        constraints = [
+            models.UniqueConstraint(fields=['ClienteId', 'LineaId', 'FechaInicio'], name='unique_cliente_linea_fecha')
+        ]
+
+    def __str__(self):
+        return f"Contrato {self.ClientesContratosId} - Cliente {self.ClienteId} - Linea {self.LineaId}"
+    
+class FacturacionClientes(models.Model):
+    ConsecutivoId = models.AutoField(primary_key=True)
+    Anio = models.IntegerField()
+    Mes = models.IntegerField()
+    ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    Factura = models.TextField(null=True, blank=True)
+    HorasFactura = models.FloatField(null=True, blank=True)
+    DiasFactura = models.FloatField(null=True, blank=True)
+    MesFactura = models.TextField(null=True, blank=True)
+    Valor = models.FloatField(null=True, blank=True)
+    Descripcion = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'Facturacion_Clientes'
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'ClienteId', 'LineaId'], name='unique_facturacion_cliente')
+        ]
+
+    def __str__(self):
+        return f"Facturación {self.ConsecutivoId} - Cliente {self.ClienteId} - Linea {self.LineaId}"
