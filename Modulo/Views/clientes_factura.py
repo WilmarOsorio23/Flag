@@ -205,6 +205,8 @@ def clientes_factura_index(request):
     facturacion_clientes = models.FacturacionClientes.objects.all()
     cliente_id = None
 
+    facturacion_info= []
+
     if request.method == 'GET':
         form = FacturacionFilterForm(request.GET)
 
@@ -213,16 +215,16 @@ def clientes_factura_index(request):
             clientes_contratos, facturacion_clientes = filtrar_facturacion(form, clientes_contratos, facturacion_clientes)
             cliente_id = form.cleaned_data.get('ClienteId')
 
+            # Obtener la información de facturación
+            facturacion_info = obtener_info_facturacion(clientes_contratos, facturacion_clientes)
+
+            # Filtrar las líneas según el cliente seleccionado
+            if cliente_id:
+                lineas = lineas.filter(clientescontratos__ClienteId=cliente_id)
+
 
     else:
         form = FacturacionFilterForm()
-
-    # Obtener la información de facturación
-    facturacion_info = obtener_info_facturacion(clientes_contratos, facturacion_clientes)
-
-    # Filtrar las líneas según el cliente seleccionado
-    if cliente_id:
-        lineas = lineas.filter(clientescontratos__ClienteId=cliente_id)
 
     # Calcular totales
     totales_facturacion = calcular_totales_facturacion(facturacion_clientes)
