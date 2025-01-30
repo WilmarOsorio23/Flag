@@ -437,7 +437,7 @@ class ClientesContratos(models.Model):
     LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
     FechaInicio = models.DateField(null=True, blank=True)
     FechaFin = models.DateField(null=True, blank=True)
-    Contrato = models.IntegerField()
+    Contrato = models.CharField(max_length=50,null=True,blank=True)  # Cambiado a CharField
     ContratoVigente = models.BooleanField(default=True)
     OC_Facturar =  models.BooleanField(default=True)
     Parafiscales =  models.BooleanField(default=True)
@@ -494,31 +494,6 @@ class Tarifa_Clientes(models.Model):
     class Meta:
         db_table = 'Tarifa_Clientes'
 
-
-class ClientesContratos(models.Model):
-    ClientesContratosId = models.AutoField(primary_key=True)
-    ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
-    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
-    FechaInicio = models.DateField()
-    FechaFin = models.DateField(null=True, blank=True)
-    Contrato = models.BooleanField(default=True)
-    ContratoVigente = models.BooleanField(default=True)
-    OC_Facturar = models.BooleanField(default=True)
-    Parafiscales = models.BooleanField(default=True)
-    HorarioServicio = models.TextField(null=True, blank=True)
-    FechaFacturacion = models.TextField(null=True, blank=True)
-    TipoFacturacion = models.TextField(null=True, blank=True)
-    Observaciones = models.TextField(null=True, blank=True)
-
-    class Meta:
-        db_table = 'Clientes_Contratos'
-        constraints = [
-            models.UniqueConstraint(fields=['ClienteId', 'LineaId', 'FechaInicio'], name='unique_cliente_linea_fecha')
-        ]
-
-    def __str__(self):
-        return f"Contrato {self.ClientesContratosId} - Cliente {self.ClienteId} - Linea {self.LineaId}"
-    
 class FacturacionClientes(models.Model):
     ConsecutivoId = models.AutoField(primary_key=True)
     Anio = models.IntegerField()

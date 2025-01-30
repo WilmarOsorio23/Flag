@@ -91,9 +91,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 disableEditMode(selected,row);
 
             } else {
-                showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger');
+                window.location.reload()
+                showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger')
+                
+               
             }
-
+            
         })
         .catch(error => {
             console.error('Error al guardar los cambios:', error);
