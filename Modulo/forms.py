@@ -571,6 +571,23 @@ class DetalleCostosIndirectosForm(forms.ModelForm):
             'Mes': 'Mes',
             'Valor': 'Valor',
         }
+        
+    def clean(self):
+            cleaned_data = super().clean()
+            Anio = cleaned_data.get('Anio')
+            Mes = cleaned_data.get('Mes')
+            CostosId = cleaned_data.get('CostosId')
+    
+            if Detalle_Costos_Indirectos.objects.filter(
+                Anio=Anio,
+                Mes=Mes,
+                CostosId=CostosId
+            ).exists():
+                raise ValidationError(
+                    "Ya existe este costo dentro de este año y mes."
+                )  
+            return cleaned_data
+        
 
 class TiemposConceptoForm(forms.ModelForm):
     class Meta:
