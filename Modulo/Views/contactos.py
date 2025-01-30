@@ -31,6 +31,7 @@ def contactos_editar(request, id):
             detalle.Nombre  = data.get('Nombre', detalle.Nombre)
             detalle.Telefono = data.get('Telefono', detalle.Telefono)
             detalle.Direccion = data.get('Direccion', detalle.Direccion)
+            detalle.activo = data.get('Activo', detalle.activo)
             detalle.save()
 
             print(JsonResponse({'status': 'success'}))
@@ -68,7 +69,9 @@ def contactos_descargar_excel(request):
                     detalle.contactoId.Descripcion  ,
                     detalle.Nombre,
                     detalle.Telefono,
-                    detalle.Direccion
+                    detalle.Direccion,
+                    detalle.CargoId.Cargo,
+                    detalle.activo
                 ])
             except Contactos.DoesNotExist:
                 print(f"detalle con ID {item_id} no encontrada.")
@@ -78,7 +81,7 @@ def contactos_descargar_excel(request):
             return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
 
         # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','Cliente','Contacto','Nombre','Telefono','Direccion'])
+        df = pd.DataFrame(detalles_data, columns=['Id','Cliente','Contacto','Nombre','Telefono','Direccion','Cargo','Activo'])
         
         # Configurar la respuesta HTTP con el archivo Excel
         response = HttpResponse(
