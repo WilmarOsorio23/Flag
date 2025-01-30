@@ -1123,14 +1123,14 @@ class Tarifa_ClientesForm(forms.ModelForm):
 class FacturacionFilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
-        required=False,
+        required=True,
         label='Año',  
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     Mes = forms.ChoiceField(
         choices=[],
-        required=False,
+        required=True,
         label='Mes',  
         widget=forms.Select(attrs={'class': 'form-control'})
     )
