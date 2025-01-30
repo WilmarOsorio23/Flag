@@ -1,5 +1,5 @@
 from django.urls import path
-from Modulo.Views import modulo
+from Modulo.Views import clientes_factura, modulo
 from Modulo.Views import ipc
 from Modulo.Views import ind
 from Modulo.Views import TipoDocumento
@@ -258,4 +258,7 @@ urlpatterns = [
     path('historial_cargos/eliminar/', historial_cargos.historial_cargos_eliminar, name='historial_cargos_eliminar'),
     path('historial_cargos/descargar_excel/', historial_cargos.historial_cargos_descargar_excel, name='historial_cargos_descargar_excel'),
 
-]
+    # Rutas para la tabla Registro Tiempos
+    path('clientes_factura/', clientes_factura.clientes_factura_index, name='clientes_factura_index'),
+    path('clientes_factura/guardar/', clientes_factura.clientes_factura_guardar, name='clientes_factura_guardar'),
+    ]

@@ -1,63 +1,16 @@
 from openpyxl import Workbook
 import pandas as pd
-import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.db import models
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.db import models
-from django.db.models import Q
-from django.contrib import messages
-from .models import Modulo
-from .forms import ModuloForm
-from .models import IPC
-from .models import Clientes
-from .forms import IPCForm
-from .models import IND
-from .forms import INDForm
-from .models import Linea
-from .forms import LineaForm
-from .models import Perfil
-from .forms import PerfilForm
-from .models import TipoDocumento
-from .forms import TipoDocumentoForm
-from .forms import ClientesForm
-from .models import Consultores
-from .forms import ConsultoresForm
-from .models import Certificacion
-from .forms import CertificacionForm
-from .models import Concepto
-from .forms import ConceptoForm
-from .models import Costos_Indirectos
-from .forms import CostosIndirectosForm
-from .models import Gastos
-from .forms import GastoForm
-from .models import Detalle_Gastos
-from .forms import DetalleGastosForm
-from .models import Total_Gastos
-from .forms import TotalGastosForm
-from .models import Total_Costos_Indirectos
-from .forms import Total_Costos_IndirectosForm
-from .models import Detalle_Costos_Indirectos
-from .forms import DetalleCostosIndirectosForm
-from .models import TiemposConcepto
+from .models import Certificacion, TiemposConcepto
 from .forms import TiemposConceptoForm
 from .models import Tiempos_Cliente
 from .forms import Tiempos_ClienteForm
-from .models import Nomina
-from .forms import NominaForm
 from .models import Detalle_Certificacion
-from .forms import Detalle_CertificacionForm
 from .models import Empleado
-from .forms import EmpleadoForm
 from .forms import EmpleadoFilterForm
-from .models import TiposContactos
-from .forms import TiposContactosForm
-from .models import Contactos
-from .forms import ContactosForm
-from .models import Historial_Cargos
-from .forms import HistorialCargosForm
 
 def inicio(request):
     return render(request, 'paginas/Inicio.html')

@@ -664,9 +664,6 @@ class NominaForm(forms.ModelForm):
             'Cliente': 'Cliente',
         }
 
-from django import forms
-from .models import Detalle_Certificacion, Certificacion  # Asegúrate de importar el modelo correcto
-
 class Detalle_CertificacionForm(forms.ModelForm):
 
     CertificacionId = forms.ModelChoiceField(
@@ -860,7 +857,6 @@ class EmpleadosEstudiosForm(forms.ModelForm):
             'fecha_Graduacion': 'Fecha de Graduacion',
         }
 
-
 class HorasHabilesForm(forms.ModelForm):
     class Meta:
         model = Horas_Habiles
@@ -889,8 +885,6 @@ class HorasHabilesForm(forms.ModelForm):
             'Dias_Habiles': 'Días Hábiles',
             'Horas_Laborales': 'Horas Laborales',
         }
-
-
 
 class Tarifa_ConsultoresForm(forms.ModelForm):
     documentoId = forms.ModelChoiceField(
@@ -950,3 +944,58 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             )
         
         return cleaned_data
+
+class FacturacionFilterForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=False,
+        label='Año',  
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    Mes = forms.ChoiceField(
+        choices=[],
+        required=False,
+        label='Mes',  
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    ClienteId = forms.ModelChoiceField(
+        queryset=Clientes.objects.all(), 
+        required=False, 
+        label='Cliente',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_anio()
+        self.populate_mes()
+        self.populate_cliente()
+        self.populate_linea()
+
+    def populate_anio(self):
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = [('', 'Seleccione el mes')] + meses
+
+    def populate_cliente(self):
+        clientes = Clientes.objects.values_list('ClienteId', 'Nombre_Cliente').distinct()
+        self.fields['ClienteId'].choices = [('', 'Seleccione el cliente')] + list(clientes)
+
+    def populate_linea(self):
+        linea = Linea.objects.values_list('LineaId', 'Linea').distinct()
+        self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)
