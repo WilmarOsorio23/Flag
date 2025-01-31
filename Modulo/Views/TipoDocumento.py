@@ -60,6 +60,7 @@ def tipo_documento_eliminar(request):
     return redirect('tipo_documento_index')
 
 def verificar_relaciones(request):
+    print("llego hasta verificar relaciones de tipo documento")
     if request.method == 'POST':
         import json
         data = json.loads(request.body)
@@ -69,8 +70,8 @@ def verificar_relaciones(request):
         relacionados = []
         for id in ids:
             if (
-                Empleado.objects.filter(TipoDocumentoId=id).exists() or
-                Clientes.objects.filter(TipoDocumentoId=id).exists()
+                Empleado.objects.filter(TipoDocumento=id).exists() or
+                Clientes.objects.filter(TipoDocumentoID=id).exists()
             ): 
                 relacionados.append(id)
 

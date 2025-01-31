@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
     async function verifyRelations(ids, csrfToken) {
         try {
-            const response = await fetch('/verificar-relaciones/', {
+            const response = await fetch('verificar-relaciones/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
     async function verifyRelations(ids, csrfToken) {
         try {
-            const response = await fetch('/verificar-relaciones/', {
+            const response = await fetch('verificar-relaciones/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

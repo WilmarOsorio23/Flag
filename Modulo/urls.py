@@ -88,7 +88,7 @@ urlpatterns = [
     path('tipo_documento/', TipoDocumento.tipo_documento_index, name='tipo_documento_index'),
     path('tipo_documento/crear', TipoDocumento.tipo_documento_crear, name='tipo_documento_crear'),
     path('tipo_documento/editar/<int:id>/', TipoDocumento.tipo_documento_editar, name='tipo_documento_editar'),
-    path('verificar-relaciones/', TipoDocumento.verificar_relaciones, name='verificar_relaciones'),
+    path('tipo_documento/verificar-relaciones/', TipoDocumento.verificar_relaciones, name='verificar_relaciones'),
     path('tipo_documento/eliminar', TipoDocumento.tipo_documento_eliminar, name='tipo_documento_eliminar'),
     path('tipo_documento/descargar_excel', TipoDocumento.tipo_documento_descargar_excel, name='tipo_documento_descargar_excel'),
 
