@@ -3,7 +3,7 @@ import json
 from pyexpat.errors import messages
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from Modulo import models
@@ -33,19 +33,19 @@ def tipo_documento_crear(request):
 
 @csrf_exempt
 def tipo_documento_editar(request, id):
+    print("llego hasta editar")
     if request.method == 'POST':
         try:
-            data = json.loads(request.body.decode('utf-8'))
-            tipo_documento = TipoDocumento.objects.get(pk=id)
-            form = TipoDocumentoForm(data, instance=tipo_documento)
+            data = json.loads(request.body)
+            tipoDocumento = get_object_or_404( TipoDocumento, pk=id)
+            tipoDocumento.Nombre = data.get('Nombre', tipoDocumento.Nombre)
+            tipoDocumento.descripcion = data.get('Descripcion', tipoDocumento.descripcion)
+            tipoDocumento.save()
 
-            if form.is_valid():
-                form.save()
-                return JsonResponse({'status': 'success'})
-            else:
-                return JsonResponse({'errors': form.errors}, status=400)
+            print(JsonResponse({'status': 'success'}))
+            return JsonResponse({'status': 'success'})
         except TipoDocumento.DoesNotExist:
-            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
+            return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
     else:

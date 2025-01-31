@@ -375,14 +375,20 @@ class TipoDocumentoForm(forms.ModelForm):
         model = TipoDocumento
         fields = '__all__'
         widgets = {
-            'nombre': forms.TextInput(attrs={
+            'Nombre': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el nombre'
             }),
+            'descripcion': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese la descripción'
+            }),
         }
         labels = {
-            'nombre': 'Nombre',
+            'Nombre': 'Nombre',
+            'descripcion': 'Descripción',
         }
 
 class CertificacionForm(forms.ModelForm):
