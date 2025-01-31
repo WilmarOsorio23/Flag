@@ -32,6 +32,7 @@ def contactos_editar(request, id):
             detalle.Telefono = data.get('Telefono', detalle.Telefono)
             detalle.Direccion = data.get('Direccion', detalle.Direccion)
             detalle.activo = data.get('Activo', detalle.activo)
+            detalle.Cargo= data.get('Cargo', detalle.Cargo)
             detalle.save()
 
             print(JsonResponse({'status': 'success'}))

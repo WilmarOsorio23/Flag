@@ -334,11 +334,11 @@ class Contactos(models.Model):
     Nombre = models.CharField(max_length=100)
     Telefono = models.CharField(max_length=20, null=True, blank=True)
     Direccion = models.CharField(max_length=255, null=True, blank=True)
-    CargoId = models.ForeignKey(Cargos, on_delete=models.CASCADE, db_column='CargoId')
+    Cargo = models.CharField(max_length=70)
     activo = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"id: {self.id}, ClientedId: {self.clienteId}, ContactoId: {self.contactoId}, Nombre: {self.Nombre}, telefono: {self.Telefono}, Direccion: {self.Direccion}, CargoId: {self.CargoId}, Activo: {self.activo}"
+        return f"id: {self.id}, ClientedId: {self.clienteId}, ContactoId: {self.contactoId}, Nombre: {self.Nombre}, telefono: {self.Telefono}, Direccion: {self.Direccion}, CargoId: {self.Cargo}, Activo: {self.activo}"
 
     class Meta:
         db_table = 'Contactos'
