@@ -136,12 +136,6 @@ class TiposContactosForm(forms.ModelForm):
         }
 
 class ContactosForm(forms.ModelForm):
-    
-    CargoId= forms.ModelChoiceField(
-        queryset=Cargos.objects.all(),
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='Cargo'
-    )   
     contactoId = forms.ModelChoiceField(
         queryset=TiposContactos.objects.all(),
         widget=forms.Select(attrs={'class': 'form-control'}),
@@ -160,14 +154,16 @@ class ContactosForm(forms.ModelForm):
             'Nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre'}),
             'Telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono'}),
             'Direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la dirección'}),
-            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'})
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'Cargo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el cargo'}),
         }
 
         labels ={
             'Nombre': 'Nombre',
             'Telefono': 'Teléfono',
             'Direccion': 'Dirección',  
-            'activo': 'Activo'
+            'activo': 'Activo',
+            'Cargo':'Cargo',
         }
 
 class ConsultoresForm(forms.ModelForm):

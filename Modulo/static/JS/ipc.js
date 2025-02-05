@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-
     window.cancelEdit = function() {
         console.log("esta en cancel")
         let selected = document.querySelectorAll('.row-select:checked');
@@ -41,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length != 1) {
-            showMessage('Error al guardar: No hay un Perfil seleccionado.', 'danger');
+            showMessage('Error al guardar: No hay un detalle seleccionado.', 'danger');
             return;
         }
 
@@ -52,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'Mes': row.querySelector('input[name ="Mes"]').value,
             'Indice': row.querySelector('input[name ="Indice"]').value
         }
-        
+
         let id = selected[0].value;
         // Deshabilitar los checkboxes y el botón de edición
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
@@ -123,16 +122,13 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('select-all').disabled = true;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
-    
+
+        // Convertir inputs en editables
         let input = row.querySelector('[name ="Indice"]');
         input.classList.remove('form-control-plaintext');
         input.classList.add('form-control');
         input.readOnly = false;
 
-        // Convertir inputs en editables
-        
-      
-      
         // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
@@ -154,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Inicialización del modal de confirmación y botón de confirmación de eliminación
     const deleteForm = document.getElementById('delete-form');
-    const Modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+    const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
     const confirmDeleteButton = document.getElementById('confirm-delete-btn');
 
     // Asociar el evento de clic al botón de seleccionar/deseleccionar todos los checkboxes
@@ -165,6 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
         handleDeleteConfirmation(event, confirmDeleteModal, confirmDeleteButton, deleteForm, csrfToken);
     });
     
+ 
     // Funciones reutilizables
 
     // Prevenir el envío del formulario al presionar la tecla Enter
@@ -199,18 +196,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        Modal.show(); // Mostrar el modal de confirmación de eliminación
+        modal.show(); // Mostrar el modal de confirmación de eliminación
 
         confirmButton.onclick = async function () {
-            const isRelated = await verifyRelations(selectedIds, csrfToken); // Verificar si hay relaciones con otros elementos
-            if (isRelated) {
-                showMessage('Algunos elementos no pueden ser eliminados porque están relacionados con otras tablas.', 'danger'); // Mensaje de error si hay relaciones
-                Modal.hide(); // Ocultar el modal
-                document.getElementById('select-all').checked = false;
-                document.querySelectorAll('.row-select').forEach(checkbox => checkbox.checked = false);
-                return;
-            }
-
             const itemsToDelete = document.getElementById('items_to_delete');
             if (itemsToDelete) {
                 itemsToDelete.value = selectedIds.join(',');
@@ -275,6 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 800);
     }
 
+
     // Confirmación antes de descargar
     window.confirmDownload = function() {
         let selected = document.querySelectorAll('.row-select:checked');
@@ -318,6 +307,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
    
+    
     
 
     
