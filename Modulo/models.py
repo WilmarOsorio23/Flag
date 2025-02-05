@@ -328,17 +328,17 @@ class TiposContactos(models.Model):
         db_table = 'Tipos_Contactos'
 
 class Contactos(models.Model):
-    id=models.AutoField(primary_key=True),
+    id = models.AutoField(primary_key=True)
     clienteId = models.ForeignKey(Clientes, on_delete=models.CASCADE, db_column='ClienteId')
     contactoId = models.ForeignKey(TiposContactos, on_delete=models.CASCADE, db_column='contactoId')
     Nombre = models.CharField(max_length=100)
     Telefono = models.CharField(max_length=20, null=True, blank=True)
     Direccion = models.CharField(max_length=255, null=True, blank=True)
-    Cargo = models.CharField(max_length=70)
+    CargoId = models.ForeignKey(Cargos, on_delete=models.CASCADE, db_column='CargoId')
     activo = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"id: {self.id}, ClientedId: {self.clienteId}, ContactoId: {self.contactoId}, Nombre: {self.Nombre}, telefono: {self.Telefono}, Direccion: {self.Direccion}, CargoId: {self.Cargo}, Activo: {self.activo}"
+        return f"id: {self.id}, ClienteId: {self.clienteId}, ContactoId: {self.contactoId}, Nombre: {self.Nombre}, Telefono: {self.Telefono}, Direccion: {self.Direccion}, CargoId: {self.CargoId}, Activo: {self.activo}"
 
     class Meta:
         db_table = 'Contactos'

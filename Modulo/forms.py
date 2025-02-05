@@ -136,23 +136,22 @@ class TiposContactosForm(forms.ModelForm):
         }
 
 class ContactosForm(forms.ModelForm):
-    contactoId = forms.ModelChoiceField(
-        queryset=TiposContactos.objects.all(),
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='Tipo de Contacto'
-    )
-
-    clienteId = forms.ModelChoiceField( 
-        queryset=Clientes.objects.all(),
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='Cliente'
-    )
-
+    
     CargoId= forms.ModelChoiceField(
         queryset=Cargos.objects.all(),
         widget=forms.Select(attrs={'class': 'form-control'}),
         label='Cargo'
     )   
+    contactoId = forms.ModelChoiceField(
+        queryset=TiposContactos.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Tipo de Contacto'
+    )
+    clienteId = forms.ModelChoiceField( 
+        queryset=Clientes.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Cliente'
+    )
 
     class Meta:
         model = Contactos
@@ -161,14 +160,14 @@ class ContactosForm(forms.ModelForm):
             'Nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre'}),
             'Telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono'}),
             'Direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la dirección'}),
-            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-     
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'})
         }
-        labels = {
+
+        labels ={
             'Nombre': 'Nombre',
             'Telefono': 'Teléfono',
-            'Direccion': 'Dirección',
-           
+            'Direccion': 'Dirección',  
+            'activo': 'Activo'
         }
 
 class ConsultoresForm(forms.ModelForm):
