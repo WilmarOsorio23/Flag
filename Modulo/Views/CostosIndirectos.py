@@ -63,6 +63,7 @@ def costos_indirectos_eliminar(request):
     return redirect('costos_indirectos_index')
 
 def verificar_relaciones(request):
+    print("entro a Verificando relaciones de costos indirectos")
     if request.method == 'POST':
         import json
         data = json.loads(request.body)
@@ -72,7 +73,7 @@ def verificar_relaciones(request):
         relacionados = []
         for id in ids:
             if (
-                Detalle_Costos_Indirectos.objects.filter(CostoId=id).exists() 
+                Detalle_Costos_Indirectos.objects.filter(CostosId=id).exists() 
             ): 
                 relacionados.append(id)
 

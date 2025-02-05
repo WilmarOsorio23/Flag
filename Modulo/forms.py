@@ -252,6 +252,16 @@ class ConsultoresForm(forms.ModelForm):
             self.fields['Direccion'].required = False  # Permitir campo vacío
             self.fields['Fecha_Retiro'].required = False  # Permitir campo vacío
 
+    def clean(self):
+        cleaned_data = super().clean()
+        fecha_retiro = cleaned_data.get('Fecha_Retiro')
+        estado = cleaned_data.get('Estado')
+
+        if fecha_retiro and estado:
+            raise ValidationError('Si la Fecha de Retiro está presente, el Estado debe ser Inactivo.')
+        
+        return cleaned_data
+
 class ColaboradorFilterForm(forms.Form):
 
     Empleado = forms.ChoiceField(

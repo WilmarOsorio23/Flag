@@ -128,6 +128,7 @@ urlpatterns = [
     path('costos_indirectos/crear', CostosIndirectos.costos_indirectos_crear, name='costos_indirectos_crear'),
     path('costos_indirectos/editar/<int:id>/', CostosIndirectos.costos_indirectos_editar, name='costos_indirectos_editar'),
     path('costos_indirectos/eliminar', CostosIndirectos.costos_indirectos_eliminar, name='costos_indirectos_eliminar'),
+    path('costos_indirectos/verificar-relaciones/', CostosIndirectos.verificar_relaciones, name='costos_indirectos_verificar_relaciones'),
     path('costos_indirectos/descargar_excel', CostosIndirectos.costos_indirectos_descargar_excel, name='costos_indirectos_descargar_excel'),
 
     # Rutas para la tabla Concepto
