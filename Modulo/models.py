@@ -139,7 +139,7 @@ class Consultores(models.Model):
     Fecha_Retiro = models.DateField(null=True, blank=True)
     Direccion = models.CharField(max_length=255, null=True, blank=True, verbose_name="Dirección")
     Telefono = models.CharField(max_length=20, null=True, blank=True, verbose_name="Teléfono")
-    Fecha_Operacion = models.DateTimeField(auto_now=True)
+    Fecha_Operacion = models.DateTimeField(auto_now_add=True)  # Cambiado a auto_now_add=True
 
     def __str__(self):
         return f'{self.TipoDocumentoID} - {self.Documento} - {self.Nombre}' 
