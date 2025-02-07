@@ -230,10 +230,10 @@ class ConsultoresForm(forms.ModelForm):
                 'placeholder': 'Teléfono (opcional)',
                 'type': 'number'
             }),
-            'Fecha_Operacion': forms.TextInput(attrs={
+            'Fecha_Operacion': forms.DateInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Fecha de Operacion (opcional)',
-                'type': 'number'
+                'type': 'date',
+                'placeholder': 'Fecha de Operación'
             }),
         }
     def __init__(self, *args, **kwargs):
@@ -989,42 +989,28 @@ class HorasHabilesForm(forms.ModelForm):
         }
 
 class Tarifa_ConsultoresForm(forms.ModelForm):
-    documentoId = forms.ModelChoiceField(
-        queryset=Consultores.objects.all(),  # Relación directa con el modelo Consultores
-        widget=forms.Select(attrs={
-            'class': 'form-control'
-        }),
-        label='Documento'
-    )
-
-    clienteID = forms.ModelChoiceField(
-        queryset=Clientes.objects.all(),  # Relación directa con el modelo Consultores
-        widget=forms.Select(attrs={
-            'class': 'form-control'
-        }),
-        label='Cliente'
-    )
 
     monedaId = forms.ModelChoiceField(
-        queryset=Moneda.objects.all(),  # Relación directa con el modelo Consultores
+        queryset=Moneda.objects.all(),
         widget=forms.Select(attrs={
             'class': 'form-control'
         }),
         label='Moneda'
     )
-
+    
     class Meta:
-        
         model = Tarifa_Consultores
         fields = '__all__'
         widgets = {
+            'documentoId': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Seleccione el documento'}),
             'anio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el año'}),
             'mes': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el mes'}),
+            'clienteID': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Seleccione el cliente'}),
             'valorHora': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor hora', 'step': '0.01'}),
             'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día', 'step': '0.01'}),
-            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'})
+            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'}),
+            
         }
-
         labels = {
             'anio': 'Año',
             'mes': 'Mes',
@@ -1032,6 +1018,11 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             'valorDia': 'Valor Día',
             'valorMes': 'Valor Mes',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['monedaId'].required = True  # Campo obligatorio
+        self.fields['monedaId'].label_from_instance = lambda obj: obj.Nombre  # Mostrar solo el nombre de la moneda
 
     def clean(self):
         cleaned_data = super().clean()

@@ -211,7 +211,7 @@ urlpatterns = [
     # Rutas para tabla Tarifa de Consultores
     path('tarifa_consultores/', tarifa_consultores.tarifa_consultores_index, name='tarifa_consultores_index'),
     path('tarifa_consultores/crear', tarifa_consultores.tarifa_consultores_crear, name='tarifa_consultores_crear'),
-    path('tarifa_consultores/editar/<int:id>/', tarifa_consultores.tarifa_consultores_editar, name='tarifa_consultores_editar'),
+    path('tarifa_consultores/editar/<int:idd>/', tarifa_consultores.tarifa_consultores_editar, name='tarifa_consultores_editar'),
     path('tarifa_consultores/eliminar', tarifa_consultores.tarifa_consultores_eliminar, name='tarifa_consultores_eliminar'),
     path('tarifa_consultores/descargar_excel', tarifa_consultores.tarifa_consultores_descargar_excel, name='tarifa_consultores_descargar_excel'),
 

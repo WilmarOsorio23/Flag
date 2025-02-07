@@ -1,5 +1,6 @@
 # Tarifa de Consultores
 import json
+from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from django.shortcuts import get_object_or_404, redirect, render
 from Modulo.forms import Tarifa_ConsultoresForm
@@ -13,7 +14,8 @@ import json
 
 def tarifa_consultores_index(request):
     tarifa_consultores = Tarifa_Consultores.objects.all()
-    return render(request, 'Tarifa_Consultores/tarifa_consultores_index.html', {'tarifa_consultores': tarifa_consultores})  
+    form=Tarifa_ConsultoresForm()
+    return render(request, 'Tarifa_Consultores/tarifa_consultores_index.html', {'tarifa_consultores': tarifa_consultores, 'form': form})  
 
 def tarifa_consultores_crear(request):
     if request.method == 'POST':
@@ -29,26 +31,28 @@ def tarifa_consultores_crear(request):
         form = Tarifa_ConsultoresForm()
     return render(request, 'Tarifa_Consultores/tarifa_consultores_form.html', {'form': form})   
 
-def tarifa_consultores_editar(request, id):
-     print("llego hasta editar")
-     if request.method == 'POST':
+@csrf_exempt
+def tarifa_consultores_editar(request, idd):
+    print("llego hasta editar")
+    if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            tarifa = get_object_or_404( Tarifa_Consultores, pk=id)
+            tarifa = get_object_or_404(Tarifa_Consultores, pk=idd)
             tarifa.valorHora = data.get('valorHora', tarifa.valorHora)
             tarifa.valorDia = data.get('valorDia', tarifa.valorDia)
             tarifa.valorMes = data.get('valorMes', tarifa.valorMes)
+            tarifa.monedaId_id = data.get('monedaId', tarifa.monedaId_id)
+           
+            
             tarifa.save()
-
-            print(JsonResponse({'status': 'success'}))
             return JsonResponse({'status': 'success'})
         except Tarifa_Consultores.DoesNotExist:
             return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-     else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)   
-
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405) 
+    
 def tarifa_consultores_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
