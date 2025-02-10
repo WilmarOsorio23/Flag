@@ -429,51 +429,6 @@ class TiemposFacturables(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['Anio', 'Mes', 'LineaId', 'ClienteId'], name='unique_tiempos_facturables')
         ]
-
-
-class ClientesContratos(models.Model):
-    ClientesContratosId = models.AutoField(primary_key=True)
-    ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
-    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
-    FechaInicio = models.DateField(null=True, blank=True)
-    FechaFin = models.DateField(null=True, blank=True)
-    Contrato = models.IntegerField()
-    ContratoVigente = models.BooleanField(default=True)
-    OC_Facturar =  models.BooleanField(default=True)
-    Parafiscales =  models.BooleanField(default=True)
-    HorarioServicio = models.TextField(null=True, blank=True)
-    FechaFacturacion = models.TextField(null=True, blank=True)
-    TipoFacturacion = models.TextField(null=True, blank=True)
-    Observaciones = models.TextField(null=True, blank=True)
-
-    class Meta:
-        db_table = 'Clientes_Contratos'
-
-    def __str__(self):
-        return f"ContratoId:{self.ClientesContratosId} - Cliente: {self.ClienteId} - Linea: {self.LineaId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - Contrato: {self.Contrato} - ContratoVigente: {self.ContratoVigente} - OC_Facturar: {self.OC_Facturar} - Parafiscales: {self.Parafiscales} - HorarioServicio: {self.HorarioServicio} - FechaFacturacion: {self.FechaFacturacion} - TipoFacturacion: {self.TipoFacturacion} - Observaciones: {self.Observaciones}"
-    
-    
-class FacturacionClientes(models.Model):
-    ConsecutivoId = models.AutoField(primary_key=True)
-    Anio = models.IntegerField()
-    Mes = models.IntegerField()
-    ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
-    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
-    Factura = models.TextField(null=True, blank=True)
-    HorasFactura = models.FloatField(null=True, blank=True)
-    DiasFactura = models.FloatField(null=True, blank=True)
-    MesFactura = models.TextField(null=True, blank=True)
-    Valor = models.FloatField(null=True, blank=True)
-    Descripcion = models.TextField(null=True, blank=True)
-
-    class Meta:
-        db_table = 'Facturacion_Clientes'
-        constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'ClienteId', 'LineaId'], name='unique_facturacion_cliente')
-        ]
-
-    def __str__(self):
-        return f"Facturación {self.ConsecutivoId} - Cliente {self.ClienteId} - Linea {self.LineaId}"
     
 class Tarifa_Clientes(models.Model):
     id = models.AutoField(primary_key=True)
@@ -540,3 +495,38 @@ class FacturacionClientes(models.Model):
 
     def __str__(self):
         return f"Facturación {self.ConsecutivoId} - Cliente {self.ClienteId} - Linea {self.LineaId}"
+    
+
+class Ind_Operat_Clientes(models.Model):
+    Id = models.AutoField(primary_key=True)
+    Anio = models.IntegerField()
+    Mes = models.IntegerField()
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    HorasTrabajadas = models.FloatField()
+    HorasFacturables = models.FloatField()
+
+    class Meta:
+        db_table = 'Ind_Operat_Clientes'
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'LineaId'], name='unique_Ind_Operat_Clientes')
+        ]
+
+    def __str__(self):
+        return f"ID {self.id} - Año {self.Anio} - Mes {self.Mes} - Linea {self.Linea_id}"
+    
+class Ind_Operat_Conceptos(models.Model):
+    Id = models.AutoField(primary_key=True)
+    Anio = models.IntegerField()
+    Mes = models.IntegerField()
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    ConceptoId = models.ForeignKey('Concepto', on_delete=models.CASCADE, db_column='ConceptoId')
+    HorasConcepto = models.FloatField()
+
+    class Meta:
+        db_table = 'Ind_Operat_Conceptos'
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'LineaId', 'ConceptoId'], name='unique_Ind_Operat_Conceptos')
+        ]
+
+    def __str__(self):
+        return f"ID {self.Id} - Año {self.Anio} - Mes {self.Mes} - Linea {self.LineaId} - Concepto {self.ConceptoId}"
