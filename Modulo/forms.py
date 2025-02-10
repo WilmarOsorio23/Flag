@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 from .models import Moneda
 from .models import ClientesContratos
 from .models import Tarifa_Clientes
+from .models import Referencia
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -1174,10 +1175,7 @@ class Tarifa_ClientesForm(forms.ModelForm):
         ).exists():
             raise ValidationError("Ya existe un registro con el mismo Cliente, Línea, Modulo, Año y Mes.")
         return cleaned_data 
-
-
-        
-
+    
 class FacturacionFilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
@@ -1232,3 +1230,16 @@ class FacturacionFilterForm(forms.Form):
     def populate_linea(self):
         linea = Linea.objects.values_list('LineaId', 'Linea').distinct()
         self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)
+
+class ReferenciaForm(forms.ModelForm):
+    class Meta:
+        model = Referencia
+        fields = '__all__'
+        widgets = {
+            'codigoReferencia': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el codigo'}),
+            'descripcionReferencia': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ingrese la descripcion'}),
+        }
+        labels = {
+            'codigoReferencia': 'Codigo',
+            'descripcionReferencia': 'Descripcion',
+        }

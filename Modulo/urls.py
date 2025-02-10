@@ -33,6 +33,7 @@ from Modulo.Views import tarifa_consultores
 from Modulo.Views import moneda
 from Modulo.Views import clientes_Contratos
 from Modulo.Views import tarifa_Clientes
+from Modulo.Views import referencia
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -287,4 +288,12 @@ urlpatterns = [
     # Rutas para la tabla Registro Tiempos
     path('clientes_factura/', clientes_factura.clientes_factura_index, name='clientes_factura_index'),
     path('clientes_factura/guardar/', clientes_factura.clientes_factura_guardar, name='clientes_factura_guardar'),
+
+    # Rutas para la tabla Referencias
+    path('referencia/', referencia.referencia_index, name='referencia_index'),
+    path('referencia/crear', referencia.referencia_crear, name='referencia_crear'),
+    path('referencia/editar/<int:id>/', referencia.referencia_editar, name='referencia_editar'),
+    path('referencia/verificar-relaciones/', referencia.verificar_relaciones, name='verificar_relaciones'),
+    path('referencia/eliminar', referencia.referencia_eliminar, name='referencia_eliminar'),
+    path('referencia/descargar_excel', referencia.referencia_descargar_excel, name='referencia_descargar_excel'),
     ]

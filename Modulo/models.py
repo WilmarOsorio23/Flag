@@ -491,9 +491,10 @@ class Tarifa_Clientes(models.Model):
     valorMes = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     bolsaMes = models.DecimalField(max_digits=10, decimal_places=2)
     monedaId = models.ForeignKey('Moneda', on_delete=models.CASCADE, db_column='monedaId')
+    referenciaId= models.ForeignKey('Referencia', on_delete=models.CASCADE, db_column='referenciaId')
 
     def __str__(self):
-        return f"id: {self.id}, ClienteId: {self.clienteId}, LineaId: {self.lineaId}, ModuloId: {self.moduloId}, Anio: {self.anio}, Mes: {self.mes}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, BolsaMes: {self.bolsaMes}, MonedaId: {self.monedaId}"
+        return f"id: {self.id}, ClienteId: {self.clienteId}, LineaId: {self.lineaId}, ModuloId: {self.moduloId}, Anio: {self.anio}, Mes: {self.mes}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, BolsaMes: {self.bolsaMes}, MonedaId: {self.monedaId}, ReferenciaId: {self.referenciaId}"
 
     class Meta:
         db_table = 'Tarifa_Clientes'
@@ -519,3 +520,14 @@ class FacturacionClientes(models.Model):
 
     def __str__(self):
         return f"Facturación {self.ConsecutivoId} - Cliente {self.ClienteId} - Linea {self.LineaId}"
+    
+class Referencia(models.Model):
+    id = models.AutoField(primary_key=True)
+    codigoReferencia = models.CharField(max_length=20)
+    descripcionReferencia = models.CharField(max_length=60)
+
+    def __str__(self):
+        return f"id: {self.id}, codigoReferencia: {self.codigoReferencia}, Referencia: {self.descripcionReferencia}"
+
+    class Meta:
+        db_table = 'Referencias'
