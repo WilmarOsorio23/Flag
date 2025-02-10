@@ -11,6 +11,7 @@ from Modulo.Views import gastos
 from Modulo.Views import cargos
 from Modulo.Views import empleado_nomina_filtrado
 from Modulo.Views import informe_empleados
+from Modulo.Views import informe_estudios  
 from Modulo.Views import empleado
 from Modulo.Views import consultores
 from Modulo.Views import Nomina
@@ -276,6 +277,10 @@ urlpatterns = [
     # Rutas para informe de empleados
     path('informes/empleados/', informe_empleados.informe_empleados, name='informes_empleado_index'),
     path('informes/empleados/exportar_empleados_excel', informe_empleados.exportar_empleados_excel, name='exportar_empleados_excel'),
+
+    #Ruta para informe de estudios
+    path('informes/estudios/', informe_estudios.empleado_estudio_filtrado, name='informes_estudios_index'),
+    path('informes/salarios/exportar_estudio_excel', informe_estudios.exportar_estudio_excel, name='exportar_estudio_excel'),
 
     # Rutas para tabla Historial Cargos
     path('historial_cargos/', historial_cargos.historial_cargos_index, name='historial_cargos_index'),
