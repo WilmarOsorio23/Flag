@@ -79,6 +79,107 @@ document.addEventListener('DOMContentLoaded', function () {
     function saveAllRows() {
         const rows = document.querySelectorAll('tbody tr');
         const data = [];
+        const lineasData = {}; // Para acumular totales por línea
+        const conceptosData = {}; // Para acumular totales por concepto y línea
+
+        // 1. Recopilar datos de empleados y consultores
+        rows.forEach((row) => {
+            const rowData = {};
+            const inputs = row.querySelectorAll('input');
+            
+            // Datos básicos
+            inputs.forEach(input => {
+                if (input.name) rowData[input.name] = input.value || null;
+            });
+    
+            // Procesar clientes y conceptos
+            const clientes = [];
+            const conceptos = [];
+            
+            // Clientes (Total Operación)
+            row.querySelectorAll('input[name^="ClienteId_"]').forEach((input, i) => {
+                const clienteId = input.value.trim();
+                const tiempoCliente = row.querySelector(`input[name="Tiempo_Clientes_${i + 1}"]`).value.trim() || '0';
+                
+                clientes.push({
+                    cliente: clienteId,
+                    tiempo: parseFloat(tiempoCliente)
+                });
+            });
+    
+            // Conceptos
+            row.querySelectorAll('input[name^="ConceptoId_"]').forEach((input, i) => {
+                const conceptoId = input.value.trim();
+                const tiempoConcepto = row.querySelector(`input[name="Tiempo_Conceptos_${i + 1}"]`).value.trim() || '0';
+                
+                // Verificar si las horas son mayores a 0
+                if (parseFloat(tiempoConcepto) > 0) {
+                    conceptos.push({
+                        concepto: conceptoId,
+                        tiempo: parseFloat(tiempoConcepto)
+                    });
+                }
+            });
+    
+            // Acumular totales por línea
+            const lineaId = row.querySelector('[name="LineaId"]').value;
+            if (!lineasData[lineaId]) {
+                lineasData[lineaId] = {
+                    horasTrabajadas: 0,
+                    horasFacturables: 0,
+                    conceptos: {}
+                };
+            }
+    
+            // Sumar horas trabajadas (Total Operación)
+            lineasData[lineaId].horasTrabajadas += clientes.reduce((acc, curr) => acc + curr.tiempo, 0);
+    
+            // Sumar conceptos
+            conceptos.forEach(({ concepto, tiempo }) => {
+                if (!lineasData[lineaId].conceptos[concepto]) {
+                    lineasData[lineaId].conceptos[concepto] = 0;
+                }
+                lineasData[lineaId].conceptos[concepto] += tiempo;
+            });
+        });
+    
+        // 2. Procesar Horas Facturables del footer
+        document.querySelectorAll('tfoot tr').forEach(row => {
+            const lineaId = row.querySelector('[name="LineaId_1"]')?.value; // Ajustar selector según tu HTML
+            if (lineaId) {
+                const totalFacturable = parseFloat(row.querySelector('[data-total-facturable-linea-row]').textContent) || 0;
+                if (lineasData[lineaId]) {
+                    lineasData[lineaId].horasFacturables = totalFacturable;
+                }
+            }
+        });
+    
+        // 3. Estructurar datos para enviar
+        Object.keys(lineasData).forEach(lineaId => {
+            data.push({
+                'type': 'linea',
+                'LineaId': lineaId,
+                'horasTrabajadas': lineasData[lineaId].horasTrabajadas,
+                'horasFacturables': lineasData[lineaId].horasFacturables,
+                'Anio': window.originalAnio,
+                'Mes': window.originalMes
+            });
+    
+            // Agregar conceptos solo si las horas son mayores a 0
+            Object.keys(lineasData[lineaId].conceptos).forEach(conceptoId => {
+                const horas = lineasData[lineaId].conceptos[conceptoId];
+                if (horas > 0) {
+                    data.push({
+                        'type': 'concepto',
+                        'LineaId': lineaId,
+                        'ConceptoId': conceptoId,
+                        'horas': horas,
+                        'Anio': window.originalAnio,
+                        'Mes': window.originalMes
+                    });
+                }
+            });
+        });
 
         rows.forEach((row, index) => {
             const rowData = {};
@@ -95,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 // Crear arrays para los clientes, conceptos y facturables, usando los nombres de los inputs con el índice
                 const clientes = [];
-                const conceptos = [];   
+                const conceptos = []; 
 
                 // Recopilar clientes y tiempos
                 row.querySelectorAll('input[name^="ClienteId_"]').forEach((input, i) => {

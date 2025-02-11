@@ -1,5 +1,5 @@
 from django.urls import path
-from Modulo.Views import clientes_factura, modulo
+from Modulo.Views import clientes_factura, indicadores_operatividad, modulo
 from Modulo.Views import ipc
 from Modulo.Views import ind
 from Modulo.Views import TipoDocumento
@@ -205,20 +205,6 @@ urlpatterns = [
     path('detalle_costos_indirectos/eliminar',detallesCostosIndirectos.detalle_costos_indirectos_eliminar, name='detalle_costos_indirectos_eliminar'),
     path('detalle_costos_indirectos/descargar_excel', detallesCostosIndirectos.detalle_costos_indirectos_descargar_excel, name='detalle_costos_indirectos_descargar_excel'),
 
-    # Rutas para tabla Tiempos Concepto
-    path('tiempos_concepto/', views.tiempos_concepto_index, name='tiempos_concepto_index'),
-    path('tiempos_concepto/crear', views.tiempos_concepto_crear, name='tiempos_concepto_crear'),
-    path('tiempos_concepto/editar/<str:id>/', views.tiempos_concepto_editar, name='tiempos_concepto_editar'),
-    path('tiempos_concepto/eliminar', views.tiempos_concepto_eliminar, name='tiempos_concepto_eliminar'),
-    path('tiempos_concepto/descargar_excel', views.tiempos_concepto_descargar_excel, name='tiempos_concepto_descargar_excel'),
-
-    # Rutas para tabla Tiempos Cliente
-    path('tiempos_cliente/', views.tiempos_cliente_index, name='tiempos_cliente_index'),
-    path('tiempos_cliente/crear', views.tiempos_cliente_crear, name='tiempos_cliente_crear'),
-    path('tiempos_cliente/editar/<int:id>/', views.tiempos_cliente_editar, name='tiempos_cliente_editar'),
-    path('tiempos_cliente/eliminar', views.tiempos_cliente_eliminar, name='tiempos_cliente_eliminar'),
-    path('tiempos_cliente/descargar_excel', views.tiempos_cliente_descargar_excel, name='tiempos_cliente_descargar_excel'),
-
     # Rutas para tabla Tarifa de Consultores
     path('tarifa_consultores/', tarifa_consultores.tarifa_consultores_index, name='tarifa_consultores_index'),
     path('tarifa_consultores/crear', tarifa_consultores.tarifa_consultores_crear, name='tarifa_consultores_crear'),
@@ -302,6 +288,9 @@ urlpatterns = [
     # Rutas para la tabla Registro Tiempos
     path('clientes_factura/', clientes_factura.clientes_factura_index, name='clientes_factura_index'),
     path('clientes_factura/guardar/', clientes_factura.clientes_factura_guardar, name='clientes_factura_guardar'),
+
+    # Rutas para la tabla Indicadores de Operatividad
+    path('indicadores_operatividad/', indicadores_operatividad.indicadores_operatividad_index, name='indicadores_operatividad_index'),
 
     # Rutas para la tabla Referencias
     path('referencia/', referencia.referencia_index, name='referencia_index'),

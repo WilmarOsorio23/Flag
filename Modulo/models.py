@@ -479,6 +479,7 @@ class FacturacionClientes(models.Model):
     def __str__(self):
         return f"Facturación {self.ConsecutivoId} - Cliente {self.ClienteId} - Linea {self.LineaId}"
     
+    
 class Tarifa_Clientes(models.Model):
     id = models.AutoField(primary_key=True)
     clienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='clienteId')
@@ -544,3 +545,38 @@ class CentrosCostos(models.Model):
 
     class Meta:
         db_table = 'Centros_Costos'
+    
+
+class Ind_Operat_Clientes(models.Model):
+    Id = models.AutoField(primary_key=True)
+    Anio = models.IntegerField()
+    Mes = models.IntegerField()
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    HorasTrabajadas = models.FloatField()
+    HorasFacturables = models.FloatField()
+
+    class Meta:
+        db_table = 'Ind_Operat_Clientes'
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'LineaId'], name='unique_Ind_Operat_Clientes')
+        ]
+
+    def __str__(self):
+        return f"ID {self.id} - Año {self.Anio} - Mes {self.Mes} - Linea {self.Linea_id}"
+    
+class Ind_Operat_Conceptos(models.Model):
+    Id = models.AutoField(primary_key=True)
+    Anio = models.IntegerField()
+    Mes = models.IntegerField()
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    ConceptoId = models.ForeignKey('Concepto', on_delete=models.CASCADE, db_column='ConceptoId')
+    HorasConcepto = models.FloatField()
+
+    class Meta:
+        db_table = 'Ind_Operat_Conceptos'
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'LineaId', 'ConceptoId'], name='unique_Ind_Operat_Conceptos')
+        ]
+
+    def __str__(self):
+        return f"ID {self.Id} - Año {self.Anio} - Mes {self.Mes} - Linea {self.LineaId} - Concepto {self.ConceptoId}"

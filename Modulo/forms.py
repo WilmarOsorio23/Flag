@@ -1177,6 +1177,8 @@ class Tarifa_ClientesForm(forms.ModelForm):
             raise ValidationError("Ya existe un registro con el mismo Cliente, Línea, Modulo, Año y Mes.")
         return cleaned_data 
     
+
+
 class FacturacionFilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
@@ -1257,3 +1259,43 @@ class CentrosCostosForm(forms.ModelForm):
             'codigoCeCo': 'Codigo',
             'descripcionCeCo': 'Descripcion',
         }
+
+
+class Ind_Operatividad_FilterForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    Mes = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Mes',
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_anio()
+        self.populate_mes()
+
+    def populate_anio(self):
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = meses
+
