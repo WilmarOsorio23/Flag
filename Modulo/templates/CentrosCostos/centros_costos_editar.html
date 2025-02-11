@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %} Editar Centro Costo {% endblock %}
+
+{% block contenido %}
+<h2>Editar Centro Costo</h2>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a href="{% url 'centros_costos_index' %}" class="btn btn-danger">Cancelar</a>
+</form>
+{% endblock %}

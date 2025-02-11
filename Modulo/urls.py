@@ -35,6 +35,7 @@ from Modulo.Views import moneda
 from Modulo.Views import clientes_Contratos
 from Modulo.Views import tarifa_Clientes
 from Modulo.Views import referencia
+from Modulo.Views import centrosCostos
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -152,6 +153,14 @@ urlpatterns = [
     path('clientes_contratos/editar/<int:id>/', clientes_Contratos.clientes_contratos_editar, name='clientes_contratos_editar'),
     path('clientes_contratos/eliminar', clientes_Contratos.clientes_contratos_eliminar, name='clientes_contratos_eliminar'),
     path('clientes_contratos/descargar_excel', clientes_Contratos.clientes_contratos_descargar_excel, name='clientes_contratos_descargar_excel'),
+
+    # Rutas para Centros de Costos
+    path('centros_costos/', centrosCostos.centros_costos_index, name='centros_costos_index'),
+    path('centros_costos/crear', centrosCostos.centros_costos_crear, name='centros_costos_crear'),
+    path('centros_costos/editar/<int:id>/', centrosCostos.centros_costos_editar, name='centros_costos_editar'),
+    path('centros_costos/eliminar', centrosCostos.centros_costos_eliminar, name='centros_costos_eliminar'),
+    path('centros_costos/verificar-relaciones/', centrosCostos.verificar_relaciones, name='centros_costos_verificar_relaciones'),
+    path('centros_costos/descargar_excel', centrosCostos.centros_costos_descargar_excel, name='centros_costos_descargar_excel'),
 
     # Rutas para tabla Gastos
     path('gastos/', gastos.gasto_index, name='gastos_index'),

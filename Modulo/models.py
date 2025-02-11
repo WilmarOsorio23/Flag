@@ -492,6 +492,7 @@ class Tarifa_Clientes(models.Model):
     bolsaMes = models.DecimalField(max_digits=10, decimal_places=2)
     monedaId = models.ForeignKey('Moneda', on_delete=models.CASCADE, db_column='monedaId')
     referenciaId= models.ForeignKey('Referencia', on_delete=models.CASCADE, db_column='referenciaId')
+    centrocostosId = models.ForeignKey('CentrosCostos', on_delete=models.CASCADE, db_column='centrocostosId')
 
     def __str__(self):
         return f"id: {self.id}, ClienteId: {self.clienteId}, LineaId: {self.lineaId}, ModuloId: {self.moduloId}, Anio: {self.anio}, Mes: {self.mes}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, BolsaMes: {self.bolsaMes}, MonedaId: {self.monedaId}, ReferenciaId: {self.referenciaId}"
@@ -531,3 +532,15 @@ class Referencia(models.Model):
 
     class Meta:
         db_table = 'Referencias'
+
+
+class CentrosCostos(models.Model):
+    id= models.AutoField(primary_key=True)
+    codigoCeCo= models.CharField(max_length=20)
+    descripcionCeCo= models.CharField(max_length=60)
+
+    def __str__(self):
+        return f"{self.id} - {self.codigoCeCo} - {self.descripcionCeCo}"
+
+    class Meta:
+        db_table = 'Centros_Costos'

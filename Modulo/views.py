@@ -23,6 +23,8 @@ from .models import ClientesContratos
 from .forms import ClientesContratosForm
 from .models import Referencia
 from .forms import ReferenciaForm
+from .models import CentrosCostos
+from .forms import CentrosCostosForm
 
 def inicio(request):
     return render(request, 'paginas/Inicio.html')
@@ -247,6 +249,9 @@ def exportar_excel(request):
     response['Content-Disposition'] = 'attachment; filename=empleados_certificaciones.xlsx'
 
     return response
+
+
+
 
 
 

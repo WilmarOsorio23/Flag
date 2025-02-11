@@ -15,6 +15,7 @@ from .models import Moneda
 from .models import ClientesContratos
 from .models import Tarifa_Clientes
 from .models import Referencia
+from .models import CentrosCostos
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -1242,4 +1243,17 @@ class ReferenciaForm(forms.ModelForm):
         labels = {
             'codigoReferencia': 'Codigo',
             'descripcionReferencia': 'Descripcion',
+        }
+
+class CentrosCostosForm(forms.ModelForm):
+    class Meta:
+        model = CentrosCostos
+        fields = '__all__'
+        widgets = {
+            'codigoCeCo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el codigo'}),
+            'descripcionCeCo': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ingrese la descripcion'}),
+        }
+        labels = {
+            'codigoCeCo': 'Codigo',
+            'descripcionCeCo': 'Descripcion',
         }
