@@ -18,6 +18,8 @@
 
         <!-- Incluye FontAwesome para los iconos -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+     
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     </head>
     <body>
         <div class="d-flex">
@@ -177,6 +179,11 @@
                                         <i class="fas fa-graduation-cap"></i> Informe Estudios
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'informes_consultores_index' %}">
+                                        <i class="fas fa-info"></i> Informe Consultores
+                                    </a>
+                                </li>
                                 
                             </ul>
                         </li>
@@ -258,7 +265,11 @@
                                 <i class="fa fa-chart-line"></i> Indicadores
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuIndicadores">
-                                <!-- Añadir elementos de "Indicadores" aquí si es necesario -->
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'indicadores_operatividad_index' %}">
+                                        <i class="fas fa-table"></i> Indicador Operatividad
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     </ul>
