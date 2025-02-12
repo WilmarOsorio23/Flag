@@ -48,8 +48,9 @@ def obtener_informe_empleados(queryset):
     campos = [
         'TipoDocumento', 'Documento', 'Nombre', 'FechaNacimiento', 'FechaIngreso', 'FechaOperacion',
         'ModuloId', 'PerfilId', 'LineaId', 'TituloProfesional', 'FechaGrado', 'Universidad',
-        'ProfesionRealizada', 'TituloProfesionalActual', 'UniversidadActual', 'AcademiaSAP',
-        'CertificadoSAP', 'OtrasCertificaciones', 'Postgrados'
+        'ProfesionRealizada', 'Universidad', 'AcademiaSAP',
+        'CertificadoSAP', 'OtrasCertificaciones', 'Postgrados', 'CargoId', 'Activo',
+        'FechaRetiro','Direccion', 'Ciudad', 'Departamento', 'DireccionAlterna', 'Telefono1', 'Telefono2'
     ]
 
     return list(queryset.values(*campos))
@@ -121,12 +122,11 @@ def exportar_empleados_excel(request):
             'Nombre Línea': empleado['LineaId'],
             'Documento Colaborador': empleado['Documento'],
             'Nombre Colaborador': empleado['Nombre'],
-            #'Cargo': empleado['CargoId__Cargos'],
+            'Cargo': empleado['CargoId'],
             'Perfil': empleado['PerfilId'],
             'Módulo': empleado['ModuloId'],
             'Certificado SAP': empleado['CertificadoSAP'],
             'Fecha Ingreso': empleado['FechaIngreso'],
-            'Título Profesional Actual': empleado['TituloProfesionalActual']
         }
         data.append(fila)
 

@@ -298,12 +298,18 @@ class Empleado(models.Model):
     FechaGrado = models.DateField()
     Universidad = models.CharField(max_length=100)
     ProfesionRealizada = models.CharField(max_length=100)
-    TituloProfesionalActual = models.CharField(max_length=100)
-    UniversidadActual = models.CharField(max_length=100)
-    AcademiaSAP = models.CharField(max_length=100)
+    AcademiaSAP = models.BooleanField(max_length=100)
     CertificadoSAP = models.BooleanField()  # tinyint(1) => BooleanField
-    OtrasCertificaciones = models.CharField(max_length=100)  # Cambiado a CharField
-    Postgrados = models.CharField(max_length=100)  # Cambiado a CharField
+    OtrasCertificaciones = models.BooleanField(max_length=100)  # Cambiado a CharField
+    Postgrados = models.BooleanField(max_length=100)  # Cambiado a CharField
+    Activo = models.BooleanField(default=True)
+    FechaRetiro = models.DateField()
+    Direccion = models.CharField(max_length=255, null=True, blank=True)
+    Ciudad = models.CharField(max_length=100, null=True, blank=True)
+    Departamento = models.CharField(max_length=100, null=True, blank=True)
+    DireccionAlterna = models.CharField(max_length=255, null=True, blank=True)
+    Telefono1 = models.CharField(max_length=20, null=True, blank=True)
+    Telefono2 = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         db_table = 'Empleado'

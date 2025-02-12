@@ -64,28 +64,84 @@
       {% if show_data %}
         <!-- Mostrar tabla de empleados -->
         <div class="table-responsive">
-          <table class="table table-bordered table-hover table-primary">
+          <table class="table table-bordered table-hover table-primary"  id="nominaTable">
             <thead>
               <tr>
-                <th>Tipo Documento</th>
-                <th>Documento</th>
-                <th>Nombre</th>
+                <th data-sort="nombre_linea" class="sortable" data-direction="default">
+                  Tipo Documento
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="nombre_linea" class="sortable" data-direction="default">
+                  Documento
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="nombre_linea" class="sortable" data-direction="default">
+                  Nombre
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
                 <th>Fecha Nacimiento</th>
                 <th>Fecha Ingreso</th>
                 <th>Fecha Operación</th>
-                <th>Módulo</th>
-                <th>Perfil</th>
-                <th>Línea</th>
+                <th data-sort="nombre_linea" class="sortable" data-direction="default">
+                  Módulo
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="nombre_linea" class="sortable" data-direction="default">
+                  Perfil
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="nombre_linea" class="sortable" data-direction="default">
+                  Línea
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="nombre_linea" class="sortable" data-direction="default">
+                  Cargo
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
                 <th>Título Profesional</th>
                 <th>Fecha Grado</th>
                 <th>Universidad</th>
                 <th>Profesión Realizada</th>
-                <th>Título Profesional Actual</th>
-                <th>Universidad Actual</th>
                 <th>Academia SAP</th>
                 <th>Certificado SAP</th>
                 <th>Otras Certificaciones</th>
                 <th>Postgrados</th>
+                <th>Activo</th>
+                <th>Fecha Retiro</th>
+                <th>Dirección</th>
+                <th>Ciudad</th>
+                <th>Departamento</th>
+                <th>Dirección Alterna</th>
+                <th>Teléfono 1</th>
+                <th>Teléfono 2</th>
               </tr>
             </thead>
             <tbody>
@@ -104,12 +160,19 @@
                   <td>{{ empleado.FechaGrado }}</td>
                   <td>{{ empleado.Universidad }}</td>
                   <td>{{ empleado.ProfesionRealizada }}</td>
-                  <td>{{ empleado.TituloProfesionalActual }}</td>
-                  <td>{{ empleado.UniversidadActual }}</td>
                   <td>{{ empleado.AcademiaSAP }}</td>
                   <td>{{ empleado.CertificadoSAP }}</td>
                   <td>{{ empleado.OtrasCertificaciones }}</td>
                   <td>{{ empleado.Postgrados }}</td>
+                  <td>{{ empleado.Cargo }}</td>
+                  <td>{{ empleado.Activo }}</td>
+                  <td>{{ empleado.FechaRetiro }}</td>
+                  <td>{{ empleado.Direccion }}</td>
+                  <td>{{ empleado.Ciudad }}</td>
+                  <td>{{ empleado.Departamento }}</td>
+                  <td>{{ empleado.DireccionAlterna }}</td>
+                  <td>{{ empleado.Telefono1 }}</td>
+                  <td>{{ empleado.Telefono2 }}</td>
                 </tr>
               {% endfor %}
             </tbody>
