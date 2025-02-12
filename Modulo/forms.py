@@ -237,6 +237,20 @@ class ConsultoresForm(forms.ModelForm):
                 'type': 'date',
                 'placeholder': 'Fecha de Operación'
             }),
+            'Certificado': forms.Select(
+                choices=[
+                    (True, 'SI'),
+                    (False, 'NO'),
+                ],
+                attrs={ 
+                    'class': 'form-control'
+                }
+            ),
+            'Certificados': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Certificados'
+            }),
+
         }
     def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -1233,6 +1247,97 @@ class FacturacionFilterForm(forms.Form):
     def populate_linea(self):
         linea = Linea.objects.values_list('LineaId', 'Linea').distinct()
         self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)
+
+class ConsultorFilterForm(forms.Form):
+    Nombre = forms.ModelChoiceField(
+        queryset=Consultores.objects.values_list('Nombre', flat=True).distinct(),
+        required=False,
+        label='Consultor',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    ModuloId = forms.ChoiceField(
+        choices=[],  
+        required=False, 
+        label='Módulo',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    Certificacion = forms.ChoiceField(
+        choices=[('', 'Seleccione'), ('1', 'SI'), ('0', 'NO')],
+        required=False,
+        label='Certificación',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    PerfilId = forms.ModelChoiceField(
+        queryset=Perfil.objects.all(),
+        required=False,
+        label="Perfil",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    ) 
+    
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_nombre()
+        self.populate_modulo()
+        self.populate_linea()
+        self.populate_perfil()
+
+    def populate_nombre(self):
+        consultores = Consultores.objects.values_list('Documento', 'Nombre').distinct()
+        self.fields['Nombre'].choices = [('', 'Seleccione el Consultor')] + list(consultores)
+        
+    def populate_modulo(self):
+        modulos = Modulo.objects.values_list('ModuloId', 'Modulo').distinct()
+        self.fields['ModuloId'].choices = [('', 'Seleccione el Módulo')] + list(modulos)
+
+    def populate_linea(self):
+        # Si ModuloId necesita opciones dinámicas, añade lógica aquí.
+        linea = Linea.objects.values_list('LineaId', 'Linea').distinct()  # Ajusta según tus modelos
+        self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)
+
+    def populate_perfil(self):
+        # Si ModuloId necesita opciones dinámicas, añade lógica aquí.
+        perfil = Perfil.objects.values_list('PerfilId', 'Perfil').distinct()  # Ajusta según tus modelos
+        self.fields['PerfilId'].choices = [('', 'Seleccione el perfil')] + list(perfil)
+    
+class EstudiosFilterForm(forms.Form):
+    Nombre = forms.ChoiceField(
+        choices=[],  
+        required=False, 
+        label='Colaborador',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    Cargo = forms.ChoiceField(
+        choices=[], 
+        required=False,
+        label='Cargo',  
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super(EstudiosFilterForm, self).__init__(*args, **kwargs)
+
+        empleados = Empleado.objects.values_list('Nombre', flat=True).distinct()
+        self.fields['Nombre'].choices = [('', 'Seleccione el colaborador')] + [(empleado, empleado) for empleado in empleados]
+
+        lineas = Linea.objects.values_list('LineaId', 'Linea').distinct()
+        self.fields['LineaId'].choices = [('', 'Seleccione la línea')] + [(linea[0], linea[1]) for linea in lineas]
+        
+        cargos = Cargos.objects.values_list('CargoId', 'Cargo').distinct()
+        self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo[0], cargo[1]) for cargo in cargos]
+
 
 class ReferenciaForm(forms.ModelForm):
     class Meta:

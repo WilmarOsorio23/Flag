@@ -121,7 +121,9 @@ def consultores_descargar_excel(request):
                     fecha_retiro if fecha_retiro is not None else '-',
                     consultor.Telefono or '-',
                     consultor.Direccion or '-',
-                    fecha_operacion if fecha_operacion is not None else '-'
+                    fecha_operacion if fecha_operacion is not None else '-',
+                    consultor.Certificado if consultor.Certificado is not None else '-',
+                    consultor.Certificaciones or '-',
                 ])
 
             df = pd.DataFrame(data, columns=[
@@ -139,6 +141,8 @@ def consultores_descargar_excel(request):
                 'Teléfono',
                 'Dirección',
                 'Fecha Operación'
+                'Certificado'
+                'Certificaciones'
             ])
 
             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

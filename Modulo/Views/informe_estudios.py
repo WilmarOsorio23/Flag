@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from collections import defaultdict
 from datetime import datetime
-from Modulo.forms import EmpleadoFilterForm
+from Modulo.forms import EstudiosFilterForm
 from Modulo.models import Empleado, Empleados_Estudios
 from django.http import HttpResponse
 import pandas as pd
@@ -64,7 +64,8 @@ def empleado_estudio_filtrado(request):
     show_data = False  
 
     if request.method == 'GET':
-        form = EmpleadoFilterForm(request.GET)
+        #form = EmpleadoFilterForm(request.GET)
+        form = EstudiosFilterForm(request.GET)
 
         if form.is_valid():
             # Inicializar empleados y estudios
@@ -72,8 +73,8 @@ def empleado_estudio_filtrado(request):
             estudios = Empleados_Estudios.objects.all()
 
             # Debug: Imprimir los datos obtenidos de la base de datos
-            print("Empleados obtenidos:", empleados)
-            print("Estudios obtenidos:", estudios)
+           # print("Empleados obtenidos:", empleados)
+           # print("Estudios obtenidos:", estudios)
 
             # Obtener información de los empleados filtrada
             empleados, estudios = filtrar_empleados_y_estudios(form, empleados, estudios)
@@ -83,10 +84,11 @@ def empleado_estudio_filtrado(request):
             show_data = bool(empleado_estudio_info)  # Mostrar datos si hay resultados
 
              # Debug: Imprimir la información de estudios de empleados
-            print("Información de estudios de empleados:", empleado_estudio_info)
+            #print("Información de estudios de empleados:", empleado_estudio_info)
 
     else: 
-        form = EmpleadoFilterForm()
+        #form = EmpleadoFilterForm()
+        form = EstudiosFilterForm()
 
     context = {
         'form': form,
@@ -101,7 +103,8 @@ def exportar_estudio_excel(request):
     empleado_estudio_info = []
     
     if request.method == 'GET':
-        form = EmpleadoFilterForm(request.GET)
+        #form = EmpleadoFilterForm(request.GET)
+        form = EstudiosFilterForm(request.GET)
 
         if form.is_valid():
             # Inicializar empleados y estudios
