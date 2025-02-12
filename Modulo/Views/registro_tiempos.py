@@ -4,7 +4,7 @@ from django.forms import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import render
 from Modulo.forms import ColaboradorFilterForm
-from Modulo.models import Clientes, Concepto, Consultores, Empleado, Horas_Habiles, Linea, Tiempos_Cliente, TiemposConcepto, TiemposFacturables
+from Modulo.models import Clientes, Concepto, Consultores, Empleado, Horas_Habiles, Ind_Operat_Clientes, Ind_Operat_Conceptos, Linea, Tiempos_Cliente, TiemposConcepto, TiemposFacturables
 from django.shortcuts import render
 from collections import defaultdict
 from django.db import transaction
@@ -58,7 +58,6 @@ def guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas):
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos del concepto: {str(e)}")
 
-
 def guardar_tiempos_facturables(anio, mes, linea_id, cliente_id, horas):
     try:
         # Verificar si existe el registro
@@ -69,6 +68,8 @@ def guardar_tiempos_facturables(anio, mes, linea_id, cliente_id, horas):
             ClienteId_id=cliente_id,
             defaults={'Horas': horas}
         )
+
+        print(tiempo_facturable,creado)
         if creado:
             if horas == '0':
                 tiempo_facturable.delete()
@@ -83,6 +84,73 @@ def guardar_tiempos_facturables(anio, mes, linea_id, cliente_id, horas):
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos facturables: {str(e)}")
 
+#Guardar totales de operación para cada linea
+def guardar_totales_operacion(anio, mes, linea_id, horas_trabajadas, horas_facturables):
+    try:
+        # Convertir a enteros si es necesario
+        anio = int(anio)
+        mes = int(mes)
+        linea_id = int(linea_id)
+        horas_trabajadas = float(horas_trabajadas)
+        horas_facturables = float(horas_facturables)
+
+        # Obtener la instancia de Linea
+        from Modulo.models import Linea
+        linea = Linea.objects.get(LineaId=linea_id)
+
+        # Crear o actualizar el registro
+        total_operacion, creado = Ind_Operat_Clientes.objects.get_or_create(
+            Anio=anio,
+            Mes=mes,
+            LineaId=linea,
+            defaults={
+                'HorasTrabajadas': horas_trabajadas,
+                'HorasFacturables': horas_facturables
+            }
+        )
+
+        if not creado:
+            total_operacion.HorasTrabajadas = horas_trabajadas
+            total_operacion.HorasFacturables = horas_facturables
+            total_operacion.save()
+
+        return total_operacion
+
+    except Exception as e:
+        raise ValidationError(f"Error al guardar los totales de operación: {str(e)}")
+
+#Guardar totales de conceptos para cada linea
+def guardar_totales_concepto(anio, mes, linea_id, concepto_id, horas_concepto):
+    try:
+        # Convertir a enteros si es necesario
+        anio = int(anio)
+        mes = int(mes)
+        linea_id = int(linea_id)
+        concepto_id = int(concepto_id)
+        horas_concepto = float(horas_concepto)
+
+        # Obtener las instancias de Linea y Concepto
+        from Modulo.models import Linea, Concepto
+        linea = Linea.objects.get(LineaId=linea_id)
+        concepto = Concepto.objects.get(ConceptoId=concepto_id)
+
+        # Crear o actualizar el registro
+        total_concepto, creado = Ind_Operat_Conceptos.objects.get_or_create(
+            Anio=anio,
+            Mes=mes,
+            LineaId=linea,
+            ConceptoId=concepto,
+            defaults={'HorasConcepto': horas_concepto}
+        )
+
+        if not creado:
+            total_concepto.HorasConcepto = horas_concepto
+            total_concepto.save()
+
+        return total_concepto
+
+    except Exception as e:
+        raise ValidationError(f"Error al guardar los totales por concepto: {str(e)}")
 
 @transaction.atomic
 def registro_tiempos_guardar(request):
@@ -92,24 +160,54 @@ def registro_tiempos_guardar(request):
             rows = data.get('data', [])
             # Aquí puedes procesar cada fila
             for row in rows:
-                documento = row.get('Documento')
-                anio = row.get('Anio')
-                mes = row.get('Mes')
-                if 'ClienteId' in row and 'Tiempo_Clientes' in row:
-                    cliente_id = row.get('ClienteId')
-                    horas = row.get('Tiempo_Clientes')
-                    guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas)
+                # Si es un registro de cliente, concepto o facturables
+                if 'Documento' in row:
+                    documento = row.get('Documento')
+                    anio = row.get('Anio')
+                    mes = row.get('Mes')
 
-                elif 'ConceptoId' in row and 'Tiempo_Conceptos' in row:
-                    concepto_id = row.get('ConceptoId')
-                    horas = row.get('Tiempo_Conceptos')
-                    guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas)
+                    if 'ClienteId' in row and 'Tiempo_Clientes' in row:
+                        cliente_id = row.get('ClienteId')
+                        horas = row.get('Tiempo_Clientes')
+                        guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas)
 
-                elif 'LineaId' in row and 'Horas_Facturables' in row:
+                    elif 'ConceptoId' in row and 'Tiempo_Conceptos' in row:
+                        concepto_id = row.get('ConceptoId')
+                        horas = row.get('Tiempo_Conceptos')
+                        guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas)
+
+                elif 'LineaId' in row and 'Horas_Facturables' in row and 'ClienteId' in row:
                     linea_id = row.get('LineaId')
                     cliente_id = row.get('ClienteId')
                     horas = row.get('Horas_Facturables')
-                    guardar_tiempos_facturables(anio, mes, linea_id, cliente_id, horas)
+                    guardar_tiempos_facturables(
+                        anio=row.get('Anio'),
+                        mes=row.get('Mes'),
+                        linea_id=linea_id, 
+                        cliente_id=cliente_id, 
+                        horas=horas
+                    )
+
+                # Si es un registro de tipo 'linea' o 'concepto'
+                elif 'type' in row:
+                    if row['type'] == 'linea':
+                        guardar_totales_operacion(
+                            anio=row.get('Anio'),
+                            mes=row.get('Mes'),
+                            linea_id=row.get('LineaId'),
+                            horas_trabajadas=row.get('horasTrabajadas'),
+                            horas_facturables=row.get('horasFacturables')
+                        )
+                    
+                    elif row['type'] == 'concepto':
+                        guardar_totales_concepto(
+                            anio=row.get('Anio'),
+                            mes=row.get('Mes'),
+                            linea_id=row.get('LineaId'),
+                            concepto_id=row.get('ConceptoId'),
+                            horas_concepto=row.get('horas')
+                        )
+
             return JsonResponse({'status': 'success'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'error': str(e)})
@@ -231,6 +329,7 @@ def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes, 
         'Nombre': colaborador.Nombre,
         'Documento': colaborador.Documento,
         'Linea': colaborador.LineaId.Linea,
+        'LineaId': colaborador.LineaId.LineaId,     
         'Perfil': colaborador.PerfilId.Perfil,
         'Modulo': colaborador.ModuloId.Modulo,
         'Empresa': "Flag Soluciones" if isinstance(colaborador, Empleado) else colaborador.Empresa,
@@ -369,3 +468,25 @@ def obtener_horas_habiles_view(request):
     mes = request.GET.get('mes')
     dias_habiles, horas_laborales = obtener_horas_habiles(anio, mes)
     return JsonResponse({'Dias_Habiles': dias_habiles, 'Horas_Laborales': horas_laborales})
+
+def calcular_totales_por_linea(datos):
+    # Estructuras para almacenar los totales
+    totales_operacion = defaultdict(float)  # {linea: total_horas_trabajadas}
+    totales_facturables = defaultdict(float)  # {linea: total_horas_facturables}
+    totales_conceptos = defaultdict(lambda: defaultdict(float))  # {linea: {concepto: total_horas}}
+
+    for fila in datos:
+        linea = fila['Línea']
+        total_operacion = float(fila['Total Operación'])
+        horas_facturables = float(fila.get('Horas Facturables', 0))
+
+        # Sumar horas trabajadas y facturables por línea
+        totales_operacion[linea] += total_operacion
+        totales_facturables[linea] += horas_facturables
+
+        # Sumar horas por concepto
+        for concepto, horas in fila.items():
+            if concepto in ['Líder', 'Capacitaciones', 'Día Familia', 'Vacaciones', 'Calamidad', 'Preventa', 'Otros']:
+                totales_conceptos[linea][concepto] += float(horas)
+
+    return totales_operacion, totales_facturables, totales_conceptos

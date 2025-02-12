@@ -1,5 +1,5 @@
 from django.urls import path
-from Modulo.Views import clientes_factura, modulo
+from Modulo.Views import clientes_factura, indicadores_operatividad, modulo
 from Modulo.Views import ipc
 from Modulo.Views import ind
 from Modulo.Views import TipoDocumento
@@ -11,6 +11,8 @@ from Modulo.Views import gastos
 from Modulo.Views import cargos
 from Modulo.Views import empleado_nomina_filtrado
 from Modulo.Views import informe_empleados
+from Modulo.Views import informe_estudios  
+from Modulo.Views import informe_consultores
 from Modulo.Views import empleado
 from Modulo.Views import consultores
 from Modulo.Views import Nomina
@@ -33,6 +35,8 @@ from Modulo.Views import tarifa_consultores
 from Modulo.Views import moneda
 from Modulo.Views import clientes_Contratos
 from Modulo.Views import tarifa_Clientes
+from Modulo.Views import referencia
+from Modulo.Views import centrosCostos
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -128,6 +132,7 @@ urlpatterns = [
     path('costos_indirectos/crear', CostosIndirectos.costos_indirectos_crear, name='costos_indirectos_crear'),
     path('costos_indirectos/editar/<int:id>/', CostosIndirectos.costos_indirectos_editar, name='costos_indirectos_editar'),
     path('costos_indirectos/eliminar', CostosIndirectos.costos_indirectos_eliminar, name='costos_indirectos_eliminar'),
+    path('costos_indirectos/verificar-relaciones/', CostosIndirectos.verificar_relaciones, name='costos_indirectos_verificar_relaciones'),
     path('costos_indirectos/descargar_excel', CostosIndirectos.costos_indirectos_descargar_excel, name='costos_indirectos_descargar_excel'),
 
     # Rutas para la tabla Concepto
@@ -149,6 +154,14 @@ urlpatterns = [
     path('clientes_contratos/editar/<int:id>/', clientes_Contratos.clientes_contratos_editar, name='clientes_contratos_editar'),
     path('clientes_contratos/eliminar', clientes_Contratos.clientes_contratos_eliminar, name='clientes_contratos_eliminar'),
     path('clientes_contratos/descargar_excel', clientes_Contratos.clientes_contratos_descargar_excel, name='clientes_contratos_descargar_excel'),
+
+    # Rutas para Centros de Costos
+    path('centros_costos/', centrosCostos.centros_costos_index, name='centros_costos_index'),
+    path('centros_costos/crear', centrosCostos.centros_costos_crear, name='centros_costos_crear'),
+    path('centros_costos/editar/<int:id>/', centrosCostos.centros_costos_editar, name='centros_costos_editar'),
+    path('centros_costos/eliminar', centrosCostos.centros_costos_eliminar, name='centros_costos_eliminar'),
+    path('centros_costos/verificar-relaciones/', centrosCostos.verificar_relaciones, name='centros_costos_verificar_relaciones'),
+    path('centros_costos/descargar_excel', centrosCostos.centros_costos_descargar_excel, name='centros_costos_descargar_excel'),
 
     # Rutas para tabla Gastos
     path('gastos/', gastos.gasto_index, name='gastos_index'),
@@ -193,24 +206,10 @@ urlpatterns = [
     path('detalle_costos_indirectos/eliminar',detallesCostosIndirectos.detalle_costos_indirectos_eliminar, name='detalle_costos_indirectos_eliminar'),
     path('detalle_costos_indirectos/descargar_excel', detallesCostosIndirectos.detalle_costos_indirectos_descargar_excel, name='detalle_costos_indirectos_descargar_excel'),
 
-    # Rutas para tabla Tiempos Concepto
-    path('tiempos_concepto/', views.tiempos_concepto_index, name='tiempos_concepto_index'),
-    path('tiempos_concepto/crear', views.tiempos_concepto_crear, name='tiempos_concepto_crear'),
-    path('tiempos_concepto/editar/<str:id>/', views.tiempos_concepto_editar, name='tiempos_concepto_editar'),
-    path('tiempos_concepto/eliminar', views.tiempos_concepto_eliminar, name='tiempos_concepto_eliminar'),
-    path('tiempos_concepto/descargar_excel', views.tiempos_concepto_descargar_excel, name='tiempos_concepto_descargar_excel'),
-
-    # Rutas para tabla Tiempos Cliente
-    path('tiempos_cliente/', views.tiempos_cliente_index, name='tiempos_cliente_index'),
-    path('tiempos_cliente/crear', views.tiempos_cliente_crear, name='tiempos_cliente_crear'),
-    path('tiempos_cliente/editar/<int:id>/', views.tiempos_cliente_editar, name='tiempos_cliente_editar'),
-    path('tiempos_cliente/eliminar', views.tiempos_cliente_eliminar, name='tiempos_cliente_eliminar'),
-    path('tiempos_cliente/descargar_excel', views.tiempos_cliente_descargar_excel, name='tiempos_cliente_descargar_excel'),
-
     # Rutas para tabla Tarifa de Consultores
     path('tarifa_consultores/', tarifa_consultores.tarifa_consultores_index, name='tarifa_consultores_index'),
     path('tarifa_consultores/crear', tarifa_consultores.tarifa_consultores_crear, name='tarifa_consultores_crear'),
-    path('tarifa_consultores/editar/<int:id>/', tarifa_consultores.tarifa_consultores_editar, name='tarifa_consultores_editar'),
+    path('tarifa_consultores/editar/<int:idd>/', tarifa_consultores.tarifa_consultores_editar, name='tarifa_consultores_editar'),
     path('tarifa_consultores/eliminar', tarifa_consultores.tarifa_consultores_eliminar, name='tarifa_consultores_eliminar'),
     path('tarifa_consultores/descargar_excel', tarifa_consultores.tarifa_consultores_descargar_excel, name='tarifa_consultores_descargar_excel'),
 
@@ -276,6 +275,15 @@ urlpatterns = [
     path('informes/empleados/', informe_empleados.informe_empleados, name='informes_empleado_index'),
     path('informes/empleados/exportar_empleados_excel', informe_empleados.exportar_empleados_excel, name='exportar_empleados_excel'),
 
+    #Ruta para informe de estudios
+    path('informes/estudios/', informe_estudios.empleado_estudio_filtrado, name='informes_estudios_index'),
+    path('informes/estudios/exportar_estudio_excel', informe_estudios.exportar_estudio_excel, name='exportar_estudio_excel'),
+
+    #Ruta para informe de consultores
+    path('informes/consultores/', informe_consultores.consultores_filtrado , name='informes_consultores_index'),
+    path('informes/consultores/exportar_consultores_excel', informe_consultores.exportar_consultores_excel , name='exportar_consultores_excel'),
+
+
     # Rutas para tabla Historial Cargos
     path('historial_cargos/', historial_cargos.historial_cargos_index, name='historial_cargos_index'),
     path('historial_cargos/crear/', historial_cargos.historial_cargos_crear, name='historial_cargos_crear'),
@@ -286,4 +294,15 @@ urlpatterns = [
     # Rutas para la tabla Registro Tiempos
     path('clientes_factura/', clientes_factura.clientes_factura_index, name='clientes_factura_index'),
     path('clientes_factura/guardar/', clientes_factura.clientes_factura_guardar, name='clientes_factura_guardar'),
+
+    # Rutas para la tabla Indicadores de Operatividad
+    path('indicadores_operatividad/', indicadores_operatividad.indicadores_operatividad_index, name='indicadores_operatividad_index'),
+
+    # Rutas para la tabla Referencias
+    path('referencia/', referencia.referencia_index, name='referencia_index'),
+    path('referencia/crear', referencia.referencia_crear, name='referencia_crear'),
+    path('referencia/editar/<int:id>/', referencia.referencia_editar, name='referencia_editar'),
+    path('referencia/verificar-relaciones/', referencia.verificar_relaciones, name='verificar_relaciones'),
+    path('referencia/eliminar', referencia.referencia_eliminar, name='referencia_eliminar'),
+    path('referencia/descargar_excel', referencia.referencia_descargar_excel, name='referencia_descargar_excel'),
     ]

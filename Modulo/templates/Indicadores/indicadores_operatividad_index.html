@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block titulo %} Indicadores de Operatividad {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title">Indicadores de Operatividad</h4>
+    </div>
+    <div class="card-body">
+        <div class="container-fluid mb-3">
+            <form method="GET">
+                <div class="row mb-3">
+                    <!-- Filtro Año -->
+                    <div class="col-md-3">
+                        <label for="anio" class="form-label">{{ form.Anio.label }}</label>
+                        {{ form.Anio }}
+                    </div>
+                
+                    <!-- Filtro Mes -->
+                    <div class="col-md-3">
+                        <label for="mes" class="form-label">{{ form.Mes.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownMes"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Meses"
+                            >
+                                Seleccione Meses
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownMes">
+                                {% for checkbox in form.Mes %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <!-- Filtro Línea -->
+                    <div class="col-md-3">
+                        <label for="linea" class="form-label">{{ form.LineaId.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownLinea"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Líneas"
+                            >
+                                Seleccione Líneas
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
+                                {% for checkbox in form.LineaId %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>                
+                                            
+                <div class="row container-fluid">
+                    <div class="col-md-6 text-start">
+                        <button type="submit" name="buscar" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Generar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Pestañas -->
+        <ul class="nav nav-tabs justify-content-center mb-4" id="myTab" role="tablist">
+            <!-- Primera pestaña -->
+            <li class="nav-item w-50" role="presentation">
+                <button class="nav-link active w-100 btn btn-light text-primary" id="indicadores-tab" 
+                        data-bs-toggle="tab" data-bs-target="#indicadores" 
+                        type="button" role="tab" aria-controls="indicadores" aria-selected="true">
+                    Indicadores
+                </button>
+            </li>
+            <!-- Segunda pestaña -->
+            <li class="nav-item w-50" role="presentation">
+                <button class="nav-link w-100 btn btn-light text-primary" id="graficos-tab" 
+                        data-bs-toggle="tab" data-bs-target="#graficos" 
+                        type="button" role="tab" aria-controls="graficos" aria-selected="false">
+                    Gráficos Indicadores
+                </button>
+            </li>
+        </ul>
+
+        <!-- Contenido de las pestañas -->
+        <div class="tab-content" id="myTabContent">
+            <!-- Pestaña de Indicadores -->
+            <div class="tab-pane fade show active p-3" id="indicadores" role="tabpanel" aria-labelledby="indicadores-tab">
+                <div class="card-footer text-muted">
+                    {% for resultado in resultados %}
+                    <div class="table-responsive mb-4">  
+                        <table class="table table-bordered">
+                            <!-- Primera fila: Horas mes y horas hábiles -->
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Horas mes &emsp; &emsp;{{ selected_anio }}</th>
+                                    {% for mes in selected_mes %}
+                                        <th>{{ horas_habiles|get_item:mes|get_item:'total'|floatformat:0 }}</th>
+                                    {% endfor %}
+                                    <th>{{ total_horas|floatformat:0 }}</th>  <!-- Total de horas -->
+                                </tr>
+                            </thead>
+                            <!-- Segunda fila: Línea y meses -->
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>{{ resultado.linea }}</th>  <!-- Nombre de la línea -->
+                                    {% for mes in selected_mes %}
+                                        <th>{{ MESES|get_item:mes }}</th>  <!-- Meses filtrados -->
+                                    {% endfor %}
+                                    <th>Acumulado</th>  <!-- Columna acumulado -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Recursos asignados -->
+                                <tr>
+                                    <td>Recursos asignados</td>
+                                    {% for mes in selected_mes %}
+                                        <td>{{ resultado.meses|get_item:mes|get_item:'Recursos_asignados'|floatformat:2 }}</td>
+                                    {% endfor %}
+                                    <td>-</td>
+                                </tr>
+
+                                <!-- Recursos activos -->
+                                <tr>
+                                    <td>Recursos activos</td>
+                                    {% for mes in selected_mes %}
+                                        <td>{{ resultado.meses|get_item:mes|get_item:'Recursos_activos'|floatformat:2 }}</td>
+                                    {% endfor %}
+                                    <td>-</td>
+                                </tr>
+
+                                <!-- Capacidad -->
+                                <tr>
+                                    <td>Capacidad</td>
+                                    {% for mes in selected_mes %}
+                                        <td>{{ resultado.meses|get_item:mes|get_item:'Capacidad'|floatformat:2 }}</td>
+                                    {% endfor %}
+                                    <td>{{ resultado.totales.Capacidad|floatformat:2 }}</td>
+                                </tr>
+
+                                <!-- Trabajado -->
+                                <tr>
+                                    <td>Trabajado</td>
+                                    {% for mes in selected_mes %}
+                                        <td>{{ resultado.meses|get_item:mes|get_item:'Trabajado'|floatformat:2 }}</td>
+                                    {% endfor %}
+                                    <td>{{ resultado.totales.Trabajado|floatformat:2 }}</td>
+                                </tr>
+
+                                <!-- Facturable -->
+                                <tr>
+                                    <td>Facturable</td>
+                                    {% for mes in selected_mes %}
+                                        <td>{{ resultado.meses|get_item:mes|get_item:'Facturable'|floatformat:2 }}</td>
+                                    {% endfor %}
+                                    <td>{{ resultado.totales.Facturable|floatformat:2 }}</td>
+                                </tr>
+
+                                <!-- Tiempo NO facturable -->
+                                <tr>
+                                    <td>Tiempo NO facturable</td>
+                                    {% for mes in selected_mes %}
+                                        <td>{{ resultado.meses|get_item:mes|get_item:'Tiempo_NO_facturable'|floatformat:2 }}</td>
+                                    {% endfor %}
+                                    <td>{{ resultado.totales.Tiempo_NO_facturable|floatformat:2 }}</td>
+                                </tr>
+
+                                <!-- Índice de operación -->
+                                <tr>
+                                    <td>Índice de operación</td>
+                                    {% for mes in selected_mes %}
+                                        <td>{{ resultado.meses|get_item:mes|get_item:'Índ_de_oper'|floatformat:2 }}%</td>
+                                    {% endfor %}
+                                    <td>{{ resultado.totales.Índ_de_oper|floatformat:2 }}%</td>
+                                </tr>
+
+                                <!-- Meta -->
+                                <tr>
+                                    <td>Meta</td>
+                                    {% for mes in selected_mes %}
+                                        <td>Valor Meta</td>
+                                    {% endfor %}
+                                    <td>Total Meta</td>
+                                </tr>
+
+                                <!-- Conceptos -->
+                                {% for concepto in conceptos %}
+                                <tr>
+                                    <td>{{ concepto.Descripcion }}</td>
+                                    {% for mes in selected_mes %}
+                                        <td>{{ resultado.meses|get_item:mes|get_item:'Conceptos'|get_item:concepto.Descripcion|floatformat:2 }}</td>
+                                    {% endfor %}
+                                    <td>{{ resultado.totales.Conceptos|get_item:concepto.Descripcion|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                                <!-- Diferencia en recursos -->
+                                <tr>
+                                    <td>Diferencia en recursos</td>
+                                    {% for mes in selected_mes %}
+                                        <td>{{ resultado.meses|get_item:mes|get_item:'Diferencia_recursos'|floatformat:2 }}</td>
+                                    {% endfor %}
+                                    <td>{{ resultado.totales.Diferencia_recursos|floatformat:2 }}</td>
+                                </tr>
+
+                                <!-- No operativos -->
+                                <tr>
+                                    <td>No operativos</td>
+                                    {% for mes in selected_mes %}
+                                        <td>{{ resultado.meses|get_item:mes|get_item:'No_operativos'|floatformat:2 }}</td>
+                                    {% endfor %}
+                                    <td>{{ resultado.totales.No_operativos|floatformat:2 }}</td>
+                                </tr>
+
+                                <!-- Total Fact. No Fact No oper -->
+                                <tr>
+                                    <td>Total Fact. No Fact No oper</td>
+                                    {% for mes in selected_mes %}
+                                        <td>{{ resultado.meses|get_item:mes|get_item:'Total_fact_no_oper'|floatformat:2 }}</td>
+                                    {% endfor %}
+                                    <td>{{ resultado.totales.Total_fact_no_oper|floatformat:2 }}</td>
+                                </tr>
+
+                                <!-- Diferencia en horas -->
+                                <tr>
+                                    <td>Diferencia en horas</td>
+                                    {% for mes in selected_mes %}
+                                        <td>{{ resultado.meses|get_item:mes|get_item:'Diferencia_horas'|floatformat:2 }}</td>
+                                    {% endfor %}
+                                    <td>{{ resultado.totales.Diferencia_horas|floatformat:2 }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    {% empty %}
+                        <div class="alert alert-warning text-center" role="alert">
+                            No hay resultados disponibles para mostrar.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Pestaña de Gráficos -->
+            <div class="tab-pane fade p-3" id="graficos" role="tabpanel" aria-labelledby="graficos-tab">
+                <div class="row g-3">
+                    <div class="col-12 col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header text-center bg-primary text-white py-2">  <!-- Reduced padding -->
+                                Indicadores Línea
+                            </div>
+                            <div class="card-body p-0">  <!-- Remove internal padding -->
+                                <div class="plot-container" style="height: 500px;">  <!-- Fixed height container -->
+                                    {{ grafico_horas|safe }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header text-center bg-primary text-white py-2">
+                                Porcentaje no operativos Línea
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="plot-container" style="height: 500px;">
+                                    {{ grafico_operacion|safe }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Incluir Plotly una sola vez -->
+<script src="{% static 'JS/indicadores_operatividad.js' %}"></script>
+{% endblock %}

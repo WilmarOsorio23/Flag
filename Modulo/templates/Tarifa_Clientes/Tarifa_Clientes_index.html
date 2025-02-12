@@ -59,13 +59,18 @@
                             <th scope="col">Cliente </th>
                             <th scope="col">Linea</th>
                             <th scope="col">Modulo</th>
+                            <th scope="col">Referencia</th>
+                            <th scope="col">Centro de costos</th>
                             <th scope="col">Año</th>
                             <th scope="col">Mes</th>
+                            <th scope="col">Sitio de trabajo</th>
                             <th scope="col">Valor Hora</th>
                             <th scope="col">Valor Día</th>
                             <th scope="col">Valor Mes</th>
                             <th scope="col">Bolsa Mes</th>
+                            <th scope="col">IVA</th>
                             <th scope="col">Moneda</th>
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -75,13 +80,36 @@
                             <td><input type="text" name="clienteId" class="form-control-plaintext" value="{{ tarifa.clienteId.Nombre_Cliente}}" readonly></td>
                             <td><input type="text" name="lineaId" class="form-control-plaintext" value="{{ tarifa.lineaId.Linea}}" readonly></td>
                             <td><input type="text" name="moduloId" class="form-control-plaintext" value="{{ tarifa.moduloId.Modulo}}" readonly></td>
+                            <td>
+                                <select name="referencia" class="form-control-plaintext">
+                                    {% for ref in form.fields.referenciaId.queryset %}
+                                        <option value="{{ref.id}}"{% if tarifa.referenciaId.id == ref.id %}selected{% endif %}>{{ref.descripcionReferencia}}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select name="centroCostos" class="form-control-plaintext">
+                                    {% for CeCo in form.fields.centrocostosId.queryset %}
+                                        <option value="{{CeCo.id}}"{% if tarifa.centrocostosId.id == CeCo.id %}selected{% endif %}>{{CeCo.descripcionCeCo}}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
                             <td><input type="text" name="anio" class="form-control-plaintext" value="{{ tarifa.anio }}" readonly></td>
                             <td><input type="text" name="mes" class="form-control-plaintext" value="{{ tarifa.mes }}" readonly></td>
+                            <td><input type="text" name="sitioTrabajo" class="form-control-plaintext" value="{{ tarifa.sitioTrabajo }}" readonly></td>
                             <td><input type="text" name="valorHora" class="form-control-plaintext" value="{{ tarifa.valorHora }}" readonly></td>
                             <td><input type="text" name="valorDia" class="form-control-plaintext" value="{{ tarifa.valorDia }}" readonly></td>
                             <td><input type="text" name="valorMes" class="form-control-plaintext" value="{{ tarifa.valorMes }}" readonly></td>
                             <td><input type="text" name="bolsaMes" class="form-control-plaintext" value="{{ tarifa.bolsaMes }}" readonly></td>
-                            <td><input type="text" name="monedaId" class="form-control-plaintext" value="{{ tarifa.monedaId.Nombre }}" readonly></td>
+                            <td><input type="text" name="iva" class="form-control-plaintext" value="{{ tarifa.iva }}" readonly></td>
+                            <td>
+                                <select name="moneda" class="form-control-plaintext">
+                                    {% for moneda in form.fields.monedaId.queryset %}
+                                        <option value="{{moneda.id}}"{% if tarifa.monedaId.id == moneda.id %}selected{% endif %}>{{moneda.Nombre}}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            
                          </tr>   
                         {% endfor %}
                     </tbody>

@@ -49,16 +49,17 @@ document.addEventListener('DOMContentLoaded', function() {
         let data = {
             'valorHora': row.querySelector('input[name="valorHora"]').value,
             'valorDia': row.querySelector('input[name="valorDia"]').value,
-            'valorMes': row.querySelector('input[name="valorMes"]').value
+            'valorMes': row.querySelector('input[name="valorMes"]').value,
+            'monedaId': row.querySelector('select[name="moneda"]').value,
         };
-        let id = selected[0].value;
+        let idd = selected[0].value;
         // Deshabilitar los checkboxes y el botón de edición
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
 
-       console.log(id)
+       console.log(idd)
        console.log(data)
-       fetch(`/tarifa_consultores/editar/${id}/`, {
+       fetch(`/tarifa_consultores/editar/${idd}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -98,23 +99,27 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     window.enableEdit = function() {
-       
         let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length === 0) {
-            alert('No has seleccionado ningúna Nomina para editar.');
+        if (selected.length == 0) {
+            showMessage('Por favor, selecciona al menos un consultor.', 'danger');
             return false;
         }
         if (selected.length > 1) {
-            alert('Solo puedes editar una Nomina a la vez.');
+            showMessage('Por favor, Selecciona un solo consultor para editar.', 'danger');
             return false;
         }
 
         let row = selected[0].closest('tr');
         let inputs = row.querySelectorAll('input.form-control-plaintext');
+        let selects = row.querySelectorAll('select.form-control-plaintext');
 
         // Guardar valores originales en un atributo personalizado 
         inputs.forEach(input => { 
-        input.setAttribute('data-original-value', input.value);
+            input.setAttribute('data-original-value', input.value);
+        });
+
+        selects.forEach(select => {
+            select.setAttribute('data-original-value', select.value);
         });
 
         // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
@@ -122,8 +127,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
 
+        selects.forEach(select => {
+            select.classList.remove("form-control-plaintext");
+            select.classList.add("form-control");
+            select.removeAttribute("disabled");
+        });
+
         // Convertir inputs en editables
-        let editables = ["valorHora", "valorDia", "valorMes"];
+        let editables = ["valorHora", "valorDia", "valorMes","moneda"];
         
         for (let i = 0; i < editables.length; i++) {
             let edit = row.querySelector(`[name="${editables[i]}"]`);
@@ -136,13 +147,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('cancel-button').classList.remove('d-none');
 
     };
-
-    document.getElementById('select-all').addEventListener('click', function(event) {
-        let checkboxes = document.querySelectorAll('.row-select');
-        for (let checkbox of checkboxes) {
-            checkbox.checked = event.target.checked;
-        }
-    });
 
     // Obtener el valor del token CSRF para ser utilizado en las solicitudes POST
    

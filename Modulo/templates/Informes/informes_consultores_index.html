@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %} Informe de consultores {% endblock %}
+
+{% block contenido %}
+
+<div class="card">
+    <div class="card-header">
+         <!-- Titulo del informe -->
+        <h4 class="card-title">Informe de consultores</h4>
+    </div>
+    <div class="card-body">
+        <div class="container-fluid mb-3">
+            <!-- Formulario principal -->
+            <form method="GET">
+                <!-- Filtros en la parte superior -->
+                <div class="row mb-3">
+
+                    <!--Filtro Consultor --> 
+                    <div class="col-md-3">
+                        <label for="consultor">{{ form.Nombre.label }}</label>
+                        {{ form.Nombre }}
+                    </div>
+
+                    <!--Filtro Línea --> 
+                    <div class="col-md-3">
+                        <label for="linea">{{ form.LineaId.label }}</label>
+                        {{ form.LineaId }}
+                    </div>
+
+                    <!--Filtro cargo -->
+                    <div class="col-md-3">
+                        <label for="cargo">{{ form.ModuloId.label }}</label>
+                        {{ form.ModuloId }}
+                    </div>
+
+                    <!--Filtro Certificados -->
+                    <div class="col-md-3">
+                        <label for="certificados">{{ form.Certificacion.label }}</label>
+                        {{ form.Certificacion }}
+                    </div>
+
+                    <!--Filtro Perfil -->
+                    <div class="col-md-3">
+                        <label for="perfil">{{ form.PerfilId.label }}</label>
+                        {{ form.PerfilId }}
+                    </div>
+
+                    <!-- Botones debajo de filtros -->
+                    <!-- Botón Buscar -->
+                    <div class = "row">
+                        <div class="col-md-6 text-start">
+                            <button type="submit" name="buscar" class="btn btn-primary mt-3">
+                                <i class="fas fa-glasses"></i>Buscar 
+                            </button>
+                        </div>
+                    </div>
+                </div>   
+            </form>
+
+             <!-- Botón de Descargar Excel -->
+             <div class="row">
+                <div class="col-md-6 text-start">
+                    <form id="download-form" method="GET" action="{% url 'exportar_consultores_excel' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="Documento" value="{{ form.Documento.value }}">
+                        <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}">
+                        <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}">
+                        <input type="hidden" name="Cargo" value="{{ form.Cargo.value }}">
+                        <input type="hidden" name="Certificacion" value="{{ form.Certificacion.value }}">
+                        <input type="hidden" name="PerfilId" value="{{ form.PerfilId.value }}">
+                        <button type="submit" class="btn btn-success mt-3">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+            {% if show_data %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-primary" id="estudiosTable">
+
+                    <!-- Encabezado de la tabla -->
+                    <thead>
+                        <!-- Filas dentro del encabezado -->
+                        <tr>
+                            <!-- Documento -->
+                            <th>Documento</th>
+
+                            <!-- Tipo documento -->
+                            <th>*Tipo documento*</th>
+
+                            <!-- Nombre -->
+                            <th>Nombre</th>
+
+                            <!-- Empresa -->
+                            <th>Empresa</th>
+
+                            <!-- Profesion -->
+                            <th>Profesión</th>
+
+                            <!-- LineaId -->
+                            <th>*Linea*</th>
+
+                            <!-- ModuloId  -->
+                            <th>*Modulo*</th>
+
+                            <!-- PerfilId -->
+                            <th>*Perfil*</th>
+
+                            <!-- Estado -->
+                            <th>Estado</th>
+
+                            <!-- Fecha_Ingreso -->
+                            <th>Fecha ingreso</th>
+
+                            <!-- Fecha Retiro -->
+                            <th>Fecha Retiro</th>
+
+                            <!-- Direccion -->
+                            <th>Direccion</th>
+
+                            <!-- Telefono -->
+                            <th>Telefono</th>
+
+                            <!-- Fecha Operacion -->
+                            <th>Fecha Operacion</th>
+
+                            <!-- Certificado -->
+                            <th>*Certificado*</th>
+
+                            <!-- Certificaciones -->
+                            <th>*Certificaciones*</th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for consultor in consultor_info %}
+                            <tr>
+                                <td>{{ consultor.documento }}</td>
+                                <td>{{ consultor.tipo_documento }}</td>
+                                <td>{{ consultor.nombre }}</td>
+                                <td>{{ consultor.empresa }}</td>
+                                <td>{{ consultor.profesion }}</td>
+                                <td>{{ consultor.linea }}</td>
+                                <td>{{ consultor.modulo }}</td>
+                                <td>{{ consultor.perfil }}</td>
+                                <td>{{ consultor.estado }}</td>
+                                <td>{{ consultor.fecha_ingreso }}</td>
+                                <td>{{ consultor.fecha_retiro }}</td>
+                                <td>{{ consultor.direccion }}</td>
+                                <td>{{ consultor.telefono }}</td>
+                                <td>{{ consultor.fecha_operacion }}</td>
+                                <td>{{ consultor.certificado }}</td>
+                                <td>{{ consultor.certificaciones }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="16">No hay datos disponibles.</td>
+                            </tr>
+                        {% endfor %}
+                        
+                    </tbody>
+                </table>
+            </div>
+            {% elif not empleado_info %}
+            <div class="alert alert-warning" role="alert">
+                {{ mensaje }}
+            </div>
+            {% endif %}
+    </div>
+</div>
+<script src="{% static 'JS/informes_consultores.js' %}"></script>
+{% endblock %}

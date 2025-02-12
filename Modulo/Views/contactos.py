@@ -16,11 +16,15 @@ def contactos_crear(request):
     if request.method == 'POST':
         form = ContactosForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('contactos_index')
+            max_id = Contactos.objects.all().aggregate(max_id=models.Max('id'))['max_id']
+            new_id = max_id + 1 if max_id is not None else 1
+            nuevo_moneda = form.save(commit=False)
+            nuevo_moneda.id = new_id
+            nuevo_moneda.save()
+        return redirect('contactos_index')
     else:
-        form = ContactosForm()
-    return render(request, 'Contactos/contactos_form.html', {'form': form})         
+     form = ContactosForm()
+     return render(request, 'Moneda/Moneda_form.html', {'form': form})  
 
 def contactos_editar(request, id):
      print("llego hasta editar")

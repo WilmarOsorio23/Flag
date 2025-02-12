@@ -18,6 +18,8 @@
 
         <!-- Incluye FontAwesome para los iconos -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+     
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     </head>
     <body>
         <div class="d-flex">
@@ -78,6 +80,11 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a class="nav-item nav-link" href="{% url 'centros_costos_index' %}">
+                                        <i class="fas fa-table"></i> Centro Costos
+                                    </a>
+                                </li>
+                                <li>
                                     <a class="nav-item nav-link" href="{% url 'empleado_index' %}">
                                         <i class="fas fa-table"></i> Empleados
                                     </a>
@@ -128,6 +135,11 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a class="nav-item nav-link" href="{% url 'referencia_index' %}">
+                                        <i class="fas fa-table"></i> Referencias
+                                    </a>
+                                </li>
+                                <li>
                                     <a class="nav-item nav-link" href="{% url 'tipo_documento_index' %}">
                                         <i class="fas fa-table"></i> Tipo Documento
                                     </a>
@@ -162,6 +174,17 @@
                                         <i class="fas fa-money-bill"></i> Informe Salarios
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'informes_estudios_index' %}">
+                                        <i class="fas fa-graduation-cap"></i> Informe Estudios
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'informes_consultores_index' %}">
+                                        <i class="fas fa-info"></i> Informe Consultores
+                                    </a>
+                                </li>
+                                
                             </ul>
                         </li>
                     </ul> 
@@ -242,7 +265,11 @@
                                 <i class="fa fa-chart-line"></i> Indicadores
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuIndicadores">
-                                <!-- Añadir elementos de "Indicadores" aquí si es necesario -->
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'indicadores_operatividad_index' %}">
+                                        <i class="fas fa-table"></i> Indicador Operatividad
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     </ul>

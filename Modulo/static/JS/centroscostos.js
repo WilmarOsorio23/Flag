@@ -46,11 +46,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         let row = selected[0].closest('tr');
-    
+       
         let data = {
-           'Costo': row.querySelector('input[name ="Costo"]').value
+            'Codigo':row.querySelector('input[name="Codigo"]').value,
+            'Descripcion': row.querySelector('input[name="Descripcion"]').value,
         };
-
         let id = selected[0].value;
         // Deshabilitar los checkboxes y el botón de edición
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
        console.log(id)
        console.log(data)
-       fetch(`/costos_indirectos/editar/${id}/`, {
+       fetch(`/centros_costos/editar/${id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -122,11 +122,15 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
     
-        inputs.forEach(input => {
-            input.classList.remove('form-control-plaintext');
-            input.classList.add('form-control');
-            input.readOnly = false;
-        });
+        let editables=["Codigo","Descripcion"]
+
+        for (let i= 0; i < editables.length; i++) {
+            let edit = row.querySelector(`[name=${editables[i]}]`);
+           edit.classList.remove('form-control-plaintext');
+           edit.classList.add('form-control');
+           edit.readOnly = false;
+            
+        }
         // Convertir inputs en editables
         
       

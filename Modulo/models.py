@@ -1,5 +1,6 @@
 from django.db import models
 from django.forms import ValidationError
+from django.utils import timezone
 
 # Modelos base
 class Modulo(models.Model):
@@ -139,7 +140,9 @@ class Consultores(models.Model):
     Fecha_Retiro = models.DateField(null=True, blank=True)
     Direccion = models.CharField(max_length=255, null=True, blank=True, verbose_name="Dirección")
     Telefono = models.CharField(max_length=20, null=True, blank=True, verbose_name="Teléfono")
-    Fecha_Operacion = models.DateTimeField(auto_now=True)
+    Fecha_Operacion = models.DateTimeField(default=timezone.now)  
+    Certificado = models.BooleanField(default=True)
+    Certificaciones = models.CharField(max_length=100) 
 
     def __str__(self):
         return f'{self.TipoDocumentoID} - {self.Documento} - {self.Nombre}' 
@@ -334,17 +337,17 @@ class TiposContactos(models.Model):
         db_table = 'Tipos_Contactos'
 
 class Contactos(models.Model):
-    id=models.AutoField(primary_key=True),
+    id = models.AutoField(primary_key=True)
     clienteId = models.ForeignKey(Clientes, on_delete=models.CASCADE, db_column='ClienteId')
     contactoId = models.ForeignKey(TiposContactos, on_delete=models.CASCADE, db_column='contactoId')
     Nombre = models.CharField(max_length=100)
     Telefono = models.CharField(max_length=20, null=True, blank=True)
     Direccion = models.CharField(max_length=255, null=True, blank=True)
-    Cargo = models.CharField(max_length=70)
+    Cargo = models.CharField(max_length=100)
     activo = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"id: {self.id}, ClientedId: {self.clienteId}, ContactoId: {self.contactoId}, Nombre: {self.Nombre}, telefono: {self.Telefono}, Direccion: {self.Direccion}, CargoId: {self.Cargo}, Activo: {self.activo}"
+        return f"id: {self.id}, ClienteId: {self.clienteId}, ContactoId: {self.contactoId}, Nombre: {self.Nombre}, Telefono: {self.Telefono}, Direccion: {self.Direccion}, CargoId: {self.Cargo}, Activo: {self.activo}"
 
     class Meta:
         db_table = 'Contactos'
@@ -484,6 +487,7 @@ class FacturacionClientes(models.Model):
     def __str__(self):
         return f"Facturación {self.ConsecutivoId} - Cliente {self.ClienteId} - Linea {self.LineaId}"
     
+    
 class Tarifa_Clientes(models.Model):
     id = models.AutoField(primary_key=True)
     clienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='clienteId')
@@ -496,9 +500,13 @@ class Tarifa_Clientes(models.Model):
     valorMes = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     bolsaMes = models.DecimalField(max_digits=10, decimal_places=2)
     monedaId = models.ForeignKey('Moneda', on_delete=models.CASCADE, db_column='monedaId')
+    referenciaId= models.ForeignKey('Referencia', on_delete=models.CASCADE, db_column='referenciaId')
+    centrocostosId = models.ForeignKey('CentrosCostos', on_delete=models.CASCADE, db_column='centrocostosId')
+    iva = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    sitioTrabajo = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
-        return f"id: {self.id}, ClienteId: {self.clienteId}, LineaId: {self.lineaId}, ModuloId: {self.moduloId}, Anio: {self.anio}, Mes: {self.mes}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, BolsaMes: {self.bolsaMes}, MonedaId: {self.monedaId}"
+        return f"id: {self.id}, ClienteId: {self.clienteId}, LineaId: {self.lineaId}, ModuloId: {self.moduloId}, Anio: {self.anio}, Mes: {self.mes}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, BolsaMes: {self.bolsaMes}, MonedaId: {self.monedaId}, ReferenciaId: {self.referenciaId}, CentroCostosId: {self.centrocostosId}, IVA: {self.iva}, SitioTrabajo: {self.sitioTrabajo}"
 
     class Meta:
         db_table = 'Tarifa_Clientes'
@@ -524,3 +532,61 @@ class FacturacionClientes(models.Model):
 
     def __str__(self):
         return f"Facturación {self.ConsecutivoId} - Cliente {self.ClienteId} - Linea {self.LineaId}"
+    
+class Referencia(models.Model):
+    id = models.AutoField(primary_key=True)
+    codigoReferencia = models.CharField(max_length=20)
+    descripcionReferencia = models.CharField(max_length=60)
+
+    def __str__(self):
+        return f"id: {self.id}, codigoReferencia: {self.codigoReferencia}, Referencia: {self.descripcionReferencia}"
+
+    class Meta:
+        db_table = 'Referencias'
+
+
+class CentrosCostos(models.Model):
+    id= models.AutoField(primary_key=True)
+    codigoCeCo= models.CharField(max_length=20)
+    descripcionCeCo= models.CharField(max_length=60)
+
+    def __str__(self):
+        return f"{self.id} - {self.codigoCeCo} - {self.descripcionCeCo}"
+
+    class Meta:
+        db_table = 'Centros_Costos'
+    
+
+class Ind_Operat_Clientes(models.Model):
+    Id = models.AutoField(primary_key=True)
+    Anio = models.IntegerField()
+    Mes = models.IntegerField()
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    HorasTrabajadas = models.FloatField()
+    HorasFacturables = models.FloatField()
+
+    class Meta:
+        db_table = 'Ind_Operat_Clientes'
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'LineaId'], name='unique_Ind_Operat_Clientes')
+        ]
+
+    def __str__(self):
+        return f"ID {self.id} - Año {self.Anio} - Mes {self.Mes} - Linea {self.Linea_id}"
+    
+class Ind_Operat_Conceptos(models.Model):
+    Id = models.AutoField(primary_key=True)
+    Anio = models.IntegerField()
+    Mes = models.IntegerField()
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    ConceptoId = models.ForeignKey('Concepto', on_delete=models.CASCADE, db_column='ConceptoId')
+    HorasConcepto = models.FloatField()
+
+    class Meta:
+        db_table = 'Ind_Operat_Conceptos'
+        constraints = [
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'LineaId', 'ConceptoId'], name='unique_Ind_Operat_Conceptos')
+        ]
+
+    def __str__(self):
+        return f"ID {self.Id} - Año {self.Anio} - Mes {self.Mes} - Linea {self.LineaId} - Concepto {self.ConceptoId}"
