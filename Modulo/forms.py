@@ -246,10 +246,11 @@ class ConsultoresForm(forms.ModelForm):
                     'class': 'form-control'
                 }
             ),
-            'Certificados': forms.TextInput(attrs={
+            'Certificaciones': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Certificados'
             }),
+            
 
         }
     def __init__(self, *args, **kwargs):
@@ -262,6 +263,8 @@ class ConsultoresForm(forms.ModelForm):
             self.fields['Telefono'].required = False  # Permitir campo vacío
             self.fields['Direccion'].required = False  # Permitir campo vacío
             self.fields['Fecha_Retiro'].required = False  # Permitir campo vacío
+            self.fields['Certificado'].required = False  # Permitir campo vacío
+            self.fields['Certificaciones'].required = False  # Permitir campo vacío
 
     def clean(self):
         cleaned_data = super().clean()
