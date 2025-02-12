@@ -493,9 +493,11 @@ class Tarifa_Clientes(models.Model):
     monedaId = models.ForeignKey('Moneda', on_delete=models.CASCADE, db_column='monedaId')
     referenciaId= models.ForeignKey('Referencia', on_delete=models.CASCADE, db_column='referenciaId')
     centrocostosId = models.ForeignKey('CentrosCostos', on_delete=models.CASCADE, db_column='centrocostosId')
+    iva = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    sitioTrabajo = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
-        return f"id: {self.id}, ClienteId: {self.clienteId}, LineaId: {self.lineaId}, ModuloId: {self.moduloId}, Anio: {self.anio}, Mes: {self.mes}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, BolsaMes: {self.bolsaMes}, MonedaId: {self.monedaId}, ReferenciaId: {self.referenciaId}"
+        return f"id: {self.id}, ClienteId: {self.clienteId}, LineaId: {self.lineaId}, ModuloId: {self.moduloId}, Anio: {self.anio}, Mes: {self.mes}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, BolsaMes: {self.bolsaMes}, MonedaId: {self.monedaId}, ReferenciaId: {self.referenciaId}, CentroCostosId: {self.centrocostosId}, IVA: {self.iva}, SitioTrabajo: {self.sitioTrabajo}"
 
     class Meta:
         db_table = 'Tarifa_Clientes'

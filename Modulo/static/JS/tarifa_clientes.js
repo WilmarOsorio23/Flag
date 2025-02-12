@@ -50,7 +50,12 @@ document.addEventListener('DOMContentLoaded', function() {
             'valorHora': row.querySelector('input[name="valorHora"]').value,
             'valorDia': row.querySelector('input[name="valorDia"]').value,
             'valorMes': row.querySelector('input[name="valorMes"]').value,
-            'bolsaMes': row.querySelector('input[name="bolsaMes"]').value
+            'bolsaMes': row.querySelector('input[name="bolsaMes"]').value,
+            'moneda': row.querySelector('select[name="moneda"]').value,
+            'referencia': row.querySelector('select[name="referencia"]').value,
+            'centroCostos': row.querySelector('select[name="centroCostos"]').value,
+            'iva': row.querySelector('input[name="iva"]').value,
+            'sitioTrabajo': row.querySelector('input[name="sitioTrabajo"]').value,
         };
         let id = selected[0].value;
         // Deshabilitar los checkboxes y el botón de edición
@@ -124,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit-button').disabled = true;
 
         // Convertir inputs en editables
-        let editables = ["valorHora", "valorDia", "valorMes","bolsaMes"];
+        let editables = ["valorHora", "valorDia", "valorMes","bolsaMes","iva","sitioTrabajo","moneda","referencia","centroCostos"];
         
         for (let i = 0; i < editables.length; i++) {
             let edit = row.querySelector(`[name="${editables[i]}"]`);

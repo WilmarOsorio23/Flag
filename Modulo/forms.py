@@ -1133,6 +1133,23 @@ class Tarifa_ClientesForm(forms.ModelForm):
         }),
         label='Moneda'
     )
+
+    referenciaId= forms.ModelChoiceField(
+        queryset=Referencia.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Referencia'
+    )
+
+    centrocostosId=forms.ModelChoiceField(
+        queryset=CentrosCostos.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Centro de Costos'
+    )
+
     class Meta:
         model = Tarifa_Clientes
         fields = '__all__'  
@@ -1146,6 +1163,8 @@ class Tarifa_ClientesForm(forms.ModelForm):
             'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día', 'step': '0.01'}),
             'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'}),
             'bolsaMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor bolsa mes', 'step': '0.01'}),
+            'iva': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor IVA', 'step': '0.01'}),
+            'sitioTrabajo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el sitio de trabajo'}),
         }
         labels = {
             'clienteId': 'Cliente',
@@ -1157,7 +1176,16 @@ class Tarifa_ClientesForm(forms.ModelForm):
             'ValorDia': 'Valor Día',
             'ValorMes': 'Valor Mes',
             'BolsaMes': 'Bolsa Mes',
+            'iva': 'IVA',
+            'SitioTrabajo': 'Sitio de Trabajo',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['monedaId'].required = True  # Campo obligatorio
+        self.fields['monedaId'].label_from_instance = lambda obj: obj.Nombre  # Mostrar solo el nombre de la moneda
+        self.fields['referenciaId'].required = True  # Campo obligatorio
+        self.fields['referenciaId'].label_from_instance = lambda obj: obj.codigoReferencia  # Mostrar solo el nombre de la moneda
     
     def clean(self):
         cleaned_data = super().clean()
