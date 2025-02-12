@@ -141,6 +141,8 @@ class Consultores(models.Model):
     Direccion = models.CharField(max_length=255, null=True, blank=True, verbose_name="Dirección")
     Telefono = models.CharField(max_length=20, null=True, blank=True, verbose_name="Teléfono")
     Fecha_Operacion = models.DateTimeField(default=timezone.now)  
+    Certificado = models.BooleanField(default=True)
+    Certificaciones = models.CharField(max_length=100) 
 
     def __str__(self):
         return f'{self.TipoDocumentoID} - {self.Documento} - {self.Nombre}' 
@@ -299,8 +301,8 @@ class Empleado(models.Model):
     FechaGrado = models.DateField()
     Universidad = models.CharField(max_length=100)
     ProfesionRealizada = models.CharField(max_length=100)
-    TituloProfesionalActual = models.CharField(max_length=100)
-    UniversidadActual = models.CharField(max_length=100)
+    #TituloProfesionalActual = models.CharField(max_length=100)
+    #UniversidadActual = models.CharField(max_length=100)
     AcademiaSAP = models.CharField(max_length=100)
     CertificadoSAP = models.BooleanField()  # tinyint(1) => BooleanField
     OtrasCertificaciones = models.CharField(max_length=100)  # Cambiado a CharField
