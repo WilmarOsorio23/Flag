@@ -1201,8 +1201,7 @@ class Tarifa_ClientesForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['monedaId'].required = True  # Campo obligatorio
         self.fields['monedaId'].label_from_instance = lambda obj: obj.Nombre  # Mostrar solo el nombre de la moneda
-        self.fields['referenciaId'].required = True  # Campo obligatorio
-        self.fields['referenciaId'].label_from_instance = lambda obj: obj.codigoReferencia  # Mostrar solo el nombre de la moneda
+         # Mostrar solo el nombre de la moneda
     
     def clean(self):
         cleaned_data = super().clean()
