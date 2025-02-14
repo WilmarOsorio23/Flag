@@ -56,8 +56,6 @@
                             <th scope="col">Fecha Grado</th>
                             <th scope="col">Universidad</th>
                             <th scope="col">Profesión Realizada</th>
-                            <th scope="col">Título Profesional Actual</th>
-                            <th scope="col">Universidad Actual</th>
                             <th scope="col">Academia SAP</th>
                             <th scope="col">Certificado SAP</th>
                             <th scope="col">Otras Certificaciones</th>
@@ -140,8 +138,6 @@
                             <td><input type="date" name="FechaGrado" class="form-control-plaintext" value="{{ empleado.FechaGrado|date:'Y-m-d' }}" readonly></td>
                             <td><input type="text" name="Universidad" class="form-control-plaintext" value="{{ empleado.Universidad }}" readonly></td>
                             <td><input type="text" name="ProfesionRealizada" class="form-control-plaintext" value="{{ empleado.ProfesionRealizada }}" readonly></td>
-                            <td><input type="text" name="TituloProfesionalActual" class="form-control-plaintext" value="{{ empleado.TituloProfesionalActual }}" readonly></td>
-                            <td><input type="text" name="UniversidadActual" class="form-control-plaintext" value="{{ empleado.UniversidadActual }}" readonly></td>
                             <td><input type="text" name="AcademiaSAP" class="form-control-plaintext" value="{{ empleado.AcademiaSAP }}" readonly></td>
                             <td>
                                 <select name="CertificadoSAP" class="form-control-plaintext" disabled>
@@ -194,7 +190,7 @@
         </div>
         </div>
     </div>
-</div>
+</div> 
 
 <script src="{% static 'JS/empleado.js' %}"></script>
 {% endblock %}

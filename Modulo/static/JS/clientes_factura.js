@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Funciones reutilizables
 
-    // Actualizar los valores de año y mes desde la URL y mostrarlos en la interfaz
     function updateAnioMesFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         const anio = urlParams.get('Anio');
@@ -19,18 +18,16 @@ document.addEventListener('DOMContentLoaded', function () {
         if (anio && mes) {
             document.querySelector('#anio-original').textContent = anio;
             document.querySelector('#mes-original').textContent = mes;
-            // Guardar los valores en variables globales
             window.originalAnio = anio;
             window.originalMes = mes;
             window.originalCliente = cliente;
-            // Activar el botón de guardar si hay año y mes
-            document.getElementById('save-button').removeAttribute('disabled');
-            // Activar el botón de agregar línea si hay año, mes y cliente
-            if (cliente) {
-                document.getElementById('add-line').removeAttribute('disabled');
+            // Si en sessionStorage se marcó que ya se realizó la búsqueda, lo establecemos
+            if (sessionStorage.getItem('searchPerformed') === 'true') {
+                window.searchPerformed = true;
             }
         }
     }
+     
 
     // Prevenir el envío del formulario al presionar la tecla Enter
     function preventFormSubmissionOnEnter() {
@@ -82,7 +79,6 @@ document.addEventListener('DOMContentLoaded', function () {
         rows.forEach((row, index) => {
             const rowData = {};
             const inputs = row.querySelectorAll('input');
-            const selects = row.querySelectorAll('select');
 
             // Recopilar todos los valores de los inputs en la fila
             inputs.forEach(input => {
@@ -102,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
             rowData['Mes'] = window.originalMes;
 
             // Verificar si los datos ingresados por el usuario son válidos
-            const userInputs = ['Horas', 'Dias', 'Meses', 'Valor', 'Descripcion', 'Numero_Factura'];
+            const userInputs = ['Horas', 'Valor_Horas', 'Dias', 'Valor_Dias', 'Meses', 'Valor_Meses', 'Bolsa', 'Valor_Bolsa', 'Valor', 'Descripcion', 'Numero_Factura', 'IVA', 'Referencia', 'Ceco', 'Sitio_Serv'];
             const hasValidUserData = userInputs.some(field => rowData[field] !== null && rowData[field] !== '' && rowData[field] !== '0');
 
             // Verificar si la fila tiene datos válidos antes de añadirla
@@ -111,7 +107,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        console.log(data);
         showSavingMessage(true);
 
         // Realizar la petición para guardar los datos
@@ -155,6 +150,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function updateRowTotal(row) {
+        const horas = parseFloat(row.querySelector('input[name="Horas"]').value) || 0;
+        const valorHoras = parseFloat(row.querySelector('input[name="Valor_Horas"]').value) || 0;
+        const dias = parseFloat(row.querySelector('input[name="Dias"]').value) || 0;
+        const valorDias = parseFloat(row.querySelector('input[name="Valor_Dias"]').value) || 0;
+        const meses = parseFloat(row.querySelector('input[name="Meses"]').value) || 0;
+        const valorMeses = parseFloat(row.querySelector('input[name="Valor_Meses"]').value) || 0;
+        
+        const total = (horas * valorHoras) + (dias * valorDias) + (meses * valorMeses);
+        row.querySelector('input[name="Valor"]').value = total.toFixed(2);
+    }    
+
     function recalculateTotals() {
         const rows = document.querySelectorAll('tbody tr');
         const totals = {
@@ -162,71 +169,217 @@ document.addEventListener('DOMContentLoaded', function () {
             totalDias: 0,
             totalValor: 0
         };
-
+    
         rows.forEach(row => {
-            let horasInput = row.querySelector('input[name="Horas"]');
-            let diasInput = row.querySelector('input[name="Dias"]');
-            let valorInput = row.querySelector('input[name="Valor"]');
+            // Actualizar total de la fila primero
+            updateRowTotal(row);
             
-            let horas = horasInput ? parseFloat(horasInput.value) : 0;
-            let dias = diasInput ? parseFloat(diasInput.value) : 0;
-            let valor = valorInput ? parseFloat(valorInput.value) : 0;
-
-            // Verificar si los valores son números válidos
-            if (isNaN(horas)) horas = 0;
-            if (isNaN(dias)) dias = 0;
-            if (isNaN(valor)) valor = 0;
-
+            // Sumar a los totales generales
+            const horas = parseFloat(row.querySelector('input[name="Horas"]').value) || 0;
+            const dias = parseFloat(row.querySelector('input[name="Dias"]').value) || 0;
+            const valor = parseFloat(row.querySelector('input[name="Valor"]').value) || 0;
+    
             totals.totalHoras += horas;
             totals.totalDias += dias;
             totals.totalValor += valor;
         });
-
+    
         // Actualizar los totales en el pie de página
         document.querySelector('tfoot th[data-total-horas]').textContent = totals.totalHoras.toFixed(0);
         document.querySelector('tfoot th[data-total-dias]').textContent = totals.totalDias.toFixed(0);
-        document.querySelector('tfoot th[data-total-valor]').textContent = totals.totalValor.toFixed(0);
+        document.querySelector('tfoot th[data-total-valor]').textContent = totals.totalValor.toFixed(2);
     }
 
-    document.querySelectorAll('input[name="Horas"], input[name="Dias"], input[name="Valor"]').forEach(input => {
-        input.addEventListener('input', recalculateTotals);
+    // Modificar los event listeners para incluir todos los campos relevantes
+    document.querySelectorAll('input[name="Horas"], input[name="Valor_Horas"], input[name="Dias"], input[name="Valor_Dias"], input[name="Meses"], input[name="Valor_Meses"]').forEach(input => {
+        input.addEventListener('input', () => {
+            // Actualizar la fila actual y luego los totales generales
+            updateRowTotal(input.closest('tr'));
+            recalculateTotals();
+        });
     });
 
-    // Función para confirmar la adición de una nueva línea
     function confirmAddLine() {
         const lineaId = document.querySelector('select[name="LineaIdModal"]').value;
         const clienteId = window.originalCliente;
-        const tbody = document.querySelector('tbody');
-
-
+    
         if (!lineaId) {
             showMessage('Seleccione una línea.', 'warning');
             return;
         }
 
-        // Crear una nueva fila en la tabla
-        const newRow = document.createElement('tr');
-        newRow.setAttribute('id', `row-`);
-        newRow.innerHTML = `
-            <td>
-                <button type="button" class="btn btn-danger fas fa-times" aria-label="Close" onclick="removeLine(this)"></button>
-                <input type="text" name="ClienteId" class="form-control" value="${clienteId}" hidden>
-            </td>
-            <td>${document.querySelector('select[name="LineaIdModal"] option:checked').textContent}
-                <input type="text" name="LineaId" class="form-control" value="${lineaId}" hidden>
-            </td>
-            <td><input type="text" name="Horas" class="form-control" value=""></td>
-            <td><input type="text" name="Dias" class="form-control" value=""></td>
-            <td><input type="text" name="Meses" class="form-control" value=""></td>
-            <td><input type="text" name="Valor" class="form-control" value=""></td>
-            <td><input type="text" name="Descripcion" class="form-control" value=""></td>
-            <td><input type="text" name="Numero_Factura" class="form-control" value=""></td>
-        `;
-        tbody.appendChild(newRow);
+        // Mostrar el mensaje de "Agregando..."
+        const addingMessage = document.getElementById('adding-message');
+        addingMessage.style.display = 'block';
+    
+        // Obtener la tarifa asociada al cliente y la línea
+        fetch(`/clientes_factura/obtener_factura/?clienteId=${clienteId}&lineaId=${lineaId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(tarifa => {
+            const tbody = document.querySelector('tbody');
+    
+            // Crear una nueva fila en la tabla con los valores predeterminados de la tarifa
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('id', `row-`);
+            newRow.innerHTML = `
+                <td>
+                    <button type="button" class="btn btn-danger fas fa-times" aria-label="Close" onclick="removeLine(this)"></button>
+                    <input type="text" name="ClienteId" class="form-control" value="${clienteId}" hidden>
+                </td>
+                <td>${document.querySelector('select[name="LineaIdModal"] option:checked').textContent}
+                    <input type="text" name="LineaId" class="form-control" value="${lineaId}" hidden>
+                </td>
+                <td><input type="text" name="Horas" class="form-control" value=""></td>
+                <td><input type="text" name="Valor_Horas" class="form-control" value="${tarifa.valorHora || 0}"></td>
+                <td><input type="text" name="Dias" class="form-control" value=""></td>
+                <td><input type="text" name="Valor_Dias" class="form-control" value="${tarifa.valorDia || 0}"></td>
+                <td><input type="text" name="Meses" class="form-control" value=""></td>
+                <td><input type="text" name="Valor_Meses" class="form-control" value="${tarifa.valorMes || 0}"></td>
+                <td><input type="text" name="Bolsa" class="form-control" value="${tarifa.bolsaMes || 0}"></td>
+                <td><input type="text" name="Valor_Bolsa" class="form-control" value="${tarifa.valorBolsa || 0}"></td>
+                <td><input type="text" name="Valor" class="form-control" value=""></td>
+                <td><input type="text" name="Descripcion" class="form-control" value=""></td>
+                <td><input type="text" name="Numero_Factura" class="form-control" value=""></td>
+                <td><input type="text" name="IVA" class="form-control" value="${tarifa.iva || 0}"></td>
+                <td><input type="text" name="Referencia" class="form-control" value="${tarifa.referenciaId?.codigoReferencia || ''}"></td>
+                <td><input type="text" name="Ceco" class="form-control" value="${tarifa.centrocostosId?.codigoCeCo || ''}"></td>
+                <td><input type="text" name="Sitio_Serv" class="form-control" value="${tarifa.sitioTrabajo || ''}"></td>
+            `;
+            tbody.appendChild(newRow);
+    
+            // Ocultar el modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addLineModal'));
+            modal.hide();
 
-        // Ocultar el modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addLineModal'));
-        modal.hide();
+            // Ocultar el mensaje de "Agregando..."
+            addingMessage.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error al obtener la tarifa:', error);
+            showMessage('Error al obtener la tarifa asociada.', 'danger');
+
+            // Ocultar el mensaje de "Agregando..." en caso de error
+            addingMessage.style.display = 'none';
+        });
+    }
+
+    // Función para generar la plantilla en formato Excel o JPG
+    function generateTemplate(format) {
+        const rows = document.querySelectorAll('tbody tr'); // Selecciona todas las filas
+        const data = [];
+
+        let subtotal = 0;
+        let ivaTotal = 0;
+
+        // Recopilar los datos de la tabla
+        rows.forEach(row => {
+            try {
+                // Verificar si la fila tiene los campos necesarios
+                const referencia = row.querySelector('input[name="Referencia"]')?.value || '';
+                const descripcion = row.querySelector('input[name="Descripcion"]')?.value || '';
+                const horas = parseFloat(row.querySelector('input[name="Horas"]')?.value) || 0;
+                const valor_horas = parseFloat(row.querySelector('input[name="Valor_Horas"]')?.value) || 0;
+                const dias = parseFloat(row.querySelector('input[name="Dias"]')?.value) || 0;
+                const valor_dias = parseFloat(row.querySelector('input[name="Valor_Dias"]')?.value) || 0;
+                const meses = parseFloat(row.querySelector('input[name="Meses"]')?.value) || 0;
+                const valor_meses = parseFloat(row.querySelector('input[name="Valor_Meses"]')?.value) || 0;
+                const ceco = row.querySelector('input[name="Ceco"]')?.value || '';
+                const sitio_serv = row.querySelector('input[name="Sitio_Serv"]')?.value || '';
+                const iva = parseFloat(row.querySelector('input[name="IVA"]')?.value) || 0; // Obtener IVA de la fila
+
+                // Calcular el valor total de la fila
+                const valor_total = (horas * valor_horas) + (dias * valor_dias) + (meses * valor_meses);
+                subtotal += valor_total;
+                ivaTotal += valor_total * (iva / 100); // Calcular IVA basado en el valor de la fila
+
+                if (horas !== 0 && dias !== 0 && meses !== 0){
+                    // Agregar los datos necesarios para la plantilla
+                    data.push({
+                        Referencia: referencia,
+                        Concepto: descripcion,
+                        Cantidad: horas || dias || meses, // Cantidad puede ser horas, días o meses
+                        Valor_Unitario: valor_horas || valor_dias || valor_meses, // Valor unitario correspondiente
+                        Valor_Total: valor_total.toFixed(2),
+                        Ceco: ceco,
+                        Sitio_Serv: sitio_serv
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error procesando fila:', error);
+            }
+        });
+
+        // Agregar subtotal, IVA y total
+        data.push({
+            Referencia: '',
+            Concepto: 'Subtotal',
+            Cantidad: '',
+            Valor_Unitario: '',
+            Valor_Total: subtotal.toFixed(2),
+            Ceco: '',
+            Sitio_Serv: ''
+        });
+
+        data.push({
+            Referencia: '',
+            Concepto: 'IVA',
+            Cantidad: '',
+            Valor_Unitario: `${((ivaTotal / subtotal) * 100).toFixed(2)}%`, // Mostrar el porcentaje
+            Valor_Total: ivaTotal.toFixed(2), // Usar IVA calculado
+            Ceco: '',
+            Sitio_Serv: ''
+        });
+
+        data.push({
+            Referencia: '',
+            Concepto: 'Total',
+            Cantidad: '',
+            Valor_Unitario: '',
+            Valor_Total: (subtotal + ivaTotal).toFixed(2),
+            Ceco: '',
+            Sitio_Serv: ''
+        });
+
+        // Enviar los datos al servidor para generar el archivo
+        fetch('/clientes_factura/generar_plantilla/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ data: data, format: format })
+        })
+        .then(response => response.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `plantilla.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage(`Error al generar la plantilla en ${format.toUpperCase()}.`, 'danger');
+        });
+    }
+
+    // Función para generar la plantilla en formato Excel
+    function generateTemplateExcel() {
+        generateTemplate('xlsx');
+    }
+
+    // Función para generar la plantilla en formato JPG
+    function generateTemplateJpg() {
+        generateTemplate('jpg');
     }
 
     // Función para eliminar una línea
@@ -243,34 +396,52 @@ document.addEventListener('DOMContentLoaded', function () {
         const cliente = document.querySelector('select[name="ClienteId"]').value;
         const saveButton = document.getElementById('save-button');
         const addLineButton = document.getElementById('add-line');
+        const generateTemplateButton = document.getElementById('generate-template');
 
         if (anio && mes && window.searchPerformed) {
             saveButton.removeAttribute('disabled');
+            
         } else {
             saveButton.setAttribute('disabled', 'disabled');
         }
 
         if (anio && mes && cliente && window.searchPerformed) {
             addLineButton.removeAttribute('disabled');
+            generateTemplateButton.removeAttribute('disabled');
         } else {
             addLineButton.setAttribute('disabled', 'disabled');
+            generateTemplateButton.setAttribute('disabled', 'disabled');
         }
     }
 
-
     // Añadir evento para habilitar o deshabilitar los botones
-    document.querySelector('select[name="Anio"]').addEventListener('change', toggleButtons);
-    document.querySelector('select[name="Mes"]').addEventListener('change', toggleButtons);
-    document.querySelector('select[name="ClienteId"]').addEventListener('change', toggleButtons);
+    document.querySelector('select[name="Anio"]').addEventListener('change', function () {
+        window.searchPerformed = false;
+        toggleButtons();
+    });
+    document.querySelector('select[name="Mes"]').addEventListener('change', function () {
+        window.searchPerformed = false;
+        toggleButtons();
+    });
+    document.querySelector('select[name="ClienteId"]').addEventListener('change', function () {
+        window.searchPerformed = false;
+        toggleButtons();
+    });    
 
-    // Marcar que se ha realizado una búsqueda
+    // Marcar la búsqueda en el submit y persistirla
     document.querySelector('form').addEventListener('submit', function () {
         window.searchPerformed = true;
+        sessionStorage.setItem('searchPerformed', 'true');
         toggleButtons(); // Re-evaluar los botones después de la búsqueda
-    });
+    });    
+
+    // Hacer las funciones accesibles globalmente
+    window.generateTemplateExcel = generateTemplateExcel;
+    window.generateTemplateJpg = generateTemplateJpg;
 
     window.saveAllRows = saveAllRows;
     window.confirmAddLine = confirmAddLine;
     window.removeLine = removeLine;
     recalculateTotals(); // Initial calculation
+    toggleButtons();
 });
