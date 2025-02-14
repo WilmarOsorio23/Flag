@@ -822,11 +822,19 @@ class EmpleadoForm(forms.ModelForm):
             'ProfesionRealizada': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la profesión realizada'}),
             'TituloProfesionalActual': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el título profesional actual'}),
             'UniversidadActual': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la universidad actual'}),
-            'AcademiaSAP': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la academia SAP'}),
+            'AcademiaSAP': forms.Select(attrs={'class': 'form-control'}, choices=[('', 'Seleccione una opción'), ('1', 'Sí'), ('0', 'No')]),
             'CertificadoSAP': forms.Select(attrs={'class': 'form-control'}, choices=[('', 'Seleccione una opción'), ('1', 'Sí'), ('0', 'No')]),
-            'OtrasCertificaciones': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ingrese otras certificaciones', 'rows': 3}),
-            'Postgrados': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ingrese los postgrados', 'rows': 3}),
-        }
+            'OtrasCertificaciones': forms.Select(attrs={'class': 'form-control'}, choices=[('', 'Seleccione una opción'), ('1', 'Sí'), ('0', 'No')]),
+            'Postgrados': forms.Select(attrs={'class': 'form-control'}, choices=[('', 'Seleccione una opción'), ('1', 'Sí'), ('0', 'No')]),
+            'Activo': forms.Select(attrs={'class': 'form-control'}, choices=[('', 'Seleccione el estado'), ('1', 'Sí'), ('0', 'No')]),
+            'FechaRetiro': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'placeholder': 'Seleccione la fecha de retiro'}),
+            'Direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la dirección'}),
+            'Ciudad': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la ciudad'}),
+            'Departamento': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el departamento'}),
+            'DireccionAlterna': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la dirección alterna'}),
+            'Telefono1': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono 1'}),
+            'Telefono2': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono 2'}),
+        }   
         labels = {
             'TipoDocumento': 'Tipo de Documento',
             'Documento': 'Documento',
@@ -848,6 +856,13 @@ class EmpleadoForm(forms.ModelForm):
             'CertificadoSAP': 'Certificado SAP',
             'OtrasCertificaciones': 'Otras Certificaciones',
             'Postgrados': 'Postgrados',
+            'Activo': 'Activo',
+            'FechaRetiro': 'FechaRetiro',
+            'Direccion': 'Direccion',
+            'Departamento': 'Departamento',
+            'DireccionAlterna': 'DirecccionAlterna',
+            'Telefono1': 'Telefono1',
+            'Telefono2':'Telefono2',
         }
 
 class EmpleadoFilterForm(forms.Form):
