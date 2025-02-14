@@ -400,10 +400,10 @@ class Tarifa_Consultores(models.Model):
     valorHora = models.DecimalField(max_digits=10, decimal_places=2, db_column='valorHora')
     valorDia = models.DecimalField(max_digits=10, decimal_places=2, db_column='valorDia')
     valorMes = models.DecimalField(max_digits=10, decimal_places=2, db_column='valorMes')
-    monedaId = models.ForeignKey('moneda',on_delete=models.CASCADE, db_column='monedaId')
+    monedaId = models.ForeignKey('moneda', on_delete=models.CASCADE, db_column='monedaId')
 
     def __str__(self):
-        return f"id: {self.id}, DocumentoId: {self.documentoId}, Año: {self.anio}, Mes: {self.mes}, ClienteId: {self.clienteID}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, Moneda: {self.moneda}"
+        return f"id: {self.id}, DocumentoId: {self.documentoId}, Año: {self.anio}, Mes: {self.mes}, ClienteId: {self.clienteID}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, Moneda: {self.id}"
 
     class Meta:
         db_table = 'Tarifa_Consultores'

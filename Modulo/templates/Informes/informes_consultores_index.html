@@ -47,6 +47,12 @@
                         {{ form.PerfilId }}
                     </div>
 
+                     <!-- Filtro Estado -->
+                     <div class="col-md-3">
+                        <label for="estado">{{ form.Estado.label }}</label>
+                        {{ form.Estado }}
+                    </div>
+
                     <!-- Botones debajo de filtros -->
                     <!-- Botón Buscar -->
                     <div class = "row">
@@ -70,6 +76,7 @@
                         <input type="hidden" name="Cargo" value="{{ form.Cargo.value }}">
                         <input type="hidden" name="Certificacion" value="{{ form.Certificacion.value }}">
                         <input type="hidden" name="PerfilId" value="{{ form.PerfilId.value }}">
+                        <input type="hidden" name="Estado" value="{{ form.Estado.value }}">
                         <button type="submit" class="btn btn-success mt-3">
                             <i class="fas fa-file-excel"></i> Descargar Excel
                         </button>
@@ -80,7 +87,7 @@
 
             {% if show_data %}
             <div class="table-responsive">
-                <table class="table table-bordered table-hover table-primary" id="estudiosTable">
+                <table class="table table-bordered table-hover table-primary" id="consultoresTable">
 
                     <!-- Encabezado de la tabla -->
                     <thead>
@@ -90,7 +97,7 @@
                             <th>Documento</th>
 
                             <!-- Tipo documento -->
-                            <th>*Tipo documento*</th>
+                            <th>Tipo documento</th>
 
                             <!-- Nombre -->
                             <th>Nombre</th>
@@ -102,13 +109,13 @@
                             <th>Profesión</th>
 
                             <!-- LineaId -->
-                            <th>*Linea*</th>
+                            <th>Linea</th>
 
                             <!-- ModuloId  -->
-                            <th>*Modulo*</th>
+                            <th>Modulo</th>
 
                             <!-- PerfilId -->
-                            <th>*Perfil*</th>
+                            <th>Perfil</th>
 
                             <!-- Estado -->
                             <th>Estado</th>
@@ -129,10 +136,10 @@
                             <th>Fecha Operacion</th>
 
                             <!-- Certificado -->
-                            <th>*Certificado*</th>
+                            <th>Certificado</th>
 
                             <!-- Certificaciones -->
-                            <th>*Certificaciones*</th>
+                            <th>Certificaciones</th>
 
                         </tr>
                     </thead>
