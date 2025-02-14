@@ -33,7 +33,6 @@ def guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas):
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos del cliente: {str(e)}")
 
-
 def guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas):
     try:
         # Verificar si existe el registro
@@ -216,8 +215,9 @@ def registro_tiempos_guardar(request):
 
 # Función para filtrar los colaboradores con los filtros especificados
 def filtrar_colaboradores(form, empleados, consultores, clientes, tiempo_clientes, tiempo_conceptos):
-    empleados = empleados.order_by('Documento')  # Orden descendente por Documento (ajustar si otro campo es clave)
-    consultores = consultores.order_by('Documento')  # Orden descendente por Documento
+    # No filtrar por estado activo
+    empleados = empleados.order_by('Documento')
+    consultores = consultores.order_by('Documento')
     
 
     # Recuperar los filtros del formulario
@@ -302,7 +302,8 @@ def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes, 
 
     # Obtener horas trabajadas por cliente
     horas_trabajadas_cliente = tiempo_clientes.filter(Documento=colaborador.Documento)
-    clientes_colaborador = {cliente.ClienteId: 0 for cliente in clientes}  # Inicializamos las horas con 0
+    clientes_colaborador = {cliente.ClienteId: 0 for cliente in clientes}
+
     for tiempo_cliente in horas_trabajadas_cliente:
         if tiempo_cliente.ClienteId_id in clientes_colaborador:
             clientes_colaborador[tiempo_cliente.ClienteId_id] += tiempo_cliente.Horas
@@ -313,6 +314,7 @@ def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes, 
     # Obtener horas trabajadas por concepto
     horas_trabajadas_concepto = tiempo_conceptos.filter(Documento=colaborador.Documento)
     conceptos_colaborador = {concepto.ConceptoId: 0 for concepto in conceptos}  # Inicializamos las horas con 0
+
     for tiempo_concepto in horas_trabajadas_concepto:
         if tiempo_concepto.ConceptoId_id in conceptos_colaborador:
             conceptos_colaborador[tiempo_concepto.ConceptoId_id] += tiempo_concepto.Horas
@@ -323,24 +325,30 @@ def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes, 
     # Calcular total de horas trabajadas (puede coincidir con total_horas_clientes o total_horas_conceptos)
     total_horas_trabajadas = total_horas_clientes+total_horas_conceptos
 
+    # Verificar si el colaborador tiene horas registradas
+    tiene_horas_registradas = total_horas_trabajadas > 0
 
-    # Crear un diccionario con la información del colaborador
-    colaborador_info = {
-        'Nombre': colaborador.Nombre,
-        'Documento': colaborador.Documento,
-        'Linea': colaborador.LineaId.Linea,
-        'LineaId': colaborador.LineaId.LineaId,     
-        'Perfil': colaborador.PerfilId.Perfil,
-        'Modulo': colaborador.ModuloId.Modulo,
-        'Empresa': "Flag Soluciones" if isinstance(colaborador, Empleado) else colaborador.Empresa,
-        'Clientes': {cliente_id: {'Cliente': cliente_info[cliente_id].Nombre_Cliente, 'ClienteId': cliente_id, 'tiempo_clientes': horas} for cliente_id, horas in clientes_colaborador.items()},
-        'Total_Clientes': total_horas_clientes,
-        'Conceptos': {concepto_id: {'Concepto': concepto_info[concepto_id].Descripcion, 'ConceptoId': concepto_id, 'tiempo_conceptos': horas} for concepto_id, horas in conceptos_colaborador.items()},
-        'Total_Conceptos': total_horas_conceptos,
-        'Total_Horas': total_horas_trabajadas
-    }
+    # Solo agregar al colaborador si está activo o tiene horas registradas
+    if colaborador.Activo if isinstance(colaborador, Empleado) else colaborador.Estado or tiene_horas_registradas:
+        # Crear un diccionario con la información del colaborador
+        colaborador_info = {
+            'Nombre': colaborador.Nombre,
+            'Documento': colaborador.Documento,
+            'Linea': colaborador.LineaId.Linea,
+            'LineaId': colaborador.LineaId.LineaId,     
+            'Perfil': colaborador.PerfilId.Perfil,
+            'Modulo': colaborador.ModuloId.Modulo,
+            'Empresa': "Flag Soluciones" if isinstance(colaborador, Empleado) else colaborador.Empresa,
+            'Clientes': {cliente_id: {'Cliente': cliente_info[cliente_id].Nombre_Cliente, 'ClienteId': cliente_id, 'tiempo_clientes': horas} for cliente_id, horas in clientes_colaborador.items()},
+            'Total_Clientes': total_horas_clientes,
+            'Conceptos': {concepto_id: {'Concepto': concepto_info[concepto_id].Descripcion, 'ConceptoId': concepto_id, 'tiempo_conceptos': horas} for concepto_id, horas in conceptos_colaborador.items()},
+            'Total_Conceptos': total_horas_conceptos,
+            'Total_Horas': total_horas_trabajadas,  
+            'Activo': colaborador.Activo if isinstance(colaborador, Empleado) else colaborador.Estado  # Incluir estado activo
+        }
 
-    return colaborador_info
+        return colaborador_info
+    return None
 
 
 def obtener_info_linea(linea, clientes, tiempo_facturables):
@@ -369,13 +377,13 @@ def obtener_info_linea(linea, clientes, tiempo_facturables):
 
 # Vista para mostrar la información filtrada de los colaboradores
 def registro_tiempos_index(request):
-    empleados = Empleado.objects.all()
-    consultores = Consultores.objects.all()
+    empleados = Empleado.objects.select_related('LineaId', 'PerfilId', 'ModuloId').all().order_by('Nombre')
+    consultores = Consultores.objects.select_related('LineaId', 'PerfilId', 'ModuloId').all().order_by('Nombre')
     clientes = Clientes.objects.all()
     conceptos = Concepto.objects.all()
-    tiempo_clientes = Tiempos_Cliente.objects.all()
-    tiempo_conceptos = TiemposConcepto.objects.all()
-    horas_facturables = TiemposFacturables.objects.all()
+    tiempo_clientes = Tiempos_Cliente.objects.select_related('ClienteId').all()
+    tiempo_conceptos = TiemposConcepto.objects.select_related('ConceptoId').all()
+    horas_facturables = TiemposFacturables.objects.select_related('LineaId', 'ClienteId').all()
     lineas = Linea.objects.all()
 
     colaborador_info = []
@@ -388,9 +396,23 @@ def registro_tiempos_index(request):
         if form.is_valid():
             # Filtrar colaboradores según los datos del formulario
             empleados, consultores, tiempo_clientes, tiempo_conceptos = filtrar_colaboradores(form, empleados, consultores, clientes, tiempo_clientes, tiempo_conceptos)
-            
+
             # Obtener información de los colaboradores
-            colaborador_info = obtener_colaborador_info(empleados, consultores, clientes, conceptos, tiempo_clientes, tiempo_conceptos)
+            for empleado in empleados:
+                info = obtener_info_colaborador(empleado, clientes, conceptos, tiempo_clientes, tiempo_conceptos)
+
+                if info:  # Solo agregar si el colaborador tiene horas registradas o está activo
+                    colaborador_info.append(info)
+
+            for consultor in consultores:
+                info = obtener_info_colaborador(consultor, clientes, conceptos, tiempo_clientes, tiempo_conceptos)
+
+                if info:  # Solo agregar si el consultor tiene horas registradas o está activo
+                    colaborador_info.append(info)
+            
+            # Ordenar colaboradores alfabéticamente por nombre
+            colaborador_info = sorted(colaborador_info, key=lambda x: x['Nombre'])
+            
             show_data = bool(colaborador_info)  # Mostrar datos si hay resultados
 
             # Extraer líneas únicas de colaborador_info
@@ -403,6 +425,7 @@ def registro_tiempos_index(request):
             for linea in lineas:
                 if linea.Linea in lineas_unicas:
                     lineas_info.append(obtener_info_linea(linea, clientes, tiempos_facturables))
+                    
 
     else: 
         form = ColaboradorFilterForm()

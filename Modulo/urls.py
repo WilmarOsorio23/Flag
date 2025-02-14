@@ -298,6 +298,8 @@ urlpatterns = [
     # Rutas para la tabla Registro Tiempos
     path('clientes_factura/', clientes_factura.clientes_factura_index, name='clientes_factura_index'),
     path('clientes_factura/guardar/', clientes_factura.clientes_factura_guardar, name='clientes_factura_guardar'),
+    path('clientes_factura/generar_plantilla/', clientes_factura.generar_plantilla, name='generar_plantilla'),
+    path('clientes_factura/obtener_factura/', clientes_factura.obtener_tarifa, name='obtener_tarifa'),
 
     # Rutas para la tabla Indicadores de Operatividad
     path('indicadores_operatividad/', indicadores_operatividad.indicadores_operatividad_index, name='indicadores_operatividad_index'),
