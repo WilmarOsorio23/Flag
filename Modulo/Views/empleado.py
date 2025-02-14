@@ -117,7 +117,15 @@ def empleado_descargar_excel(request):
                 empleado.AcademiaSAP, 
                 empleado.CertificadoSAP, 
                 empleado.OtrasCertificaciones, 
-                empleado.Postgrados
+                empleado.Postgrados,
+                empleado.Activo,
+                empleado.FechaRetiro,
+                empleado.Direccion,
+                empleado.Ciudad,
+                empleado.Departamento,
+                empleado.DireccionAlterna,
+                empleado.Telefono1,
+                empleado.Telefono2
             ])
 
         df = pd.DataFrame(data, columns=[
