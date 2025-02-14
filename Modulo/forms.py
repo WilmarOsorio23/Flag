@@ -900,6 +900,16 @@ class EmpleadoFilterForm(forms.Form):
         label="TipoDocumento",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+    Activo = forms.ChoiceField(
+        choices=[
+            ('', 'Seleccione estado'),
+            ('True', 'Sí'),
+            ('False', 'No')
+        ],
+        required=False,
+        label='Activo',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
 
     def __init__(self, *args, **kwargs):
         certificacion_seleccionada = kwargs.pop('certificacion_seleccionada', None)
@@ -919,6 +929,7 @@ class EmpleadoFilterForm(forms.Form):
 
         cargos = Cargos.objects.values_list('CargoId', 'Cargo').distinct()
         self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo[0], cargo[1]) for cargo in cargos]
+
 
         self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]
 

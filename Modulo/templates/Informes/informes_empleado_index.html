@@ -38,6 +38,10 @@
               <label for="PerfilId">{{ form.PerfilId.label }}</label>
               {{ form.PerfilId }}
             </div>
+            <div class="col-md-3">
+              <label for="Activo">{{ form.Activo.label }}</label>
+              {{ form.Activo }}
+            </div>
           </div>
           <!-- Botones en la parte inferior -->
           <div class="row">
@@ -153,9 +157,9 @@
                   <td>{{ empleado.FechaNacimiento }}</td>
                   <td>{{ empleado.FechaIngreso }}</td>
                   <td>{{ empleado.FechaOperacion }}</td>
-                  <td>{{ empleado.ModuloId }}</td>
-                  <td>{{ empleado.PerfilId }}</td>
-                  <td>{{ empleado.LineaId }}</td>
+                  <td>{{ empleado.Modulo }}</td>
+                  <td>{{ empleado.Perfil }}</td>
+                  <td>{{ empleado.Linea }}</td>
                   <td>{{ empleado.TituloProfesional }}</td>
                   <td>{{ empleado.FechaGrado }}</td>
                   <td>{{ empleado.Universidad }}</td>
