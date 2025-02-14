@@ -15,6 +15,7 @@ def filtrar_consultores(form, consultores):
     modulo = form.cleaned_data.get('ModuloId')
     certificacion = form.cleaned_data.get('Certificacion')
     perfil = form.cleaned_data.get('PerfilId')
+    estado = form.cleaned_data.get('Estado')
 
     if nombre:
         consultores = consultores.filter(Nombre=nombre)
@@ -26,6 +27,8 @@ def filtrar_consultores(form, consultores):
         consultores = consultores.filter(Certificado=bool(int(certificacion)))
     if perfil:
         consultores = consultores.filter(PerfilId=perfil)
+    if estado:
+        consultores = consultores.filter(Estado=bool(int(estado)))
 
     return consultores
 
