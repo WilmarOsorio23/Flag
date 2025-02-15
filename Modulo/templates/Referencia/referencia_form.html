@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %} Crear Referencia {% endblock %}
+
+{% block contenido %}
+    <h2>Crear Nueva Referencia</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'referencia_index' %}" class="btn btn-danger">Cancelar</a>
+    </form>
+{% endblock %}

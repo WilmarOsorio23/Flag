@@ -9,6 +9,7 @@ from Modulo.forms import IPCForm
 from Modulo.models import IPC
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
+from django.contrib import messages
 
 def ipc_index(request):
     ipc_data = IPC.objects.all().order_by('-Anio','Mes')
@@ -50,11 +51,11 @@ def ipc_editar(request, id):
 
 
 def ipc_eliminar(request):
-    if request.method == 'POST':
+   if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
         IPC.objects.filter(id__in=item_ids).delete()
+        messages.success(request, 'El registro se han eliminado correctamente.')
         return redirect('ipc_index')
-    return redirect('ipc_index')
 
 def ipc_descargar_excel(request):
     if request.method == 'POST':

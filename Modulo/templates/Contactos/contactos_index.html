@@ -61,6 +61,8 @@
                             <th scope="col">Nombre</th>
                             <th scope="col">Telefono</th>
                             <th scope="col">Direccion</th>
+                            <th scope="col">Cargo</th>
+                            <th scope="col">Activo</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -72,7 +74,9 @@
                             <td><input type="text" name="nombre" value="{{ contacto.Nombre}}" class="form-control-plaintext"></td>
                             <td><input type="text" name="telefono" value="{{ contacto.Telefono}}" class="form-control-plaintext"></td>
                             <td><input type="text" name="Direccion" value="{{ contacto.Direccion}}" class="form-control-plaintext"></td>
-{% empty %}
+                            <td><input type="text" name="Cargo" value="{{contacto.Cargo}}" class="form-control-plaintext"></td>
+                            <td><input type="text" name="Activo" value="{{ contacto.activo}}" class="form-control-plaintext"></td>
+                         {% empty %}
                         <tr>
                             <td colspan="6">No hay datos disponibles.</td>
                         </tr>

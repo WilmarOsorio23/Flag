@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
     async function verifyRelations(ids, csrfToken) {
         try {
-            const response = await fetch('/verificar-relaciones/', {
+            const response = await fetch('verificar-relaciones/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
     async function verifyRelations(ids, csrfToken) {
         try {
-            const response = await fetch('/verificar-relaciones/', {
+            const response = await fetch('verificar-relaciones/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -167,13 +167,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         let row = selected[0].closest('tr');
-        let inputs = row.querySelectorAll('input.form-control-plaintext');
-        inputs.forEach(input => {
-            input.classList.remove('form-control-plaintext');
-            input.classList.add('form-control');
-            input.readOnly = false;
-        });
-
+        let editables = ["Nombre", "Descripcion"];
+        
+        for (let i = 0; i < editables.length; i++) {
+            let edit = row.querySelector(`[name="${editables[i]}"]`);
+            edit.classList.remove('form-control-plaintext');
+            edit.classList.add('form-control');
+            edit.readOnly = false; // Corregido aquí
+        }
+    
         // Mostrar botón de guardar
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
@@ -232,7 +234,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let row = selected.closest('tr');
         let data = {
-            'Nombre': row.querySelector('input[name ="Nombre"]').value
+            'Nombre': row.querySelector('input[name ="Nombre"]').value,
+            'Descripcion': row.querySelector('input[name ="Descripcion"]').value
         };
 
         console.log(data)

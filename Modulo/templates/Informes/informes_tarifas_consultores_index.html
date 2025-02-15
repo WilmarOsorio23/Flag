@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %} Informe de Tarifas consultores {% endblock %}
+
+{% block contenido %}
+
+<div class="card">
+    <div class="card-header">
+         <!-- Titulo del informe -->
+        <h4 class="card-title">Informe de Tarifas consultores</h4>
+    </div>
+    <div class="card-body">
+        <div class="container-fluid mb-3">
+            <!-- Formulario principal -->
+            <form method="GET">
+                <!-- Filtros en la parte superior -->
+                <div class="row mb-3">
+
+                    <!--Filtro Consultor --> 
+                    <div class="col-md-3">
+                        <label for="consultor">{{ form.Nombre.label }}</label>
+                        {{ form.Nombre }}
+                    </div>
+
+                    <!--Filtro Línea --> 
+                    <div class="col-md-3">
+                        <label for="linea">{{ form.LineaId.label }}</label>
+                        {{ form.LineaId }}
+                    </div>
+
+                    <!--Filtro Año -->
+                    <div class="col-md-3">
+                        <label for="anio">{{ form.anio.label }}</label>
+                        {{ form.anio }}
+                    </div>
+      
+                    <!-- Botones debajo de filtros -->
+                    <!-- Botón Buscar -->
+                    <div class = "row">
+                        <div class="col-md-6 text-start">
+                            <button type="submit" name="buscar" class="btn btn-primary mt-3">
+                                <i class="fas fa-glasses"></i>Buscar 
+                            </button>
+                        </div>
+                    </div>
+                </div>   
+            </form>
+
+             <!-- Botón de Descargar Excel -->
+             <div class="row">
+                <div class="col-md-6 text-start">
+                    <form id="download-form" method="GET" action="{% url 'exportar_tarifas_consultores_excel' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}">
+                        <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}">
+                        {% for anio in form.anio.value %}
+                            <input type="hidden" name="anio" value="{{ anio }}">
+                        {% endfor %}
+                        <!--<input type="hidden" name="anio" value="{{ form.anio.value|join:',' }}">-->
+                        <!--<input type="hidden" name="anio" value="{{ form.anio.value }}">-->
+                        <button type="submit" class="btn btn-success mt-3">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+            {% if show_data %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-primary" id="consultoresTarifasTable">
+
+                    <!-- Encabezado de la tabla -->
+                    <thead>
+                        <!-- Filas dentro del encabezado -->
+                        <tr>
+                            <!-- Nombre Línea -->
+                            <th>Línea</th>
+
+                            <!-- Documento Consultor -->
+                            <th>Documento Consultor</th>
+
+                            <!-- Nombre Consultor -->
+                            <th>Nombre Consultor</th>
+
+                            <!-- Perfil  -->
+                            <th>Perfil</th>
+
+                            <!-- Módulo  -->
+                            <th>Módulo</th>
+
+                            <!-- Año -->
+                            <th>Año</th>
+
+                            <!-- Mes -->
+                            <th>Mes</th>
+
+                            <!-- Cliente ID -->
+                            <th>Cliente</th>
+
+                            <!-- Tarifa Hora -->
+                            <th>Tarifa Hora</th>
+
+                            <!-- Tarifa Día -->
+                            <th>Tarifa Día</th>
+
+                            <!-- Tarifa Mes -->
+                            <th>Tarifa Mes</th>
+
+                            <!-- Moneda -->
+                            <th>Moneda</th>
+                            
+                    </thead>
+
+                    <tbody>
+                        {% for consultor in consultor_tarifas_info %}
+                            {% for anio, tarifas in consultor.tarifas.items %}
+                                {% for tarifa in tarifas %}
+                                    <tr>
+                                        <td>{{ consultor.linea }}</td>
+                                        <td>{{ consultor.documento }}</td>
+                                        <td>{{ consultor.nombre }}</td>
+                                        <td>{{ consultor.perfil }}</td>
+                                        <td>{{ consultor.modulo }}</td>
+                                        <td>{{ anio }}</td> <!-- Mostrar el año en cada fila -->
+                                        <td>{{ tarifa.mes }}</td>
+                                        <td>{{ tarifa.clienteID }}</td>
+                                        <td>{{ tarifa.tarifa_hora }}</td>
+                                        <td>{{ tarifa.tarifa_dia }}</td>
+                                        <td>{{ tarifa.tarifa_mes }}</td>
+                                        <td>{{ tarifa.moneda }}</td>
+                                    </tr>
+                                {% endfor %}
+                                <!--{% if tarifas|length == 0 %}
+                                    <tr>
+                                        <td colspan="12">No hay datos para el año {{ anio }}</td>
+                                    </tr>
+                                {% endif %}-->
+                            {% endfor %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="12">No hay datos disponibles.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+            {% elif not consultor_tarifas_info %}
+            <div class="alert alert-warning" role="alert">
+                {{ mensaje }}
+            </div>
+            {% endif %}
+    </div>
+</div>
+<script src="{% static 'JS/informes_tarifas_consultores.js' %}"></script>
+{% endblock %}

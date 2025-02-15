@@ -56,6 +56,8 @@
                                 <th scope="col">Telefono</th>
                                 <th scope="col">Dirección</th>
                                 <th scope="col">Fecha Operación</th>
+                                <th scope="col">Certificado</th>
+                                <th scope="col">Certificaciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -136,6 +138,14 @@
                                 <td><input type="text" name="Telefono" class="form-control-plaintext" value="{{ consultor.Telefono|default:'-' }}" readonly></td>
                                 <td><input type="text" name="Direccion" class="form-control-plaintext" value="{{ consultor.Direccion|default:'-' }}" readonly></td>
                                 <td><input type="date" name="Fecha_Operacion" class="form-control-plaintext" value="{{ consultor.Fecha_Operacion|date:'Y-m-d' }}" readonly></td>
+                                <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                    <!-- Certificado editable -->
+                                    <select name="Certificado" class="form-control-plaintext" disabled>
+                                        <option value="True" {% if consultor.Certificado %}selected{% endif %}>SI</option>
+                                        <option value="False" {% if not consultor.Certificado %}selected{% endif %}>NO</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" name="Certificaciones" class="form-control-plaintext" value="{{consultor.Certificaciones}}" readonly></td>
                             </tr>
                             {% empty %}
                             <tr>

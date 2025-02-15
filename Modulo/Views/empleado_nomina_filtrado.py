@@ -76,7 +76,6 @@ def obtener_empleado_info(empleados, nominas, meses):
                 'fecha_ingreso': empleado.FechaIngreso,
                 'años_en_flag': años_en_flag,
                 'año': anio,
-                'titulo_profesional_actual': empleado.TituloProfesionalActual,
                 'meses': salarios_meses,
             })
     return empleado_info
@@ -155,7 +154,6 @@ def exportar_nomina_excel(request):
             'Certificado SAP': empleado['certificado'],
             'Fecha Ingreso': empleado['fecha_ingreso'],
             'Años en Flag': empleado['años_en_flag'],
-            'Título Profesional Actual': empleado['titulo_profesional_actual'],
             'Año': empleado['año']
         }
 

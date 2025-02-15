@@ -109,7 +109,7 @@ def Tipos_contactos_descargar_excel(request):
         response = HttpResponse(
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = 'attachment; filename="Contactos.xlsx"'
+        response['Content-Disposition'] = 'attachment; filename="TiposContactos.xlsx"'
         
         # Escribir el DataFrame en el archivo Excel
         df.to_excel(response, index=False)

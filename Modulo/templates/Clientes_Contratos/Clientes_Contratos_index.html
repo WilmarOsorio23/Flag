@@ -30,10 +30,7 @@
             <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar"></button> 
             <form id="download-form" method="POST" action="{% url 'clientes_contratos_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
-                {% for contrato in clientes_contratos_data %} 
-                    <input type="hidden" name="items_to_delete" value="{{ contrato.ClientesContratosId }}">
-                {% endfor %}
-                <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
+                <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
             </form>
             <!-- Botones de Guardar y Cancelar -->  
             <button id="save-button" 
@@ -78,8 +75,8 @@
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ contrato.ClientesContratosId }}"></td>
                             <td><input type="text" class="form-control-plaintext" name="Nombre_Cliente" value="{{ contrato.ClienteId.Nombre_Cliente }}" readonly></td>
                             <td><input type="text" class="form-control-plaintext" name="Linea" value="{{ contrato.LineaId.Linea }}" readonly></td>
-                            <td><input type="text" class="form-control-plaintext" name="FechaInicio" value="{{ contrato.FechaInicio|date:'Y-m-d' }}" readonly></td>
-                            <td><input type="text" class="form-control-plaintext" name="FechaFin" value="{{ contrato.FechaFin|date:'Y-m-d' }}" readonly></td>
+                            <td><input type="date" class="form-control-plaintext" name="FechaInicio" value="{{ contrato.FechaInicio|date:'Y-m-d' }}" readonly></td>
+                            <td><input type="date" class="form-control-plaintext" name="FechaFin" value="{{ contrato.FechaFin|date:'Y-m-d' }}" readonly></td>
                             <td><input type="text" class="form-control-plaintext" name="Contrato" value="{{ contrato.Contrato }}" readonly></td>
                             <td><input type="text" class="form-control-plaintext" name="ContratoVigente" value="{{ contrato.ContratoVigente }}" readonly></td>
                             <td><input type="text" class="form-control-plaintext" name="OC_Facturar" value="{{ contrato.OC_Facturar}}" readonly></td>

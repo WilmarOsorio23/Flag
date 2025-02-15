@@ -11,7 +11,8 @@ import json
 
 def tarifa_clientes_index(request):
     tarifa_clientes_data = Tarifa_Clientes.objects.all()
-    return render(request, 'tarifa_clientes/tarifa_clientes_index.html', {'tarifa_clientes_data': tarifa_clientes_data})    
+    form=Tarifa_ClientesForm()
+    return render(request, 'tarifa_clientes/tarifa_clientes_index.html', {'tarifa_clientes_data': tarifa_clientes_data,'form': form}, )    
 
 def tarifa_clientes_crear(request):
    if request.method == 'POST':
@@ -38,6 +39,11 @@ def tarifa_clientes_editar(request, id):
             tarifa.valorDia = data.get('valorDia', tarifa.valorDia)
             tarifa.valorMes = data.get('valorMes', tarifa.valorMes)
             tarifa.bolsaMes= data.get('bolsaMes',tarifa.bolsaMes)
+            tarifa.iva = data.get('iva', tarifa.iva)
+            tarifa.monedaId_id = data.get('moneda', tarifa.monedaId_id)
+            tarifa.referenciaId_id = data.get('referencia', tarifa.referenciaId_id)
+            tarifa.centrocostosId_id = data.get('centroCostos', tarifa.centrocostosId_id)
+            tarifa.sitioTrabajo = data.get('sitioTrabajo', tarifa.sitioTrabajo)
             tarifa.save()
 
             print(JsonResponse({'status': 'success'}))
@@ -81,7 +87,11 @@ def tarifa_clientes_descargar_excel(request):
                     detalle.valorDia,
                     detalle.valorMes,
                     detalle.bolsaMes,
-                    detalle.monedaId.Nombre
+                    detalle.monedaId.Nombre,
+                    detalle.referenciaId.codigoReferencia,
+                    detalle.centrocostosId.codigoCeCo,
+                    detalle.iva,
+                    detalle.sitioTrabajo
                 ])
             except Tarifa_Clientes.DoesNotExist:
                 print(f"detalle con ID {item_id} no encontrada.")
@@ -91,7 +101,7 @@ def tarifa_clientes_descargar_excel(request):
             return HttpResponse("No se encontraron registros de tarifas de consultores.", status=404)
 
         # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','Cliente','Linea','Modulo','Año','Mes','Valor Hora','Valor Dia','Valor Mes','Bolsa','Moneda'])
+        df = pd.DataFrame(detalles_data, columns=['Id','Cliente','Linea','Modulo','Año','Mes','Valor Hora','Valor Dia','Valor Mes','Bolsa','Moneda','Referencia','Centro de Costos','IVA','Sitio de Trabajo'])
         
         # Configurar la respuesta HTTP con el archivo Excel
         response = HttpResponse(

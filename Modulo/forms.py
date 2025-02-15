@@ -14,6 +14,8 @@ from django.core.exceptions import ValidationError
 from .models import Moneda
 from .models import ClientesContratos
 from .models import Tarifa_Clientes
+from .models import Referencia
+from .models import CentrosCostos
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -136,24 +138,34 @@ class TiposContactosForm(forms.ModelForm):
         }
 
 class ContactosForm(forms.ModelForm):
+    contactoId = forms.ModelChoiceField(
+        queryset=TiposContactos.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Tipo de Contacto'
+    )
+    clienteId = forms.ModelChoiceField( 
+        queryset=Clientes.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Cliente'
+    )
+
     class Meta:
         model = Contactos
         fields = '__all__'
         widgets = {
-            'contactoId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el ID de Contacto'}),
-            'clienteId': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el ID de Cliente'}),
             'Nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre'}),
             'Telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono'}),
             'Direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la dirección'}),
-     
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'Cargo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el cargo'}),
         }
-        labels = {
-            'contactosID': 'ID de Contacto',
-            'clienteID': 'ID de Cliente',
+
+        labels ={
             'Nombre': 'Nombre',
             'Telefono': 'Teléfono',
-            'Direccion': 'Dirección',
-           
+            'Direccion': 'Dirección',  
+            'activo': 'Activo',
+            'Cargo':'Cargo',
         }
 
 class ConsultoresForm(forms.ModelForm):
@@ -220,11 +232,26 @@ class ConsultoresForm(forms.ModelForm):
                 'placeholder': 'Teléfono (opcional)',
                 'type': 'number'
             }),
-            'Fecha_Operacion': forms.TextInput(attrs={
+            'Fecha_Operacion': forms.DateInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Fecha de Operacion (opcional)',
-                'type': 'number'
+                'type': 'date',
+                'placeholder': 'Fecha de Operación'
             }),
+            'Certificado': forms.Select(
+                choices=[
+                    (True, 'SI'),
+                    (False, 'NO'),
+                ],
+                attrs={ 
+                    'class': 'form-control'
+                }
+            ),
+            'Certificaciones': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Certificados'
+            }),
+            
+
         }
     def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -236,6 +263,18 @@ class ConsultoresForm(forms.ModelForm):
             self.fields['Telefono'].required = False  # Permitir campo vacío
             self.fields['Direccion'].required = False  # Permitir campo vacío
             self.fields['Fecha_Retiro'].required = False  # Permitir campo vacío
+            self.fields['Certificado'].required = False  # Permitir campo vacío
+            self.fields['Certificaciones'].required = False  # Permitir campo vacío
+
+    def clean(self):
+        cleaned_data = super().clean()
+        fecha_retiro = cleaned_data.get('Fecha_Retiro')
+        estado = cleaned_data.get('Estado')
+
+        if fecha_retiro and estado:
+            raise ValidationError('Si la Fecha de Retiro está presente, el Estado debe ser Inactivo.')
+        
+        return cleaned_data
 
 class ColaboradorFilterForm(forms.Form):
 
@@ -360,14 +399,20 @@ class TipoDocumentoForm(forms.ModelForm):
         model = TipoDocumento
         fields = '__all__'
         widgets = {
-            'nombre': forms.TextInput(attrs={
+            'Nombre': forms.TextInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'Ingrese el nombre'
             }),
+            'descripcion': forms.TextInput(attrs={
+                'type': 'text',
+                'class': 'form-control',
+                'placeholder': 'Ingrese la descripción'
+            }),
         }
         labels = {
-            'nombre': 'Nombre',
+            'Nombre': 'Nombre',
+            'descripcion': 'Descripción',
         }
 
 class CertificacionForm(forms.ModelForm):
@@ -431,6 +476,15 @@ class GastoForm(forms.ModelForm):
         }
 
 class DetalleGastosForm(forms.ModelForm):
+
+    GastosId=forms.ModelChoiceField(
+        queryset=Gastos.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Gastos'
+    )   
+
     class Meta:
         model = Detalle_Gastos
         fields = '__all__'
@@ -445,11 +499,6 @@ class DetalleGastosForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'GastosId': forms.NumberInput(attrs={
-                'type': 'number',
-                'class': 'form-control',
-                'placeholder': 'Ingrese el ID del gasto'
-            }),
             'Valor': forms.NumberInput(attrs={
                 'type': 'number',
                 'class': 'form-control',
@@ -459,9 +508,24 @@ class DetalleGastosForm(forms.ModelForm):
         labels = {
             'Anio': 'Año',
             'Mes': 'Mes',
-            'GastosId': 'Gasto ID',
             'Valor': 'Valor',
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        Anio = cleaned_data.get('Anio')
+        Mes = cleaned_data.get('Mes')
+        GastosId = cleaned_data.get('GastosId')
+
+        if Detalle_Gastos.objects.filter(
+            Anio=Anio,
+            Mes=Mes,
+            GastosId=GastosId
+        ).exists():
+            raise ValidationError(
+                "Ya existe este gasto dentro de este mes y año."
+            )  
+        return cleaned_data
 
 class TotalGastosForm(forms.ModelForm):
     class Meta:
@@ -552,6 +616,23 @@ class DetalleCostosIndirectosForm(forms.ModelForm):
             'Mes': 'Mes',
             'Valor': 'Valor',
         }
+        
+    def clean(self):
+            cleaned_data = super().clean()
+            Anio = cleaned_data.get('Anio')
+            Mes = cleaned_data.get('Mes')
+            CostosId = cleaned_data.get('CostosId')
+    
+            if Detalle_Costos_Indirectos.objects.filter(
+                Anio=Anio,
+                Mes=Mes,
+                CostosId=CostosId
+            ).exists():
+                raise ValidationError(
+                    "Ya existe este costo dentro de este año y mes."
+                )  
+            return cleaned_data
+        
 
 class TiemposConceptoForm(forms.ModelForm):
     class Meta:
@@ -741,11 +822,19 @@ class EmpleadoForm(forms.ModelForm):
             'ProfesionRealizada': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la profesión realizada'}),
             'TituloProfesionalActual': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el título profesional actual'}),
             'UniversidadActual': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la universidad actual'}),
-            'AcademiaSAP': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la academia SAP'}),
+            'AcademiaSAP': forms.Select(attrs={'class': 'form-control'}, choices=[('', 'Seleccione una opción'), ('1', 'Sí'), ('0', 'No')]),
             'CertificadoSAP': forms.Select(attrs={'class': 'form-control'}, choices=[('', 'Seleccione una opción'), ('1', 'Sí'), ('0', 'No')]),
-            'OtrasCertificaciones': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ingrese otras certificaciones', 'rows': 3}),
-            'Postgrados': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ingrese los postgrados', 'rows': 3}),
-        }
+            'OtrasCertificaciones': forms.Select(attrs={'class': 'form-control'}, choices=[('', 'Seleccione una opción'), ('1', 'Sí'), ('0', 'No')]),
+            'Postgrados': forms.Select(attrs={'class': 'form-control'}, choices=[('', 'Seleccione una opción'), ('1', 'Sí'), ('0', 'No')]),
+            'Activo': forms.Select(attrs={'class': 'form-control'}, choices=[('', 'Seleccione el estado'), ('1', 'Sí'), ('0', 'No')]),
+            'FechaRetiro': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'placeholder': 'Seleccione la fecha de retiro'}),
+            'Direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la dirección'}),
+            'Ciudad': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la ciudad'}),
+            'Departamento': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el departamento'}),
+            'DireccionAlterna': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la dirección alterna'}),
+            'Telefono1': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono 1'}),
+            'Telefono2': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono 2'}),
+        }   
         labels = {
             'TipoDocumento': 'Tipo de Documento',
             'Documento': 'Documento',
@@ -767,6 +856,13 @@ class EmpleadoForm(forms.ModelForm):
             'CertificadoSAP': 'Certificado SAP',
             'OtrasCertificaciones': 'Otras Certificaciones',
             'Postgrados': 'Postgrados',
+            'Activo': 'Activo',
+            'FechaRetiro': 'FechaRetiro',
+            'Direccion': 'Direccion',
+            'Departamento': 'Departamento',
+            'DireccionAlterna': 'DirecccionAlterna',
+            'Telefono1': 'Telefono1',
+            'Telefono2':'Telefono2',
         }
 
 class EmpleadoFilterForm(forms.Form):
@@ -822,6 +918,16 @@ class EmpleadoFilterForm(forms.Form):
         label="TipoDocumento",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+    Activo = forms.ChoiceField(
+        choices=[
+            ('', 'Seleccione estado'),
+            ('True', 'Sí'),
+            ('False', 'No')
+        ],
+        required=False,
+        label='Activo',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
 
     def __init__(self, *args, **kwargs):
         certificacion_seleccionada = kwargs.pop('certificacion_seleccionada', None)
@@ -841,6 +947,7 @@ class EmpleadoFilterForm(forms.Form):
 
         cargos = Cargos.objects.values_list('CargoId', 'Cargo').distinct()
         self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo[0], cargo[1]) for cargo in cargos]
+
 
         self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]
 
@@ -927,42 +1034,28 @@ class HorasHabilesForm(forms.ModelForm):
         }
 
 class Tarifa_ConsultoresForm(forms.ModelForm):
-    documentoId = forms.ModelChoiceField(
-        queryset=Consultores.objects.all(),  # Relación directa con el modelo Consultores
-        widget=forms.Select(attrs={
-            'class': 'form-control'
-        }),
-        label='Documento'
-    )
-
-    clienteID = forms.ModelChoiceField(
-        queryset=Clientes.objects.all(),  # Relación directa con el modelo Consultores
-        widget=forms.Select(attrs={
-            'class': 'form-control'
-        }),
-        label='Cliente'
-    )
 
     monedaId = forms.ModelChoiceField(
-        queryset=Moneda.objects.all(),  # Relación directa con el modelo Consultores
+        queryset=Moneda.objects.all(),
         widget=forms.Select(attrs={
             'class': 'form-control'
         }),
         label='Moneda'
     )
-
+    
     class Meta:
-        
         model = Tarifa_Consultores
         fields = '__all__'
         widgets = {
+            'documentoId': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Seleccione el documento'}),
             'anio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el año'}),
             'mes': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el mes'}),
+            'clienteID': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Seleccione el cliente'}),
             'valorHora': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor hora', 'step': '0.01'}),
             'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día', 'step': '0.01'}),
-            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'})
+            'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'}),
+            
         }
-
         labels = {
             'anio': 'Año',
             'mes': 'Mes',
@@ -970,6 +1063,11 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             'valorDia': 'Valor Día',
             'valorMes': 'Valor Mes',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['monedaId'].required = True  # Campo obligatorio
+        self.fields['monedaId'].label_from_instance = lambda obj: obj.Nombre  # Mostrar solo el nombre de la moneda
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1004,6 +1102,11 @@ class MonedaForm(forms.ModelForm):
             'Nombre':'Nombre',
             'descripcion': 'Descripción',
         }
+    def clean_Nombre(self):
+        nombre = self.cleaned_data.get('Nombre')
+        if Moneda.objects.filter(Nombre=nombre).exists():
+            raise ValidationError('Ya existe una moneda con ese nombre')
+        return nombre
 
 class ClientesContratosForm(forms.ModelForm):
     ClienteId = forms.ModelChoiceField(
@@ -1073,6 +1176,23 @@ class Tarifa_ClientesForm(forms.ModelForm):
         }),
         label='Moneda'
     )
+
+    referenciaId= forms.ModelChoiceField(
+        queryset=Referencia.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Referencia'
+    )
+
+    centrocostosId=forms.ModelChoiceField(
+        queryset=CentrosCostos.objects.all(),
+        widget=forms.Select(attrs={
+            'class':'form-control'
+        }),
+        label='Centro de Costos'
+    )
+
     class Meta:
         model = Tarifa_Clientes
         fields = '__all__'  
@@ -1086,6 +1206,8 @@ class Tarifa_ClientesForm(forms.ModelForm):
             'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día', 'step': '0.01'}),
             'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'}),
             'bolsaMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor bolsa mes', 'step': '0.01'}),
+            'iva': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor IVA', 'step': '0.01'}),
+            'sitioTrabajo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el sitio de trabajo'}),
         }
         labels = {
             'clienteId': 'Cliente',
@@ -1097,7 +1219,15 @@ class Tarifa_ClientesForm(forms.ModelForm):
             'ValorDia': 'Valor Día',
             'ValorMes': 'Valor Mes',
             'BolsaMes': 'Bolsa Mes',
+            'iva': 'IVA',
+            'SitioTrabajo': 'Sitio de Trabajo',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['monedaId'].required = True  # Campo obligatorio
+        self.fields['monedaId'].label_from_instance = lambda obj: obj.Nombre  # Mostrar solo el nombre de la moneda
+         # Mostrar solo el nombre de la moneda
     
     def clean(self):
         cleaned_data = super().clean()
@@ -1116,9 +1246,8 @@ class Tarifa_ClientesForm(forms.ModelForm):
         ).exists():
             raise ValidationError("Ya existe un registro con el mismo Cliente, Línea, Modulo, Año y Mes.")
         return cleaned_data 
+    
 
-
-        
 
 class FacturacionFilterForm(forms.Form):
     Anio = forms.ChoiceField(
@@ -1174,3 +1303,205 @@ class FacturacionFilterForm(forms.Form):
     def populate_linea(self):
         linea = Linea.objects.values_list('LineaId', 'Linea').distinct()
         self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)
+
+class ConsultorFilterForm(forms.Form):
+    Nombre = forms.ModelChoiceField(
+        queryset=Consultores.objects.values_list('Nombre', flat=True).distinct(),
+        required=False,
+        label='Consultor',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    ModuloId = forms.ChoiceField(
+        choices=[],  
+        required=False, 
+        label='Módulo',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    Certificacion = forms.ChoiceField(
+        choices=[('', 'Seleccione'), ('1', 'SI'), ('0', 'NO')],
+        required=False,
+        label='Certificación',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    PerfilId = forms.ModelChoiceField(
+        queryset=Perfil.objects.all(),
+        required=False,
+        label="Perfil",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    ) 
+    Estado = forms.ChoiceField(
+        choices=[('', 'Seleccione'), ('1', 'Activo'), ('0', 'Inactivo')],
+        required=False,
+        label='Estado',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_nombre()
+        self.populate_modulo()
+        self.populate_linea()
+        self.populate_perfil()
+
+    def populate_nombre(self):
+        consultores = Consultores.objects.values_list('Documento', 'Nombre').distinct()
+        self.fields['Nombre'].choices = [('', 'Seleccione el Consultor')] + list(consultores)
+        
+    def populate_modulo(self):
+        modulos = Modulo.objects.values_list('ModuloId', 'Modulo').distinct()
+        self.fields['ModuloId'].choices = [('', 'Seleccione el Módulo')] + list(modulos)
+
+    def populate_linea(self):
+        # Si ModuloId necesita opciones dinámicas, añade lógica aquí.
+        linea = Linea.objects.values_list('LineaId', 'Linea').distinct()  # Ajusta según tus modelos
+        self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)
+
+    def populate_perfil(self):
+        # Si ModuloId necesita opciones dinámicas, añade lógica aquí.
+        perfil = Perfil.objects.values_list('PerfilId', 'Perfil').distinct()  # Ajusta según tus modelos
+        self.fields['PerfilId'].choices = [('', 'Seleccione el perfil')] + list(perfil)
+    
+class EstudiosFilterForm(forms.Form):
+    Nombre = forms.ChoiceField(
+        choices=[],  
+        required=False, 
+        label='Colaborador',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    Cargo = forms.ChoiceField(
+        choices=[], 
+        required=False,
+        label='Cargo',  
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super(EstudiosFilterForm, self).__init__(*args, **kwargs)
+
+        empleados = Empleado.objects.values_list('Nombre', flat=True).distinct()
+        self.fields['Nombre'].choices = [('', 'Seleccione el colaborador')] + [(empleado, empleado) for empleado in empleados]
+
+        lineas = Linea.objects.values_list('LineaId', 'Linea').distinct()
+        self.fields['LineaId'].choices = [('', 'Seleccione la línea')] + [(linea[0], linea[1]) for linea in lineas]
+        
+        cargos = Cargos.objects.values_list('CargoId', 'Cargo').distinct()
+        self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo[0], cargo[1]) for cargo in cargos]
+
+
+class ReferenciaForm(forms.ModelForm):
+    class Meta:
+        model = Referencia
+        fields = '__all__'
+        widgets = {
+            'codigoReferencia': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el codigo'}),
+            'descripcionReferencia': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ingrese la descripcion'}),
+        }
+        labels = {
+            'codigoReferencia': 'Codigo',
+            'descripcionReferencia': 'Descripcion',
+        }
+
+class CentrosCostosForm(forms.ModelForm):
+    class Meta:
+        model = CentrosCostos
+        fields = '__all__'
+        widgets = {
+            'codigoCeCo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el codigo'}),
+            'descripcionCeCo': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ingrese la descripcion'}),
+        }
+        labels = {
+            'codigoCeCo': 'Codigo',
+            'descripcionCeCo': 'Descripcion',
+        }
+
+
+class Ind_Operatividad_FilterForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    Mes = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Mes',
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_anio()
+        self.populate_mes()
+
+    def populate_anio(self):
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = meses
+
+class TarifaConsultorFilterForm(forms.Form):
+    Nombre = forms.ModelChoiceField(
+        queryset=Consultores.objects.values_list('Nombre', flat=True).distinct(),
+        required=False,
+        label='Consultor',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    anio = forms.MultipleChoiceField(
+        choices=[],  
+        required=False, 
+        label='Año',
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_nombre()
+        self.populate_linea()
+        self.populate_anio()
+
+    def populate_nombre(self):
+        consultores = Consultores.objects.values_list('Documento', 'Nombre').distinct()
+        self.fields['Nombre'].choices = [('', 'Seleccione el Consultor')] + list(consultores)
+        
+    def populate_linea(self):
+        # Si ModuloId necesita opciones dinámicas, añade lógica aquí.
+        linea = Linea.objects.values_list('LineaId', 'Linea').distinct()  # Ajusta según tus modelos
+        self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)
+
+    def populate_anio(self):
+        anios = Tarifa_Consultores.objects.values_list('anio', flat=True).distinct()
+        self.fields['anio'].choices = [(anio, anio) for anio in anios]

@@ -135,6 +135,7 @@
 
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
                                 {{ empleado.Linea }}
+                                <input type="text" name="LineaId" class="form-control d-none" value="{{ empleado.LineaId }}">
                             </td>
                             
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
@@ -160,6 +161,7 @@
 
                             <td data-total-clientes-row>
                                 {{ empleado.Total_Clientes|floatformat:0 }}
+                                <input type="text" name="Total_Clientes" class="form-control d-none" value="{{ empleado.Total_Clientes }}">
                             </td>
 
                             {% for concepto in empleado.Conceptos.values %}
@@ -201,7 +203,7 @@
                         </tr>
                         {% for linea in Tiempo_Lineas %}
                         <tr>
-                            <th colspan="2">Horas Facturables</th>
+                            <th colspan="2">Horas Facturables</th>  
                             <td colspan="3">{{ linea.Linea }}</td>
                             {% for cliente in linea.Clientes.values %}
                             <td>
@@ -223,6 +225,7 @@
                             <th data-total-clientes-facturables>{{ TotalesFacturables.Total_Clientes|floatformat:0 }}</th>
                             <th colspan="{{ Conceptos.count }}"></th> <!-- Espacio para las columnas de conceptos -->
                             <th data-total-horas-facturables>{{ TotalesFacturables.Total_Horas|floatformat:0 }}</th>
+                            <th colspan="5"></th>
                         </tr>
                     </tfoot>
                 </table>

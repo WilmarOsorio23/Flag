@@ -23,6 +23,7 @@ def filtrar_empleados(form, empleados):
     cargo = form.cleaned_data.get('Cargo')
     certificaciones = form.cleaned_data.get('Certificación')
     perfil = form.cleaned_data.get('PerfilId')
+    activo = form.cleaned_data.get('Activo')
 
     if documento:
         empleados = empleados.filter(Documento=documento)
@@ -34,25 +35,54 @@ def filtrar_empleados(form, empleados):
         empleados = empleados.filter(Certificacion=certificaciones)
     if perfil:
         empleados = empleados.filter(PerfilId=perfil)
-
+    if activo is not None:
+        empleados = empleados.filter(Activo=activo == 'True')
     return empleados
 
 # Función para obtener la información del informe
-def obtener_informe_empleados(queryset):
+def obtener_informe_empleados(empleados):
     """
     Genera el informe de empleados basado en un queryset dado.
 
     :param queryset: QuerySet filtrado de empleados.
     :return: Lista de diccionarios con los datos del informe.
     """
-    campos = [
-        'TipoDocumento', 'Documento', 'Nombre', 'FechaNacimiento', 'FechaIngreso', 'FechaOperacion',
-        'ModuloId', 'PerfilId', 'LineaId', 'TituloProfesional', 'FechaGrado', 'Universidad',
-        'ProfesionRealizada', 'TituloProfesionalActual', 'UniversidadActual', 'AcademiaSAP',
-        'CertificadoSAP', 'OtrasCertificaciones', 'Postgrados'
-    ]
+    empleado_info = []
 
-    return list(queryset.values(*campos))
+
+    for empleado in empleados: 
+        datos_empleado = {
+            'TipoDocumento': empleado.TipoDocumento.Nombre, 
+            'Documento': empleado.Documento,
+            'Nombre': empleado.Nombre, 
+            'FechaNacimiento': empleado.FechaNacimiento, 
+            'FechaIngreso': empleado.FechaIngreso, 
+            'FechaOperacion': empleado.FechaOperacion,
+            'Modulo': empleado.ModuloId.Modulo, 
+            'Perfil': empleado.PerfilId.Perfil, 
+            'Linea': empleado.LineaId.Linea, 
+            'TituloProfesional': empleado.TituloProfesional, 
+            'FechaGrado': empleado.FechaGrado, 
+            'Universidad': empleado.Universidad,
+            'ProfesionRealizada': empleado.ProfesionRealizada, 
+            'Universidad': empleado.Universidad, 
+            'AcademiaSAP': empleado.AcademiaSAP,
+            'CertificadoSAP': empleado.CertificadoSAP,
+            'OtrasCertificaciones': empleado.OtrasCertificaciones, 
+            'Postgrados': empleado.Postgrados, 
+            'CargoId': empleado.CargoId.Cargo, 
+            'Activo': empleado.Activo,
+            'FechaRetiro': empleado.FechaRetiro,
+            'Direccion': empleado.Direccion,
+            'Ciudad': empleado.Ciudad, 
+            'Departamento': empleado.Departamento, 
+            'DireccionAlterna': empleado.DireccionAlterna, 
+            'Telefono1': empleado.Telefono1, 
+            'Telefono2': empleado.Telefono2,
+        }
+
+        empleado_info.append(datos_empleado)
+    return empleado_info
 
 # Vista del informe de empleados
 def informe_empleados(request):
@@ -103,7 +133,7 @@ def exportar_empleados_excel(request):
             empleados = Empleado.objects.all()
 
             # Filtrar empleados
-            empleados = filtrar_empleados(form, Empleado.objects.all ())
+            empleados = filtrar_empleados(form, empleados )
             
             # Obtener información de los empleados
             empleado_info = obtener_informe_empleados(empleados)
@@ -118,15 +148,41 @@ def exportar_empleados_excel(request):
     data = []
     for empleado in empleado_info:
         fila = {
-            'Nombre Línea': empleado['LineaId'],
+            'Línea': empleado['Linea'],
             'Documento Colaborador': empleado['Documento'],
             'Nombre Colaborador': empleado['Nombre'],
-            #'Cargo': empleado['CargoId__Cargos'],
-            'Perfil': empleado['PerfilId'],
-            'Módulo': empleado['ModuloId'],
+            #'Cargo': empleado['Cargo'],
+            'Perfil': empleado['Perfil'],
+            'Módulo': empleado['Modulo'],
             'Certificado SAP': empleado['CertificadoSAP'],
             'Fecha Ingreso': empleado['FechaIngreso'],
-            'Título Profesional Actual': empleado['TituloProfesionalActual']
+            #'TipoDocumento': empleado['TipoDocumento.Nombre'], 
+            'Documento': empleado['Documento'],
+            'Nombre': empleado['Nombre'], 
+            'FechaNacimiento': empleado['FechaNacimiento'], 
+            'FechaIngreso': empleado['FechaIngreso'], 
+            'FechaOperacion': empleado['FechaOperacion'],
+            #'Modulo': empleado['ModuloId.Modulo'], 
+            #'Perfil': empleado['PerfilId.Perfil'], 
+            #'Linea': empleado['LineaId.Linea'], 
+            'TituloProfesional': empleado['TituloProfesional'], 
+            'FechaGrado': empleado['FechaGrado'], 
+            'Universidad': empleado['Universidad'],
+            'ProfesionRealizada': empleado['ProfesionRealizada'], 
+            'Universidad': empleado['Universidad'], 
+            'AcademiaSAP': empleado['AcademiaSAP'],
+            'CertificadoSAP': empleado['CertificadoSAP'],
+            'OtrasCertificaciones': empleado['OtrasCertificaciones'], 
+            'Postgrados': empleado['Postgrados'], 
+            #'CargoId': empleado['CargoId.Cargo'], 
+            'Activo': empleado['Activo'],
+            'FechaRetiro': empleado['FechaRetiro'],
+            'Direccion': empleado['Direccion'],
+            'Ciudad': empleado['Ciudad'], 
+            'Departamento': empleado['Departamento'], 
+            'DireccionAlterna': empleado['DireccionAlterna'], 
+            'Telefono1': empleado['Telefono1'], 
+            'Telefono2': empleado['Telefono2'],
         }
         data.append(fila)
 

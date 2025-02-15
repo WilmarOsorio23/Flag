@@ -264,7 +264,10 @@ document.addEventListener('DOMContentLoaded', function() {
             'Telefono': row.querySelector('input[name="Telefono"]').value,
             'Direccion': row.querySelector('input[name="Direccion"]').value,
             'Fecha_Operacion': row.querySelector('input[name="Fecha_Operacion"]').value,
+            'Certificado': row.querySelector('select[name="Certificado"]').value,
+            'Certificaciones': row.querySelector('input[name="Certificaciones"]').value,
         };
+        console.log(data);
 
         // Deshabilitar los checkboxes y el botón de edición
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
