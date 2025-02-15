@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td><input type="text" name="Valor_Meses" class="form-control" value="${tarifa.valorMes || 0}"></td>
                 <td><input type="text" name="Bolsa" class="form-control" value="${tarifa.bolsaMes || 0}"></td>
                 <td><input type="text" name="Valor_Bolsa" class="form-control" value="${tarifa.valorBolsa || 0}"></td>
-                <td><input type="text" name="Valor" class="form-control" value=""></td>
+                <td><input type="text" name="Valor" class="form-control" value=""disabled></td>
                 <td><input type="text" name="Descripcion" class="form-control" value=""></td>
                 <td><input type="text" name="Numero_Factura" class="form-control" value=""></td>
                 <td><input type="text" name="IVA" class="form-control" value="${tarifa.iva || 0}"></td>
