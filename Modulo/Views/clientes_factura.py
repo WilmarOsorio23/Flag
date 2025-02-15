@@ -534,26 +534,64 @@ def generar_plantilla(request):
     return HttpResponse('Método no permitido', status=405)
 
 def obtener_tarifa(request):
-    cliente_id = request.GET.get('clienteId')
-    linea_id = request.GET.get('lineaId')
-
     try:
-        tarifa = Tarifa_Clientes.objects.get(clienteId=cliente_id, lineaId=linea_id)
-        data = {
-            'valorHora': tarifa.valorHora,
-            'valorDia': tarifa.valorDia,
-            'valorMes': tarifa.valorMes,
-            'bolsaMes': tarifa.bolsaMes,
-            'valorBolsa': tarifa.valorBolsa,
-            'iva': tarifa.iva,
-            'referenciaId': {
-                'codigoReferencia': tarifa.referenciaId.codigoReferencia if tarifa.referenciaId else ''
-            },
-            'centrocostosId': {
-                'codigoCeCo': tarifa.centrocostosId.codigoCeCo if tarifa.centrocostosId else ''
-            },
-            'sitioTrabajo': tarifa.sitioTrabajo
-        }
+        # Obtener los parámetros de la solicitud
+        cliente_id = request.GET.get('clienteId')
+        linea_id = request.GET.get('lineaId')
+        anio = request.GET.get('anio')
+        mes = request.GET.get('mes')
+
+        # Validar que los parámetros sean números enteros
+        if not cliente_id or not linea_id or not anio or not mes:
+            return JsonResponse({'error': 'Los parámetros clienteId, lineaId, anio y mes son requeridos.'}, status=400)
+        
+        try:
+            cliente_id = int(cliente_id)
+            linea_id = int(linea_id)
+            anio = int(anio)
+            mes = int(mes)
+        except ValueError:
+            return JsonResponse({'error': 'clienteId, lineaId, anio y mes deben ser números enteros.'}, status=400)
+
+       # Buscar la tarifa en la base de datos
+        try:
+            tarifa = Tarifa_Clientes.objects.get(clienteId=cliente_id, lineaId=linea_id, anio=anio, mes=mes)
+            # Construir la respuesta JSON con los datos de la tarifa encontrada
+            data = {
+                'valorHora': float(tarifa.valorHora) if tarifa.valorHora else 0.0,
+                'valorDia': float(tarifa.valorDia) if tarifa.valorDia else 0.0,
+                'valorMes': float(tarifa.valorMes) if tarifa.valorMes else 0.0,
+                'bolsaMes': float(tarifa.bolsaMes) if tarifa.bolsaMes else 0.0,
+                'valorBolsa': float(tarifa.valorBolsa) if tarifa.valorBolsa else 0.0,
+                'iva': float(tarifa.iva) if tarifa.iva else 0.0,
+                'referenciaId': {
+                    'codigoReferencia': tarifa.referenciaId.codigoReferencia if tarifa.referenciaId else ''
+                },
+                'centrocostosId': {
+                    'codigoCeCo': tarifa.centrocostosId.codigoCeCo if tarifa.centrocostosId else ''
+                },
+                'sitioTrabajo': tarifa.sitioTrabajo if tarifa.sitioTrabajo else ''
+            }
+        except Tarifa_Clientes.DoesNotExist:
+            # Si no se encuentra la tarifa, devolver un objeto con valores vacíos
+            data = {
+                'valorHora': 0.0,
+                'valorDia': 0.0,
+                'valorMes': 0.0,
+                'bolsaMes': 0.0,
+                'valorBolsa': 0.0,
+                'iva': 0.0,
+                'referenciaId': {
+                    'codigoReferencia': ''
+                },
+                'centrocostosId': {
+                    'codigoCeCo': ''
+                },
+                'sitioTrabajo': ''
+            }
+
         return JsonResponse(data)
-    except Tarifa_Clientes.DoesNotExist:
-        return JsonResponse({'error': 'Tarifa no encontrada'}, status=404)
+
+    except Exception as e:
+        # Manejar cualquier otro error inesperado
+        return JsonResponse({'error': f'Error interno del servidor: {str(e)}'}, status=500)

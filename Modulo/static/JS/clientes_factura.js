@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
      
-
     // Prevenir el envío del formulario al presionar la tecla Enter
     function preventFormSubmissionOnEnter() {
         document.querySelectorAll('form').forEach(form => {
@@ -202,6 +201,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function confirmAddLine() {
         const lineaId = document.querySelector('select[name="LineaIdModal"]').value;
         const clienteId = window.originalCliente;
+        const anio = window.originalAnio; // Obtener el año del filtro
+        const mes = window.originalMes;   // Obtener el mes del filtro
     
         if (!lineaId) {
             showMessage('Seleccione una línea.', 'warning');
@@ -213,14 +214,19 @@ document.addEventListener('DOMContentLoaded', function () {
         addingMessage.style.display = 'block';
     
         // Obtener la tarifa asociada al cliente y la línea
-        fetch(`/clientes_factura/obtener_factura/?clienteId=${clienteId}&lineaId=${lineaId}`, {
+        fetch(`/clientes_factura/obtener_factura/?clienteId=${clienteId}&lineaId=${lineaId}&anio=${anio}&mes=${mes}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la solicitud');
+            }
+            return response.json();
+        })
         .then(tarifa => {
             const tbody = document.querySelector('tbody');
     
@@ -259,11 +265,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Ocultar el mensaje de "Agregando..."
             addingMessage.style.display = 'none';
+
+            // Procesar la tarifa
+            console.log('Tarifa:', tarifa);
         })
         .catch(error => {
             console.error('Error al obtener la tarifa:', error);
             showMessage('Error al obtener la tarifa asociada.', 'danger');
-
             // Ocultar el mensaje de "Agregando..." en caso de error
             addingMessage.style.display = 'none';
         });
