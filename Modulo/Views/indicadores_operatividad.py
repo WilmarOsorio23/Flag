@@ -50,16 +50,28 @@ def indicadores_operatividad_index(request):
         for linea in lineas:
             resultados_linea = procesar_linea(linea, anio, meses_seleccionados, horas_habiles, conceptos)
             resultados.append(resultados_linea)
-        
-        context.update({
-            'resultados': resultados,
-            'horas_habiles': horas_habiles,
-            'total_horas': sum(h['total'] for h in horas_habiles.values()),
-            'selected_anio': anio,
-            'selected_mes': [str(m) for m in meses_seleccionados],
-            'grafico_operacion': generar_grafico_no_operativos(resultados),
-            'grafico_horas': generar_grafico_horas_linea(resultados)
-        })
+
+        # Verificar si hay resultados antes de generar gráficos
+        if resultados:
+            context.update({
+                'resultados': resultados,
+                'horas_habiles': horas_habiles,
+                'total_horas': sum(h['total'] for h in horas_habiles.values()),
+                'selected_anio': anio,
+                'selected_mes': [str(m) for m in meses_seleccionados],
+                'grafico_operacion': generar_grafico_no_operativos(resultados),
+                'grafico_horas': generar_grafico_horas_linea(resultados)
+            })
+        else:
+            context.update({
+                'resultados': [],
+                'horas_habiles': horas_habiles,
+                'total_horas': 0,
+                'selected_anio': anio,
+                'selected_mes': [str(m) for m in meses_seleccionados],
+                'grafico_operacion': "<p>No hay datos para generar el gráfico de no operativos.</p>",
+                'grafico_horas': "<p>No hay datos para generar el gráfico de horas.</p>"
+            })
 
     return render(request, 'Indicadores/indicadores_operatividad_index.html', context)
 
@@ -119,14 +131,24 @@ def procesar_linea(linea, anio, meses, horas_habiles, conceptos):
             totales_conceptos[descripcion] += conceptos_dict[descripcion]
 
         resultados_meses[mes]['Conceptos'] = conceptos_dict
-        
         # Calcular indicadores
         horas_mes = horas_habiles.get(mes, {}).get('total', 1)
         recursos_asignados = (clientes_mes['trabajado'] or 0) + sum(conceptos_dict.values())
+
+        # Obtener valores de Vacaciones y Día de la Familia
+        vacaciones = conceptos_dict.get('Vacaciones', 0)
+        dia_familia = conceptos_dict.get('Día de la Familia', 0)
+
+        # 1. Restar Vacaciones y Día de la Familia del total de la capacidad
+        capacidad_ajustada = (safe_divide(recursos_asignados, horas_mes)) * horas_mes - vacaciones - dia_familia
+
+        # 2. Restar Día de la Familia de NO operativos
+        no_operativos = sum(conceptos_dict.values()) - vacaciones - dia_familia
+
         resultados_meses[mes] = {
             'Recursos_asignados': safe_divide(recursos_asignados, horas_mes),
             'Recursos_activos': safe_divide(clientes_mes['trabajado'], horas_mes),
-            'Capacidad': (safe_divide(recursos_asignados, horas_mes)) * horas_mes,
+            'Capacidad': capacidad_ajustada,
             'Trabajado': clientes_mes['trabajado'] or 0.0,
             'Facturable': clientes_mes['facturable'] or 0.0,
             'Tiempo_NO_facturable': ( clientes_mes['trabajado']) - (clientes_mes['facturable']) or 0.0,
@@ -141,7 +163,7 @@ def procesar_linea(linea, anio, meses, horas_habiles, conceptos):
         # Calcular nuevos campos
         suma_conceptos = sum(conceptos_dict.values())
         vacaciones = conceptos_dict.get('Vacaciones', 0)
-        no_operativos = suma_conceptos - vacaciones
+        no_operativos = sum(conceptos_dict.values()) - vacaciones - dia_familia
         total_fact_no_oper = (
             clientes_mes.get('facturable', 0) + 
             (clientes_mes.get('trabajado', 0) - clientes_mes.get('facturable', 0)) + 
@@ -190,7 +212,7 @@ def safe_divide(numerator, denominator):
 
 def generar_grafico_no_operativos(resultados):
     if not resultados:
-        return ""
+        return "<p>No hay datos para generar el gráfico de no operativos.</p>"
 
     # Lista para almacenar las gráficas y tablas de cada línea
     graficas_tablas = []
@@ -211,30 +233,52 @@ def generar_grafico_no_operativos(resultados):
 
     # Recorrer cada línea en los resultados
     for resultado in resultados:
+        # Verificar si hay meses procesados para esta línea
+        if not resultado['meses']:
+            continue
+
         linea = resultado['linea']
         meses = list(resultado['meses'].keys())
         meses_nombres = [MESES.get(mes, mes) for mes in meses]  # Convertir números de mes a nombres
 
-        # Obtener los conceptos y sus porcentajes por mes
+        # Recopilar datos y verificar si hay valores válidos
         conceptos = set()
-        datos_por_mes = defaultdict(dict)  # Usar un diccionario para almacenar los datos por mes
+        datos_por_mes = defaultdict(dict)
+        has_valid_data = False  # Bandera para datos válidos
 
         for mes in meses:
-            for concepto, horas in resultado['meses'][mes]['Conceptos'].items():
+            mes_data = resultado['meses'][mes]
+            for concepto, horas in mes_data['Conceptos'].items():
+                # Calcular porcentaje solo si hay capacidad
+                total_horas_mes = mes_data.get('Capacidad', 0)
+                porcentaje = 0
+                if total_horas_mes > 0 and horas > 0:
+                    porcentaje = (horas / total_horas_mes) * 100
+                    has_valid_data = True  # Hay al menos un dato válido
+                
                 conceptos.add(concepto)
-                # Calcular el porcentaje de no operativos para cada concepto
-                total_horas_mes = resultado['meses'][mes]['Capacidad']
-                porcentaje = (horas / total_horas_mes) * 100 if total_horas_mes > 0 else 0
-                datos_por_mes[mes][concepto] = porcentaje  # Almacenar en un diccionario
+                datos_por_mes[mes][concepto] = porcentaje
+
+        # Saltar si no hay datos válidos
+        if not has_valid_data:
+            continue
 
         # Ordenar los conceptos alfabéticamente
         conceptos_ordenados = sorted(conceptos)
+
+        # Verificar si hay datos para graficar
+        if not conceptos_ordenados:
+            continue  # Saltar si no hay conceptos
 
         # Crear trazas para la gráfica
         data = []
         for i, mes in enumerate(meses):
             # Obtener los porcentajes para el mes actual
             porcentajes = [datos_por_mes[mes].get(concepto, 0) for concepto in conceptos_ordenados]
+
+            # Saltar meses con todos los porcentajes en cero
+            if sum(porcentajes) == 0:
+                continue
 
             # Crear una barra para cada mes
             data.append(go.Bar(
@@ -244,6 +288,10 @@ def generar_grafico_no_operativos(resultados):
                 marker_color=colores_meses[i % len(colores_meses)],  # Color del mes
                 opacity=0.7
             ))
+
+        # Verificar si hay datos en `data`
+        if not data:
+            continue  # Saltar si no hay datos
 
         # Layout de la gráfica
         layout = go.Layout(
@@ -264,13 +312,16 @@ def generar_grafico_no_operativos(resultados):
             )
         )
 
-        # Crear la gráfica
-        grafica = plot(
-            {'data': data, 'layout': layout},
-            output_type='div',
-            include_plotlyjs=False,
-            config={'responsive': True}
-        )
+        try:
+            grafica = plot(
+                {'data': data, 'layout': layout},
+                output_type='div',
+                include_plotlyjs=False,
+                config={'responsive': True}
+            )
+        except Exception as e:
+            print(f"Error al generar gráfico: {str(e)}")
+            continue
 
         # Crear la tabla con los porcentajes por mes y concepto
         tabla = """
@@ -302,12 +353,11 @@ def generar_grafico_no_operativos(resultados):
         graficas_tablas.append(grafica + tabla)
 
     # Unir todas las gráficas y tablas en un solo resultado
-    return "<hr>".join(graficas_tablas)  # Separador entre gráficas de diferentes líneas
-
+    return "<hr>".join(graficas_tablas) if graficas_tablas else "<p>No hay datos para generar el gráfico de no operativos.</p>"
 
 def generar_grafico_horas_linea(resultados):
     if not resultados:
-        return ""
+        return "<p>No hay datos para generar el gráfico de horas.</p>"
 
     # Lista para almacenar las gráficas y tablas de cada línea
     graficas_tablas = []
@@ -323,61 +373,100 @@ def generar_grafico_horas_linea(resultados):
 
     # Recorrer cada línea en los resultados
     for resultado in resultados:
+        # Verificar si hay meses procesados para esta línea
+        if not resultado['meses']:
+            continue  # Saltar si no hay datos
+
         # Obtener los meses seleccionados
         meses = list(resultado['meses'].keys())
         meses_nombres = [MESES.get(mes, mes) for mes in meses]  # Convertir números de mes a nombres
 
-        # Extraer datos para la gráfica y la tabla
-        capacidad_mes = [mes['Capacidad'] for mes in resultado['meses'].values()]
-        trabajado_mes = [mes['Trabajado'] for mes in resultado['meses'].values()]
-        facturable_mes = [mes['Facturable'] for mes in resultado['meses'].values()]
-        ind_oper_mes = [mes['Índ_de_oper'] for mes in resultado['meses'].values()]
+        # Extraer datos y manejar valores nulos o faltantes
+        capacidad_mes = []
+        trabajado_mes = []
+        facturable_mes = []
+        ind_oper_mes = []
+
+        for mes in meses:
+            mes_data = resultado['meses'][mes]
+            capacidad_mes.append(mes_data.get('Capacidad', 0))
+            trabajado_mes.append(mes_data.get('Trabajado', 0))
+            facturable_mes.append(mes_data.get('Facturable', 0))
+            ind_oper = mes_data.get('Índ_de_oper', 0)
+            ind_oper_mes.append(ind_oper if ind_oper is not None else 0)
+
+        # Verificar si hay datos para graficar
+        if (
+            sum(capacidad_mes) == 0
+            and sum(trabajado_mes) == 0
+            and sum(facturable_mes) == 0
+        ):
+            continue  # Saltar si todos los valores son cero
+
         meta_data = [90] * len(meses)  # Meta constante del 90%
 
-
-        # Crear trazas para la gráfica
-        data = [
-            go.Bar(
-                x=meses_nombres,
-                y=capacidad_mes,
-                name='Capacidad',
-                marker_color=colores['Capacidad'],
-                opacity=0.7,
-                width=0.2  # Reducir el ancho de las barras
-            ),
-            go.Bar(
-                x=meses_nombres,
-                y=trabajado_mes,
-                name='Trabajado',
-                marker_color=colores['Trabajado'],
-                opacity=0.7,
-                width=0.2  # Reducir el ancho de las barras
-            ),
-            go.Bar(
-                x=meses_nombres,
-                y=facturable_mes,
-                name='Facturable',
-                marker_color=colores['Facturable'],
-                opacity=0.7,
-                width=0.2  # Reducir el ancho de las barras
-            ),
-            go.Scatter(
-                x=meses_nombres,
-                y=ind_oper_mes,
-                name='Índice de Operación',
-                line=dict(color=colores['Índ_de_oper'], width=4),  # Agrandar la línea
-                mode='lines+markers',
-                yaxis='y2'  # Usar el eje Y derecho
-            ),
-            go.Scatter(
-                x=meses_nombres,
-                y=meta_data,  # Meta constante del 90%
-                name='Meta 90%',
-                line=dict(color=colores['Meta'], dash='dash', width=3),  # Agrandar la línea
-                mode='lines',
-                yaxis='y2'  # Usar el eje Y derecho
+        # Crear trazas solo si hay datos
+        data = []
+        if any(capacidad_mes):
+            data.append(
+                go.Bar(
+                    x=meses_nombres,
+                    y=capacidad_mes,
+                    name='Capacidad',
+                    marker_color=colores['Capacidad'],
+                    opacity=0.7,
+                    width=0.2
+                )
             )
-        ]
+        if any(trabajado_mes):
+            data.append(
+                go.Bar(
+                    x=meses_nombres,
+                    y=trabajado_mes,
+                    name='Trabajado',
+                    marker_color=colores['Trabajado'],
+                    opacity=0.7,
+                    width=0.2
+                )
+            )
+        if any(facturable_mes):
+            data.append(
+                go.Bar(
+                    x=meses_nombres,
+                    y=facturable_mes,
+                    name='Facturable',
+                    marker_color=colores['Facturable'],
+                    opacity=0.7,
+                    width=0.2
+                )
+            )
+        if any(ind_oper_mes):
+            data.append(
+                go.Scatter(
+                    x=meses_nombres,
+                    y=ind_oper_mes,
+                    name='Índice de Operación',
+                    line=dict(color=colores['Índ_de_oper'], width=4),
+                    mode='lines+markers',
+                    yaxis='y2'
+                )
+            )
+
+        # Siempre agregar la meta
+        data.append(
+            go.Scatter(
+                x=meses_nombres,
+                y=meta_data,
+                name='Meta 90%',
+                line=dict(color=colores['Meta'], dash='dash', width=3),
+                mode='lines',
+                yaxis='y2'
+            )
+        )
+
+        # Crear gráfico solo si hay trazas
+        if not data:
+            continue
 
         # Layout de la gráfica
         layout = go.Layout(
@@ -437,4 +526,4 @@ def generar_grafico_horas_linea(resultados):
         graficas_tablas.append(grafica + tabla)
 
     # Unir todas las gráficas y tablas en un solo resultado
-    return "<hr>".join(graficas_tablas)  # Separador entre gráficas de diferentes líneas
+    return "<hr>".join(graficas_tablas) if graficas_tablas else "<p>No hay datos para el gráfico de horas.</p>"

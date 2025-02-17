@@ -103,12 +103,11 @@
     <div class="card-footer text-muted">
         <div class="table-responsive">
             <form id="delete-form" method="POST">
-
                 {% csrf_token %}
                 <table class="table table-primary">
                     <thead>
                         <tr>
-                            <th scope="col">Colaborador</th>
+                            <th class="sticky-column" scope="col">Colaborador</th>
                             <th scope="col">Línea</th>
                             <th scope="col">Perfil</th>
                             <th scope="col">Módulo</th>
@@ -128,7 +127,7 @@
                     <tbody>
                         {% for empleado in colaborador_info %}
                         <tr id="row-{{ empleado.Documento }}">
-                            <td>
+                            <td class="sticky-column" style="text-align: left;">
                                 {{ empleado.Nombre }}
                                 <input type="text" name="Documento" class="form-control-plaintext d-none" value="{{ empleado.Documento }}" readonly>
                             </td>
