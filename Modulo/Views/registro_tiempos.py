@@ -411,8 +411,8 @@ def registro_tiempos_index(request):
                     colaborador_info.append(info)
             
             # Ordenar colaboradores alfabéticamente por nombre
-            colaborador_info = sorted(colaborador_info, key=lambda x: x['Nombre'])
-            
+            colaborador_info =sorted(colaborador_info, key=lambda x: ( x.get('Nombre', ''),     x.get('Empresa', '')))
+
             show_data = bool(colaborador_info)  # Mostrar datos si hay resultados
 
             # Extraer líneas únicas de colaborador_info

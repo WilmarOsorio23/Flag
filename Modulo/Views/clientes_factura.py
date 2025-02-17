@@ -220,9 +220,9 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
 
 
                 # Obtener los valores unitarios (Valor_Horas, Valor_Dias, Valor_Meses)
-                valor_horas = facturacion.Valor_Horas or (tarifa.valorHora if tarifa else 0)
-                valor_dias = facturacion.Valor_Dias or (tarifa.valorDia if tarifa else 0)
-                valor_meses = facturacion.Valor_Meses or (tarifa.valorMes if tarifa else 0)
+                valor_horas = facturacion.Valor_Horas or (float(tarifa.valorHora) if tarifa and tarifa.valorHora is not None else 0)
+                valor_dias = facturacion.Valor_Dias or (float(tarifa.valorDia) if tarifa and tarifa.valorDia is not None else 0)
+                valor_meses = facturacion.Valor_Meses or (float(tarifa.valorMes) if tarifa and tarifa.valorMes is not None else 0)
 
                 # Calcular el valor total
                 valor = (horas * float(valor_horas)) + (dias * float(valor_dias)) + (meses * float(valor_meses))
@@ -251,14 +251,15 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
             # Si no hay facturación, usar valores por defecto de la tarifa
             horas = 0
             dias = 0
-            meses = 0  # Asumimos 1 mes si hay tarifa
+            meses = 0 
 
-            valor_horas = tarifa.valorHora if tarifa else 0
-            valor_dias = tarifa.valorDia if tarifa else 0
-            valor_meses = tarifa.valorMes if tarifa else 0
+            # Asegurarse de que los valores no sean None antes de convertirlos a float
+            valor_horas = float(tarifa.valorHora) if tarifa and tarifa.valorHora is not None else 0
+            valor_dias = float(tarifa.valorDia) if tarifa and tarifa.valorDia is not None else 0
+            valor_meses = float(tarifa.valorMes) if tarifa and tarifa.valorMes is not None else 0
             
             # Calcular el valor total
-            valor = (horas * float(valor_horas)) + (dias * float(valor_dias)) + (meses * float(valor_meses))
+            valor = (horas * valor_horas) + (dias * valor_dias) + (meses * valor_meses)
             
             cliente_info['Facturas'].append({
                 'ConsecutivoId': '',
@@ -307,9 +308,9 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
             meses = facturacion.MesFactura or 0  # MesFactura es un campo de texto, asumimos 1 si tiene valor
 
             # Obtener los valores unitarios (Valor_Horas, Valor_Dias, Valor_Meses)
-            valor_horas = facturacion.Valor_Horas or (tarifa.valorHora if tarifa else 0)
-            valor_dias = facturacion.Valor_Dias or (tarifa.valorDia if tarifa else 0)
-            valor_meses = facturacion.Valor_Meses or (tarifa.valorMes if tarifa else 0)
+            valor_horas = facturacion.Valor_Horas or (float(tarifa.valorHora) if tarifa and tarifa.valorHora is not None else 0)
+            valor_dias = facturacion.Valor_Dias or (float(tarifa.valorDia) if tarifa and tarifa.valorDia is not None else 0)
+            valor_meses = facturacion.Valor_Meses or (float(tarifa.valorMes) if tarifa and tarifa.valorMes is not None else 0)
 
             # Calcular el valor total
             valor = (horas * float(valor_horas)) + (dias * float(valor_dias)) + (meses * float(valor_meses))

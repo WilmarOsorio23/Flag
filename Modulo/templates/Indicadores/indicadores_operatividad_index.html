@@ -4,11 +4,24 @@
 {% block titulo %} Indicadores de Operatividad {% endblock %}
 
 {% block contenido %}
+<style>
+    /* Añadir estos estilos */
+    .plot-container {
+        width: 100%;
+        min-width: 0; /* Necesario para overflow en flex containers */
+        overflow-x: auto;
+    }
+    
+    .plotly-graph-div {
+        width: 100% !important;
+        max-width: 40vw; /* Límite máximo al ancho del viewport */
+    }
+</style>
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Indicadores de Operatividad</h4>
     </div>
-    <div class="card-body">
+    <div class="card-body" style="overflow: hidden;">
         <div class="container-fluid mb-3">
             <form method="GET">
                 <div class="row mb-3">
@@ -263,7 +276,7 @@
                                 Indicadores Línea
                             </div>
                             <div class="card-body p-0">  <!-- Remove internal padding -->
-                                <div class="plot-container" style="height: 500px;">  <!-- Fixed height container -->
+                                <div class="plot-container" style="position: relative;">  <!-- Fixed height container -->
                                     {{ grafico_horas|safe }}
                                 </div>
                             </div>
@@ -276,7 +289,7 @@
                                 Porcentaje no operativos Línea
                             </div>
                             <div class="card-body p-0">
-                                <div class="plot-container" style="height: 500px;">
+                                <div class="plot-container" style="position: relative;">
                                     {{ grafico_operacion|safe }}
                                 </div>
                             </div>
