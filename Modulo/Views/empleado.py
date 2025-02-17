@@ -112,8 +112,6 @@ def empleado_descargar_excel(request):
                 empleado.FechaGrado, 
                 empleado.Universidad, 
                 empleado.ProfesionRealizada, 
-                empleado.TituloProfesionalActual, 
-                empleado.UniversidadActual, 
                 empleado.AcademiaSAP, 
                 empleado.CertificadoSAP, 
                 empleado.OtrasCertificaciones, 
