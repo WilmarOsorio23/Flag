@@ -73,12 +73,12 @@ def obtener_informe_empleados(empleados):
             'CargoId': empleado.CargoId.Cargo, 
             'Activo': 'SI' if empleado.Activo else 'NO' ,
             'FechaRetiro': empleado.FechaRetiro if empleado.FechaRetiro else '-', 
-            'Direccion': empleado.Direccion if empleado.Direccion else 'NA' ,
-            'Ciudad': empleado.Ciudad if empleado.Ciudad else 'NA', 
-            'Departamento': empleado.Departamento if empleado.Departamento else 'NA', 
-            'DireccionAlterna': empleado.DireccionAlterna if empleado.DireccionAlterna else 'NA', 
-            'Telefono1': empleado.Telefono1 if empleado.Telefono1 else 'NA', 
-            'Telefono2': empleado.Telefono2 if empleado.Telefono2 else 'NA',
+            'Direccion': empleado.Direccion if empleado.Direccion else '-' ,
+            'Ciudad': empleado.Ciudad if empleado.Ciudad else '-', 
+            'Departamento': empleado.Departamento if empleado.Departamento else '-', 
+            'DireccionAlterna': empleado.DireccionAlterna if empleado.DireccionAlterna else '-', 
+            'Telefono1': empleado.Telefono1 if empleado.Telefono1 else '-', 
+            'Telefono2': empleado.Telefono2 if empleado.Telefono2 else '-',
         }
 
         empleado_info.append(datos_empleado)
