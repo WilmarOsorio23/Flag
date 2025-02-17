@@ -271,8 +271,6 @@ document.addEventListener('DOMContentLoaded', function() {
             'FechaGrado': row.querySelector('input[name="FechaGrado"]').value,
             'Universidad': row.querySelector('input[name="Universidad"]').value,
             'ProfesionRealizada': row.querySelector('input[name="ProfesionRealizada"]').value,
-            'TituloProfesionalActual': row.querySelector('input[name="TituloProfesionalActual"]').value,
-            'UniversidadActual': row.querySelector('input[name="UniversidadActual"]').value,
             'AcademiaSAP': row.querySelector('input[name="AcademiaSAP"]').value,
             'CertificadoSAP': row.querySelector('select[name="CertificadoSAP"]').value,
             'OtrasCertificaciones': row.querySelector('input[name="OtrasCertificaciones"]').value,

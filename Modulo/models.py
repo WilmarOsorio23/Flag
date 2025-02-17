@@ -297,6 +297,7 @@ class Empleado(models.Model):
     PerfilId = models.ForeignKey(Perfil, on_delete=models.CASCADE, db_column='PerfilId')
     LineaId = models.ForeignKey(Linea, on_delete=models.CASCADE, db_column='LineaId')
     CargoId = models.ForeignKey(Cargos, on_delete=models.CASCADE, db_column='CargoId')  # Cambiado aquí
+    Activo =  models.BooleanField(default=True)
     TituloProfesional = models.CharField(max_length=100)
     FechaGrado = models.DateField()
     Universidad = models.CharField(max_length=100)
@@ -465,29 +466,6 @@ class ClientesContratos(models.Model):
         return f"ContratoId:{self.ClientesContratosId} - Cliente: {self.ClienteId} - Linea: {self.LineaId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - Contrato: {self.Contrato} - ContratoVigente: {self.ContratoVigente} - OC_Facturar: {self.OC_Facturar} - Parafiscales: {self.Parafiscales} - HorarioServicio: {self.HorarioServicio} - FechaFacturacion: {self.FechaFacturacion} - TipoFacturacion: {self.TipoFacturacion} - Observaciones: {self.Observaciones}"
     
     
-class FacturacionClientes(models.Model):
-    ConsecutivoId = models.AutoField(primary_key=True)
-    Anio = models.IntegerField()
-    Mes = models.IntegerField()
-    ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
-    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
-    Factura = models.TextField(null=True, blank=True)
-    HorasFactura = models.FloatField(null=True, blank=True)
-    DiasFactura = models.FloatField(null=True, blank=True)
-    MesFactura = models.TextField(null=True, blank=True)
-    Valor = models.FloatField(null=True, blank=True)
-    Descripcion = models.TextField(null=True, blank=True)
-
-    class Meta:
-        db_table = 'Facturacion_Clientes'
-        constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'ClienteId', 'LineaId'], name='unique_facturacion_cliente')
-        ]
-
-    def __str__(self):
-        return f"Facturación {self.ConsecutivoId} - Cliente {self.ClienteId} - Linea {self.LineaId}"
-    
-    
 class Tarifa_Clientes(models.Model):
     id = models.AutoField(primary_key=True)
     clienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='clienteId')
@@ -498,12 +476,14 @@ class Tarifa_Clientes(models.Model):
     valorHora = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     valorDia = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     valorMes = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    bolsaMes = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True)
-    monedaId = models.ForeignKey('Moneda', on_delete=models.CASCADE, db_column='monedaId', null=True, blank=True)
-    referenciaId= models.ForeignKey('Referencia', on_delete=models.CASCADE, db_column='referenciaId',null=True, blank=True)
-    centrocostosId = models.ForeignKey('CentrosCostos', on_delete=models.CASCADE, db_column='centrocostosId',null=True, blank=True)
-    iva = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    sitioTrabajo = models.CharField(max_length=50, null=True, blank=True)
+    bolsaMes = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    valorBolsa = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    monedaId = models.ForeignKey('Moneda', on_delete=models.CASCADE, db_column='monedaId')
+    referenciaId= models.ForeignKey('Referencia', on_delete=models.CASCADE, db_column='referenciaId')
+    centrocostosId = models.ForeignKey('CentrosCostos', on_delete=models.CASCADE, db_column='centrocostosId')
+    iva = models.FloatField(null=True, blank=True)
+    sitioTrabajo = models.TextField(null=True, blank=True)
+
 
     def __str__(self):
         return f"id: {self.id}, ClienteId: {self.clienteId}, LineaId: {self.lineaId}, ModuloId: {self.moduloId}, Anio: {self.anio}, Mes: {self.mes}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, BolsaMes: {self.bolsaMes}, MonedaId: {self.monedaId}, ReferenciaId: {self.referenciaId}, CentroCostosId: {self.centrocostosId}, IVA: {self.iva}, SitioTrabajo: {self.sitioTrabajo}"
@@ -519,10 +499,19 @@ class FacturacionClientes(models.Model):
     LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
     Factura = models.TextField(null=True, blank=True)
     HorasFactura = models.FloatField(null=True, blank=True)
+    Valor_Horas = models.FloatField(null=True, blank=True)
     DiasFactura = models.FloatField(null=True, blank=True)
-    MesFactura = models.TextField(null=True, blank=True)
+    Valor_Dias = models.FloatField(null=True, blank=True)
+    MesFactura = models.IntegerField(null=True, blank=True)
+    Valor_Meses = models.FloatField(null=True, blank=True)
+    Bolsa = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    Valor_Bolsa = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     Valor = models.FloatField(null=True, blank=True)
     Descripcion = models.TextField(null=True, blank=True)
+    IVA = models.FloatField(null=True, blank=True)
+    Referencia= models.TextField(null=True, blank=True) 
+    Ceco = models.TextField(null=True, blank=True)
+    Sitio_Serv = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'Facturacion_Clientes'
