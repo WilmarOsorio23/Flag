@@ -175,13 +175,13 @@
                                     <option value="0" {% if empleado.Activo == 0 %}selected{% endif %}>No</option>
                                 </select>
                             </td>
-                            <td><input type="text" name="FechaRetiro" class="form-control-plaintext" value="{{ empleado.FechaRetiro }}" readonly></td>
-                            <td><input type="text" name="Direccion" class="form-control-plaintext" value="{{ empleado.Direccion }}" readonly></td>
-                            <td><input type="text" name="Ciudad" class="form-control-plaintext" value="{{ empleado.Ciudad }}" readonly></td>
-                            <td><input type="text" name="Departamento" class="form-control-plaintext" value="{{ empleado.Departamento }}" readonly></td>
-                            <td><input type="text" name="DireccionAlterna" class="form-control-plaintext" value="{{ empleado.DireccionAlterna }}" readonly></td>
-                            <td><input type="text" name="Telefono1" class="form-control-plaintext" value="{{ empleado.Telefono1 }}" readonly></td>
-                            <td><input type="text" name="Telefono2" class="form-control-plaintext" value="{{ empleado.Telefono2 }}" readonly></td>
+                            <td><input type="text" name="FechaRetiro" class="form-control-plaintext" value="{{ empleado.FechaRetiro|default:"-" }}" readonly></td>
+                            <td><input type="text" name="Direccion" class="form-control-plaintext" value="{{ empleado.Direccion|default:"-" }}" readonly></td>
+                            <td><input type="text" name="Ciudad" class="form-control-plaintext" value="{{ empleado.Ciudad|default:"-" }}" readonly></td>
+                            <td><input type="text" name="Departamento" class="form-control-plaintext" value="{{ empleado.Departamento|default:"-" }}" readonly></td>
+                            <td><input type="text" name="DireccionAlterna" class="form-control-plaintext" value="{{ empleado.DireccionAlterna|default:"-" }}" readonly></td>
+                            <td><input type="text" name="Telefono1" class="form-control-plaintext" value="{{ empleado.Telefono1|default:"-" }}" readonly></td>
+                            <td><input type="text" name="Telefono2" class="form-control-plaintext" value="{{ empleado.Telefono2|default:"-" }}" readonly></td>
                         </tr>
                         {% empty %}
                         <tr>
