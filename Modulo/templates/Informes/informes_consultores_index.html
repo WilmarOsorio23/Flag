@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
+<!-- Titulo de la pestaña en navegador -->
 {% block titulo %} Informe de consultores {% endblock %}
 
 {% block contenido %}
@@ -14,7 +15,7 @@
         <div class="container-fluid mb-3">
             <!-- Formulario principal -->
             <form method="GET">
-                <!-- Filtros en la parte superior -->
+                <!-- Filtros en la parte superior:Consultor, Línea, Cargo, Certificados, Perfil, Estado -->
                 <div class="row mb-3">
 
                     <!--Filtro Consultor --> 
@@ -144,6 +145,7 @@
                         </tr>
                     </thead>
 
+                    <!-- Lectura de campos para mostrar -->
                     <tbody>
                         {% for consultor in consultor_info %}
                             <tr>

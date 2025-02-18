@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+
+<!-- Titulo de la pestaña en navegador -->
+{% block titulo %} Informe de Tarifas Clientes {% endblock %}
+
+{% block contenido %}
+
+<div class="card">
+    <div class="card-header">
+         <!-- Titulo del informe -->
+        <h4 class="card-title">Informe de tarifas de clientes</h4>
+    </div>
+
+    <div class="card-body">
+        <div class="container-fluid mb-3">
+
+            <!-- Formulario principal -->
+            <form method="GET">
+                <!-- Filtros en la parte superior: Cliente, Línea, Módulo, Estado(Activo), Años(Rango) -->
+                <div class="row mb-3">
+
+                    <!--Filtro Cliente --> 
+                    <div class="col-md-3">
+                        <label for="cliente">{{ form.Nombre_Cliente.label }}</label>
+                        {{ form.Nombre_Cliente }}
+                    </div>
+
+                    <!--Filtro Línea --> 
+                    <div class="col-md-3">
+                        <label for="linea">{{ form.LineaId.label }}</label>
+                        {{ form.LineaId }}
+                    </div>
+
+                    <!--Filtro modulo -->
+                    <div class="col-md-3">
+                        <label for="modulo">{{ form.ModuloId.label }}</label>
+                        {{ form.ModuloId }}
+                    </div>
+
+                    <!-- Filtro Activo -->
+                    <div class="col-md-3">
+                        <label for="activo">{{ form.Activo.label }}</label>
+                        {{ form.Activo }}
+                    </div>
+
+                    <!--Filtro Año 
+                    <div class="col-md-3">
+                        <label for="anio">{{ form.anio.label }}</label>
+                        {{ form.anio }}
+                    </div>-->
+
+                    <!--Filtro Año 
+                    <div class="col-md-3">
+                        <label for="anio" class="form-label">{{ form.anio.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownanios"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione años"
+                            >
+                                Seleccione años
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownanio">
+                                {% for checkbox in form.anios %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>-->
+
+                    <!-- Filtro Año -->
+                    <div class="col-md-3">
+                        <label for="anio" class="form-label">{{ form.anio.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownanios"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione años"
+                            >
+                                Seleccione años
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownanio">
+                                {% for anio in anios_disponibles %}
+                                    <li class="dropdown-item">
+                                        <input type="checkbox" name="anio" value="{{ anio }}" id="anio_{{ anio }}" {% if anio in form.anios.value %} checked {% endif %}>
+                                        <label for="anio_{{ anio }}">{{ anio }}</label>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+      
+                    <!-- Botones debajo de filtros: Buscar y Descarga Excel -->
+
+                    <!-- Botón Buscar -->
+                    <div class = "row">
+                        <div class="col-md-6 text-start">
+                            <button type="submit" name="buscar" class="btn btn-primary mt-3">
+                                <i class="fas fa-glasses"></i>Buscar <!-- Texto e icono de botón -->
+                            </button>
+                        </div>
+                    </div>
+                </div>   
+            </form>
+
+             <!-- Botón de Descargar Excel-->
+             <div class="row">
+                <div class="col-md-6 text-start">
+                    <form id="download-form" method="GET" action="{% url 'exportar_tarifas_clientes_excel' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="Nombre_Cliente" value="{{ form.Nombre_Cliente.value }}">
+                        <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}">
+                        {% for anio in form.anio.value %}
+                            <input type="hidden" name="anio" value="{{ anio }}">
+                        {% endfor %}
+                        <input type="hidden" name="Activo" value="{{ form.Activo.value }}">
+                        <input type="hidden" name="ModuloId" value="{{ form.ModuloId.value }}">
+                        
+                        <button type="submit" class="btn btn-success mt-3">
+                            <i class="fas fa-file-excel"></i> Descargar Excel<!-- Texto e icono de botón -->
+                        </button>
+                    </form>
+                </div>
+            </div>
+             
+        </div>
+
+            {% if show_data %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-primary" id="clientesTarifasTable">
+
+                    <!-- Encabezado de la tabla -->
+                    <thead>
+                        <!-- Filas dentro del encabezado -->
+                        <tr>
+
+                            <!-- Documento Cliente CLIENTES-->
+                            <th>Documento Cliente</th>
+
+                            <!-- Nombre Cliente CLIENTES-->
+                            <th>Nombre Cliente</th>
+
+                            <!-- Estado CLIENTES -->
+                            <th>Estado</th>
+
+                            <!-- Nombre línea TARIFA_CLIENTES-->
+                            <th>Nombre Línea</th>
+
+                            <!-- Módulo TARIFA_CLIENTES-->
+                            <th>Módulo</th>
+
+                            <!-- Año TARIFA_CLIENTES-->   
+                            <th>Año</th>
+
+                            <!-- Mes TARIFA_CLIENTES-->
+                            <th>Mes</th>
+
+                            <!-- Tarifa Hora TARIFA_CLIENTES-->
+                            <th>Tarifa Hora</th>
+
+                            <!-- Tarifa Día TARIFA_CLIENTES-->
+                            <th>Tarifa Día</th>
+
+                            <!-- Tarifa Mes TARIFA_CLIENTES-->
+                            <th>Tarifa Mes</th>
+
+                            <!-- Tarifa bolsa TARIFA_CLIENTES-->
+                            <th>Tarifa Bolsa</th>
+
+                            <!-- Referencia  TARIFA_CLIENTES-->
+                            <th>Referencia</th>
+
+                            <!-- Centro de costos TARIFA_CLIENTES -->
+                            <th>Centro de costos</th>
+                            
+                            <!-- IVA TARIFA_CLIENTES-->
+                            <th>IVA</th>
+
+                            <!-- Sitio trabajo TARIFA_CLIENTES-->
+                            <th>Sitio trabajo</th>   
+
+                            <!-- Moneda TARIFA_CLIENTES-->
+                            <th>Moneda</th>
+                            
+                    </thead>
+
+                    <!-- Lectura de campos para mostrar -->
+                    <tbody>
+                        {% for cliente in cliente_tarifas_info %}
+                            {% for anio, tarifas in cliente.tarifas.items %}
+                                {% for tarifa in tarifas %}
+                                    <tr>
+                                        <td>{{ cliente.documento }}</td>
+                                        <td>{{ cliente.nombre_cliente }}</td>
+                                        <td>{{ cliente.activo }}</td>
+                                        <td>{{ tarifa.linea }}</td>
+                                        <td>{{ tarifa.modulo }}</td>
+                                        <td>{{ anio }}</td> <!-- Mostrar el año en cada fila -->
+                                        <td>{{ tarifa.mes }}</td>
+                                        <td>{{ tarifa.tarifa_hora }}</td>
+                                        <td>{{ tarifa.tarifa_dia }}</td>
+                                        <td>{{ tarifa.tarifa_mes }}</td>
+                                        <td>{{ tarifa.tarifa_bolsa }}</td>
+                                        <td>{{ tarifa.referencia }}</td>
+                                        <td>{{ tarifa.centro_costos }}</td>
+                                        <td>{{ tarifa.iva }}</td>
+                                        <td>{{ tarifa.sitio_trabajo }}</td>
+                                        <td>{{ tarifa.moneda }}</td>
+                                    </tr>
+                                {% endfor %}
+                               
+                            {% endfor %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="16">No hay datos disponibles.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+            {% elif not cliente_tarifas_info %}
+            <div class="alert alert-warning" role="alert">
+                {{ mensaje }}
+            </div>
+            {% endif %}
+    </div>
+</div>
+<script src="{% static 'JS/informes_tarifas_clientes.js' %}"></script>
+{% endblock %}
