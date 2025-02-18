@@ -44,6 +44,7 @@ def tarifa_clientes_editar(request, id):
             tarifa.referenciaId_id = data.get('referencia', tarifa.referenciaId_id)
             tarifa.centrocostosId_id = data.get('centroCostos', tarifa.centrocostosId_id)
             tarifa.sitioTrabajo = data.get('sitioTrabajo', tarifa.sitioTrabajo)
+            tarifa.valorBolsa = data.get('valorBolsa', tarifa.valorBolsa)
             tarifa.save()
 
             print(JsonResponse({'status': 'success'}))

@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'centroCostos': row.querySelector('select[name="centroCostos"]').value,
             'iva': row.querySelector('input[name="iva"]').value,
             'sitioTrabajo': row.querySelector('input[name="sitioTrabajo"]').value,
+            'valorBolsa': row.querySelector('input[name="valorBolsa"]').value,
         };
         let id = selected[0].value;
         // Deshabilitar los checkboxes y el botón de edición
@@ -129,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit-button').disabled = true;
 
         // Convertir inputs en editables
-        let editables = ["valorHora", "valorDia", "valorMes","bolsaMes","iva","sitioTrabajo","moneda","referencia","centroCostos"];
+        let editables = ["valorHora", "valorDia", "valorMes","bolsaMes","iva","sitioTrabajo","moneda","referencia","centroCostos","valorBolsa"];
         
         for (let i = 0; i < editables.length; i++) {
             let edit = row.querySelector(`[name="${editables[i]}"]`);

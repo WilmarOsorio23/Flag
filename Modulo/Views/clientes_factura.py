@@ -2,6 +2,7 @@ import json
 import textwrap
 import numpy as np
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
 from io import BytesIO
 from django.http import HttpResponse, JsonResponse
@@ -52,9 +53,9 @@ def clientes_factura_guardar(request):
                 sitio_serv = row.get('Sitio_Serv', "") or ""
 
                 # Calcular el valor
-                valor = (horas_factura * valor_horas if horas_factura else 0) + (dias_factura * valor_dias if dias_factura else 0) + (mes_factura * valor_meses if valor_meses else 0)
+                valor = (horas_factura * valor_horas if horas_factura else 0) + (dias_factura * valor_dias if dias_factura else 0) + (mes_factura * valor_meses if valor_meses else 0) + (bolsa * valor_bolsa if bolsa else 0)
 
-                if (horas_factura > 0 or dias_factura > 0 or mes_factura > 0):
+                if (horas_factura > 0 or dias_factura > 0 or mes_factura > 0 or bolsa > 0):
                     # Verificar si el registro ya existe
                     if consecutivo_id:
                         try:
@@ -217,15 +218,17 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
                 horas = facturacion.HorasFactura or 0
                 dias = facturacion.DiasFactura or 0
                 meses = facturacion.MesFactura or 0
+                bolsa = facturacion.Bolsa or 0
 
 
                 # Obtener los valores unitarios (Valor_Horas, Valor_Dias, Valor_Meses)
                 valor_horas = facturacion.Valor_Horas or (float(tarifa.valorHora) if tarifa and tarifa.valorHora is not None else 0)
                 valor_dias = facturacion.Valor_Dias or (float(tarifa.valorDia) if tarifa and tarifa.valorDia is not None else 0)
                 valor_meses = facturacion.Valor_Meses or (float(tarifa.valorMes) if tarifa and tarifa.valorMes is not None else 0)
+                valor_bolsa = facturacion.Valor_Bolsa or (float(tarifa.valorBolsa) if tarifa and tarifa.valorBolsa is not None else 0)
 
                 # Calcular el valor total
-                valor = (horas * float(valor_horas)) + (dias * float(valor_dias)) + (meses * float(valor_meses))
+                valor = (horas * float(valor_horas)) + (dias * float(valor_dias)) + (meses * float(valor_meses)) + (bolsa * float(valor_bolsa))
                 
                 cliente_info['Facturas'].append({
                     'ConsecutivoId': facturacion.ConsecutivoId,
@@ -240,7 +243,7 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
                     'Valor': valor,
                     'Descripcion': facturacion.Descripcion,
                     'NumeroFactura': facturacion.Factura,
-                    'Bolsa': facturacion.Bolsa or (tarifa.bolsaMes if tarifa else 0),
+                    'Bolsa': facturacion.Bolsa,
                     'Valor_Bolsa': facturacion.Valor_Bolsa or (tarifa.valorBolsa if tarifa else 0),
                     'IVA': facturacion.IVA or (tarifa.iva if tarifa else 0),
                     'Referencia': facturacion.Referencia or (tarifa.referenciaId.codigoReferencia if tarifa and tarifa.referenciaId else ''),
@@ -252,14 +255,16 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
             horas = 0
             dias = 0
             meses = 0 
+            bolsa = 0
 
             # Asegurarse de que los valores no sean None antes de convertirlos a float
             valor_horas = float(tarifa.valorHora) if tarifa and tarifa.valorHora is not None else 0
             valor_dias = float(tarifa.valorDia) if tarifa and tarifa.valorDia is not None else 0
             valor_meses = float(tarifa.valorMes) if tarifa and tarifa.valorMes is not None else 0
+            valor_bolsa = float(tarifa.valorBolsa) if tarifa and tarifa.valorBolsa is not None else 0
             
             # Calcular el valor total
-            valor = (horas * valor_horas) + (dias * valor_dias) + (meses * valor_meses)
+            valor = (horas * valor_horas) + (dias * valor_dias) + (meses * valor_meses) + (bolsa * valor_bolsa)
             
             cliente_info['Facturas'].append({
                 'ConsecutivoId': '',
@@ -274,7 +279,7 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
                 'Valor': valor,
                 'Descripcion': '',
                 'NumeroFactura': '',
-                'Bolsa': tarifa.bolsaMes if tarifa else 0,
+                'Bolsa': '',
                 'Valor_Bolsa': tarifa.valorBolsa if tarifa else 0,
                 'IVA': tarifa.iva if tarifa else 0,
                 'Referencia': tarifa.referenciaId.codigoReferencia if tarifa and tarifa.referenciaId else '',
@@ -306,14 +311,16 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
             horas = facturacion.HorasFactura or 0
             dias = facturacion.DiasFactura or 0
             meses = facturacion.MesFactura or 0  # MesFactura es un campo de texto, asumimos 1 si tiene valor
+            bolsa = facturacion.Bolsa or 0
 
             # Obtener los valores unitarios (Valor_Horas, Valor_Dias, Valor_Meses)
             valor_horas = facturacion.Valor_Horas or (float(tarifa.valorHora) if tarifa and tarifa.valorHora is not None else 0)
             valor_dias = facturacion.Valor_Dias or (float(tarifa.valorDia) if tarifa and tarifa.valorDia is not None else 0)
             valor_meses = facturacion.Valor_Meses or (float(tarifa.valorMes) if tarifa and tarifa.valorMes is not None else 0)
+            valor_bolsa = facturacion.Valor_Bolsa or (float(tarifa.valorBolsa) if tarifa and tarifa.valorBolsa is not None else 0)
 
             # Calcular el valor total
-            valor = (horas * float(valor_horas)) + (dias * float(valor_dias)) + (meses * float(valor_meses))
+            valor = (horas * float(valor_horas)) + (dias * float(valor_dias)) + (meses * float(valor_meses)) + (bolsa * float(valor_bolsa))
 
             cliente_info['Facturas'].append({
                 'ConsecutivoId': facturacion.ConsecutivoId,
@@ -328,7 +335,7 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
                 'Valor': valor,
                 'Descripcion': facturacion.Descripcion,
                 'NumeroFactura': facturacion.Factura,
-                'Bolsa': facturacion.Bolsa or (tarifa.bolsaMes if tarifa else 0),
+                'Bolsa': facturacion.Bolsa,
                 'Valor_Bolsa': facturacion.Valor_Bolsa or (tarifa.valorBolsa if tarifa else 0),
                 'IVA': facturacion.IVA or (tarifa.iva if tarifa else 0),
                 'Referencia': facturacion.Referencia or (tarifa.referenciaId.codigoReferencia if tarifa and tarifa.referenciaId else ''),
@@ -389,6 +396,8 @@ def calcular_totales_facturacion(facturacion_clientes):
     for factura in facturacion_clientes:
         totales['Total_Horas'] += factura.HorasFactura or 0
         totales['Total_Dias'] += factura.DiasFactura or 0
+        totales['Total_Meses'] += factura.MesFactura or 0
+        totales['Total_Bolsa'] += factura.Bolsa or 0
         totales['Total_Valor'] += factura.Valor or 0
 
     return totales
@@ -400,10 +409,10 @@ def generar_plantilla(request):
             data = json.loads(request.body)
             format_type = data.get('format', 'xlsx')
             rows = data.get('data', [])
-            
             df = pd.DataFrame(rows)
 
             if format_type == 'xlsx':
+                matplotlib.use('Agg') 
                 # Generar Excel con formato profesional
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
@@ -457,6 +466,11 @@ def generar_plantilla(request):
                     worksheet.set_zoom(90)
 
                 output.seek(0)
+
+                # Limpiar explícitamente la figura
+                plt.close('all')  # <--- Añadir esto para liberar memoria
+                matplotlib.pyplot.close('all')  # <--- Doble limpieza por seguridad
+
                 response = HttpResponse(
                     output.getvalue(),
                     content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -465,6 +479,8 @@ def generar_plantilla(request):
                 return response
 
             elif format_type == 'jpg':
+                matplotlib.use('Agg') 
+
                 # Preparar datos para imagen
                 df_jpg = df.copy()
                 
@@ -518,7 +534,10 @@ def generar_plantilla(request):
                            bbox_inches='tight',
                            pad_inches=0.3,
                            dpi=300)
-                plt.close()
+                
+                # Limpiar explícitamente la figura
+                plt.close('all')  # <--- Añadir esto para liberar memoria
+                matplotlib.pyplot.close('all')  # <--- Doble limpieza por seguridad
                 
                 response = HttpResponse(
                     img_buffer.getvalue(),
@@ -562,7 +581,6 @@ def obtener_tarifa(request):
                 'valorHora': float(tarifa.valorHora) if tarifa.valorHora else 0.0,
                 'valorDia': float(tarifa.valorDia) if tarifa.valorDia else 0.0,
                 'valorMes': float(tarifa.valorMes) if tarifa.valorMes else 0.0,
-                'bolsaMes': float(tarifa.bolsaMes) if tarifa.bolsaMes else 0.0,
                 'valorBolsa': float(tarifa.valorBolsa) if tarifa.valorBolsa else 0.0,
                 'iva': float(tarifa.iva) if tarifa.iva else 0.0,
                 'referenciaId': {
@@ -579,7 +597,6 @@ def obtener_tarifa(request):
                 'valorHora': 0.0,
                 'valorDia': 0.0,
                 'valorMes': 0.0,
-                'bolsaMes': 0.0,
                 'valorBolsa': 0.0,
                 'iva': 0.0,
                 'referenciaId': {

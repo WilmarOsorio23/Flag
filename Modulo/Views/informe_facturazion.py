@@ -5,13 +5,15 @@ from Modulo.forms import FacturacionFilterForm
 from Modulo.models import FacturacionClientes
 
 def filtrar_facturazion(form,factura):
-    Año = factura.order_by('Anio')
+    anio = form.order_by('Anio')
     Mes = form.cleaned_data.get('Mes')
     Linea = form.cleaned_data.get('LineaId')
-    Cliente = form.cleaned_data.get('Cargo')
+    Cliente = form.cleaned_data.get('ClienteId')
 
-    if Año:
-        factura = factura.filter(Anio=Año)
+    print("Año:", anio, "Mes:", Mes, "Linea:", Linea, "Cliente:", Cliente)
+
+    if anio:
+        factura = factura.filter(Anio=anio)
     if Mes:
         factura = factura.filter(Mes=Mes)
     if Linea:
@@ -22,29 +24,28 @@ def filtrar_facturazion(form,factura):
 
 #TRAE BIEN LA INFO
 # Función para calcular la información de estudio del empleado
-def obtener_facturazion(facturas):
+def obtener_facturazion(factura):
     factura_info = []
+    lineas_info = set()  # Use a set to store unique lines
 
-    # Organizar los estudios por documentoId para optimizar consultas
-
-    for factura in facturas:   
+    for f in factura:   
         # Crear el diccionario con los datos del empleado y sus estudios
-        datos_empleado = {
-            'nombre_linea': empleado.LineaId.Linea,
-            'documento_colaborador': empleado.Documento,
-            'nombre_colaborador': empleado.Nombre,
-            'cargo': empleado.CargoId.Cargo,
-            'perfil': empleado.PerfilId.Perfil,
-            'modulo': empleado.ModuloId.Modulo,
+        datos_factura = {
+            'Año': f.Anio,
+            'Mes': f.Mes,
+            'Linea': f.LineaId.Linea,
+            'Cliente': f.ClienteId.Nombre_Cliente
         }
         
-        factura_info.append(datos_empleado)
+        factura_info.append(datos_factura)
+        lineas_info.add(f.LineaId.Linea)  # Add unique lines to the set
 
-    return factura_info
+    return factura_info, list(lineas_info)  # Convert set to list before returning
 
 
 def facturazion_filtrada (request):
     factura_info = []  
+    lineas_info = []
     show_data = False  
 
     if request.method == 'GET':
@@ -64,21 +65,19 @@ def facturazion_filtrada (request):
             factura = filtrar_facturazion(form, factura)
             
             # Obtener información de los estudios de los empleados
-            facturazion_info = obtener_facturazion(factura)
+            factura_info, lineas_info = obtener_facturazion(factura)
             show_data = bool(factura_info)  # Mostrar datos si hay resultados
-
-             # Debug: Imprimir la información de estudios de empleados
-            #print("Información de estudios de empleados:", empleado_estudio_info)
-
+            
     else: 
         #form = EmpleadoFilterForm()
-        form = FacturacionClientes()
+        form = FacturacionFilterForm()
 
     context = {
         'form': form,
-        'empleado_estudio_info': facturazion_info,      
+        'factura_info': factura_info,      
+        'lineas_info': lineas_info,  # Add lineas_info to the context
         'show_data': show_data,
         'mensaje': "No se encontraron resultados para los filtros aplicados." if not factura_info else ""
     }
 
-    return render(request, 'informes/informes_facturazion_index.html', context)
+    return render(request, 'informes/informes_facturacion_index.html', context)
