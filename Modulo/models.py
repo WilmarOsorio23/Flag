@@ -512,11 +512,13 @@ class FacturacionClientes(models.Model):
     Referencia= models.TextField(null=True, blank=True) 
     Ceco = models.TextField(null=True, blank=True)
     Sitio_Serv = models.TextField(null=True, blank=True)
+    ModuloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='ModuloId')
+
 
     class Meta:
         db_table = 'Facturacion_Clientes'
         constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'ClienteId', 'LineaId'], name='unique_facturacion_cliente')
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'ClienteId', 'LineaId','ModuloId'], name='unique_facturacion_cliente')
         ]
 
     def __str__(self):

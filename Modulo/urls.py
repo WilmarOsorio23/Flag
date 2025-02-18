@@ -38,6 +38,7 @@ from Modulo.Views import clientes_Contratos
 from Modulo.Views import tarifa_Clientes
 from Modulo.Views import referencia
 from Modulo.Views import centrosCostos
+from Modulo.Views import informe_facturazion
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -289,7 +290,7 @@ urlpatterns = [
     path('informes/tarifas_consultores/exportar_tarifas_consultores_excel', informe_tarifas_consultores.exportar_tarifas_consultores_excel , name='exportar_tarifas_consultores_excel'),
 
     #Ruta para informe de facturación
-    path('informes/facturacion/', informe_facturazion.facturazion_filtrado , name='informes_facturacion_index'),
+    path('informes/facturacion/', informe_facturazion.facturazion_filtrada , name='informes_facturacion_index'),
 
     # Rutas para tabla Historial Cargos
     path('historial_cargos/', historial_cargos.historial_cargos_index, name='historial_cargos_index'),
