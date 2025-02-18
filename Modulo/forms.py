@@ -929,6 +929,13 @@ class EmpleadoFilterForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
+    Cliente = forms.ChoiceField(
+        choices=[],  # Se llenará dinámicamente en el __init__
+        required=False,
+        label='Cliente',  
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     def __init__(self, *args, **kwargs):
         certificacion_seleccionada = kwargs.pop('certificacion_seleccionada', None)
         super(EmpleadoFilterForm, self).__init__(*args, **kwargs)
@@ -1205,7 +1212,8 @@ class Tarifa_ClientesForm(forms.ModelForm):
             'valorHora': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor hora', 'step': '0.01'}),
             'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día', 'step': '0.01'}),
             'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'}),
-            'bolsaMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor bolsa mes', 'step': '0.01'}),
+            'bolsaMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la cantidad del mes', 'step': '0.01'}),
+            'valorBolsa': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor bolsa', 'step': '0.01'}),
             'iva': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor IVA', 'step': '0.01'}),
             'sitioTrabajo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el sitio de trabajo'}),
         }
@@ -1218,7 +1226,8 @@ class Tarifa_ClientesForm(forms.ModelForm):
             'ValorHora': 'Valor Hora',
             'ValorDia': 'Valor Día',
             'ValorMes': 'Valor Mes',
-            'BolsaMes': 'Bolsa Mes',
+            'bolsaMes': 'Cantidad bolsa mes',
+            'valorBolsa': 'valorBolsa',
             'iva': 'IVA',
             'SitioTrabajo': 'Sitio de Trabajo',
         }

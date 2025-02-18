@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %} Informe de estudios {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+         <!-- Titulo del informe -->
+        <h4 class="card-title">Informe de estudios</h4>
+    </div>
+    <div class="card-body">
+        <div class="container-fluid mb-3">
+            <!-- Formulario principal -->
+            <form method="GET">
+                <!-- Filtros en la parte superior -->
+                <div class="row mb-3">
+
+                 <!--Filtro Colaborador --> 
+                    <div class="col-md-3">
+                        <label for="colaborador">{{ form.Nombre.label }}</label>
+                        {{ form.Nombre }}
+                    </div>
+
+                    <!--Filtro Línea --> 
+                    <div class="col-md-3">
+                        <label for="linea">{{ form.LineaId.label }}</label>
+                        {{ form.LineaId }}
+                    </div>
+
+                    <!--Filtro cargo -->
+                    <div class="col-md-3">
+                        <label for="cargo">{{ form.Cargo.label }}</label>
+                        {{ form.Cargo }}
+                    </div>
+
+                    <!-- Botones debajo de filtros -->
+                    <!-- Botón Buscar -->
+                    <div class = "row">
+                        <div class="col-md-6 text-start">
+                            <button type="submit" name="buscar" class="btn btn-primary mt-3">
+                                <i class="fas fa-glasses"></i>Buscar 
+                            </button>
+                        </div>
+                    </div>
+                </div>   
+            </form>
+
+             <!-- Botón de Descargar Excel -->
+             <div class="row">
+                <div class="col-md-6 text-start">
+                    <form id="download-form" method="GET" action="{% url 'exportar_estudio_excel' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}">
+                        <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}">
+                        <input type="hidden" name="Cargo" value="{{ form.Cargo.value }}">
+                        <button type="submit" class="btn btn-success mt-3">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+            {% if show_data %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-primary" id="estudiosTable">
+
+                    <!-- Encabezado de la tabla -->
+                    <thead>
+                        <!-- Filas dentro del encabezado -->
+                        <tr>
+                            <!-- Nombre línea --> 
+                            <th data-sort="nombre_linea" class="sortable" data-direction="default">
+                                Nombre Línea 
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+
+                            <!-- Documento Colaborador -->
+                            <th data-sort="documento_colaborador" class="sortable" data-direction="default">
+                                Documento Colaborador 
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+
+                            <!-- Nombre Colaborador -->
+                            <th data-sort="nombre_colaborador" class="sortable" data-direction="default">
+                                Nombre Colaborador 
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+
+                            <!-- Cargo --> 
+                            <th data-sort="cargo" class="sortable" data-direction="default">
+                                Cargo 
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+
+                            <!-- Perfil -->
+                            <th data-sort="perfil" class="sortable" data-direction="default">
+                                Perfil 
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+
+                            <!-- Módulo -->
+                            <th>Módulo</th>
+
+                            <!-- Titulo -->
+                            <th>Título</th>
+
+                            <!-- Institución -->
+                            <th>Institución</th>
+
+                            <!-- Fecha Grado -->
+                            <th>Fecha Grado</th>
+
+                            <!-- Fecha Inicio -->
+                            <th>Fecha inicio</th>
+
+                            <!-- Fecha Fin -->
+                            <th>Fecha Fin</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for empleado in empleado_estudio_info %}
+                            {% for estudio in empleado.estudios %}
+                                <tr>
+                                    <td>{{ empleado.nombre_linea }}</td>
+                                    <td>{{ empleado.documento_colaborador }}</td>
+                                    <td>{{ empleado.nombre_colaborador }}</td>
+                                    <td>{{ empleado.cargo }}</td>
+                                    <td>{{ empleado.perfil }}</td>
+                                    <td>{{ empleado.modulo }}</td>
+                                    <td>{{ estudio.titulo }}</td>
+                                    <td>{{ estudio.institucion }}</td>
+                                    <td>{{ estudio.fecha_grado }}</td>
+                                    <td>{{ estudio.fecha_inicio }}</td>
+                                    <td>{{ estudio.fecha_fin }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="11">No hay datos disponibles.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% elif not empleado_estudio_info %}
+            <div class="alert alert-warning" role="alert">
+                {{ mensaje }}
+            </div>
+            {% endif %}
+    </div>
+</div>
+<script src="{% static 'JS/informes_estudios.js' %}"></script>
+{% endblock %}

@@ -288,6 +288,9 @@ urlpatterns = [
     path('informes/tarifas_consultores/', informe_tarifas_consultores.tarifas_consultores_filtrado , name='informes_tarifas_consultores_index'),
     path('informes/tarifas_consultores/exportar_tarifas_consultores_excel', informe_tarifas_consultores.exportar_tarifas_consultores_excel , name='exportar_tarifas_consultores_excel'),
 
+    #Ruta para informe de facturación
+    path('informes/facturacion/', informe_facturazion.facturazion_filtrado , name='informes_facturacion_index'),
+
     # Rutas para tabla Historial Cargos
     path('historial_cargos/', historial_cargos.historial_cargos_index, name='historial_cargos_index'),
     path('historial_cargos/crear/', historial_cargos.historial_cargos_crear, name='historial_cargos_crear'),
