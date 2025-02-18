@@ -156,8 +156,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const valorDias = parseFloat(row.querySelector('input[name="Valor_Dias"]').value) || 0;
         const meses = parseFloat(row.querySelector('input[name="Meses"]').value) || 0;
         const valorMeses = parseFloat(row.querySelector('input[name="Valor_Meses"]').value) || 0;
+        const bolsa = parseFloat(row.querySelector('input[name="Bolsa"]').value) || 0;
+        const valorBolsa = parseFloat(row.querySelector('input[name="Valor_Bolsa"]').value) || 0;
         
-        const total = (horas * valorHoras) + (dias * valorDias) + (meses * valorMeses);
+        
+        const total = (horas * valorHoras) + (dias * valorDias) + (meses * valorMeses) + (bolsa *  valorBolsa);
         row.querySelector('input[name="Valor"]').value = total.toFixed(2);
     }    
 
@@ -166,6 +169,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const totals = {
             totalHoras: 0,
             totalDias: 0,
+            totalMeses: 0,
+            totalBolsa: 0,
             totalValor: 0
         };
     
@@ -176,21 +181,27 @@ document.addEventListener('DOMContentLoaded', function () {
             // Sumar a los totales generales
             const horas = parseFloat(row.querySelector('input[name="Horas"]').value) || 0;
             const dias = parseFloat(row.querySelector('input[name="Dias"]').value) || 0;
+            const meses = parseFloat(row.querySelector('input[name="Meses"]').value) || 0;
+            const bolsa = parseFloat(row.querySelector('input[name="Bolsa"]').value) || 0;
             const valor = parseFloat(row.querySelector('input[name="Valor"]').value) || 0;
     
             totals.totalHoras += horas;
             totals.totalDias += dias;
+            totals.totalMeses += meses;
+            totals.totalBolsa += bolsa;
             totals.totalValor += valor;
         });
     
         // Actualizar los totales en el pie de página
         document.querySelector('tfoot th[data-total-horas]').textContent = totals.totalHoras.toFixed(0);
         document.querySelector('tfoot th[data-total-dias]').textContent = totals.totalDias.toFixed(0);
+        document.querySelector('tfoot th[data-total-meses]').textContent = totals.totalMeses.toFixed(0);
+        document.querySelector('tfoot th[data-total-bolsa]').textContent = totals.totalBolsa.toFixed(0);
         document.querySelector('tfoot th[data-total-valor]').textContent = totals.totalValor.toFixed(2);
     }
 
     // Modificar los event listeners para incluir todos los campos relevantes
-    document.querySelectorAll('input[name="Horas"], input[name="Valor_Horas"], input[name="Dias"], input[name="Valor_Dias"], input[name="Meses"], input[name="Valor_Meses"]').forEach(input => {
+    document.querySelectorAll('input[name="Horas"], input[name="Valor_Horas"], input[name="Dias"], input[name="Valor_Dias"], input[name="Meses"], input[name="Valor_Meses"], input[name="Bolsa"], input[name="Valor_Bolsa"]').forEach(input => {
         input.addEventListener('input', () => {
             // Actualizar la fila actual y luego los totales generales
             updateRowTotal(input.closest('tr'));
@@ -247,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td><input type="text" name="Valor_Dias" class="form-control" value="${tarifa.valorDia || 0}"></td>
                 <td><input type="text" name="Meses" class="form-control" value=""></td>
                 <td><input type="text" name="Valor_Meses" class="form-control" value="${tarifa.valorMes || 0}"></td>
-                <td><input type="text" name="Bolsa" class="form-control" value="${tarifa.bolsaMes || 0}"></td>
+                <td><input type="text" name="Bolsa" class="form-control" value=""></td>
                 <td><input type="text" name="Valor_Bolsa" class="form-control" value="${tarifa.valorBolsa || 0}"></td>
                 <td><input type="text" name="Valor" class="form-control" value=""disabled></td>
                 <td><input type="text" name="Descripcion" class="form-control" value=""></td>
@@ -297,22 +308,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 const valor_dias = parseFloat(row.querySelector('input[name="Valor_Dias"]')?.value) || 0;
                 const meses = parseFloat(row.querySelector('input[name="Meses"]')?.value) || 0;
                 const valor_meses = parseFloat(row.querySelector('input[name="Valor_Meses"]')?.value) || 0;
+                const bolsa = parseFloat(row.querySelector('input[name="Bolsa"]')?.value) || 0;
+                const valor_bolsa = parseFloat(row.querySelector('input[name="Valor_Bolsa"]')?.value) || 0;
                 const ceco = row.querySelector('input[name="Ceco"]')?.value || '';
                 const sitio_serv = row.querySelector('input[name="Sitio_Serv"]')?.value || '';
                 const iva = parseFloat(row.querySelector('input[name="IVA"]')?.value) || 0; // Obtener IVA de la fila
 
                 // Calcular el valor total de la fila
-                const valor_total = (horas * valor_horas) + (dias * valor_dias) + (meses * valor_meses);
+                const valor_total = (horas * valor_horas) + (dias * valor_dias) + (meses * valor_meses) + (bolsa * valor_bolsa);
+                let Valor_Unitario = 0;
+                if (horas !== 0) {
+                    Valor_Unitario = valor_horas;
+                    }
+                else if (dias !== 0) {
+                    Valor_Unitario = valor_dias;
+                    }
+                else if (meses !== 0) {
+                    Valor_Unitario = valor_meses;
+                    }
+                else if (bolsa !== 0) {
+                    Valor_Unitario = valor_bolsa;
+                    }
                 subtotal += valor_total;
                 ivaTotal += valor_total * (iva / 100); // Calcular IVA basado en el valor de la fila
 
-                if (horas !== 0 && dias !== 0 && meses !== 0){
+                if (horas !== 0 || dias !== 0 || meses !== 0 || bolsa !== 0) {
                     // Agregar los datos necesarios para la plantilla
                     data.push({
                         Referencia: referencia,
                         Concepto: descripcion,
-                        Cantidad: horas || dias || meses, // Cantidad puede ser horas, días o meses
-                        Valor_Unitario: valor_horas || valor_dias || valor_meses, // Valor unitario correspondiente
+                        Cantidad: horas || dias || meses || bolsa, // Cantidad puede ser horas, días o meses O BOLSA
+                        Valor_Unitario: Valor_Unitario.toFixed(2),
                         Valor_Total: valor_total.toFixed(2),
                         Ceco: ceco,
                         Sitio_Serv: sitio_serv
