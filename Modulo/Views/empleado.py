@@ -147,14 +147,14 @@ def empleado_descargar_excel(request):
             'Academia SAP', 
             'Certificado SAP', 
             'Otras Certificaciones', 
-            'Postgrados'
-            'Activo'
-            'FechaRetiro'
-            'Dirección'
-            'Ciudad'
-            'Departamento'
-            'Dirección Alterna'
-            'Telefono 1'
+            'Postgrados',
+            'Activo',
+            'FechaRetiro',
+            'Dirección',
+            'Ciudad',
+            'Departamento',
+            'Dirección Alterna',
+            'Telefono 1',
             'Telefono 2'
         ])
 
