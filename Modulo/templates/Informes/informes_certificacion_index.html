@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block titulo %} Filtrar Certificados {% endblock %}
+{% block titulo %} Informe Certificados {% endblock %}
 
 {% block contenido %}
 <div class="card">
@@ -8,75 +8,132 @@
         <h4 class="card-title">Filtrar Certificados</h4>
     </div>
     <div class="card-body">
-        <!-- Formulario de búsqueda -->
-        <form method="GET" class="form-inline">
-            <div class="form-group mr-3 col-md-3">
-                {{ form.Nombre.label_tag }}
-                {{ form.Nombre }}
+        <div class="container-fluid mb-3">
+            <!-- Formulario de búsqueda -->
+            <form method="GET" >
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                      <label for="Nombre">{{ form.Nombre.label }}</label>
+                      {{ form.Nombre }}
+                    </div>
+                    <div class="col-md-3">
+                      <label for="Linea">{{ form.LineaId.label }}</label>
+                      {{ form.LineaId }}
+                    </div>
+                    <div class="col-md-3">
+                      <label for="Certificacion">{{ form.Certificacion.label }}</label>
+                      {{ form.Certificacion }}
+                    </div>
+                </div>
+                 <!-- Botones en la parte inferior -->
+                <div class="row">
+                    <div class="col-md-6 text-start">
+                    <button type="submit" name="buscar" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+                    </div>
+                </div>        
+            </form>
+        <!-- Botón de Descargar Excel -->
+        <div class="row">
+            <div class="col-md-6 text-end offset-md-6">
+              <form id="download-form" method="GET" action="{% url 'exportar_certificaciones_excel' %}">
+                {% csrf_token %}
+                <input type="hidden" name="Documento" value="{{ form.Documento.value }}" />
+                <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}" />
+                <input type="hidden" name="Certificacion" value="{{ form.Certificacion.value }}" />
+                <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}" />
+                <button type="submit" class="btn btn-success"><i class="fas fa-file-excel"></i> Descargar Excel</button>
+              </form> 
             </div>
-            <div class="form-group mr-3 col-md-3">
-                {{ form.Certificacion.label_tag }}
-                {{ form.Certificacion }}
-            </div>
-            <div class="form-group mr-3 col-md-3">
-                {{ form.LineaId.label_tag }}
-                {{ form.LineaId }}
-            </div>
-            <div class="form-group mt-3     mr-3 col-md-3">
-                <button type="submit" name="buscar" class="btn btn-primary">Buscar</button>
-            </div>            
-        </form>
+          </div>
+        </div>
 
         <!-- Resultados -->
-        {% if show_data and empleados %}
+        {% if show_data %}
+        <!-- Tabla para mostrar los resultados -->
         <div class="table-responsive">
-            <table class="table">
+            <table class="table table-bordered table-hover table-primary"  id="nominaTable">
                 <thead>
                     <tr>
-                        <th>Línea</th>
-                        <th>Documento</th>
-                        <th>Nombre Empleado</th>
-                        <th>Cargo Empleado</th>
-                        <th>Perfil Empleado</th>
-                        <th>Módulo</th>
+                        <th data-sort="Documento" class="sortable" data-direction="default">
+                            Doc Empleado
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="Nombre" class="sortable" data-direction="default">
+                            Nombre
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="LineaId" class="sortable" data-direction="default">
+                            Línea
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="Cargo" class="sortable" data-direction="default">
+                            Cargo
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>      
+                        <th data-sort="Perfil" class="sortable" data-direction="default">
+                            Perfil
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="Modulo" class="sortable" data-direction="default">
+                            Módulo
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="Certificacion" class="sortable" data-direction="default">
+                            Certificación
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
                         <th>Nombre Certificación</th>
                         <th>Fecha Certificación</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in empleado_info %}
+                    {% for empleado in certificaciones_info %}
                         <tr>
-                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.LineaId }}</td>
-                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.Documento }}</td>
-                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.Nombre }}</td>
-                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.Cargo }}</td>
-                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.PerfilId }}</td>
-                            <td rowspan="{{ item.certificaciones.count }}">{{ item.empleado.ModuloId }}</td>   
-                            <td>
-                                <ul>
-                                    {% for cert in item.certificaciones %}
-                                        <li>{{ cert.CertificacionId }}</li>
-                                    {% endfor %}
-                                </ul>       
-                            </td>         
-                            <td>
-                                <ul>
-                                    {% for cert in item.certificaciones %}
-                                        <li>{{ cert.Fecha_Certificacion|date:"d/m/Y" }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </td>                   
-                        </tr>                  
+                            <td>{{ empleado.Documento }}</td>
+                            <td>{{ empleado.Nombre }}</td>
+                            <td>{{ empleado.Linea }}</td>
+                            <td>{{ empleado.Cargo }}</td>
+                            <td>{{ empleado.Perfil }}</td>
+                            <td>{{ empleado.Modulo }}</td>
+                            <td>{{ empleado.CertificacionId }}</td>
+                            <td>{{ empleado.Certificacion }}</td>
+                            <td>{{ empleado.Fecha_Certificacion }}</td>
+                        </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="8">No se encontraron empleados con los filtros seleccionados.</td>
+                            <td colspan="9">No se encontraron empleados con certificaciones</td>
                         </tr>
                     {% endfor %}
-                </tbody>                         
+                </tbody>
             </table>
-
-            <!-- Botón de descarga de Excel -->
-            <a href="{% url 'descargar_excel' %}" class="btn btn-success">Descargar Excel</a>
         </div>
         {% elif show_data %}
             <p>No se encontraron resultados.</p>

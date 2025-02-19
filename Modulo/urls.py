@@ -17,6 +17,7 @@ from Modulo.Views import informe_tarifas_consultores
 from Modulo.Views import empleado
 from Modulo.Views import consultores
 from Modulo.Views import Nomina
+from Modulo.Views import Informe_certificaciones
 from Modulo.models import TiposContactos
 from . import views
 from Modulo.Views import perfil
@@ -265,8 +266,8 @@ urlpatterns = [
     path('registro_tiempos/horas_habiles/', registro_tiempos.obtener_horas_habiles_view, name='obtener_horas_habiles'),
 
     # Rutas para informe de certificación
-    path('informes/', views.empleado_filtrado, name='informes_certificacion_index'),
-    path('descargar_excel/', modulo.descargar_excel, name='descargar_excel'),
+    path('informes/certificaciones', Informe_certificaciones.empleado_filtrado, name='informes_certificacion_index'),
+    path('informes/certificaciones/exportar_certificaciones_excel/', Informe_certificaciones.exportar_certificaciones_excel, name='exportar_certificaciones_excel'),
 
     # Rutas para informe de salario
     path('informes/salarios/', empleado_nomina_filtrado.empleado_nomina_filtrado, name='informes_salarios_index'),
