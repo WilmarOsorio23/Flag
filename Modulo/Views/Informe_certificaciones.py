@@ -76,7 +76,9 @@ def exportar_certificaciones_excel(request):
     """
     Exporta el informe de certificaciones en formato Excel.
     """
+    print('LLEGO AQUÍ')
     certificaciones_info = []  
+    
 
     if request.method == 'GET':
         form = EmpleadoFilterForm(request.GET)

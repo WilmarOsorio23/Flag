@@ -307,7 +307,7 @@ class Empleado(models.Model):
     OtrasCertificaciones = models.BooleanField(max_length=100)  # Cambiado a CharField
     Postgrados = models.BooleanField(max_length=100)  # Cambiado a CharField
     Activo = models.BooleanField(default=True)
-    FechaRetiro = models.DateField()
+    FechaRetiro = models.DateField(null=True, blank=True)
     Direccion = models.CharField(max_length=255, null=True, blank=True)
     Ciudad = models.CharField(max_length=100, null=True, blank=True)
     Departamento = models.CharField(max_length=100, null=True, blank=True)

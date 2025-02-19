@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         let row = selected[0].closest('tr');
-        let id = selected[0].value; // Obtener el ID del empleado seleccionado
+        let id = selected[0].value; // Obtener el ID del empleado seleccionado        
 
         // Recopilar los valores de los inputs y selects dentro de la fila
         let data = {
@@ -271,16 +271,26 @@ document.addEventListener('DOMContentLoaded', function() {
             'FechaGrado': row.querySelector('input[name="FechaGrado"]').value,
             'Universidad': row.querySelector('input[name="Universidad"]').value,
             'ProfesionRealizada': row.querySelector('input[name="ProfesionRealizada"]').value,
-            'AcademiaSAP': row.querySelector('input[name="AcademiaSAP"]').value,
+            'AcademiaSAP': row.querySelector('select[name="AcademiaSAP"]').value,
             'CertificadoSAP': row.querySelector('select[name="CertificadoSAP"]').value,
-            'OtrasCertificaciones': row.querySelector('input[name="OtrasCertificaciones"]').value,
-            'Postgrados': row.querySelector('input[name="Postgrados"]').value
+            'OtrasCertificaciones': row.querySelector('select[name="OtrasCertificaciones"]').value,
+            'Postgrados': row.querySelector('select[name="Postgrados"]').value,
+            'Activo': row.querySelector('select[name="Activo"]').value,
+            'FechaRetiro': row.querySelector('input[name="FechaRetiro"]').value,
+            'Direccion': row.querySelector('input[name="Direccion"]').value,
+            'Ciudad': row.querySelector('input[name="Ciudad"]').value, 
+            'Departamento':row.querySelector('input[name="Departamento"]').value, 
+            'DireccionAlterna': row.querySelector('input[name="DireccionAlterna"]').value, 
+            'Telefono1': row.querySelector('input[name="Telefono1"]').value, 
+            'Telefono2': row.querySelector('input[name="Telefono2"]').value,
+        
         };
 
         // Deshabilitar los checkboxes y el botón de edición
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
 
+        
         fetch(`/empleado/editar/${id}/`, {
             method: 'POST',
             headers: {
@@ -289,33 +299,27 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(data)
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => {
-                    throw new Error(err.message || 'Error al guardar los cambios');
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log(data.status)
-            if (data.status === 'success') {
-                showMessage('Cambios guardados correctamente.', 'success');
-                row.querySelectorAll('input.form-control').forEach(input => {
-                    input.classList.add('highlighted');
-                    setTimeout(() => input.classList.remove('highlighted'), 2000);
-                });
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.status)
+                if (data.status === 'success') {
+                    showMessage('Cambios guardados correctamente.', 'success');
+                    row.querySelectorAll('input').forEach(input => {
+                        input.classList.remove('form-control');
+                        input.classList.add('form-control-plaintext');                        
+                        input.readOnly = true;
+                    });
+                    disableEditMode(selected, row);
+                } else {
+                    showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger');
+                    disableEditMode(selected, row);
+                }
+            })
+            .catch(error => {
+                console.error('Error al guardar los cambios:', error);
+                showMessage('Error al guardar los cambios: ' + error.message, 'danger');
                 disableEditMode(selected, row);
-            } else {
-                showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger');
-                disableEditMode(selected, row);
-            }
-        })
-        .catch(error => {
-            console.error('Error al guardar los cambios:', error);
-            showMessage('Error al guardar los cambios: ' + error.message, 'danger');
-            disableEditMode(selected, row);
-        });
+            });
     };
 });
 
