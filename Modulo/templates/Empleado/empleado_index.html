@@ -103,7 +103,6 @@
                                 <input type="date" name="FechaOperacion" class="form-control-plaintext" value="{{ empleado.FechaOperacion|date:'Y-m-d' }}" readonly>
                             </td>
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-
                                 <select name="ModuloId" class="form-control-plaintext" disabled>
                                     {% for modulo in form.fields.ModuloId.queryset %}
                                         <option value="{{ modulo.ModuloId }}" {% if empleado.ModuloId == modulo.id %}selected{% endif %}>
@@ -175,7 +174,7 @@
                                     <option value="0" {% if empleado.Activo == 0 %}selected{% endif %}>No</option>
                                 </select>
                             </td>
-                            <td><input type="text" name="FechaRetiro" class="form-control-plaintext" value="{{ empleado.FechaRetiro|default:"-" }}" readonly></td>
+                            <td><input type="date" name="FechaRetiro" class="form-control-plaintext" value="{{ empleado.FechaRetiro|date:'Y-m-d' }}" readonly></td>
                             <td><input type="text" name="Direccion" class="form-control-plaintext" value="{{ empleado.Direccion|default:"-" }}" readonly></td>
                             <td><input type="text" name="Ciudad" class="form-control-plaintext" value="{{ empleado.Ciudad|default:"-" }}" readonly></td>
                             <td><input type="text" name="Departamento" class="form-control-plaintext" value="{{ empleado.Departamento|default:"-" }}" readonly></td>
