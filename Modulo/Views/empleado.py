@@ -30,14 +30,12 @@ def empleado_crear(request):
 # Vista para editar un empleado
 @csrf_exempt
 def empleado_editar(request, id):
-    print('AQUI 1', id)
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
             empleado = get_object_or_404(Empleado, Documento=id)
             form = EmpleadoForm(data, instance=empleado)
 
-            print('AQUI', data)
             if form.is_valid():
                 form.save()
                 return JsonResponse({'status': 'success'})
