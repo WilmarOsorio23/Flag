@@ -7,6 +7,7 @@ import pandas as pd
 from Modulo.forms import EmpleadoForm
 from Modulo.models import Empleado, Nomina
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import F, Func, Value
 
 def empleado_index(request):
     empleados = Empleado.objects.all()
@@ -86,19 +87,27 @@ def verificar_relaciones(request):
 # Vista para descargar datos de empleados en Excel
 def empleado_descargar_excel(request):
     if request.method == 'POST':
-        
-        # Obtener los IDs desde el formulario
-        item_ids = request.POST.get('items_to_delete') 
-        item_ids = list(map(int, item_ids.replace('.', '').split(',')))  # Eliminar puntos antes de convertir a entero
+        item_ids = request.POST.get('items_to_delete')
+        documentos = item_ids.split(',')
 
-        empleados_data = Empleado.objects.filter(Documento__in=item_ids)
+        # Eliminar puntos de los documentos recibidos
+        documentos_limpios = [doc.replace('.', '') for doc in documentos]
+        print("Documentos sin puntos:", documentos_limpios)
 
+        # Comparar documentos en la BD eliminando puntos antes de filtrar
+        empleados_data = Empleado.objects.annotate(
+            DocumentoSinPuntos=Func(F('Documento'), Value('.'), Value(''), function='REPLACE')
+        ).filter(DocumentoSinPuntos__in=documentos_limpios)
+
+        print("Empleados encontrados:", empleados_data)
+
+        # Preparar respuesta en formato Excel
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="empleados.xlsx"'
 
-        data = []
-        for empleado in empleados_data:
-            data.append([
+        # Extraer los datos en formato lista para el DataFrame
+        data = [
+            [
                 empleado.TipoDocumento.Nombre, 
                 empleado.Documento, 
                 empleado.Nombre, 
@@ -125,8 +134,11 @@ def empleado_descargar_excel(request):
                 empleado.DireccionAlterna,
                 empleado.Telefono1,
                 empleado.Telefono2
-            ])
+            ]
+            for empleado in empleados_data
+        ]
 
+        # Crear DataFrame y exportar a Excel
         df = pd.DataFrame(data, columns=[
             'Tipo Documento', 
             'Documento ID', 
@@ -145,14 +157,14 @@ def empleado_descargar_excel(request):
             'Academia SAP', 
             'Certificado SAP', 
             'Otras Certificaciones', 
-            'Postgrados',
-            'Activo',
-            'FechaRetiro',
-            'Dirección',
-            'Ciudad',
-            'Departamento',
-            'Dirección Alterna',
-            'Telefono 1',
+            'Postgrados', 
+            'Activo', 
+            'Fecha Retiro', 
+            'Dirección', 
+            'Ciudad', 
+            'Departamento', 
+            'Dirección Alterna', 
+            'Telefono 1', 
             'Telefono 2'
         ])
 
@@ -160,3 +172,4 @@ def empleado_descargar_excel(request):
         return response
 
     return redirect('empleado_index')
+

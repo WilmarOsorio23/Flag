@@ -81,13 +81,18 @@ def exportar_certificaciones_excel(request):
     
 
     if request.method == 'GET':
+        print('LLEGO AQUI 2')
         form = EmpleadoFilterForm(request.GET)
-
+        print('LLEGO AQUÍ 3')
+        
         if form.is_valid():
             certificaciones = Certificacion.objects.all()
             empleados = Empleado.objects.all()
             detalles = Detalle_Certificacion.objects.all()
 
+            print('LLEGO AQUÍ', empleados)
+            print('LLEGO AQUI 2',certificaciones)
+            print('LLEGO AQUI 3', detalles)
             # Aplicar filtros
             certificaciones = filtrar_empleado(form, certificaciones)
             empleados = filtrar_empleado(form, empleados)
