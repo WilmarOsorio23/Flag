@@ -35,7 +35,7 @@ def filtrar_empleados(form, empleados):
         empleados = empleados.filter(Certificacion=certificaciones)
     if perfil:
         empleados = empleados.filter(PerfilId=perfil)
-    if activo is not None:
+    if activo:
         empleados = empleados.filter(Activo=activo == 'True')
     return empleados
 
