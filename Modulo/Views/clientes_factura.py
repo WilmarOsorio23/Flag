@@ -307,6 +307,10 @@ def clientes_factura_index(request):
     clientes_contratos = models.ClientesContratos.objects.all()
     facturacion_clientes = models.FacturacionClientes.objects.all()
 
+    # Inicializar facturacion_info con una lista vacía
+    facturacion_info = []
+    totales_facturacion = {}
+
     if request.method == 'GET':
         form = FacturacionFilterForm(request.GET)
 
@@ -325,8 +329,6 @@ def clientes_factura_index(request):
 
     else:
         form = FacturacionFilterForm()
-        facturacion_info = []
-        totales_facturacion = {}
 
     context = {
         'form': form,
