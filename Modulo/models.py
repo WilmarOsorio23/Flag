@@ -494,7 +494,7 @@ class Tarifa_Clientes(models.Model):
 class FacturacionClientes(models.Model):
     ConsecutivoId = models.AutoField(primary_key=True)
     Anio = models.IntegerField()
-    Mes = models.IntegerField()
+    Mes = models.IntegerField(null=True, blank=True)
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
     LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
     Factura = models.TextField(null=True, blank=True)

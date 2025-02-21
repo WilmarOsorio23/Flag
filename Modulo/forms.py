@@ -1268,7 +1268,7 @@ class FacturacionFilterForm(forms.Form):
 
     Mes = forms.ChoiceField(
         choices=[],
-        required=True,
+        required=False,
         label='Mes',  
         widget=forms.Select(attrs={'class': 'form-control'})
     )
@@ -1295,7 +1295,7 @@ class FacturacionFilterForm(forms.Form):
         self.populate_linea()
 
     def populate_anio(self):
-        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2021, 2026)]
 
     def populate_mes(self):
         meses = [
