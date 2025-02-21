@@ -447,7 +447,6 @@ class TiemposFacturables(models.Model):
 class ClientesContratos(models.Model):
     ClientesContratosId = models.AutoField(primary_key=True)
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
-    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
     FechaInicio = models.DateField(null=True, blank=True)
     FechaFin = models.DateField(null=True, blank=True)
     Contrato = models.CharField(max_length=50,null=True,blank=True)  # Cambiado a CharField
@@ -463,7 +462,7 @@ class ClientesContratos(models.Model):
         db_table = 'Clientes_Contratos'
 
     def __str__(self):
-        return f"ContratoId:{self.ClientesContratosId} - Cliente: {self.ClienteId} - Linea: {self.LineaId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - Contrato: {self.Contrato} - ContratoVigente: {self.ContratoVigente} - OC_Facturar: {self.OC_Facturar} - Parafiscales: {self.Parafiscales} - HorarioServicio: {self.HorarioServicio} - FechaFacturacion: {self.FechaFacturacion} - TipoFacturacion: {self.TipoFacturacion} - Observaciones: {self.Observaciones}"
+        return f"ContratoId:{self.ClientesContratosId} - Cliente: {self.ClienteId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - Contrato: {self.Contrato} - ContratoVigente: {self.ContratoVigente} - OC_Facturar: {self.OC_Facturar} - Parafiscales: {self.Parafiscales} - HorarioServicio: {self.HorarioServicio} - FechaFacturacion: {self.FechaFacturacion} - TipoFacturacion: {self.TipoFacturacion} - Observaciones: {self.Observaciones}"
     
     
 class Tarifa_Clientes(models.Model):
@@ -497,6 +496,7 @@ class FacturacionClientes(models.Model):
     Mes = models.IntegerField()
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
     LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    ModuloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='ModuloId')
     Factura = models.TextField(null=True, blank=True)
     HorasFactura = models.FloatField(null=True, blank=True)
     Valor_Horas = models.FloatField(null=True, blank=True)
@@ -509,14 +509,14 @@ class FacturacionClientes(models.Model):
     Valor = models.FloatField(null=True, blank=True)
     Descripcion = models.TextField(null=True, blank=True)
     IVA = models.FloatField(null=True, blank=True)
-    Referencia= models.TextField(null=True, blank=True) 
+    Referencia= models.TextField(null=True, blank=True)
     Ceco = models.TextField(null=True, blank=True)
     Sitio_Serv = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'Facturacion_Clientes'
         constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'ClienteId', 'LineaId'], name='unique_facturacion_cliente')
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'ClienteId', 'LineaId', 'ModuloId'], name='unique_facturacion_cliente')
         ]
 
     def __str__(self):

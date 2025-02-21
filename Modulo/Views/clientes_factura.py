@@ -24,7 +24,7 @@ def clientes_factura_guardar(request):
             # Aquí puedes procesar cada fila
             for row in rows:
                 # Validar campos obligatorios
-                if not all(key in row for key in ['ClienteId', 'LineaId', 'Anio', 'Mes']):
+                if not all(key in row for key in ['ClienteId', 'LineaId', 'Anio', 'Mes','ModuloId']):
                     continue  # Saltar filas que no tienen los campos obligatorios
 
                 # Convertir valores de manera segura
@@ -33,6 +33,7 @@ def clientes_factura_guardar(request):
                 mes = int(row.get('Mes', 0)) if row.get('Mes') else 0
                 cliente_id = int(row.get('ClienteId', 0)) if row.get('ClienteId') else 0
                 linea_id = int(row.get('LineaId', 0)) if row.get('LineaId') else 0
+                modulo_id = int(row.get('ModuloId', 0)) if row.get('ModuloId') else 0
                 
                 horas_factura = float(row.get('Horas', 0)) if row.get('Horas') else 0.0
                 valor_horas = float(row.get('Valor_Horas', 0)) if row.get('Valor_Horas') else 0.0
@@ -64,7 +65,8 @@ def clientes_factura_guardar(request):
                                 Anio=anio,
                                 Mes=mes,
                                 ClienteId=cliente_id,
-                                LineaId=linea_id
+                                LineaId=linea_id,
+                                ModuloId=modulo_id
                             )
                             
                             # Verificar si los datos han cambiado
@@ -110,6 +112,7 @@ def clientes_factura_guardar(request):
                                 Mes=mes,
                                 ClienteId_id=cliente_id,
                                 LineaId_id=linea_id,
+                                ModuloId_id=modulo_id,
                                 HorasFactura=horas_factura,
                                 Valor_Horas=valor_horas,
                                 DiasFactura=dias_factura,
@@ -134,6 +137,7 @@ def clientes_factura_guardar(request):
                             Mes=mes,
                             ClienteId_id=cliente_id,
                             LineaId_id=linea_id,
+                            ModuloId_id=modulo_id,
                             HorasFactura=horas_factura,
                             Valor_Horas=valor_horas,
                             DiasFactura=dias_factura,
@@ -177,7 +181,6 @@ def filtrar_facturacion(form, clientes_contratos, facturacion_clientes):
         facturacion_clientes = facturacion_clientes.filter(ClienteId=cliente_id)
 
     if linea_id:
-        clientes_contratos = clientes_contratos.filter(LineaId=linea_id)
         facturacion_clientes = facturacion_clientes.filter(LineaId=linea_id)
 
     return clientes_contratos, facturacion_clientes
@@ -185,163 +188,116 @@ def filtrar_facturacion(form, clientes_contratos, facturacion_clientes):
 def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes):
     facturacion_info = []
 
-    # Crear un diccionario para acceder rápidamente a los contratos por cliente y línea
-    contratos_dict = {(contrato.ClienteId.ClienteId, contrato.LineaId.LineaId): contrato for contrato in clientes_contratos}
+    # Diccionario para rastrear las combinaciones de cliente, línea y módulo ya procesadas
+    combinaciones_procesadas = set()
 
-    # Procesar los contratos
+    # Procesar todos los contratos (vigentes y no vigentes)
     for contrato in clientes_contratos:
-        cliente_info = next((item for item in facturacion_info if item['ClienteId'] == contrato.ClienteId.ClienteId), None)
-        if not cliente_info:
-            cliente_info = {
-                'Cliente': contrato.ClienteId.Nombre_Cliente,
-                'ClienteId': contrato.ClienteId.ClienteId,
-                'Facturas': []
-            }
-            facturacion_info.append(cliente_info)
-        
-        # Obtener la tarifa correspondiente para este contrato
-        tarifa = Tarifa_Clientes.objects.filter(
-            clienteId=contrato.ClienteId,
-            lineaId=contrato.LineaId,
-            anio=anio,
-            mes=mes
-        ).first()
-
-        facturaciones = facturacion_clientes.filter(
-            ClienteId=contrato.ClienteId,
-            LineaId=contrato.LineaId
-        )
-
-        if facturaciones.exists():
-            for facturacion in facturaciones:
-                # Obtener los valores de horas, días y meses
-                horas = facturacion.HorasFactura or 0
-                dias = facturacion.DiasFactura or 0
-                meses = facturacion.MesFactura or 0
-                bolsa = facturacion.Bolsa or 0
-
-
-                # Obtener los valores unitarios (Valor_Horas, Valor_Dias, Valor_Meses)
-                valor_horas = facturacion.Valor_Horas or (float(tarifa.valorHora) if tarifa and tarifa.valorHora is not None else 0)
-                valor_dias = facturacion.Valor_Dias or (float(tarifa.valorDia) if tarifa and tarifa.valorDia is not None else 0)
-                valor_meses = facturacion.Valor_Meses or (float(tarifa.valorMes) if tarifa and tarifa.valorMes is not None else 0)
-                valor_bolsa = facturacion.Valor_Bolsa or (float(tarifa.valorBolsa) if tarifa and tarifa.valorBolsa is not None else 0)
-
-                # Calcular el valor total
-                valor = (horas * float(valor_horas)) + (dias * float(valor_dias)) + (meses * float(valor_meses)) + (bolsa * float(valor_bolsa))
-                
-                cliente_info['Facturas'].append({
-                    'ConsecutivoId': facturacion.ConsecutivoId,
-                    'LineaId': contrato.LineaId.LineaId,
-                    'Linea': contrato.LineaId.Linea,
-                    'Horas': facturacion.HorasFactura,
-                    'Valor_Horas': facturacion.Valor_Horas or (tarifa.valorHora if tarifa else 0),
-                    'Dias': facturacion.DiasFactura,
-                    'Valor_Dias': facturacion.Valor_Dias or (tarifa.valorDia if tarifa else 0),
-                    'Mes': facturacion.MesFactura,
-                    'Valor_Meses': facturacion.Valor_Meses or (tarifa.valorMes if tarifa else 0),
-                    'Valor': valor,
-                    'Descripcion': facturacion.Descripcion,
-                    'NumeroFactura': facturacion.Factura,
-                    'Bolsa': facturacion.Bolsa,
-                    'Valor_Bolsa': facturacion.Valor_Bolsa or (tarifa.valorBolsa if tarifa else 0),
-                    'IVA': facturacion.IVA or (tarifa.iva if tarifa else 0),
-                    'Referencia': facturacion.Referencia or (tarifa.referenciaId.codigoReferencia if tarifa and tarifa.referenciaId else ''),
-                    'Ceco': facturacion.Ceco or (tarifa.centrocostosId.codigoCeCo if tarifa and tarifa.centrocostosId else ''),
-                    'Sitio_Serv': facturacion.Sitio_Serv or (tarifa.sitioTrabajo if tarifa else '')
-                })
-        else:
-            # Si no hay facturación, usar valores por defecto de la tarifa
-            horas = 0
-            dias = 0
-            meses = 0 
-            bolsa = 0
-
-            # Asegurarse de que los valores no sean None antes de convertirlos a float
-            valor_horas = float(tarifa.valorHora) if tarifa and tarifa.valorHora is not None else 0
-            valor_dias = float(tarifa.valorDia) if tarifa and tarifa.valorDia is not None else 0
-            valor_meses = float(tarifa.valorMes) if tarifa and tarifa.valorMes is not None else 0
-            valor_bolsa = float(tarifa.valorBolsa) if tarifa and tarifa.valorBolsa is not None else 0
-            
-            # Calcular el valor total
-            valor = (horas * valor_horas) + (dias * valor_dias) + (meses * valor_meses) + (bolsa * valor_bolsa)
-            
-            cliente_info['Facturas'].append({
-                'ConsecutivoId': '',
-                'LineaId': contrato.LineaId.LineaId,
-                'Linea': contrato.LineaId.Linea,
-                'Horas': '',
-                'Valor_Horas': tarifa.valorHora if tarifa else 0,
-                'Dias': '',
-                'Valor_Dias': tarifa.valorDia if tarifa else 0,
-                'Mes': '',
-                'Valor_Meses': tarifa.valorMes if tarifa else 0,
-                'Valor': valor,
-                'Descripcion': '',
-                'NumeroFactura': '',
-                'Bolsa': '',
-                'Valor_Bolsa': tarifa.valorBolsa if tarifa else 0,
-                'IVA': tarifa.iva if tarifa else 0,
-                'Referencia': tarifa.referenciaId.codigoReferencia if tarifa and tarifa.referenciaId else '',
-                'Ceco': tarifa.centrocostosId.codigoCeCo if tarifa and tarifa.centrocostosId else '',
-                'Sitio_Serv': tarifa.sitioTrabajo if tarifa else ''
-            })
-
-    # Procesar las facturaciones que no están en contratos
-    for facturacion in facturacion_clientes:
-        if (facturacion.ClienteId.ClienteId, facturacion.LineaId.LineaId) not in contratos_dict:
-            cliente_info = next((item for item in facturacion_info if item['ClienteId'] == facturacion.ClienteId.ClienteId), None)
+        # Verificar si el contrato está vigente o si tiene datos en facturación
+        if contrato.ContratoVigente or facturacion_clientes.filter(ClienteId=contrato.ClienteId).exists():
+            cliente_info = next((item for item in facturacion_info if item['ClienteId'] == contrato.ClienteId.ClienteId), None)
             if not cliente_info:
                 cliente_info = {
-                    'Cliente': facturacion.ClienteId.Nombre_Cliente,
-                    'ClienteId': facturacion.ClienteId.ClienteId,
+                    'Cliente': contrato.ClienteId.Nombre_Cliente,
+                    'ClienteId': contrato.ClienteId.ClienteId,
                     'Facturas': []
                 }
                 facturacion_info.append(cliente_info)
 
-            # Obtener la tarifa correspondiente para esta facturación
-            tarifa = Tarifa_Clientes.objects.filter(
-                clienteId=facturacion.ClienteId,
-                lineaId=facturacion.LineaId,
-                anio=anio,
-                mes=mes
-            ).first()
+            # Obtener todas las tarifas para este cliente, año y mes
+            tarifas = Tarifa_Clientes.objects.filter(
+                clienteId=contrato.ClienteId,
+                anio__lte=anio,  # Tarifas con año menor o igual al solicitado
+                mes__lte=mes     # Tarifas con mes menor o igual al solicitado
+            ).order_by('-anio', '-mes')  # Ordenar por año y mes descendente
 
-            # Obtener los valores de horas, días y meses
-            horas = facturacion.HorasFactura or 0
-            dias = facturacion.DiasFactura or 0
-            meses = facturacion.MesFactura or 0  # MesFactura es un campo de texto, asumimos 1 si tiene valor
-            bolsa = facturacion.Bolsa or 0
+            # Si no hay tarifas, continuar con el siguiente contrato
+            if not tarifas.exists():
+                continue
 
-            # Obtener los valores unitarios (Valor_Horas, Valor_Dias, Valor_Meses)
-            valor_horas = facturacion.Valor_Horas or (float(tarifa.valorHora) if tarifa and tarifa.valorHora is not None else 0)
-            valor_dias = facturacion.Valor_Dias or (float(tarifa.valorDia) if tarifa and tarifa.valorDia is not None else 0)
-            valor_meses = facturacion.Valor_Meses or (float(tarifa.valorMes) if tarifa and tarifa.valorMes is not None else 0)
-            valor_bolsa = facturacion.Valor_Bolsa or (float(tarifa.valorBolsa) if tarifa and tarifa.valorBolsa is not None else 0)
+            # Procesar cada tarifa
+            for tarifa in tarifas:
+                # Crear una clave única para la combinación de cliente, línea y módulo
+                clave_combinacion = (tarifa.clienteId.ClienteId, tarifa.lineaId.LineaId, tarifa.moduloId.ModuloId)
 
-            # Calcular el valor total
-            valor = (horas * float(valor_horas)) + (dias * float(valor_dias)) + (meses * float(valor_meses)) + (bolsa * float(valor_bolsa))
+                # Si ya hemos procesado esta combinación, continuar con la siguiente tarifa
+                if clave_combinacion in combinaciones_procesadas:
+                    continue
 
-            cliente_info['Facturas'].append({
-                'ConsecutivoId': facturacion.ConsecutivoId,
-                'LineaId': contrato.LineaId.LineaId,
-                'Linea': contrato.LineaId.Linea,
-                'Horas': facturacion.HorasFactura,
-                'Valor_Horas': facturacion.Valor_Horas or (tarifa.valorHora if tarifa else 0),
-                'Dias': facturacion.DiasFactura,
-                'Valor_Dias': facturacion.Valor_Dias or (tarifa.valorDia if tarifa else 0),
-                'Mes': facturacion.MesFactura,
-                'Valor_Meses': facturacion.Valor_Meses or (tarifa.valorMes if tarifa else 0),
-                'Valor': valor,
-                'Descripcion': facturacion.Descripcion,
-                'NumeroFactura': facturacion.Factura,
-                'Bolsa': facturacion.Bolsa,
-                'Valor_Bolsa': facturacion.Valor_Bolsa or (tarifa.valorBolsa if tarifa else 0),
-                'IVA': facturacion.IVA or (tarifa.iva if tarifa else 0),
-                'Referencia': facturacion.Referencia or (tarifa.referenciaId.codigoReferencia if tarifa and tarifa.referenciaId else ''),
-                'Ceco': facturacion.Ceco or (tarifa.centrocostosId.codigoCeCo if tarifa and tarifa.centrocostosId else ''),
-                'Sitio_Serv': facturacion.Sitio_Serv or (tarifa.sitioTrabajo if tarifa else '')
-            })
+                # Marcar esta combinación como procesada
+                combinaciones_procesadas.add(clave_combinacion)
+
+                # Obtener las facturaciones para esta tarifa (cliente, línea y módulo)
+                facturaciones = facturacion_clientes.filter(
+                    ClienteId=tarifa.clienteId,
+                    LineaId=tarifa.lineaId,
+                    ModuloId=tarifa.moduloId
+                )
+
+                # Si el contrato está vigente, mostrar datos vacíos si no hay facturaciones
+                if contrato.ContratoVigente and not facturaciones.exists():
+                    cliente_info['Facturas'].append({
+                        'ConsecutivoId': '',
+                        'LineaId': tarifa.lineaId.LineaId,
+                        'Linea': tarifa.lineaId.Linea,
+                        'ModuloId': tarifa.moduloId.ModuloId if tarifa.moduloId else None,
+                        'Modulo': tarifa.moduloId.Modulo if tarifa.moduloId else '',
+                        'Horas': '',
+                        'Valor_Horas': tarifa.valorHora if tarifa else 0,
+                        'Dias': '',
+                        'Valor_Dias': tarifa.valorDia if tarifa else 0,
+                        'Mes': '',
+                        'Valor_Meses': tarifa.valorMes if tarifa else 0,
+                        'Valor': 0,
+                        'Descripcion': '',
+                        'NumeroFactura': '',
+                        'Bolsa': '',
+                        'Valor_Bolsa': tarifa.valorBolsa if tarifa else 0,
+                        'IVA': tarifa.iva if tarifa else 0,
+                        'Referencia': tarifa.referenciaId.codigoReferencia if tarifa and tarifa.referenciaId else '',
+                        'Ceco': tarifa.centrocostosId.codigoCeCo if tarifa and tarifa.centrocostosId else '',
+                        'Sitio_Serv': tarifa.sitioTrabajo if tarifa else ''
+                    })
+                else:
+                    # Procesar las facturaciones para esta tarifa
+                    for facturacion in facturaciones:
+                        # Obtener los valores de horas, días y meses
+                        horas = facturacion.HorasFactura or 0
+                        dias = facturacion.DiasFactura or 0
+                        meses = facturacion.MesFactura or 0
+                        bolsa = facturacion.Bolsa or 0
+
+                        # Obtener los valores unitarios (Valor_Horas, Valor_Dias, Valor_Meses)
+                        valor_horas = facturacion.Valor_Horas or (float(tarifa.valorHora) if tarifa and tarifa.valorHora is not None else 0)
+                        valor_dias = facturacion.Valor_Dias or (float(tarifa.valorDia) if tarifa and tarifa.valorDia is not None else 0)
+                        valor_meses = facturacion.Valor_Meses or (float(tarifa.valorMes) if tarifa and tarifa.valorMes is not None else 0)
+                        valor_bolsa = facturacion.Valor_Bolsa or (float(tarifa.valorBolsa) if tarifa and tarifa.valorBolsa is not None else 0)
+
+                        # Calcular el valor total
+                        valor = (horas * float(valor_horas)) + (dias * float(valor_dias)) + (meses * float(valor_meses)) + (bolsa * float(valor_bolsa))
+
+                        cliente_info['Facturas'].append({
+                            'ConsecutivoId': facturacion.ConsecutivoId,
+                            'LineaId': tarifa.lineaId.LineaId,
+                            'Linea': tarifa.lineaId.Linea,
+                            'ModuloId': tarifa.moduloId.ModuloId if tarifa.moduloId else None,
+                            'Modulo': tarifa.moduloId.Modulo if tarifa.moduloId else '',
+                            'Horas': horas,
+                            'Valor_Horas': valor_horas,
+                            'Dias': dias,
+                            'Valor_Dias': valor_dias,
+                            'Mes': meses,
+                            'Valor_Meses': valor_meses,
+                            'Valor': valor,
+                            'Descripcion': facturacion.Descripcion,
+                            'NumeroFactura': facturacion.Factura,
+                            'Bolsa': bolsa,
+                            'Valor_Bolsa': valor_bolsa,
+                            'IVA': facturacion.IVA or (tarifa.iva if tarifa else 0),
+                            'Referencia': facturacion.Referencia or (tarifa.referenciaId.codigoReferencia if tarifa and tarifa.referenciaId else ''),
+                            'Ceco': facturacion.Ceco or (tarifa.centrocostosId.codigoCeCo if tarifa and tarifa.centrocostosId else ''),
+                            'Sitio_Serv': facturacion.Sitio_Serv or (tarifa.sitioTrabajo if tarifa else '')
+                        })
 
     return facturacion_info
 
@@ -350,9 +306,6 @@ def clientes_factura_index(request):
     lineas = models.Linea.objects.all()
     clientes_contratos = models.ClientesContratos.objects.all()
     facturacion_clientes = models.FacturacionClientes.objects.all()
-    cliente_id = None
-
-    facturacion_info= []
 
     if request.method == 'GET':
         form = FacturacionFilterForm(request.GET)
@@ -363,21 +316,17 @@ def clientes_factura_index(request):
             
             # Filtrar facturación según los datos del formulario
             clientes_contratos, facturacion_clientes = filtrar_facturacion(form, clientes_contratos, facturacion_clientes)
-            cliente_id = form.cleaned_data.get('ClienteId')
 
             # Obtener la información de facturación
             facturacion_info = obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes)
 
-            # Filtrar las líneas según el cliente seleccionado
-            if cliente_id:
-                lineas = lineas.filter(clientescontratos__ClienteId=cliente_id)
-
+            # Calcular totales
+            totales_facturacion = calcular_totales_facturacion(facturacion_clientes)
 
     else:
         form = FacturacionFilterForm()
-
-    # Calcular totales
-    totales_facturacion = calcular_totales_facturacion(facturacion_clientes)
+        facturacion_info = []
+        totales_facturacion = {}
 
     context = {
         'form': form,
@@ -553,29 +502,31 @@ def generar_plantilla(request):
             return HttpResponse(f'Error: {str(e)}', status=500)
     return HttpResponse('Método no permitido', status=405)
 
-def obtener_tarifa(request):
+def obtener_tarifa(request): 
     try:
         # Obtener los parámetros de la solicitud
         cliente_id = request.GET.get('clienteId')
         linea_id = request.GET.get('lineaId')
+        modulo_id = request.GET.get('moduloId')
         anio = request.GET.get('anio')
         mes = request.GET.get('mes')
 
         # Validar que los parámetros sean números enteros
-        if not cliente_id or not linea_id or not anio or not mes:
-            return JsonResponse({'error': 'Los parámetros clienteId, lineaId, anio y mes son requeridos.'}, status=400)
+        if not cliente_id or not linea_id or not anio or not mes or not modulo_id:
+            return JsonResponse({'error': 'Los parámetros clienteId, lineaId, anio, mes y modulo son requeridos.'}, status=400)
         
         try:
             cliente_id = int(cliente_id)
             linea_id = int(linea_id)
+            modulo_id = int(modulo_id)
             anio = int(anio)
             mes = int(mes)
         except ValueError:
-            return JsonResponse({'error': 'clienteId, lineaId, anio y mes deben ser números enteros.'}, status=400)
+            return JsonResponse({'error': 'clienteId, lineaId, anio, mes y moduloId deben ser números enteros.'}, status=400)
 
        # Buscar la tarifa en la base de datos
         try:
-            tarifa = Tarifa_Clientes.objects.get(clienteId=cliente_id, lineaId=linea_id, anio=anio, mes=mes)
+            tarifa = Tarifa_Clientes.objects.get(clienteId=cliente_id, lineaId=linea_id, moduloId=modulo_id, anio=anio, mes=mes)
             # Construir la respuesta JSON con los datos de la tarifa encontrada
             data = {
                 'valorHora': float(tarifa.valorHora) if tarifa.valorHora else 0.0,

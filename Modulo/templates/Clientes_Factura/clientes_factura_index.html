@@ -109,6 +109,7 @@
                         <tr>
                             <th scope="col">Cliente</th>
                             <th scope="col">Línea</th>
+                            <th scope="col">Módulo</th>
                             <th scope="col">Horas</th>
                             <th scope="col">Valor Horas</th>
                             <th scope="col">Días</th>
@@ -138,6 +139,10 @@
                                         <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
                                             {{ factura.Linea }}
                                             <input type="text" name="LineaId" class="form-control" value="{{ factura.LineaId }}" hidden>
+                                        </td>
+                                        <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                            {{ factura.Modulo }}
+                                            <input type="text" name="ModuloId" class="form-control" value="{{ factura.ModuloId }}" hidden>
                                         </td>
                                         <td>
                                             <input type="text" name="Horas" class="form-control" value="{{ factura.Horas|floatformat:0 }}">
@@ -193,6 +198,10 @@
                                         <td>
                                             {{ factura.Linea }}
                                             <input type="text" name="LineaId" class="form-control" value="{{ factura.LineaId }}" hidden>
+                                        </td>
+                                        <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                            {{ factura.Modulo }}
+                                            <input type="text" name="ModuloId" class="form-control" value="{{ factura.ModuloId }}" hidden>
                                         </td>
                                         <td>
                                             <input type="text" name="Horas" class="form-control" value="{{ factura.Horas|floatformat:0 }}">
@@ -251,7 +260,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="2">Total</th>
+                            <th colspan="3">Total</th>
                             <th data-total-horas>{{ TotalesFacturacion.Total_Horas|floatformat:0 }}</th>
                             <th colspan="1"></th>
                             <th data-total-dias>{{ TotalesFacturacion.Total_Dias|floatformat:0 }}</th>
