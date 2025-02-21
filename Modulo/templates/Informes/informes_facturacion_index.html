@@ -1,53 +1,47 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block titulo %} Informe de estudios {% endblock %}
+{% block titulo %} Informe de Facturación {% endblock %}
 
 {% block contenido %}
 <div class="card">
     <div class="card-header">
-         <!-- Titulo del informe -->
-        <h4 class="card-title">Informe de Facturacion</h4>
+        <h4 class="card-title">Informe de Facturación</h4>
     </div>
     <div class="card-body">
         <div class="container-fluid mb-3">
             <!-- Formulario principal -->
             <form method="GET">
-                <!-- Filtros en la parte superior -->
                 <div class="row mb-3">
-
-                 <!--Filtro Año --> 
+                    <!-- Filtro Año --> 
                     <div class="col-md-3">
                         <label for="Anio">{{ form.Anio.label }}</label>
                         {{ form.Anio }}
                     </div>
 
-                    <!--Filtro Linea -->
+                    <!-- Filtro Línea -->
                     <div class="col-md-3">
-                        <label for="Linea">Linea</label>
+                        <label for="Linea">Línea</label>
                         {{ form.LineaId }}
                     </div>
 
-                    <!--Filtro cargo -->
+                    <!-- Filtro Cliente -->
                     <div class="col-md-3">
                         <label for="Cliente">Cliente</label>
                         {{ form.ClienteId }}
                     </div>
 
-                    <!-- Botones debajo de filtros -->
                     <!-- Botón Buscar -->
-                    <div class = "row">
-                        <div class="col-md-6 text-start">
-                            <button type="submit" name="buscar" class="btn btn-primary mt-3">
-                                <i class="fas fa-glasses"></i>Buscar 
-                            </button>
-                        </div>
+                    <div class="col-md-3 text-start">
+                        <button type="submit" name="buscar" class="btn btn-primary mt-3">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
                     </div>
                 </div>   
             </form>
 
-             <!-- Botón de Descargar Excel -->
-             <div class="row">
+            <!-- Botón de Descargar Excel -->
+            <div class="row">
                 <div class="col-md-6 text-start">
                     <form id="download-form" method="GET" action="{% url 'exportar_estudio_excel' %}">
                         {% csrf_token %}
@@ -62,42 +56,46 @@
             </div>
         </div>
 
-            {% if show_data %}
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover table-primary" id="estudiosTable">
-
-                    <!-- Encabezado de la tabla -->
-                    <thead>
-                        <tr>
-                            <th colspan="10">Total por Linea</th>
-                        </tr>
-                        <tr>
-                            <th>Meses</th>
-                            {% for linea in lineas_info %}
-                                <th>{{ linea }}</th>
-                            {% endfor %}
-                            <th>Total General</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for mes, total(Meses_info, Total_Meses) %}
-                        <tr>
-                            <td>{{ mes }}</td>
-                            {% for linea in lineas_info %}
-                            <td>--</td>
-                            {% endfor %}
-                            <td>{{ total }}</td>
-                        </tr>
+        {% if show_data %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-primary" id="estudiosTable">
+                <!-- Encabezado de la tabla -->
+                <thead>
+                    <tr>
+                        <th colspan="10">Total por Línea</th>
+                    </tr>
+                    <tr>
+                        <th>Meses</th>
+                        {% for linea in lineas_info %}
+                            <th>{{ linea }}</th>
                         {% endfor %}
-                    </tbody>
-                </table>
-             </div>
-             {% elif not factura_info %}
-             <div class="alert alert-warning" role="alert">
-                {{ mensaje }}
-            </div>
-            {% endif %}
+                        <th>Total General</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mes, total in Meses_info %}
+                    <tr>
+                        <td>{{ mes }}</td>
+                        {% for linea in lineas_info %}
+                        <td>--</td>
+                        {% endfor %}
+                        <td>{{ total }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+          
+
+                
+            </table>
+
+        </div>
+        {% elif not factura_info %}
+        <div class="alert alert-warning" role="alert">
+            {{ mensaje }}
+        </div>
+        {% endif %}
     </div>
 </div>
+
 <script src="{% static 'JS/informes_facturacion.js' %}"></script>
 {% endblock %}
