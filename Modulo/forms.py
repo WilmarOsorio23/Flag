@@ -1280,6 +1280,13 @@ class FacturacionFilterForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
+    ModuloId = forms.ModelChoiceField(
+        queryset=Modulo.objects.all(),
+        required=False,
+        label="Modulo",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.populate_anio()
@@ -1288,7 +1295,7 @@ class FacturacionFilterForm(forms.Form):
         self.populate_linea()
 
     def populate_anio(self):
-        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2021, 2026)]
 
     def populate_mes(self):
         meses = [
@@ -1328,7 +1335,7 @@ class ConsultorFilterForm(forms.Form):
     Certificacion = forms.ChoiceField(
         choices=[('', 'Seleccione'), ('1', 'SI'), ('0', 'NO')],
         required=False,
-        label='Certificación',
+        label='Certificación',  
         widget=forms.Select(attrs={'class': 'form-control'})
     )
     PerfilId = forms.ModelChoiceField(
