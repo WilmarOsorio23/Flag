@@ -103,7 +103,7 @@ def clientes_contratos_descargar_excel(request):
             return HttpResponse("No se encontraron registros de tarifas de consultores.", status=404)
 
         # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id', 'Cliente', 'Linea', 'FechaInicio', 'FechaFin', 'Contrato', 'ContratoVigente', 'OC_Facturar', 'Parafiscales', 'HorarioServicio', 'FechaFacturacion', 'TipoFacturacion', 'Observaciones'])
+        df = pd.DataFrame(detalles_data, columns=['Id', 'Cliente', 'FechaInicio', 'FechaFin', 'Contrato', 'ContratoVigente', 'OC_Facturar', 'Parafiscales', 'HorarioServicio', 'FechaFacturacion', 'TipoFacturacion', 'Observaciones'])
         
         # Configurar la respuesta HTTP con el archivo Excel
         response = HttpResponse(
