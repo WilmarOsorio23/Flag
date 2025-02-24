@@ -1116,13 +1116,6 @@ class ClientesContratosForm(forms.ModelForm):
         }),
         label='Cliente'
     )
-    LineaId = forms.ModelChoiceField(
-        queryset=Linea.objects.all(),  # Relación directa con el modelo Consultores
-        widget=forms.Select(attrs={
-            'class': 'form-control'
-        }),
-        label='Línea'
-    )
     class Meta:
         model = ClientesContratos
         fields = '__all__'
@@ -1155,16 +1148,14 @@ class ClientesContratosForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         ClienteId = cleaned_data.get('ClienteId')
-        LineaId = cleaned_data.get('LineaId')
         FechaInicio = cleaned_data.get('FechaInicio')
 
         if ClientesContratos.objects.filter(
             ClienteId=ClienteId,
-            LineaId=LineaId,
             FechaInicio=FechaInicio
         ).exists():
             raise ValidationError(
-                "Ya existe un registro con el mismo Cliente, Línea, Fecha de Inicio."
+                "Ya existe un registro con el mismo Cliente, Fecha de Inicio."
             )  
         return cleaned_data
     

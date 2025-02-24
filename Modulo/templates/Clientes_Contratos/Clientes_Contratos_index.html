@@ -56,7 +56,6 @@
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
                             <th scope="col">Cliente</th>
-                            <th scope="col">Linea</th>
                             <th scope="col">Fecha Inicio</th>
                             <th scope="col">Fecha Fin</th>
                             <th scope="col">Contrato</th>
@@ -72,19 +71,56 @@
                     <tbody>
                         {% for contrato in clientes_contratos_data %}
                         <tr>
-                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ contrato.ClientesContratosId }}"></td>
-                            <td><input type="text" class="form-control-plaintext" name="Nombre_Cliente" value="{{ contrato.ClienteId.Nombre_Cliente }}" readonly></td>
-                            <td><input type="text" class="form-control-plaintext" name="Linea" value="{{ contrato.LineaId.Linea }}" readonly></td>
-                            <td><input type="date" class="form-control-plaintext" name="FechaInicio" value="{{ contrato.FechaInicio|date:'Y-m-d' }}" readonly></td>
-                            <td><input type="date" class="form-control-plaintext" name="FechaFin" value="{{ contrato.FechaFin|date:'Y-m-d' }}" readonly></td>
-                            <td><input type="text" class="form-control-plaintext" name="Contrato" value="{{ contrato.Contrato }}" readonly></td>
-                            <td><input type="text" class="form-control-plaintext" name="ContratoVigente" value="{{ contrato.ContratoVigente }}" readonly></td>
-                            <td><input type="text" class="form-control-plaintext" name="OC_Facturar" value="{{ contrato.OC_Facturar}}" readonly></td>
-                            <td><input type="text" class="form-control-plaintext" name="Parafiscales" value="{{ contrato.Parafiscales }}" readonly></td>
-                            <td><input type="text" class="form-control-plaintext" name="HorarioServicio" value="{{ contrato.HorarioServicio }}" readonly></td>
-                            <td><input type="text" class="form-control-plaintext" name="FechaFacturacion" value="{{ contrato.FechaFacturacion }}" readonly></td>
-                            <td><input type="text" class="form-control-plaintext" name="TipoFacturacion" value="{{ contrato.TipoFacturacion }}" readonly></td>
-                            <td><input type="text" class="form-control-plaintext" name="Observaciones" value="{{ contrato.Observaciones }}" readonly></td>
+                            <td>
+                                <input type="checkbox" class="row-select" name="items_to_delete" value="{{ contrato.ClientesContratosId }}">
+                            </td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
+                                <input type="text" class="form-control-plaintext" name="Nombre_Cliente" value="{{ contrato.ClienteId.Nombre_Cliente }}" readonly>
+                            </td>
+                            <td>
+                                <input type="date" class="form-control-plaintext" name="FechaInicio" value="{{ contrato.FechaInicio|date:'Y-m-d' }}" readonly>
+                            </td>
+                            <td>
+                                <input type="date" class="form-control-plaintext" name="FechaFin" value="{{ contrato.FechaFin|date:'Y-m-d' }}" readonly>
+                            </td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
+                                <input type="text" class="form-control-plaintext" name="Contrato" value="{{ contrato.Contrato }}" readonly>
+                            </td>
+                            <td>
+                                <!-- Modo de solo lectura -->
+                                <span class="form-control-plaintext boolean-display" data-field="ContratoVigente">
+                                    {% if contrato.ContratoVigente %}Sí{% else %}No{% endif %}
+                                </span>
+                                <!-- Modo de edición -->
+                                <input type="checkbox" class="form-check-input boolean-edit d-none" 
+                                       name="ContratoVigente" {% if contrato.ContratoVigente %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <span class="form-control-plaintext boolean-display" data-field="OC_Facturar">
+                                    {% if contrato.OC_Facturar %}Sí{% else %}No{% endif %}
+                                </span>
+                                <input type="checkbox" class="form-check-input boolean-edit d-none" 
+                                       name="OC_Facturar" {% if contrato.OC_Facturar %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <span class="form-control-plaintext boolean-display" data-field="Parafiscales">
+                                    {% if contrato.Parafiscales %}Sí{% else %}No{% endif %}
+                                </span>
+                                <input type="checkbox" class="form-check-input boolean-edit d-none" 
+                                       name="Parafiscales" {% if contrato.Parafiscales %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control-plaintext" name="HorarioServicio" value="{{ contrato.HorarioServicio }}" readonly>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control-plaintext" name="FechaFacturacion" value="{{ contrato.FechaFacturacion }}" readonly>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control-plaintext" name="TipoFacturacion" value="{{ contrato.TipoFacturacion }}" readonly>
+                            </td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
+                                <input type="text" class="form-control-plaintext" name="Observaciones" value="{{ contrato.Observaciones }}" readonly>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
     window.cancelEdit = function() {
-        console.log("esta en cancel")
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 1) {
             let row = selected[0].closest('tr');
@@ -47,23 +46,22 @@ document.addEventListener('DOMContentLoaded', function() {
         let row = selected[0].closest('tr');
        
         let data = {
-            'FechaFin': row.querySelector('input[name="FechaFin"]').value,
+            'FechaFin': row.querySelector('input[name="FechaFin"]').value || null,  // Permitir valor nulo
             'Contrato': row.querySelector('input[name="Contrato"]').value,
-            'ContratoVigente': row.querySelector('input[name="ContratoVigente"]').value,
-            'OC_Facturar': row.querySelector('input[name="OC_Facturar"]').value,
-            'Parafiscales': row.querySelector('input[name="Parafiscales"]').value,
+            'ContratoVigente': row.querySelector('input[name="ContratoVigente"]').checked,
+            'OC_Facturar': row.querySelector('input[name="OC_Facturar"]').checked,
+            'Parafiscales': row.querySelector('input[name="Parafiscales"]').checked,
             'HorarioServicio': row.querySelector('input[name="HorarioServicio"]').value,
             'FechaFacturacion': row.querySelector('input[name="FechaFacturacion"]').value,
             'TipoFacturacion': row.querySelector('input[name="TipoFacturacion"]').value,
             'Observaciones': row.querySelector('input[name="Observaciones"]').value 
         };
+        
         let id = selected[0].value;
         // Deshabilitar los checkboxes y el botón de edición
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
 
-       console.log(id)
-       console.log(data)
        fetch(`/clientes_contratos/editar/${id}/`, {
             method: 'POST',
             headers: {
@@ -81,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => { 
             if (data.status == 'success') {
                 showMessage('Cambios guardados correctamente.', 'success');
-                window.location.reload()
+                    window.location.reload()
 
                 row.querySelectorAll('input.form-control').forEach(input => {
                     input.classList.add('highlighted');
@@ -93,8 +91,6 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 window.location.reload()
                 showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger')
-                
-               
             }
             
         })
@@ -132,15 +128,34 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit-button').disabled = true;
 
         // Convertir inputs en editables
-        let editables = ["FechaFin", "Contrato", "ContratoVigente", "OC_Facturar", "Parafiscales", "HorarioServicio", "FechaFacturacion", "TipoFacturacion", "Observaciones"];
+        let editables = [
+            { name: "FechaFin", type: "date" },
+            { name: "Contrato", type: "text" },
+            { name: "ContratoVigente", type: "checkbox" },
+            { name: "OC_Facturar", type: "checkbox" },
+            { name: "Parafiscales", type: "checkbox" },
+            { name: "HorarioServicio", type: "text" },
+            { name: "FechaFacturacion", type: "text" },
+            { name: "TipoFacturacion", type: "text" },
+            { name: "Observaciones", type: "text" }
+        ];
         
-        for (let i = 0; i < editables.length; i++) {
-            let edit = row.querySelector(`[name="${editables[i]}"]`);
-            edit.classList.remove('form-control-plaintext');
-            edit.classList.add('form-control');
-            edit.readOnly = false; // Corregido aquí
-        }
-      
+        editables.forEach(field => {
+            let element = row.querySelector(`[name="${field.name}"]`);
+            if (field.type === 'checkbox') {
+                let display = row.querySelector(`.boolean-display[data-field="${field.name}"]`);
+                let checkbox = row.querySelector(`.boolean-edit[name="${field.name}"]`);
+                if (display && checkbox) {
+                    display.classList.add('d-none'); // Ocultar texto en modo edición
+                    checkbox.classList.remove('d-none'); // Mostrar checkbox en modo edición
+                }
+            } else {
+                element.classList.remove('form-control-plaintext');
+                element.classList.add('form-control');
+                element.readOnly = false;
+            }
+        });
+
         // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
@@ -201,7 +216,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Manejar la confirmación de eliminación
     async function handleDeleteConfirmation(event, modal, confirmButton, form, csrfToken) {
         event.preventDefault(); // Prevenir la acción predeterminada del evento
-        console.log("si esta entrando en handledelete")
         const selectedIds = getSelectedIds(); // Obtener los IDs de los elementos seleccionados
         if (selectedIds.length == 0) {
             showMessage('No has seleccionado ningún elemento para eliminar.', 'danger'); // Mostrar mensaje si no hay elementos seleccionados

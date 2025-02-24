@@ -67,7 +67,7 @@
                             <th scope="col">Valor Hora</th>
                             <th scope="col">Valor Día</th>
                             <th scope="col">Valor Mes</th>
-                            <th scope="col">Cantidad bolsa mes</th>
+                            <th scope="col">Cantidad Bolsa</th>
                             <th scope="col">Valor bolsa</th>
                             <th scope="col">IVA</th>
                             <th scope="col">Moneda</th>
@@ -78,32 +78,32 @@
                         {% for tarifa in  tarifa_clientes_data %}
                          <tr id="row-{{tarifa.id}}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{tarifa.id}}"></td>
-                            <td><input type="text" name="clienteId" class="form-control-plaintext" value="{{ tarifa.clienteId.Nombre_Cliente}}" readonly></td>
-                            <td><input type="text" name="lineaId" class="form-control-plaintext" value="{{ tarifa.lineaId.Linea}}" readonly></td>
-                            <td><input type="text" name="moduloId" class="form-control-plaintext" value="{{ tarifa.moduloId.Modulo}}" readonly></td>
-                            <td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 180px;"><input type="text" name="clienteId" class="form-control-plaintext" value="{{ tarifa.clienteId.Nombre_Cliente}}" readonly></td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 120px;"><input type="text" name="lineaId" class="form-control-plaintext" value="{{ tarifa.lineaId.Linea}}" readonly></td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;"><input type="text" name="moduloId" class="form-control-plaintext" value="{{ tarifa.moduloId.Modulo}}" readonly></td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
                                 <select name="referencia" class="form-control-plaintext">
                                     {% for ref in form.fields.referenciaId.queryset %}
                                         <option value="{{ref.id}}"{% if tarifa.referenciaId.id == ref.id %}selected{% endif %}>{{ref.descripcionReferencia}}</option>
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
                                 <select name="centroCostos" class="form-control-plaintext">
                                     {% for CeCo in form.fields.centrocostosId.queryset %}
                                         <option value="{{CeCo.id}}"{% if tarifa.centrocostosId.id == CeCo.id %}selected{% endif %}>{{CeCo.descripcionCeCo}}</option>
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td><input type="text" name="anio" class="form-control-plaintext" value="{{ tarifa.anio }}" readonly></td>
-                            <td><input type="text" name="mes" class="form-control-plaintext" value="{{ tarifa.mes }}" readonly></td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 80px;"><input type="text" name="anio" class="form-control-plaintext" value="{{ tarifa.anio }}" readonly></td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 50px;"><input type="text" name="mes" class="form-control-plaintext" value="{{ tarifa.mes }}" readonly></td>
                             <td><input type="text" name="sitioTrabajo" class="form-control-plaintext" value="{{ tarifa.sitioTrabajo }}" readonly></td>
                             <td><input type="text" name="valorHora" class="form-control-plaintext" value="{{ tarifa.valorHora }}" readonly></td>
                             <td><input type="text" name="valorDia" class="form-control-plaintext" value="{{ tarifa.valorDia }}" readonly></td>
                             <td><input type="text" name="valorMes" class="form-control-plaintext" value="{{ tarifa.valorMes }}" readonly></td>
                             <td><input type="text" name="bolsaMes" class="form-control-plaintext" value="{{ tarifa.bolsaMes }}" readonly></td>
                             <td><input type="text" name="valorBolsa" class="form-control-plaintext" value="{{ tarifa.valorBolsa }}" readonly></td>
-                            <td><input type="text" name="iva" class="form-control-plaintext" value="{{ tarifa.iva }}" readonly></td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 80px;"><input type="text" name="iva" class="form-control-plaintext" value="{{ tarifa.iva }}" readonly></td>
                             <td>
                                 <select name="moneda" class="form-control-plaintext">
                                     {% for moneda in form.fields.monedaId.queryset %}

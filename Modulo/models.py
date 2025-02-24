@@ -447,7 +447,7 @@ class TiemposFacturables(models.Model):
 class ClientesContratos(models.Model):
     ClientesContratosId = models.AutoField(primary_key=True)
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
-    FechaInicio = models.DateField(null=True, blank=True)
+    FechaInicio = models.DateField(null=False, blank=False)
     FechaFin = models.DateField(null=True, blank=True)
     Contrato = models.CharField(max_length=50,null=True,blank=True)  # Cambiado a CharField
     ContratoVigente = models.BooleanField(default=True)

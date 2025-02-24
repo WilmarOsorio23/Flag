@@ -29,30 +29,36 @@ def clientes_contratos_editar(request, id):
     logger.info("llego hasta editar")
     if request.method == 'POST':
         try:
+            # Decodificar los datos JSON recibidos
             data = json.loads(request.body)
-            if data.get('FechaFin') is None:
-                return JsonResponse({'error': 'FechaFin es requerido'}, status=400)
-            else:
-             contrato = get_object_or_404( ClientesContratos, pk=id)
-             contrato.FechaFin = data.get('FechaFin', contrato.FechaFin)
-             contrato.Contrato = data.get('Contrato', contrato.Contrato)
-             contrato.ContratoVigente = data.get('ContratoVigente', contrato.ContratoVigente)
-             contrato.OC_Facturar = data.get('OC_Facturar', contrato.OC_Facturar)
-             contrato.Parafiscales = data.get('Parafiscales', contrato.Parafiscales)
-             contrato.HorarioServicio = data.get('HorarioServicio', contrato.HorarioServicio)
-             contrato.FechaFacturacion = data.get('FechaFacturacion', contrato.FechaFacturacion)
-             contrato.TipoFacturacion = data.get('TipoFacturacion', contrato.TipoFacturacion)
-             contrato.Observaciones = data.get('Observaciones', contrato.Observaciones)
-             contrato.save()
-
-            print(JsonResponse({'status': 'success'}))
+            
+            # Obtener el contrato a editar
+            contrato = get_object_or_404(ClientesContratos, pk=id)
+            
+            # Actualizar los campos del contrato
+            contrato.FechaFin = data.get('FechaFin', contrato.FechaFin)
+            contrato.Contrato = data.get('Contrato', contrato.Contrato)
+            contrato.ContratoVigente = data.get('ContratoVigente', contrato.ContratoVigente)
+            contrato.OC_Facturar = data.get('OC_Facturar', contrato.OC_Facturar)
+            contrato.Parafiscales = data.get('Parafiscales', contrato.Parafiscales)
+            contrato.HorarioServicio = data.get('HorarioServicio', contrato.HorarioServicio)
+            contrato.FechaFacturacion = data.get('FechaFacturacion', contrato.FechaFacturacion)
+            contrato.TipoFacturacion = data.get('TipoFacturacion', contrato.TipoFacturacion)
+            contrato.Observaciones = data.get('Observaciones', contrato.Observaciones)
+            
+            # Guardar los cambios en la base de datos
+            contrato.save()
+            
+            # Retornar una respuesta exitosa
             return JsonResponse({'status': 'success'})
-        except ClientesContratos.DoesNotExist:
-            return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
+        
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-    else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
+            return JsonResponse({'error': 'Error en el formato de los datos JSON'}, status=400)
+        except Exception as e:
+            # Capturar cualquier excepción y retornar un mensaje de error
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def clientes_contratos_eliminar(request):
     if request.method == 'POST':
@@ -77,7 +83,6 @@ def clientes_contratos_descargar_excel(request):
                 detalles_data.append([
                     contrato.ClientesContratosId,
                     contrato.ClienteId.Nombre_Cliente,
-                    contrato.LineaId.Linea,
                     contrato.FechaInicio,
                     contrato.FechaFin,
                     contrato.Contrato,
