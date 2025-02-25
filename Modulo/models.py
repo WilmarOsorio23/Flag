@@ -94,12 +94,22 @@ class Clientes(models.Model):
         TipoDocumento, 
         on_delete=models.CASCADE,
         db_column='TipoDocumentoID'
-    )
+    )   
     DocumentoId = models.CharField(max_length=20)
     Nombre_Cliente = models.CharField(max_length=50)
     Activo = models.BooleanField(default=True)
     Fecha_Inicio = models.DateField()
     Fecha_Retiro = models.DateField(null=True, blank=True)
+    Direccion = models.CharField(max_length=100)
+    Telefono = models.CharField(max_length=20)
+    Direccion = models.CharField(max_length=100)
+    CorreoElectronico = models.CharField(max_length=100)
+    ContactoID = models.IntegerField()
+    BuzonFacturacion = models.CharField(max_length=100)
+    TipoCliente = models.CharField(max_length=20)
+    Ciudad = models.CharField(max_length=50)
+    Departamento = models.CharField(max_length=100)
+    Pais = models.CharField(max_length=50)
 
     def __str__(self):
         return f'{self.TipoDocumentoID.Nombre} - {self.TipoDocumentoID.TipoDocumentoID} - {self.DocumentoId} - {self.Nombre_Cliente}'
@@ -303,7 +313,7 @@ class Empleado(models.Model):
     Universidad = models.CharField(max_length=100)
     ProfesionRealizada = models.CharField(max_length=100)
     AcademiaSAP = models.BooleanField(max_length=100)
-    CertificadoSAP = models.BooleanField()  # tinyint(1) => BooleanField
+    CertificadoSAP = models.BooleanField(default=True)  # tinyint(1) => BooleanField
     OtrasCertificaciones = models.BooleanField(max_length=100)  # Cambiado a CharField
     Postgrados = models.BooleanField(max_length=100)  # Cambiado a CharField
     Activo = models.BooleanField(default=True)

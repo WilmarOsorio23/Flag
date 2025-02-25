@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}
+  Informe de Clientes
+{% endblock %}
+
+{% block contenido %}
+  <div class="card">
+    <div class="card-header">
+      <h4 class="card-title">Informe de Clientes</h4>
+    </div>
+    <div class="card-body">
+      <div class="container-fluid mb-3">
+        <!-- Formulario de filtros -->
+        <form method="GET">
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="Cliente">{{ form.Nombre_Cliente.label }}</label>
+              {{ form.Nombre_Cliente }}
+            </div>
+            <div class="col-md-4">
+              <label for="Activo">{{ form.Activo.label }}</label>
+              {{ form.Activo }}
+            </div>
+            <div class="col-md-4">
+              <label for="Pais">{{ form.Pais.label }}</label>
+              {{ form.Pais }}
+            </div>
+          </div>
+          <div class="row mb-3">            
+            <div class="col-md-4">
+              <label for="Ciudad">{{ form.Ciudad.label }}</label>
+              {{ form.Ciudad }}
+            </div>
+            <div class="col-md-4">
+              <label for="TipoCliente">{{ form.TipoCliente.label }}</label>
+              {{ form.TipoCliente }}
+            </div>
+          </div>
+          <!-- Botón de búsqueda -->
+          <div class="row">
+            <div class="col-md-6 text-start">
+              <button type="submit" name="buscar" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+          </div>
+        </form>
+        
+        <!-- Botón para descargar Excel -->
+        <div class="row">
+          <div class="col-md-6 text-end offset-md-6">
+            <form method="GET" action="{% url 'exportar_clientes_excel' %}">
+              {% csrf_token %}
+              <input type="hidden" name="ClienteId" value="{{ form.ClienteId.value }}" />
+              <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}" />
+              <input type="hidden" name="Sector" value="{{ form.Sector.value }}" />
+              <input type="hidden" name="Pais" value="{{ form.Pais.value }}" />
+              <input type="hidden" name="Ciudad" value="{{ form.Ciudad.value }}" />
+              <button type="submit" class="btn btn-success"><i class="fas fa-file-excel"></i> Descargar Excel</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      {% if show_data %}
+        <!-- Tabla de clientes -->
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover table-primary">
+            <thead>
+              <tr>
+                <th data-sort="DocumentoId" class="sortable" data-direction="default">
+                    Documento
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th data-sort="TipoDocumentoID" class="sortable" data-direction="default">
+                    Tipo Documento
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th data-sort="Nombre_Cliente" class="sortable" data-direction="default">
+                    Nombre Cliente
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th>Activo</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Retiro</th>
+                <th data-sort="Direccion" class="sortable" data-direction="default">
+                    Dirección
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th data-sort="Telefono" class="sortable" data-direction="default">
+                    Teléfono
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th>Correo Electrónico</th>
+                <th>Contacto</th>
+                <th>Buzón Facturación</th>
+                <th data-sort="TipoCliente" class="sortable" data-direction="default">
+                    Tipo Cliente
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th data-sort="Ciudad" class="sortable" data-direction="default">
+                    Ciudad
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th data-sort="Departamento" class="sortable" data-direction="default">
+                    Departamento
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th data-sort="Pais" class="sortable" data-direction="default">
+                    País
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cliente in clientes_info %}
+                <tr>
+                    <td>{{ cliente.DocumentoId }}</td>
+                    <td>{{ cliente.TipoDocumentoID }}</td>
+                    <td>{{ cliente.Nombre_Cliente }}</td>
+                    <td>{{ cliente.Activo }}</td>
+                    <td>{{ cliente.Fecha_Inicio }}</td>
+                    <td>{{ cliente.Fecha_Retiro }}</td>
+                    <td>{{ cliente.Direccion }}</td>
+                    <td>{{ cliente.Telefono }}</td>
+                    <td>{{ cliente.CorreoElectronico }}</td>
+                    <td>{{ cliente.ContactoID }}</td>
+                    <td>{{ cliente.BuzonFacturacion }}</td>
+                    <td>{{ cliente.TipoCliente }}</td>
+                    <td>{{ cliente.Ciudad }}</td>
+                    <td>{{ cliente.Departamento }}</td>
+                    <td>{{ cliente.Pais }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="alert alert-warning">{{ mensaje }}</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
