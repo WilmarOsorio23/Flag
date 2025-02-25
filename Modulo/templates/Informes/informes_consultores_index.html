@@ -68,13 +68,13 @@
 
              <!-- Botón de Descargar Excel -->
              <div class="row">
-                <div class="col-md-6 text-start">
+                <div class="col-md-6 text-end offset-md-6">
                     <form id="download-form" method="GET" action="{% url 'exportar_consultores_excel' %}">
                         {% csrf_token %}
-                        <input type="hidden" name="Documento" value="{{ form.Documento.value }}">
+                       <input type="hidden" name="Documento" value="{{ form.Documento.value }}">
                         <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}">
                         <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}">
-                        <input type="hidden" name="Cargo" value="{{ form.Cargo.value }}">
+                        <input type="hidden" name="ModuloId" value="{{ form.ModuloId.value }}">
                         <input type="hidden" name="Certificacion" value="{{ form.Certificacion.value }}">
                         <input type="hidden" name="PerfilId" value="{{ form.PerfilId.value }}">
                         <input type="hidden" name="Estado" value="{{ form.Estado.value }}">
@@ -127,12 +127,6 @@
                             <!-- Fecha Retiro -->
                             <th>Fecha Retiro</th>
 
-                            <!-- Direccion -->
-                            <th>Direccion</th>
-
-                            <!-- Telefono -->
-                            <th>Telefono</th>
-
                             <!-- Fecha Operacion -->
                             <th>Fecha Operacion</th>
 
@@ -141,6 +135,21 @@
 
                             <!-- Certificaciones -->
                             <th>Certificaciones</th>
+
+                            <!-- Fecha Nacimiento -->
+                            <th>Fecha Nacimiento</th>
+
+                            <!-- Año Evaluacion -->
+                            <th>Año Evaluacion</th>
+
+                            <!-- Nota Evaluacion -->
+                            <th>Nota Evaluacion</th>
+
+                            <!-- Direccion -->
+                            <th>Direccion</th>
+
+                            <!-- Telefono -->
+                            <th>Telefono</th>
 
                         </tr>
                     </thead>
@@ -160,11 +169,14 @@
                                 <td>{{ consultor.estado }}</td>
                                 <td>{{ consultor.fecha_ingreso }}</td>
                                 <td>{{ consultor.fecha_retiro }}</td>
-                                <td>{{ consultor.direccion }}</td>
-                                <td>{{ consultor.telefono }}</td>
                                 <td>{{ consultor.fecha_operacion }}</td>
                                 <td>{{ consultor.certificado }}</td>
                                 <td>{{ consultor.certificaciones }}</td>
+                                <td>{{ consultor.fecha_nacimiento }}</td>
+                                <td>{{ consultor.anio_evaluacion }}</td>
+                                <td>{{ consultor.nota_evaluacion }}</td>
+                                <td>{{ consultor.direccion }}</td>
+                                <td>{{ consultor.telefono }}</td>
                             </tr>
                         {% empty %}
                             <tr>
