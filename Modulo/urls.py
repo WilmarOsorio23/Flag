@@ -112,7 +112,9 @@ urlpatterns = [
     path('clientes/crear/', Clientes.clientes_crear, name='clientes_crear'),
     path('clientes/editar/<int:id>/', Clientes.clientes_editar, name='clientes_editar'),
     path('clientes/eliminar/', Clientes.clientes_eliminar, name='clientes_eliminar'),
+    path('clientes/verificar-relaciones/', Clientes.verificar_relaciones, name='clientes_verificar_relaciones'),
     path('clientes/descargar_excel/', Clientes.clientes_descargar_excel, name='clientes_descargar_excel'),
+    path('clientes/contactos/', Clientes.obtener_contactos, name='obtener_contactos'),# Nueva ruta para obtener contactos
 
     # Rutas para la tabla Consultores
     path('consultores/', consultores.consultores_index, name='consultores_index'),

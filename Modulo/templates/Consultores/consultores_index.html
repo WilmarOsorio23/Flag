@@ -53,11 +53,14 @@
                                 <th scope="col">Estado</th>
                                 <th scope="col">Fecha Ingreso</th>
                                 <th scope="col">Fecha Retiro</th>
-                                <th scope="col">Telefono</th>
-                                <th scope="col">Dirección</th>
                                 <th scope="col">Fecha Operación</th>
                                 <th scope="col">Certificado</th>
                                 <th scope="col">Certificaciones</th>
+                                <th scope="col">Fecha Nacimiento</th>
+                                <th scope="col">Año Evaluación</th>
+                                <th scope="col">Nota Evaluación</th>
+                                <th scope="col">Telefono</th>
+                                <th scope="col">Dirección</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -65,10 +68,7 @@
                             <tr id="row-{{ consultor.Documento }}">
                                 <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ consultor.Documento }}"></td>
                                 <td>
-                                    <!-- Modo estático: Mostrar el valor del tipo documento actual -->
                                     {{ consultor.TipoDocumentoID.Nombre }}
-
-                                    <!-- Modo edición: Select de TipoDocumento -->
                                     <select name="TipoDocumentoID" class="form-select d-none">
                                         {% for tipo_doc in form.fields.TipoDocumentoID.queryset %}
                                             <option value="{{ tipo_doc.TipoDocumentoID }}" {% if consultor.TipoDocumentoID.Nombre == tipo_doc.Nombre %}selected{% endif %}>
@@ -77,23 +77,21 @@
                                         {% endfor %}
                                     </select>
                                 </td>
-
                                 <td>
                                     {{ consultor.Documento }}
                                     <input type="text" name="Documento" class="form-control-plaintext d-none" value="{{ consultor.Documento }}" readonly>
                                 </td>
                                 <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <input type="text" name="Nombre" class="form-control-plaintext" value="{{ consultor.Nombre }}" readonly>
+                                    <input type="text" name="Nombre" class="form-control-plaintext" value="{{ consultor.Nombre }}" readonly style="width: 200px;">
                                 </td>
                                 <td>
-                                    <input type="text" name="Empresa" class="form-control-plaintext" value="{{ consultor.Empresa }}" readonly>
+                                    <input type="text" name="Empresa" class="form-control-plaintext" value="{{ consultor.Empresa }}" readonly style="width: 150px;">
                                 </td>
                                 <td>
-                                    <input type="text" name="Profesion" class="form-control-plaintext" value="{{ consultor.Profesion }}" readonly>
+                                    <input type="text" name="Profesion" class="form-control-plaintext" value="{{ consultor.Profesion }}" readonly style="width: 200px;">
                                 </td>
-
                                 <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <select name="LineaId" class="form-control-plaintext" disabled>
+                                    <select name="LineaId" class="form-control-plaintext" disabled style="width: 150px;">
                                         {% for linea in form.fields.LineaId.queryset %}
                                             <option value="{{ linea.LineaId }}" {% if consultor.LineaId.Linea == linea.Linea %}selected{% endif %}>
                                                 {{ linea.Linea }}
@@ -101,9 +99,8 @@
                                         {% endfor %}
                                     </select>
                                 </td>
-                                
                                 <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <select name="ModuloId" class="form-control-plaintext" disabled>
+                                    <select name="ModuloId" class="form-control-plaintext" disabled style="width: 150px;">
                                         {% for modulo in form.fields.ModuloId.queryset %}
                                             <option value="{{ modulo.ModuloId }}" {% if consultor.ModuloId.Modulo == modulo.Modulo %}selected{% endif %}>
                                                 {{ modulo.Modulo }}
@@ -111,41 +108,36 @@
                                         {% endfor %}
                                     </select>
                                 </td>
-
                                 <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <select name="PerfilId" class="form-control-plaintext" disabled>
+                                    <select name="PerfilId" class="form-control-plaintext" disabled style="width: 150px;">
                                         {% for perfil in form.fields.PerfilId.queryset %}
                                             <option value="{{ perfil.PerfilId }}" {% if consultor.PerfilId.Perfil == perfil.Perfil %}selected{% endif %}>
                                                 {{ perfil.Perfil }}
                                             </option>   
                                         {% endfor %}
                                     </select>
-                                </td>          
-
+                                </td>
                                 <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <!-- Estado editable -->
-                                    <select name="Estado" class="form-control-plaintext" disabled>
+                                    <select name="Estado" class="form-control-plaintext" disabled style="width: 150px;">
                                         <option value="True" {% if consultor.Estado %}selected{% endif %}>Activo</option>
                                         <option value="False" {% if not consultor.Estado %}selected{% endif %}>Inactivo</option>
                                     </select>
                                 </td>
-
-                                <td><input type="date" name="Fecha_Ingreso" class="form-control-plaintext" value="{{ consultor.Fecha_Ingreso|date:'Y-m-d' }}" readonly></td>
-                                <td>
-                                    <input type="date" name="Fecha_Retiro" class="form-control-plaintext" 
-                                        value="{{ consultor.Fecha_Retiro|date:'Y-m-d' }}" readonly>
-                                </td>
-                                <td><input type="text" name="Telefono" class="form-control-plaintext" value="{{ consultor.Telefono|default:'-' }}" readonly></td>
-                                <td><input type="text" name="Direccion" class="form-control-plaintext" value="{{ consultor.Direccion|default:'-' }}" readonly></td>
-                                <td><input type="date" name="Fecha_Operacion" class="form-control-plaintext" value="{{ consultor.Fecha_Operacion|date:'Y-m-d' }}" readonly></td>
+                                <td><input type="date" name="Fecha_Ingreso" class="form-control-plaintext" value="{{ consultor.Fecha_Ingreso|date:'Y-m-d' }}" readonly style="width: 150px;"></td>
+                                <td><input type="date" name="Fecha_Retiro" class="form-control-plaintext" value="{{ consultor.Fecha_Retiro|date:'Y-m-d' }}" readonly style="width: 150px;"></td>
+                                <td><input type="date" name="Fecha_Operacion" class="form-control-plaintext" value="{{ consultor.Fecha_Operacion|date:'Y-m-d' }}" readonly style="width: 150px;"></td>
                                 <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <!-- Certificado editable -->
-                                    <select name="Certificado" class="form-control-plaintext" disabled>
+                                    <select name="Certificado" class="form-control-plaintext" disabled style="width: 150px;">
                                         <option value="True" {% if consultor.Certificado %}selected{% endif %}>SI</option>
                                         <option value="False" {% if not consultor.Certificado %}selected{% endif %}>NO</option>
                                     </select>
                                 </td>
-                                <td><input type="text" name="Certificaciones" class="form-control-plaintext" value="{{consultor.Certificaciones}}" readonly></td>
+                                <td><input type="text" name="Certificaciones" class="form-control-plaintext" value="{{ consultor.Certificaciones }}" readonly style="width: 150px;"></td>
+                                <td><input type="date" name="Fecha_Nacimiento" class="form-control-plaintext" value="{{ consultor.Fecha_Nacimiento|date:'Y-m-d' }}" readonly style="width: 150px;"></td>
+                                <td><input type="number" name="Anio_Evaluacion" class="form-control-plaintext" value="{{ consultor.Anio_Evaluacion }}" readonly style="width: 150px;"></td>
+                                <td><input type="text" name="NotaEvaluacion" class="form-control-plaintext" value="{{ consultor.NotaEvaluacion }}" readonly style="width: 150px;"></td>
+                                <td><input type="text" name="Telefono" class="form-control-plaintext" value="{{ consultor.Telefono|default:'-' }}" readonly style="width: 150px;"></td>
+                                <td><input type="text" name="Direccion" class="form-control-plaintext" value="{{ consultor.Direccion|default:'-' }}" readonly style="width: 150px;"></td>
                             </tr>
                             {% empty %}
                             <tr>

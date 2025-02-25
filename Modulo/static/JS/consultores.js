@@ -266,6 +266,9 @@ document.addEventListener('DOMContentLoaded', function() {
             'Fecha_Operacion': row.querySelector('input[name="Fecha_Operacion"]').value,
             'Certificado': row.querySelector('select[name="Certificado"]').value,
             'Certificaciones': row.querySelector('input[name="Certificaciones"]').value,
+            'Fecha_Nacimiento': row.querySelector('input[name="Fecha_Nacimiento"]').value,
+            'Anio_Evaluacion': row.querySelector('input[name="Anio_Evaluacion"]').value,
+            'NotaEvaluacion': row.querySelector('input[name="NotaEvaluacion"]').value
         };
         console.log(data);
 

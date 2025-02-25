@@ -1,6 +1,9 @@
 from django.db import models
 from django.forms import ValidationError
 from django.utils import timezone
+from django.core.validators import EmailValidator
+from django.core.exceptions import ValidationError
+import re
 
 # Modelos base
 class Modulo(models.Model):
@@ -100,14 +103,86 @@ class Clientes(models.Model):
     Activo = models.BooleanField(default=True)
     Fecha_Inicio = models.DateField()
     Fecha_Retiro = models.DateField(null=True, blank=True)
+    Direccion = models.CharField(max_length=100, null=True, blank=True)
+    Telefono = models.CharField(max_length=20, null=True, blank=True)
+    CorreoElectronico = models.CharField(max_length=100, null=True, blank=True)
+    ContactoID = models.ForeignKey(
+        'Contactos', 
+        on_delete=models.CASCADE,
+        db_column='ContactoID',
+        null=True,  # Permitir valores nulos
+        blank=True  # Hacerlo opcional
+    )
+    BuzonFacturacion = models.CharField(max_length=100, null=True, blank=True)
+    TipoCliente = models.CharField(max_length=20, null=True, blank=True)
+    Ciudad = models.CharField(max_length=50, null=True, blank=True)
+    Departamento = models.CharField(max_length=20, null=True, blank=True)
+    Pais = models.CharField(max_length=20, null=True, blank=True)
+
+    def clean(self):
+        """
+        Validación personalizada para el modelo Clientes.
+
+        Reglas de validación:
+        - CorreoElectronico: Validar que sea un correo electrónico válido.
+        - Telefono: Validar que contenga solo números y opcionalmente algunos caracteres especiales como +, -, (), y espacios.
+        - BuzonFacturacion: Validar que sea un correo electrónico válido.
+        - Ciudad, Departamento y Pais: Validar que no contengan caracteres especiales no permitidos.
+
+        Lanza:
+            ValidationError: Si alguna validación falla.
+        """
+        super().clean()
+        #CorreoElectronico: Validar que sea un correo electrónico válido, en formato.
+        if self.CorreoElectronico:
+            email_validator = EmailValidator()
+            try:
+                email_validator(self.CorreoElectronico)
+            except ValidationError:
+                raise ValidationError({'CorreoElectronico': 'El correo electrónico no es válido.'})
+        
+        #Telefono: Validar que contenga solo números y opcionalmente algunos caracteres especiales como +, -, (), y espacios.
+        if self.Telefono:
+            if not re.match(r'^[\d\+\-\(\) ]+$', self.Telefono):
+                raise ValidationError({'Telefono': 'El teléfono contiene caracteres no permitidos.'})
+        
+        # Validar BuzonFacturacion (si se espera que sea un correo electrónico)
+        if self.BuzonFacturacion:
+            email_validator = EmailValidator()
+            try:
+                email_validator(self.BuzonFacturacion)
+            except ValidationError:
+                raise ValidationError({'BuzonFacturacion': 'El buzón de facturación no es válido.'})
+        
+        #Ciudad, Departamento y Pais: Validar que no contengan caracteres especiales no permitidos.
+         # Validar Ciudad, Departamento, Pais
+        if self.Ciudad:
+            if not re.match(r'^[\w\s\-]+$', self.Ciudad):
+                raise ValidationError({'Ciudad': 'La ciudad contiene caracteres no permitidos.'})
+        
+        if self.Departamento:
+            if not re.match(r'^[\w\s\-]+$', self.Departamento):
+                raise ValidationError({'Departamento': 'El departamento contiene caracteres no permitidos.'})
+        
+        if self.Pais:
+            if not re.match(r'^[\w\s\-]+$', self.Pais):
+                raise ValidationError({'Pais': 'El país contiene caracteres no permitidos.'})
+
 
     def __str__(self):
-        return f'{self.TipoDocumentoID.Nombre} - {self.TipoDocumentoID.TipoDocumentoID} - {self.DocumentoId} - {self.Nombre_Cliente}'
+        """
+        Devuelve una representación en cadena del objeto Clientes.
+        """
+        tipo_documento_nombre = self.TipoDocumentoID.Nombre if self.TipoDocumentoID else "Sin TipoDocumento"
+        tipo_documento_id = self.TipoDocumentoID.TipoDocumentoID if self.TipoDocumentoID else "Sin ID"
+        contacto_nombre = self.ContactoID.Nombre if self.ContactoID else "Sin Contacto"
+        contacto_id = self.ContactoID.id if self.ContactoID else "Sin ID"
+        return f'{tipo_documento_nombre} - {tipo_documento_id} - {self.DocumentoId} - {self.Nombre_Cliente} - {contacto_nombre} - {contacto_id}'
 
     class Meta:
         db_table = 'Clientes'
         constraints = [
-            models.UniqueConstraint(fields=['TipoDocumentoID', 'DocumentoId'], name='unique_cliente')
+            models.UniqueConstraint(fields=['TipoDocumentoID', 'DocumentoId'], name='unique_cliente'),
         ]
 
 class Tiempos_Cliente(models.Model):
@@ -143,6 +218,40 @@ class Consultores(models.Model):
     Fecha_Operacion = models.DateTimeField(default=timezone.now)
     Certificado = models.BooleanField(default=True)
     Certificaciones = models.CharField(max_length=255, null=True, blank=True)  # Ensure this field is properly defined
+    Fecha_Nacimiento = models.DateField()
+    Anio_Evaluacion = models.CharField(max_length=4, null=True, blank=True)
+    NotaEvaluacion = models.DecimalField(max_digits=4, decimal_places=2,null=True, blank=True)
+
+    def clean(self):
+        """
+        Validación personalizada para el modelo Consultores.
+
+        Reglas de validación:
+        - Fecha_Nacimiento: No puede ser una fecha futura.
+        - Anio_Evaluacion: Debe estar entre 1900 y el año actual.
+        - NotaEvaluacion: Debe estar entre 0 y 100.
+
+        Lanza:
+            ValidationError: Si alguna validación falla.
+        """
+        super().clean()
+        # Validar Fecha_Nacimiento
+        if self.Fecha_Nacimiento and self.Fecha_Nacimiento > timezone.now().date():
+            raise ValidationError({'Fecha_Nacimiento': 'La fecha de nacimiento no puede ser una fecha futura.'})
+        
+        # Validar Anio_Evaluacion
+        if self.Anio_Evaluacion:
+            current_year = timezone.now().year
+            if not (1900 <= int(self.Anio_Evaluacion) <= current_year):
+                raise ValidationError({'Anio_Evaluacion': f'El año de evaluación debe estar entre 1900 y {current_year}.'})
+        
+         # Validar NotaEvaluacion
+        if self.NotaEvaluacion is not None:
+            if not (0 <= self.NotaEvaluacion <= 100):
+                raise ValidationError({'NotaEvaluacion': 'La nota de evaluación debe estar entre 0 y 100.'})
+            if self.NotaEvaluacion < 0:
+                raise ValidationError({'NotaEvaluacion': 'La nota de evaluación no puede ser negativa.'})
+
 
     def __str__(self):
         return f'{self.TipoDocumentoID} - {self.Documento} - {self.Nombre} - {self.Certificado} - {self.Certificaciones}'
@@ -348,8 +457,8 @@ class Contactos(models.Model):
     activo = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"id: {self.id}, ClienteId: {self.clienteId}, ContactoId: {self.contactoId}, Nombre: {self.Nombre}, Telefono: {self.Telefono}, Direccion: {self.Direccion}, CargoId: {self.Cargo}, Activo: {self.activo}"
-
+        #return f"id: {self.id}, ClienteId: {self.clienteId}, ContactoId: {self.contactoId}, Nombre: {self.Nombre}, Telefono: {self.Telefono}, Direccion: {self.Direccion}, CargoId: {self.Cargo}, Activo: {self.activo}"
+        return f"id: {self.id}, Nombre: {self.Nombre}"
     class Meta:
         db_table = 'Contactos'
 
