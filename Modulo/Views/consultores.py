@@ -42,6 +42,7 @@ def consultores_editar(request, id):
             form = ConsultoresForm(data, instance=consultor)
 
             if form.is_valid():
+                consultor.full_clean()  # Validar los datos
                 form.save()
                 return JsonResponse({'status': 'success','consultor': data})
             else:
@@ -67,22 +68,26 @@ def verificar_relaciones(request):
         import json
         data = json.loads(request.body)
         ids = data.get('ids', [])
+        try:
+                # Verifica si los módulos están relacionados
+                relacionados = []
+                for id in ids:
+                    if (
+                        Empleado.objects.filter(CargoId=id).exists()
+                    ): 
+                        relacionados.append(id)
 
-        # Verifica si los módulos están relacionados
-        relacionados = []
-        for id in ids:
-            if (
-                Empleado.objects.filter(CargoId=id).exists()
-            ): 
-                relacionados.append(id)
-
-        if relacionados:
-            return JsonResponse({
-                'isRelated': True,
-                'ids': relacionados
-            })
-        else:
-            return JsonResponse({'isRelated': False})
+                if relacionados:
+                    return JsonResponse({
+                        'isRelated': True,
+                        'ids': relacionados
+                    })
+                else:
+                    return JsonResponse({'isRelated': False})
+                
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
     return JsonResponse({'error': 'Cargo no permitido'}, status=405)
 
 def make_timezone_unaware(fecha):
@@ -106,6 +111,7 @@ def consultores_descargar_excel(request):
                 fecha_ingreso = make_timezone_unaware(consultor.Fecha_Ingreso)
                 fecha_retiro = make_timezone_unaware(consultor.Fecha_Retiro)
                 fecha_operacion = make_timezone_unaware(consultor.Fecha_Operacion)
+                fecha_nacimiento = make_timezone_unaware(consultor.Fecha_Nacimiento)
 
                 data.append([
                     consultor.TipoDocumentoID or '-',
@@ -124,6 +130,9 @@ def consultores_descargar_excel(request):
                     fecha_operacion if fecha_operacion is not None else '-',
                     consultor.Certificado if consultor.Certificado is not None else '-',
                     consultor.Certificaciones or '-',
+                    fecha_nacimiento if fecha_nacimiento is not None else '-',
+                    consultor.Anio_Evaluacion or '-',
+                    consultor.NotaEvaluacion or '-',
                 ])
 
             df = pd.DataFrame(data, columns=[
@@ -140,9 +149,12 @@ def consultores_descargar_excel(request):
                 'Fecha Retiro',
                 'Teléfono',
                 'Dirección',
-                'Fecha Operación'
-                'Certificado'
-                'Certificaciones'
+                'Fecha Operación',
+                'Certificado',
+                'Certificaciones',
+                'Fecha_Nacimiento',
+                'Anio_Evaluacion',
+                'NotaEvaluacion'
             ])
 
             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

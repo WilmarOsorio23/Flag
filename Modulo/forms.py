@@ -70,9 +70,33 @@ class CargosForm(forms.ModelForm):
         } 
 
 class ClientesForm(forms.ModelForm):
+    """
+    Formulario para gestionar los datos de los clientes.
+
+    Campos:
+        - TipoDocumentoID: Selección del tipo de documento.
+        - DocumentoId: Identificación del documento.
+        - Nombre_Cliente: Nombre del cliente.
+        - Activo: Estado activo del cliente.
+        - Fecha_Inicio: Fecha de inicio del cliente.
+        - Fecha_Retiro: Fecha de retiro del cliente.
+        - Direccion: Dirección del cliente.
+        - Telefono: Teléfono del cliente.
+        - CorreoElectronico: Correo electrónico del cliente.
+        - BuzonFacturacion: Buzón de facturación del cliente.
+        - TipoCliente: Tipo de cliente.
+        - Ciudad: Ciudad del cliente.
+        - Departamento: Departamento del cliente.
+        - Pais: País del cliente.
+    """
     class Meta:
         model = Clientes
-        fields = '__all__'
+        fields = [
+            'TipoDocumentoID', 'DocumentoId', 'Nombre_Cliente', 'Activo', 
+            'Fecha_Inicio', 'Fecha_Retiro', 'Direccion', 'Telefono', 
+            'CorreoElectronico', 'BuzonFacturacion', 'TipoCliente', 
+            'Ciudad', 'Departamento', 'Pais', 'ContactoID'
+        ]
         widgets = {
             'TipoDocumentoID': forms.Select(attrs={
                 'class': 'form-control',
@@ -86,8 +110,11 @@ class ClientesForm(forms.ModelForm):
                 'class': 'form-control', 
                 'placeholder': 'Nombre del Cliente'
                 }),
-            'Activo': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
+            'Activo': forms.Select(choices=[
+                (True, 'SI'),
+                (False, 'NO')
+            ], attrs={
+                'class': 'form-control'
                 }),
             'Fecha_Inicio': forms.DateInput(attrs={
                 'class': 'form-control', 
@@ -97,7 +124,64 @@ class ClientesForm(forms.ModelForm):
                 'class': 'form-control', 
                 'type': 'date'
                 }),
-        }  
+            'Direccion' : forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Direccion',
+                
+                }),
+            'Telefono' : forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Telefono',
+                }),
+            'CorreoElectronico': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Correo Electrónico',
+                }),
+            'ContactoID': forms.Select(attrs={
+                'class': 'form-control',
+                'required': False}),
+            'BuzonFacturacion': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Buzón Facturación',
+                }),
+            'TipoCliente': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Tipo Cliente',
+                }),
+            'Ciudad': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Ciudad',
+                }),
+            'Departamento': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Departamento',
+                }),
+            'Pais': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Pais',
+                })
+        } 
+    def __init__(self, *args, **kwargs):
+        super(ClientesForm, self).__init__(*args, **kwargs)
+        self.fields['Direccion'].required = False
+        self.fields['Telefono'].required = False
+        self.fields['CorreoElectronico'].required = False
+        self.fields['BuzonFacturacion'].required = False
+        self.fields['TipoCliente'].required = False
+        self.fields['Ciudad'].required = False
+        self.fields['Departamento'].required = False
+        self.fields['Pais'].required = False
+        self.fields['ContactoID'].queryset = Contactos.objects.none() 
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        activo = cleaned_data.get('Activo')
+        fecha_retiro = cleaned_data.get('Fecha_Retiro')
+
+        if not activo and not fecha_retiro:
+            raise forms.ValidationError('No se puede desactivar un cliente sin una fecha de retiro.')
+
+        return cleaned_data
         
 class INDForm(forms.ModelForm):
     class Meta:
@@ -169,6 +253,30 @@ class ContactosForm(forms.ModelForm):
         }
 
 class ConsultoresForm(forms.ModelForm):
+    """
+    Formulario para gestionar los datos de los consultores.
+
+    Campos:
+        - TipoDocumentoID: Selección del tipo de documento.
+        - Documento: Identificación del documento.
+        - Nombre: Nombre del consultor.
+        - Empresa: Empresa del consultor.
+        - Profesion: Profesión del consultor.
+        - LineaId: Selección de la línea.
+        - ModuloId: Selección del módulo.
+        - PerfilId: Selección del perfil.
+        - Estado: Estado del consultor (Activo/Inactivo).
+        - Fecha_Ingreso: Fecha de ingreso del consultor.
+        - Fecha_Retiro: Fecha de retiro del consultor (opcional).
+        - Direccion: Dirección del consultor (opcional).
+        - Telefono: Teléfono del consultor (opcional).
+        - Fecha_Operacion: Fecha de operación.
+        - Certificado: Certificado del consultor (SI/NO).
+        - Certificaciones: Certificaciones del consultor.
+        - Fecha_Nacimiento: Fecha de nacimiento del consultor.
+        - Anio_Evaluacion: Año de evaluación (opcional).
+        - NotaEvaluacion: Nota de evaluación (opcional).
+    """
     class Meta:
         model = Consultores
         fields = '__all__'
@@ -250,10 +358,35 @@ class ConsultoresForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Certificados'
             }),
+            'Fecha_Nacimiento': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+            }),
+            'Anio_Evaluacion': forms.TextInput(attrs={
+                            'type': 'number',
+                            'class': 'form-control',
+                            'placeholder': 'Ingrese el año'
+            }),
+            'NotaEvaluacion': forms.NumberInput(attrs={
+                'type': 'number',
+                'class': 'form-control',
+                'placeholder': 'Ingrese la Nota'
+            })
             
-
         }
     def __init__(self, *args, **kwargs):
+            """
+            Validación personalizada para el modelo Clientes.
+
+            Reglas de validación:
+            - CorreoElectronico: Validar que sea un correo electrónico válido.
+            - Telefono: Validar que contenga solo números y opcionalmente algunos caracteres especiales como +, -, (), y espacios.
+            - BuzonFacturacion: Validar que sea un correo electrónico válido.
+            - Ciudad, Departamento y Pais: Validar que no contengan caracteres especiales no permitidos.
+
+            Lanza:
+                ValidationError: Si alguna validación falla.
+            """
             super().__init__(*args, **kwargs)
             self.fields['Fecha_Retiro'].required = False  # Campo no obligatorio
             self.fields['Fecha_Retiro'].label = "Fecha de Retiro (opcional)"    
@@ -265,8 +398,19 @@ class ConsultoresForm(forms.ModelForm):
             self.fields['Fecha_Retiro'].required = False  # Permitir campo vacío
             self.fields['Certificado'].required = False  # Permitir campo vacío
             self.fields['Certificaciones'].required = False  # Permitir campo vacío
-
+            self.fields['Anio_Evaluacion'].required = False # Permitir campo vacío
+            self.fields['NotaEvaluacion'].required = False # Permitir campo vacío
+            
     def clean(self):
+        """
+        Validación personalizada para el formulario ConsultoresForm.
+
+        Reglas de validación:
+        - Si la Fecha de Retiro está presente, el Estado debe ser Inactivo.
+
+        Lanza:
+            ValidationError: Si alguna validación falla.
+        """
         cleaned_data = super().clean()
         fecha_retiro = cleaned_data.get('Fecha_Retiro')
         estado = cleaned_data.get('Estado')
