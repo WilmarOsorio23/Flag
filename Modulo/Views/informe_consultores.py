@@ -37,6 +37,14 @@ def obtener_consultores(consultores):
     consultor_info = []
 
     for consultor in consultores:
+         # Convertir Fecha_Nacimiento a objeto datetime.date si es una cadena
+        fecha_nacimiento = consultor.Fecha_Nacimiento
+        if isinstance(fecha_nacimiento, str):
+            try:
+                fecha_nacimiento = datetime.strptime(fecha_nacimiento, '%Y-%m-%d').date()
+            except ValueError:
+                fecha_nacimiento = None
+
         datos_consultor = {
             'documento': consultor.Documento,
             'tipo_documento': consultor.TipoDocumentoID.Nombre,
@@ -49,11 +57,14 @@ def obtener_consultores(consultores):
             'estado': 'Activo' if consultor.Estado else 'Inactivo',
             'fecha_ingreso': consultor.Fecha_Ingreso.strftime('%Y-%m-%d') if consultor.Fecha_Ingreso else '',
             'fecha_retiro': consultor.Fecha_Retiro.strftime('%Y-%m-%d') if consultor.Fecha_Retiro else '',
-            'direccion': consultor.Direccion,
-            'telefono': consultor.Telefono,
             'fecha_operacion': consultor.Fecha_Operacion.strftime('%Y-%m-%d %H:%M:%S') if consultor.Fecha_Operacion else '',
             'certificado':  'SI' if consultor.Certificado else 'NO',
             'certificaciones': consultor.Certificaciones,
+            'fecha_nacimiento': fecha_nacimiento.strftime('%Y-%m-%d') if fecha_nacimiento else '',
+            'anio_evaluacion': consultor.Anio_Evaluacion if consultor.Anio_Evaluacion else '',
+            'nota_evaluacion': consultor.NotaEvaluacion if consultor.NotaEvaluacion else '',
+            'direccion': consultor.Direccion if consultor.Direccion else '',
+            'telefono': consultor.Telefono if consultor.Telefono else '',
         }
 
         consultor_info.append(datos_consultor)
@@ -128,11 +139,14 @@ def exportar_consultores_excel(request):
                 'Estado': consultor['estado'],
                 'Fecha Ingreso': consultor['fecha_ingreso'],
                 'Fecha Retiro': consultor['fecha_retiro'],
-                'Dirección': consultor['direccion'],
-                'Teléfono': consultor['telefono'],
                 'Fecha Operación': consultor['fecha_operacion'],
                 'Certificado': consultor['certificado'],
                 'Certificaciones': consultor['certificaciones'],
+                'Fecha Nacimiento': consultor['fecha_nacimiento'],
+                'Año Evaluación': consultor['anio_evaluacion'],
+                'Nota Evaluación': consultor['nota_evaluacion'],
+                'Dirección': consultor['direccion'],
+                'Teléfono': consultor['telefono'],
             }
             data.append(fila)
 

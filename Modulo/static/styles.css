@@ -729,4 +729,9 @@ a.fas, .fa {
         font-size: 1.2em; /* Tamaño de iconos más pequeño */
     }
 
+    .contenedor_principal {
+        display: flex;
+        flex-direction: row;
+    }
+
 }

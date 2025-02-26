@@ -85,9 +85,16 @@ def tarifas_clientes_filtrado(request):
         form = TarifaClienteFilterForm(request.GET)
 
         if form.is_valid():
-            clientes = Clientes.objects.all()
-            tarifas = Tarifa_Clientes.objects.all()
+            #clientes = Clientes.objects.all()
+            #tarifas = Tarifa_Clientes.objects.all()
 
+            clientes = Clientes.objects.only('Nombre_Cliente', 'ClienteId').filter(Activo=True)
+            #clientes = Clientes.objects.filter(Activo=True).values('Nombre_Cliente', 'ClienteId')
+
+            anios = form.cleaned_data.get('anio')
+            tarifas = Tarifa_Clientes.objects.only('lineaId', 'moduloId', 'anio').filter(anio__in=anios)
+            #tarifas = Tarifa_Clientes.objects.filter(anio__in=anios_seleccionados).values('lineaId', 'moduloId', 'anio')
+            
             print("CLIENTES", clientes)
             print("TARIFAS", tarifas)
 

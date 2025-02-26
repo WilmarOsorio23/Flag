@@ -6,7 +6,26 @@
     <h2>Crear Nuevo Cliente</h2>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form.non_field_errors }}
+        {{ form.hidden_fields }}
+        {{ form.TipoDocumentoID.as_p }}
+        {{ form.DocumentoId.as_p }}
+        {{ form.Nombre_Cliente.as_p }}
+        {{ form.Activo.as_p }}
+        {{ form.Fecha_Inicio.as_p }}
+        {{ form.Fecha_Retiro.as_p }}
+        {{ form.Direccion.as_p }}
+        {{ form.Telefono.as_p }}
+        {{ form.CorreoElectronico.as_p }}
+        {{ form.BuzonFacturacion.as_p }}
+        {{ form.TipoCliente.as_p }}
+        {{ form.Ciudad.as_p }}
+        {{ form.Departamento.as_p }}
+        {{ form.Pais.as_p }}
+        <div class="form-group">
+            <label for="id_ContactoID">Contacto Principal</label>
+            {{ form.ContactoID }}
+        </div>
         <button type="submit" class="btn btn-primary">Guardar</button>
         <a href="{% url 'clientes_index' %}" class="btn btn-danger">Cancelar</a>
     </form>

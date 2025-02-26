@@ -24,7 +24,7 @@ def contactos_crear(request):
         return redirect('contactos_index')
     else:
      form = ContactosForm()
-     return render(request, 'Moneda/Moneda_form.html', {'form': form})  
+     return render(request, 'Contactos/contactos_form.html', {'form': form})  # Se ajusta el redireccionamiento 
 
 def contactos_editar(request, id):
      print("llego hasta editar")

@@ -39,11 +39,21 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // Captura los valores de los checkboxes seleccionados
+        let selectedValues = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+    
+        // Asigna los valores seleccionados al campo oculto
+        document.getElementById('items_to_delete').value = selectedValues.join(',');
+
+        /*Limpiar cualquier checkbox previamente clonado
+        document.querySelectorAll('#download-form input[type="checkbox"]').forEach(checkbox => checkbox.remove());
+
+
         selectedCheckboxes.forEach(function (checkbox) {
             let clonedCheckbox = checkbox.cloneNode();
             clonedCheckbox.setAttribute('type', 'hidden'); // Ocultarlo en el formulario
             document.getElementById('download-form').appendChild(clonedCheckbox);
-        });
+        });*/
     });
 
     // Seleccionar todos los checkboxes
@@ -53,6 +63,23 @@ document.addEventListener('DOMContentLoaded', function () {
             checkbox.checked = event.target.checked;
         }
     });
+
+
+
+    document.querySelectorAll('select[name="ContactoID"]').forEach(select => {
+        select.addEventListener('focus', function () {
+            const clienteId = this.closest('tr').querySelector('input[name="items_to_delete"]').value;
+            const contactos = contactosPorCliente[clienteId] || [];
+            this.innerHTML = ''; // Limpiar opciones anteriores
+            contactos.forEach(contacto => {
+                const option = document.createElement('option');
+                option.value = contacto.id;
+                option.textContent = contacto.Nombre;
+                this.appendChild(option);
+            });
+        });
+    });
+
 
     // Confirmación antes de eliminar
     window.confirmDelete = function () {
@@ -81,29 +108,53 @@ document.addEventListener('DOMContentLoaded', function () {
         return true; // Permitir la descarga si hay elementos seleccionados
     };
 
+    // Habilitar edición en la fila seleccionada
     window.enableEdit = function() {
         let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length === 0) {
-            alert('No has seleccionado ningún Cliente para editar.');
+        if (selected.length == 0) {
+            showMessage('Por favor, selecciona al menos un Cliente.', 'danger');
             return false;
         }
         if (selected.length > 1) {
-            alert('Solo puedes editar un Cliente a la vez.');
+            showMessage('Por favor, Selecciona un solo cliente para editar.', 'danger');
             return false;
         }
-    
-        let row = selected[0].closest('tr'); // Asegura que se obtiene la fila correcta
-        let inputs = row.querySelectorAll('input.form-control-plaintext'); // Asegura que el selector sea correcto
-    
-        inputs.forEach(input => {
-            input.classList.remove('form-control-plaintext'); // Cambiar la clase
-            input.classList.add('form-control');
-            input.readOnly = false; // Hacerlo editable
+
+        let row = selected[0].closest('tr');
+        let inputs = row.querySelectorAll('input.form-control-plaintext');
+        let selects = row.querySelectorAll('select.form-control-plaintext');
+
+        // Guardar valores originales en un atributo personalizado 
+        inputs.forEach(input => { 
+            input.setAttribute('data-original-value', input.value);
         });
-    
-        // Mostrar botón de guardar
+
+        selects.forEach(select => {
+            select.setAttribute('data-original-value', select.value);
+        });
+
+        // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
+        document.getElementById('select-all').disabled = true;
+        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
+        document.getElementById('edit-button').disabled = true;
+
+        selects.forEach(select => {
+            select.classList.remove("form-control-plaintext");
+            select.classList.add("form-control");
+            select.removeAttribute("disabled");
+        });
+
+        // Convertir inputs en editables
+        inputs.forEach(input => {
+            input.classList.remove('form-control-plaintext');
+            input.classList.add('form-control');
+            input.readOnly = false;
+        });
+
+        // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
+
     };
     
 
@@ -115,10 +166,22 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        let row = selected[0].closest('tr');       
+        
+        let row = selected[0].closest('tbody tr');       
         let data = {
             'Nombre_Cliente': row.querySelector('input[name ="Nombre_Cliente"]').value,
+            'Activo': row.querySelector('select[name="Activo"]').value,
             'Fecha_Inicio': row.querySelector('input[name ="Fecha_Inicio"]').value,
+            'Fecha_Retiro': row.querySelector('input[name="Fecha_Retiro"]').value || null,
+            'Direccion': row.querySelector('input[name ="Direccion"]').value || null,
+            'Telefono': row.querySelector('input[name ="Telefono"]').value || null,
+            'CorreoElectronico': row.querySelector('input[name ="CorreoElectronico"]').value || null,
+            'BuzonFacturacion': row.querySelector('input[name ="BuzonFacturacion"]').value || null,
+            'TipoCliente': row.querySelector('input[name ="TipoCliente"]').value || null,
+            'Ciudad': row.querySelector('input[name ="Ciudad"]').value || null,
+            'Departamento': row.querySelector('input[name ="Departamento"]').value || null,
+            'Pais': row.querySelector('input[name ="Pais"]').value || null,
+            'ContactoID': row.querySelector('select[name="ContactoID"]').value || null
         };
 
         let id = selected[0].value;
@@ -126,9 +189,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
 
-        console.log(id)
-        console.log(data)
-        console.log('URL de la petición:', `/clientes/editar/${id}/`); // Para debugging
         fetch(`/clientes/editar/${id}/`, {
             method: 'POST',
             headers: {
@@ -138,7 +198,6 @@ document.addEventListener('DOMContentLoaded', function () {
             body: JSON.stringify(data)
         })
         .then(response => {
-            console.log(response)
             if (!response.ok) {
                 throw new Error('Error al guardar los cambios');
             }
@@ -181,6 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmButton.onclick = async function () {
             const isRelated = await verifyRelations(selectedIds, csrfToken);
             if (isRelated) {
+                console.log(isRelated)
                 showMessage('Algunos clientes no pueden ser eliminados porque están relacionados con otras tablas.', 'danger');
                 modal.hide();
                 document.getElementById('select-all').checked = false;
@@ -193,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
+
     window.cancelEdit = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 1) {
@@ -204,6 +265,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     input.value = input.getAttribute('data-original-value');
                 }
             });
+
+            // Restaurar los valores originales desde el atributo personalizado
+            row.querySelectorAll('select.form-control').forEach(select => {
+                if (select.hasAttribute('data-original-value')) {
+                    select.value = select.getAttribute('data-original-value');
+                }
+            });
             
             disableEditMode(selected,row);
             showMessage('Cambios cancelados.', 'danger');
@@ -211,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Deshabilitar modo edición
-    function disableEditMode(selected, row) {
+    function disableEditMode(selected,row) {
         // Cambiar inputs a solo lectura
         row.querySelectorAll('input.form-control').forEach(input => {
             input.classList.add('form-control-plaintext');
@@ -219,9 +287,17 @@ document.addEventListener('DOMContentLoaded', function () {
             input.readOnly = true;
         });
 
-        selected.disabled = false;
-        selected.checked = false;
-        
+        // Cambiar inputs a solo lectura
+        row.querySelectorAll('select.form-control').forEach(selects => {
+            selects.classList.add('form-control-plaintext');
+            selects.classList.remove('form-control');
+            selects.disabled = true;
+        });
+
+        // Desmarcar y habilitar el checkbox de la fila
+        selected[0].checked = false;
+        selected[0].disabled = false;
+
         // Habilitar todos los checkboxes y el botón de edición
         document.getElementById('select-all').disabled = false;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
@@ -233,7 +309,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function getSelectedIds() {
-        return Array.from(document.querySelectorAll('.row-select:checked')).map(el => el.value);
+        //return Array.from(document.querySelectorAll('.row-select:checked')).map(el => el.value);
+        const selectedIds = Array.from(document.querySelectorAll('.row-select:checked')).map(el => el.value);
+        console.log(selectedIds); // Asegúrate de que los IDs son los correctos
+        return selectedIds;
     }
 
     async function verifyRelations(ids, csrfToken) {
@@ -246,6 +325,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 body: JSON.stringify({ ids }),
             });
+
+
+            if (!response.ok) {
+                throw new Error('Error al verificar relaciones');
+            }
+
             const data = await response.json();
             return data.isRelated || false;
         } catch (error) {
@@ -253,6 +338,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return true;
         }
     }
+        
 
     function showMessage(message, type) {
         const alertBox = document.getElementById('message-box');

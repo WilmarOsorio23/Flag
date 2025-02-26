@@ -1,5 +1,5 @@
 from django.urls import path
-from Modulo.Views import clientes_factura, indicadores_operatividad, modulo
+from Modulo.Views import Informe_clientes, clientes_factura, indicadores_operatividad, modulo
 from Modulo.Views import ipc
 from Modulo.Views import ind
 from Modulo.Views import TipoDocumento
@@ -40,6 +40,7 @@ from Modulo.Views import clientes_Contratos
 from Modulo.Views import tarifa_Clientes
 from Modulo.Views import referencia
 from Modulo.Views import centrosCostos
+from Modulo.Views import informe_facturacion
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -112,7 +113,9 @@ urlpatterns = [
     path('clientes/crear/', Clientes.clientes_crear, name='clientes_crear'),
     path('clientes/editar/<int:id>/', Clientes.clientes_editar, name='clientes_editar'),
     path('clientes/eliminar/', Clientes.clientes_eliminar, name='clientes_eliminar'),
+    path('clientes/verificar-relaciones/', Clientes.verificar_relaciones, name='clientes_verificar_relaciones'),
     path('clientes/descargar_excel/', Clientes.clientes_descargar_excel, name='clientes_descargar_excel'),
+    path('clientes/contactos/', Clientes.obtener_contactos, name='obtener_contactos'),# Nueva ruta para obtener contactos
 
     # Rutas para la tabla Consultores
     path('consultores/', consultores.consultores_index, name='consultores_index'),
@@ -290,9 +293,16 @@ urlpatterns = [
     path('informes/tarifas_consultores/', informe_tarifas_consultores.tarifas_consultores_filtrado , name='informes_tarifas_consultores_index'),
     path('informes/tarifas_consultores/exportar_tarifas_consultores_excel', informe_tarifas_consultores.exportar_tarifas_consultores_excel , name='exportar_tarifas_consultores_excel'),
 
+    #Ruta para informe de facturación
+    path('informes/facturacion/', informe_facturacion.informes_facturacion_index , name='informes_facturacion_index'),
+    path('informes/facturacion/descargar/', informe_facturacion.descargar_reporte_excel, name='descargar_reporte_excel'),
+
     #Ruta para informe de tarifas de clientes
     path('informes/tarifas_clientes/', informe_tarifas_clientes.tarifas_clientes_filtrado , name='informes_tarifas_clientes_index'),
     path('informes/tarifas_clientes/exportar_tarifas_clientes_excel', informe_tarifas_clientes.exportar_tarifas_clientes_excel , name='exportar_tarifas_clientes_excel'),
+    #Ruta para informe de Clientes
+    path('informes/informes_clientes/', Informe_clientes.clientes_filtrado, name='informes_clientes_index'),
+    path('informes/informes_clientes/exportar_clientes_excel', Informe_clientes.exportar_clientes_excel , name='exportar_clientes_excel'),
 
     # Rutas para tabla Historial Cargos
     path('historial_cargos/', historial_cargos.historial_cargos_index, name='historial_cargos_index'),

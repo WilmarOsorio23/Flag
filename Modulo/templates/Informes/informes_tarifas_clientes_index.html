@@ -114,7 +114,7 @@
 
              <!-- Botón de Descargar Excel-->
              <div class="row">
-                <div class="col-md-6 text-start">
+                <div class="col-md-6 text-end offset-md-6">
                     <form id="download-form" method="GET" action="{% url 'exportar_tarifas_clientes_excel' %}">
                         {% csrf_token %}
                         <input type="hidden" name="Nombre_Cliente" value="{{ form.Nombre_Cliente.value }}">
