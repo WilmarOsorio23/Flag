@@ -97,7 +97,7 @@ class Clientes(models.Model):
         TipoDocumento, 
         on_delete=models.CASCADE,
         db_column='TipoDocumentoID'
-    )
+    )   
     DocumentoId = models.CharField(max_length=20)
     Nombre_Cliente = models.CharField(max_length=50)
     Activo = models.BooleanField(default=True)
@@ -412,7 +412,7 @@ class Empleado(models.Model):
     Universidad = models.CharField(max_length=100)
     ProfesionRealizada = models.CharField(max_length=100)
     AcademiaSAP = models.BooleanField(max_length=100)
-    CertificadoSAP = models.BooleanField()  # tinyint(1) => BooleanField
+    CertificadoSAP = models.BooleanField(default=True)  # tinyint(1) => BooleanField
     OtrasCertificaciones = models.BooleanField(max_length=100)  # Cambiado a CharField
     Postgrados = models.BooleanField(max_length=100)  # Cambiado a CharField
     Activo = models.BooleanField(default=True)

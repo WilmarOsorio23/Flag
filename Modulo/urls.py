@@ -1,5 +1,5 @@
 from django.urls import path
-from Modulo.Views import clientes_factura, indicadores_operatividad, modulo
+from Modulo.Views import Informe_clientes, clientes_factura, indicadores_operatividad, modulo
 from Modulo.Views import ipc
 from Modulo.Views import ind
 from Modulo.Views import TipoDocumento
@@ -300,6 +300,9 @@ urlpatterns = [
     #Ruta para informe de tarifas de clientes
     path('informes/tarifas_clientes/', informe_tarifas_clientes.tarifas_clientes_filtrado , name='informes_tarifas_clientes_index'),
     path('informes/tarifas_clientes/exportar_tarifas_clientes_excel', informe_tarifas_clientes.exportar_tarifas_clientes_excel , name='exportar_tarifas_clientes_excel'),
+    #Ruta para informe de Clientes
+    path('informes/informes_clientes/', Informe_clientes.clientes_filtrado, name='informes_clientes_index'),
+    path('informes/informes_clientes/exportar_clientes_excel', Informe_clientes.exportar_clientes_excel , name='exportar_clientes_excel'),
 
     # Rutas para tabla Historial Cargos
     path('historial_cargos/', historial_cargos.historial_cargos_index, name='historial_cargos_index'),

@@ -101,11 +101,11 @@ class ClientesForm(forms.ModelForm):
             'TipoDocumentoID': forms.Select(attrs={
                 'class': 'form-control',
                 'placeholder': 'Tipo de Documento'
-                }),
+            }),
             'DocumentoId': forms.TextInput(attrs={
                 'class': 'form-control', 
                 'placeholder': 'Documento ID'
-                }),
+            }),
             'Nombre_Cliente': forms.TextInput(attrs={
                 'class': 'form-control', 
                 'placeholder': 'Nombre del Cliente'
@@ -119,7 +119,7 @@ class ClientesForm(forms.ModelForm):
             'Fecha_Inicio': forms.DateInput(attrs={
                 'class': 'form-control', 
                 'type': 'date'
-                }),
+            }),
             'Fecha_Retiro': forms.DateInput(attrs={
                 'class': 'form-control', 
                 'type': 'date'
@@ -1012,13 +1012,13 @@ class EmpleadoFilterForm(forms.Form):
     Nombre = forms.ChoiceField(
         choices=[],  
         required=False, 
-        label='Colaborador',
+        label='Documento',
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-    Certificacion = forms.ChoiceField(
-        choices=[],  
-        required=False, 
-        label='Certificación',        
+    CertificadoSAP = forms.ChoiceField(
+        choices=[('', 'Seleccione'), ('1', 'SI'), ('0', 'NO')],
+        required=False,
+        label='Certificación',
         widget=forms.Select(attrs={'class': 'form-control'})
     )
     LineaId = forms.ModelChoiceField(
@@ -1083,9 +1083,9 @@ class EmpleadoFilterForm(forms.Form):
         certificacion_seleccionada = kwargs.pop('certificacion_seleccionada', None)
         super(EmpleadoFilterForm, self).__init__(*args, **kwargs)
 
-        certificaciones = Certificacion.objects.values_list('CertificacionId', 'Certificacion').distinct()
-        self.fields['Certificacion'].choices = [('', 'Seleccione la certificación')] + [(certificacion[0], certificacion[1]) for certificacion in certificaciones]
-
+        ''' certificaciones = Empleado.objects.values_list('CertificadoSAP', flat=True).distinct()
+        self.fields['CertificadoSAP'].choices = [('', 'Seleccione la certificación')] + [(empleado, empleado) for empleado in certificaciones]
+        '''
         lineas = Linea.objects.values_list('LineaId', 'Linea').distinct()
         self.fields['LineaId'].choices = [('', 'Seleccione la línea')] + [(linea[0], linea[1]) for linea in lineas]
 
@@ -1097,8 +1097,7 @@ class EmpleadoFilterForm(forms.Form):
 
         cargos = Cargos.objects.values_list('CargoId', 'Cargo').distinct()
         self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo[0], cargo[1]) for cargo in cargos]
-
-
+        
         self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]
 
 class HistorialCargosForm(forms.ModelForm):
@@ -1260,7 +1259,7 @@ class MonedaForm(forms.ModelForm):
 
 class ClientesContratosForm(forms.ModelForm):
     ClienteId = forms.ModelChoiceField(
-        queryset=Clientes.objects.all(),  # Relación directa con el modelo Consultores
+        queryset=Clientes.objects.all(),  
         widget=forms.Select(attrs={
             'class': 'form-control'
         }),
@@ -1654,7 +1653,8 @@ class TarifaConsultorFilterForm(forms.Form):
         anios = Tarifa_Consultores.objects.values_list('anio', flat=True).distinct()
         self.fields['anio'].choices = [(anio, anio) for anio in anios]
 
-class TarifaClienteFilterForm(forms.Form):
+
+class ClienteFilterForm(forms.Form):
     Nombre_Cliente = forms.ModelChoiceField(
         queryset=Clientes.objects.values_list('Nombre_Cliente', flat=True).distinct(),
         required=False,
@@ -1742,3 +1742,38 @@ class InformeFacturacionForm(forms.Form):
         
         # Personalizar cómo se muestran los clientes
         self.fields['ClienteId'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente}"
+    Activo = forms.ChoiceField(
+        choices=[
+            ('', 'Seleccione estado'),
+            ('True', 'Sí'),
+            ('False', 'No')
+        ],
+        required=False,
+        label='Activo',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    Pais = forms.ChoiceField(
+        choices=[('', 'Seleccione un país')] + [(p, p) for p in Clientes.objects.values_list('Pais', flat=True).distinct()],
+        required=False,
+        label='Pais',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    Ciudad = forms.ChoiceField(
+        choices=[('', 'Seleccione una ciudad')] + [(c, c) for c in Clientes.objects.values_list('Ciudad', flat=True).distinct()],
+        required=False,
+        label='Ciudad',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    TipoCliente = forms.ChoiceField(
+        choices=[('', 'Seleccione un tipo de cliente')] + [(t, t) for t in Clientes.objects.values_list('TipoCliente', flat=True).distinct()],
+        required=False,
+        label='Tipo Cliente',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_choices()
+
+    def populate_choices(self):
+        self.fields['Nombre_Cliente'].queryset = Clientes.objects.all()
