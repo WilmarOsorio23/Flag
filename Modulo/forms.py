@@ -1,5 +1,5 @@
 from django import forms
-from .models import Horas_Habiles, Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes, Consultores, Certificacion, Costos_Indirectos
+from .models import FacturacionClientes, Horas_Habiles, Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes, Consultores, Certificacion, Costos_Indirectos
 from .models import Concepto, Gastos, Detalle_Gastos, Total_Gastos, Total_Costos_Indirectos
 from .models import Detalle_Costos_Indirectos, TiemposConcepto, Tiempos_Cliente, Nomina, Detalle_Certificacion, Empleado
 from .models import Cargos
@@ -633,7 +633,6 @@ class DetalleCostosIndirectosForm(forms.ModelForm):
                 )  
             return cleaned_data
         
-
 class TiemposConceptoForm(forms.ModelForm):
     class Meta:
         model = TiemposConcepto
@@ -1256,8 +1255,6 @@ class Tarifa_ClientesForm(forms.ModelForm):
             raise ValidationError("Ya existe un registro con el mismo Cliente, Línea, Modulo, Año y Mes.")
         return cleaned_data 
     
-
-
 class FacturacionFilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
@@ -1514,3 +1511,35 @@ class TarifaConsultorFilterForm(forms.Form):
     def populate_anio(self):
         anios = Tarifa_Consultores.objects.values_list('anio', flat=True).distinct()
         self.fields['anio'].choices = [(anio, anio) for anio in anios]
+
+class InformeFacturacionForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=False,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    ClienteId = forms.ModelMultipleChoiceField(
+        queryset=Clientes.objects.only('DocumentoId', 'Nombre_Cliente'),
+        required=False,
+        label="Cliente",
+        widget=forms.CheckboxSelectMultiple() 
+    )   
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Llenar el campo de años dinámicamente
+        years = FacturacionClientes.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in years]
+        
+        # Personalizar cómo se muestran los clientes
+        self.fields['ClienteId'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente}"
