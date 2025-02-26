@@ -1661,6 +1661,82 @@ class ClienteFilterForm(forms.Form):
         label='Cliente',
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+    Activo = forms.ChoiceField(
+        choices=[
+            ('', 'Seleccione estado'),
+            ('True', 'Sí'),
+            ('False', 'No')
+        ],
+        required=False,
+        label='Activo',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    Pais = forms.ChoiceField(
+        choices=[('', 'Seleccione un país')] + [(p, p) for p in Clientes.objects.values_list('Pais', flat=True).distinct()],
+        required=False,
+        label='Pais',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    Ciudad = forms.ChoiceField(
+        choices=[('', 'Seleccione una ciudad')] + [(c, c) for c in Clientes.objects.values_list('Ciudad', flat=True).distinct()],
+        required=False,
+        label='Ciudad',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    TipoCliente = forms.ChoiceField(
+        choices=[('', 'Seleccione un tipo de cliente')] + [(t, t) for t in Clientes.objects.values_list('TipoCliente', flat=True).distinct()],
+        required=False,
+        label='Tipo Cliente',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_choices()
+
+    def populate_choices(self):
+        self.fields['Nombre_Cliente'].queryset = Clientes.objects.all()
+
+class InformeFacturacionForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=False,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    ClienteId = forms.ModelMultipleChoiceField(
+        queryset=Clientes.objects.only('DocumentoId', 'Nombre_Cliente'),
+        required=False,
+        label="Cliente",
+        widget=forms.CheckboxSelectMultiple() 
+    )   
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Llenar el campo de años dinámicamente
+        years = FacturacionClientes.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in years]
+        
+        # Personalizar cómo se muestran los clientes
+        self.fields['ClienteId'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente}"
+
+
+class TarifaClienteFilterForm(forms.Form):
+    Nombre_Cliente = forms.ModelChoiceField(
+        queryset=Clientes.objects.values_list('Nombre_Cliente', flat=True).distinct(),
+        required=False,
+        label='Cliente',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
     LineaId = forms.ModelChoiceField(
         queryset=Linea.objects.all(),
         required=False,
@@ -1711,69 +1787,3 @@ class ClienteFilterForm(forms.Form):
     def populate_anio(self):
         anios = Tarifa_Clientes.objects.values_list('anio', flat=True).distinct()
         self.fields['anio'].choices = [(anio, anio) for anio in anios]
-class InformeFacturacionForm(forms.Form):
-    Anio = forms.ChoiceField(
-        choices=[],
-        required=False,
-        label='Año',
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
-
-    LineaId = forms.ModelMultipleChoiceField(
-        queryset=Linea.objects.all(),
-        required=False,
-        label="Línea",
-        widget=forms.CheckboxSelectMultiple()
-    )
-
-    ClienteId = forms.ModelMultipleChoiceField(
-        queryset=Clientes.objects.only('DocumentoId', 'Nombre_Cliente'),
-        required=False,
-        label="Cliente",
-        widget=forms.CheckboxSelectMultiple() 
-    )   
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        # Llenar el campo de años dinámicamente
-        years = FacturacionClientes.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
-        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in years]
-        
-        # Personalizar cómo se muestran los clientes
-        self.fields['ClienteId'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente}"
-    Activo = forms.ChoiceField(
-        choices=[
-            ('', 'Seleccione estado'),
-            ('True', 'Sí'),
-            ('False', 'No')
-        ],
-        required=False,
-        label='Activo',
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    Pais = forms.ChoiceField(
-        choices=[('', 'Seleccione un país')] + [(p, p) for p in Clientes.objects.values_list('Pais', flat=True).distinct()],
-        required=False,
-        label='Pais',
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    Ciudad = forms.ChoiceField(
-        choices=[('', 'Seleccione una ciudad')] + [(c, c) for c in Clientes.objects.values_list('Ciudad', flat=True).distinct()],
-        required=False,
-        label='Ciudad',
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    TipoCliente = forms.ChoiceField(
-        choices=[('', 'Seleccione un tipo de cliente')] + [(t, t) for t in Clientes.objects.values_list('TipoCliente', flat=True).distinct()],
-        required=False,
-        label='Tipo Cliente',
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.populate_choices()
-
-    def populate_choices(self):
-        self.fields['Nombre_Cliente'].queryset = Clientes.objects.all()
