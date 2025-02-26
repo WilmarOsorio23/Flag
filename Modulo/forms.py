@@ -1603,3 +1603,12 @@ class ClienteFilterForm(forms.Form):
 
     def populate_choices(self):
         self.fields['Nombre_Cliente'].queryset = Clientes.objects.all()
+
+    # Personalizar cómo se muestran los clientes
+        self.fields['Nombre_Cliente'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente}"
+
+    # Personalizar cómo se muestran los clientes
+        self.fields['Nombre_Cliente'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente}"
+
+    # Personalizar cómo se muestran los clientes
+        self.fields['Nombre_Cliente'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente}"

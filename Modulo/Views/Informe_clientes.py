@@ -18,7 +18,6 @@ def filtrar_clientes(form, clientes):
     tipo_cliente = form.cleaned_data.get('TipoCliente')
 
     # Filtrar los clientes según los parámetros
-    #clientes = Clientes.objects.all()
     if nombre:
         clientes = clientes.filter(Nombre_Cliente=nombre)
     if activo:
@@ -32,10 +31,6 @@ def filtrar_clientes(form, clientes):
 
     # Pasar los clientes al contexto del template
     return clientes
-    ''' return render(request, 'Informes/informes_clientes_index.html', {
-        'clientes_info': clientes,
-        'show_data': clientes.exists(),
-    })'''
 
 # Función para obtener información de los clientes
 def obtener_info_clientes(clientes):
@@ -113,7 +108,8 @@ def exportar_clientes_excel(request):
         ws.title = "Informe de Clientes"
 
         # Agregar encabezados
-        encabezados = ["Nombre", "Categoría", "Contacto", "Teléfono", "Correo", "Dirección"]
+        encabezados = ["Documento", "Tipo Documento", "Nombre Cliente", "Activo", "Fecha Inicio", "Fecha Retiro", "Dirección",
+                       "Telefono", "Correo", "Contacto", "Buzon Facturación", "Tipo Cliente", "Ciudad", "Departamento", "País"]
         for col_num, header in enumerate(encabezados, 1):
             cell = ws.cell(row=1, column=col_num, value=header)
             cell.font = Font(bold=True)
@@ -121,12 +117,21 @@ def exportar_clientes_excel(request):
 
         # Agregar datos
         for row_num, cliente in enumerate(clientes_info, 2):
-            ws.cell(row=row_num, column=1, value=cliente['nombre'])
-            ws.cell(row=row_num, column=2, value=cliente['categoria'])
-            ws.cell(row=row_num, column=3, value=cliente['contacto'])
-            ws.cell(row=row_num, column=4, value=cliente['telefono'])
-            ws.cell(row=row_num, column=5, value=cliente['correo'])
-            ws.cell(row=row_num, column=6, value=cliente['direccion'])
+            ws.cell(row=row_num, column=1, value=cliente['DocumentoId'])
+            #ws.cell(row=row_num, column=2, value=cliente['TipoDocumentoID'])
+            ws.cell(row=row_num, column=3, value=cliente['Nombre_Cliente'])
+            ws.cell(row=row_num, column=4, value=cliente['Activo'])
+            ws.cell(row=row_num, column=5, value=cliente['Fecha_Inicio'])
+            ws.cell(row=row_num, column=6, value=cliente['Fecha_Retiro'])
+            ws.cell(row=row_num, column=7, value=cliente['Direccion'])
+            ws.cell(row=row_num, column=8, value=cliente['Telefono'])
+            ws.cell(row=row_num, column=9, value=cliente['CorreoElectronico'])
+            ws.cell(row=row_num, column=10, value=cliente['ContactoID'])
+            ws.cell(row=row_num, column=11, value=cliente['BuzonFacturacion'])
+            ws.cell(row=row_num, column=12, value=cliente['TipoCliente'])
+            ws.cell(row=row_num, column=13, value=cliente['Ciudad'])
+            ws.cell(row=row_num, column=14, value=cliente['Departamento'])
+            ws.cell(row=row_num, column=15, value=cliente['Pais'])
 
         # Aplicar estilos a las celdas
         thin_border = Border(left=Side(style='thin'), right=Side(style='thin'),
