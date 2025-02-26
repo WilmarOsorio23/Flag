@@ -602,7 +602,7 @@ class Tarifa_Clientes(models.Model):
 class FacturacionClientes(models.Model):
     ConsecutivoId = models.AutoField(primary_key=True)
     Anio = models.IntegerField()
-    Mes = models.IntegerField()
+    Mes = models.IntegerField(null=True, blank=True)
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
     LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
     ModuloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='ModuloId')
@@ -621,6 +621,8 @@ class FacturacionClientes(models.Model):
     Referencia= models.TextField(null=True, blank=True)
     Ceco = models.TextField(null=True, blank=True)
     Sitio_Serv = models.TextField(null=True, blank=True)
+    ModuloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='ModuloId')
+
 
     class Meta:
         db_table = 'Facturacion_Clientes'
