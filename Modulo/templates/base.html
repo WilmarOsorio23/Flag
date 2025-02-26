@@ -25,23 +25,23 @@
         <div class="d-flex">
             <!-- Menú lateral -->
             <nav id="sidebar">
+                <div class="sidebar-header">
+                    <img src="{% static 'resource/logo.png' %}" alt="Logo" class="img-fluid">
+                </div>
                 <div class="content">
-                    <div class="sidebar-header">
-                        <img src="{% static 'resource/logo.png' %}" alt="Logo" class="img-fluid">
-                    </div>
                     <!-- INICIO-->
                     <ul class="list-unstyled components">
                         <li>
-                            <a class="nav-item nav-link sidebar-item-principal" href="{% url 'inicio' %}">
-                                <i class="fas fa-compass"></i> Inicio
+                            <a class="nav-item nav-link sidebar-item-principal" id="Inicio" href="{% url 'inicio' %}">
+                                <i class="fas fa-compass"></i> <span>Inicio</span>
                             </a>
                         </li>
                     </ul>
                     <!-- DATOS MAESTROS -->
                     <ul class="list-unstyled components">
                         <li>
-                            <a href="#homeSubmenuDatosMaestros" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
-                                <i class="fas fa-home"></i> Datos Maestros
+                            <a href="#homeSubmenuDatosMaestros" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                                <i class="fas fa-home"></i> <span>Datos Maestros</span>
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuDatosMaestros">
                                 <li>
@@ -155,8 +155,8 @@
                     <!-- INFORMES -->
                     <ul class="list-unstyled components">
                         <li>
-                            <a href="#homeSubmenuInformes" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
-                                <i class="fas fa-file-alt"></i> Informes
+                            <a href="#homeSubmenuInformes" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                                <i class="fas fa-file-alt"></i> <span>Informes</span>
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuInformes">
                                 <li>
@@ -200,8 +200,8 @@
                     <!-- MOVIMIENTOS -->
                     <ul class="list-unstyled components">
                         <li>
-                            <a href="#homeSubmenuMovimientos" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
-                                <i class="fa fa-exchange-alt"></i> Movimientos
+                            <a href="#homeSubmenuMovimientos" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                                <i class="fa fa-exchange-alt"></i> <span>Movimientos</span>
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuMovimientos">
                                 <li>
@@ -270,8 +270,8 @@
                     <!-- INDICADORES -->
                     <ul class="list-unstyled components">
                         <li>
-                            <a href="#homeSubmenuIndicadores" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
-                                <i class="fa fa-chart-line"></i> Indicadores
+                            <a href="#homeSubmenuIndicadores" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                                <i class="fa fa-chart-line"></i> <span>Indicadores</span>
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuIndicadores">
                                 <li>
@@ -285,6 +285,9 @@
                 </div>
                 <!-- FOOTER -->     
             </nav>
+            <button class="toggle-btn" onclick="toggleSidebar()">
+                <i class="fas fa-chevron-left fa-sm"></i>
+            </button>
         
             <!-- Contenido de la página -->
             <div class="container" id="content">
@@ -309,6 +312,6 @@
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
         <script src="{% static 'script.js' %}"></script>
-
+        <script src="{% static 'JS/sidebar.js' %}"></script> <!-- Enlace al archivo sidebar.js -->
     </body>
 </html>
