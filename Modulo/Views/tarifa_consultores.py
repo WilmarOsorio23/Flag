@@ -76,6 +76,7 @@ def tarifa_consultores_descargar_excel(request):
                 detalles_data.append([
                     detalle.id,
                     detalle.documentoId.Documento,
+                    detalle.documentoId.Nombre,
                     detalle.anio,
                     detalle.mes,
                     detalle.clienteID.Nombre_Cliente,
@@ -91,7 +92,7 @@ def tarifa_consultores_descargar_excel(request):
             return HttpResponse("No se encontraron registros de tarifas de consultores.", status=404)
 
         # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','Consultor documento','Año','Mes','Cliente','Valor Hora','Valor Dia','Valo Mes'])
+        df = pd.DataFrame(detalles_data, columns=['Id','Consultor documento','Consultor Nombre','Año','Mes','Cliente','Valor Hora','Valor Dia','Valo Mes'])
         
         # Configurar la respuesta HTTP con el archivo Excel
         response = HttpResponse(
