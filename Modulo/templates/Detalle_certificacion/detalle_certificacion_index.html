@@ -59,7 +59,9 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Documento</th>
+                            <!--Columna muestra documento de empleado-->
+                            <!--<th scope="col">Documento</th>-->
+                            <th scope="col">Nombre Empleado</th>
                             <th scope="col">Certificación</th>
                             <th scope="col">Fecha de Certificación</th>
                         </tr>
@@ -68,7 +70,9 @@
                         {% for detalle in detalles_certificacion %}
                         <tr>
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ detalle.Id}}"></td>
-                            <td><input type="text" name="DocumentoId_{{ forloop.counter }}" class="form-control-plaintext" value="{{ detalle.Documento.Documento}}" readonly></td>
+                            <!--Columna muestra documento de empleado-->
+                            <!--<td><input type="text" name="DocumentoId_{{ forloop.counter }}" class="form-control-plaintext" value="{{ detalle.Documento.Documento}}" readonly></td>-->
+                            <td><input type="text" name="EmpleadoNombre" class="form-control-plaintext" value="{{detalle.Documento.Nombre}}" readonly></td>
                             <td><input type="text" name="CertificacionId" class="form-control-plaintext" value="{{detalle.CertificacionId}}" readonly></td>
                             <td><input type="date" name="Fecha_Certificacion" class="form-control-plaintext" value="{{ detalle.Fecha_Certificacion|date:'Y-m-d' }}" readonly></td>
                         </tr>

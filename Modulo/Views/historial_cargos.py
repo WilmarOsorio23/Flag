@@ -66,7 +66,7 @@ def historial_cargos_descargar_excel(request):
                 cargo = Historial_Cargos.objects.get(pk=item_id)
                 detalles_data.append([
                     cargo.id,
-                    cargo.documentoId,
+                    cargo.documentoId.Nombre,
                     cargo.cargoId,
                     cargo.FechaInicio,
                     cargo.FechaFin,
@@ -79,7 +79,7 @@ def historial_cargos_descargar_excel(request):
             return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
 
         # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','documentoId','cargoId','FechaInicio','FechaFin'])
+        df = pd.DataFrame(detalles_data, columns=['Id','Nombre Empleado','cargoId','FechaInicio','FechaFin'])
         
         # Configurar la respuesta HTTP con el archivo Excel
         response = HttpResponse(
