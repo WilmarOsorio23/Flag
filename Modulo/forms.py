@@ -1656,7 +1656,7 @@ class TarifaConsultorFilterForm(forms.Form):
 
 class ClienteFilterForm(forms.Form):
     Nombre_Cliente = forms.ModelChoiceField(
-        queryset=Clientes.objects.values_list('Nombre_Cliente', flat=True).distinct(),
+        queryset=Clientes.objects.all(),
         required=False,
         label='Cliente',
         widget=forms.Select(attrs={'class': 'form-control'})
@@ -1692,98 +1692,5 @@ class ClienteFilterForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.populate_choices()
-
-    def populate_choices(self):
-        self.fields['Nombre_Cliente'].queryset = Clientes.objects.all()
-
-class InformeFacturacionForm(forms.Form):
-    Anio = forms.ChoiceField(
-        choices=[],
-        required=False,
-        label='Año',
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
-
-    LineaId = forms.ModelMultipleChoiceField(
-        queryset=Linea.objects.all(),
-        required=False,
-        label="Línea",
-        widget=forms.CheckboxSelectMultiple()
-    )
-
-    ClienteId = forms.ModelMultipleChoiceField(
-        queryset=Clientes.objects.only('DocumentoId', 'Nombre_Cliente'),
-        required=False,
-        label="Cliente",
-        widget=forms.CheckboxSelectMultiple() 
-    )   
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        # Llenar el campo de años dinámicamente
-        years = FacturacionClientes.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
-        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in years]
-        
-        # Personalizar cómo se muestran los clientes
-        self.fields['ClienteId'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente}"
-
-
-class TarifaClienteFilterForm(forms.Form):
-    Nombre_Cliente = forms.ModelChoiceField(
-        queryset=Clientes.objects.values_list('Nombre_Cliente', flat=True).distinct(),
-        required=False,
-        label='Cliente',
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    LineaId = forms.ModelChoiceField(
-        queryset=Linea.objects.all(),
-        required=False,
-        label="Línea",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    ModuloId = forms.ChoiceField(
-        choices=[],  
-        required=False, 
-        label='Módulo',
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    Activo = forms.ChoiceField(
-        choices=[('', 'Seleccione'), ('1', 'Activo'), ('0', 'Inactivo')],
-        required=False,
-        label='Estado',
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    anio = forms.MultipleChoiceField(
-        choices=[],  
-        required=False, 
-        label='Año',
-        widget=forms.CheckboxSelectMultiple()
-    )
-   
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.populate_nombre()
-        self.populate_linea()
-        self.populate_modulo()
-        self.populate_anio()
-
-    def populate_nombre(self):
-        clientes = Clientes.objects.values_list('ClienteId', 'Nombre_Cliente').distinct()
-        self.fields['Nombre_Cliente'].choices = [('', 'Seleccione el Cliente')] + list(clientes)
-        
-    def populate_linea(self):
-        # Si ModuloId necesita opciones dinámicas, añade lógica aquí.
-        linea = Linea.objects.values_list('LineaId', 'Linea').distinct()  # Ajusta según tus modelos
-        self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)
-
-    def populate_modulo(self):
-        modulos = Modulo.objects.values_list('ModuloId', 'Modulo').distinct()
-        self.fields['ModuloId'].choices = [('', 'Seleccione el Módulo')] + list(modulos)
-
-
-    def populate_anio(self):
-        anios = Tarifa_Clientes.objects.values_list('anio', flat=True).distinct()
-        self.fields['anio'].choices = [(anio, anio) for anio in anios]
+        self.fields['Nombre_Cliente'].queryset = Clientes.objects.all().order_by('Nombre_Cliente')
+        self.fields['Nombre_Cliente'].label_from_instance = lambda obj: obj.Nombre_Cliente
