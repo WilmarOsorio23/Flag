@@ -1692,6 +1692,43 @@ class ClienteFilterForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.populate_choices()
+
+    def populate_choices(self):
+        self.fields['Nombre_Cliente'].queryset = Clientes.objects.all()
+
+class InformeFacturacionForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=False,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    ClienteId = forms.ModelMultipleChoiceField(
+        queryset=Clientes.objects.only('DocumentoId', 'Nombre_Cliente'),
+        required=False,
+        label="Cliente",
+        widget=forms.CheckboxSelectMultiple() 
+    )   
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Llenar el campo de años dinámicamente
+        years = FacturacionClientes.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in years]
+        
+        # Personalizar cómo se muestran los clientes
+        self.fields['ClienteId'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente}"
+
         self.fields['Nombre_Cliente'].queryset = Clientes.objects.all().order_by('Nombre_Cliente')
         self.fields['Nombre_Cliente'].label_from_instance = lambda obj: obj.Nombre_Cliente
 
