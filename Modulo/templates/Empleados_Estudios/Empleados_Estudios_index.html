@@ -58,7 +58,7 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Documento</th>
+                            <th scope="col">Nombre Empleado</th>
                             <th scope="col">Título</th>
                             <th scope="col">Institución</th>
                             <th scope="col">Fecha de Inicio</th>
@@ -70,7 +70,8 @@
                         {% for estudio in empleados_estudios%}
                         <tr>
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ estudio.id }}"></td>
-                            <td><input type="text" name="documentoId_{{ forloop.counter }}" class="form-control-plaintext" value="{{ estudio.documentoId.Documento }}" readonly></td>
+                            <!--<td><input type="text" name="documentoId_{{ forloop.counter }}" class="form-control-plaintext" value="{{ estudio.documentoId.Documento }}" readonly></td>-->
+                            <td><input type="text" name="NombreEmpleado" class="form-control-plaintext" value="{{ estudio.documentoId.Nombre }}" readonly></td>
                             <td><input type="text" name="titulo" class="form-control-plaintext" value="{{ estudio.titulo }}" readonly></td>
                             <td><input type="text" name="institucion" class="form-control-plaintext" value="{{ estudio.institucion }}" readonly></td>
                             <td><input type="date" name="fecha_Inicio" class="form-control-plaintext" value="{{estudio.fecha_Inicio|date:'Y-m-d' }}" readonly></td>
