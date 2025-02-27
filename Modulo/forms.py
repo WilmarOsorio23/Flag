@@ -1400,7 +1400,7 @@ class FacturacionFilterForm(forms.Form):
 
     Mes = forms.ChoiceField(
         choices=[],
-        required=False,
+        required=True,
         label='Mes',  
         widget=forms.Select(attrs={'class': 'form-control'})
     )

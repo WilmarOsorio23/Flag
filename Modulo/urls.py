@@ -313,6 +313,7 @@ urlpatterns = [
     path('clientes_factura/guardar/', clientes_factura.clientes_factura_guardar, name='clientes_factura_guardar'),
     path('clientes_factura/generar_plantilla/', clientes_factura.generar_plantilla, name='generar_plantilla'),
     path('clientes_factura/obtener_factura/', clientes_factura.obtener_tarifa, name='obtener_tarifa'),
+    path('clientes_factura/get_lineas_modulos/', clientes_factura.get_lineas_modulos, name='get_lineas_modulos'),
 
     # Rutas para la tabla Indicadores de Operatividad
     path('indicadores_operatividad/', indicadores_operatividad.indicadores_operatividad_index, name='indicadores_operatividad_index'),
