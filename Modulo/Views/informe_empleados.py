@@ -18,21 +18,22 @@ def filtrar_empleados(form, empleados):
     :param empleados: QuerySet de empleados.
     :return: QuerySet filtrado.
     """
-    documento = form.cleaned_data.get('Documento')
+    nombre = form.cleaned_data.get('Nombre')
     linea = form.cleaned_data.get('LineaId')
     cargo = form.cleaned_data.get('Cargo')
-    certificaciones = form.cleaned_data.get('Certificación')
+    certificaciones = form.cleaned_data.get('CertificadoSAP')
     perfil = form.cleaned_data.get('PerfilId')
     activo = form.cleaned_data.get('Activo')
 
-    if documento:
-        empleados = empleados.filter(Documento=documento)
+    if nombre:
+        empleados = empleados.filter(Nombre=nombre)
     if linea:
         empleados = empleados.filter(LineaId=linea)
     if cargo:
         empleados = empleados.filter(CargoId=cargo)
     if certificaciones:
-        empleados = empleados.filter(Certificacion=certificaciones)
+        empleados = empleados.filter(CertificadoSAP=bool(int(certificaciones)))
+        print('Aqui', certificaciones)
     if perfil:
         empleados = empleados.filter(PerfilId=perfil)
     if activo:
@@ -61,16 +62,15 @@ def obtener_informe_empleados(empleados):
             'Modulo': empleado.ModuloId.Modulo, 
             'Perfil': empleado.PerfilId.Perfil, 
             'Linea': empleado.LineaId.Linea, 
+            'CargoId': empleado.CargoId.Cargo, 
             'TituloProfesional': empleado.TituloProfesional, 
             'FechaGrado': empleado.FechaGrado, 
             'Universidad': empleado.Universidad,
             'ProfesionRealizada': empleado.ProfesionRealizada, 
-            'Universidad': empleado.Universidad, 
             'AcademiaSAP':  'SI' if empleado.AcademiaSAP else 'NO', 
             'CertificadoSAP': 'SI' if empleado.CertificadoSAP else 'NO',
             'OtrasCertificaciones': 'SI' if empleado.OtrasCertificaciones else 'NO', 
-            'Postgrados':  'SI' if empleado.Postgrados else 'NO', 
-            'CargoId': empleado.CargoId.Cargo, 
+            'Postgrados':  'SI' if empleado.Postgrados else 'NO',             
             'Activo': 'SI' if empleado.Activo else 'NO' ,
             'FechaRetiro': empleado.FechaRetiro if empleado.FechaRetiro else '-', 
             'Direccion': empleado.Direccion if empleado.Direccion else '-' ,

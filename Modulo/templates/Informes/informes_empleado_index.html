@@ -17,8 +17,8 @@
           <!-- Filtros en la parte superior -->
           <div class="row mb-3">
             <div class="col-md-3">
-              <label for="Documento">{{ form.Documento.label }}</label>
-              {{ form.Documento }}
+              <label for="Documento">{{ form.Nombre.label }}</label>
+              {{ form.Nombre }}
             </div>
             <div class="col-md-3">
               <label for="Linea">{{ form.LineaId.label }}</label>
@@ -29,8 +29,8 @@
               {{ form.Cargo }}
             </div>
             <div class="col-md-3">
-              <label for="Certificaciones">{{ form.Certificacion.label }}</label>
-              {{ form.Certificacion }}
+              <label for="Certificaciones">{{ form.CertificadoSAP.label }}</label>
+              {{ form.CertificadoSAP }}
             </div>
           </div>
           <div class="row mb-3">
@@ -160,6 +160,7 @@
                   <td>{{ empleado.Modulo }}</td>
                   <td>{{ empleado.Perfil }}</td>
                   <td>{{ empleado.Linea }}</td>
+                  <td>{{ empleado.CargoId }}</td>
                   <td>{{ empleado.TituloProfesional }}</td>
                   <td>{{ empleado.FechaGrado }}</td>
                   <td>{{ empleado.Universidad }}</td>
@@ -167,8 +168,7 @@
                   <td>{{ empleado.AcademiaSAP }}</td>
                   <td>{{ empleado.CertificadoSAP }}</td>
                   <td>{{ empleado.OtrasCertificaciones }}</td>
-                  <td>{{ empleado.Postgrados }}</td>
-                  <td>{{ empleado.Cargo }}</td>
+                  <td>{{ empleado.Postgrados }}</td>                  
                   <td>{{ empleado.Activo }}</td>
                   <td>{{ empleado.FechaRetiro }}</td>
                   <td>{{ empleado.Direccion }}</td>
