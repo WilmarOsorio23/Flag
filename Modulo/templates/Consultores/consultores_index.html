@@ -63,7 +63,7 @@
                                 <th scope="col">Dirección</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="tbody">
                             {% for consultor in consultores %}
                             <tr id="row-{{ consultor.Documento }}">
                                 <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ consultor.Documento }}"></td>

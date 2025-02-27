@@ -18,7 +18,7 @@ html, body {
 
 /* Tarjetas */
 .card {
-    min-height: auto; /* Ocupa al menos el 100% de la altura de la ventana */
+    height: 100%;
     display: flex;     /* Flexbox para manejar el contenido */
     flex-direction: column; /* Acomoda el contenido en una columna */
     border: 2px solid #dee2e6;
@@ -28,15 +28,22 @@ html, body {
 
 /* Ajustes para evitar superposición con la navbar y el sidebar */
 #content {
-    min-height: 100vh; /* Ocupa al menos el 100% de la altura de la ventana */
     display: flex;     /* Flexbox para manejar el contenido */
     flex-direction: column; /* Acomoda el contenido en una columna */
-    margin-left: 20.7vw; /* Ajusta para que el contenido no se solape con el sidebar */
     padding: 1em; /* Espacio alrededor del contenido */
     position: relative;
-    max-width: calc(100% - 20.7vw); /* Deja espacio para el sidebar */
+    max-width: 100%; /* Deja espacio para el sidebar */
     height: 100%;
+    overflow:hidden;
+    flex-grow: 1;
+    padding-left: 2.5em;
 }
+.content-principal{
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+}
+
 
 /* ========================== */
 /*          graficos          */
@@ -145,7 +152,6 @@ html, body {
 #sidebar {
     width: 20.5vw;  
     height: 100vh;
-    position: fixed;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0.5em;
@@ -372,19 +378,36 @@ a[aria-expanded="true"] {
 /* ========================== */
 
 .table-responsive {
+    display: flex;
     margin: 1em 0;
-    overflow-x: auto;
-    overflow-y: auto;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     border-radius: 0.5em;
-    
+    height: 400px;
+    width: 100%;
+    overflow-x: auto;
+}
+.table-responsive-informes {
+    display: flex;
+    margin: 1em 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 0.5em;
+    height: 200px;
+}
+.card-footer {
+    height: 72vh; /* Ajusta esta altura según tus necesidades */
+    overflow: auto;
+    width: 100%;
 }
 
 .table {
-    table-layout: auto;     /* Permite que las celdas se ajusten automáticamente */
-    width: 100%;  
+    table-layout: fixed;     /* Permite que las celdas se ajusten automáticamente */
+    width: 100%; 
+    border-collapse: collapse;
 }
-
+.tbody {
+    overflow-y: auto;
+    overflow-x: auto;
+}
 .table-primary {
     background-color: #f8f9fa; /* Cambia esto al color que prefieras */
 }
@@ -403,8 +426,7 @@ a[aria-expanded="true"] {
     transition: background 0.3s; /* Transición suave para el fondo */
 }
 
-.table th, .table td {  
-    max-width: 100em; /* Puedes ajustar el tamaño aquí */
+.table th, .table td { 
     vertical-align: middle; /* Centrar verticalmente el contenido */
     text-align: center;
     white-space: nowrap; /* Evita que el contenido se divida en varias líneas */
