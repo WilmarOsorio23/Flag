@@ -19,15 +19,16 @@ def filtrar_clientes(form, clientes):
 
     # Filtrar los clientes según los parámetros
     if nombre:
+        nombre = nombre.Nombre_Cliente
         # Manejar tanto objetos Cliente como IDs
         if isinstance(nombre, str):
             try:
-                cliente_id = int(nombre)
-                clientes = clientes.filter(ClienteId=cliente_id)
+                clientes = clientes.filter(Nombre_Cliente=nombre)
             except (ValueError, TypeError):
                 pass
         else:
-            clientes = clientes.filter(ClienteId=nombre.ClienteId)
+            clientes = clientes.filter(Nombre_Cliente=nombre)
+            print(nombre)
     if activo:
         clientes = clientes.filter(Activo=activo == 'True')
     if pais:
@@ -58,8 +59,7 @@ def obtener_info_clientes(clientes):
             'TipoCliente': cliente.TipoCliente,
             'Ciudad': cliente.Ciudad,
             'Departamento': cliente.Departamento,
-            'Pais': cliente.Pais,
-            
+            'Pais': cliente.Pais,            
         }
         clientes_info.append(datos_cliente)
     return clientes_info
@@ -75,7 +75,6 @@ def clientes_filtrado(request):
 
         if form.is_valid():
             clientes = filtrar_clientes(form, clientes)
-            print('llego', clientes)
             clientes_info = obtener_info_clientes(clientes)
             show_data = bool(clientes_info)
     else: 
@@ -102,7 +101,6 @@ def exportar_clientes_excel(request):
             clientes = Clientes.objects.all()
             clientes = filtrar_clientes(form, clientes)
             clientes_info = obtener_info_clientes(clientes)
-
             if not clientes_info:
                 return HttpResponse("No se encontraron resultados para los filtros aplicados.")
     

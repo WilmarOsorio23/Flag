@@ -51,9 +51,7 @@
           <div class="col-md-6 text-end offset-md-6">
             <form method="GET" action="{% url 'exportar_clientes_excel' %}">
               <!-- Pasar todos los filtros actuales -->
-              {% if form.Nombre_Cliente.value %}
-                <input type="hidden" name="Nombre_Cliente" value="{{ form.Nombre_Cliente.value.ClienteId }}" />
-              {% endif %}
+              <input type="hidden" name="Nombre_Cliente" value="{{ form.Nombre_Cliente.value|default:'' }}" />
               <input type="hidden" name="Activo" value="{{ form.Activo.value|default:'' }}" />
               <input type="hidden" name="Pais" value="{{ form.Pais.value|default:'' }}" />
               <input type="hidden" name="Ciudad" value="{{ form.Ciudad.value|default:'' }}" />
