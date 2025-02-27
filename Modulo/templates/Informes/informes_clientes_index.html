@@ -50,13 +50,17 @@
         <div class="row">
           <div class="col-md-6 text-end offset-md-6">
             <form method="GET" action="{% url 'exportar_clientes_excel' %}">
-              {% csrf_token %}
-              <input type="hidden" name="ClienteId" value="{{ form.ClienteId.value }}" />
-              <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}" />
-              <input type="hidden" name="Sector" value="{{ form.Sector.value }}" />
-              <input type="hidden" name="Pais" value="{{ form.Pais.value }}" />
-              <input type="hidden" name="Ciudad" value="{{ form.Ciudad.value }}" />
-              <button type="submit" class="btn btn-success"><i class="fas fa-file-excel"></i> Descargar Excel</button>
+              <!-- Pasar todos los filtros actuales -->
+              {% if form.Nombre_Cliente.value %}
+                <input type="hidden" name="Nombre_Cliente" value="{{ form.Nombre_Cliente.value.ClienteId }}" />
+              {% endif %}
+              <input type="hidden" name="Activo" value="{{ form.Activo.value|default:'' }}" />
+              <input type="hidden" name="Pais" value="{{ form.Pais.value|default:'' }}" />
+              <input type="hidden" name="Ciudad" value="{{ form.Ciudad.value|default:'' }}" />
+              <input type="hidden" name="TipoCliente" value="{{ form.TipoCliente.value|default:'' }}" />
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Descargar Excel
+              </button>
             </form>
           </div>
         </div>
