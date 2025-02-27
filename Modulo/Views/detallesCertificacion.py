@@ -74,9 +74,10 @@ def detalle_certificacion_descargar_excel(request):
                 detalle = Detalle_Certificacion.objects.get(pk=item_id)
                 detalles_data.append([
                     detalle.Id,
+                    detalle.Documento.Nombre,
                     detalle.Fecha_Certificacion,
                     detalle.CertificacionId,
-                    detalle.Documento.Documento,
+                    #detalle.Documento.Documento,
                 ])
             except Detalle_Certificacion.DoesNotExist:
                 print(f"detalle con ID {item_id} no encontrada.")
@@ -86,7 +87,7 @@ def detalle_certificacion_descargar_excel(request):
             return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
 
         # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','Fecha','certificacion','documento'])
+        df = pd.DataFrame(detalles_data, columns=['Id','Nombre Empleado','Fecha','certificacion'])
         
         # Configurar la respuesta HTTP con el archivo Excel
         response = HttpResponse(
