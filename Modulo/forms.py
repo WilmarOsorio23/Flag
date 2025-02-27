@@ -1563,7 +1563,7 @@ class TarifaConsultorFilterForm(forms.Form):
 
 class ClienteFilterForm(forms.Form):
     Nombre_Cliente = forms.ModelChoiceField(
-        queryset=Clientes.objects.values_list('Nombre_Cliente', flat=True).distinct(),
+        queryset=Clientes.objects.all(),
         required=False,
         label='Cliente',
         widget=forms.Select(attrs={'class': 'form-control'})
@@ -1599,16 +1599,5 @@ class ClienteFilterForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.populate_choices()
-
-    def populate_choices(self):
-        self.fields['Nombre_Cliente'].queryset = Clientes.objects.all()
-
-    # Personalizar cómo se muestran los clientes
-        self.fields['Nombre_Cliente'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente}"
-
-    # Personalizar cómo se muestran los clientes
-        self.fields['Nombre_Cliente'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente}"
-
-    # Personalizar cómo se muestran los clientes
-        self.fields['Nombre_Cliente'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente}"
+        self.fields['Nombre_Cliente'].queryset = Clientes.objects.all().order_by('Nombre_Cliente')
+        self.fields['Nombre_Cliente'].label_from_instance = lambda obj: obj.Nombre_Cliente

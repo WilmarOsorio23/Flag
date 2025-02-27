@@ -19,7 +19,15 @@ def filtrar_clientes(form, clientes):
 
     # Filtrar los clientes según los parámetros
     if nombre:
-        clientes = clientes.filter(Nombre_Cliente=nombre)
+        # Manejar tanto objetos Cliente como IDs
+        if isinstance(nombre, str):
+            try:
+                cliente_id = int(nombre)
+                clientes = clientes.filter(ClienteId=cliente_id)
+            except (ValueError, TypeError):
+                pass
+        else:
+            clientes = clientes.filter(ClienteId=nombre.ClienteId)
     if activo:
         clientes = clientes.filter(Activo=activo == 'True')
     if pais:
@@ -29,7 +37,6 @@ def filtrar_clientes(form, clientes):
     if tipo_cliente:
         clientes = clientes.filter(TipoCliente=tipo_cliente)
 
-    # Pasar los clientes al contexto del template
     return clientes
 
 # Función para obtener información de los clientes
@@ -117,21 +124,21 @@ def exportar_clientes_excel(request):
 
         # Agregar datos
         for row_num, cliente in enumerate(clientes_info, 2):
-            ws.cell(row=row_num, column=1, value=cliente['DocumentoId'])
-            #ws.cell(row=row_num, column=2, value=cliente['TipoDocumentoID'])
-            ws.cell(row=row_num, column=3, value=cliente['Nombre_Cliente'])
+            ws.cell(row=row_num, column=1, value=str(cliente['DocumentoId']))
+            ws.cell(row=row_num, column=2, value=str(cliente['TipoDocumentoID'].Nombre) if cliente['TipoDocumentoID'] else '')
+            ws.cell(row=row_num, column=3, value=str(cliente['Nombre_Cliente']))
             ws.cell(row=row_num, column=4, value=cliente['Activo'])
-            ws.cell(row=row_num, column=5, value=cliente['Fecha_Inicio'])
-            ws.cell(row=row_num, column=6, value=cliente['Fecha_Retiro'])
-            ws.cell(row=row_num, column=7, value=cliente['Direccion'])
-            ws.cell(row=row_num, column=8, value=cliente['Telefono'])
-            ws.cell(row=row_num, column=9, value=cliente['CorreoElectronico'])
-            ws.cell(row=row_num, column=10, value=cliente['ContactoID'])
-            ws.cell(row=row_num, column=11, value=cliente['BuzonFacturacion'])
-            ws.cell(row=row_num, column=12, value=cliente['TipoCliente'])
-            ws.cell(row=row_num, column=13, value=cliente['Ciudad'])
-            ws.cell(row=row_num, column=14, value=cliente['Departamento'])
-            ws.cell(row=row_num, column=15, value=cliente['Pais'])
+            ws.cell(row=row_num, column=5, value=cliente['Fecha_Inicio'].strftime('%Y-%m-%d') if cliente['Fecha_Inicio'] else '')
+            ws.cell(row=row_num, column=6, value=cliente['Fecha_Retiro'].strftime('%Y-%m-%d') if cliente['Fecha_Retiro'] else '')
+            ws.cell(row=row_num, column=7, value=str(cliente['Direccion']) if cliente['Direccion'] else '')
+            ws.cell(row=row_num, column=8, value=str(cliente['Telefono']) if cliente['Telefono'] else '')
+            ws.cell(row=row_num, column=9, value=str(cliente['CorreoElectronico']) if cliente['CorreoElectronico'] else '')
+            ws.cell(row=row_num, column=10, value=str(cliente['ContactoID']) if cliente['ContactoID'] else '')
+            ws.cell(row=row_num, column=11, value=str(cliente['BuzonFacturacion']) if cliente['BuzonFacturacion'] else '')
+            ws.cell(row=row_num, column=12, value=str(cliente['TipoCliente']) if cliente['TipoCliente'] else '')
+            ws.cell(row=row_num, column=13, value=str(cliente['Ciudad']) if cliente['Ciudad'] else '')
+            ws.cell(row=row_num, column=14, value=str(cliente['Departamento']) if cliente['Departamento'] else '')
+            ws.cell(row=row_num, column=15, value=str(cliente['Pais']) if cliente['Pais'] else '')
 
         # Aplicar estilos a las celdas
         thin_border = Border(left=Side(style='thin'), right=Side(style='thin'),
