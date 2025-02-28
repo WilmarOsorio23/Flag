@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load custom_filters %}
 
 {% block titulo %} Informe de Facturación {% endblock %}
 
@@ -9,74 +8,27 @@
     <div class="card-header">
         <h4 class="card-title">Informe de Facturación</h4>
     </div>
-    <div class="card-body">
+    <div class="card-body informes-table">
         <div class="container-fluid mb-3">
             <!-- Formulario principal -->
             <form method="GET">
                 <div class="row mb-3">
                     <!-- Filtro Año --> 
-                    <!-- Filtro Año --> 
                     <div class="col-md-3">
-                        <label for="{{ form.Anio.id_for_label }}" class="form-label">{{ form.Anio.label }}</label>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="dropdownAnio" data-bs-toggle="dropdown" aria-expanded="false" data-selected-text="Seleccionar Año">
-                                Seleccionar Año
-                            </button>
-                            <ul class="dropdown-menu w-100">
-                                {% for value, label in form.Anio.field.choices %}
-                                    <li><a class="dropdown-item anio-option" data-value="{{ value }}">{{ label }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        <input type="hidden" name="{{ form.Anio.html_name }}" id="selectedAnio">
+                        <label for="Anio">{{ form.Anio.label }}</label>
+                        {{ form.Anio }}
                     </div>
 
                     <!-- Filtro Línea -->
                     <div class="col-md-3">
-                        <label for="linea" class="form-label">{{ form.LineaId.label }}</label>
-                        <div class="dropdown">
-                            <button
-                                class="btn btn-outline-primary dropdown-toggle w-100"
-                                type="button"
-                                id="dropdownLinea"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                                data-selected-text="Seleccione Líneas"
-                            >
-                                Seleccione Líneas
-                            </button>
-                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
-                                {% for checkbox in form.LineaId %}
-                                    <li class="dropdown-item">
-                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
+                        <label for="Linea">Línea</label>
+                        {{ form.LineaId }}
                     </div>
 
-                    <!-- Filtro Línea -->
+                    <!-- Filtro Cliente -->
                     <div class="col-md-3">
-                        <label for="linea" class="form-label">{{ form.ClienteId.label }}</label>
-                        <div class="dropdown">
-                            <button
-                                class="btn btn-outline-primary dropdown-toggle w-100"
-                                type="button"
-                                id="dropdownCliente"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                                data-selected-text="Seleccione Cliente"
-                            >
-                                Seleccione Líneas
-                            </button>
-                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownCliente">
-                                {% for checkbox in form.ClienteId %}
-                                    <li class="dropdown-item">
-                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
+                        <label for="Cliente">Cliente</label>
+                        {{ form.ClienteId }}
                     </div>
 
                     <!-- Botón Buscar -->
@@ -91,10 +43,11 @@
             <!-- Botón de Descargar Excel -->
             <div class="row">
                 <div class="col-md-6 text-start">
-                    <form method="GET" action="{% url 'descargar_reporte_excel' %}">
-                        <input type="hidden" name="Anio" value="{{ form.Anio.value }}">
+                    <form id="download-form" method="GET" action="{% url 'exportar_estudio_excel' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="Nombre" value="{{ form.Año.value }}">
                         <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}">
-                        <input type="hidden" name="ClienteId" value="{{ form.ClienteId.value }}">
+                        <input type="hidden" name="Cargo" value="{{ form.Cargo.value }}">
                         <button type="submit" class="btn btn-success mt-3">
                             <i class="fas fa-file-excel"></i> Descargar Excel
                         </button>
@@ -103,68 +56,43 @@
             </div>
         </div>
 
-        {% if rows %}
-        <div class="table-responsive">
+        {% if show_data %}
+        <div class="table-responsive-informes">
             <table class="table table-bordered table-hover table-primary" id="estudiosTable">
                 <!-- Encabezado de la tabla -->
                 <thead>
                     <tr>
-                        <th colspan="{{ lineas|length|add:2 }}">Totales por Línea</th>
-                        {% for cliente in clientes %}
-                            <th colspan="{{ lineas|length }}">{{ cliente.Nombre_Cliente }}</th>
-                        {% endfor %}
+                        <th colspan="10">Total por Línea</th>
                     </tr>
                     <tr>
-                        <th rowspan="1">Meses</th>
-                        {% for linea in lineas %}
-                            <th>{{ linea.Linea }}</th>
+                        <th>Meses</th>
+                        {% for linea in lineas_info %}
+                            <th>{{ linea }}</th>
                         {% endfor %}
-                        <th rowspan="1">Total General</th>
-                        {% for cliente in clientes %}
-                            {% for linea in lineas %}
-                                <th>{{ linea.Linea }}</th>
-                            {% endfor %}
-                        {% endfor %}
+                        <th>Total General</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for row in rows %}
+                    {% for mes, total in Meses_info %}
                     <tr>
-                        <td>{{ row.mes }}</td>
-                        {% for total in row.totales_linea %}
-                            <td>{{ total|floatformat:2 }}</td>
+                        <td>{{ mes }}</td>
+                        {% for linea in lineas_info %}
+                        <td>--</td>
                         {% endfor %}
-                        <td>{{ row.total_general|floatformat:2 }}</td>
-                        {% for cliente in row.clientes %}
-                            {% for total in cliente.totales %}
-                                <td>{{ total|floatformat:2 }}</td>
-                            {% endfor %}
-                        {% endfor %}
+                        <td>{{ total }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
-                <tfoot>
-                    <tr>
-                        <th>Total</th>
-                        {% for total in footer.totales_linea %}
-                            <th>{{ total|floatformat:2 }}</th>
-                        {% endfor %}
-                        <th>{{ footer.total_general|floatformat:2 }}</th>
-                        {% for cliente in footer.clientes %}
-                            {% for total in cliente.totales %}
-                                <th>{{ total|floatformat:2 }}</th>
-                            {% endfor %}
-                        {% endfor %}
-                    </tr>
-                </tfoot>
+
             </table>
+
         </div>
-        {% else %}
-            <div class="alert alert-warning" role="alert">
-                {{ mensaje }}
-            </div>
+        {% elif not factura_info %}
+        <div class="alert alert-warning" role="alert">
+            {{ mensaje }}
+        </div>
         {% endif %}
-    </div>  
+    </div>
 </div>
 
 <script src="{% static 'JS/informes_facturacion.js' %}"></script>
