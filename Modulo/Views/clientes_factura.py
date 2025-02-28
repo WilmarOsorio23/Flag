@@ -27,6 +27,9 @@ def clientes_factura_guardar(request):
                 if not all(key in row for key in ['ClienteId', 'LineaId', 'Anio', 'Mes','ModuloId']):
                     continue  # Saltar filas que no tienen los campos obligatorios
 
+                # Obtener el flag is_new_line
+                is_new_line = row.get('is_new_line', 'false').lower() == 'true'
+
                 # Convertir valores de manera segura
                 consecutivo_id = row.get('ConsecutivoId') or None
                 anio = int(row.get('Anio', 0)) if row.get('Anio') else 0
@@ -57,17 +60,11 @@ def clientes_factura_guardar(request):
                 valor = (horas_factura * valor_horas if horas_factura else 0) + (dias_factura * valor_dias if dias_factura else 0) + (mes_factura * valor_meses if valor_meses else 0) + (bolsa * valor_bolsa if bolsa else 0)
 
                 if (horas_factura > 0 or dias_factura > 0 or mes_factura > 0 or bolsa > 0):
+
                     # Verificar si el registro ya existe
                     if consecutivo_id:
                         try:
-                            facturacion_cliente = FacturacionClientes.objects.get(
-                                ConsecutivoId=consecutivo_id,
-                                Anio=anio,
-                                Mes=mes,
-                                ClienteId=cliente_id,
-                                LineaId=linea_id,
-                                ModuloId=modulo_id
-                            )
+                            facturacion_cliente = FacturacionClientes.objects.get(ConsecutivoId=consecutivo_id)
                             
                             # Verificar si los datos han cambiado
                             if (facturacion_cliente.HorasFactura == horas_factura and
@@ -131,29 +128,56 @@ def clientes_factura_guardar(request):
                             )
 
                     else:
-                        # Crear un nuevo registro solo si no se encontró el anterior
-                        FacturacionClientes.objects.create(
-                            Anio=anio,
-                            Mes=mes,
-                            ClienteId_id=cliente_id,
-                            LineaId_id=linea_id,
-                            ModuloId_id=modulo_id,
-                            HorasFactura=horas_factura,
-                            Valor_Horas=valor_horas,
-                            DiasFactura=dias_factura,
-                            Valor_Dias=valor_dias,
-                            MesFactura=mes_factura,
-                            Valor_Meses=valor_meses,
-                            Valor=valor,
-                            Descripcion=descripcion,
-                            Factura=numero_factura,
-                            Bolsa=bolsa,
-                            Valor_Bolsa=valor_bolsa,
-                            IVA=iva,
-                            Referencia=referencia,
-                            Ceco=ceco,
-                            Sitio_Serv=sitio_serv
-                        )
+                        if is_new_line:
+                            # Si es una nueva línea, crear un registro sin verificar duplicados
+                            FacturacionClientes.objects.create(
+                                Anio=anio,
+                                Mes=mes,
+                                ClienteId_id=cliente_id,
+                                LineaId_id=linea_id,
+                                ModuloId_id=modulo_id,
+                                HorasFactura=horas_factura,
+                                Valor_Horas=valor_horas,
+                                DiasFactura=dias_factura,
+                                Valor_Dias=valor_dias,
+                                MesFactura=mes_factura,
+                                Valor_Meses=valor_meses,
+                                Valor=valor,
+                                Descripcion=descripcion,
+                                Factura=numero_factura,
+                                Bolsa=bolsa,
+                                Valor_Bolsa=valor_bolsa,
+                                IVA=iva,
+                                Referencia=referencia,
+                                Ceco=ceco,
+                                Sitio_Serv=sitio_serv
+                            )
+                        else:
+                            # Usar update_or_create para evitar duplicados
+                            FacturacionClientes.objects.update_or_create(
+                                Anio=anio,
+                                Mes=mes,
+                                ClienteId_id=cliente_id,
+                                LineaId_id=linea_id,
+                                ModuloId_id=modulo_id,
+                                defaults={
+                                    'HorasFactura': horas_factura,
+                                    'Valor_Horas': valor_horas,
+                                    'DiasFactura': dias_factura,
+                                    'Valor_Dias': valor_dias,
+                                    'MesFactura': mes_factura,
+                                    'Valor_Meses': valor_meses,
+                                    'Valor': valor,
+                                    'Descripcion': descripcion,
+                                    'Factura': numero_factura,
+                                    'Bolsa': bolsa,
+                                    'Valor_Bolsa': valor_bolsa,
+                                    'IVA': iva,
+                                    'Referencia': referencia,
+                                    'Ceco': ceco,
+                                    'Sitio_Serv': sitio_serv
+                                }
+                            )
                 else:
                     continue
 

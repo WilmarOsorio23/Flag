@@ -81,7 +81,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Recopilar todos los valores de los inputs en la fila
             inputs.forEach(input => {
-                if (input.name) {
+                if (input.name === 'is_new_line') {
+                    // Solo enviar el flag si está presente
+                    if (input.value === 'true') {
+                        rowData[input.name] = input.value;
+                    }
+                } else if (input.name) {
                     rowData[input.name] = input.value || null;
                 }
             });
@@ -128,6 +133,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (deleteButton) {
                         deleteButton.remove(); // Eliminar el botón
                     }
+                });
+                
+                // Eliminar el flag is_new_line después de guardar
+                document.querySelectorAll('input[name="is_new_line"]').forEach(input => {
+                    input.remove();
                 });
             } else {
                 showMessage('Error al guardar los datos.', 'danger');
@@ -249,6 +259,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>
                     <button type="button" class="btn btn-danger fas fa-times" aria-label="Close" onclick="removeLine(this)"></button>
                     <input type="text" name="ClienteId" class="form-control" value="${clienteId}" hidden>
+                    <input type="hidden" name="is_new_line" value="true">
                 </td>
                 <td>${document.querySelector('#lineaSelect option:checked').textContent}
                     <input type="text" name="LineaId" class="form-control" value="${lineaId}" hidden>
