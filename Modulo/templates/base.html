@@ -27,6 +27,10 @@
             <nav id="sidebar">
                 <div class="sidebar-header">
                     <img src="{% static 'resource/logo.png' %}" alt="Logo" class="img-fluid">
+                    <img src="{% static 'resource/miniFlagIcon.png' %}" alt="Logo" class="img-icon">
+                    <button class="toggle-btn" onclick="toggleSidebar()">
+                        <i class="fas fa-chevron-left fa-sm"></i>
+                    </button>
                 </div>
                 <div class="content">
                     <!-- INICIO-->
@@ -295,9 +299,6 @@
                 </div>
                 <!-- FOOTER -->     
             </nav>
-            <button class="toggle-btn" onclick="toggleSidebar()">
-                <i class="fas fa-chevron-left fa-sm"></i>
-            </button>
         
             <!-- Contenido de la página -->
             <div class="container" id="content">
