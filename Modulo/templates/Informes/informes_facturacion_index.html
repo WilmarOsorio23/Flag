@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_filters %}
 
 {% block titulo %} Informe de Facturación {% endblock %}
 
@@ -8,27 +9,74 @@
     <div class="card-header">
         <h4 class="card-title">Informe de Facturación</h4>
     </div>
-    <div class="card-body informes-table">
+    <div class="card-body">
         <div class="container-fluid mb-3">
             <!-- Formulario principal -->
             <form method="GET">
                 <div class="row mb-3">
                     <!-- Filtro Año --> 
+                    <!-- Filtro Año --> 
                     <div class="col-md-3">
-                        <label for="Anio">{{ form.Anio.label }}</label>
-                        {{ form.Anio }}
+                        <label for="{{ form.Anio.id_for_label }}" class="form-label">{{ form.Anio.label }}</label>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="dropdownAnio" data-bs-toggle="dropdown" aria-expanded="false" data-selected-text="Seleccionar Año">
+                                Seleccionar Año
+                            </button>
+                            <ul class="dropdown-menu w-100">
+                                {% for value, label in form.Anio.field.choices %}
+                                    <li><a class="dropdown-item anio-option" data-value="{{ value }}">{{ label }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <input type="hidden" name="{{ form.Anio.html_name }}" id="selectedAnio">
                     </div>
 
                     <!-- Filtro Línea -->
                     <div class="col-md-3">
-                        <label for="Linea">Línea</label>
-                        {{ form.LineaId }}
+                        <label for="linea" class="form-label">{{ form.LineaId.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownLinea"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Líneas"
+                            >
+                                Seleccione Líneas
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
+                                {% for checkbox in form.LineaId %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
 
-                    <!-- Filtro Cliente -->
+                    <!-- Filtro Línea -->
                     <div class="col-md-3">
-                        <label for="Cliente">Cliente</label>
-                        {{ form.ClienteId }}
+                        <label for="linea" class="form-label">{{ form.ClienteId.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownCliente"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Cliente"
+                            >
+                                Seleccione Líneas
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownCliente">
+                                {% for checkbox in form.ClienteId %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
 
                     <!-- Botón Buscar -->
@@ -60,8 +108,8 @@
             </div>
         </div>
 
-        {% if show_data %}
-        <div class="table-responsive-informes">
+        {% if rows %}
+        <div class="table-responsive">
             <table class="table table-bordered table-hover table-primary" id="estudiosTable">
                 <!-- Encabezado de la tabla -->
                 <thead>
@@ -88,7 +136,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for mes, total in Meses_info %}
+                    {% for row in rows %}
                     <tr>
                         <td>{{ row.mes }}</td>
                         <!-- Líneas activas -->
@@ -117,14 +165,13 @@
                     </tr>
                 </tfoot>
             </table>
-
         </div>
-        {% elif not factura_info %}
-        <div class="alert alert-warning" role="alert">
-            {{ mensaje }}
-        </div>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                {{ mensaje }}
+            </div>
         {% endif %}
-    </div>
+    </div>  
 </div>
 
 <script src="{% static 'JS/informes_facturacion.js' %}"></script>
