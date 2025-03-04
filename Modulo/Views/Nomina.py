@@ -98,6 +98,7 @@ def nomina_descargar_excel(request):
                     nomina.Anio, 
                     nomina.Mes, 
                     nomina.Documento.Documento, 
+                    nomina.Documento.Nombre,
                     nomina.Salario, 
                     nomina.Cliente.Nombre_Cliente
                 ])
@@ -109,7 +110,7 @@ def nomina_descargar_excel(request):
             return HttpResponse("No se encontraron registros de nómina.", status=404)
 
         # Crear DataFrame de pandas
-        df = pd.DataFrame(nomina_data, columns=['Año', 'Mes', 'Documento', 'Salario', 'Cliente'])
+        df = pd.DataFrame(nomina_data, columns=['Año', 'Mes', 'Documento','Nombre Empleado', 'Salario', 'Cliente'])
         
         # Configurar la respuesta HTTP con el archivo Excel
         response = HttpResponse(

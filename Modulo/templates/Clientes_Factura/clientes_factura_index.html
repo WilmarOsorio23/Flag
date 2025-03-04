@@ -308,11 +308,15 @@
             <div class="modal-body">
                 <form>
                     <div class="mb-3">
-                        <label for="LineaIdModal" class="form-label">Seleccione la Línea</label>
-                        <select name="LineaIdModal" class="form-select">
-                            {% for linea in Lineas %}
-                                <option value="{{ linea.LineaId }}">{{ linea.Linea }}</option>
-                            {% endfor %}
+                        <label for="lineaSelect" class="form-label">Línea</label>
+                        <select id="lineaSelect" class="form-select" required>
+                            <!-- Opciones se cargarán dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="moduloSelect" class="form-label">Módulo</label>
+                        <select id="moduloSelect" class="form-select" required>
+                            <!-- Opciones se cargarán dinámicamente -->
                         </select>
                     </div>
                 </form>

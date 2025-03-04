@@ -81,7 +81,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Recopilar todos los valores de los inputs en la fila
             inputs.forEach(input => {
-                if (input.name) {
+                if (input.name === 'is_new_line') {
+                    // Solo enviar el flag si está presente
+                    if (input.value === 'true') {
+                        rowData[input.name] = input.value;
+                    }
+                } else if (input.name) {
                     rowData[input.name] = input.value || null;
                 }
             });
@@ -128,6 +133,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (deleteButton) {
                         deleteButton.remove(); // Eliminar el botón
                     }
+                });
+                
+                // Eliminar el flag is_new_line después de guardar
+                document.querySelectorAll('input[name="is_new_line"]').forEach(input => {
+                    input.remove();
                 });
             } else {
                 showMessage('Error al guardar los datos.', 'danger');
@@ -210,13 +220,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function confirmAddLine() {
-        const lineaId = document.querySelector('select[name="LineaIdModal"]').value;
+        const lineaId = document.getElementById('lineaSelect').value;
+        const moduloId = document.getElementById('moduloSelect').value;
         const clienteId = window.originalCliente;
         const anio = window.originalAnio; // Obtener el año del filtro
         const mes = window.originalMes;   // Obtener el mes del filtro
     
-        if (!lineaId) {
-            showMessage('Seleccione una línea.', 'warning');
+        if (!lineaId || !moduloId) {
+            showMessage('Seleccione una línea y módulo.', 'warning');
             return;
         }
 
@@ -225,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
         addingMessage.style.display = 'block';
     
         // Obtener la tarifa asociada al cliente y la línea
-        fetch(`/clientes_factura/obtener_factura/?clienteId=${clienteId}&lineaId=${lineaId}&anio=${anio}&mes=${mes}`, {
+        fetch(`/clientes_factura/obtener_factura/?clienteId=${clienteId}&lineaId=${lineaId}&moduloId=${moduloId}&anio=${anio}&mes=${mes}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -248,9 +259,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>
                     <button type="button" class="btn btn-danger fas fa-times" aria-label="Close" onclick="removeLine(this)"></button>
                     <input type="text" name="ClienteId" class="form-control" value="${clienteId}" hidden>
+                    <input type="hidden" name="is_new_line" value="true">
                 </td>
-                <td>${document.querySelector('select[name="LineaIdModal"] option:checked').textContent}
+                <td>${document.querySelector('#lineaSelect option:checked').textContent}
                     <input type="text" name="LineaId" class="form-control" value="${lineaId}" hidden>
+                </td>
+                <td>${document.querySelector('#moduloSelect option:checked').textContent}
+                    <input type="text" name="ModuloId" class="form-control" value="${moduloId}" hidden>
                 </td>
                 <td><input type="text" name="Horas" class="form-control" value=""></td>
                 <td><input type="text" name="Valor_Horas" class="form-control" value="${tarifa.valorHora || 0}"></td>
@@ -277,14 +292,31 @@ document.addEventListener('DOMContentLoaded', function () {
             // Ocultar el mensaje de "Agregando..."
             addingMessage.style.display = 'none';
 
-            // Procesar la tarifa
-            console.log('Tarifa:', tarifa);
+            // Agregar event listeners a los campos de la nueva fila para calcular el valor en tiempo real
+            addEventListenersToRow(newRow);
+
+            // Recalcular totales
+            recalculateTotals();
         })
         .catch(error => {
             console.error('Error al obtener la tarifa:', error);
             showMessage('Error al obtener la tarifa asociada.', 'danger');
             // Ocultar el mensaje de "Agregando..." en caso de error
             addingMessage.style.display = 'none';
+        });
+    }
+
+    // Función para agregar event listeners a los campos de una fila
+    function addEventListenersToRow(row) {
+        const inputs = row.querySelectorAll('input[name="Horas"], input[name="Valor_Horas"], input[name="Dias"], input[name="Valor_Dias"], input[name="Meses"], input[name="Valor_Meses"], input[name="Bolsa"], input[name="Valor_Bolsa"]');
+
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                // Actualizar el valor total de la fila
+                updateRowTotal(row);
+                // Recalcular los totales generales
+                recalculateTotals();
+            });
         });
     }
 
@@ -447,6 +479,43 @@ document.addEventListener('DOMContentLoaded', function () {
             generateTemplateButton.setAttribute('disabled', 'disabled');
         }
     }
+
+    document.getElementById('addLineModal').addEventListener('show.bs.modal', function (event) {
+        const clienteId = window.originalCliente;
+        const anio = window.originalAnio;
+        const mes = window.originalMes;
+    
+        if (!clienteId || !anio || !mes) {
+            showMessage('Primero seleccione un cliente, año y mes.', 'warning');
+            return;
+        }
+    
+        fetch(`/clientes_factura/get_lineas_modulos/?clienteId=${clienteId}&anio=${anio}&mes=${mes}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la solicitud');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const lineaSelect = document.getElementById('lineaSelect');
+                const moduloSelect = document.getElementById('moduloSelect');
+    
+                // Limpiar y cargar líneas
+                lineaSelect.innerHTML = data.lineas.map(linea => 
+                    `<option value="${linea.LineaId}">${linea.Linea}</option>`
+                ).join('');
+    
+                // Limpiar y cargar módulos
+                moduloSelect.innerHTML = data.modulos.map(modulo => 
+                    `<option value="${modulo.ModuloId}">${modulo.Modulo}</option>`
+                ).join('');
+            })
+            .catch(error => {
+                console.error('Error al obtener las líneas y módulos:', error);
+                showMessage('Error al cargar las opciones.', 'danger');
+            });
+    });
 
     // Añadir evento para habilitar o deshabilitar los botones
     document.querySelector('select[name="Anio"]').addEventListener('change', function () {

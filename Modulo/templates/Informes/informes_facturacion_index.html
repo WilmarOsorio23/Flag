@@ -43,11 +43,15 @@
             <!-- Botón de Descargar Excel -->
             <div class="row">
                 <div class="col-md-6 text-start">
-                    <form id="download-form" method="GET" action="{% url 'exportar_estudio_excel' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="Nombre" value="{{ form.Año.value }}">
-                        <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}">
-                        <input type="hidden" name="Cargo" value="{{ form.Cargo.value }}">
+                    <!-- Botón de Descargar Excel -->
+                    <form method="GET" action="{% url 'descargar_reporte_excel' %}">
+                        <input type="hidden" name="Anio" value="{{ form.Anio.value }}">
+                        {% for linea in form.LineaId.value %}
+                            <input type="hidden" name="LineaId" value="{{ linea }}">
+                        {% endfor %}
+                        {% for cliente in form.ClienteId.value %}
+                            <input type="hidden" name="ClienteId" value="{{ cliente }}">
+                        {% endfor %}
                         <button type="submit" class="btn btn-success mt-3">
                             <i class="fas fa-file-excel"></i> Descargar Excel
                         </button>
@@ -62,28 +66,56 @@
                 <!-- Encabezado de la tabla -->
                 <thead>
                     <tr>
-                        <th colspan="10">Total por Línea</th>
+                        <!-- Totales por Línea -->
+                        <th colspan="{{ lineas_activas|length|add:2 }}">Totales por Línea</th>
+                        <!-- Clientes Activos agrupados -->
+                        {% regroup clientes_activos by 0 as clientes_grouped %}
+                        {% for grupo in clientes_grouped %}
+                            <th colspan="{{ grupo.list|length }}">{{ grupo.grouper.Nombre_Cliente }}</th>
+                        {% endfor %}
                     </tr>
                     <tr>
-                        <th>Meses</th>
-                        {% for linea in lineas_info %}
-                            <th>{{ linea }}</th>
+                        <th rowspan="1">Meses</th>
+                        <!-- Líneas Activas -->
+                        {% for linea in lineas_activas %}
+                            <th>{{ linea.Linea }}</th>
                         {% endfor %}
-                        <th>Total General</th>
+                        <th rowspan="1">Total General</th>
+                        <!-- Columnas por Cliente-Línea -->
+                        {% for cliente, linea in clientes_activos %}
+                            <th>{{ linea.Linea }}</th>
+                        {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
                     {% for mes, total in Meses_info %}
                     <tr>
-                        <td>{{ mes }}</td>
-                        {% for linea in lineas_info %}
-                        <td>--</td>
+                        <td>{{ row.mes }}</td>
+                        <!-- Líneas activas -->
+                        {% for linea in lineas_activas %}
+                            <td>{{ row.totales_linea|get_item:linea.LineaId|floatformat:2 }}</td>
                         {% endfor %}
-                        <td>{{ total }}</td>
+                        <td>{{ row.total_general|floatformat:2 }}</td>
+                        <!-- Clientes activos -->
+                        {% for cliente, linea in clientes_activos %}
+                            <td>{{ row.clientes|get_item:cliente.ClienteId|get_item:'totales'|get_item:linea.LineaId|floatformat:2 }}</td>
+                        {% endfor %}
                     </tr>
                     {% endfor %}
                 </tbody>
-
+                
+                <tfoot>
+                    <tr>
+                        <th>Total</th>
+                        {% for linea in lineas_activas %}
+                            <th>{{ footer.totales_linea|get_item:linea.LineaId|floatformat:2 }}</th>
+                        {% endfor %}
+                        <th>{{ footer.total_general|floatformat:2 }}</th>
+                        {% for cliente, linea in clientes_activos %}
+                            <th>{{ footer.clientes|get_item:cliente.ClienteId|get_item:'totales'|get_item:linea.LineaId|floatformat:2 }}</th>
+                        {% endfor %}
+                    </tr>
+                </tfoot>
             </table>
 
         </div>

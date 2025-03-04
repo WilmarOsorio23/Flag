@@ -75,7 +75,7 @@ def contactos_descargar_excel(request):
                     detalle.Nombre,
                     detalle.Telefono,
                     detalle.Direccion,
-                    detalle.CargoId.Cargo,
+                    detalle.Cargo,
                     detalle.activo
                 ])
             except Contactos.DoesNotExist:

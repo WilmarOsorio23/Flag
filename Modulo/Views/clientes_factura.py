@@ -27,6 +27,9 @@ def clientes_factura_guardar(request):
                 if not all(key in row for key in ['ClienteId', 'LineaId', 'Anio', 'Mes','ModuloId']):
                     continue  # Saltar filas que no tienen los campos obligatorios
 
+                # Obtener el flag is_new_line
+                is_new_line = row.get('is_new_line', 'false').lower() == 'true'
+
                 # Convertir valores de manera segura
                 consecutivo_id = row.get('ConsecutivoId') or None
                 anio = int(row.get('Anio', 0)) if row.get('Anio') else 0
@@ -57,17 +60,11 @@ def clientes_factura_guardar(request):
                 valor = (horas_factura * valor_horas if horas_factura else 0) + (dias_factura * valor_dias if dias_factura else 0) + (mes_factura * valor_meses if valor_meses else 0) + (bolsa * valor_bolsa if bolsa else 0)
 
                 if (horas_factura > 0 or dias_factura > 0 or mes_factura > 0 or bolsa > 0):
+
                     # Verificar si el registro ya existe
                     if consecutivo_id:
                         try:
-                            facturacion_cliente = FacturacionClientes.objects.get(
-                                ConsecutivoId=consecutivo_id,
-                                Anio=anio,
-                                Mes=mes,
-                                ClienteId=cliente_id,
-                                LineaId=linea_id,
-                                ModuloId=modulo_id
-                            )
+                            facturacion_cliente = FacturacionClientes.objects.get(ConsecutivoId=consecutivo_id)
                             
                             # Verificar si los datos han cambiado
                             if (facturacion_cliente.HorasFactura == horas_factura and
@@ -131,29 +128,56 @@ def clientes_factura_guardar(request):
                             )
 
                     else:
-                        # Crear un nuevo registro solo si no se encontró el anterior
-                        FacturacionClientes.objects.create(
-                            Anio=anio,
-                            Mes=mes,
-                            ClienteId_id=cliente_id,
-                            LineaId_id=linea_id,
-                            ModuloId_id=modulo_id,
-                            HorasFactura=horas_factura,
-                            Valor_Horas=valor_horas,
-                            DiasFactura=dias_factura,
-                            Valor_Dias=valor_dias,
-                            MesFactura=mes_factura,
-                            Valor_Meses=valor_meses,
-                            Valor=valor,
-                            Descripcion=descripcion,
-                            Factura=numero_factura,
-                            Bolsa=bolsa,
-                            Valor_Bolsa=valor_bolsa,
-                            IVA=iva,
-                            Referencia=referencia,
-                            Ceco=ceco,
-                            Sitio_Serv=sitio_serv
-                        )
+                        if is_new_line:
+                            # Si es una nueva línea, crear un registro sin verificar duplicados
+                            FacturacionClientes.objects.create(
+                                Anio=anio,
+                                Mes=mes,
+                                ClienteId_id=cliente_id,
+                                LineaId_id=linea_id,
+                                ModuloId_id=modulo_id,
+                                HorasFactura=horas_factura,
+                                Valor_Horas=valor_horas,
+                                DiasFactura=dias_factura,
+                                Valor_Dias=valor_dias,
+                                MesFactura=mes_factura,
+                                Valor_Meses=valor_meses,
+                                Valor=valor,
+                                Descripcion=descripcion,
+                                Factura=numero_factura,
+                                Bolsa=bolsa,
+                                Valor_Bolsa=valor_bolsa,
+                                IVA=iva,
+                                Referencia=referencia,
+                                Ceco=ceco,
+                                Sitio_Serv=sitio_serv
+                            )
+                        else:
+                            # Usar update_or_create para evitar duplicados
+                            FacturacionClientes.objects.update_or_create(
+                                Anio=anio,
+                                Mes=mes,
+                                ClienteId_id=cliente_id,
+                                LineaId_id=linea_id,
+                                ModuloId_id=modulo_id,
+                                defaults={
+                                    'HorasFactura': horas_factura,
+                                    'Valor_Horas': valor_horas,
+                                    'DiasFactura': dias_factura,
+                                    'Valor_Dias': valor_dias,
+                                    'MesFactura': mes_factura,
+                                    'Valor_Meses': valor_meses,
+                                    'Valor': valor,
+                                    'Descripcion': descripcion,
+                                    'Factura': numero_factura,
+                                    'Bolsa': bolsa,
+                                    'Valor_Bolsa': valor_bolsa,
+                                    'IVA': iva,
+                                    'Referencia': referencia,
+                                    'Ceco': ceco,
+                                    'Sitio_Serv': sitio_serv
+                                }
+                            )
                 else:
                     continue
 
@@ -304,6 +328,7 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
 def clientes_factura_index(request):
     clientes = models.Clientes.objects.all()
     lineas = models.Linea.objects.all()
+    modulos = models.Modulo.objects.all()
     clientes_contratos = models.ClientesContratos.objects.all()
     facturacion_clientes = models.FacturacionClientes.objects.all()
 
@@ -335,6 +360,7 @@ def clientes_factura_index(request):
         'facturacion_info': facturacion_info,
         'Clientes': clientes,
         'Lineas': lineas,
+        'Modulos': modulos,
         'TotalesFacturacion': totales_facturacion,
         'mensaje': "No se encontraron resultados para los filtros aplicados." if not facturacion_info else ""
     }
@@ -528,7 +554,14 @@ def obtener_tarifa(request):
 
        # Buscar la tarifa en la base de datos
         try:
-            tarifa = Tarifa_Clientes.objects.get(clienteId=cliente_id, lineaId=linea_id, moduloId=modulo_id, anio=anio, mes=mes)
+            # Buscar la tarifa más reciente
+            tarifa = Tarifa_Clientes.objects.filter(
+                clienteId=cliente_id,
+                lineaId=linea_id,
+                moduloId=modulo_id,
+                anio__lte=anio,
+                mes__lte=mes
+            ).order_by('-anio', '-mes').first()
             # Construir la respuesta JSON con los datos de la tarifa encontrada
             data = {
                 'valorHora': float(tarifa.valorHora) if tarifa.valorHora else 0.0,
@@ -566,3 +599,45 @@ def obtener_tarifa(request):
     except Exception as e:
         # Manejar cualquier otro error inesperado
         return JsonResponse({'error': f'Error interno del servidor: {str(e)}'}, status=500)
+
+def get_lineas_modulos(request):
+    cliente_id = request.GET.get('clienteId')
+    anio = request.GET.get('anio')
+    mes = request.GET.get('mes')
+
+    if not cliente_id or not anio or not mes:
+        return JsonResponse({'error': 'ClienteId, anio y mes son requeridos.'}, status=400)
+
+    try:
+        # Filtrar tarifas por cliente, año y mes
+        tarifas = Tarifa_Clientes.objects.filter(
+            clienteId=cliente_id,
+            anio=anio,
+            mes=mes
+        ).select_related('lineaId', 'moduloId').distinct()
+
+        lineas = []
+        modulos = []
+
+        seen_lineas = set()
+        seen_modulos = set()
+
+        for tarifa in tarifas:
+            if tarifa.lineaId and tarifa.lineaId.LineaId not in seen_lineas:
+                lineas.append({
+                    'LineaId': tarifa.lineaId.LineaId,
+                    'Linea': tarifa.lineaId.Linea
+                })
+                seen_lineas.add(tarifa.lineaId.LineaId)
+
+            if tarifa.moduloId and tarifa.moduloId.ModuloId not in seen_modulos:
+                modulos.append({
+                    'ModuloId': tarifa.moduloId.ModuloId,
+                    'Modulo': tarifa.moduloId.Modulo
+                })
+                seen_modulos.add(tarifa.moduloId.ModuloId)
+
+        return JsonResponse({'lineas': lineas, 'modulos': modulos})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

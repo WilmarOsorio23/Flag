@@ -58,7 +58,7 @@
                             <th><input type="checkbox" id="select-all"></th>
                             <th scope="col">Año</th>
                             <th scope="col">Mes</th>
-                            <th scope="col">Documento</th>
+                            <th scope="col">Nombre Empleado</th>
                             <th scope="col">Salario</th>
                             <th scope="col">Cliente</th>
                         </tr>
@@ -70,7 +70,7 @@
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{nomina.NominaId}}"></td>
                             <td><input type="text" name="anio" class="form-control-plaintext" value="{{ nomina.Anio }}" readonly></td>
                             <td><input type="text" name="mes" class="form-control-plaintext" value="{{ nomina.Mes }}" readonly></td>
-                            <td><input type="text" name="documento" class="form-control-plaintext" value="{{nomina.Documento.Documento}}" readonly></td>
+                            <td><input type="text" name="EmpleadoNombre" class="form-control-plaintext" value="{{nomina.Documento.Nombre}}" readonly></td>
                             <td><input type="text" name="salario" class="form-control-plaintext" value="{{nomina.Salario}}" readonly></td>
                             <td><input type="text" name="cliente" class="form-control-plaintext" value="{{nomina.Cliente.Nombre_Cliente}}" readonly></td>
                          </tr>   

@@ -76,7 +76,7 @@ def obtener_tarifas_clientes(clientes, tarifas, anios):
 
     return cliente_tarifas_info
 
-#Función para generar el informe de tarifas de clientes
+# Función para generar el informe de tarifas de clientes
 def tarifas_clientes_filtrado(request):
     cliente_tarifas_info = []
     show_data = False  
@@ -85,33 +85,19 @@ def tarifas_clientes_filtrado(request):
         form = TarifaClienteFilterForm(request.GET)
 
         if form.is_valid():
-            #clientes = Clientes.objects.all()
-            #tarifas = Tarifa_Clientes.objects.all()
-
+            # Filtrar clientes y tarifas
             clientes = Clientes.objects.only('Nombre_Cliente', 'ClienteId').filter(Activo=True)
-            #clientes = Clientes.objects.filter(Activo=True).values('Nombre_Cliente', 'ClienteId')
-
             anios = form.cleaned_data.get('anio')
-            tarifas = Tarifa_Clientes.objects.only('lineaId', 'moduloId', 'anio').filter(anio__in=anios)
-            #tarifas = Tarifa_Clientes.objects.filter(anio__in=anios_seleccionados).values('lineaId', 'moduloId', 'anio')
-            
-            print("CLIENTES", clientes)
-            print("TARIFAS", tarifas)
-
+            tarifas = Tarifa_Clientes.objects.select_related('lineaId', 'moduloId', 'referenciaId', 'centrocostosId', 'monedaId').filter(anio__in=anios)
             clientes, tarifas = filtrar_tarifas_clientes(form, clientes, tarifas)
 
-             # Obtener los años disponibles
+            # Obtener los años disponibles
             anios_disponibles = Tarifa_Clientes.objects.values_list('anio', flat=True).distinct()
 
-            # Obtener los años seleccionados por el usuario
-            anios = form.cleaned_data.get('anio')
-
+            # Obtener información de las tarifas de los clientes
             cliente_tarifas_info = obtener_tarifas_clientes(clientes, tarifas, anios)
-            
-            print("CLIENTE_TARIFAS_INFO", cliente_tarifas_info)
 
-            show_data = bool(cliente_tarifas_info)  # Mostrar datos si hay resultados
-            
+            show_data = bool(cliente_tarifas_info)  # Mostrar datos si hay resultados       
     else:
         form = TarifaClienteFilterForm()
     
@@ -174,8 +160,6 @@ def exportar_tarifas_clientes_excel(request):
                         tarifa['sitio_trabajo'],
                         tarifa['moneda'],
                     ])
-        print("Errores del formulario:", form.errors)
-        print("DATAa:",data) 
         if data:
             # Crear el libro de Excel
             wb = Workbook()

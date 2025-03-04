@@ -4,7 +4,9 @@ from django.db.models import Sum
 from Modulo.forms import InformeFacturacionForm
 from Modulo.models import FacturacionClientes, Linea, Clientes
 from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, Border, Side
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from openpyxl.utils import get_column_letter
+from openpyxl.cell import MergedCell
 from datetime import datetime
 
 # Función para filtrar datos
@@ -27,6 +29,7 @@ def filtrar_datos(form):
     else:
         clientes = Clientes.objects.all()  # Traer todos los clientes si no se selecciona ninguno
 
+    # Anotar el total por mes, línea y cliente
     facturas = facturas.values('Mes', 'LineaId', 'ClienteId').annotate(total=Sum('Valor'))
     return facturas, lineas, clientes
 
@@ -50,10 +53,10 @@ def organizar_datos(facturas, lineas, clientes):
     }
 
     for f in facturas:
-        mes = f['Mes']
-        linea = f['LineaId']
-        cliente = f['ClienteId']
-        total = f['total'] or 0
+        mes = f['Mes']  # Acceder al campo Mes
+        linea = f['LineaId']  # Acceder al campo LineaId
+        cliente = f['ClienteId']  # Acceder al campo ClienteId
+        total = f['total'] or 0  # Acceder al campo total
 
         totales['por_linea'][mes][linea] += total
         totales['footer']['por_linea'][linea] += total
@@ -66,36 +69,46 @@ def organizar_datos(facturas, lineas, clientes):
 
     rows = []
     for mes_num, mes_nombre in meses:
+        # Cambiar listas por diccionarios
         row = {
             'mes': mes_nombre,
-            'totales_linea': [totales['por_linea'][mes_num].get(linea.LineaId, 0) for linea in lineas],
+            'totales_linea': {linea.LineaId: totales['por_linea'][mes_num].get(linea.LineaId, 0) for linea in lineas},
             'total_general': totales['general'].get(mes_num, 0),
-            'clientes': []
+            'clientes': {}
         }
 
-        for cliente in clientes:
-            cliente_data = {
-                'id': cliente.ClienteId,
-                'totales': [totales['clientes'][cliente.ClienteId][mes_num].get(linea.LineaId, 0) for linea in lineas]
+        for cliente in clientes:    
+            # Diccionario para totales del cliente
+            row['clientes'][cliente.ClienteId] = {
+                'totales': {linea.LineaId: totales['clientes'][cliente.ClienteId][mes_num].get(linea.LineaId, 0) 
+                            for linea in lineas}
             }
-            row['clientes'].append(cliente_data)
 
         rows.append(row)
 
     footer = {
-        'totales_linea': [totales['footer']['por_linea'][linea.LineaId] for linea in lineas],
+        'totales_linea': {linea.LineaId: totales['footer']['por_linea'][linea.LineaId] for linea in lineas},
         'total_general': totales['footer']['general'],
-        'clientes': []
+        'clientes': {}
     }
 
     for cliente in clientes:
-        cliente_data = {
-            'id': cliente.ClienteId,
-            'totales': [totales['footer']['clientes'][cliente.ClienteId][linea.LineaId] for linea in lineas]
+        footer['clientes'][cliente.ClienteId] = {
+            'totales': {linea.LineaId: totales['footer']['clientes'][cliente.ClienteId][linea.LineaId] 
+                        for linea in lineas}
         }
-        footer['clientes'].append(cliente_data)
 
-    return rows, footer, lineas, clientes, meses
+    # Filtrar activos usando diccionarios
+    lineas_activas = [linea for linea in lineas if footer['totales_linea'].get(linea.LineaId, 0) != 0]
+
+    clientes_activos = []
+    for cliente in clientes:
+        for linea in lineas:
+            total = footer['clientes'][cliente.ClienteId]['totales'].get(linea.LineaId, 0)
+            if total != 0:
+                clientes_activos.append((cliente, linea))
+
+    return rows, footer, lineas, clientes, meses, lineas_activas, clientes_activos
 
 # Función para generar el reporte en el frontend
 def informes_facturacion_index(request):
@@ -107,14 +120,25 @@ def informes_facturacion_index(request):
     clientes = None
     meses = None
 
-    if form.is_valid():
-        facturas, lineas, clientes = filtrar_datos(form)
-        if facturas.exists():
-            rows, footer, lineas, clientes, meses = organizar_datos(facturas, lineas, clientes)
+    # Verificar si el formulario se ha enviado
+    if 'buscar' in request.GET:
+        if form.is_valid():
+            facturas, lineas, clientes = filtrar_datos(form)
+            if facturas.exists():
+                rows, footer, lineas, clientes, meses, lineas_activas, clientes_activos = organizar_datos(facturas, lineas, clientes)
+            else:
+                mensaje = "No se encontraron datos con los filtros seleccionados."
         else:
-            mensaje = "No se encontraron datos con los filtros seleccionados."
+            mensaje = "Por favor, corrige los errores en el formulario."
     else:
-        mensaje = "Por favor, corrige los errores en el formulario."
+        # Primera carga: traer todos los datos y procesarlos como en filtrar_datos
+        facturas = FacturacionClientes.objects.values('Mes', 'LineaId', 'ClienteId').annotate(total=Sum('Valor'))
+        lineas = Linea.objects.all()
+        clientes = Clientes.objects.all()
+        if facturas.exists():
+            rows, footer, lineas, clientes, meses, lineas_activas, clientes_activos = organizar_datos(facturas, lineas, clientes)
+        else:
+            mensaje = "No se encontraron datos."
 
     context = {
         'form': form,
@@ -123,67 +147,207 @@ def informes_facturacion_index(request):
         'lineas': lineas,
         'clientes': clientes,
         'meses': meses,
-        'mensaje': mensaje
+        'mensaje': mensaje,
+        'lineas_activas': lineas_activas,
+        'clientes_activos': clientes_activos
     }
+
     return render(request, 'Informes/informes_facturacion_index.html', context)
 
 # Función para descargar el reporte en Excel
 def descargar_reporte_excel(request):
-    form = InformeFacturacionForm(request.GET or None)
+    # Obtener parámetros y convertir a enteros
+    anio = request.GET.get('Anio')
+    lineas_ids = [int(id) for id in request.GET.getlist('LineaId') if id.isdigit()]
+    clientes_ids = [int(id) for id in request.GET.getlist('ClienteId') if id.isdigit()]
 
-    if form.is_valid():
-        facturas, lineas, clientes = filtrar_datos(form)
-        if facturas.exists():
-            rows, footer, lineas, clientes, meses = organizar_datos(facturas, lineas, clientes)
-
-            # Preparar datos para Excel
-            data = []
-            for row in rows:
-                for cliente in row['clientes']:
-                    data.append([
-                        row['mes'],
-                        *row['totales_linea'],
-                        row['total_general'],
-                        *cliente['totales']
-                    ])
-
-            # Crear libro de Excel
-            wb = Workbook()
-            ws = wb.active
-            ws.title = "Informe de Facturación"
-
-            # Encabezados
-            encabezados = ["Mes", *[linea.Linea for linea in lineas], "Total General", *[f"{cliente.Nombre_Cliente} - {linea.Linea}" for cliente in clientes for linea in lineas]]
-            for col_num, header in enumerate(encabezados, 1):
-                cell = ws.cell(row=1, column=col_num, value=header)
-                cell.font = Font(bold=True)
-                cell.alignment = Alignment(horizontal='center')
-
-            # Datos
-            for row_num, row in enumerate(data, 2):
-                for col_num, value in enumerate(row, 1):
-                    cell = ws.cell(row=row_num, column=col_num, value=value)
-                    cell.alignment = Alignment(horizontal='center')
-
-            # Ajustar columnas
-            for column in ws.columns:
-                max_length = max(len(str(cell.value)) for cell in column)
-                ws.column_dimensions[column[0].column_letter].width = max_length + 2
-
-            # Bordes
-            thin_border = Border(left=Side(style='thin'), right=Side(style='thin'),
-                             top=Side(style='thin'), bottom=Side(style='thin'))
-            for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
-                for cell in row:
-                    cell.border = thin_border
-
-            # Respuesta
-            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            filename = f"informe_facturacion_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-            wb.save(response)
-            return response
-        else:
-            return HttpResponse("No se encontraron datos para exportar.")
+    # Filtrar datos
+    facturas = FacturacionClientes.objects.all()
+    
+    # Aplicar filtro de año
+    if anio and anio.isdigit():
+        facturas = facturas.filter(Anio=int(anio))
+    
+    # Aplicar filtro de líneas
+    if lineas_ids:
+        lineas = Linea.objects.filter(LineaId__in=lineas_ids)
+        facturas = facturas.filter(LineaId__in=lineas_ids)
     else:
-        return HttpResponse("Formulario no válido.")
+        lineas = Linea.objects.all()
+    
+    # Aplicar filtro de clientes
+    if clientes_ids:
+        clientes = Clientes.objects.filter(ClienteId__in=clientes_ids)
+        facturas = facturas.filter(ClienteId__in=clientes_ids)
+    else:
+        clientes = Clientes.objects.all()
+
+    # Procesar datos
+    facturas = facturas.values('Mes', 'LineaId', 'ClienteId').annotate(total=Sum('Valor'))
+    
+    if facturas.exists():
+        # Capturar todos los valores retornados
+        rows, footer, lineas_queryset, clientes_queryset, meses, lineas_activas, clientes_activos = organizar_datos(facturas, lineas, clientes)
+        
+        # Usar los valores ya obtenidos de organizar_datos
+        active_client_lines = clientes_activos
+
+        # Crear libro de Excel
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Informe de Facturación"
+
+        # =========================================================================
+        # ESTILOS PERSONALIZADOS
+        # =========================================================================
+        header_font = Font(bold=True, color="FFFFFF")
+        blue_fill = PatternFill(start_color="0066CC", end_color="0066CC", fill_type="solid")
+        light_blue_fill = PatternFill(start_color="99CCFF", end_color="99CCFF", fill_type="solid")
+        footer_fill = PatternFill(start_color="336699", end_color="336699", fill_type="solid")
+        border = Border(left=Side(style='thin'), right=Side(style='thin'),
+                       top=Side(style='thin'), bottom=Side(style='thin'))
+        alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+        # =========================================================================
+        # CONSTRUIR CABECERAS
+        # =========================================================================
+        # Primera fila de cabecera
+        first_row = [""]  # Celda A1 vacía para "Meses"
+        first_row.append("Totales por Línea")
+        first_row.extend([""] * (len(lineas_activas) - 1))  # Celdas para merge
+        first_row.append("")
+
+        # Agrupar clientes únicos manteniendo el orden
+        seen_clients = set()
+        unique_clients = []
+        client_lineas_count = defaultdict(int)
+        
+        for cliente, linea in active_client_lines:
+            client_lineas_count[cliente] += 1
+            if cliente not in seen_clients:
+                seen_clients.add(cliente)
+                unique_clients.append(cliente)
+
+        # Añadir nombres de clientes con espacios para merge
+        for cliente in unique_clients:
+            count = client_lineas_count[cliente]
+            first_row.append(cliente.Nombre_Cliente)
+            if count > 1:
+                first_row.extend([""] * (count - 1))
+
+        ws.append(first_row)
+
+        # Segunda fila de cabecera
+        second_row = ["Meses"]
+        second_row.extend([linea.Linea for linea in lineas_activas])
+        second_row.append("Total General")
+        second_row.extend([linea.Linea for _, linea in active_client_lines])
+        ws.append(second_row)
+
+        # Combinar celdas
+        # Merge "Totales por Línea" (B1:G1 para 6 líneas)
+        start_col = 2
+        end_col = start_col + len(lineas_activas) - 1
+        ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=end_col)
+
+        # Merge para nombres de clientes
+        current_col = end_col + 2  # Columna después de Total General
+        for cliente in unique_clients:
+            num_lineas = client_lineas_count[cliente]
+            if num_lineas > 1:
+                end_merge = current_col + num_lineas - 1
+                ws.merge_cells(
+                    start_row=1,
+                    start_column=current_col,
+                    end_row=1,
+                    end_column=end_merge
+                )
+            current_col += num_lineas
+
+        # Agrupar líneas por cliente para combinar celdas
+        client_groups = defaultdict(list)
+        for cliente, linea in active_client_lines:
+            client_groups[cliente].append(linea)
+
+        # Combinar celdas para clientes
+        start_col = len(lineas_activas) + 3  # Columna inicial después de Total General
+        current_col = start_col
+        for cliente, lineas in client_groups.items():
+            num_columnas = len(lineas)
+            if num_columnas > 1:
+                end_col = current_col + num_columnas - 1
+                ws.merge_cells(start_row=1, start_column=current_col, end_row=1, end_column=end_col)
+            current_col += num_columnas
+
+        # Aplicar estilos a cabeceras
+        for row in ws.iter_rows(min_row=1, max_row=2):
+            for cell in row:
+                cell.font = header_font
+                cell.fill = blue_fill if cell.row == 1 else light_blue_fill
+                cell.border = border
+                cell.alignment = alignment
+
+        # =========================================================================
+        # LLENAR DATOS
+        # =========================================================================
+        for row in rows:
+            fila = [
+                row['mes'],
+                # Usar LineaId como clave del diccionario
+                *[row['totales_linea'][linea.LineaId] for linea in lineas_activas],
+                row['total_general'],
+                # Acceder a los datos usando ClienteId y LineaId
+                *[row['clientes'][cliente.ClienteId]['totales'][linea.LineaId] 
+                for cliente, linea in clientes_activos]
+            ]
+            ws.append(fila)
+
+        # =========================================================================
+        # FILA DE TOTALES
+        # =========================================================================
+        fila_footer = [
+            "Total",
+            # Usar LineaId para acceder a los totales
+            *[footer['totales_linea'][linea.LineaId] for linea in lineas_activas],
+            footer['total_general'],
+            # Acceder a los totales de clientes con ClienteId y LineaId
+            *[footer['clientes'][cliente.ClienteId]['totales'][linea.LineaId] 
+            for cliente, linea in clientes_activos]
+        ]
+        ws.append(fila_footer)
+
+        # Aplicar estilo al footer
+        for cell in ws[ws.max_row]:
+            cell.fill = footer_fill
+            cell.font = header_font
+            cell.border = border
+            cell.alignment = alignment
+
+        # =========================================================================
+        # FORMATO NUMÉRICO Y AJUSTES
+        # =========================================================================
+        # Formato de números con separadores de miles
+        for row in ws.iter_rows(min_row=3, max_row=ws.max_row-1):
+            for cell in row[1:]:
+                if isinstance(cell.value, (int, float)):
+                    cell.number_format = '#,##0'
+
+        # Ajustar ancho de columnas
+        for col_idx, col in enumerate(ws.columns, start=1):
+            max_length = 0
+            column_letter = get_column_letter(col_idx)
+            for cell in col:
+                if isinstance(cell, MergedCell):
+                    continue
+                if cell.value is not None:
+                    max_length = max(max_length, len(str(cell.value)))
+            ws.column_dimensions[column_letter].width = max_length + 2
+
+        # Respuesta
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        filename = f"informe_facturacion_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        wb.save(response)
+        return response
+    else:
+        return HttpResponse("No se encontraron datos para exportar.")

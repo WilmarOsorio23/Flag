@@ -66,7 +66,8 @@ def empleados_estudios_descargarExcel(request):
                 cargo = Empleados_Estudios.objects.get(pk=item_id)
                 detalles_data.append([
                     cargo.id,
-                    cargo.documentoId,
+                    cargo.documentoId.Documento,
+                    cargo.documentoId.Nombre,
                     cargo.fecha_Inicio,
                     cargo.fecha_Fin,
                 ])
@@ -78,7 +79,7 @@ def empleados_estudios_descargarExcel(request):
             return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
 
         # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','documentoId','FechaInicio','FechaFin'])
+        df = pd.DataFrame(detalles_data, columns=['Id','documentoId','Nombre Empleado','FechaInicio','FechaFin'])
         
         # Configurar la respuesta HTTP con el archivo Excel
         response = HttpResponse(
