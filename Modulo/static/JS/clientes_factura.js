@@ -104,29 +104,45 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleDeleteButton(); // Añadir esta línea para actualizar los botones
     });
 
-    // Función de eliminación - Modificada para uso global
+    // Función de eliminación 
     window.deleteSelectedRows = function() {
         const selectedIds = getSelectedRows();
         if (selectedIds.length === 0) return;
 
-        if (!confirm('¿Está seguro de eliminar las filas seleccionadas?')) return;
+        // Mostrar el modal de confirmación
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+        const confirmDeleteButton = document.getElementById('confirmDelete');
 
-        showSavingOverlay(true);
-        
-        fetch('/clientes_factura/eliminar/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({ ids: selectedIds })
-        })
-        .then(response => {
-            if (response.ok) {
-                window.location.reload();
-            }
-        })
-        .finally(() => showSavingOverlay(false));
+        // Limpiar event listeners previos
+        confirmDeleteButton.replaceWith(confirmDeleteButton.cloneNode(true));
+        const newConfirmDeleteButton = document.getElementById('confirmDelete');
+
+        // Manejar la confirmación de eliminación
+        const handleDelete = () => {
+            deleteModal.hide();
+            showSavingOverlay(true);
+
+            fetch('/clientes_factura/eliminar/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ ids: selectedIds })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                }
+            })
+            .finally(() => showSavingOverlay(false));
+        };
+
+        // Asignar el evento de confirmación
+        newConfirmDeleteButton.addEventListener('click', handleDelete, { once: true });
+
+        // Mostrar el modal
+        deleteModal.show();
     };
 
     // Función para mostrar modal de confirmación de plantilla POST-GUARDADO
@@ -165,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(result => {
             if (result.status === 'success') {
-                if (hasNewRows || selectedIds.length > 0) {
+                if (hasNewRows && selectedIds.length > 0) {
                     const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
                     const confirmButton = document.getElementById('confirmGenerate');
                     
@@ -183,7 +199,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (!sessionStorage.getItem('pendingTemplateGeneration')) {
                             window.location.reload();
                         }
-                        window.location.reload();
                     };
 
                     confirmationModal._element.addEventListener('hidden.bs.modal', handleClose, {once: true});
@@ -263,31 +278,6 @@ document.addEventListener('DOMContentLoaded', function () {
             .filter(id => id && id !== "undefined");
         return selectedIds;
     }
-
-    // Eliminar filas seleccionadas
-    window.deleteSelectedRows = function() {
-        const selectedIds = getSelectedRows();
-        if (selectedIds.length === 0) return;
-
-        if (!confirm('¿Está seguro de eliminar las filas seleccionadas?')) return;
-
-        showSavingOverlay(true);
-        
-        fetch('/clientes_factura/eliminar/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({ ids: selectedIds })
-        })
-        .then(response => {
-            if (response.ok) {
-                window.location.reload();
-            }
-        })
-        .finally(() => showSavingOverlay(false));
-    };
 
     // Función para mostrar modal de plantilla - Global
     window.showTemplateConfirmationModal = function() {
