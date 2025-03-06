@@ -186,6 +186,18 @@ def clientes_factura_guardar(request):
             return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
     return JsonResponse({'status': 'error', 'error': 'Método no permitido.'}, status=405)
 
+@csrf_exempt
+def eliminar_facturas(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            ids = data.get('ids', [])
+            FacturacionClientes.objects.filter(ConsecutivoId__in=ids).delete()
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
+    return JsonResponse({'status': 'error'}, status=400)
+
 def filtrar_facturacion(form, clientes_contratos, facturacion_clientes):
     # Recuperar los filtros del formulario
     anio = form.cleaned_data.get('Anio')
