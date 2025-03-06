@@ -28,6 +28,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
      
+    // Función para deshabilitar UI
+    function disableUI(disable) {
+        document.querySelectorAll('input, button, select').forEach(element => {
+            if (element.id !== 'saving-overlay') { // Excluir el overlay
+                element.disabled = disable;
+            }
+        });
+    }
+
     // Prevenir el envío del formulario al presionar la tecla Enter
     function preventFormSubmissionOnEnter() {
         document.querySelectorAll('form').forEach(form => {
@@ -70,94 +79,219 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 800);
     }
 
-    // Función para guardar todas las filas
-    function saveAllRows() {
-        const rows = document.querySelectorAll('tbody tr');
-        const data = [];
+    // Funciones para manejar selecciones
+    function toggleDeleteButton() {
+        const selectedIds = getSelectedRows();
+        sessionStorage.setItem('selectedRows', JSON.stringify(selectedIds)); // Guardar en sessionStorage
+        document.getElementById('delete-button').disabled = selectedIds.length === 0;
+        document.getElementById('generate-template').disabled = selectedIds.length === 0;
+    }
 
-        rows.forEach((row, index) => {
-            const rowData = {};
-            const inputs = row.querySelectorAll('input');
-
-            // Recopilar todos los valores de los inputs en la fila
-            inputs.forEach(input => {
-                if (input.name === 'is_new_line') {
-                    // Solo enviar el flag si está presente
-                    if (input.value === 'true') {
-                        rowData[input.name] = input.value;
-                    }
-                } else if (input.name) {
-                    rowData[input.name] = input.value || null;
-                }
-            });
-
-            // Añadir el id de la fila
-            const rowId = row.getAttribute('id');
-            if (rowId) {
-                rowData['ConsecutivoId'] = rowId.replace('row-', '');
-            }
-
-            // Añadir los datos adicionales
-            rowData['Anio'] = window.originalAnio;
-            rowData['Mes'] = window.originalMes;
-
-            // Verificar si los datos ingresados por el usuario son válidos
-            const userInputs = ['Horas', 'Valor_Horas', 'Dias', 'Valor_Dias', 'Meses', 'Valor_Meses', 'Bolsa', 'Valor_Bolsa', 'Valor', 'Descripcion', 'Numero_Factura', 'IVA', 'Referencia', 'Ceco', 'Sitio_Serv'];
-            const hasValidUserData = userInputs.some(field => rowData[field] !== null && rowData[field] !== '' && rowData[field] !== '0');
-
-            // Verificar si la fila tiene datos válidos antes de añadirla
-            if (hasValidUserData && rowData['ClienteId'] && rowData['LineaId']) {
-                data.push(rowData);
-            }
+    document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const allChecked = document.querySelectorAll('.row-checkbox:checked').length === 
+                             document.querySelectorAll('.row-checkbox').length;
+            document.getElementById('select-all').checked = allChecked;
+            toggleDeleteButton();
         });
+    });
 
-        showSavingMessage(true);
+    // Modificar el evento del select-all
+    document.getElementById('select-all').addEventListener('change', function() {
+        document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        toggleDeleteButton(); // Añadir esta línea para actualizar los botones
+    });
 
-        // Realizar la petición para guardar los datos
+    // Función de eliminación - Modificada para uso global
+    window.deleteSelectedRows = function() {
+        const selectedIds = getSelectedRows();
+        if (selectedIds.length === 0) return;
+
+        if (!confirm('¿Está seguro de eliminar las filas seleccionadas?')) return;
+
+        showSavingOverlay(true);
+        
+        fetch('/clientes_factura/eliminar/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ ids: selectedIds })
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        })
+        .finally(() => showSavingOverlay(false));
+    };
+
+    // Función para mostrar modal de confirmación de plantilla POST-GUARDADO
+    window.showPostSaveTemplateModal = function() {
+        const modal = new bootstrap.Modal(document.getElementById('generateTemplateModal'));
+        
+        const handleClose = () => {
+            modal._element.removeEventListener('hidden.bs.modal', handleClose);
+            if (sessionStorage.getItem('templateGenerated') === 'true') {
+                sessionStorage.removeItem('templateGenerated');
+                window.location.reload(); // Forzar recarga solo si se generó plantilla
+            }
+        };
+        
+        modal._element.addEventListener('hidden.bs.modal', handleClose);
+        modal.show();
+    };
+
+   // Guarda de saveAllRows
+   function saveAllRows() {
+        const selectedIds = getSelectedRows();
+        showSavingOverlay(true);
+        disableUI(true);
+
         fetch('/clientes_factura/guardar/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken
             },
-            body: JSON.stringify({ data: data })
+            body: JSON.stringify({ data: prepareSaveData() })
         })
         .then(response => response.json())
         .then(result => {
-            showSavingMessage(false);
             if (result.status === 'success') {
-                showMessage('Datos guardados correctamente.', 'success');
-                // Deshabilitar o eliminar el botón de eliminar línea después de guardar
-                document.querySelectorAll('tbody tr').forEach(row => {
-                    const deleteButton = row.querySelector('button[aria-label="Close"]');
-                    if (deleteButton) {
-                        deleteButton.remove(); // Eliminar el botón
-                    }
-                });
-                
-                // Eliminar el flag is_new_line después de guardar
-                document.querySelectorAll('input[name="is_new_line"]').forEach(input => {
-                    input.remove();
-                });
-            } else {
-                showMessage('Error al guardar los datos.', 'danger');
+                if (selectedIds.length > 0) {
+                    const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+                    const confirmButton = document.getElementById('confirmGenerate');
+                    
+                    // Limpiar event listeners previos
+                    confirmButton.replaceWith(confirmButton.cloneNode(true));
+                    const newConfirmButton = document.getElementById('confirmGenerate');
+
+                    const handleConfirmation = () => {
+                        confirmationModal.hide();
+                        sessionStorage.setItem('pendingTemplateGeneration', JSON.stringify(selectedIds));
+                        showPostSaveTemplateModal();
+                    };
+
+                    const handleClose = () => {
+                        confirmationModal._element.removeEventListener('hidden.bs.modal', handleClose);
+                        // Solo recargar si no se confirmó la generación
+                        if (!sessionStorage.getItem('pendingTemplateGeneration')) {
+                            window.location.reload();
+                        }
+                    };
+
+                    confirmationModal._element.addEventListener('hidden.bs.modal', handleClose, {once: true});
+                    newConfirmButton.addEventListener('click', handleConfirmation, {once: true});
+                    
+                    confirmationModal.show();
+                } else {
+                    window.location.reload();
+                }
             }
         })
         .catch(error => {
-            showSavingMessage(false);
             console.error('Error:', error);
-            showMessage('Error de conexión al guardar los datos.', 'danger');
+            showMessage('Error al guardar los cambios.', 'danger');
+        })
+        .finally(() => {
+            showSavingOverlay(false);
+            disableUI(false);
         });
     }
 
-    function showSavingMessage(show) {
-        const savingMessage = document.getElementById('saving-message');
-        if (show) {
-            savingMessage.style.display = 'block';
-        } else {
-            savingMessage.style.display = 'none';
+    // Verificar modal al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        if (sessionStorage.getItem('showTemplateModal') === 'true') {
+            sessionStorage.removeItem('showTemplateModal');
+            showTemplateConfirmationModal();
         }
+    });
+
+    function prepareSaveData() {
+        const rows = document.querySelectorAll('tbody tr');
+        const data = [];
+    
+        rows.forEach((row) => {
+            const rowData = {};
+            const inputs = row.querySelectorAll('input');
+            
+            inputs.forEach(input => {
+                if (input.name) {
+                    rowData[input.name] = input.value;
+                }
+            });
+    
+            const rowId = row.id.replace('row-', '');
+            if (rowId) rowData['ConsecutivoId'] = rowId;
+            
+            rowData['Anio'] = window.originalAnio;
+            rowData['Mes'] = window.originalMes;
+    
+            data.push(rowData);
+        });
+    
+        return data;
     }
+
+    // Restaurar al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedSelection = JSON.parse(sessionStorage.getItem('selectedRows') || '[]');
+        savedSelection.forEach(id => {
+            const checkbox = document.querySelector(`.row-checkbox[data-id="${id}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+        sessionStorage.removeItem('selectedRows');
+    });
+
+    function showSavingOverlay(show) {
+        const overlay = document.getElementById('saving-overlay');
+        overlay.style.display = show ? 'flex' : 'none';
+    }
+
+    function getSelectedRows() {
+        const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked'))
+            .map(checkbox => {
+                const id = checkbox.dataset.id || checkbox.closest('tr').id.replace('row-', '');
+                return id;
+            })
+            .filter(id => id && id !== "undefined");
+        return selectedIds;
+    }
+
+    // Eliminar filas seleccionadas
+    window.deleteSelectedRows = function() {
+        const selectedIds = getSelectedRows();
+        if (selectedIds.length === 0) return;
+
+        if (!confirm('¿Está seguro de eliminar las filas seleccionadas?')) return;
+
+        showSavingOverlay(true);
+        
+        fetch('/clientes_factura/eliminar/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ ids: selectedIds })
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        })
+        .finally(() => showSavingOverlay(false));
+    };
+
+    // Función para mostrar modal de plantilla - Global
+    window.showTemplateConfirmationModal = function() {
+        const modal = new bootstrap.Modal(document.getElementById('templateConfirmationModal'));
+        modal.show();
+    };
 
     function updateRowTotal(row) {
         const horas = parseFloat(row.querySelector('input[name="Horas"]').value) || 0;
@@ -258,6 +392,8 @@ document.addEventListener('DOMContentLoaded', function () {
             newRow.innerHTML = `
                 <td>
                     <button type="button" class="btn btn-danger fas fa-times" aria-label="Close" onclick="removeLine(this)"></button>
+                </td>
+                <td>
                     <input type="text" name="ClienteId" class="form-control" value="${clienteId}" hidden>
                     <input type="hidden" name="is_new_line" value="true">
                 </td>
@@ -321,17 +457,27 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Función para generar la plantilla en formato Excel o JPG
-    function generateTemplate(format) {
-        const rows = document.querySelectorAll('tbody tr'); // Selecciona todas las filas
-        const data = [];
+    function generateTemplate(format, selectedIds) {
+        const validSelectedIds = selectedIds.filter(id => id && id !== "undefined");
 
+        let rowsToProcess = validSelectedIds.length > 0 
+            ? Array.from(document.querySelectorAll('tbody tr')).filter(row => {
+                const rowId = row.id.replace('row-', '');
+                return validSelectedIds.includes(rowId);
+            })
+            : [];
+
+        if (rowsToProcess.length === 0) {
+            rowsToProcess = Array.from(document.querySelectorAll('tbody tr'));
+        }
+
+        const data = [];
         let subtotal = 0;
         let ivaTotal = 0;
 
-        // Recopilar los datos de la tabla
-        rows.forEach(row => {
+        // Recopilar datos solo de las filas seleccionadas
+        rowsToProcess.forEach(row => {
             try {
-                // Verificar si la fila tiene los campos necesarios
                 const referencia = row.querySelector('input[name="Referencia"]')?.value || '';
                 const descripcion = row.querySelector('input[name="Descripcion"]')?.value || '';
                 const horas = parseFloat(row.querySelector('input[name="Horas"]')?.value) || 0;
@@ -344,45 +490,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 const valor_bolsa = parseFloat(row.querySelector('input[name="Valor_Bolsa"]')?.value) || 0;
                 const ceco = row.querySelector('input[name="Ceco"]')?.value || '';
                 const sitio_serv = row.querySelector('input[name="Sitio_Serv"]')?.value || '';
-                const iva = parseFloat(row.querySelector('input[name="IVA"]')?.value) || 0; // Obtener IVA de la fila
+                const iva = parseFloat(row.querySelector('input[name="IVA"]')?.value) || 0;
 
-                // Calcular el valor total de la fila
-                const valor_total = (horas * valor_horas) + (dias * valor_dias) + (meses * valor_meses) + (bolsa * valor_bolsa);
+                const valor_total = (horas * valor_horas) + (dias * valor_dias) + 
+                                (meses * valor_meses) + (bolsa * valor_bolsa);
+                
                 let Valor_Unitario = 0;
-                if (horas !== 0) {
-                    Valor_Unitario = valor_horas;
-                    }
-                else if (dias !== 0) {
-                    Valor_Unitario = valor_dias;
-                    }
-                else if (meses !== 0) {
-                    Valor_Unitario = valor_meses;
-                    }
-                else if (bolsa !== 0) {
-                    Valor_Unitario = valor_bolsa;
-                    }
+                if (horas !== 0) Valor_Unitario = valor_horas;
+                else if (dias !== 0) Valor_Unitario = valor_dias;
+                else if (meses !== 0) Valor_Unitario = valor_meses;
+                else if (bolsa !== 0) Valor_Unitario = valor_bolsa;
+
                 subtotal += valor_total;
-                ivaTotal += valor_total * (iva / 100); // Calcular IVA basado en el valor de la fila
+                ivaTotal += valor_total * (iva / 100);
 
                 if (horas !== 0 || dias !== 0 || meses !== 0 || bolsa !== 0) {
-                    // Agregar los datos necesarios para la plantilla
                     data.push({
                         Referencia: referencia,
                         Concepto: descripcion,
-                        Cantidad: horas || dias || meses || bolsa, // Cantidad puede ser horas, días o meses O BOLSA
+                        Cantidad: horas || dias || meses || bolsa,
                         Valor_Unitario: Valor_Unitario.toFixed(2),
                         Valor_Total: valor_total.toFixed(2),
                         Ceco: ceco,
                         Sitio_Serv: sitio_serv
                     });
                 }
-
             } catch (error) {
                 console.error('Error procesando fila:', error);
             }
         });
 
-        // Agregar subtotal, IVA y total
+        // Agregar totales (igual que antes)
         data.push({
             Referencia: '',
             Concepto: 'Subtotal',
@@ -397,8 +535,8 @@ document.addEventListener('DOMContentLoaded', function () {
             Referencia: '',
             Concepto: 'IVA',
             Cantidad: '',
-            Valor_Unitario: `${((ivaTotal / subtotal) * 100).toFixed(2)}%`, // Mostrar el porcentaje
-            Valor_Total: ivaTotal.toFixed(2), // Usar IVA calculado
+            Valor_Unitario: `${((ivaTotal / subtotal) * 100).toFixed(2)}%`,
+            Valor_Total: ivaTotal.toFixed(2),
             Ceco: '',
             Sitio_Serv: ''
         });
@@ -413,24 +551,34 @@ document.addEventListener('DOMContentLoaded', function () {
             Sitio_Serv: ''
         });
 
-        // Enviar los datos al servidor para generar el archivo
-        fetch('/clientes_factura/generar_plantilla/', {
+        return fetch('/clientes_factura/generar_plantilla/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
+                'X-CSRFToken': csrfToken,
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache'
             },
-            body: JSON.stringify({ data: data, format: format })
+            body: JSON.stringify({ 
+                data: data, 
+                format: format,
+                selectedIds: selectedIds,
+                timestamp: Date.now() // Parámetro único anti-cache
+            })
         })
         .then(response => response.blob())
         .then(blob => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `plantilla.${format}`;
+            // Añadir timestamp al nombre del archivo
+            const timestamp = new Date().getTime();
+            a.download = `plantilla_${format}_${timestamp}.${format}`;
             document.body.appendChild(a);
             a.click();
             a.remove();
+            window.URL.revokeObjectURL(url);
+            return true; // Indicar éxito
         })
         .catch(error => {
             console.error('Error:', error);
@@ -438,15 +586,46 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Función para generar la plantilla en formato Excel
-    function generateTemplateExcel() {
-        generateTemplate('xlsx');
-    }
+   // Modificar funciones de generación para cerrar el modal
+   window.generateTemplateExcel = function() {
+        const selectedIds = getSelectedRows();
+        const isPostSave = selectedIds.length > 0;
 
-    // Función para generar la plantilla en formato JPG
-    function generateTemplateJpg() {
-        generateTemplate('jpg');
-    }
+        generateTemplate('xlsx', selectedIds)
+        .then(success => {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('generateTemplateModal'));
+            modal.hide();
+            
+            if (isPostSave && success) {
+                sessionStorage.removeItem('pendingTemplateGeneration');
+                window.location.reload(); // Recarga solo post-guardado exitoso
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            sessionStorage.removeItem('pendingTemplateGeneration');
+        });
+    };
+
+    window.generateTemplateJpg = function() {
+        const selectedIds = getSelectedRows();
+        const isPostSave = selectedIds.length > 0;
+
+        generateTemplate('jpg', selectedIds)
+        .then(success => {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('generateTemplateModal'));
+            modal.hide();
+            
+            if (isPostSave && success) {
+                sessionStorage.removeItem('pendingTemplateGeneration');
+                window.location.reload(); // Recarga solo post-guardado exitoso
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            sessionStorage.removeItem('pendingTemplateGeneration');
+        });
+    };
 
     // Función para eliminar una línea
     function removeLine(button) {
@@ -460,24 +639,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const anio = document.querySelector('select[name="Anio"]').value;
         const mes = document.querySelector('select[name="Mes"]').value;
         const cliente = document.querySelector('select[name="ClienteId"]').value;
-        const saveButton = document.getElementById('save-button');
-        const addLineButton = document.getElementById('add-line');
-        const generateTemplateButton = document.getElementById('generate-template');
-
-        if (anio && mes && window.searchPerformed) {
-            saveButton.removeAttribute('disabled');
-            
-        } else {
-            saveButton.setAttribute('disabled', 'disabled');
-        }
-
-        if (anio && mes && cliente && window.searchPerformed) {
-            addLineButton.removeAttribute('disabled');
-            generateTemplateButton.removeAttribute('disabled');
-        } else {
-            addLineButton.setAttribute('disabled', 'disabled');
-            generateTemplateButton.setAttribute('disabled', 'disabled');
-        }
+        
+        // Habilitar guardar si hay año y mes
+        document.getElementById('save-button').disabled = !(anio && mes);
+        
+        // Habilitar agregar línea si hay año, mes y cliente
+        document.getElementById('add-line').disabled = !(anio && mes && cliente);
+        
+        // Habilitar generar plantilla si hay selección
+        toggleDeleteButton();
     }
 
     document.getElementById('addLineModal').addEventListener('show.bs.modal', function (event) {

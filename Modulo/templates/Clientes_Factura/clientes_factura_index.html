@@ -55,6 +55,14 @@
                             disabled>
                         <i class="fas fa-save me-2"></i> Guardar
                     </button>
+                    <button id="delete-button" 
+                            class="btn btn-danger btn-lg d-flex align-items-center me-2" 
+                            title="Eliminar" 
+                            type="button" 
+                            onclick="window.deleteSelectedRows()"
+                            disabled>
+                        <i class="fas fa-trash me-2"></i> Eliminar
+                    </button>
                     <!-- Botón Agregar Línea -->
                     <button id="add-line" 
                             class="btn btn-success btn-lg d-flex align-items-center" 
@@ -70,8 +78,7 @@
                             class="btn btn-success btn-lg d-flex align-items-center" 
                             title="GenerateTemplate" 
                             type="button" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#generateTemplateModal" 
+                            onclick="window.showPostSaveTemplateModal()"
                             disabled>
                         <i class="fas fa-download me-2"></i> Generar Plantilla
                     </button>
@@ -107,6 +114,9 @@
                 <table class="table table-primary">
                     <thead>
                         <tr>
+                            <th scope="col">
+                                <input type="checkbox" id="select-all">
+                            </th>
                             <th scope="col">Cliente</th>
                             <th scope="col">Línea</th>
                             <th scope="col">Módulo</th>
@@ -132,6 +142,10 @@
                             {% for factura in cliente_info.Facturas %}
                                 {% if forloop.first %}
                                     <tr id="row-{{ factura.ConsecutivoId }}">
+                                        <td>
+                                            <input type="checkbox" class="row-checkbox" 
+                                                   data-id="{{ factura.ConsecutivoId }}">
+                                        </td>
                                         <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
                                             <strong>{{ cliente_info.Cliente }}</strong>
                                             <input type="text" name="ClienteId" class="form-control" value="{{ cliente_info.ClienteId }}" hidden>
@@ -148,28 +162,28 @@
                                             <input type="text" name="Horas" class="form-control" value="{{ factura.Horas|floatformat:0 }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas|floatformat:0 }}">
+                                            <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas}}">
                                         </td>
                                         <td>
                                             <input type="text" name="Dias" class="form-control" value="{{ factura.Dias|floatformat:0 }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Dias" class="form-control" value="{{ factura.Valor_Dias|floatformat:0 }}">
+                                            <input type="text" name="Valor_Dias" class="form-control" value="{{ factura.Valor_Dias}}">
                                         </td>
                                         <td>
                                             <input type="text" name="Meses" class="form-control" value="{{ factura.Mes|floatformat:0 }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Meses" class="form-control" value="{{ factura.Valor_Meses|floatformat:0 }}">
+                                            <input type="text" name="Valor_Meses" class="form-control" value="{{ factura.Valor_Meses}}">
                                         </td>
                                         <td style="overflow: visible; text-overflow: ellipsis; min-width: 100px;" >
                                             <input type="text" name="Bolsa" class="form-control" value="{{ factura.Bolsa|floatformat:0 }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Bolsa" class="form-control" value="{{ factura.Valor_Bolsa|floatformat:0 }}">
+                                            <input type="text" name="Valor_Bolsa" class="form-control" value="{{ factura.Valor_Bolsa}}">
                                         </td>
                                         <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                            <input type="text" name="Valor" class="form-control" value="{{ factura.Valor|floatformat:0 }}" disabled>
+                                            <input type="text" name="Valor" class="form-control" value="{{ factura.Valor }}" disabled>
                                         </td>
                                         <td>
                                             <input type="text" name="Descripcion" class="form-control" value="{{ factura.Descripcion }}">
@@ -192,6 +206,10 @@
                                     </tr>
                                 {% else %}
                                     <tr id="row-{{ factura.ConsecutivoId }}">
+                                        <td>
+                                            <input type="checkbox" class="row-checkbox" 
+                                                   data-id="{{ factura.ConsecutivoId }}">
+                                        </td>
                                         <td>
                                             <input type="text" name="ClienteId" class="form-control" value="{{ cliente_info.ClienteId }}" hidden>
                                         </td>
@@ -260,7 +278,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="3">Total</th>
+                            <th colspan="4">Total</th>
                             <th data-total-horas>{{ TotalesFacturacion.Total_Horas|floatformat:0 }}</th>
                             <th colspan="1"></th>
                             <th data-total-dias>{{ TotalesFacturacion.Total_Dias|floatformat:0 }}</th>
@@ -281,9 +299,16 @@
         <span id="alert-icon" class="alert-heading"></span>
         <span id="alert-message"></span>
     </div>
-    <div id="saving-message" class="alert alert-info" role="alert" style="display: none;">
-        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-        Guardando...
+    <!-- overlay de guardado -->
+    <div id="saving-overlay" class="saving-overlay" style="display: none;">
+        <div class="saving-content">
+            <div class="spinner-border text-primary" role="status"></div>
+            <span class="mt-2">Guardando cambios...</span>
+        </div>
+    </div>
+    <div id="saving-message" class="alert alert-info saving-alert" role="alert" style="display: none;">
+        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        Guardando cambios...
     </div>
     {% if messages %}
     <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
@@ -335,19 +360,60 @@
 
 <!-- Modal para generar plantilla -->
 <div class="modal fade" id="generateTemplateModal" tabindex="-1" aria-labelledby="generateTemplateModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="generateTemplateModalLabel">Generar Plantilla</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="generateTemplateModalLabel">
+                    <i class="fas fa-file-download me-2"></i>Generar Plantilla
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body text-center">
-                <h5>¿En que formato quieres la plantilla?</h5><br>
-                <button type="button" class="btn btn-success p-3" onclick="generateTemplateExcel()"><i class="fas fa-file-excel me-2"></i> Excel</button>
-                <button type="button" class="btn btn-success p-3" onclick="generateTemplateJpg()"><i class="fas fa-image me-2"></i> Imagen</button>
+            <div class="modal-body text-center py-4">
+                <h5 class="mb-4">Selecciona el formato de descarga</h5>
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="button" 
+                            class="btn btn-success btn-lg d-flex align-items-center"
+                            onclick="generateTemplateExcel()">
+                        <i class="fas fa-file-excel fa-2x me-2"></i>
+                        Excel
+                    </button>
+                    <button type="button" 
+                            class="btn btn-success btn-lg d-flex align-items-center"
+                            onclick="generateTemplateJpg()">
+                        <i class="fas fa-image fa-2x me-2"></i>
+                        Imagen
+                    </button>
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="confirmationModalLabel">
+                    <i class="fas fa-file-export me-2"></i>Generar Plantilla
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="lead">¿Desea generar la plantilla con las filas seleccionadas?</p>
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <button type="button" class="btn btn-lg btn-danger" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>No, Solo Guardar
+                    </button>
+                    <button type="button" class="btn btn-lg btn-success" id="confirmGenerate">
+                        <i class="fas fa-check me-2"></i>Si, Guardar y Generar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
