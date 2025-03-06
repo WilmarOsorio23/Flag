@@ -147,7 +147,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
    // Guarda de saveAllRows
    function saveAllRows() {
+        const data = prepareSaveData();
+        const hasNewRows = data.some(row => !row.ConsecutivoId);
         const selectedIds = getSelectedRows();
+
         showSavingOverlay(true);
         disableUI(true);
 
@@ -157,16 +160,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken
             },
-            body: JSON.stringify({ data: prepareSaveData() })
+            body: JSON.stringify({ data: data })
         })
         .then(response => response.json())
         .then(result => {
             if (result.status === 'success') {
-                if (selectedIds.length > 0) {
+                if (hasNewRows || selectedIds.length > 0) {
                     const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
                     const confirmButton = document.getElementById('confirmGenerate');
                     
-                    // Limpiar event listeners previos
                     confirmButton.replaceWith(confirmButton.cloneNode(true));
                     const newConfirmButton = document.getElementById('confirmGenerate');
 
@@ -178,10 +180,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const handleClose = () => {
                         confirmationModal._element.removeEventListener('hidden.bs.modal', handleClose);
-                        // Solo recargar si no se confirmó la generación
                         if (!sessionStorage.getItem('pendingTemplateGeneration')) {
                             window.location.reload();
                         }
+                        window.location.reload();
                     };
 
                     confirmationModal._element.addEventListener('hidden.bs.modal', handleClose, {once: true});
