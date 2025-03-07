@@ -80,44 +80,22 @@ def verificar_relaciones(request):
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
-
 def referencia_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        
-        # Verificar si se recibieron IDs
-        if not item_ids:
-            return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
-        
-        # Consultar las nóminas usando las IDs
-        ref_data = []
-        for item_id in item_ids:
-            try:
-                ref = Referencia.objects.get(pk=item_id)
-                ref_data.append([
-                    ref.id,
-                    ref.codigoReferencia,
-                    ref.descripcionReferencia
-                ])
-            except Referencia.DoesNotExist:
-                print(f"detalle con ID {item_id} no encontrada.")
-        
-        # Si no hay datos para exportar
-        if not ref_data:
-            return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
+        # Verifica si la solicitud es POST
+        if request.method == 'POST':
+            referencia_ids = request.POST.get('items_to_download')  
+            referencia_ids = list(map(int, referencia_ids.split (','))) 
+            referencia = Referencia.objects.filter(id__in=referencia_ids)
+    
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename="Referencia.xlsx"'
 
-        # Crear DataFrame de pandas
-        df = pd.DataFrame(ref_data, columns=['Id','Codigo','Descripcion'])
-        
-        # Configurar la respuesta HTTP con el archivo Excel
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        response['Content-Disposition'] = 'attachment; filename="Referencias.xlsx"'
-        
-        # Escribir el DataFrame en el archivo Excel
-        df.to_excel(response, index=False)
-        return response
-
-    return response
-
+            data = []
+            for referencias in referencia:
+                data.append([referencias.id,
+                             referencias.codigoReferencia,
+                             referencias.descripcionReferencia])
+            df = pd.DataFrame(data, columns=['Id','Codigo','Descripcion'])
+            df.to_excel(response, index=False)
+            return response
+        return redirect('referencia_index')

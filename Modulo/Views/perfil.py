@@ -73,51 +73,28 @@ def verificar_relaciones(request):
 
 def perfil_eliminar(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
+        item_ids = request.POST.getlist('items_to_download')
         Perfil.objects.filter(PerfilId__in=item_ids).delete()
         messages.success(request, 'Los perfiles seleccionados se han eliminado correctamente.')
         return redirect('perfil_index')
     return redirect('perfil_index')
 
 
-
-
-# Vista para descargar Perfiles seleccionados en formato Excel
 def perfil_descargar_excel(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        
-        # Verificar si se recibieron IDs
-        if not item_ids:
-            return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
-        
-        # Consultar las nóminas usando las IDs
-        perfil_data = []
-        for item_id in item_ids:
-            try:
-                perfil = Perfil.objects.get(pk=item_id)
-                perfil_data.append([
-                    perfil.PerfilId,
-                    perfil.Perfil 
-                ])
-            except Perfil.DoesNotExist:
-                print(f"Perfil con ID {item_id} no encontrada.")
-        
-        # Si no hay datos para exportar
-        if not perfil_data:
-            return HttpResponse("No se encontraron registros de nómina.", status=404)
+        perfil_ids = request.POST.get('items_to_download')
+        perfil_ids = list(map(int, perfil_ids.split (',')))
+        perfil = Perfil.objects.filter(PerfilId__in=perfil_ids)
 
-        # Crear DataFrame de pandas
-        df = pd.DataFrame(perfil_data, columns=['Id','perfil'])
-        
-        # Configurar la respuesta HTTP con el archivo Excel
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        response['Content-Disposition'] = 'attachment; filename="perfil.xlsx"'
-        
-        # Escribir el DataFrame en el archivo Excel
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Perfil.xlsx"'
+
+        data = []
+        for perfiles in perfil:
+            data.append([perfiles.PerfilId,
+                         perfiles.Perfil])
+
+        df = pd.DataFrame(data, columns=['Id','Perfil'])
         df.to_excel(response, index=False)
         return response
-
-    return redirect('perfil_index') 
+    return redirect('perfil_index')    
