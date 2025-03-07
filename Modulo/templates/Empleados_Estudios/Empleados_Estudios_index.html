@@ -30,9 +30,7 @@
             <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar"></button> 
             <form id="download-form" method="POST" action="{% url 'empleados_estudios_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
-                {% for estudio in empleados_estudios_data %} 
-                    <input type="hidden" name="items_to_delete" value="{{ estudio.documentoid }}">
-                {% endfor %}
+                <input type="hidden" name="items_to_download" id="items_to_download">
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
             </form>
             <!-- Botones de Guardar y Cancelar -->  
