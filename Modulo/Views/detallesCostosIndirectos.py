@@ -56,6 +56,31 @@ def detalle_costos_indirectos_eliminar(request):
     return redirect('detalle_costos_indirectos_index')
 
 def detalle_costos_indirectos_descargar_excel(request):
+    if request.method == 'POST':
+        items_selected = request.POST.get('items_to_download')
+        items_selected = list(map(int, items_selected.split (',')))
+
+        detallesCostosIndirectos = Detalle_Costos_Indirectos.objects.filter(Id__in=items_selected)
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="DetalleCostosIndirectos.xlsx"'
+
+        data = []
+        for detalle in detallesCostosIndirectos:
+            data.append([
+                detalle.Id,
+                detalle.Anio,
+                detalle.Mes,
+                detalle.Valor,
+                detalle.CostosId
+            ])
+        df = pd.DataFrame(data, columns=['Id','Anio','Mes','Valor','CostosId'])
+        df.to_excel(response, index=False)
+        return response
+    return redirect('detalle_costos_indirectos_index')
+
+
+'''def detalle_costos_indirectos_descargar_excel(request):
      if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
         
@@ -97,3 +122,4 @@ def detalle_costos_indirectos_descargar_excel(request):
 
 
      return redirect('detalle_costos_indirectos_index')
+'''

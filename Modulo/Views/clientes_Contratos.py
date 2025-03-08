@@ -68,51 +68,29 @@ def clientes_contratos_eliminar(request):
     return redirect('clientes_contratos_index')
 
 def clientes_contratos_descargar_excel(request):
-     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        
-        # Verificar si se recibieron IDs
-        if not item_ids:
-            return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
-        
-        # Consultar los contartos usando las IDs
-        detalles_data = []
-        for item_id in item_ids:
-            try:
-                contrato = ClientesContratos.objects.get(pk=item_id)
-                detalles_data.append([
-                    contrato.ClientesContratosId,
-                    contrato.ClienteId.Nombre_Cliente,
-                    contrato.FechaInicio,
-                    contrato.FechaFin,
-                    contrato.Contrato,
-                    contrato.ContratoVigente,
-                    contrato.OC_Facturar,
-                    contrato.Parafiscales,
-                    contrato.HorarioServicio,
-                    contrato.FechaFacturacion,
-                    contrato.TipoFacturacion,
-                    contrato.Observaciones
+    if request.method == 'POST':
+        clientescontratos_ids = request.POST.get('items_to_download')
+        clientescontratos_ids = list(map(int, clientescontratos_ids.split(',')))
+        clientescontratos = ClientesContratos.objects.filter(ClientesContratosId__in=clientescontratos_ids)
 
-                ])
-            except ClientesContratos.DoesNotExist:
-                print(f"detalle con ID {item_id} no encontrada.")
-        
-        # Si no hay datos para exportar
-        if not detalles_data:
-            return HttpResponse("No se encontraron registros de tarifas de consultores.", status=404)
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Clientes_Contactos.xlsx"'
 
-        # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id', 'Cliente', 'FechaInicio', 'FechaFin', 'Contrato', 'ContratoVigente', 'OC_Facturar', 'Parafiscales', 'HorarioServicio', 'FechaFacturacion', 'TipoFacturacion', 'Observaciones'])
-        
-        # Configurar la respuesta HTTP con el archivo Excel
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        response['Content-Disposition'] = 'attachment; filename="ClientesContratos.xlsx"'
-        
-        # Escribir el DataFrame en el archivo Excel
+        data = []
+        for clientescontrato in clientescontratos:
+            data.append([clientescontrato.ClientesContratosId,
+                         clientescontrato.ClienteId.Nombre_Cliente,
+                         clientescontrato.FechaInicio,
+                         clientescontrato.FechaFin,
+                         clientescontrato.Contrato,
+                         clientescontrato.ContratoVigente,
+                         clientescontrato.OC_Facturar,
+                         clientescontrato.Parafiscales,
+                         clientescontrato.HorarioServicio,
+                         clientescontrato.FechaFacturacion,
+                         clientescontrato.TipoFacturacion,
+                         clientescontrato.Observaciones])
+        df = pd.DataFrame(data, columns=['Id', 'Cliente', 'FechaInicio', 'FechaFin', 'Contrato', 'ContratoVigente', 'OC_Facturar', 'Parafiscales', 'HorarioServicio', 'FechaFacturacion', 'TipoFacturacion', 'Observaciones'])
         df.to_excel(response, index=False)
         return response
-     return response
-
+    return redirect('clientes_contratos_index')

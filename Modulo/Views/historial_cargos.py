@@ -53,41 +53,24 @@ def historial_cargos_eliminar(request):
 
 def historial_cargos_descargar_excel(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        
-        # Verificar si se recibieron IDs
-        if not item_ids:
-            return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
-        
-        # Consultar las nóminas usando las IDs
-        detalles_data = []
-        for item_id in item_ids:
-            try:
-                cargo = Historial_Cargos.objects.get(pk=item_id)
-                detalles_data.append([
-                    cargo.id,
-                    cargo.documentoId.Nombre,
-                    cargo.cargoId,
-                    cargo.FechaInicio,
-                    cargo.FechaFin,
-                ])
-            except Historial_Cargos.DoesNotExist:
-                print(f"detalle con ID {item_id} no encontrada.")
-        
-        # Si no hay datos para exportar
-        if not detalles_data:
-            return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
+        items_selected = request.POST.get('items_to_download')
+        items_selected = list(map(int, items_selected.split (','))) 
 
-        # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','Nombre Empleado','cargoId','FechaInicio','FechaFin'])
-        
-        # Configurar la respuesta HTTP con el archivo Excel
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
+        historialCargos = Historial_Cargos.objects.filter(id__in=items_selected)
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="HistorialCargos.xlsx"'
-        
-        # Escribir el DataFrame en el archivo Excel
+
+        data = []
+        for item in historialCargos:
+            data.append([
+                item.id,
+                item.documentoId.Nombre,
+                item.cargoId,
+                item.FechaInicio,
+                item.FechaFin,
+            ])
+        df = pd.DataFrame(data, columns=['Id','Nombre Empleado','cargoId','FechaInicio','FechaFin'])
         df.to_excel(response, index=False)
         return response
-    return response
+    return redirect('historial_cargos_index')

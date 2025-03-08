@@ -368,6 +368,7 @@ class Detalle_Costos_Indirectos(models.Model):
         db_table = 'Detalle_Costos_Indirectos'
 
 class Total_Costos_Indirectos(models.Model):
+    id = models.AutoField(primary_key=True)
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
     Total = models.DecimalField(max_digits=15, decimal_places=2)

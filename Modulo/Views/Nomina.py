@@ -80,8 +80,33 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
         return JsonResponse({'error': 'Método no permitido'}, status=405)
     
-
 def nomina_descargar_excel(request):
+    if request.method == 'POST':
+        items_selected = request.POST.get('items_to_download')
+        items_selected = list(map(int, items_selected.split (','))) 
+
+        nominas = Nomina.objects.filter(NominaId__in=items_selected)
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Nomina.xlsx"'
+
+        data = []
+        for nomina in nominas:
+            data.append([
+                nomina.Anio,
+                nomina.Mes,
+                nomina.Documento.Documento,
+                nomina.Documento.Nombre,
+                nomina.Salario,
+                nomina.Cliente.Nombre_Cliente,
+            ])
+        df = pd.DataFrame(data, columns=['Año','Mes','Documento','Nombre Empleado','Salario','Cliente'])
+        df.to_excel(response, index=False)
+        return response
+    return redirect('nomina_index')
+
+
+'''def nomina_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
         
@@ -122,5 +147,5 @@ def nomina_descargar_excel(request):
         df.to_excel(response, index=False)
         return response
 
-    return redirect('nomina_index')
+    return redirect('nomina_index')'''
     
