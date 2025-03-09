@@ -5,7 +5,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
 from Modulo.forms import ConsultoresForm
-from Modulo.models import Consultores, Empleado
+from Modulo.models import Consultores, Empleado, Linea, Modulo, Perfil
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 
@@ -31,26 +31,48 @@ def consultores_crear(request):
 def consultores_editar(request, id):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body.decode('utf-8'))
+            data = json.loads(request.body)
             consultor = get_object_or_404(Consultores, Documento=id)
 
-            # Verifica y convierte valores vacíos a None
-            for key, value in data.items():
-                if value == "" or value == "-":
-                    data[key] = None
+            consultor.Nombre = data.get('Nombre', consultor.Nombre)
+            consultor.Empresa = data.get('Empresa', consultor.Empresa)
+            consultor.Profesion = data.get('Profesion', consultor.Profesion)
 
-            form = ConsultoresForm(data, instance=consultor)
+            # Obtener instancias de modelos relacionados
+            consultor.LineaId = get_object_or_404(Linea, pk=data.get('LineaId')) if data.get('LineaId') else consultor.LineaId
+            consultor.ModuloId = get_object_or_404(Modulo, pk=data.get('ModuloId')) if data.get('ModuloId') else consultor.ModuloId
+            consultor.PerfilId = get_object_or_404(Perfil, pk=data.get('PerfilId')) if data.get('PerfilId') else consultor.PerfilId
+            
 
-            if form.is_valid():
-                consultor.full_clean()  # Validar los datos
-                form.save()
-                return JsonResponse({'status': 'success','consultor': data})
-            else:
-                return JsonResponse({'errors': form.errors}, status=400)
+            consultor.Estado = data.get('Estado', consultor.Estado) == 'True'
+            consultor.Fecha_Ingreso = data.get('Fecha_Ingreso', consultor.Fecha_Ingreso)
+            consultor.Fecha_Retiro = data.get('Fecha_Retiro', consultor.Fecha_Retiro) or None
+            consultor.Telefono = data.get('Telefono', consultor.Telefono) or None
+            consultor.Direccion = data.get('Direccion', consultor.Direccion) or None
+            consultor.Fecha_Operacion = data.get('Fecha_Operacion', consultor.Fecha_Operacion) or None
+            consultor.Certificado = data.get('Certificado', consultor.Certificado)
+            consultor.Certificaciones = data.get('Certificaciones', consultor.Certificaciones) or None
+            consultor.Fecha_Nacimiento = data.get('Fecha_Nacimiento', consultor.Fecha_Nacimiento)
+            consultor.Anio_Evaluacion = data.get('Anio_Evaluacion', consultor.Anio_Evaluacion) or None
+            consultor.NotaEvaluacion = data.get('NotaEvaluacion', consultor.NotaEvaluacion) or None
+
+            # Validación adicional: Si Estado es False y no hay Fecha_Retiro, no permitir guardar
+            if not consultor.Estado and not consultor.Fecha_Retiro:
+                return JsonResponse({'error': 'No se puede desactivar un consultor sin una fecha de retiro.'}, status=400)
+
+            consultor.full_clean()
+            consultor.save()
+
+            return JsonResponse({'status': 'success'})
         except Consultores.DoesNotExist:
             return JsonResponse({'error': 'Consultor no encontrado'}, status=404)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+        except Exception as e:
+            # Capturar cualquier otra excepción y registrar el error
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'error': str(e)}, status=500)
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
     

@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        let row = selected[0].closest('tr');
+        let row = selected[0].closest('tbody tr');
         let id = selected[0].value;
         let data = {
             'TipoDocumentoID': row.querySelector('select[name="TipoDocumentoID"]').value,
@@ -259,16 +259,16 @@ document.addEventListener('DOMContentLoaded', function() {
             'ModuloId': row.querySelector('select[name="ModuloId"]').value,
             'PerfilId': row.querySelector('select[name="PerfilId"]').value,
             'Estado': row.querySelector('select[name="Estado"]').value,
-            'Fecha_Ingreso': row.querySelector('input[name="Fecha_Ingreso"]').value,
-            'Fecha_Retiro': row.querySelector('input[name="Fecha_Retiro"]').value,
-            'Telefono': row.querySelector('input[name="Telefono"]').value,
-            'Direccion': row.querySelector('input[name="Direccion"]').value,
-            'Fecha_Operacion': row.querySelector('input[name="Fecha_Operacion"]').value,
+            'Fecha_Ingreso': row.querySelector('input[name="Fecha_Ingreso"]').value || null,
+            'Fecha_Retiro': row.querySelector('input[name="Fecha_Retiro"]').value || null,
+            'Telefono': row.querySelector('input[name="Telefono"]').value || null,
+            'Direccion': row.querySelector('input[name="Direccion"]').value || null,
+            'Fecha_Operacion': row.querySelector('input[name="Fecha_Operacion"]').value || null,
             'Certificado': row.querySelector('select[name="Certificado"]').value,
-            'Certificaciones': row.querySelector('input[name="Certificaciones"]').value,
-            'Fecha_Nacimiento': row.querySelector('input[name="Fecha_Nacimiento"]').value,
-            'Anio_Evaluacion': row.querySelector('input[name="Anio_Evaluacion"]').value,
-            'NotaEvaluacion': row.querySelector('input[name="NotaEvaluacion"]').value
+            'Certificaciones': row.querySelector('input[name="Certificaciones"]').value || null,
+            'Fecha_Nacimiento': row.querySelector('input[name="Fecha_Nacimiento"]').value || null,
+            'Anio_Evaluacion': row.querySelector('input[name="Anio_Evaluacion"]').value || null,
+            'NotaEvaluacion': row.querySelector('input[name="NotaEvaluacion"]').value || null
         };
         console.log(data);
 

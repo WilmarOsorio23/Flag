@@ -132,12 +132,12 @@
                                         <option value="False" {% if not consultor.Certificado %}selected{% endif %}>NO</option>
                                     </select>
                                 </td>
-                                <td><input type="text" name="Certificaciones" class="form-control-plaintext" value="{{ consultor.Certificaciones }}" readonly style="width: 150px;"></td>
+                                <td><input type="text" name="Certificaciones" class="form-control-plaintext" value="{{ consultor.Certificaciones|default_if_none:'' }}" readonly style="width: 150px;"></td>
                                 <td><input type="date" name="Fecha_Nacimiento" class="form-control-plaintext" value="{{ consultor.Fecha_Nacimiento|date:'Y-m-d' }}" readonly style="width: 150px;"></td>
-                                <td><input type="number" name="Anio_Evaluacion" class="form-control-plaintext" value="{{ consultor.Anio_Evaluacion }}" readonly style="width: 150px;"></td>
-                                <td><input type="text" name="NotaEvaluacion" class="form-control-plaintext" value="{{ consultor.NotaEvaluacion }}" readonly style="width: 150px;"></td>
-                                <td><input type="text" name="Telefono" class="form-control-plaintext" value="{{ consultor.Telefono|default:'-' }}" readonly style="width: 150px;"></td>
-                                <td><input type="text" name="Direccion" class="form-control-plaintext" value="{{ consultor.Direccion|default:'-' }}" readonly style="width: 150px;"></td>
+                                <td><input type="number" name="Anio_Evaluacion" class="form-control-plaintext" value="{{ consultor.Anio_Evaluacion|default_if_none:'' }}" readonly style="width: 150px;"></td>
+                                <td><input type="text" name="NotaEvaluacion" class="form-control-plaintext" value="{{ consultor.NotaEvaluacion|default_if_none:'' }}" readonly style="width: 150px;"></td>
+                                <td><input type="text" name="Telefono" class="form-control-plaintext" value="{{ consultor.Telefono|default_if_none:'' }}" readonly style="width: 150px;"></td>
+                                <td><input type="text" name="Direccion" class="form-control-plaintext" value="{{ consultor.Direccion|default_if_none:'' }}" readonly style="width: 150px;"></td>
                             </tr>
                             {% empty %}
                             <tr>
