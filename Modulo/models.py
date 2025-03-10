@@ -215,7 +215,7 @@ class Consultores(models.Model):
     Fecha_Retiro = models.DateField(null=True, blank=True)
     Direccion = models.CharField(max_length=255, null=True, blank=True, verbose_name="Dirección")
     Telefono = models.CharField(max_length=20, null=True, blank=True, verbose_name="Teléfono")
-    Fecha_Operacion = models.DateTimeField(default=timezone.now)
+    Fecha_Operacion = models.DateField(null=True, blank=True)
     Certificado = models.BooleanField(default=True)
     Certificaciones = models.CharField(max_length=255, null=True, blank=True)  # Ensure this field is properly defined
     Fecha_Nacimiento = models.DateField(null=True, blank=True)

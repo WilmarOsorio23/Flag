@@ -5,9 +5,10 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
 from Modulo.forms import ConsultoresForm
-from Modulo.models import Consultores, Empleado, Linea, Modulo, Perfil
+from Modulo.models import Consultores, Empleado, Linea, Modulo, Perfil, Tarifa_Consultores
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ValidationError
 
 
 def consultores_index(request):
@@ -68,6 +69,9 @@ def consultores_editar(request, id):
             return JsonResponse({'error': 'Consultor no encontrado'}, status=404)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+        except ValidationError as ve:
+            # Capturar errores de validación específicos
+            return JsonResponse({'error': ve.message_dict}, status=400)
         except Exception as e:
             # Capturar cualquier otra excepción y registrar el error
             import traceback
@@ -91,26 +95,35 @@ def verificar_relaciones(request):
         data = json.loads(request.body)
         ids = data.get('ids', [])
         try:
-                # Verifica si los módulos están relacionados
-                relacionados = []
-                for id in ids:
-                    if (
-                        Empleado.objects.filter(CargoId=id).exists()
-                    ): 
-                        relacionados.append(id)
-
-                if relacionados:
-                    return JsonResponse({
-                        'isRelated': True,
-                        'ids': relacionados
-                    })
-                else:
-                    return JsonResponse({'isRelated': False})
                 
+            # Verifica que los ids estén presentes y bien formados
+            if not ids:
+                return JsonResponse({'error': 'No se han enviado IDs'}, status=400)
+            
+            # Lista para almacenar los IDs de los clientes relacionados
+            relacionados = []
+            
+            for id in ids:
+                # Verifica si el cliente está relacionado con otros registros
+                is_related = (
+                    #Empleado.objects.filter(CargoId=id).exists() or
+                    Tarifa_Consultores.objects.filter(documentoId=id).exists()
+                )
+
+                if is_related:
+                    relacionados.append(id)
+
+            if relacionados:
+                return JsonResponse({'isRelated': True, 'ids': relacionados})
+            else:
+                return JsonResponse({'isRelated': False})
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-        
-    return JsonResponse({'error': 'Cargo no permitido'}, status=405)
+            return JsonResponse({'error': f'Error en servidor: {str(e)}'}, status=500)
+
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def make_timezone_unaware(fecha):
     # Verifica si la fecha es un objeto datetime con zona horaria
@@ -136,7 +149,7 @@ def consultores_descargar_excel(request):
                 fecha_nacimiento = make_timezone_unaware(consultor.Fecha_Nacimiento)
 
                 data.append([
-                    consultor.TipoDocumentoID or '-',
+                    consultor.TipoDocumentoID.Nombre or '-',
                     consultor.Documento or '-',
                     consultor.Nombre or '-',
                     consultor.Empresa or '-',
@@ -147,14 +160,14 @@ def consultores_descargar_excel(request):
                     consultor.Estado if consultor.Estado is not None else '-',
                     fecha_ingreso if fecha_ingreso is not None else '-',
                     fecha_retiro if fecha_retiro is not None else '-',
-                    consultor.Telefono or '-',
-                    consultor.Direccion or '-',
+                    consultor.Telefono,
+                    consultor.Direccion,
                     fecha_operacion if fecha_operacion is not None else '-',
                     consultor.Certificado if consultor.Certificado is not None else '-',
-                    consultor.Certificaciones or '-',
+                    consultor.Certificaciones,
                     fecha_nacimiento if fecha_nacimiento is not None else '-',
-                    consultor.Anio_Evaluacion or '-',
-                    consultor.NotaEvaluacion or '-',
+                    consultor.Anio_Evaluacion,
+                    consultor.NotaEvaluacion,
                 ])
 
             df = pd.DataFrame(data, columns=[

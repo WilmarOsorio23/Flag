@@ -136,8 +136,8 @@
                                 <td><input type="date" name="Fecha_Nacimiento" class="form-control-plaintext" value="{{ consultor.Fecha_Nacimiento|date:'Y-m-d' }}" readonly style="width: 150px;"></td>
                                 <td><input type="number" name="Anio_Evaluacion" class="form-control-plaintext" value="{{ consultor.Anio_Evaluacion|default_if_none:'' }}" readonly style="width: 150px;"></td>
                                 <td><input type="text" name="NotaEvaluacion" class="form-control-plaintext" value="{{ consultor.NotaEvaluacion|default_if_none:'' }}" readonly style="width: 150px;"></td>
-                                <td><input type="text" name="Telefono" class="form-control-plaintext" value="{{ consultor.Telefono|default_if_none:'' }}" readonly style="width: 150px;"></td>
-                                <td><input type="text" name="Direccion" class="form-control-plaintext" value="{{ consultor.Direccion|default_if_none:'' }}" readonly style="width: 150px;"></td>
+                                <td><input type="text" name="Telefono" class="form-control-plaintext" value="{{ consultor.Telefono|default_if_none:'' }}" readonly style="width: 150px;" maxlength="20"></td>
+                                <td><input type="text" name="Direccion" class="form-control-plaintext" value="{{ consultor.Direccion|default_if_none:'' }}" readonly style="width: 150px;" maxlength="255"></td>
                             </tr>
                             {% empty %}
                             <tr>

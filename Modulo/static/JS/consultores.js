@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({ ids }), // Enviar los IDs en el cuerpo de la solicitud
             });
             const data = await response.json(); // Obtener la respuesta como JSON
+            console.log(data);
             return data.isRelated || false; // Si la respuesta indica que están relacionados, retornar true
         } catch (error) {
             console.error('Error verificando relaciones:', error);
@@ -116,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 alertBox.style.display = 'none';
             }, 300); // Tiempo para que la transición termine
-        }, 800);
+        }, 4000);
     }
 
     // Confirmación antes de descargar
@@ -188,10 +189,6 @@ document.addEventListener('DOMContentLoaded', function() {
             input.setAttribute('data-original-value', input.value);
         });
 
-        selects.forEach(select => {
-            select.setAttribute('data-original-value', select.value);
-        });
-
         // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
         document.getElementById('select-all').disabled = true;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
@@ -243,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.saveRow = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length != 1) {
-            showMessage('Error al guardar: No hay un gasto seleccionado.', 'danger');
+            showMessage('Error al guardar: No hay un consultor seleccionado.', 'danger');
             return;
         }
 
@@ -286,7 +283,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Error al guardar los cambios');
+                return response.json().then(errorData => {
+                    throw new Error(JSON.stringify(errorData));
+                });
             }
             return response.json();
         })
@@ -309,8 +308,30 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error al guardar los cambios:', error);
-            showMessage('Error al guardar los cambios: ' + error.message, 'danger');
-
+            let errorMessage = 'Error al guardar los cambios: ';
+            try {
+                let errorData = JSON.parse(error.message).error;
+                for (let field in errorData) {
+                    errorMessage += `${field}: ${errorData[field].join(', ')}. `;
+                }
+            } catch (e) {
+                errorMessage += error.message;
+            }
+            showMessage(errorMessage.replace(/_/g, ' '), 'danger');
+    
+            // Restaurar los valores originales en caso de error
+            row.querySelectorAll('input.form-control').forEach(input => {
+                if (input.hasAttribute('data-original-value')) {
+                    input.value = input.getAttribute('data-original-value');
+                }
+            });
+    
+            row.querySelectorAll('select.form-control').forEach(select => {
+                if (select.hasAttribute('data-original-value')) {
+                    select.value = select.getAttribute('data-original-value');
+                }
+            });
+    
             disableEditMode(selected,row);
         });
     };
