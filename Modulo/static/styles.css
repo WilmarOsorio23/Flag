@@ -625,6 +625,13 @@ a.fas, .fa {
     background-color: transparent;
 }
 
+.dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 10000 !important;
+    position: absolute;
+}
+
 /* ========================== */
 /*     FILTROS DESIGN      */
 /* ========================== */
@@ -695,6 +702,13 @@ a.fas, .fa {
 .sort-icon i {
     vertical-align: middle;
 }
+
+.dropdown-menu {
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 10000 !important;
+        position: absolute;
+    }
 
 /* ========================== */
 /*     RESPONSIVE DESIGN      */

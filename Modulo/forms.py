@@ -1614,6 +1614,52 @@ class Ind_Operatividad_FilterForm(forms.Form):
         ]
         self.fields['Mes'].choices = meses
 
+class Ind_Totales_FilterForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    Mes = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Mes',
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    ClienteId = forms.ModelMultipleChoiceField(
+        queryset=Clientes.objects.all(),
+        required=False,
+        label="Cliente",
+        widget=forms.CheckboxSelectMultiple()
+    )
+    
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_anio()
+        self.populate_mes()
+
+    def populate_anio(self):
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = meses
+
 class TarifaConsultorFilterForm(forms.Form):
     Nombre = forms.ModelChoiceField(
         queryset=Consultores.objects.values_list('Nombre', flat=True).distinct(),

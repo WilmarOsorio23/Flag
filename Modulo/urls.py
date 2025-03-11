@@ -1,5 +1,5 @@
 from django.urls import path
-from Modulo.Views import Informe_clientes, clientes_factura, indicadores_operatividad, modulo
+from Modulo.Views import Informe_clientes, clientes_factura, indicadores_operatividad, indicadores_totales, modulo
 from Modulo.Views import ipc
 from Modulo.Views import ind
 from Modulo.Views import TipoDocumento
@@ -329,4 +329,9 @@ urlpatterns = [
     path('referencia/verificar-relaciones/', referencia.verificar_relaciones, name='verificar_relaciones'),
     path('referencia/eliminar', referencia.referencia_eliminar, name='referencia_eliminar'),
     path('referencia/descargar_excel', referencia.referencia_descargar_excel, name='referencia_descargar_excel'),
+
+    # Rutas para la tabla Indicadores de totales
+    path('indicadores_totales/', indicadores_totales.indicadores_totales, name='indicadores_totales_index'),
+
     ]
+

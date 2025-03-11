@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block titulo %} Indicadores Totales {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title">Indicadores de Totales</h4>
+    </div>
+    <div class="card-body" style="overflow: hidden;">
+        <div class="container-fluid mb-3">
+            <form method="GET">
+                <div class="row mb-3">
+                    <!-- Filtro Año -->
+                    <div class="col-md-3">
+                        <label for="anio" class="form-label">{{ form.Anio.label }}</label>
+                        {{ form.Anio }}
+                    </div>
+                
+                    <!-- Filtro Mes -->
+                    <div class="col-md-3">
+                        <label for="mes" class="form-label">{{ form.Mes.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownMes"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Meses"
+                            >
+                                Seleccione Meses
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownMes">
+                                {% for checkbox in form.Mes %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <!-- Filtro Línea -->
+                    <div class="col-md-3">
+                        <label for="linea" class="form-label">{{ form.LineaId.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownLinea"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Líneas"
+                            >
+                                Seleccione Líneas
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
+                                {% for checkbox in form.LineaId %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Filtro Clientes -->
+                    <div class="col-md-3">
+                        <label for="linea" class="form-label">{{ form.ClienteId.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownCliente"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Cliente"
+                            >
+                                Seleccione Líneas
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownCliente">
+                                {% for checkbox in form.ClienteId %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>     
+            </div>   
+                                            
+                <div class="row container-fluid">
+                    <div class="col-md-6 text-start">
+                        <button type="submit" name="buscar" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Generar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% if resultados.general %}
+        <!-- Tabla Principal -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th rowspan="2">Mes</th>
+                        <th rowspan="2">Días</th>
+                        {% for cliente in selected_clientes %}
+                        <th colspan="6">{{ cliente.Nombre_Cliente }}</th>
+                        {% endfor %}
+                        <th colspan="6">Totales Generales</th>
+                    </tr>
+                    <tr>
+                        {% for cliente in selected_clientes %}
+                        <th>Trabajado</th>
+                        <th>Costo</th>
+                        <th>Facturado</th>
+                        <th>$ Fact</th>
+                        <th>Pendiente</th>
+                        <th>$ Pend</th>
+                        {% endfor %}
+                        <th>Total H</th>
+                        <th>Total $</th>
+                        <th>Fact H</th>
+                        <th>Fact $</th>
+                        <th>Margen</th>
+                        <th>Diferencia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mes, datos in resultados.general.items %}
+                    <tr>
+                        <td>{{ MESES|get_item:mes }}</td>
+                        <td>{{ datos.dias }}</td>
+                        
+                        {% for cliente in selected_clientes %}
+                        {% with c=datos.clientes|get_item:cliente.Nombre_Cliente %}
+                        <td>{{ c.trabajado|floatformat:2 }}</td>
+                        <td>${{ c.costo|floatformat:2 }}</td>
+                        <td>{{ c.facturado.horas|floatformat:2 }}</td>
+                        <td>${{ c.facturado.valor|floatformat:2 }}</td>
+                        <td>{{ c.pendiente.horas|floatformat:2 }}</td>
+                        <td>${{ c.pendiente.valor|floatformat:2 }}</td>
+                        {% endwith %}
+                        {% endfor %}
+                        
+                        <td>{{ datos.totales_mes.total_horas|floatformat:2 }}</td>
+                        <td>${{ datos.totales_mes.total_costo|floatformat:2 }}</td>
+                        <td>{{ datos.totales_mes.total_facturado|floatformat:2 }}</td>
+                        <td>${{ datos.totales_mes.diferencia|floatformat:2 }}</td>
+                        <td>{{ datos.totales_mes.margen|floatformat:2 }}%</td>
+                        <td>${{ datos.totales_mes.diferencia|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-dark">
+                    <tr>
+                        <td colspan="{{ selected_clientes|length|add:2 }}">Totales Anuales</td>
+                        <td>{{ resultados.totales.total_horas|floatformat:2 }}</td>
+                        <td>${{ resultados.totales.total_costo|floatformat:2 }}</td>
+                        <td>{{ resultados.totales.total_facturado|floatformat:2 }}</td>
+                        <td>${{ resultados.totales.diferencia|floatformat:2 }}</td>
+                        <td>{{ resultados.totales.margen|floatformat:2 }}%</td>
+                        <td>${{ resultados.totales.diferencia|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Sección de Líneas Especiales -->
+        {% for nombre_linea, datos_linea in resultados.lineas_especiales.items %}
+        <div class="mt-5">
+            <h4>{{ nombre_linea }}</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Mes</th>
+                            <th>Trabajado</th>
+                            <th>Costo</th>
+                            <th>Facturado</th>
+                            <th>Pendiente Horas</th>
+                            <th>Pendiente $</th>
+                            <th>Diferencia</th>
+                            <th>Margen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mes, datos in datos_linea.items %}
+                        <tr>
+                            <td>{{ MESES|get_item:mes }}</td>
+                            <td>{{ datos.trabajado|floatformat:2 }}</td>
+                            <td>${{ datos.costo|floatformat:2 }}</td>
+                            <td>${{ datos.facturado|floatformat:2 }}</td>
+                            <td>{{ datos.pendiente_horas|floatformat:2 }}</td>
+                            <td>${{ datos.pendiente_valor|floatformat:2 }}</td>
+                            <td>${{ datos.diferencia|floatformat:2 }}</td>
+                            <td>{{ datos.margen|floatformat:2 }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Sección de Conceptos No Facturables -->
+        <div class="mt-5">
+            <h4>Conceptos No Facturables</h4>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        {% for concepto, valor in resultados.conceptos_no_fact.items %}
+                        <th>{{ concepto }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        {% for concepto, valor in resultados.conceptos_no_fact.items %}
+                        <td>{{ valor|floatformat:2 }}</td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning mt-3">
+            No se encontraron datos con los filtros seleccionados
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'JS/indicadores_totales.js' %}"></script>
+{% endblock %}

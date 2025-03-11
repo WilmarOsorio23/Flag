@@ -525,7 +525,7 @@ class Tarifa_Consultores(models.Model):
         db_table = 'Tarifa_Consultores'
 
 class Moneda(models.Model):
-    id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True) 
     Nombre= models.CharField(max_length=10)
     descripcion = models.CharField(max_length=20)
 
