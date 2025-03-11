@@ -61,41 +61,23 @@ def detalle_certificacion_eliminar(request):
 
 def detalle_certificacion_descargar_excel(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        
-        # Verificar si se recibieron IDs
-        if not item_ids:
-            return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
-        
-        # Consultar las nóminas usando las IDs
-        detalles_data = []
-        for item_id in item_ids:
-            try:
-                detalle = Detalle_Certificacion.objects.get(pk=item_id)
-                detalles_data.append([
-                    detalle.Id,
-                    detalle.Documento.Nombre,
-                    detalle.Fecha_Certificacion,
-                    detalle.CertificacionId,
-                    #detalle.Documento.Documento,
-                ])
-            except Detalle_Certificacion.DoesNotExist:
-                print(f"detalle con ID {item_id} no encontrada.")
-        
-        # Si no hay datos para exportar
-        if not detalles_data:
-            return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
+        items_selected = request.POST.get('items_to_download')
+        items_selected = list(map(int, items_selected.split (','))) 
 
-        # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','Nombre Empleado','Fecha','certificacion'])
-        
-        # Configurar la respuesta HTTP con el archivo Excel
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        response['Content-Disposition'] = 'attachment; filename="DetalleCertificacion.xlsx"'
-        
-        # Escribir el DataFrame en el archivo Excel
+        detalleCertificacion = Detalle_Certificacion.objects.filter(Id__in=items_selected)
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="DetallesCertificacion.xlsx"'
+
+        data = []
+        for detalle in detalleCertificacion:
+            data.append([
+                detalle.Id,
+                detalle.Documento.Nombre,
+                detalle.Fecha_Certificacion,
+                detalle.CertificacionId,
+            ])
+        df = pd.DataFrame(data, columns=['Id','Nombre Empleado','Fecha','certificacion'])
         df.to_excel(response, index=False)
         return response
     return redirect('detalle_certificacion_index')

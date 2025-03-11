@@ -57,7 +57,7 @@ def obtener_consultores(consultores):
             'estado': 'Activo' if consultor.Estado else 'Inactivo',
             'fecha_ingreso': consultor.Fecha_Ingreso.strftime('%Y-%m-%d') if consultor.Fecha_Ingreso else '',
             'fecha_retiro': consultor.Fecha_Retiro.strftime('%Y-%m-%d') if consultor.Fecha_Retiro else '',
-            'fecha_operacion': consultor.Fecha_Operacion.strftime('%Y-%m-%d %H:%M:%S') if consultor.Fecha_Operacion else '',
+            'fecha_operacion': consultor.Fecha_Operacion.strftime('%Y-%m-%d') if consultor.Fecha_Operacion else '',
             'certificado':  'SI' if consultor.Certificado else 'NO',
             'certificaciones': consultor.Certificaciones,
             'fecha_nacimiento': fecha_nacimiento.strftime('%Y-%m-%d') if fecha_nacimiento else '',

@@ -215,43 +215,17 @@ class Consultores(models.Model):
     Fecha_Retiro = models.DateField(null=True, blank=True)
     Direccion = models.CharField(max_length=255, null=True, blank=True, verbose_name="Dirección")
     Telefono = models.CharField(max_length=20, null=True, blank=True, verbose_name="Teléfono")
-    Fecha_Operacion = models.DateTimeField(default=timezone.now)
+    Fecha_Operacion = models.DateField(null=True, blank=True)
     Certificado = models.BooleanField(default=True)
     Certificaciones = models.CharField(max_length=255, null=True, blank=True)  # Ensure this field is properly defined
-    Fecha_Nacimiento = models.DateField()
+    Fecha_Nacimiento = models.DateField(null=True, blank=True)
     Anio_Evaluacion = models.CharField(max_length=4, null=True, blank=True)
     NotaEvaluacion = models.DecimalField(max_digits=4, decimal_places=2,null=True, blank=True)
 
     def clean(self):
-        """
-        Validación personalizada para el modelo Consultores.
-
-        Reglas de validación:
-        - Fecha_Nacimiento: No puede ser una fecha futura.
-        - Anio_Evaluacion: Debe estar entre 1900 y el año actual.
-        - NotaEvaluacion: Debe estar entre 0 y 100.
-
-        Lanza:
-            ValidationError: Si alguna validación falla.
-        """
-        super().clean()
-        # Validar Fecha_Nacimiento
-        if self.Fecha_Nacimiento and self.Fecha_Nacimiento > timezone.now().date():
-            raise ValidationError({'Fecha_Nacimiento': 'La fecha de nacimiento no puede ser una fecha futura.'})
-        
-        # Validar Anio_Evaluacion
-        if self.Anio_Evaluacion:
-            current_year = timezone.now().year
-            if not (1900 <= int(self.Anio_Evaluacion) <= current_year):
-                raise ValidationError({'Anio_Evaluacion': f'El año de evaluación debe estar entre 1900 y {current_year}.'})
-        
-         # Validar NotaEvaluacion
-        if self.NotaEvaluacion is not None:
-            if not (0 <= self.NotaEvaluacion <= 100):
-                raise ValidationError({'NotaEvaluacion': 'La nota de evaluación debe estar entre 0 y 100.'})
-            if self.NotaEvaluacion < 0:
-                raise ValidationError({'NotaEvaluacion': 'La nota de evaluación no puede ser negativa.'})
-
+        # Verificar que Fecha_Ingreso no sea anterior a Fecha_Nacimiento si ambas fechas están presentes
+        if self.Fecha_Nacimiento and self.Fecha_Ingreso and self.Fecha_Ingreso < self.Fecha_Nacimiento:
+            raise ValidationError('La fecha de ingreso no puede ser anterior a la fecha de nacimiento.')
 
     def __str__(self):
         return f'{self.TipoDocumentoID} - {self.Documento} - {self.Nombre} - {self.Certificado} - {self.Certificaciones}'
@@ -368,6 +342,7 @@ class Detalle_Costos_Indirectos(models.Model):
         db_table = 'Detalle_Costos_Indirectos'
 
 class Total_Costos_Indirectos(models.Model):
+    id = models.AutoField(primary_key=True)
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
     Total = models.DecimalField(max_digits=15, decimal_places=2)

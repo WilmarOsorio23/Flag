@@ -45,6 +45,7 @@ def obtener_tarifas_consultores(consultores, tarifas, anios):
             'linea': consultor.LineaId.Linea,
             'documento': consultor.Documento,
             'nombre': consultor.Nombre,
+            'certificado': 'SI' if consultor.Certificado else 'NO',
             'perfil': consultor.PerfilId.Perfil,
             'modulo': consultor.ModuloId.Modulo,
             'tarifas': {anio: [] for anio in anios}
@@ -141,6 +142,7 @@ def exportar_tarifas_consultores_excel(request):
                         consultor['linea'],
                         consultor['documento'],
                         consultor['nombre'],
+                        consultor['certificado'],
                         consultor['perfil'],
                         consultor['modulo'],
                         anio,
@@ -159,8 +161,8 @@ def exportar_tarifas_consultores_excel(request):
             ws.title = "Informe tarifas de consultores"
 
             # Agregar encabezados
-            encabezados = [
-                "Linea", "Documento", "Nombre", "Perfil", "Modulo", 
+            encabezados = [ 
+                "Linea", "Documento", "Nombre", "Certificado", "Perfil", "Modulo", 
                 "Año", "Mes", "Cliente", "Tarifa por hora", "Tarifa por día", 
                 "Tarifa por mes", "Moneda"
             ]

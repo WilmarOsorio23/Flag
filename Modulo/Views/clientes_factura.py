@@ -19,7 +19,7 @@ from collections import defaultdict
 def clientes_factura_guardar(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
+            data = json.loads(request.body) 
             rows = data.get('data', [])
             # Aquí puedes procesar cada fila
             for row in rows:
@@ -39,14 +39,14 @@ def clientes_factura_guardar(request):
                 modulo_id = int(row.get('ModuloId', 0)) if row.get('ModuloId') else 0
                 
                 horas_factura = float(row.get('Horas', 0)) if row.get('Horas') else 0.0
-                valor_horas = float(row.get('Valor_Horas', 0)) if row.get('Valor_Horas') else 0.0
+                valor_horas = float(row.get('Valor_Horas', 0)) if row.get('Valor_Horas') and row.get('Valor_Horas').lower() != 'none' else 0.0
                 dias_factura = float(row.get('Dias', 0)) if row.get('Dias') else 0.0
-                valor_dias = float(row.get('Valor_Dias', 0)) if row.get('Valor_Dias') else 0.0
-                mes_factura = int(row.get('Meses', 0)) if row.get('Meses') else 0
-                valor_meses = float(row.get('Valor_Meses', 0)) if row.get('Valor_Meses') else 0.0
+                valor_dias = float(row.get('Valor_Dias', 0)) if row.get('Valor_Dias') and row.get('Valor_Dias').lower() != 'none' else 0.0
+                mes_factura = int(row.get('Meses', 0)) if row.get('Meses') else 0   
+                valor_meses = float(row.get('Valor_Meses', 0)) if row.get('Valor_Meses') and row.get('Valor_Meses').lower() != 'none' else 0.0
 
                 bolsa = float(row.get('Bolsa', 0)) if row.get('Bolsa') else 0.0
-                valor_bolsa = float(row.get('Valor_Bolsa', 0)) if row.get('Valor_Bolsa') else 0.0
+                valor_bolsa = float(row.get('Valor_Bolsa', 0)) if row.get('Valor_Bolsa') and row.get('Valor_Bolsa').lower() != 'none' else 0.0
 
                 iva = float(row.get('IVA', 0)) if row.get('IVA') else 0.0
 
@@ -66,7 +66,7 @@ def clientes_factura_guardar(request):
                         try:
                             facturacion_cliente = FacturacionClientes.objects.get(ConsecutivoId=consecutivo_id)
                             
-                            # Verificar si los datos han cambiado
+                            # Verificar si los datos han cambiado   
                             if (facturacion_cliente.HorasFactura == horas_factura and
                                 facturacion_cliente.Valor_Horas == valor_horas and
                                 facturacion_cliente.DiasFactura == dias_factura and

@@ -82,13 +82,8 @@
                                 </select>
                             </td>
                             <td><input type="date" name="Fecha_Inicio" class="form-control-plaintext" value="{{ cliente.Fecha_Inicio|date:'Y-m-d' }}" readonly style="width: 150px;"></td>
-                            <td>
-                                {% if not cliente.Activo %}
-                                <input type="date" name="Fecha_Retiro" class="form-control-plaintext" value="{{ cliente.Fecha_Retiro|date:'Y-m-d' }}" readonly style="width: 150px;">
-                                {% else %}
-                                <input type="date" name="Fecha_Retiro" class="form-control-plaintext" value="" readonly style="width: 150px;">
-                                {% endif %}
-                            </td>
+                            
+                            <td><input type="date" name="Fecha_Retiro" class="form-control-plaintext" value="{{ cliente.Fecha_Retiro|date:'Y-m-d' }}" readonly style="width: 150px;"></td>
                             <td><input type="text" name="Direccion" class="form-control-plaintext" value="{{ cliente.Direccion|default_if_none:'' }}" readonly style="width: 150px;"></td>
                             <td><input type="text" name="Telefono" class="form-control-plaintext" value="{{ cliente.Telefono|default_if_none:'' }}" readonly style="width: 150px;"></td>
                             <td><input type="text" name="CorreoElectronico" class="form-control-plaintext" value="{{ cliente.CorreoElectronico|default_if_none:'' }}" readonly style="width: 150px;"></td>

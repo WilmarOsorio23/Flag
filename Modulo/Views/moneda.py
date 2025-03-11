@@ -78,43 +78,21 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
 def moneda_descargar_excel(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        
-        # Verificar si se recibieron IDs
-        if not item_ids:
-            return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
-        
-        # Consultar las nóminas usando las IDs
-        moneda_data = []
-        for item_id in item_ids:
-            try:
-                moneda = Moneda.objects.get(pk=item_id)
-                moneda_data.append([
-                    moneda.id,
-                    moneda.Nombre,
-                    moneda.descripcion
-                ])
-            except Moneda.DoesNotExist:
-                print(f"detalle con ID {item_id} no encontrada.")
-        
-        # Si no hay datos para exportar
-        if not moneda_data:
-            return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
+        moneda_ids = request.POST.get('items_to_download')
+        moneda_ids = list(map(int, moneda_ids.split (',')))
+        moneda = Moneda.objects.filter(id__in=moneda_ids)
 
-        # Crear DataFrame de pandas
-        df = pd.DataFrame(moneda_data, columns=['Id','Moneda','Descripcion'])
-        
-        # Configurar la respuesta HTTP con el archivo Excel
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="Moneda.xlsx"'
-        
-        # Escribir el DataFrame en el archivo Excel
+
+        data = []
+        for monedas in moneda:
+            data.append([monedas.id,
+                         monedas.Nombre,
+                         monedas.descripcion])
+        df = pd.DataFrame(data, columns=['Id','Moneda','Descripcion'])
         df.to_excel(response, index=False)
         return response
     return redirect('moneda_index')
-

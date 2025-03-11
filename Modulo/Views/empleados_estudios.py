@@ -53,44 +53,29 @@ def empleados_estudios_eliminar(request):
 
 def empleados_estudios_descargarExcel(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        
-        # Verificar si se recibieron IDs
-        if not item_ids:
-            return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
-        
-        # Consultar las nóminas usando las IDs
-        detalles_data = []
-        for item_id in item_ids:
-            try:
-                cargo = Empleados_Estudios.objects.get(pk=item_id)
-                detalles_data.append([
-                    cargo.id,
-                    cargo.documentoId.Documento,
-                    cargo.documentoId.Nombre,
-                    cargo.fecha_Inicio,
-                    cargo.fecha_Fin,
-                ])
-            except Empleados_Estudios.DoesNotExist:
-                print(f"detalle con ID {item_id} no encontrada.")
-        
-        # Si no hay datos para exportar
-        if not detalles_data:
-            return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
+        empleadoestudio_ids = request.POST.get('items_to_download')
+        empleadoestudio_ids = list(map(int, empleadoestudio_ids.split (','))) 
+        empleadoestudio = Empleados_Estudios.objects.filter(id__in=empleadoestudio_ids)
 
-        # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','documentoId','Nombre Empleado','FechaInicio','FechaFin'])
-        
-        # Configurar la respuesta HTTP con el archivo Excel
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        response['Content-Disposition'] = 'attachment; filename="EmpleadoEstudios.xlsx"'
-        
-        # Escribir el DataFrame en el archivo Excel
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Empleados_Estudios.xlsx"'
+
+        data = []
+        for empleadoestudios in empleadoestudio:
+            data.append([
+                empleadoestudios.id,
+                empleadoestudios.documentoId.Documento,
+                empleadoestudios.documentoId.Nombre,
+                empleadoestudios.titulo,
+                empleadoestudios.institucion,
+                empleadoestudios.fecha_Inicio,
+                empleadoestudios.fecha_Fin,
+                empleadoestudios.fecha_Graduacion,
+            ])
+        df = pd.DataFrame(data, columns=['Id', 'documentoId', 'Nombre Empleado', 'Titulo', 'Institucion', 'FechaInicio', 'FechaFin', 'FechaGraduacion'])
         df.to_excel(response, index=False)
         return response
-    return response
+    return redirect('empleados_estudios_index')
 
 
 

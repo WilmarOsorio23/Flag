@@ -80,43 +80,24 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+
 def centros_costos_descargar_excel(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        
-        # Verificar si se recibieron IDs
-        if not item_ids:
-            return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
-        
-        # Consultar las nóminas usando las IDs
-        ref_data = []
-        for item_id in item_ids:
-            try:
-                ref = CentrosCostos.objects.get(pk=item_id)
-                ref_data.append([
-                    ref.id,
-                    ref.codigoCeCo,
-                    ref.descripcionCeCo
-                ])
-            except CentrosCostos.DoesNotExist:
-                print(f"detalle con ID {item_id} no encontrada.")
-        
-        # Si no hay datos para exportar
-        if not ref_data:
-            return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
+        centrocostos_ids = request.POST.get('items_to_download')
+        centrocostos_ids = list(map(int, centrocostos_ids.split (','))) 
+        centrocosto = CentrosCostos.objects.filter(id__in=centrocostos_ids)
 
-        # Crear DataFrame de pandas
-        df = pd.DataFrame(ref_data, columns=['Id','Codigo','Descripcion'])
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Centros_Costos.xlsx"'
+
+        data = []
+        for centrocostos in centrocosto:
+            data.append([centrocostos.id,
+                         centrocostos.codigoCeCo,
+                         centrocostos.descripcionCeCo])
         
-        # Configurar la respuesta HTTP con el archivo Excel
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        response['Content-Disposition'] = 'attachment; filename="CentrosCostos.xlsx"'
-        
-        # Escribir el DataFrame en el archivo Excel
+        df = pd.DataFrame(data, columns=['Id','Codigo','Descripcion'])
         df.to_excel(response, index=False)
+
         return response
-
-    return response
-
+    return redirect('centros_costos_index')

@@ -55,42 +55,26 @@ def detalle_gastos_eliminar(request):
      return redirect('detalle_gastos_index')
 
 def detalle_gastos_descargar_excel(request):
-     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        
-        # Verificar si se recibieron IDs
-        if not item_ids:
-            return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
-        
-        # Consultar las nóminas usando las IDs
-        detalles_data = []
-        for item_id in item_ids:
-            try:
-                detalle = Detalle_Gastos.objects.get(pk=item_id)
-                detalles_data.append([
-                    detalle.id,
-                    detalle.Anio,
-                    detalle.Mes,
-                    detalle.Valor,
-                    detalle.GastosId
-                ])
-            except Detalle_Gastos.DoesNotExist:
-                print(f"detalle con ID {item_id} no encontrada.")
-        
-        # Si no hay datos para exportar
-        if not detalles_data:
-            return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
+    if request.method == 'POST':
+        items_selected = request.POST.get('items_to_download')
+        items_selected = list(map(int, items_selected.split (','))) 
 
-        # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','Anio','Mes','Valor','Gasto'])
-        
-        # Configurar la respuesta HTTP con el archivo Excel
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        response['Content-Disposition'] = 'attachment; filename="DetalleGasto.xlsx"'
-        
-        # Escribir el DataFrame en el archivo Excel
+        detalleGastos = Detalle_Gastos.objects.filter(id__in=items_selected)
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="DetalleGastos.xlsx"'
+
+        data = []
+        for detalle in detalleGastos:
+            data.append([
+                detalle.id,
+                detalle.Anio,
+                detalle.Mes,
+                detalle.Valor,
+                detalle.GastosId
+            ])
+        df = pd.DataFrame(data, columns=['Id','Anio','Mes','Valor','Gasto'])
         df.to_excel(response, index=False)
         return response
-     return redirect('detalle_gastos_index')
+    return redirect('detalle_gastos_index')
+

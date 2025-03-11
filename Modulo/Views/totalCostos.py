@@ -55,41 +55,24 @@ def total_costos_indirectos_eliminar(request):
     return redirect('total_costos_indirectos_index')
 
 def total_costos_indirectos_descargar_excel(request):
-     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        
-        # Verificar si se recibieron IDs
-        if not item_ids:
-            return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
-        
-        # Consultar las nóminas usando las IDs
-        detalles_data = []
-        for item_id in item_ids:
-            try:
-                costo = Total_Costos_Indirectos.objects.get(pk=item_id)
-                detalles_data.append([
-                    costo.id,
-                    costo.Anio,
-                    costo.Mes,
-                    costo.Total,
-                ])
-            except Total_Costos_Indirectos.DoesNotExist:
-                print(f"detalle con ID {item_id} no encontrada.")
-        
-        # Si no hay datos para exportar
-        if not detalles_data:
-            return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
+    if request.method == 'POST':
+        items_selected = request.POST.get('items_to_download')
+        items_selected = list(map(int, items_selected.split (','))) 
 
-        # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','Año','Mes','Total'])
-        
-        # Configurar la respuesta HTTP con el archivo Excel
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        response['Content-Disposition'] = 'attachment; filename="TotalCostos.xlsx"'
-        
-        # Escribir el DataFrame en el archivo Excel
+        costosIndirectos = Total_Costos_Indirectos.objects.filter(id__in=items_selected)
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Total_Costos_Indirectos.xlsx"'
+
+        data = []
+        for costo in costosIndirectos:
+            data.append([
+                costo.id,
+                costo.Anio,
+                costo.Mes,
+                costo.Total,
+            ])
+        df = pd.DataFrame(data, columns=['Id','Año','Mes','Total'])
         df.to_excel(response, index=False)
         return response
-     return redirect('total_costos_indirectos_index')
+    return redirect('total_costos_indirectos_index')

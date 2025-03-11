@@ -77,41 +77,20 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-def Tipos_contactos_descargar_excel(request):       
-   if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        
-        # Verificar si se recibieron IDs
-        if not item_ids:
-            return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
-        
-        # Consultar las nóminas usando las IDs
-        detalles_data = []
-        for item_id in item_ids:
-            try:
-                Contacto = TiposContactos.objects.get(pk=item_id)
-                detalles_data.append([
-                    Contacto.contactoId,
-                    Contacto.Descripcion,
-                   
-                ])
-            except TiposContactos.DoesNotExist:
-                print(f"detalle con ID {item_id} no encontrada.")
-        
-        # Si no hay datos para exportar
-        if not detalles_data:
-            return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
-
-        # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','Descripcion'])
-        
-        # Configurar la respuesta HTTP con el archivo Excel
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        response['Content-Disposition'] = 'attachment; filename="TiposContactos.xlsx"'
-        
-        # Escribir el DataFrame en el archivo Excel
+def Tipos_contactos_descargar_excel(request):
+    if request.method == 'POST':
+        tipoContactos_ids = request.POST.get('items_to_download')
+        tipoContactos_ids = list(map(int, tipoContactos_ids.split (',')))
+        tiposContactos = TiposContactos.objects.filter(contactoId__in=tipoContactos_ids)
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="TipoContactos.xlsx"'
+        data = []
+        for tipoContacto in tiposContactos:
+            data.append([
+                tipoContacto.contactoId,
+                tipoContacto.Descripcion,
+            ])
+        df = pd.DataFrame(data, columns=['Id', 'Descripcion'])
         df.to_excel(response, index=False)
         return response
-                                                        
+    return redirect('tipos_contactos_index')

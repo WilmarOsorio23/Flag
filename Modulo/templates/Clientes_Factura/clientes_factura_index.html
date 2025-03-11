@@ -159,19 +159,19 @@
                                             <input type="text" name="ModuloId" class="form-control" value="{{ factura.ModuloId }}" hidden>
                                         </td>
                                         <td>
-                                            <input type="text" name="Horas" class="form-control" value="{{ factura.Horas|floatformat:0 }}">
+                                            <input type="text" name="Horas" class="form-control" value="{{ factura.Horas}}">
                                         </td>
                                         <td>
                                             <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Dias" class="form-control" value="{{ factura.Dias|floatformat:0 }}">
+                                            <input type="text" name="Dias" class="form-control" value="{{ factura.Dias}}">
                                         </td>
                                         <td>
                                             <input type="text" name="Valor_Dias" class="form-control" value="{{ factura.Valor_Dias}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Meses" class="form-control" value="{{ factura.Mes|floatformat:0 }}">
+                                            <input type="text" name="Meses" class="form-control" value="{{ factura.Mes}}">
                                         </td>
                                         <td>
                                             <input type="text" name="Valor_Meses" class="form-control" value="{{ factura.Valor_Meses}}">
@@ -222,31 +222,31 @@
                                             <input type="text" name="ModuloId" class="form-control" value="{{ factura.ModuloId }}" hidden>
                                         </td>
                                         <td>
-                                            <input type="text" name="Horas" class="form-control" value="{{ factura.Horas|floatformat:0 }}">
+                                            <input type="text" name="Horas" class="form-control" value="{{ factura.Horas}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas|floatformat:0 }}">
+                                            <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Dias" class="form-control" value="{{ factura.Dias|floatformat:0 }}">
+                                            <input type="text" name="Dias" class="form-control" value="{{ factura.Dias}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Dias" class="form-control" value="{{ factura.Valor_Dias|floatformat:0 }}">
+                                            <input type="text" name="Valor_Dias" class="form-control" value="{{ factura.Valor_Dias}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Meses" class="form-control" value="{{ factura.Mes|floatformat:0 }}">
+                                            <input type="text" name="Meses" class="form-control" value="{{ factura.Mes}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Meses" class="form-control" value="{{ factura.Valor_Meses|floatformat:0 }}">
+                                            <input type="text" name="Valor_Meses" class="form-control" value="{{ factura.Valor_Meses}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Bolsa" class="form-control" value="{{ factura.Bolsa|floatformat:0 }}">
+                                            <input type="text" name="Bolsa" class="form-control" value="{{ factura.Bolsa}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Bolsa" class="form-control" value="{{ factura.Valor_Bolsa|floatformat:0 }}">
+                                            <input type="text" name="Valor_Bolsa" class="form-control" value="{{ factura.Valor_Bolsa}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor" class="form-control" value="{{ factura.Valor|floatformat:0 }}" disabled>
+                                            <input type="text" name="Valor" class="form-control" value="{{ factura.Valor}}" disabled>
                                         </td>
                                         <td>
                                             <input type="text" name="Descripcion" class="form-control" value="{{ factura.Descripcion }}">
@@ -279,15 +279,15 @@
                     <tfoot>
                         <tr>
                             <th colspan="4">Total</th>
-                            <th data-total-horas>{{ TotalesFacturacion.Total_Horas|floatformat:0 }}</th>
+                            <th data-total-horas>{{ TotalesFacturacion.Total_Horas}}</th>
                             <th colspan="1"></th>
-                            <th data-total-dias>{{ TotalesFacturacion.Total_Dias|floatformat:0 }}</th>
+                            <th data-total-dias>{{ TotalesFacturacion.Total_Dias}}</th>
                             <th colspan="1"></th>
-                            <th data-total-meses>{{ TotalesFacturacion.Total_Meses|floatformat:0 }}</th>
+                            <th data-total-meses>{{ TotalesFacturacion.Total_Meses}}</th>
                             <th colspan="1"></th>
-                            <th data-total-bolsa>{{ TotalesFacturacion.Total_Bolsa|floatformat:0 }}</th>
+                            <th data-total-bolsa>{{ TotalesFacturacion.Total_Bolsa}}</th>
                             <th colspan="1"></th>
-                            <th data-total-valor>{{ TotalesFacturacion.Total_Valor|floatformat:0 }}</th>
+                            <th data-total-valor>{{ TotalesFacturacion.Total_Valor}}</th>
                             <th colspan="11"></th>
                         </tr>
                     </tfoot>
@@ -407,13 +407,39 @@
             <div class="modal-body text-center">
                 <p class="lead">¿Desea generar la plantilla con las filas seleccionadas?</p>
                 <div class="d-flex justify-content-center gap-3 mt-4">
-                    <button type="button" class="btn btn-lg btn-danger" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-lg btn-danger" data-bs-dismiss="modal" onclick="window.location.reload()">
                         <i class="fas fa-times me-2"></i>No, Solo Guardar
                     </button>
                     <button type="button" class="btn btn-lg btn-success" id="confirmGenerate">
                         <i class="fas fa-check me-2"></i>Si, Guardar y Generar
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Eliminación -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="lead">¿Está seguro de que desea eliminar las filas seleccionadas?</p>
+                <p class="text-muted">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">
+                    <i class="fas fa-trash me-2"></i>Eliminar
+                </button>
             </div>
         </div>
     </div>

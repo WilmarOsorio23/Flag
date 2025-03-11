@@ -52,8 +52,31 @@ def total_gastos_eliminar(request):
         messages.success(request, 'Los detalles seleccionados se han eliminado correctamente.')
         return redirect('total_gastos_index')
 
-
 def total_gastos_descargar_excel(request):
+    if request.method == 'POST':
+        items_selected = request.POST.get('items_to_download')
+        items_selected = list(map(int, items_selected.split (','))) 
+
+        totalGastos = Total_Gastos.objects.filter(id__in=items_selected)
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Total_Gasto.xlsx"'
+
+        data = []
+        for totalgasto in totalGastos:
+            data.append([
+                totalgasto.id,
+                totalgasto.Anio,
+                totalgasto.Mes,
+                totalgasto.Total,
+            ])
+        df = pd.DataFrame(data, columns=['Id','Año','Mes','Total'])
+        df.to_excel(response, index=False)
+        return response
+    return redirect('total_gastos_index')
+
+
+'''def total_gastos_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
         
@@ -92,4 +115,4 @@ def total_gastos_descargar_excel(request):
         df.to_excel(response, index=False)
         return response
 
-    return redirect('total_gastos_index')
+    return redirect('total_gastos_index')'''

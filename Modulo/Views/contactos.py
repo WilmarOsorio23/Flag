@@ -56,46 +56,33 @@ def contactos_eliminar(request):
     return redirect('contactos_index')  
 
 def contactos_descargar_excel(request):
-     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        
-        # Verificar si se recibieron IDs
-        if not item_ids:
-            return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
-        
-        # Consultar las nóminas usando las IDs
-        detalles_data = []
-        for item_id in item_ids:
-            try:
-                detalle = Contactos.objects.get(pk=item_id)
-                detalles_data.append([
-                    detalle.id,
-                    detalle.clienteId.Nombre_Cliente,
-                    detalle.contactoId.Descripcion  ,
-                    detalle.Nombre,
-                    detalle.Telefono,
-                    detalle.Direccion,
-                    detalle.CargoId.Cargo,
-                    detalle.activo
-                ])
-            except Contactos.DoesNotExist:
-                print(f"detalle con ID {item_id} no encontrada.")
-        
-        # Si no hay datos para exportar
-        if not detalles_data:
-            return HttpResponse("No se encontraron registros de detalles costos indirectos.", status=404)
-
-        # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','Cliente','Contacto','Nombre','Telefono','Direccion','Cargo','Activo'])
-        
-        # Configurar la respuesta HTTP con el archivo Excel
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
+     
+     # Verifica si la solicitud es POST
+    if request.method == 'POST':
+        contacto_ids = request.POST.get('items_to_download')  
+        # Convierte la cadena de IDs en una lista de enteros
+        contacto_ids = list(map(int, contacto_ids.split (','))) 
+        contacto = Contactos.objects.filter(id__in=contacto_ids)
+        # Crea una respuesta HTTP con el tipo de contenido de Excel
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="Contactos.xlsx"'
-        
-        # Escribir el DataFrame en el archivo Excel
+
+        data = []
+        for contactos in contacto:
+            data.append([contactos.id,
+                         contactos.clienteId.Nombre_Cliente,
+                         contactos.contactoId.Descripcion, 
+                         contactos.Nombre,
+                         contactos.Telefono,
+                         contactos.Direccion,
+                         contactos.Cargo,
+                        contactos.activo])
+
+        df = pd.DataFrame(data, columns=['Id','Cliente','Contacto','Nombre','Telefono','Direccion','Cargo','Activo'])
         df.to_excel(response, index=False)
+
         return response
+
+    return redirect('contactos_index')
      
    

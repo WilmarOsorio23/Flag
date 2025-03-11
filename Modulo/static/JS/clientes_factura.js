@@ -104,29 +104,45 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleDeleteButton(); // Añadir esta línea para actualizar los botones
     });
 
-    // Función de eliminación - Modificada para uso global
+    // Función de eliminación 
     window.deleteSelectedRows = function() {
         const selectedIds = getSelectedRows();
         if (selectedIds.length === 0) return;
 
-        if (!confirm('¿Está seguro de eliminar las filas seleccionadas?')) return;
+        // Mostrar el modal de confirmación
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+        const confirmDeleteButton = document.getElementById('confirmDelete');
 
-        showSavingOverlay(true);
-        
-        fetch('/clientes_factura/eliminar/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({ ids: selectedIds })
-        })
-        .then(response => {
-            if (response.ok) {
-                window.location.reload();
-            }
-        })
-        .finally(() => showSavingOverlay(false));
+        // Limpiar event listeners previos
+        confirmDeleteButton.replaceWith(confirmDeleteButton.cloneNode(true));
+        const newConfirmDeleteButton = document.getElementById('confirmDelete');
+
+        // Manejar la confirmación de eliminación
+        const handleDelete = () => {
+            deleteModal.hide();
+            showSavingOverlay(true);
+
+            fetch('/clientes_factura/eliminar/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ ids: selectedIds })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                }
+            })
+            .finally(() => showSavingOverlay(false));
+        };
+
+        // Asignar el evento de confirmación
+        newConfirmDeleteButton.addEventListener('click', handleDelete, { once: true });
+
+        // Mostrar el modal
+        deleteModal.show();
     };
 
     // Función para mostrar modal de confirmación de plantilla POST-GUARDADO
@@ -147,7 +163,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
    // Guarda de saveAllRows
    function saveAllRows() {
+        const data = prepareSaveData();
+        const hasNewRows = data.some(row => !row.ConsecutivoId);
         const selectedIds = getSelectedRows();
+
         showSavingOverlay(true);
         disableUI(true);
 
@@ -157,16 +176,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken
             },
-            body: JSON.stringify({ data: prepareSaveData() })
+            body: JSON.stringify({ data: data })
         })
         .then(response => response.json())
         .then(result => {
             if (result.status === 'success') {
-                if (selectedIds.length > 0) {
+                if (hasNewRows && selectedIds.length > 0) {
                     const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
                     const confirmButton = document.getElementById('confirmGenerate');
                     
-                    // Limpiar event listeners previos
                     confirmButton.replaceWith(confirmButton.cloneNode(true));
                     const newConfirmButton = document.getElementById('confirmGenerate');
 
@@ -178,7 +196,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const handleClose = () => {
                         confirmationModal._element.removeEventListener('hidden.bs.modal', handleClose);
-                        // Solo recargar si no se confirmó la generación
                         if (!sessionStorage.getItem('pendingTemplateGeneration')) {
                             window.location.reload();
                         }
@@ -261,31 +278,6 @@ document.addEventListener('DOMContentLoaded', function () {
             .filter(id => id && id !== "undefined");
         return selectedIds;
     }
-
-    // Eliminar filas seleccionadas
-    window.deleteSelectedRows = function() {
-        const selectedIds = getSelectedRows();
-        if (selectedIds.length === 0) return;
-
-        if (!confirm('¿Está seguro de eliminar las filas seleccionadas?')) return;
-
-        showSavingOverlay(true);
-        
-        fetch('/clientes_factura/eliminar/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({ ids: selectedIds })
-        })
-        .then(response => {
-            if (response.ok) {
-                window.location.reload();
-            }
-        })
-        .finally(() => showSavingOverlay(false));
-    };
 
     // Función para mostrar modal de plantilla - Global
     window.showTemplateConfirmationModal = function() {

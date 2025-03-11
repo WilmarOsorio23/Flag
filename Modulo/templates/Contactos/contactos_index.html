@@ -31,6 +31,7 @@
             <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" ></button>
             <form id="download-form" method="POST" action="{% url 'contactos_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
+                <input type="hidden" name="items_to_download" id="items_to_download">
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
             </form>
             <button id="save-button" 

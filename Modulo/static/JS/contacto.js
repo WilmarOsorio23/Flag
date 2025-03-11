@@ -27,11 +27,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    selectedCheckboxes.forEach(function(checkbox) {
-        let clonedCheckbox = checkbox.cloneNode();
-        clonedCheckbox.setAttribute('type', 'hidden'); // Ocultarlo en el formulario
-        document.getElementById('download-form').appendChild(clonedCheckbox);
-    });
+    // Captura los valores de los checkboxes seleccionados
+    let selectedValues = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+     // Asigna los valores seleccionados al campo oculto
+     document.getElementById('items_to_download').value = selectedValues.join(',');
    });
 
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -309,10 +308,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('cancel-button').classList.add('d-none');
         
     }
-
-   
-    
-    
 
     
 });

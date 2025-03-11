@@ -18,7 +18,7 @@ html, body {
 
 /* Tarjetas */
 .card {
-    min-height: auto; /* Ocupa al menos el 100% de la altura de la ventana */
+    height: 100%;
     display: flex;     /* Flexbox para manejar el contenido */
     flex-direction: column; /* Acomoda el contenido en una columna */
     border: 2px solid #dee2e6;
@@ -28,15 +28,24 @@ html, body {
 
 /* Ajustes para evitar superposición con la navbar y el sidebar */
 #content {
-    min-height: 100vh; /* Ocupa al menos el 100% de la altura de la ventana */
     display: flex;     /* Flexbox para manejar el contenido */
     flex-direction: column; /* Acomoda el contenido en una columna */
-    margin-left: 20.7vw; /* Ajusta para que el contenido no se solape con el sidebar */
     padding: 1em; /* Espacio alrededor del contenido */
     position: relative;
-    max-width: calc(100% - 20.7vw); /* Deja espacio para el sidebar */
+    max-width: 100%; /* Deja espacio para el sidebar */
     height: 100%;
+    flex-grow: 1;
+    padding-left: 2.5em;
+    width: 100%;
+    overflow: auto;
 }
+.content-principal{
+    display: flex;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
 
 /* ========================== */
 /*          graficos          */
@@ -181,7 +190,6 @@ html, body {
 #sidebar {
     width: 20.5vw;  
     height: 100vh;
-    position: fixed;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0.5em;
@@ -196,8 +204,6 @@ html, body {
 .toggle-btn {
     justify-content: baseline;
     position: fixed;
-    top: 10px;
-    left: 250px;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -207,13 +213,23 @@ html, body {
     transition: transform 0.3s ease;
 }
 #sidebar .sidebar-header{
-    flex-direction: column;
+    position: relative;
+    justify-content: center;
+    align-self: center;
+    flex-direction: row;
     border-radius: 0.5em;
     padding: 1em;
     margin-top: 0.5em;
     margin-bottom: 1.5em;
     opacity: 1;
     transition: opacity 0.5s ease-in-out;
+}
+.img-icon {
+    position: absolute;
+    display: none;
+    top: 0;
+    height: 3.5em;
+    width: 3.5em;
 }
 
 #sidebar::-webkit-scrollbar {
@@ -327,12 +343,22 @@ a[aria-expanded="true"] {
 /* ========================== */
 /*       COLLAPSE STYLING       */
 /* ========================== */
-
-#sidebar .sidebar-header.collapsive {
+.img-fluid{
+    opacity: 1;
+    pointer-events: none;
+}
+.img-fluid.collapsive{
     opacity: 0;
     pointer-events: none;
 }
-
+.img-icon.collapsive {
+    align-self: center;
+    margin-top: 1em;
+    display: block;
+}
+.toggle-btn.collapsive {
+    transform: rotate(180deg);
+}
 .sidebar-item-principal.collapsive span {
     opacity: 0;
     width: 0;
@@ -344,10 +370,6 @@ a[aria-expanded="true"] {
 }
 #sidebar.collapsive {
     width: 8vw;
-}
-#sidebar.collapsive + .toggle-btn{
-    transform: rotate(180deg);
-    left: 6.5vw;
 }
 
 #sidebar ul li a.collapsive span {
@@ -408,19 +430,45 @@ a[aria-expanded="true"] {
 /* ========================== */
 
 .table-responsive {
+    display: fixed;
     margin: 1em 0;
-    overflow-x: auto;
-    overflow-y: auto;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     border-radius: 0.5em;
-    
+    max-height: 62vh;
+    overflow-x: auto;
+}
+.table-responsive-informes {
+    display: flex;
+    margin: 1em 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 0.5em;
+    max-height: 48vh;
+    overflow-x: auto;
+}
+.card-footer {
+    height: auto; /* Ajusta esta altura según tus necesidades */
+    overflow: auto;
+    width: 100%;
+}
+
+.informes-table {
+    height: auto; /* Ajusta esta altura según tus necesidades */
+    overflow: auto;
+    width: 100%;
 }
 
 .table {
     table-layout: auto;     /* Permite que las celdas se ajusten automáticamente */
-    width: 100%;  
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
 }
 
+.tbody {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: auto;
+}
 .table-primary {
     background-color: #f8f9fa; /* Cambia esto al color que prefieras */
 }
@@ -439,8 +487,7 @@ a[aria-expanded="true"] {
     transition: background 0.3s; /* Transición suave para el fondo */
 }
 
-.table th, .table td {  
-    max-width: 100em; /* Puedes ajustar el tamaño aquí */
+.table th, .table td { 
     vertical-align: middle; /* Centrar verticalmente el contenido */
     text-align: center;
     white-space: nowrap; /* Evita que el contenido se divida en varias líneas */
@@ -563,7 +610,26 @@ input[type="checkbox"]:disabled {
 .table-responsive::-webkit-scrollbar-thumb:hover {
     background-color: #0056b3; /* Color al pasar el mouse */
 }
+/* Scrollbar para tablas */
+.table-responsive-informes::-webkit-scrollbar {
+    width: 8px; /* Ancho del scrollbar vertical */
+    height: 8px; /* Altura del scrollbar horizontal */
+}
 
+.table-responsive-informes::-webkit-scrollbar-track {
+    background: #e0e0e0; /* Color de fondo del track */
+    border-radius: 5px;
+}
+
+.table-responsive-informes::-webkit-scrollbar-thumb {
+    background-color: #007bff; /* Color de la barra */
+    border-radius: 5px; /* Bordes redondeados */
+    border: 2px solid #e0e0e0; /* Borde alrededor del thumb para espacio */
+}
+
+.table-responsive-informes::-webkit-scrollbar-thumb:hover {
+    background-color: #0056b3; /* Color al pasar el mouse */
+}
 /* ========================== */
 /*        BUTTONS STYLING     */
 /* ========================== */
@@ -715,6 +781,15 @@ a.fas, .fa {
 /* ========================== */
 
 /* Ajustes para pantallas medianas */
+@media (max-width:1080px) {
+    .table-responsive {
+        max-height: 95%;
+        overflow-x: auto; /* Habilita el desplazamiento horizontal */
+    }
+    .table-responsive-informes {
+        max-height: 84vh;
+    }
+}
 @media (max-width: 992px) {
     #sidebar {
         width: 25vw; /* Reduce el ancho de la sidebar */
@@ -745,6 +820,10 @@ a.fas, .fa {
         max-width: 100%;
         overflow-x: auto; /* Habilita el desplazamiento horizontal */
     }
+    .table-responsive-informes {
+        max-width: 100%;
+        overflow-x: auto; /* Habilita el desplazamiento horizontal */
+    }
     .table {
         font-size: 0.9em; /* Reduce el tamaño de la tabla */
     }
@@ -752,9 +831,6 @@ a.fas, .fa {
 
 /* Ajustes para pantallas extra pequeñas (móviles) */
 @media (max-width: 576px) {
-    #sidebar {
-        display: none; /* Oculta el sidebar en pantallas muy pequeñas */
-    }
     #content {
         width: 100%; /* El contenido ocupa todo el ancho */
         margin-left: 0;
