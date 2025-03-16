@@ -15,6 +15,7 @@ from Modulo.Views import informe_estudios
 from Modulo.Views import informe_consultores
 from Modulo.Views import informe_tarifas_consultores
 from Modulo.Views import informe_tarifas_clientes
+from Modulo.Views import informe_clientes_contratos
 from Modulo.Views import empleado
 from Modulo.Views import consultores
 from Modulo.Views import Nomina
@@ -304,6 +305,10 @@ urlpatterns = [
     path('informes/informes_clientes/', Informe_clientes.clientes_filtrado, name='informes_clientes_index'),
     path('informes/informes_clientes/exportar_clientes_excel', Informe_clientes.exportar_clientes_excel , name='exportar_clientes_excel'),
 
+    #Ruta para informe clientes contratos
+    path('informes/informes_clientes_contratos/', informe_clientes_contratos.clientes_contratos_filtrado, name='informes_clientes_contratos_index'),
+    path('informes/informes_clientes_contratos/exportar_clientes_contratos_excel', informe_clientes_contratos.exportar_clientes_contratos_excel , name='exportar_clientes_contratos_excel'),
+        
     # Rutas para tabla Historial Cargos
     path('historial_cargos/', historial_cargos.historial_cargos_index, name='historial_cargos_index'),
     path('historial_cargos/crear/', historial_cargos.historial_cargos_crear, name='historial_cargos_crear'),

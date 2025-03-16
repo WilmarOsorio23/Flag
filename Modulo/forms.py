@@ -1789,3 +1789,31 @@ class TarifaClienteFilterForm(forms.Form):
     def populate_anio(self):
         anios = Tarifa_Clientes.objects.values_list('anio', flat=True).distinct()
         self.fields['anio'].choices = [(anio, anio) for anio in anios]
+
+class ClientesContratosFilterForm(forms.Form):
+    Nombre_Cliente = forms.ModelChoiceField(
+        queryset=Clientes.objects.values_list('Nombre_Cliente', flat=True).distinct(),
+        required=False,
+        label='Cliente',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    FechaInicio = forms.DateField(
+        required=False,
+        label='Fecha Inicio',
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+    ContratoVigente = forms.ChoiceField(
+        choices=[('', 'Seleccione'), ('True', 'Sí'), ('False', 'No')],
+        required=False,
+        label='Contrato Vigente',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_nombre()
+    
+    def populate_nombre(self):
+        clientes = Clientes.objects.values_list('ClienteId', 'Nombre_Cliente').distinct()
+        self.fields['Nombre_Cliente'].choices = [('', 'Seleccione el Cliente')] + list(clientes)
+        
