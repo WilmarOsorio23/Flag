@@ -105,37 +105,34 @@
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
                                 <select name="ModuloId" class="form-control-plaintext" disabled>
                                     {% for modulo in form.fields.ModuloId.queryset %}
-                                        <option value="{{ modulo.ModuloId }}" {% if empleado.ModuloId == modulo.id %}selected{% endif %}>
+                                        <option value="{{ modulo.ModuloId }}" {% if empleado.ModuloId.Modulo == modulo.Modulo %}selected{% endif %}>
                                             {{ modulo.Modulo }}
                                         </option>
                                     {% endfor %}
                                 </select>
                             </td>
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-
                                 <select name="PerfilId" class="form-control-plaintext" disabled>
                                     {% for perfil in form.fields.PerfilId.queryset %}
-                                        <option value="{{ perfil.PerfilId }}" {% if empleado.PerfilId == perfil.id %}selected{% endif %}>
+                                        <option value="{{ perfil.PerfilId }}" {% if empleado.PerfilId.Perfil == perfil.Perfil %}selected{% endif %}>
                                             {{ perfil.Perfil }}
                                         </option>   
                                     {% endfor %}
                                 </select>
                             </td>
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-
                                 <select name="LineaId" class="form-control-plaintext" disabled>
                                     {% for linea in form.fields.LineaId.queryset %}
-                                        <option value="{{ linea.LineaId }}" {% if empleado.LineaId == linea.id %}selected{% endif %}>
+                                        <option value="{{ linea.LineaId }}" {% if empleado.LineaId.Linea == linea.Linea %}selected{% endif %}>
                                             {{ linea.Linea }}
                                         </option>
                                     {% endfor %}
                                 </select>
                             </td>
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-
                                 <select name="CargoId" class="form-control-plaintext" disabled>
                                     {% for cargo in form.fields.CargoId.queryset %}
-                                        <option value="{{ cargo.CargoId }}" {% if empleado.CargoId == cargo.id %}selected{% endif %}>
+                                        <option value="{{ cargo.CargoId }}" {% if empleado.CargoId.Cargo == cargo.Cargo %}selected{% endif %}>
                                             {{ cargo.Cargo }}
                                         </option>
                                     {% endfor %}
