@@ -42,6 +42,8 @@ from Modulo.Views import tarifa_Clientes
 from Modulo.Views import referencia
 from Modulo.Views import centrosCostos
 from Modulo.Views import informe_facturacion
+from Modulo.Views import informe_historial_cargos
+
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -301,9 +303,14 @@ urlpatterns = [
     #Ruta para informe de tarifas de clientes
     path('informes/tarifas_clientes/', informe_tarifas_clientes.tarifas_clientes_filtrado , name='informes_tarifas_clientes_index'),
     path('informes/tarifas_clientes/exportar_tarifas_clientes_excel', informe_tarifas_clientes.exportar_tarifas_clientes_excel , name='exportar_tarifas_clientes_excel'),
+
     #Ruta para informe de Clientes
     path('informes/informes_clientes/', Informe_clientes.clientes_filtrado, name='informes_clientes_index'),
     path('informes/informes_clientes/exportar_clientes_excel', Informe_clientes.exportar_clientes_excel , name='exportar_clientes_excel'),
+
+    #Ruta para informe de Historial Cargos
+    path('informes/informes_historial_cargos/', informe_historial_cargos.historial_cargos_filtrado, name='informes_historial_cargos_index'),
+    path('informes/informes_historial_cargos/exportar_historial_cargos_excel', informe_historial_cargos.exportar_historial_cargos_excel , name='exportar_historial_cargos_excel'),
 
     #Ruta para informe clientes contratos
     path('informes/informes_clientes_contratos/', informe_clientes_contratos.clientes_contratos_filtrado, name='informes_clientes_contratos_index'),

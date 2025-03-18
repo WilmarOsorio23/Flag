@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}
+  Informe de Historial de Cargos
+{% endblock %}
+
+{% block contenido %}
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4 class="card-title">Informe de Historial de Cargos</h4>
+    </div>
+    <div class="card-body informes-table">
+      <div class="container-fluid mb-3">
+        <!-- Formulario de filtros -->
+        <form method="GET">
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="Empleado" class="form-label">{{ form.Empleado.label }}</label>
+              <div class="dropdown">
+                <button 
+                class="btn btn-outline-primary dropdown-toggle w-100" 
+                type="button" 
+                id="dropdownEmpleado" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false"
+                data-selected-text="Seleccione Empleado">
+                
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownEmpleado">
+                  {% for checkbox in form.Empleado %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                      {{ checkbox.tag }} {{ checkbox.choice_label }}
+                    </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label for="Cargo" class="form-label">{{ form.Cargo.label }}</label>
+              <div class="dropdown">
+                <button 
+                class="btn btn-outline-primary dropdown-toggle w-100" 
+                type="button" 
+                id="dropdownCargo" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false"
+                data-selected-text="Seleccione Cargo">
+              
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownCargo">
+                  {% for checkbox in form.Cargo %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                      {{ checkbox.tag }} {{ checkbox.choice_label }}
+                    </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label for="Linea" class="form-label">{{ form.Linea.label }}</label>
+              <div class="dropdown">
+                <button 
+                class="btn btn-outline-primary dropdown-toggle w-100" 
+                type="button" 
+                id="dropdownLinea" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false"
+                data-selected-text="Seleccione Linea">
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
+                  {% for checkbox in form.Linea %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                      {{ checkbox.tag }} {{ checkbox.choice_label }}
+                    </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">            
+            <div class="col-md-4">
+              <label for="FechaInicio">{{ form.FechaInicio.label }}</label>
+              {{ form.FechaInicio }}
+            </div>
+            <div class="col-md-4">
+              <label for="FechaFin">{{ form.FechaFin.label }}</label>
+              {{ form.FechaFin }}
+            </div>
+          </div>
+          <!-- Botón de búsqueda -->
+          <div class="row">
+            <div class="col-md-6 text-start">
+              <button type="submit" name="buscar" class="btn btn-primary">
+                <i class="fas fa-search"></i> Buscar
+              </button>
+            </div>
+          </div>
+        </form>
+        
+        <!-- Botón para descargar Excel -->
+        <div class="row">
+          <div class="col-md-6 text-end offset-md-6">
+            <form method="GET" action="{% url 'exportar_historial_cargos_excel' %}">
+              {% for emp in form.Empleado.value %}
+              <input type="hidden" name="Empleado" value="{{ emp }}" />
+              {% endfor %}
+              <input type="hidden" name="Cargo" value="{{ form.Cargo.value|default:'' }}" />
+              <input type="hidden" name="Linea" value="{{ form.Linea.value|default:'' }}" />
+              <input type="hidden" name="FechaInicio" value="{{ form.FechaInicio.value|default:'' }}" />
+              <input type="hidden" name="FechaFin" value="{{ form.FechaFin.value|default:'' }}" />
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Descargar Excel
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      {% if show_data %}
+        <!-- Tabla de historial de cargos -->
+        <div class="table-responsive-informes">
+          <table class="table table-bordered table-hover table-primary">
+            <thead>
+              <tr>
+                <th>Documento</th>
+                <th>Nombre</th>
+                <th>Linea</th>
+                <th>Cargo</th>
+                <th>Descripción del Cargo</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Fin</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if historial_cargos_info %}
+                {% for historial in historial_cargos_info %}
+                <tr>
+                    <td>{{ historial.Documento }}</td>
+                    <td>{{ historial.Nombre }}</td>
+                    <td>{{ historial.Linea }}</td>
+                    <td>{{ historial.Cargo }}</td>
+                    <td>{{ historial.DescripcionCargo }}</td>
+                    <td>{{ historial.FechaInicio }}</td>
+                    <td>{{ historial.FechaFin }}</td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                    <td colspan="7">No hay datos disponibles.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="alert alert-warning">{{ mensaje }}</div>
+      {% endif %}
+    </div>
+  </div>
+  <script src="{% static 'JS/informesHistorialCargos.js' %}"></script>
+{% endblock %}

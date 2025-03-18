@@ -37,12 +37,17 @@ def filtrar_empleados_y_nominas(form, empleados, nominas):
 
 # Función para calcular la información del empleado
 def obtener_empleado_info(empleados, nominas, meses):
+    def limpiar_documento(doc):
+        #Elimina puntos, espacios y convierte a string sin espacios adicionales
+        return str(doc).replace('.', '').replace(' ', '').strip()
+    
     empleado_info = []
     nominas_por_documento_y_mes = defaultdict(dict)
 
     # Organizar las nóminas por Documento, Año y Mes para optimizar consultas
     for nomina in nominas:
-        nominas_por_documento_y_mes[(nomina.Documento, nomina.Anio)][nomina.Mes] = nomina
+        doc_limpio = limpiar_documento(nomina.Documento.Documento)
+        nominas_por_documento_y_mes[(doc_limpio, str(nomina.Anio))][str(nomina.Mes).zfill(2)] = nomina
 
     for empleado in empleados:
         # Obtener años únicos de nómina para el empleado
@@ -52,14 +57,15 @@ def obtener_empleado_info(empleados, nominas, meses):
             # Salarios y clientes mes a mes para el año específico
             salarios_meses = []
             for mes in range(1, 13):
-                mes_nomina = nominas_por_documento_y_mes.get((empleado.Documento, anio), {}).get(str(mes).zfill(2))
+                doc_limpio = limpiar_documento(empleado.Documento)
+                mes_nomina = nominas_por_documento_y_mes.get((empleado.Documento, str(anio)), {}).get(str(mes).zfill(2))
+
                 if mes_nomina:
                     salario = mes_nomina.Salario
-                    cliente = mes_nomina.Cliente.Nombre_Cliente
+                    cliente = mes_nomina.Cliente.Nombre_Cliente if mes_nomina and mes_nomina.Cliente else "-"
                 else:
                     salario = cliente = "-"
                 salarios_meses.append({'salario': salario, 'cliente': cliente})
-
             # Calcular "Años en Flag"
             fecha_actual = date.today()
             años_en_flag = relativedelta(fecha_actual, empleado.FechaIngreso).years
@@ -100,9 +106,11 @@ def empleado_nomina_filtrado(request):
             # Obtener información de los empleados
             empleado_info = obtener_empleado_info(empleados, nominas, meses)
             show_data = bool(empleado_info)  # Mostrar datos si hay resultados
-
+            
     else: 
         form = EmpleadoFilterForm()
+        print("Datos obtenidos:", empleado_info)
+
 
     context = {
         "meses": meses,
