@@ -16,6 +16,8 @@ from .models import ClientesContratos
 from .models import Tarifa_Clientes
 from .models import Referencia
 from .models import CentrosCostos
+from datetime import date
+
 
 class ModuloForm(forms.ModelForm):
     class Meta:
@@ -1098,8 +1100,9 @@ class EmpleadoFilterForm(forms.Form):
         cargos = Cargos.objects.values_list('CargoId', 'Cargo').distinct()
         self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo[0], cargo[1]) for cargo in cargos]
         
-        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]
-
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [
+        (str(year), str(year)) for year in range(2022, date.today().year + 1)
+        ]
 class HistorialCargosForm(forms.ModelForm):
     documentoId= forms.ModelChoiceField(
         queryset=Empleado.objects.all(),
@@ -1789,3 +1792,39 @@ class TarifaClienteFilterForm(forms.Form):
     def populate_anio(self):
         anios = Tarifa_Clientes.objects.values_list('anio', flat=True).distinct()
         self.fields['anio'].choices = [(anio, anio) for anio in anios]
+
+    from django import forms
+from .models import Empleado, Linea, Cargos
+
+class HistorialCargosFilterForm(forms.Form):
+    Empleado = forms.ModelMultipleChoiceField(
+        queryset=Empleado.objects.all(),
+        required=False,
+        label="Empleado",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    Linea = forms.ModelMultipleChoiceField( 
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Linea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    Cargo = forms.ModelMultipleChoiceField(
+        queryset=Cargos.objects.all(),
+        required=False,
+        label="Cargo",
+        widget=forms.CheckboxSelectMultiple()
+    )
+    def __init__(self, *args, **kwargs):
+        super(HistorialCargosFilterForm, self).__init__(*args, **kwargs)
+
+        empleados = Empleado.objects.values_list('Documento', 'Nombre').distinct()
+        self.fields['Empleado'].choices = [('', 'Seleccione el empleado')] + [(empleado[0], empleado[1]) for empleado in empleados]
+
+        lineas = Linea.objects.values_list('LineaId', 'Linea').distinct()
+        self.fields['Linea'].choices = [('', 'Seleccione la línea')] + [(linea[0], linea[1]) for linea in lineas]
+
+        cargos = Cargos.objects.values_list('CargoId', 'Cargo').distinct()
+        self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo[0], cargo[1]) for cargo in cargos]
