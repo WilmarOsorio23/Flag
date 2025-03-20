@@ -77,7 +77,7 @@
                                 id="dropdownCliente"
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
-                                data-selected-text="Seleccione Cliente"
+                                data-selected-text="Seleccione Clientes"
                             >
                                 Seleccione Líneas
                             </button>
@@ -91,7 +91,6 @@
                         </div>
                     </div>
                 </div>     
-            </div>   
                                             
                 <div class="row container-fluid">
                     <div class="col-md-6 text-start">
@@ -103,138 +102,219 @@
             </form>
         </div>
 
-        {% if resultados.general %}
-        <!-- Tabla Principal -->
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-                <thead class="table-dark">
-                    <tr>
-                        <th rowspan="2">Mes</th>
-                        <th rowspan="2">Días</th>
-                        {% for cliente in selected_clientes %}
-                        <th colspan="6">{{ cliente.Nombre_Cliente }}</th>
-                        {% endfor %}
-                        <th colspan="6">Totales Generales</th>
-                    </tr>
-                    <tr>
-                        {% for cliente in selected_clientes %}
-                        <th>Trabajado</th>
-                        <th>Costo</th>
-                        <th>Facturado</th>
-                        <th>$ Fact</th>
-                        <th>Pendiente</th>
-                        <th>$ Pend</th>
-                        {% endfor %}
-                        <th>Total H</th>
-                        <th>Total $</th>
-                        <th>Fact H</th>
-                        <th>Fact $</th>
-                        <th>Margen</th>
-                        <th>Diferencia</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for mes, datos in resultados.general.items %}
-                    <tr>
-                        <td>{{ MESES|get_item:mes }}</td>
-                        <td>{{ datos.dias }}</td>
-                        
-                        {% for cliente in selected_clientes %}
-                        {% with c=datos.clientes|get_item:cliente.Nombre_Cliente %}
-                        <td>{{ c.trabajado|floatformat:2 }}</td>
-                        <td>${{ c.costo|floatformat:2 }}</td>
-                        <td>{{ c.facturado.horas|floatformat:2 }}</td>
-                        <td>${{ c.facturado.valor|floatformat:2 }}</td>
-                        <td>{{ c.pendiente.horas|floatformat:2 }}</td>
-                        <td>${{ c.pendiente.valor|floatformat:2 }}</td>
-                        {% endwith %}
-                        {% endfor %}
-                        
-                        <td>{{ datos.totales_mes.total_horas|floatformat:2 }}</td>
-                        <td>${{ datos.totales_mes.total_costo|floatformat:2 }}</td>
-                        <td>{{ datos.totales_mes.total_facturado|floatformat:2 }}</td>
-                        <td>${{ datos.totales_mes.diferencia|floatformat:2 }}</td>
-                        <td>{{ datos.totales_mes.margen|floatformat:2 }}%</td>
-                        <td>${{ datos.totales_mes.diferencia|floatformat:2 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot class="table-dark">
-                    <tr>
-                        <td colspan="{{ selected_clientes|length|add:2 }}">Totales Anuales</td>
-                        <td>{{ resultados.totales.total_horas|floatformat:2 }}</td>
-                        <td>${{ resultados.totales.total_costo|floatformat:2 }}</td>
-                        <td>{{ resultados.totales.total_facturado|floatformat:2 }}</td>
-                        <td>${{ resultados.totales.diferencia|floatformat:2 }}</td>
-                        <td>{{ resultados.totales.margen|floatformat:2 }}%</td>
-                        <td>${{ resultados.totales.diferencia|floatformat:2 }}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+        <!-- Pestañas -->
+        <ul class="nav nav-tabs justify-content-center mb-4" id="myTab" role="tablist">
+            <!-- Primera pestaña -->
+            <li class="nav-item w-50" role="presentation">
+                <button class="nav-link active w-100 btn btn-light text-primary" id="totales-tab" 
+                        data-bs-toggle="tab" data-bs-target="#totales" 
+                        type="button" role="tab" aria-controls="totales" aria-selected="true">
+                    Totales
+                </button>
+            </li>
+            <!-- Segunda pestaña -->
+            <li class="nav-item w-50" role="presentation">
+                <button class="nav-link w-100 btn btn-light text-primary" id="lineas-tab" 
+                        data-bs-toggle="tab" data-bs-target="#lineas" 
+                        type="button" role="tab" aria-controls="lineas" aria-selected="false">
+                    Totales por linea
+                </button>
+            </li>
+        </ul>
 
-        <!-- Sección de Líneas Especiales -->
-        {% for nombre_linea, datos_linea in resultados.lineas_especiales.items %}
-        <div class="mt-5">
-            <h4>{{ nombre_linea }}</h4>
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Mes</th>
-                            <th>Trabajado</th>
-                            <th>Costo</th>
-                            <th>Facturado</th>
-                            <th>Pendiente Horas</th>
-                            <th>Pendiente $</th>
-                            <th>Diferencia</th>
-                            <th>Margen</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for mes, datos in datos_linea.items %}
-                        <tr>
-                            <td>{{ MESES|get_item:mes }}</td>
-                            <td>{{ datos.trabajado|floatformat:2 }}</td>
-                            <td>${{ datos.costo|floatformat:2 }}</td>
-                            <td>${{ datos.facturado|floatformat:2 }}</td>
-                            <td>{{ datos.pendiente_horas|floatformat:2 }}</td>
-                            <td>${{ datos.pendiente_valor|floatformat:2 }}</td>
-                            <td>${{ datos.diferencia|floatformat:2 }}</td>
-                            <td>{{ datos.margen|floatformat:2 }}%</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <!-- Contenido de las pestañas -->
+        <div class="tab-content" id="myTabContent">
+            <!-- Pestaña de Indicadores -->
+            <div class="tab-pane fade show active p-3" id="totales" role="tabpanel" aria-labelledby="totales-tab">
+                    {% if resultados.general %}
+                    <!-- Tabla Principal -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th rowspan="2">Mes</th>
+                                    <th rowspan="2">Días</th>
+                                    <th rowspan="2">Horas</th>
+                                    {% for cliente in Clientes %}
+                                        {% with nombre_cliente=cliente.Nombre_Cliente %}
+                                        <th colspan="6">{{ nombre_cliente }}</th>
+                                        {% endwith %}
+                                    {% endfor %}
+                                    {% for concepto in Conceptos %}
+                                    <th rowspan="2">{{ concepto.Descripcion }}</th>
+                                    {% endfor %}
+                                    <th rowspan="2">Costo No Op</th>
+                                    <th rowspan="2">Costo Vacaciones</th>
+                                    <th rowspan="2">Costo Incapacidades</th>
+                                    <th rowspan="2">Total Horas</th>
+                                </tr>
+                                <tr>
+                                    {% for cliente in Clientes %}
+                                    <th>Trabajado</th>
+                                    <th>$ Costo</th>
+                                    <th>Facturado</th>
+                                    <th>$ Facturado</th>
+                                    <th>Pend.Fact</th>
+                                    <th>$ Pend.Fact</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mes, datos in resultados.general.items %}
+                                <tr>
+                                    <td>{{ MESES|get_item:mes }}</td>
+                                    <td>{{ datos.Dias }}</td>
+                                    <td>{{ datos.Horas|floatformat:2 }}</td>
+                                    
+                                    {% for cliente in Clientes %}
+                                        {% with c=datos.Clientes|get_item:cliente.Nombre_Cliente %}
+                                        <td>
+                                            {% if mes == '1' %}
+                                            <div class="text-muted small">ant: {{ c.Pendiente.trabajado_anterior|default:0|floatformat:2 }}</div>
+                                            {% endif %}
+                                            {{ c.Trabajado|default:0|floatformat:2 }}
+                                        </td>
+                                        <td>${{ c.Costo|default:0|floatformat:2 }}</td>
+                                        <td>{{ c.Facturado.horas|default:0|floatformat:2 }}</td>
+                                        <td>${{ c.Facturado.valor|default:0|floatformat:2 }}</td>
+                                        <td>{{ c.Pendiente.horas|default:0|floatformat:2 }}</td>
+                                        <td>${{ c.Pendiente.valor|default:0|floatformat:2 }}</td>
+                                        {% endwith %}
+                                    {% endfor %}
+                                    
+                                    {% for concepto in Conceptos %}
+                                        <td>{{ datos.Conceptos_Horas|get_item:concepto.Descripcion|default:0|floatformat:2 }}</td>
+                                    {% endfor %}
+                                    
+                                    <td>${{ datos.totales_mes.costo_no_op|default:0|floatformat:2 }}</td>
+                                    <td>${{ datos.totales_mes.costo_vacaciones|default:0|floatformat:2 }}</td>
+                                    <td>${{ datos.totales_mes.costo_incapacidades|default:0|floatformat:2 }}</td>
+                                    <td>{{ datos.totales_mes.total_horas|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>TOTALES</th>
+                                    <th>{{ resultados.totales.Dias|default:0|floatformat:2 }}</th>
+                                    <th>{{ resultados.totales.Horas|default:0|floatformat:2 }}</th>
+                                    {% for cliente in Clientes %}
+                                        {% with total=resultados.totales|get_item:cliente.Nombre_Cliente %}
+                                            <th>{{ total.Trabajado|default:0|floatformat:2 }}</th>
+                                            <th>${{ total.Costo|default:0|floatformat:2 }}</th>
+                                            <th>{{ total.Facturado_horas|default:0|floatformat:2 }}</th>
+                                            <th>${{ total.Facturado_valor|default:0|floatformat:2 }}</th>
+                                            <th>{{ total.Pendiente_horas|default:0|floatformat:2 }}</th>
+                                            <th>${{ total.Pendiente_valor|default:0|floatformat:2 }}</th>
+                                        {% endwith %}
+                                    {% endfor %}
+                                    {% for concepto in Conceptos %}
+                                        <th>{{ resultados.totales.Conceptos_Horas|get_item:concepto.Descripcion|default:0|floatformat:2 }}</th>
+                                    {% endfor %}
+                                </tr>
+                                <tr>
+                                    <th>Dif fact / Tbjo</th>
+                                    {% for cliente in Clientes %}
+                                        {% with total=resultados.totales|get_item:cliente.Nombre_Cliente %}
+                                            <td colspan="4"></td>
+                                            <th>{{ total.Dif_Fact_Horas|default:0|floatformat:2 }}</th>
+                                            <th>${{ total.Dif_Fact_Valor|default:0|floatformat:2 }}</th>
+                                        {% endwith %}
+                                    {% endfor %}
+                                </tr>
+                                <tr>
+                                    <th>% Margen Bruto</th>
+                                    {% for cliente in Clientes %}
+                                        {% with total=resultados.totales|get_item:cliente.Nombre_Cliente %}
+                                            <td colspan="5"></td>
+                                            <th>{{ total.Margen_Bruto|default:0|floatformat:2 }}%</th>
+                                        {% endwith %}
+                                    {% endfor %}
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning mt-3">
+                        No se encontraron datos con los filtros seleccionados
+                    </div>
+                    {% endif %}
+            </div>
+            <!-- Pestaña de Totales por Línea -->
+            <div class="tab-pane fade p-3" id="lineas" role="tabpanel" aria-labelledby="lineas-tab">
+                {% if resultados.lineas %}
+                    {% for linea in Lineas %}
+                        {% with linea_data=resultados.lineas|get_item:linea.LineaId %}
+                            <div class="mb-5">
+                                <div class="card-header text-center bg-primary text-white py-2">
+                                    {{ linea.Linea }}
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Mes</th>
+                                                <th>Días</th>
+                                                <th>Horas</th>
+                                                <th>Trabajado</th>
+                                                <th>$ Costo</th>
+                                                <th>Facturado</th>
+                                                <th>$ Facturado</th>
+                                                <th>Pend.Fact</th>
+                                                <th>$ Pend.Fact</th>
+                                                <th>Tot Fact</th>
+                                                <th>$ Tot Fact</th>
+                                                <th>Dif Horas</th>
+                                                <th>Dif Valor</th>
+                                                <th>% Margen</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for mes, datos in linea_data.general.items %}
+                                                <tr>
+                                                    <td>{{ MESES|get_item:mes }}</td>
+                                                    <td>{{ datos.Dias }}</td>
+                                                    <td>{{ datos.Horas|floatformat:2 }}</td>
+                                                    <td>{{ datos.Trabajado|default:0|floatformat:2 }}</td>
+                                                    <td>${{ datos.Costo|default:0|floatformat:2 }}</td>
+                                                    <td>{{ datos.Facturado.horas|default:0|floatformat:2 }}</td>
+                                                    <td>${{ datos.Facturado.valor|default:0|floatformat:2 }}</td>
+                                                    <td>{{ datos.Pendiente.horas|default:0|floatformat:2 }}</td>
+                                                    <td>${{ datos.Pendiente.valor|default:0|floatformat:2 }}</td>
+                                                    <td>{{ datos.TotalFacturado.horas|default:0|floatformat:2 }}</td>
+                                                    <td>${{ datos.TotalFacturado.valor|default:0|floatformat:2 }}</td>
+                                                    <td>{{ datos.Dif_Horas|default:0|floatformat:2 }}</td>
+                                                    <td>${{ datos.Dif_Valor|default:0|floatformat:2 }}</td>
+                                                    <td>{{ datos.Margen|default:0|floatformat:2 }}%</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th>TOTALES</th>
+                                                <td>{{ linea_data.totales.Trabajado|default:0|floatformat:2 }}</td>
+                                                <td>${{ linea_data.totales.Costo|default:0|floatformat:2 }}</td>
+                                                <td>{{ linea_data.totales.Facturado_horas|default:0|floatformat:2 }}</td>
+                                                <td>${{ linea_data.totales.Facturado_valor|default:0|floatformat:2 }}</td>
+                                                <td>{{ linea_data.totales.Pendiente_horas|default:0|floatformat:2 }}</td>
+                                                <td>${{ linea_data.totales.Pendiente_valor|default:0|floatformat:2 }}</td>
+                                                <td>{{ linea_data.totales.TotalFacturado_horas|default:0|floatformat:2 }}</td>
+                                                <td>${{ linea_data.totales.TotalFacturado_valor|default:0|floatformat:2 }}</td>
+                                                <td>{{ linea_data.totales.Dif_Horas|default:0|floatformat:2 }}</td>
+                                                <td>${{ linea_data.totales.Dif_Valor|default:0|floatformat:2 }}</td>
+                                                <td>{{ linea_data.totales.Margen|default:0|floatformat:2 }}%</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        {% endwith %}
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-warning">No hay datos</div>
+                {% endif %}
             </div>
         </div>
-        {% endfor %}
-
-        <!-- Sección de Conceptos No Facturables -->
-        <div class="mt-5">
-            <h4>Conceptos No Facturables</h4>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        {% for concepto, valor in resultados.conceptos_no_fact.items %}
-                        <th>{{ concepto }}</th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        {% for concepto, valor in resultados.conceptos_no_fact.items %}
-                        <td>{{ valor|floatformat:2 }}</td>
-                        {% endfor %}
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="alert alert-warning mt-3">
-            No se encontraron datos con los filtros seleccionados
-        </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

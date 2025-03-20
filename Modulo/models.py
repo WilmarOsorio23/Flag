@@ -190,6 +190,7 @@ class Tiempos_Cliente(models.Model):
     Mes = models.CharField(max_length=2)
     Documento = models.CharField(max_length=20)
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
     Horas = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
@@ -198,7 +199,7 @@ class Tiempos_Cliente(models.Model):
     class Meta:
         db_table = 'Tiempos_Cliente'
         constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento', 'ClienteId'], name='unique_tiempos_cliente')
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento', 'ClienteId', 'LineaId'], name='unique_tiempos_cliente')
         ]
 
 class Consultores(models.Model):
@@ -271,6 +272,7 @@ class TiemposConcepto(models.Model):
     Mes = models.CharField(max_length=2)
     Documento = models.CharField(max_length=20)
     ConceptoId = models.ForeignKey('Concepto', on_delete=models.CASCADE, db_column='ConceptoId')
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
     Horas = models.DecimalField(max_digits=5, decimal_places=2)
 
     def __str__(self):
@@ -279,7 +281,7 @@ class TiemposConcepto(models.Model):
     class Meta:
         db_table = 'Tiempos_Concepto'
         constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento', 'ConceptoId'], name='unique_tiempos_concepto')
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento', 'ConceptoId', 'LineaId'], name='unique_tiempos_concepto')
         ]
 class Gastos(models.Model):
     GastoId = models.AutoField(primary_key=True)

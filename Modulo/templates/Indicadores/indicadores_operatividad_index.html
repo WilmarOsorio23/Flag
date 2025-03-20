@@ -114,157 +114,155 @@
         <div class="tab-content" id="myTabContent">
             <!-- Pestaña de Indicadores -->
             <div class="tab-pane fade show active p-3" id="indicadores" role="tabpanel" aria-labelledby="indicadores-tab">
-                <div class="card-footer text-muted">
-                    {% for resultado in resultados %}
-                    <div class="table-responsive mb-4">  
-                        <table class="table table-bordered">
-                            <!-- Primera fila: Horas mes y horas hábiles -->
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Horas mes &emsp; &emsp;{{ selected_anio }}</th>
-                                    {% for mes in selected_mes %}
-                                        <th>{{ horas_habiles|get_item:mes|get_item:'total'|floatformat:0 }}</th>
-                                    {% endfor %}
-                                    <th>{{ total_horas|floatformat:0 }}</th>  <!-- Total de horas -->
-                                </tr>
-                            </thead>
-                            <!-- Segunda fila: Línea y meses -->
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>{{ resultado.linea }}</th>  <!-- Nombre de la línea -->
-                                    {% for mes in selected_mes %}
-                                        <th>{{ MESES|get_item:mes }}</th>  <!-- Meses filtrados -->
-                                    {% endfor %}
-                                    <th>Acumulado</th>  <!-- Columna acumulado -->
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Recursos asignados -->
-                                <tr>
-                                    <td>Recursos asignados</td>
-                                    {% for mes in selected_mes %}
-                                        <td>{{ resultado.meses|get_item:mes|get_item:'Recursos_asignados'|floatformat:2 }}</td>
-                                    {% endfor %}
-                                    <td>-</td>
-                                </tr>
-
-                                <!-- Recursos activos -->
-                                <tr>
-                                    <td>Recursos activos</td>
-                                    {% for mes in selected_mes %}
-                                        <td>{{ resultado.meses|get_item:mes|get_item:'Recursos_activos'|floatformat:2 }}</td>
-                                    {% endfor %}
-                                    <td>-</td>
-                                </tr>
-
-                                <!-- Capacidad -->
-                                <tr>
-                                    <td>Capacidad</td>
-                                    {% for mes in selected_mes %}
-                                        <td>{{ resultado.meses|get_item:mes|get_item:'Capacidad'|floatformat:2 }}</td>
-                                    {% endfor %}
-                                    <td>{{ resultado.totales.Capacidad|floatformat:2 }}</td>
-                                </tr>
-
-                                <!-- Trabajado -->
-                                <tr>
-                                    <td>Trabajado</td>
-                                    {% for mes in selected_mes %}
-                                        <td>{{ resultado.meses|get_item:mes|get_item:'Trabajado'|floatformat:2 }}</td>
-                                    {% endfor %}
-                                    <td>{{ resultado.totales.Trabajado|floatformat:2 }}</td>
-                                </tr>
-
-                                <!-- Facturable -->
-                                <tr>
-                                    <td>Facturable</td>
-                                    {% for mes in selected_mes %}
-                                        <td>{{ resultado.meses|get_item:mes|get_item:'Facturable'|floatformat:2 }}</td>
-                                    {% endfor %}
-                                    <td>{{ resultado.totales.Facturable|floatformat:2 }}</td>
-                                </tr>
-
-                                <!-- Tiempo NO facturable -->
-                                <tr>
-                                    <td>Tiempo NO facturable</td>
-                                    {% for mes in selected_mes %}
-                                        <td>{{ resultado.meses|get_item:mes|get_item:'Tiempo_NO_facturable'|floatformat:2 }}</td>
-                                    {% endfor %}
-                                    <td>{{ resultado.totales.Tiempo_NO_facturable|floatformat:2 }}</td>
-                                </tr>
-
-                                <!-- Índice de operación -->
-                                <tr>
-                                    <td>Índice de operación</td>
-                                    {% for mes in selected_mes %}
-                                        <td>{{ resultado.meses|get_item:mes|get_item:'Índ_de_oper'|floatformat:2 }}%</td>
-                                    {% endfor %}
-                                    <td>{{ resultado.totales.Índ_de_oper|floatformat:2 }}%</td>
-                                </tr>
-
-                                <!-- Meta -->
-                                <tr>
-                                    <td>Meta</td>
-                                    {% for mes in selected_mes %}
-                                        <td>Valor Meta</td>
-                                    {% endfor %}
-                                    <td>Total Meta</td>
-                                </tr>
-
-                                <!-- Conceptos -->
-                                {% for concepto in conceptos %}
-                                <tr>
-                                    <td>{{ concepto.Descripcion }}</td>
-                                    {% for mes in selected_mes %}
-                                        <td>{{ resultado.meses|get_item:mes|get_item:'Conceptos'|get_item:concepto.Descripcion|floatformat:2 }}</td>
-                                    {% endfor %}
-                                    <td>{{ resultado.totales.Conceptos|get_item:concepto.Descripcion|floatformat:2 }}</td>
-                                </tr>
+                {% for resultado in resultados %}
+                <div class="table-responsive mb-4">  
+                    <table class="table table-bordered">
+                        <!-- Primera fila: Horas mes y horas hábiles -->
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Horas mes &emsp; &emsp;{{ selected_anio }}</th>
+                                {% for mes in selected_mes %}
+                                    <th>{{ horas_habiles|get_item:mes|get_item:'total'|floatformat:0 }}</th>
                                 {% endfor %}
-                                <!-- Diferencia en recursos -->
-                                <tr>
-                                    <td>Diferencia en recursos</td>
-                                    {% for mes in selected_mes %}
-                                        <td>{{ resultado.meses|get_item:mes|get_item:'Diferencia_recursos'|floatformat:2 }}</td>
-                                    {% endfor %}
-                                    <td>{{ resultado.totales.Diferencia_recursos|floatformat:2 }}</td>
-                                </tr>
+                                <th>{{ total_horas|floatformat:0 }}</th>  <!-- Total de horas -->
+                            </tr>
+                        </thead>
+                        <!-- Segunda fila: Línea y meses -->
+                        <thead class="table-dark">
+                            <tr>
+                                <th>{{ resultado.linea }}</th>  <!-- Nombre de la línea -->
+                                {% for mes in selected_mes %}
+                                    <th>{{ MESES|get_item:mes }}</th>  <!-- Meses filtrados -->
+                                {% endfor %}
+                                <th>Acumulado</th>  <!-- Columna acumulado -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Recursos asignados -->
+                            <tr>
+                                <td>Recursos asignados</td>
+                                {% for mes in selected_mes %}
+                                    <td>{{ resultado.meses|get_item:mes|get_item:'Recursos_asignados'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>-</td>
+                            </tr>
 
-                                <!-- No operativos -->
-                                <tr>
-                                    <td>No operativos</td>
-                                    {% for mes in selected_mes %}
-                                        <td>{{ resultado.meses|get_item:mes|get_item:'No_operativos'|floatformat:2 }}</td>
-                                    {% endfor %}
-                                    <td>{{ resultado.totales.No_operativos|floatformat:2 }}</td>
-                                </tr>
+                            <!-- Recursos activos -->
+                            <tr>
+                                <td>Recursos activos</td>
+                                {% for mes in selected_mes %}
+                                    <td>{{ resultado.meses|get_item:mes|get_item:'Recursos_activos'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>-</td>
+                            </tr>
 
-                                <!-- Total Fact. No Fact No oper -->
-                                <tr>
-                                    <td>Total Fact. No Fact No oper</td>
-                                    {% for mes in selected_mes %}
-                                        <td>{{ resultado.meses|get_item:mes|get_item:'Total_fact_no_oper'|floatformat:2 }}</td>
-                                    {% endfor %}
-                                    <td>{{ resultado.totales.Total_fact_no_oper|floatformat:2 }}</td>
-                                </tr>
+                            <!-- Capacidad -->
+                            <tr>
+                                <td>Capacidad</td>
+                                {% for mes in selected_mes %}
+                                    <td>{{ resultado.meses|get_item:mes|get_item:'Capacidad'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.Capacidad|floatformat:2 }}</td>
+                            </tr>
 
-                                <!-- Diferencia en horas -->
-                                <tr>
-                                    <td>Diferencia en horas</td>
-                                    {% for mes in selected_mes %}
-                                        <td>{{ resultado.meses|get_item:mes|get_item:'Diferencia_horas'|floatformat:2 }}</td>
-                                    {% endfor %}
-                                    <td>{{ resultado.totales.Diferencia_horas|floatformat:2 }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    {% empty %}
-                        <div class="alert alert-warning text-center" role="alert">
-                            No hay resultados disponibles para mostrar.
-                        </div>
-                    {% endfor %}
+                            <!-- Trabajado -->
+                            <tr>
+                                <td>Trabajado</td>
+                                {% for mes in selected_mes %}
+                                    <td>{{ resultado.meses|get_item:mes|get_item:'Trabajado'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.Trabajado|floatformat:2 }}</td>
+                            </tr>
+
+                            <!-- Facturable -->
+                            <tr>
+                                <td>Facturable</td>
+                                {% for mes in selected_mes %}
+                                    <td>{{ resultado.meses|get_item:mes|get_item:'Facturable'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.Facturable|floatformat:2 }}</td>
+                            </tr>
+
+                            <!-- Tiempo NO facturable -->
+                            <tr>
+                                <td>Tiempo NO facturable</td>
+                                {% for mes in selected_mes %}
+                                    <td>{{ resultado.meses|get_item:mes|get_item:'Tiempo_NO_facturable'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.Tiempo_NO_facturable|floatformat:2 }}</td>
+                            </tr>
+
+                            <!-- Índice de operación -->
+                            <tr>
+                                <td>Índice de operación</td>
+                                {% for mes in selected_mes %}
+                                    <td>{{ resultado.meses|get_item:mes|get_item:'Índ_de_oper'|floatformat:2 }}%</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.Índ_de_oper|floatformat:2 }}%</td>
+                            </tr>
+
+                            <!-- Meta -->
+                            <tr>
+                                <td>Meta</td>
+                                {% for mes in selected_mes %}
+                                    <td>Valor Meta</td>
+                                {% endfor %}
+                                <td>Total Meta</td>
+                            </tr>
+
+                            <!-- Conceptos -->
+                            {% for concepto in conceptos %}
+                            <tr>
+                                <td>{{ concepto.Descripcion }}</td>
+                                {% for mes in selected_mes %}
+                                    <td>{{ resultado.meses|get_item:mes|get_item:'Conceptos'|get_item:concepto.Descripcion|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.Conceptos|get_item:concepto.Descripcion|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                            <!-- Diferencia en recursos -->
+                            <tr>
+                                <td>Diferencia en recursos</td>
+                                {% for mes in selected_mes %}
+                                    <td>{{ resultado.meses|get_item:mes|get_item:'Diferencia_recursos'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.Diferencia_recursos|floatformat:2 }}</td>
+                            </tr>
+
+                            <!-- No operativos -->
+                            <tr>
+                                <td>No operativos</td>
+                                {% for mes in selected_mes %}
+                                    <td>{{ resultado.meses|get_item:mes|get_item:'No_operativos'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.No_operativos|floatformat:2 }}</td>
+                            </tr>
+
+                            <!-- Total Fact. No Fact No oper -->
+                            <tr>
+                                <td>Total Fact. No Fact No oper</td>
+                                {% for mes in selected_mes %}
+                                    <td>{{ resultado.meses|get_item:mes|get_item:'Total_fact_no_oper'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.Total_fact_no_oper|floatformat:2 }}</td>
+                            </tr>
+
+                            <!-- Diferencia en horas -->
+                            <tr>
+                                <td>Diferencia en horas</td>
+                                {% for mes in selected_mes %}
+                                    <td>{{ resultado.meses|get_item:mes|get_item:'Diferencia_horas'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.Diferencia_horas|floatformat:2 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
+                {% empty %}
+                    <div class="alert alert-warning text-center" role="alert">
+                        No hay resultados disponibles para mostrar.
+                    </div>
+                {% endfor %}
             </div>
 
             <!-- Pestaña de Gráficos -->

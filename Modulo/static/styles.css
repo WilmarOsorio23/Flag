@@ -691,11 +691,20 @@ a.fas, .fa {
     background-color: transparent;
 }
 
+/* Agregar este estilo en el head o en tu archivo CSS */
 .dropdown-menu {
     max-height: 300px;
     overflow-y: auto;
-    z-index: 10000 !important;
-    position: absolute;
+    z-index: 10000 !important; /* Asegura que aparezca por encima de todo */
+    position: absolute !important;
+    transform: none !important;
+    top: 100% !important;
+    left: 0 !important;
+    will-change: transform;
+}
+
+.card-body {
+    overflow: visible !important; /* Permite que los elementos se superpongan */
 }
 
 /* ========================== */
@@ -768,13 +777,6 @@ a.fas, .fa {
 .sort-icon i {
     vertical-align: middle;
 }
-
-.dropdown-menu {
-        max-height: 300px;
-        overflow-y: auto;
-        z-index: 10000 !important;
-        position: absolute;
-    }
 
 /* ========================== */
 /*     RESPONSIVE DESIGN      */

@@ -1098,7 +1098,7 @@ class EmpleadoFilterForm(forms.Form):
         cargos = Cargos.objects.values_list('CargoId', 'Cargo').distinct()
         self.fields['Cargo'].choices = [('', 'Seleccione el cargo')] + [(cargo[0], cargo[1]) for cargo in cargos]
         
-        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2025)]
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
 
 class HistorialCargosForm(forms.ModelForm):
     documentoId= forms.ModelChoiceField(
@@ -1637,17 +1637,19 @@ class Ind_Totales_FilterForm(forms.Form):
     )
 
     ClienteId = forms.ModelMultipleChoiceField(
-        queryset=Clientes.objects.all(),
+        queryset=Clientes.objects.only('DocumentoId', 'Nombre_Cliente'),
         required=False,
         label="Cliente",
-        widget=forms.CheckboxSelectMultiple()
-    )
+        widget=forms.CheckboxSelectMultiple() 
+    )   
     
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.populate_anio()
         self.populate_mes()
+        # Personalizar cómo se muestran los clientes
+        self.fields['ClienteId'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente} - {obj.DocumentoId}"
 
     def populate_anio(self):
         self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
@@ -1659,6 +1661,7 @@ class Ind_Totales_FilterForm(forms.Form):
             ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
         ]
         self.fields['Mes'].choices = meses
+    
 
 class TarifaConsultorFilterForm(forms.Form):
     Nombre = forms.ModelChoiceField(

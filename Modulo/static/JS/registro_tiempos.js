@@ -197,6 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Crear arrays para los clientes, conceptos y facturables, usando los nombres de los inputs con el índice
                 const clientes = [];
                 const conceptos = []; 
+                const lineaId = row.querySelector('input[name="LineaId"]').value;
 
                 // Recopilar clientes y tiempos
                 row.querySelectorAll('input[name^="ClienteId_"]').forEach((input, i) => {
@@ -229,7 +230,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         'ClienteId': cliente,
                         'Tiempo_Clientes': tiempoCliente,
                         'Anio': window.originalAnio,
-                        'Mes': window.originalMes
+                        'Mes': window.originalMes,
+                        'LineaId': lineaId
                     });
                 });
 
@@ -239,7 +241,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         'ConceptoId': concepto,
                         'Tiempo_Conceptos': tiempoConcepto,
                         'Anio': window.originalAnio,
-                        'Mes': window.originalMes
+                        'Mes': window.originalMes,
+                        'LineaId': lineaId
                     });
                 });
 

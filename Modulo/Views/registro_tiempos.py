@@ -9,7 +9,7 @@ from django.shortcuts import render
 from collections import defaultdict
 from django.db import transaction
 
-def guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas):
+def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, horas):
     try:
         # Verificar si existe el registro
         tiempo_cliente, creado = Tiempos_Cliente.objects.get_or_create(
@@ -17,7 +17,8 @@ def guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas):
             Mes=mes,
             Documento=documento,
             defaults={'Horas': horas},
-            ClienteId_id=cliente_id  # Usar `_id` para asignar directamente el ID de la relación
+            ClienteId_id=cliente_id,
+            LineaId_id=linea_id
         )
         if creado:
             if horas == '0':
@@ -33,7 +34,7 @@ def guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas):
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos del cliente: {str(e)}")
 
-def guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas):
+def guardar_tiempos_concepto(anio, mes, documento, concepto_id, linea_id, horas):
     try:
         # Verificar si existe el registro
         tiempo_concepto, creado = TiemposConcepto.objects.get_or_create(
@@ -41,7 +42,8 @@ def guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas):
             Mes=mes,
             Documento=documento,
             defaults={'Horas': horas},
-            ConceptoId_id=concepto_id  # Usar `_id` para asignar directamente el ID de la relación
+            ConceptoId_id=concepto_id, 
+            LineaId_id=linea_id
         )
         if creado:
             if horas == '0':
@@ -67,8 +69,6 @@ def guardar_tiempos_facturables(anio, mes, linea_id, cliente_id, horas):
             ClienteId_id=cliente_id,
             defaults={'Horas': horas}
         )
-
-        print(tiempo_facturable,creado)
         if creado:
             if horas == '0':
                 tiempo_facturable.delete()
@@ -164,16 +164,17 @@ def registro_tiempos_guardar(request):
                     documento = row.get('Documento')
                     anio = row.get('Anio')
                     mes = row.get('Mes')
+                    linea_id = row.get('LineaId')
 
                     if 'ClienteId' in row and 'Tiempo_Clientes' in row:
                         cliente_id = row.get('ClienteId')
                         horas = row.get('Tiempo_Clientes')
-                        guardar_tiempos_cliente(anio, mes, documento, cliente_id, horas)
+                        guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, horas)
 
                     elif 'ConceptoId' in row and 'Tiempo_Conceptos' in row:
                         concepto_id = row.get('ConceptoId')
                         horas = row.get('Tiempo_Conceptos')
-                        guardar_tiempos_concepto(anio, mes, documento, concepto_id, horas)
+                        guardar_tiempos_concepto(anio, mes, documento, concepto_id, linea_id, horas)
 
                 elif 'LineaId' in row and 'Horas_Facturables' in row and 'ClienteId' in row:
                     linea_id = row.get('LineaId')

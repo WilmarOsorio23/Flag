@@ -1,23 +1,48 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Actualizar textos de dropdowns
-    function actualizarContadorDropdown(buttonId, count) {
-        const button = document.getElementById(buttonId);
-        const text = button.innerText.split('(')[0].trim();
-        button.innerText = count > 0 ? `${text} (${count})` : text;
+    // Inicializar tabs
+    const triggerTabList = [].slice.call(document.querySelectorAll('#myTab button'))
+    triggerTabList.forEach(triggerEl => {
+        const tabTrigger = new bootstrap.Tab(triggerEl)
+        triggerEl.addEventListener('click', event => {
+            event.preventDefault()
+            tabTrigger.show()
+        })
+    })
+    
+    // Actualiza el texto del dropdown al seleccionar/desmarcar opciones
+    function updateDropdownLabel(dropdownId, checkboxes) {
+        const button = document.getElementById(dropdownId);
+        const selectedText = button.getAttribute('data-selected-text');
+        const selectedOptions = Array.from(checkboxes)
+            .filter((checkbox) => checkbox.checked)
+            .map((checkbox) => checkbox.nextSibling.textContent.trim());
+        
+        button.textContent = selectedOptions.length > 0
+            ? selectedOptions.join(', ')    
+            : selectedText;
     }
 
-    // Actualizar todos los contadores
-    function actualizarContadores() {
-        actualizarContadorDropdown('dropdownMes', document.querySelectorAll('input[name="mes"]:checked').length);
-        actualizarContadorDropdown('dropdownLinea', document.querySelectorAll('input[name="linea"]:checked').length);
-        actualizarContadorDropdown('dropdownCliente', document.querySelectorAll('input[name="cliente"]:checked').length);
-    }
+    // Meses
+    const mesCheckboxes = document.querySelectorAll('#dropdownMes ~ .dropdown-menu input[type="checkbox"]');
+    mesCheckboxes.forEach((checkbox) =>
+        checkbox.addEventListener('change', () =>
+            updateDropdownLabel('dropdownMes', mesCheckboxes)
+        )
+    );
 
-    // Event listeners para cambios en los checkboxes
-    document.querySelectorAll('.dropdown-menu input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', actualizarContadores);
-    });
+    // Líneas
+    const lineaCheckboxes = document.querySelectorAll('#dropdownLinea ~ .dropdown-menu input[type="checkbox"]');
+    lineaCheckboxes.forEach((checkbox) =>
+        checkbox.addEventListener('change', () =>
+            updateDropdownLabel('dropdownLinea', lineaCheckboxes)
+        )
+    );
 
-    // Inicializar contadores
-    actualizarContadores();
+    // Clientes
+    const clienteCheckboxes = document.querySelectorAll('#dropdownCliente ~ .dropdown-menu input[type="checkbox"]');
+    clienteCheckboxes.forEach((checkbox) =>
+        checkbox.addEventListener('change', () =>
+            updateDropdownLabel('dropdownCliente', clienteCheckboxes)
+        )
+    );
 });
