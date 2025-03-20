@@ -153,31 +153,31 @@
                             {% for cliente in empleado.Clientes.values %}
                                 <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
                                     <input type="text" name="ClienteId_{{ forloop.counter }}" class="form-control d-none" value="{{ cliente.ClienteId }}">
-                                    <input type="text" name="Tiempo_Clientes_{{ forloop.counter }}" class="form-control" value="{{ cliente.tiempo_clientes|floatformat:0 }}">
+                                    <input type="text" name="Tiempo_Clientes_{{ forloop.counter }}" class="form-control" value="{{ cliente.tiempo_clientes}}">
                                 </td>
                             {% endfor %}
                             
 
                             <td data-total-clientes-row>
-                                {{ empleado.Total_Clientes|floatformat:0 }}
+                                {{ empleado.Total_Clientes }}
                                 <input type="text" name="Total_Clientes" class="form-control d-none" value="{{ empleado.Total_Clientes }}">
                             </td>
 
                             {% for concepto in empleado.Conceptos.values %}
                                 <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
                                     <input type="text" name="ConceptoId_{{ forloop.counter }}" class="form-control d-none" value="{{ concepto.ConceptoId }}">
-                                    <input type="text" name="Tiempo_Conceptos_{{ forloop.counter }}" class="form-control" value="{{ concepto.tiempo_conceptos|floatformat:0 }}">
+                                    <input type="text" name="Tiempo_Conceptos_{{ forloop.counter }}" class="form-control" value="{{ concepto.tiempo_conceptos }}">
                                 </td>
                             {% endfor %}
 
                             <td data-total-conceptos-row>
-                                {{ empleado.Total_Conceptos|floatformat:0 }}
+                                {{ empleado.Total_Conceptos}}
                             </td>
                             <td data-total-horas-row>
-                                {{ empleado.Total_Horas|floatformat:0 }}
+                                {{ empleado.Total_Horas }}
                             </td>
                             <td data-dif-horas-row>
-                                {{ Dif_Horas|floatformat:0 }}
+                                {{ Dif_Horas }}
                             </td>
                         </tr>
                         {% empty %}
@@ -190,15 +190,15 @@
                         <tr>
                             <th colspan="5">Total Horas</th>
                                 {% for cliente in Clientes.values %}
-                                    <th data-cliente-id="{{ cliente.ClienteId }}">{{ Totales|get_item:cliente.ClienteId|floatformat:0 }}</th>
+                                    <th data-cliente-id="{{ cliente.ClienteId }}">{{ Totales|get_item:cliente.ClienteId }}</th>
                                 {% endfor %}
-                            <th data-total-clientes>{{ Totales.Total_Clientes|floatformat:0 }}</th>
+                            <th data-total-clientes>{{ Totales.Total_Clientes }}</th>
                             {% for concepto in Conceptos.values %}
-                                <th data-concepto-id="{{ concepto.ConceptoId }}">{{ Totales|get_item:concepto.ConceptoId|floatformat:0 }}</th>
+                                <th data-concepto-id="{{ concepto.ConceptoId }}">{{ Totales|get_item:concepto.ConceptoId }}</th>
                             {% endfor %}
-                            <th data-total-conceptos>{{ Totales.Total_Conceptos|floatformat:0 }}</th>
-                            <th data-total-horas>{{ Totales.Total_Horas|floatformat:0 }}</th>
-                            <th data-dif-horas>{{ Totales.Dif_horas|floatformat:0 }}</th>
+                            <th data-total-conceptos>{{ Totales.Total_Conceptos }}</th>
+                            <th data-total-horas>{{ Totales.Total_Horas }}</th>
+                            <th data-dif-horas>{{ Totales.Dif_horas }}</th>
                         </tr>
                         {% for linea in Tiempo_Lineas %}
                         <tr>
@@ -206,24 +206,24 @@
                             <td colspan="3">{{ linea.Linea }}</td>
                             {% for cliente in linea.Clientes.values %}
                             <td>
-                                <input type="text" name="Hora_Facturable_{{ forloop.counter }}" class="form-control" value="{{ cliente.horas_facturables|floatformat:0 }}">
+                                <input type="text" name="Hora_Facturable_{{ forloop.counter }}" class="form-control" value="{{ cliente.horas_facturables }}">
                                 <input type="hidden" name="LineaId_{{ forloop.counter }}" value="{{ linea.LineaId }}">
                                 <input type="hidden" name="ClienteId_{{ forloop.counter }}" value="{{ cliente.ClienteId }}">
                             </td>
                             {% endfor %}
                             <td data-total-facturable-linea-row>
-                                {{ linea.Total_Horas_Facturables|floatformat:0 }}
+                                {{ linea.Total_Horas_Facturables }}
                             </td>
                         </tr>
                         {% endfor %}
                         <tr>
                             <th colspan="5">Total Horas Facturables</th>
                             {% for cliente in Clientes.values %}
-                                <th data-cliente-facturables-id="{{ cliente.ClienteId }}">{{ TotalesFacturables|get_item:cliente.ClienteId|floatformat:0 }}</th>
+                                <th data-cliente-facturables-id="{{ cliente.ClienteId }}">{{ TotalesFacturables|get_item:cliente.ClienteId }}</th>
                             {% endfor %}
-                            <th data-total-clientes-facturables>{{ TotalesFacturables.Total_Clientes|floatformat:0 }}</th>
+                            <th data-total-clientes-facturables>{{ TotalesFacturables.Total_Clientes }}</th>
                             <th colspan="{{ Conceptos.count }}"></th> <!-- Espacio para las columnas de conceptos -->
-                            <th data-total-horas-facturables>{{ TotalesFacturables.Total_Horas|floatformat:0 }}</th>
+                            <th data-total-horas-facturables>{{ TotalesFacturables.Total_Horas }}</th>
                             <th colspan="5"></th>
                         </tr>
                     </tfoot>
