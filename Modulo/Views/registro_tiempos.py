@@ -380,7 +380,7 @@ def obtener_info_linea(linea, clientes, tiempo_facturables):
 def registro_tiempos_index(request):
     empleados = Empleado.objects.select_related('LineaId', 'PerfilId', 'ModuloId').all().order_by('Nombre')
     consultores = Consultores.objects.select_related('LineaId', 'PerfilId', 'ModuloId').all().order_by('Nombre')
-    clientes = Clientes.objects.all()
+    clientes = Clientes.objects.all().order_by('Nombre_Cliente')
     conceptos = Concepto.objects.all()
     tiempo_clientes = Tiempos_Cliente.objects.select_related('ClienteId').all()
     tiempo_conceptos = TiemposConcepto.objects.select_related('ConceptoId').all()
