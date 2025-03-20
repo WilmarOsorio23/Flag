@@ -1,0 +1,156 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+<!-- Titulo de la pestaña en navegador -->
+{% block titulo %} Informe Clientes Contratos {% endblock %}
+
+{% block contenido %}
+
+<div class="card">
+    <div class="card-header">
+         <!-- Titulo del informe -->
+        <h4 class="card-title">Informe Clientes Contratos</h4>
+    </div>
+
+    <div class="card-body informes-table">
+        <div class="container-fluid mb-3">
+
+            <!-- Formulario principal -->
+            <form method="GET">
+                <!-- Filtros en la parte superior: Cliente, Fecha Inicio, Contrato Vigente -->
+                <div class="row mb-3">
+
+                    <!--Filtro Cliente --> 
+                    <div class="col-md-3">
+                        <label for="cliente">{{ form.Nombre_Cliente.label }}</label>
+                        {{ form.Nombre_Cliente }}
+                    </div>
+
+                    <!-- Filtro Fecha Inicio -->
+                    <div class="col-md-3">
+                        <label for="fecha_inicio">{{ form.FechaInicio.label }}</label>
+                        {{ form.FechaInicio }}
+                    </div>
+
+                    <!-- Filtro Contrato Vigente -->
+                    <div class="col-md-3">
+                        <label for="contrato_vigente">{{ form.ContratoVigente.label }}</label>
+                        {{ form.ContratoVigente }}
+                    </div>
+
+                    <!-- Botones debajo de filtros: Buscar y Descarga Excel -->
+
+                    <!-- Botón Buscar -->
+                    <div class = "row">
+                        <div class="col-md-6 text-start">
+                            <button type="submit" name="buscar" class="btn btn-primary mt-3">
+                                <i class="fas fa-glasses"></i>Buscar <!-- Texto e icono de botón -->
+                            </button>
+                        </div>
+                    </div>
+                </div>   
+            </form>
+
+             <!-- Botón de Descargar Excel-->
+             <div class="row">
+                <div class="col-md-6 text-end offset-md-6">
+                    <form id="download-form" method="GET" action="{% url 'exportar_clientes_contratos_excel' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="Nombre_Cliente" value="{{ form.Nombre_Cliente.value }}">
+                        <input type="hidden" name="FechaInicio" value="{{ form.FechaInicio.value }}">
+                        <input type="hidden" name="ContratoVigente" value="{{ form.ContratoVigente.value }}">
+                        
+                        <button type="submit" class="btn btn-success mt-3">
+                            <i class="fas fa-file-excel"></i> Descargar Excel<!-- Texto e icono de botón -->
+                        </button>
+                    </form>
+                </div>
+            </div>
+             
+        </div>
+
+            {% if show_data %}
+            <div class="table-responsive-informes">
+                <table class="table table-bordered table-hover table-primary" id="clientesContratosTable">
+
+                    <!-- Encabezado de la tabla -->
+                    <thead>
+                        <!-- Filas dentro del encabezado -->
+                        <tr>
+
+                            <!-- Cliente ID-->
+                            <th>Documento Cliente</th>
+
+                            <!-- Nombre Cliente -->
+                            <th>Nombre</th>
+
+                            <!-- Fecha Inicio -->
+                            <th>Fecha Inicio</th>
+
+                            <!-- Fecha Fin -->
+                            <th>Fecha Fin</th>
+
+                            <!-- Contrato -->
+                            <th>Contrato</th>
+
+                            <!-- Contrato Vigente -->
+                            <th>Contrato Vigente</th>
+
+                            <!-- OC Facturar -->
+                            <th>OC Facturar</th>
+
+                            <!-- Parafiscales -->
+                            <th>Parafiscales</th>
+
+                            <!-- Horario Servicio -->
+                            <th>Horario Servicio</th>
+
+                            <!-- Fecha Facturación -->
+                            <th>Fecha Facturación</th>
+
+                            <!-- Tipo Facturación -->
+                            <th>Tipo Facturación</th>
+
+                            <!-- Observaciones -->
+                            <th>Observaciones</th>
+
+                    </thead>
+
+                    <!-- Lectura de campos para mostrar -->
+                    <tbody>
+                        {% for cliente_contratos in cliente_contratos_info %}
+                            {% for contrato in cliente_contratos.contratos %}
+                                <tr>
+                                    <td>{{ contrato.documento }}</td>
+                                    <td>{{ contrato.Nombre_Cliente }}</td>
+                                    <td>{{ contrato.FechaInicio|default_if_none:""  }}</td>
+                                    <td>{{ contrato.FechaFin|default_if_none:""  }}</td>
+                                    <td>{{ contrato.Contrato }}</td>
+                                    <td>{{ contrato.ContratoVigente|yesno:"SI,NO"  }}</td>
+                                    <td>{{ contrato.OC_Facturar|yesno:"SI,NO"  }}</td>
+                                    <td>{{ contrato.Parafiscales|yesno:"SI,NO"  }}</td>
+                                    <td>{{ contrato.HorarioServicio }}</td>
+                                    <td>{{ contrato.FechaFacturacion }}</td>
+                                    <td>{{ contrato.TipoFacturacion }}</td>
+                                    <td>{{ contrato.Observaciones }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="12">No hay datos disponibles.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+            {% elif not cliente_contratos_info %}
+            <div class="alert alert-warning" role="alert">
+                {{ mensaje }}
+            </div>
+            {% endif %}
+    </div>
+</div>
+<script src="{% static 'JS/informes_clientes_contratos.js' %}"></script>
+{% endblock %}
