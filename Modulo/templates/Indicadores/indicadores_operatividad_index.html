@@ -122,9 +122,9 @@
                             <tr>
                                 <th>Horas mes &emsp; &emsp;{{ selected_anio }}</th>
                                 {% for mes in selected_mes %}
-                                    <th>{{ horas_habiles|get_item:mes|get_item:'total'|floatformat:0 }}</th>
+                                    <th>{{ horas_habiles|get_item:mes|get_item:'total' }}</th>
                                 {% endfor %}
-                                <th>{{ total_horas|floatformat:0 }}</th>  <!-- Total de horas -->
+                                <th>{{ total_horas }}</th>  <!-- Total de horas -->
                             </tr>
                         </thead>
                         <!-- Segunda fila: Línea y meses -->

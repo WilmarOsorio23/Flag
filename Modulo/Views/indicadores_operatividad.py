@@ -137,10 +137,10 @@ def procesar_linea(linea, anio, meses, horas_habiles, conceptos):
 
         # Obtener valores de Vacaciones y Día de la Familia
         vacaciones = conceptos_dict.get('Vacaciones', 0)
-        dia_familia = conceptos_dict.get('Día de la Familia', 0)
+        dia_familia = conceptos_dict.get('Dia de la Familia', 0)
 
         # 1. Restar Vacaciones y Día de la Familia del total de la capacidad
-        capacidad_ajustada = (safe_divide(recursos_asignados, horas_mes)) * horas_mes - vacaciones - dia_familia
+        capacidad_ajustada = ((safe_divide(recursos_asignados, horas_mes)) * horas_mes) - vacaciones - dia_familia
 
         # 2. Restar Día de la Familia de NO operativos
         no_operativos = sum(conceptos_dict.values()) - vacaciones - dia_familia

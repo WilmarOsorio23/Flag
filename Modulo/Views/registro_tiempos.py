@@ -1,4 +1,5 @@
 # Vista para listar empleados
+from decimal import Decimal
 import json
 from django.forms import ValidationError
 from django.http import JsonResponse
@@ -449,32 +450,52 @@ def registro_tiempos_index(request):
 
     return render(request, 'Registro_Tiempos/registro_tiempos_index.html', context)
 
-
 def calcular_totales(colaborador_info, lineas_info):
-    totales = defaultdict(int)
-    totales_facturables = defaultdict(int)
+    # Usar Decimal como tipo base para los totales
+    totales = defaultdict(Decimal)
+    totales_facturables = defaultdict(Decimal)
     
-    # Sumar las horas por cada columna (clientes y conceptos)
+    # Sumar horas clientes y conceptos
     for empleado in colaborador_info:
         for cliente in empleado['Clientes'].values():
-            totales[cliente['ClienteId']] += cliente['tiempo_clientes']
+            tiempo = Decimal(str(cliente['tiempo_clientes']))
+            totales[cliente['ClienteId']] += tiempo
         
         for concepto in empleado['Conceptos'].values():
-            totales[concepto['ConceptoId']] += concepto['tiempo_conceptos']
+            tiempo = Decimal(str(concepto['tiempo_conceptos']))
+            totales[concepto['ConceptoId']] += tiempo
     
-    # Calcular los totales generales
-    totales['Total_Clientes'] = sum(empleado['Total_Clientes'] for empleado in colaborador_info)
-    totales['Total_Conceptos'] = sum(empleado['Total_Conceptos'] for empleado in colaborador_info)
-    totales['Total_Horas'] = sum(empleado['Total_Horas'] for empleado in colaborador_info)
+    # Calcular totales generales
+    totales['Total_Clientes'] = sum(
+        Decimal(str(empleado['Total_Clientes'])) 
+        for empleado in colaborador_info
+    )
+    
+    totales['Total_Conceptos'] = sum(
+        Decimal(str(empleado['Total_Conceptos'])) 
+        for empleado in colaborador_info
+    )
+    
+    totales['Total_Horas'] = sum(
+        Decimal(str(empleado['Total_Horas'])) 
+        for empleado in colaborador_info
+    )
 
-    # Sumar las horas facturables por cada columna (clientes)
+    # Horas facturables
     for linea in lineas_info:
         for cliente in linea['Clientes'].values():
-            totales_facturables[cliente['ClienteId']] += cliente['horas_facturables']
+            horas = Decimal(str(cliente['horas_facturables']))
+            totales_facturables[cliente['ClienteId']] += horas
     
-    # Calcular los totales generales de horas facturables
-    totales_facturables['Total_Clientes'] = sum(linea['Total_Horas_Facturables'] for linea in lineas_info)
-    totales_facturables['Total_Horas'] = sum(linea['Total_Horas_Facturables'] for linea in lineas_info)
+    totales_facturables['Total_Clientes'] = sum(
+        Decimal(str(linea['Total_Horas_Facturables'])) 
+        for linea in lineas_info
+    )
+    
+    totales_facturables['Total_Horas'] = sum(
+        Decimal(str(linea['Total_Horas_Facturables'])) 
+        for linea in lineas_info
+    )
     
     return totales, totales_facturables
 

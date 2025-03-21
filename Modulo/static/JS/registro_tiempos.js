@@ -358,10 +358,10 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             // Actualizar las columnas de total en la fila actual
-            row.querySelector('td[data-total-clientes-row]').textContent = totalClientesRow.toFixed(0);
-            row.querySelector('td[data-total-conceptos-row]').textContent = totalConceptosRow.toFixed(0);
-            row.querySelector('td[data-total-horas-row]').textContent = (totalClientesRow + totalConceptosRow).toFixed(0);
-            row.querySelector('td[data-dif-horas-row]').textContent = (0).toFixed(0);
+            row.querySelector('td[data-total-clientes-row]').textContent = totalClientesRow.toFixed(2);
+            row.querySelector('td[data-total-conceptos-row]').textContent = totalConceptosRow.toFixed(2);
+            row.querySelector('td[data-total-horas-row]').textContent = (totalClientesRow + totalConceptosRow).toFixed(2);
+            row.querySelector('td[data-dif-horas-row]').textContent = (0).toFixed(2);
         });
 
         // Recopilar datos de las líneas facturables en el tfoot
@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Actualizar las columnas de total en la fila actual
             const totalFacturableCell = row.querySelector('td[data-total-facturable-linea-row]');
             if (totalFacturableCell) {
-                totalFacturableCell.textContent = totalFacturablesRow.toFixed(0);
+                totalFacturableCell.textContent = totalFacturablesRow.toFixed(2);
             }
         });
 
@@ -410,18 +410,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 rows.forEach(row => {
                     const totalHorasRow = parseFloat(row.querySelector('td[data-total-horas-row]').textContent) || 0;
                     const difHorasRow = horasLaboralesTotales - totalHorasRow;
-                    row.querySelector('td[data-dif-horas-row]').textContent = difHorasRow.toFixed(0);
+                    row.querySelector('td[data-dif-horas-row]').textContent = difHorasRow.toFixed(2);
                     totalDifHoras += difHorasRow;
                 });
 
                 // Actualizar la columna de diferencia de horas en el pie de página
-                document.querySelector('tfoot th[data-dif-horas]').textContent = totalDifHoras.toFixed(0);
+                document.querySelector('tfoot th[data-dif-horas]').textContent = totalDifHoras.toFixed(2);
 
                 // Actualizar la diferencia de horas para cada colaborador
                 rows.forEach(row => {
                     const totalHorasRow = parseFloat(row.querySelector('td[data-total-horas-row]').textContent) || 0;
                     const difHorasRow = horasLaboralesTotales - totalHorasRow;
-                    row.querySelector('td[data-dif-horas-row]').textContent = difHorasRow.toFixed(0);
+                    row.querySelector('td[data-dif-horas-row]').textContent = difHorasRow.toFixed(2);
                 });
             })
             .catch(error => {
@@ -431,26 +431,26 @@ document.addEventListener('DOMContentLoaded', function () {
         // Update the totals in the footer
         document.querySelectorAll('tfoot th[data-cliente-id]').forEach(th => {
             const clienteId = th.getAttribute('data-cliente-id');
-            th.textContent = (totals.clientes[clienteId] || 0).toFixed(0);
+            th.textContent = (totals.clientes[clienteId] || 0).toFixed(2);
         });
 
         document.querySelectorAll('tfoot th[data-concepto-id]').forEach(th => {
             const conceptoId = th.getAttribute('data-concepto-id');
-            th.textContent = (totals.conceptos[conceptoId] || 0).toFixed(0);
+            th.textContent = (totals.conceptos[conceptoId] || 0).toFixed(2);
         });
 
-        document.querySelector('tfoot th[data-total-clientes]').textContent = totals.totalClientes.toFixed(0);
-        document.querySelector('tfoot th[data-total-conceptos]').textContent = totals.totalConceptos.toFixed(0);
-        document.querySelector('tfoot th[data-total-horas]').textContent = totals.totalHoras.toFixed(0);
+        document.querySelector('tfoot th[data-total-clientes]').textContent = totals.totalClientes.toFixed(2);
+        document.querySelector('tfoot th[data-total-conceptos]').textContent = totals.totalConceptos.toFixed(2);
+        document.querySelector('tfoot th[data-total-horas]').textContent = totals.totalHoras.toFixed(2);
     
         // Update the totals for facturables in the footer
         document.querySelectorAll('tfoot th[data-cliente-facturables-id]').forEach(th => {
             const clienteId = th.getAttribute('data-cliente-facturables-id');
-            th.textContent = (totals.facturables[clienteId] || 0).toFixed(0);
+            th.textContent = (totals.facturables[clienteId] || 0).toFixed(2);
         });
 
-        document.querySelector('tfoot th[data-total-clientes-facturables]').textContent = totals.totalFacturables.toFixed(0);
-        document.querySelector('tfoot th[data-total-horas-facturables]').textContent = totals.totalFacturables.toFixed(0);
+        document.querySelector('tfoot th[data-total-clientes-facturables]').textContent = totals.totalFacturables.toFixed(2);
+        document.querySelector('tfoot th[data-total-horas-facturables]').textContent = totals.totalFacturables.toFixed(2);
     }
 
     document.querySelectorAll('input[name^="Tiempo_Clientes_"], input[name^="Tiempo_Conceptos_"], input[name^="Hora_Facturable_"]').forEach(input => {

@@ -329,10 +329,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     
         // Actualizar los totales en el pie de página
-        document.querySelector('tfoot th[data-total-horas]').textContent = totals.totalHoras.toFixed(0);
-        document.querySelector('tfoot th[data-total-dias]').textContent = totals.totalDias.toFixed(0);
-        document.querySelector('tfoot th[data-total-meses]').textContent = totals.totalMeses.toFixed(0);
-        document.querySelector('tfoot th[data-total-bolsa]').textContent = totals.totalBolsa.toFixed(0);
+        document.querySelector('tfoot th[data-total-horas]').textContent = totals.totalHoras.toFixed(2);
+        document.querySelector('tfoot th[data-total-dias]').textContent = totals.totalDias.toFixed(2);
+        document.querySelector('tfoot th[data-total-meses]').textContent = totals.totalMeses.toFixed(2);
+        document.querySelector('tfoot th[data-total-bolsa]').textContent = totals.totalBolsa.toFixed(2);
         document.querySelector('tfoot th[data-total-valor]').textContent = totals.totalValor.toFixed(2);
     }
 
