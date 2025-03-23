@@ -85,6 +85,7 @@ def clientes_editar(request, id):
             cliente.Ciudad = data.get('Ciudad', cliente.Ciudad) or None
             cliente.Departamento = data.get('Departamento', cliente.Departamento) or None
             cliente.Pais = data.get('Pais', cliente.Pais) or None
+            cliente.Nacional = data.get('Nacional', cliente.Nacional) == 'True'
             cliente.ContactoID_id = data.get('ContactoID', cliente.ContactoID_id) or None
 
             # Validación adicional: Si Activo es False y no hay Fecha_Retiro, no permitir guardar
@@ -152,26 +153,29 @@ def verificar_relaciones(request):
             if not ids:
                 return JsonResponse({'error': 'No se han enviado IDs'}, status=400)
 
-            # Lista para almacenar los IDs de los clientes relacionados
-            relacionados = []
+            # Diccionario para almacenar los detalles de las relaciones
+            relaciones = {}
 
             for id in ids:
                 # Verifica si el cliente está relacionado con otros registros
-                is_related = (
-                    Contactos.objects.filter(clienteId=id).exists() or
-                    Tiempos_Cliente.objects.filter(ClienteId=id).exists() or
-                    TiemposFacturables.objects.filter(ClienteId=id).exists() or
-                    Tarifa_Clientes.objects.filter(clienteId=id).exists()
-                )
+                relaciones_cliente = []
+                if Contactos.objects.filter(clienteId=id).exists():
+                    relaciones_cliente.append('Contactos')
+                if Tiempos_Cliente.objects.filter(ClienteId=id).exists():
+                    relaciones_cliente.append('Tiempos_Cliente')
+                if TiemposFacturables.objects.filter(ClienteId=id).exists():
+                    relaciones_cliente.append('TiemposFacturables')
+                if Tarifa_Clientes.objects.filter(clienteId=id).exists():
+                    relaciones_cliente.append('Tarifa_Clientes')
 
-                if is_related:
-                    relacionados.append(id)
+                if relaciones_cliente:
+                    relaciones[id] = relaciones_cliente
 
-            # Responde con los clientes relacionados
-            if relacionados:
+            # Responde con los detalles de las relaciones
+            if relaciones:
                 return JsonResponse({
                     'isRelated': True,
-                    'ids': relacionados
+                    'relaciones': relaciones
                 })
             else:
                 return JsonResponse({'isRelated': False})
@@ -226,13 +230,14 @@ def clientes_descargar_excel(request):
                 cliente.TipoCliente,
                 cliente.Ciudad,
                 cliente.Departamento,
-                cliente.Pais                   
+                cliente.Pais,
+                cliente.Nacional                   
             ])
         
         # Crear DataFrame de pandas
         df = pd.DataFrame(data, columns=['ClienteID', 'Nombre', 'Activo', 'Fecha de Inicio', 'Fecha de Retiro',
                                          'Direccion', 'Telefono', 'Correo Electronico','Contacto Principal', 'Buzon de Facturacion', 'Tipo de Cliente',
-                                         'Ciudad', 'Departamento', 'Pais'])
+                                         'Ciudad', 'Departamento', 'Pais', 'Nacional'])
         
         # Configurar la respuesta HTTP con el archivo Excel
         response = HttpResponse(

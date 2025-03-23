@@ -118,6 +118,7 @@ class Clientes(models.Model):
     Ciudad = models.CharField(max_length=50, null=True, blank=True)
     Departamento = models.CharField(max_length=20, null=True, blank=True)
     Pais = models.CharField(max_length=20, null=True, blank=True)
+    Nacional = models.BooleanField(default=False)
 
     def clean(self):
         """

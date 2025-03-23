@@ -90,6 +90,7 @@ class ClientesForm(forms.ModelForm):
         - Ciudad: Ciudad del cliente.
         - Departamento: Departamento del cliente.
         - Pais: País del cliente.
+        - Nacional
     """
     class Meta:
         model = Clientes
@@ -97,7 +98,7 @@ class ClientesForm(forms.ModelForm):
             'TipoDocumentoID', 'DocumentoId', 'Nombre_Cliente', 'Activo', 
             'Fecha_Inicio', 'Fecha_Retiro', 'Direccion', 'Telefono', 
             'CorreoElectronico', 'BuzonFacturacion', 'TipoCliente', 
-            'Ciudad', 'Departamento', 'Pais', 'ContactoID'
+            'Ciudad', 'Departamento', 'Pais', 'Nacional', 'ContactoID'
         ]
         widgets = {
             'TipoDocumentoID': forms.Select(attrs={
@@ -161,6 +162,12 @@ class ClientesForm(forms.ModelForm):
             'Pais': forms.TextInput(attrs={
                 'class': 'form-control', 
                 'placeholder': 'Pais',
+                }),
+            'Nacional': forms.Select(choices=[
+                (True, 'SI'),
+                (False, 'NO')
+            ], attrs={
+                'class': 'form-control'
                 })
         } 
     def __init__(self, *args, **kwargs):

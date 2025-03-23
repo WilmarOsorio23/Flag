@@ -64,6 +64,7 @@
                             <th>Ciudad</th>
                             <th>Departamento</th>
                             <th>Pais</th>
+                            <th>Nacional</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -99,6 +100,12 @@
                             <td><input type="text" name="Ciudad" class="form-control-plaintext" value="{{ cliente.Ciudad|default_if_none:'' }}" readonly style="width: 150px;"></td>
                             <td><input type="text" name="Departamento" class="form-control-plaintext" value="{{ cliente.Departamento|default_if_none:'' }}" readonly style="width: 150px;"></td>
                             <td><input type="text" name="Pais" class="form-control-plaintext" value="{{ cliente.Pais|default_if_none:'' }}" readonly style="width: 150px;"></td>
+                            <td>
+                                <select name="Nacional" class="form-control-plaintext" disabled style="width: 150px;">
+                                    <option value="True" {% if cliente.Nacional %}selected{% endif %}>SI</option>
+                                    <option value="False" {% if not cliente.Nacional %}selected{% endif %}>NO</option>
+                                </select>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
