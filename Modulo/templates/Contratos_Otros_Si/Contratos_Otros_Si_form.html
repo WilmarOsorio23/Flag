@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %} Crear Contrato_Otro_Si {% endblock %}
+
+{% block contenido %}
+    <h2>Crear Nuevo Contrato Otro Si</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'contratos_otros_si_index' %}" class="btn btn-danger">Cancelar</a>
+    </form>
+{% endblock %}

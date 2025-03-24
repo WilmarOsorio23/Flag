@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block titulo %} Confirmar Eliminación {% endblock %}
+
+{% block contenido %}
+    <h2>¿Estás seguro de que deseas eliminar el registro de Contrato_Otro_Si con ClienteId "{{ contrato_otro_si.cliente_id }}" y ContratoId "{{ contrato_otro_si.contrato_id }}"?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+        <a href="{% url 'contratos_otros_si_index' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+{% endblock %}

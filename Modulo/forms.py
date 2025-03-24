@@ -13,6 +13,7 @@ from .models import Tarifa_Consultores
 from django.core.exceptions import ValidationError
 from .models import Moneda
 from .models import ClientesContratos
+from .models import ContratosOtrosSi
 from .models import Tarifa_Clientes
 from .models import Referencia
 from .models import CentrosCostos
@@ -1922,3 +1923,51 @@ class ClientesContratosFilterForm(forms.Form):
         clientes = Clientes.objects.values_list('ClienteId', 'Nombre_Cliente').distinct()
         self.fields['Nombre_Cliente'].choices = [('', 'Seleccione el Cliente')] + list(clientes)
         
+class ContratosOtrosSiForm(forms.ModelForm):
+    ClienteId = forms.ModelChoiceField(
+        queryset=Clientes.objects.all(),  
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Cliente'
+    )
+    class Meta:
+        model = ContratosOtrosSi
+        fields = '__all__'
+        widgets = {
+            'FechaInicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'FechaFin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'NumeroOtroSi': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el Numero de Otro Si'}),
+            'ValorOtroSi': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el Valor'}),
+            'ValorIncluyeIva': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'Polizas': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'PolizasDesc': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la descripción de las poliza'}),
+            'FirmadoFlag': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'FirmadoCliente': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+        labels = {
+            'FechaInicio': 'Fecha de Inicio',
+            'FechaFin': 'Fecha de Fin',
+            'NumeroOtroSi': 'Numero de Otro Si',
+            'ValorOtroSi': 'Valor Otro Si',
+            'ValorIncluyeIva': 'Valor Incluye Iva',
+            'Polizas': 'Polizas',
+            'PolizasDesc': 'Descripción de las Polizas',
+            'FirmadoFlag': 'Firmado Flag',
+            'FirmadoCliente': 'Firmado Cliente',
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        ClienteId = cleaned_data.get('ClienteId')
+        FechaInicio = cleaned_data.get('FechaInicio')
+
+        if ContratosOtrosSi.objects.filter(
+            ClienteId=ClienteId,
+            FechaInicio=FechaInicio
+        ).exists():
+            raise ValidationError(
+                "Ya existe un registro con el mismo Cliente, Fecha de Inicio."
+            )  
+        return cleaned_data

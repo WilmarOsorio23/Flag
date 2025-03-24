@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %} Editar Contrato_Otro_Si {% endblock %}
+
+{% block contenido %}
+<h2>Editar Contrato_Otro_Si</h2>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a href="{% url 'contratos_otros_si_index' %}" class="btn btn-danger">Cancelar</a>
+</form>
+{% endblock %}
