@@ -67,6 +67,11 @@
                             <th scope="col">Fecha Facturación</th>
                             <th scope="col">Tipo Facturación</th>
                             <th scope="col">Observaciones</th>
+                            <th scope="col">Polizas</th>
+                            <th scope="col">Descripción Polizas</th>
+                            <th scope="col">Incluye Iva Valor</th>
+                            <th scope="col">Descripción Contrato</th>
+                            <th scope="col">Servicio Remoto</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -121,6 +126,33 @@
                             </td>
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
                                 <input type="text" class="form-control-plaintext" name="Observaciones" value="{{ contrato.Observaciones }}" readonly>
+                            </td>
+                            <td>
+                                <span class="form-control-plaintext boolean-display" data-field="Polizas">
+                                    {% if contrato.Polizas %}Sí{% else %}No{% endif %}
+                                </span>
+                                <input type="checkbox" class="form-check-input boolean-edit d-none" 
+                                       name="Polizas" {% if contrato.Polizas %}checked{% endif %}>
+                            </td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
+                                <input type="text" class="form-control-plaintext" name="PolizasDesc" value="{{ contrato.PolizasDesc|default_if_none:'' }}" readonly>
+                            </td>
+                            <td>
+                                <span class="form-control-plaintext boolean-display" data-field="IncluyeIvaValor">
+                                    {% if contrato.IncluyeIvaValor %}Sí{% else %}No{% endif %}
+                                </span>
+                                <input type="checkbox" class="form-check-input boolean-edit d-none" 
+                                       name="IncluyeIvaValor" {% if contrato.IncluyeIvaValor %}checked{% endif %}>
+                            </td>
+                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
+                                <input type="text" class="form-control-plaintext" name="ContratoDesc" value="{{ contrato.ContratoDesc|default_if_none:'' }}" readonly>
+                            </td>
+                            <td>
+                                <span class="form-control-plaintext boolean-display" data-field="ServicioRemoto">
+                                    {% if contrato.ServicioRemoto %}Sí{% else %}No{% endif %}
+                                </span>
+                                <input type="checkbox" class="form-check-input boolean-edit d-none" 
+                                       name="ServicioRemoto" {% if contrato.ServicioRemoto %}checked{% endif %}>
                             </td>
                         </tr>
                         {% endfor %}

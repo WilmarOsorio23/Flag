@@ -1289,6 +1289,11 @@ class ClientesContratosForm(forms.ModelForm):
             'FechaFacturacion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la fecha de facturacion'}),
             'TipoFacturacion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el tipo de facturacion'}),
             'Observaciones': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese las observaciones'}),
+            'Polizas': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'PolizasDesc': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la descripción de las poliza'}),
+            'IncluyeIvaValor': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'ContratoDesc': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la descripción del contrato'}),
+            'ServicioRemoto': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
         labels = {
@@ -1302,6 +1307,11 @@ class ClientesContratosForm(forms.ModelForm):
             'FechaFacturacion': 'Fecha de Facturacion',
             'TipoFacturacion': 'Tipo de Facturacion',
             'Observaciones': 'Observaciones',
+            'Polizas': 'Polizas',
+            'PolizasDesc': 'Descripción de las Polizas',
+            'IncluyeIvaValor': 'Incluye Iva Valor',
+            'ContratoDesc': 'Descripción del Contrato',
+            'ServicioRemoto': 'Servicio Remoto',
         }
 
     def clean(self):

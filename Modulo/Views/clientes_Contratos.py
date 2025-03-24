@@ -45,6 +45,12 @@ def clientes_contratos_editar(request, id):
             contrato.FechaFacturacion = data.get('FechaFacturacion', contrato.FechaFacturacion)
             contrato.TipoFacturacion = data.get('TipoFacturacion', contrato.TipoFacturacion)
             contrato.Observaciones = data.get('Observaciones', contrato.Observaciones)
+            contrato.Polizas = data.get('Polizas', contrato.Polizas)
+            contrato.PolizasDesc = data.get('PolizasDesc', contrato.PolizasDesc) or None
+            #contrato.ContratoValor = data.get('ContratoValor', contrato.ContratoValor) or None
+            contrato.IncluyeIvaValor = data.get('IncluyeIvaValor', contrato.IncluyeIvaValor)
+            contrato.ContratoDesc = data.get('ContratoDesc', contrato.ContratoDesc) or None
+            contrato.ServicioRemoto = data.get('ServicioRemoto', contrato.ServicioRemoto)
             
             # Guardar los cambios en la base de datos
             contrato.save()
@@ -89,8 +95,16 @@ def clientes_contratos_descargar_excel(request):
                          clientescontrato.HorarioServicio,
                          clientescontrato.FechaFacturacion,
                          clientescontrato.TipoFacturacion,
-                         clientescontrato.Observaciones])
-        df = pd.DataFrame(data, columns=['Id', 'Cliente', 'FechaInicio', 'FechaFin', 'Contrato', 'ContratoVigente', 'OC_Facturar', 'Parafiscales', 'HorarioServicio', 'FechaFacturacion', 'TipoFacturacion', 'Observaciones'])
+                         clientescontrato.Observaciones,
+                         clientescontrato.Polizas,
+                         clientescontrato.PolizasDesc,
+                         clientescontrato.IncluyeIvaValor,
+                         clientescontrato.ContratoDesc,
+                         clientescontrato.ServicioRemoto])
+        df = pd.DataFrame(data, columns=['Id', 'Cliente', 'FechaInicio', 'FechaFin', 'Contrato', 
+                                         'ContratoVigente', 'OC_Facturar', 'Parafiscales', 'HorarioServicio', 'FechaFacturacion', 
+                                         'TipoFacturacion', 'Observaciones', 'Polizas', 'PolizasDesc',  
+                                         'IncluyeIvaValor', 'ContratoDesc', 'ServicioRemoto'])
         df.to_excel(response, index=False)
         return response
     return redirect('clientes_contratos_index')
