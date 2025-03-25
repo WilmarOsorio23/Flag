@@ -46,20 +46,14 @@ document.addEventListener('DOMContentLoaded', function() {
         let row = selected[0].closest('tr');
        
         let data = {
-            'FechaFin': row.querySelector('input[name="FechaFin"]').value || null,  // Permitir valor nulo
-            'Contrato': row.querySelector('input[name="Contrato"]').value,
-            'ContratoVigente': row.querySelector('input[name="ContratoVigente"]').checked,
-            'OC_Facturar': row.querySelector('input[name="OC_Facturar"]').checked,
-            'Parafiscales': row.querySelector('input[name="Parafiscales"]').checked,
-            'HorarioServicio': row.querySelector('input[name="HorarioServicio"]').value,
-            'FechaFacturacion': row.querySelector('input[name="FechaFacturacion"]').value,
-            'TipoFacturacion': row.querySelector('input[name="TipoFacturacion"]').value,
-            'Observaciones': row.querySelector('input[name="Observaciones"]').value,
+            'FechaFin': row.querySelector('input[name="FechaFin"]').value || null, 
+            'NumeroOtroSi': row.querySelector('input[name="NumeroOtroSi"]').value,
+            'ValorOtroSi': row.querySelector('input[name="ValorOtroSi"]').value,
+            'ValorIncluyeIva': row.querySelector('input[name="ValorIncluyeIva"]').checked,
             'Polizas': row.querySelector('input[name="Polizas"]').checked,
             'PolizasDesc': row.querySelector('input[name="PolizasDesc"]').value,
-            'IncluyeIvaValor': row.querySelector('input[name="IncluyeIvaValor"]').checked,
-            'ContratoDesc': row.querySelector('input[name="ContratoDesc"]').value,
-            'ServicioRemoto': row.querySelector('input[name="ServicioRemoto"]').checked
+            'FirmadoFlag': row.querySelector('input[name="FirmadoFlag"]').checked,
+            'FirmadoCliente': row.querySelector('input[name="FirmadoCliente"]').checked
         };
         
         let id = selected[0].value;
@@ -67,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
 
-       fetch(`/clientes_contratos/editar/${id}/`, {
+       fetch(`/contratos_otros_si/editar/${id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -135,20 +129,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Convertir inputs en editables
         let editables = [
             { name: "FechaFin", type: "date" },
-            { name: "Contrato", type: "text" },
-            { name: "ContratoVigente", type: "checkbox" },
-            { name: "OC_Facturar", type: "checkbox" },
-            { name: "Parafiscales", type: "checkbox" },
-            { name: "HorarioServicio", type: "text" },
-            { name: "FechaFacturacion", type: "text" },
-            { name: "TipoFacturacion", type: "text" },
-            { name: "Observaciones", type: "text" },
+            { name: "NumeroOtroSi", type: "text" },
+            { name: "ValorOtroSi", type: "text" },
+            { name: "ValorIncluyeIva", type: "checkbox" },
             { name: "Polizas", type: "checkbox" },
             { name: "PolizasDesc", type: "text" },
-            { name: "IncluyeIvaValor", type: "checkbox" },
-            { name: "ContratoDesc", type: "text" },
-            { name: "ServicioRemoto", type: "checkbox" }
-
+            { name: "FirmadoFlag", type: "checkbox" },
+            { name: "FirmadoCliente", type: "checkbox" }
         ];
         
         editables.forEach(field => {
@@ -247,8 +234,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         };
     }
-
-   
 
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
     async function verifyRelations(ids, csrfToken) {

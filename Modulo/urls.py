@@ -38,6 +38,7 @@ from Modulo.Views import Horas_Habiles
 from Modulo.Views import tarifa_consultores
 from Modulo.Views import moneda
 from Modulo.Views import clientes_Contratos
+from Modulo.Views import ContratosOtrosSi
 from Modulo.Views import tarifa_Clientes
 from Modulo.Views import referencia
 from Modulo.Views import centrosCostos
@@ -163,6 +164,13 @@ urlpatterns = [
     path('clientes_contratos/editar/<int:id>/', clientes_Contratos.clientes_contratos_editar, name='clientes_contratos_editar'),
     path('clientes_contratos/eliminar', clientes_Contratos.clientes_contratos_eliminar, name='clientes_contratos_eliminar'),
     path('clientes_contratos/descargar_excel', clientes_Contratos.clientes_contratos_descargar_excel, name='clientes_contratos_descargar_excel'),
+
+    # Rutas para tabla Contratos Otros Si
+    path('contratos_otros_si/', ContratosOtrosSi.contratos_otros_si_index, name='contratos_otros_si_index'),
+    path('contratos_otros_si/crear', ContratosOtrosSi.contratos_otros_si_crear, name='contratos_otros_si_crear'),
+    path('contratos_otros_si/editar/<int:id>/', ContratosOtrosSi.contratos_otros_si_editar, name='contratos_otros_si_editar'),
+    path('contratos_otros_si/eliminar', ContratosOtrosSi.contratos_otros_si_eliminar, name='contratos_otros_si_eliminar'),
+    path('contratos_otros_si/descargar_excel', ContratosOtrosSi.contratos_otros_si_descargar_excel, name='contratos_otros_si_descargar_excel'),
 
     # Rutas para Centros de Costos
     path('centros_costos/', centrosCostos.centros_costos_index, name='centros_costos_index'),

@@ -181,7 +181,8 @@ document.addEventListener('DOMContentLoaded', function () {
             'Ciudad': row.querySelector('input[name ="Ciudad"]').value || null,
             'Departamento': row.querySelector('input[name ="Departamento"]').value || null,
             'Pais': row.querySelector('input[name ="Pais"]').value || null,
-            'ContactoID': row.querySelector('select[name="ContactoID"]').value || null
+            'ContactoID': row.querySelector('select[name="ContactoID"]').value || null,
+            'Nacional': row.querySelector('select[name="Nacional"]').value,
         };
 
         let id = selected[0].value;
@@ -238,10 +239,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         modal.show();
         confirmButton.onclick = async function () {
-            const isRelated = await verifyRelations(selectedIds, csrfToken);
-            if (isRelated) {
-                console.log(isRelated)
-                showMessage('Algunos clientes no pueden ser eliminados porque están relacionados con otras tablas.', 'danger');
+            const relations = await verifyRelations(selectedIds, csrfToken);
+            if (relations.isRelated) {
+                let message = 'Algunos clientes no pueden ser eliminados porque están relacionados con las siguientes tablas:\n';
+                for (const [id, tables] of Object.entries(relations.relaciones)) {
+                    message += `Cliente ID ${id}: ${tables.join(', ')}\n`;
+                }
+                showMessage(message, 'danger', 5000); // Mostrar el mensaje por 5 segundos
                 modal.hide();
                 document.getElementById('select-all').checked = false;
                 document.querySelectorAll('.row-select').forEach(checkbox => checkbox.checked = false);
@@ -332,15 +336,15 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const data = await response.json();
-            return data.isRelated || false;
+            return data;
         } catch (error) {
             console.error('Error verificando relaciones:', error);
-            return true;
+            return { isRelated: true }; // Asumir que hay relaciones en caso de error
         }
     }
         
 
-    function showMessage(message, type) {
+    function showMessage(message, type, duration = 6000) {
         const alertBox = document.getElementById('message-box');
         const alertIcon = document.getElementById('alert-icon');
         const alertMessage = document.getElementById('alert-message');
@@ -362,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 alertBox.style.display = 'none';
             }, 300);
-        }, 800);
+        }, duration);
     }
 
 });

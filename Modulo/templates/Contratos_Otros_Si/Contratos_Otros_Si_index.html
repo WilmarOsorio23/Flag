@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block titulo %} Lista de Clientes Contratos {% endblock %}
+{% block titulo %} Contratos Otros Si {% endblock %}
 
 {% block contenido %}
 <div class="card">
@@ -19,16 +19,16 @@
     </div>
     {% endif %}
     <div class="card-header d-flex justify-content-between align-items-center"> 
-        <h4 class="card-title">Clientes Contratos</h4>
+        <h4 class="card-title">Contratos Otros Si</h4>
     </div>
     <div class="card-body">
         <!-- CRUD Icons -->
         <div class="button-group">
-            <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'clientes_contratos_crear' %}" role="button"></a> 
+            <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'contratos_otros_si_crear' %}" role="button"></a> 
             <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button" onclick="enableEdit();"></a> 
             <i class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
             <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar"></button> 
-            <form id="download-form" method="POST" action="{% url 'clientes_contratos_descargar_excel' %}" style="display:inline;">
+            <form id="download-form" method="POST" action="{% url 'contratos_otros_si_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
                 <input type="hidden" name="items_to_download" id="items_to_download">
                 <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
@@ -50,7 +50,7 @@
     </div>
     <div class="card-footer text-muted">
         <div class="table-responsive">
-            <form id="delete-form" method="POST" action="{% url 'clientes_contratos_eliminar' %}">
+            <form id="delete-form" method="POST" action="{% url 'contratos_otros_si_eliminar' %}">
                 {% csrf_token %}
                 <table class="table table-primary">
                     <thead>
@@ -59,26 +59,20 @@
                             <th scope="col">Cliente</th>
                             <th scope="col">Fecha Inicio</th>
                             <th scope="col">Fecha Fin</th>
-                            <th scope="col">Contrato</th>
-                            <th scope="col">Contrato Vigente</th>
-                            <th scope="col">OC Facturar</th>
-                            <th scope="col">Parafiscales</th>
-                            <th scope="col">Horario Servicio</th>
-                            <th scope="col">Fecha Facturación</th>
-                            <th scope="col">Tipo Facturación</th>
-                            <th scope="col">Observaciones</th>
+                            <th scope="col">Número Otro Si</th>
+                            <th scope="col">Valor Otro Si</th>
+                            <th scope="col">Valor Incluye Iva</th>
                             <th scope="col">Polizas</th>
                             <th scope="col">Descripción Polizas</th>
-                            <th scope="col">Incluye Iva Valor</th>
-                            <th scope="col">Descripción Contrato</th>
-                            <th scope="col">Servicio Remoto</th>
+                            <th scope="col">Firmado Flag</th>
+                            <th scope="col">Firmado Cliente</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for contrato in clientes_contratos_data %}
+                        {% for contrato in contratos_otros_si_data %}
                         <tr>
                             <td>
-                                <input type="checkbox" class="row-select" name="items_to_delete" value="{{ contrato.ClientesContratosId }}">
+                                <input type="checkbox" class="row-select" name="items_to_delete" value="{{ contrato.ContratosOtrosSiId }}">
                             </td>
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
                                 <input type="text" class="form-control-plaintext" name="Nombre_Cliente" value="{{ contrato.ClienteId.Nombre_Cliente }}" readonly>
@@ -90,43 +84,17 @@
                                 <input type="date" class="form-control-plaintext" name="FechaFin" value="{{ contrato.FechaFin|date:'Y-m-d' }}" readonly>
                             </td>
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
-                                <input type="text" class="form-control-plaintext" name="Contrato" value="{{ contrato.Contrato }}" readonly>
+                                <input type="text" class="form-control-plaintext" name="NumeroOtroSi" value="{{ contrato.NumeroOtroSi }}" readonly>
                             </td>
+                            <td><input type="text" name="ValorOtroSi" class="form-control-plaintext" value="{{contrato.ValorOtroSi}}" readonly></td>
                             <td>
-                                <!-- Modo de solo lectura -->
-                                <span class="form-control-plaintext boolean-display" data-field="ContratoVigente">
-                                    {% if contrato.ContratoVigente %}Sí{% else %}No{% endif %}
-                                </span>
-                                <!-- Modo de edición -->
-                                <input type="checkbox" class="form-check-input boolean-edit d-none" 
-                                       name="ContratoVigente" {% if contrato.ContratoVigente %}checked{% endif %}>
-                            </td>
-                            <td>
-                                <span class="form-control-plaintext boolean-display" data-field="OC_Facturar">
-                                    {% if contrato.OC_Facturar %}Sí{% else %}No{% endif %}
+                                <span class="form-control-plaintext boolean-display" data-field="ValorIncluyeIva">
+                                    {% if contrato.ValorIncluyeIva %}Sí{% else %}No{% endif %}
                                 </span>
                                 <input type="checkbox" class="form-check-input boolean-edit d-none" 
-                                       name="OC_Facturar" {% if contrato.OC_Facturar %}checked{% endif %}>
+                                       name="ValorIncluyeIva" {% if contrato.ValorIncluyeIva %}checked{% endif %}>
                             </td>
-                            <td>
-                                <span class="form-control-plaintext boolean-display" data-field="Parafiscales">
-                                    {% if contrato.Parafiscales %}Sí{% else %}No{% endif %}
-                                </span>
-                                <input type="checkbox" class="form-check-input boolean-edit d-none" 
-                                       name="Parafiscales" {% if contrato.Parafiscales %}checked{% endif %}>
-                            </td>
-                            <td>
-                                <input type="text" class="form-control-plaintext" name="HorarioServicio" value="{{ contrato.HorarioServicio }}" readonly>
-                            </td>
-                            <td>
-                                <input type="text" class="form-control-plaintext" name="FechaFacturacion" value="{{ contrato.FechaFacturacion }}" readonly>
-                            </td>
-                            <td>
-                                <input type="text" class="form-control-plaintext" name="TipoFacturacion" value="{{ contrato.TipoFacturacion }}" readonly>
-                            </td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
-                                <input type="text" class="form-control-plaintext" name="Observaciones" value="{{ contrato.Observaciones }}" readonly>
-                            </td>
+                            
                             <td>
                                 <span class="form-control-plaintext boolean-display" data-field="Polizas">
                                     {% if contrato.Polizas %}Sí{% else %}No{% endif %}
@@ -138,21 +106,18 @@
                                 <input type="text" class="form-control-plaintext" name="PolizasDesc" value="{{ contrato.PolizasDesc|default_if_none:'' }}" readonly>
                             </td>
                             <td>
-                                <span class="form-control-plaintext boolean-display" data-field="IncluyeIvaValor">
-                                    {% if contrato.IncluyeIvaValor %}Sí{% else %}No{% endif %}
+                                <span class="form-control-plaintext boolean-display" data-field="FirmadoFlag">
+                                    {% if contrato.FirmadoFlag %}Sí{% else %}No{% endif %}
                                 </span>
                                 <input type="checkbox" class="form-check-input boolean-edit d-none" 
-                                       name="IncluyeIvaValor" {% if contrato.IncluyeIvaValor %}checked{% endif %}>
-                            </td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
-                                <input type="text" class="form-control-plaintext" name="ContratoDesc" value="{{ contrato.ContratoDesc|default_if_none:'' }}" readonly>
+                                       name="FirmadoFlag" {% if contrato.FirmadoFlag %}checked{% endif %}>
                             </td>
                             <td>
-                                <span class="form-control-plaintext boolean-display" data-field="ServicioRemoto">
-                                    {% if contrato.ServicioRemoto %}Sí{% else %}No{% endif %}
+                                <span class="form-control-plaintext boolean-display" data-field="FirmadoCliente">
+                                    {% if contrato.FirmadoCliente %}Sí{% else %}No{% endif %}
                                 </span>
                                 <input type="checkbox" class="form-check-input boolean-edit d-none" 
-                                       name="ServicioRemoto" {% if contrato.ServicioRemoto %}checked{% endif %}>
+                                       name="FirmadoCliente" {% if contrato.FirmadoCliente %}checked{% endif %}>
                             </td>
                         </tr>
                         {% endfor %}
@@ -181,6 +146,6 @@
     </div>
 </div>
 
-<script src="{% static 'JS/clientesContratos.js' %}"></script>
+<script src="{% static 'JS/contratosOtrosSi.js' %}"></script>
 
 {% endblock %}

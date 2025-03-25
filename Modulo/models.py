@@ -118,6 +118,7 @@ class Clientes(models.Model):
     Ciudad = models.CharField(max_length=50, null=True, blank=True)
     Departamento = models.CharField(max_length=20, null=True, blank=True)
     Pais = models.CharField(max_length=20, null=True, blank=True)
+    Nacional = models.BooleanField(default=False)
 
     def clean(self):
         """
@@ -543,12 +544,18 @@ class ClientesContratos(models.Model):
     FechaFacturacion = models.TextField(null=True, blank=True)
     TipoFacturacion = models.TextField(null=True, blank=True)
     Observaciones = models.TextField(null=True, blank=True)
+    Polizas = models.BooleanField(default=False)
+    PolizasDesc = models.CharField(max_length=200,null=True,blank=True)
+    #ContratoValor = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    IncluyeIvaValor = models.BooleanField(default=False)
+    ContratoDesc = models.CharField(max_length=200,null=True,blank=True)
+    ServicioRemoto = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'Clientes_Contratos'
 
     def __str__(self):
-        return f"ContratoId:{self.ClientesContratosId} - Cliente: {self.ClienteId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - Contrato: {self.Contrato} - ContratoVigente: {self.ContratoVigente} - OC_Facturar: {self.OC_Facturar} - Parafiscales: {self.Parafiscales} - HorarioServicio: {self.HorarioServicio} - FechaFacturacion: {self.FechaFacturacion} - TipoFacturacion: {self.TipoFacturacion} - Observaciones: {self.Observaciones}"
+        return f"ContratoId:{self.ClientesContratosId} - Cliente: {self.ClienteId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - Contrato: {self.Contrato} - ContratoVigente: {self.ContratoVigente} - OC_Facturar: {self.OC_Facturar} - Parafiscales: {self.Parafiscales} - HorarioServicio: {self.HorarioServicio} - FechaFacturacion: {self.FechaFacturacion} - TipoFacturacion: {self.TipoFacturacion} - Observaciones: {self.Observaciones} - Polizas: {self.Polizas} - PolizasDesc: {self.PolizasDesc} - IncluyeIvaValor: {self.IncluyeIvaValor} - ContratoDesc: {self.ContratoDesc} - ServicioRemoto: {self.ServicioRemoto}"
     
     
 class Tarifa_Clientes(models.Model):
@@ -663,3 +670,23 @@ class Ind_Operat_Conceptos(models.Model):
 
     def __str__(self):
         return f"ID {self.Id} - Año {self.Anio} - Mes {self.Mes} - Linea {self.LineaId} - Concepto {self.ConceptoId}"
+    
+class ContratosOtrosSi(models.Model):
+    ContratosOtrosSiId = models.AutoField(primary_key=True)
+    ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
+    FechaInicio = models.DateField(null=False, blank=False)
+    FechaFin = models.DateField(null=True, blank=True)
+    NumeroOtroSi = models.CharField(max_length=20,null=True,blank=True) 
+    ValorOtroSi = models.DecimalField(max_digits=10, decimal_places=2)
+    ValorIncluyeIva = models.BooleanField(default = 0)
+    Polizas = models.BooleanField(default=0)
+    PolizasDesc = models.CharField(max_length=200,null=True,blank=True)
+    FirmadoFlag = models.BooleanField(default=0)
+    FirmadoCliente = models.BooleanField(default=0)
+
+
+    class Meta:
+        db_table = 'Contratos_OtrosSi'
+
+    def __str__(self):
+        return f"ContratoId:{self.ContratosOtrosSiId} - Cliente: {self.ClienteId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - NumeroOtroSi: {self.NumeroOtroSi} - ValorOtroSi: {self.ValorOtroSi} - ValorIncluyeIva: {self.ValorIncluyeIva} - Polizas: {self.Polizas} - PolizasDesc: {self.PolizasDesc} - FirmadoFlag: {self.FirmadoFlag} - FirmadoCliente: {self.FirmadoCliente}"
