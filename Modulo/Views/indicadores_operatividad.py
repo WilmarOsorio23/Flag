@@ -153,7 +153,7 @@ def procesar_linea(linea, anio, meses, horas_habiles, conceptos):
             'Trabajado': clientes_mes['trabajado'] or 0.0,
             'Facturable': clientes_mes['facturable'] or 0.0,
             'Tiempo_NO_facturable': ( clientes_mes['trabajado']) - (clientes_mes['facturable']) or 0.0,
-            'Índ_de_oper': (safe_divide( clientes_mes['facturable'], (safe_divide(recursos_asignados, horas_mes)) * horas_mes))* 100 or 0.0,
+            'Índ_de_oper': safe_divide( clientes_mes['facturable'],capacidad_ajustada)* 100 or 0.0,
             'Conceptos': conceptos_dict,
         }
         
