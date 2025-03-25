@@ -133,11 +133,12 @@ def procesar_linea(linea, anio, meses, horas_habiles, conceptos):
         resultados_meses[mes]['Conceptos'] = conceptos_dict
         # Calcular indicadores
         horas_mes = horas_habiles.get(mes, {}).get('total', 1)
-        recursos_asignados = (clientes_mes['trabajado'] or 0) + sum(conceptos_dict.values())
 
         # Obtener valores de Vacaciones y Día de la Familia
         vacaciones = conceptos_dict.get('Vacaciones', 0)
         dia_familia = conceptos_dict.get('Dia de la Familia', 0)
+        
+        recursos_asignados = ((clientes_mes['trabajado'] or 0) + sum(conceptos_dict.values())) - vacaciones
 
         # 1. Restar Vacaciones y Día de la Familia del total de la capacidad
         capacidad_ajustada = ((safe_divide(recursos_asignados, horas_mes)) * horas_mes) - vacaciones - dia_familia
