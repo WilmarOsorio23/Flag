@@ -138,7 +138,7 @@ def procesar_linea(linea, anio, meses, horas_habiles, conceptos):
         vacaciones = conceptos_dict.get('Vacaciones', 0)
         dia_familia = conceptos_dict.get('Dia de la Familia', 0)
         
-        recursos_asignados = ((clientes_mes['trabajado'] or 0) + sum(conceptos_dict.values())) - vacaciones
+        recursos_asignados = ((clientes_mes['trabajado'] or 0) + sum(conceptos_dict.values()))
 
         # 1. Restar Vacaciones y Día de la Familia del total de la capacidad
         capacidad_ajustada = ((safe_divide(recursos_asignados, horas_mes)) * horas_mes) - vacaciones - dia_familia
@@ -147,7 +147,7 @@ def procesar_linea(linea, anio, meses, horas_habiles, conceptos):
         no_operativos = sum(conceptos_dict.values()) - vacaciones - dia_familia
 
         resultados_meses[mes] = {
-            'Recursos_asignados': safe_divide(recursos_asignados, horas_mes),
+            'Recursos_asignados': safe_divide((recursos_asignados - vacaciones), horas_mes),
             'Recursos_activos': safe_divide(clientes_mes['trabajado'], horas_mes),
             'Capacidad': capacidad_ajustada,
             'Trabajado': clientes_mes['trabajado'] or 0.0,
