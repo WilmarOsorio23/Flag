@@ -56,6 +56,11 @@ def obtener_clientes_contratos(clientes, contratos):
                 'FechaFacturacion': contrato.FechaFacturacion,
                 'TipoFacturacion': contrato.TipoFacturacion,
                 'Observaciones': contrato.Observaciones,
+                'Polizas': contrato.Polizas,
+                'PolizasDesc': contrato.PolizasDesc,
+                'IncluyeIvaValor': contrato.IncluyeIvaValor,
+                'ContratoDesc': contrato.ContratoDesc,
+                'ServicioRemoto': contrato.ServicioRemoto,
                 'documento': cliente.DocumentoId,
                 'Nombre_Cliente': cliente.Nombre_Cliente}
                 for contrato in contratos_cliente]  # Corrected variable name here
@@ -139,6 +144,11 @@ def exportar_clientes_contratos_excel(request):
                     contrato['FechaFacturacion'],
                     contrato['TipoFacturacion'],
                     contrato['Observaciones'],
+                    contrato['Polizas'],
+                    contrato['PolizasDesc'],
+                    'SI' if contrato['IncluyeIvaValor'] else 'NO',
+                    contrato['ContratoDesc'],
+                    'SI' if contrato['ServicioRemoto'] else 'NO',
                 ])
 
         if data:
@@ -161,6 +171,11 @@ def exportar_clientes_contratos_excel(request):
                 'Fecha Facturación',
                 'Tipo Facturación',
                 'Observaciones',
+                'Polizas',
+                'Polizas Desc',
+                'Incluye IVA',
+                'Descripción Contrato',
+                'Servicio Remoto',
             ]
             for col_num, header in enumerate(encabezados, 1):
                 cell = ws.cell(row=1, column=col_num, value=header)
