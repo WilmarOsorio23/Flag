@@ -69,6 +69,7 @@
                             <th scope="col">Observaciones</th>
                             <th scope="col">Polizas</th>
                             <th scope="col">Descripción Polizas</th>
+                            <th scope="col">Contrato Valor</th>
                             <th scope="col">Incluye Iva Valor</th>
                             <th scope="col">Descripción Contrato</th>
                             <th scope="col">Servicio Remoto</th>
@@ -137,6 +138,7 @@
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
                                 <input type="text" class="form-control-plaintext" name="PolizasDesc" value="{{ contrato.PolizasDesc|default_if_none:'' }}" readonly>
                             </td>
+                            <td><input type="text" name="ContratoValor" class="form-control-plaintext" value="{{contrato.ContratoValor|default_if_none:''}}" readonly></td>
                             <td>
                                 <span class="form-control-plaintext boolean-display" data-field="IncluyeIvaValor">
                                     {% if contrato.IncluyeIvaValor %}Sí{% else %}No{% endif %}

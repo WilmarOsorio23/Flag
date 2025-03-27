@@ -121,6 +121,9 @@
                             <!-- Descripción Polizas -->
                             <th>Descripción Polizas</th>
 
+                            <!--Contrato Valor -->
+                            <th>Contrato Valor</th>
+
                             <!-- Incluye Iva Valor -->
                             <th>Incluye Iva Valor</th>
 
@@ -150,6 +153,7 @@
                                     <td>{{ contrato.Observaciones|default_if_none:"" }}</td>
                                     <td>{{ contrato.Polizas|yesno:"SI,NO" }}</td>
                                     <td>{{ contrato.PolizasDesc|default_if_none:"" }}</td>
+                                    <td>{{ contrato.ContratoValor|default_if_none:"" }}</td>
                                     <td>{{ contrato.IncluyeIvaValor|yesno:"SI,NO" }}</td>
                                     <td>{{ contrato.ContratoDesc|default_if_none:"" }}</td>
                                     <td>{{ contrato.ServicioRemoto|yesno:"SI,NO" }}</td>
@@ -157,7 +161,7 @@
                             {% endfor %}
                         {% empty %}
                             <tr>
-                                <td colspan="17">No hay datos disponibles.</td>
+                                <td colspan="18">No hay datos disponibles.</td>
                             </tr>
                         {% endfor %}
                     </tbody>

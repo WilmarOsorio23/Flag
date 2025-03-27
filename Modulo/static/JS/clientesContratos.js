@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'Observaciones': row.querySelector('input[name="Observaciones"]').value,
             'Polizas': row.querySelector('input[name="Polizas"]').checked,
             'PolizasDesc': row.querySelector('input[name="PolizasDesc"]').value,
+            'ContratoValor': row.querySelector('input[name="ContratoValor"]').value,
             'IncluyeIvaValor': row.querySelector('input[name="IncluyeIvaValor"]').checked,
             'ContratoDesc': row.querySelector('input[name="ContratoDesc"]').value,
             'ServicioRemoto': row.querySelector('input[name="ServicioRemoto"]').checked
@@ -145,6 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
             { name: "Observaciones", type: "text" },
             { name: "Polizas", type: "checkbox" },
             { name: "PolizasDesc", type: "text" },
+            { name: "ContratoValor", type: "text" },
             { name: "IncluyeIvaValor", type: "checkbox" },
             { name: "ContratoDesc", type: "text" },
             { name: "ServicioRemoto", type: "checkbox" }

@@ -58,6 +58,7 @@ def obtener_clientes_contratos(clientes, contratos):
                 'Observaciones': contrato.Observaciones,
                 'Polizas': contrato.Polizas,
                 'PolizasDesc': contrato.PolizasDesc,
+                'ContratoValor': contrato.ContratoValor,
                 'IncluyeIvaValor': contrato.IncluyeIvaValor,
                 'ContratoDesc': contrato.ContratoDesc,
                 'ServicioRemoto': contrato.ServicioRemoto,
@@ -126,7 +127,7 @@ def exportar_clientes_contratos_excel(request):
             
         else:
                 print("Errores del formulario:", form.errors)
-                return HttpResponse("No se encontraron resultados para los filtros aplicadosssss.")
+                return HttpResponse("No se encontraron resultados para los filtros aplicados.")
 
         data = []    
         for cliente in cliente_contratos_info:
@@ -144,8 +145,9 @@ def exportar_clientes_contratos_excel(request):
                     contrato['FechaFacturacion'],
                     contrato['TipoFacturacion'],
                     contrato['Observaciones'],
-                    contrato['Polizas'],
+                    'SI' if contrato['Polizas'] else 'NO',
                     contrato['PolizasDesc'],
+                    contrato['ContratoValor'],
                     'SI' if contrato['IncluyeIvaValor'] else 'NO',
                     contrato['ContratoDesc'],
                     'SI' if contrato['ServicioRemoto'] else 'NO',
@@ -173,6 +175,7 @@ def exportar_clientes_contratos_excel(request):
                 'Observaciones',
                 'Polizas',
                 'Polizas Desc',
+                'Valor Contrato',
                 'Incluye IVA',
                 'Descripción Contrato',
                 'Servicio Remoto',
