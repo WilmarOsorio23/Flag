@@ -16,6 +16,7 @@ def filtrar_clientes(form, clientes):
     pais = form.cleaned_data.get('Pais')
     ciudad = form.cleaned_data.get('Ciudad')
     tipo_cliente = form.cleaned_data.get('TipoCliente')
+    nacional = form.cleaned_data.get('Nacional')
 
     # Filtrar los clientes según los parámetros
     if nombre:
@@ -37,6 +38,8 @@ def filtrar_clientes(form, clientes):
         clientes = clientes.filter(Ciudad=ciudad)
     if tipo_cliente:
         clientes = clientes.filter(TipoCliente=tipo_cliente)
+    if nacional:
+        clientes = clientes.filter(Nacional=nacional == 'True')
 
     return clientes
 
@@ -59,7 +62,8 @@ def obtener_info_clientes(clientes):
             'TipoCliente': cliente.TipoCliente,
             'Ciudad': cliente.Ciudad,
             'Departamento': cliente.Departamento,
-            'Pais': cliente.Pais,            
+            'Pais': cliente.Pais,  
+            'Nacional': 'SI' if cliente.Nacional else 'NO',          
         }
         clientes_info.append(datos_cliente)
     return clientes_info
@@ -114,7 +118,7 @@ def exportar_clientes_excel(request):
 
         # Agregar encabezados
         encabezados = ["Documento", "Tipo Documento", "Nombre Cliente", "Activo", "Fecha Inicio", "Fecha Retiro", "Dirección",
-                       "Telefono", "Correo", "Contacto", "Buzon Facturación", "Tipo Cliente", "Ciudad", "Departamento", "País"]
+                       "Telefono", "Correo", "Contacto", "Buzon Facturación", "Tipo Cliente", "Ciudad", "Departamento", "País", "Nacional"]
         for col_num, header in enumerate(encabezados, 1):
             cell = ws.cell(row=1, column=col_num, value=header)
             cell.font = Font(bold=True)
@@ -137,6 +141,7 @@ def exportar_clientes_excel(request):
             ws.cell(row=row_num, column=13, value=str(cliente['Ciudad']) if cliente['Ciudad'] else '')
             ws.cell(row=row_num, column=14, value=str(cliente['Departamento']) if cliente['Departamento'] else '')
             ws.cell(row=row_num, column=15, value=str(cliente['Pais']) if cliente['Pais'] else '')
+            ws.cell(row=row_num, column=16, value=cliente['Nacional'])
 
         # Aplicar estilos a las celdas
         thin_border = Border(left=Side(style='thin'), right=Side(style='thin'),

@@ -1762,6 +1762,17 @@ class ClienteFilterForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
+    Nacional = forms.ChoiceField(
+        choices=[
+            ('', 'Seleccione estado'),
+            ('True', 'Sí'),
+            ('False', 'No')
+        ],
+        required=False,
+        label='Nacional',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.populate_choices()
