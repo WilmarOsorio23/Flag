@@ -132,6 +132,9 @@
 
                             <!-- Servicio Remoto -->
                             <th>Servicio Remoto</th>
+
+                            <!-- Moneda -->
+                            <th>Moneda</th>
                     </thead>
 
                     <!-- Lectura de campos para mostrar -->
@@ -157,6 +160,7 @@
                                     <td>{{ contrato.IncluyeIvaValor|yesno:"SI,NO" }}</td>
                                     <td>{{ contrato.ContratoDesc|default_if_none:"" }}</td>
                                     <td>{{ contrato.ServicioRemoto|yesno:"SI,NO" }}</td>
+                                    <td>{{ contrato.monedaId.Nombre }}</td>
                                 </tr>
                             {% endfor %}
                         {% empty %}

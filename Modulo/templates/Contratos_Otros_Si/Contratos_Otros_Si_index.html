@@ -66,6 +66,7 @@
                             <th scope="col">Descripción Polizas</th>
                             <th scope="col">Firmado Flag</th>
                             <th scope="col">Firmado Cliente</th>
+                            <th scope="col">Moneda</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -86,7 +87,7 @@
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
                                 <input type="text" class="form-control-plaintext" name="NumeroOtroSi" value="{{ contrato.NumeroOtroSi }}" readonly>
                             </td>
-                            <td><input type="text" name="ValorOtroSi" class="form-control-plaintext" value="{{contrato.ValorOtroSi}}" readonly></td>
+                            <td><input type="text" name="ValorOtroSi" class="form-control-plaintext" value="{{contrato.ValorOtroSi|default_if_none:'' }}" readonly></td>
                             <td>
                                 <span class="form-control-plaintext boolean-display" data-field="ValorIncluyeIva">
                                     {% if contrato.ValorIncluyeIva %}Sí{% else %}No{% endif %}
@@ -118,6 +119,15 @@
                                 </span>
                                 <input type="checkbox" class="form-check-input boolean-edit d-none" 
                                        name="FirmadoCliente" {% if contrato.FirmadoCliente %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <select name="moneda" class="form-control-plaintext" disabled>
+                                    {% for moneda in form.fields.monedaId.queryset %}
+                                        <option value="{{ moneda.id }}"{% if contrato.monedaId.id == moneda.id %} selected{% endif %}>
+                                            {{ moneda.Nombre }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
                             </td>
                         </tr>
                         {% endfor %}

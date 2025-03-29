@@ -11,7 +11,8 @@ from django.contrib import messages
 
 def clientes_contratos_index(request):
     clientes_contratos_data = ClientesContratos.objects.all()
-    return render(request, 'clientes_contratos/clientes_contratos_index.html', {'clientes_contratos_data': clientes_contratos_data})
+    form = ClientesContratosForm()
+    return render(request, 'clientes_contratos/clientes_contratos_index.html', {'clientes_contratos_data': clientes_contratos_data, 'form': form})
 
 def clientes_contratos_crear(request):
     if request.method == 'POST':
@@ -47,10 +48,15 @@ def clientes_contratos_editar(request, id):
             contrato.Observaciones = data.get('Observaciones', contrato.Observaciones)
             contrato.Polizas = data.get('Polizas', contrato.Polizas)
             contrato.PolizasDesc = data.get('PolizasDesc', contrato.PolizasDesc) or None
-            contrato.ContratoValor = data.get('ContratoValor', contrato.ContratoValor)
+            contrato.ContratoValor = data.get('ContratoValor', contrato.ContratoValor) or None
             contrato.IncluyeIvaValor = data.get('IncluyeIvaValor', contrato.IncluyeIvaValor)
             contrato.ContratoDesc = data.get('ContratoDesc', contrato.ContratoDesc) or None
             contrato.ServicioRemoto = data.get('ServicioRemoto', contrato.ServicioRemoto)
+
+            # Validar y asignar monedaId
+            moneda_id = data.get('monedaId')
+            if moneda_id:
+                contrato.monedaId_id = moneda_id
             
             # Guardar los cambios en la base de datos
             contrato.save()
@@ -101,11 +107,12 @@ def clientes_contratos_descargar_excel(request):
                          clientescontrato.ContratoValor,
                          clientescontrato.IncluyeIvaValor,
                          clientescontrato.ContratoDesc,
-                         clientescontrato.ServicioRemoto])
+                         clientescontrato.ServicioRemoto,
+                         getattr(clientescontrato.monedaId, 'Nombre', 'Sin Moneda')])
         df = pd.DataFrame(data, columns=['Id', 'Cliente', 'FechaInicio', 'FechaFin', 'Contrato', 
                                          'ContratoVigente', 'OC_Facturar', 'Parafiscales', 'HorarioServicio', 'FechaFacturacion', 
                                          'TipoFacturacion', 'Observaciones', 'Polizas', 'PolizasDesc',  'ContratoValor',
-                                         'IncluyeIvaValor', 'ContratoDesc', 'ServicioRemoto'])
+                                         'IncluyeIvaValor', 'ContratoDesc', 'ServicioRemoto', 'Moneda'])
         df.to_excel(response, index=False)
         return response
     return redirect('clientes_contratos_index')

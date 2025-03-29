@@ -57,10 +57,11 @@ document.addEventListener('DOMContentLoaded', function() {
             'Observaciones': row.querySelector('input[name="Observaciones"]').value,
             'Polizas': row.querySelector('input[name="Polizas"]').checked,
             'PolizasDesc': row.querySelector('input[name="PolizasDesc"]').value,
-            'ContratoValor': row.querySelector('input[name="ContratoValor"]').value,
+            'ContratoValor': row.querySelector('input[name="ContratoValor"]').value || null,  // Permitir valor nulo
             'IncluyeIvaValor': row.querySelector('input[name="IncluyeIvaValor"]').checked,
             'ContratoDesc': row.querySelector('input[name="ContratoDesc"]').value,
-            'ServicioRemoto': row.querySelector('input[name="ServicioRemoto"]').checked
+            'ServicioRemoto': row.querySelector('input[name="ServicioRemoto"]').checked,
+            'monedaId': row.querySelector('select[name="moneda"]').value,
         };
         
         let id = selected[0].value;
@@ -149,7 +150,8 @@ document.addEventListener('DOMContentLoaded', function() {
             { name: "ContratoValor", type: "text" },
             { name: "IncluyeIvaValor", type: "checkbox" },
             { name: "ContratoDesc", type: "text" },
-            { name: "ServicioRemoto", type: "checkbox" }
+            { name: "ServicioRemoto", type: "checkbox" },
+            { name: "moneda", type: "select" },
 
         ];
         
@@ -162,6 +164,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     display.classList.add('d-none'); // Ocultar texto en modo edición
                     checkbox.classList.remove('d-none'); // Mostrar checkbox en modo edición
                 }
+            } else if (field.type === 'select') {
+                element.disabled = false; // Habilitar el select en modo edición
+                element.classList.remove('form-control-plaintext'); // Quitar estilo de solo lectura
+                element.classList.add('form-control'); // Agregar estilo editable
             } else {
                 element.classList.remove('form-control-plaintext');
                 element.classList.add('form-control');
@@ -328,6 +334,11 @@ document.addEventListener('DOMContentLoaded', function() {
             input.classList.add('form-control-plaintext');
             input.classList.remove('form-control');
             input.readOnly = true;
+        });
+
+        // Deshabilitar el campo select
+        row.querySelectorAll('select').forEach(select => {
+            select.disabled = true; // Deshabilitar el select
         });
 
         // Desmarcar y habilitar el checkbox de la fila

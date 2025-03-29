@@ -12,7 +12,8 @@ from Modulo.models import ContratosOtrosSi
 
 def contratos_otros_si_index(request):
     contratos_otros_si_data = ContratosOtrosSi.objects.all()
-    return render(request, 'contratos_otros_si/contratos_otros_si_index.html', {'contratos_otros_si_data': contratos_otros_si_data})
+    form=ContratosOtrosSiForm()
+    return render(request, 'contratos_otros_si/contratos_otros_si_index.html', {'contratos_otros_si_data': contratos_otros_si_data, 'form': form})
 
 def contratos_otros_si_crear(request):
     if request.method == 'POST':
@@ -38,12 +39,18 @@ def contratos_otros_si_editar(request, id):
             # Actualizar los campos del contrato
             contrato.FechaFin = data.get('FechaFin', contrato.FechaFin)
             contrato.NumeroOtroSi = data.get('NumeroOtroSi', contrato.NumeroOtroSi)
-            contrato.ValorOtroSi = data.get('ValorOtroSi', contrato.ValorOtroSi)
+            contrato.ValorOtroSi = data.get('ValorOtroSi', contrato.ValorOtroSi) or None
             contrato.ValorIncluyeIva = data.get('ValorIncluyeIva', contrato.ValorIncluyeIva)
             contrato.Polizas = data.get('Polizas', contrato.Polizas)
             contrato.PolizasDesc = data.get('PolizasDesc', contrato.PolizasDesc) or None
             contrato.FirmadoFlag = data.get('FirmadoFlag', contrato.FirmadoFlag)
             contrato.FirmadoCliente = data.get('FirmadoCliente', contrato.FirmadoCliente)
+
+
+            # Validar y asignar monedaId
+            moneda_id = data.get('monedaId')
+            if moneda_id:
+                contrato.monedaId_id = moneda_id
             
             # Guardar los cambios en la base de datos
             contrato.save()
@@ -86,9 +93,10 @@ def contratos_otros_si_descargar_excel(request):
                          contratosotrosi.Polizas,
                          contratosotrosi.PolizasDesc,
                          contratosotrosi.FirmadoFlag,
-                         contratosotrosi.FirmadoCliente])
+                         contratosotrosi.FirmadoCliente,
+                         contratosotrosi.monedaId.Nombre])
         df = pd.DataFrame(data, columns=['Id', 'Cliente', 'FechaInicio', 'FechaFin', 'NumeroOtroSi', 'ValorOtroSi',
-                                         'ValorIncluyeIva', 'Polizas', 'PolizasDesc', 'FirmadoFlag', 'FirmadoCliente'])
+                                         'ValorIncluyeIva', 'Polizas', 'PolizasDesc', 'FirmadoFlag', 'FirmadoCliente', 'Moneda'])
         df.to_excel(response, index=False)
         return response
     return redirect('contratos_otros_si_index')

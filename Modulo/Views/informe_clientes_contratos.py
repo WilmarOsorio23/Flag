@@ -63,7 +63,8 @@ def obtener_clientes_contratos(clientes, contratos):
                 'ContratoDesc': contrato.ContratoDesc,
                 'ServicioRemoto': contrato.ServicioRemoto,
                 'documento': cliente.DocumentoId,
-                'Nombre_Cliente': cliente.Nombre_Cliente}
+                'Nombre_Cliente': cliente.Nombre_Cliente,
+                'monedaId': contrato.monedaId}
                 for contrato in contratos_cliente]  # Corrected variable name here
         }
 
@@ -82,7 +83,7 @@ def clientes_contratos_filtrado(request):
         if form.is_valid():
             # Filtrar clientes y contratos
             clientes = Clientes.objects.only('Nombre_Cliente', 'ClienteId').filter(Activo=True)
-            contratos = ClientesContratos.objects.select_related('ClienteId').all()
+            contratos = ClientesContratos.objects.select_related('ClienteId', 'monedaId').all()
             clientes, contratos = filtrar_clientes_contratos(form, clientes, contratos)
             
             print("Clientes filtrados:", clientes)
@@ -151,6 +152,7 @@ def exportar_clientes_contratos_excel(request):
                     'SI' if contrato['IncluyeIvaValor'] else 'NO',
                     contrato['ContratoDesc'],
                     'SI' if contrato['ServicioRemoto'] else 'NO',
+                    contrato['monedaId'].Nombre if contrato['monedaId'] else "Sin Moneda",  # Manejo de moneda
                 ])
 
         if data:
@@ -179,6 +181,7 @@ def exportar_clientes_contratos_excel(request):
                 'Incluye IVA',
                 'Descripción Contrato',
                 'Servicio Remoto',
+                'Moneda',
             ]
             for col_num, header in enumerate(encabezados, 1):
                 cell = ws.cell(row=1, column=col_num, value=header)

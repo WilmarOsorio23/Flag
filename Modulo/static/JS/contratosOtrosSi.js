@@ -48,12 +48,13 @@ document.addEventListener('DOMContentLoaded', function() {
         let data = {
             'FechaFin': row.querySelector('input[name="FechaFin"]').value || null, 
             'NumeroOtroSi': row.querySelector('input[name="NumeroOtroSi"]').value,
-            'ValorOtroSi': row.querySelector('input[name="ValorOtroSi"]').value,
+            'ValorOtroSi': row.querySelector('input[name="ValorOtroSi"]').value || null,
             'ValorIncluyeIva': row.querySelector('input[name="ValorIncluyeIva"]').checked,
             'Polizas': row.querySelector('input[name="Polizas"]').checked,
             'PolizasDesc': row.querySelector('input[name="PolizasDesc"]').value,
             'FirmadoFlag': row.querySelector('input[name="FirmadoFlag"]').checked,
-            'FirmadoCliente': row.querySelector('input[name="FirmadoCliente"]').checked
+            'FirmadoCliente': row.querySelector('input[name="FirmadoCliente"]').checked,
+            'monedaId': row.querySelector('select[name="moneda"]').value,
         };
         
         let id = selected[0].value;
@@ -135,7 +136,8 @@ document.addEventListener('DOMContentLoaded', function() {
             { name: "Polizas", type: "checkbox" },
             { name: "PolizasDesc", type: "text" },
             { name: "FirmadoFlag", type: "checkbox" },
-            { name: "FirmadoCliente", type: "checkbox" }
+            { name: "FirmadoCliente", type: "checkbox" },
+            { name: "moneda", type: "select" }
         ];
         
         editables.forEach(field => {
@@ -147,6 +149,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     display.classList.add('d-none'); // Ocultar texto en modo edición
                     checkbox.classList.remove('d-none'); // Mostrar checkbox en modo edición
                 }
+            } else if (field.type === 'select') {
+                element.disabled = false; // Habilitar el select en modo edición
+                element.classList.remove('form-control-plaintext'); // Quitar estilo de solo lectura
+                element.classList.add('form-control'); // Agregar estilo editable
             } else {
                 element.classList.remove('form-control-plaintext');
                 element.classList.add('form-control');
@@ -311,6 +317,11 @@ document.addEventListener('DOMContentLoaded', function() {
             input.classList.add('form-control-plaintext');
             input.classList.remove('form-control');
             input.readOnly = true;
+        });
+
+        // Deshabilitar el campo select
+        row.querySelectorAll('select').forEach(select => {
+            select.disabled = true; // Deshabilitar el select
         });
 
         // Desmarcar y habilitar el checkbox de la fila

@@ -73,6 +73,7 @@
                             <th scope="col">Incluye Iva Valor</th>
                             <th scope="col">Descripción Contrato</th>
                             <th scope="col">Servicio Remoto</th>
+                            <th scope="col">Moneda</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -155,6 +156,15 @@
                                 </span>
                                 <input type="checkbox" class="form-check-input boolean-edit d-none" 
                                        name="ServicioRemoto" {% if contrato.ServicioRemoto %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <select name="moneda" class="form-control-plaintext" disabled>
+                                    {% for moneda in form.fields.monedaId.queryset %}
+                                        <option value="{{ moneda.id }}"{% if contrato.monedaId.id == moneda.id %} selected{% endif %}>
+                                            {{ moneda.Nombre }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
                             </td>
                         </tr>
                         {% endfor %}

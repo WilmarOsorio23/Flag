@@ -1269,6 +1269,15 @@ class MonedaForm(forms.ModelForm):
         return nombre
 
 class ClientesContratosForm(forms.ModelForm):
+
+    monedaId = forms.ModelChoiceField(
+        queryset=Moneda.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Moneda'
+    )
+
     ClienteId = forms.ModelChoiceField(
         queryset=Clientes.objects.all(),  
         widget=forms.Select(attrs={
@@ -1316,6 +1325,11 @@ class ClientesContratosForm(forms.ModelForm):
             'ContratoDesc': 'Descripción del Contrato',
             'ServicioRemoto': 'Servicio Remoto',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['monedaId'].required = True  # Campo obligatorio
+        self.fields['monedaId'].label_from_instance = lambda obj: obj.Nombre  # Mostrar solo el nombre de la moneda   
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1937,6 +1951,15 @@ class ClientesContratosFilterForm(forms.Form):
         self.fields['Nombre_Cliente'].choices = [('', 'Seleccione el Cliente')] + list(clientes)
         
 class ContratosOtrosSiForm(forms.ModelForm):
+
+    monedaId = forms.ModelChoiceField(
+        queryset=Moneda.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label='Moneda'
+    )
+
     ClienteId = forms.ModelChoiceField(
         queryset=Clientes.objects.all(),  
         widget=forms.Select(attrs={
@@ -1970,6 +1993,11 @@ class ContratosOtrosSiForm(forms.ModelForm):
             'FirmadoFlag': 'Firmado Flag',
             'FirmadoCliente': 'Firmado Cliente',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['monedaId'].required = True  # Campo obligatorio
+        self.fields['monedaId'].label_from_instance = lambda obj: obj.Nombre  # Mostrar solo el nombre de la moneda
 
     def clean(self):
         cleaned_data = super().clean()
