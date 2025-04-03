@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block titulo %} Agregar Detalle {% endblock %}
+
+{% block contenido %}
+    <h2>Agregar Detalle a {{ total_gastos }}</h2>
+    <form method="post">
+        {% csrf_token %}
+         <!-- Ocultar los campos Año y Mes -->
+        <input type="hidden" name="Anio" value="{{ total_gastos.Anio }}">
+        <input type="hidden" name="Mes" value="{{ total_gastos.Mes }}">
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar Detalle</button>
+        <a href="{% url 'total_gastos_index' %}" class="btn btn-danger">Cancelar</a>
+    </form>
+{% endblock %}

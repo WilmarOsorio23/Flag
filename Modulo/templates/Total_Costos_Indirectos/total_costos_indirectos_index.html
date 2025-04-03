@@ -8,6 +8,7 @@
         <span id="alert-icon" class="alert-heading"></span>
         <span id="alert-message"></span>
     </div>
+
     {% if messages %}
     <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
         {% for message in messages %}
@@ -18,39 +19,48 @@
         {% endfor %}
     </div>
     {% endif %}
+
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Total Costos Indirectos</h4>
     </div>
+
     <div class="card-body">
         <!-- CRUD Icons -->
-        <div class="button-group" >
-            <a name="" id="" class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'total_costos_indirectos_crear' %}" role="button" ></a>
-            <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button"  onclick="enableEdit();"></a>
-            <i name="" id="" class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i>
-            <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" ></button>
+        <div class="button-group">
+            <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'total_costos_indirectos_crear' %}" role="button"></a>
+            <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button" onclick="enableEditDetails();"></a>
+            <button type="button" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="eliminarSeleccionados(event);"></button>
             <form id="download-form" method="POST" action="{% url 'total_costos_indirectos_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
                 <input type="hidden" name="items_to_download" id="items_to_download">
-                <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
+                <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
             </form>
-            <!-- Botones de Guardar y Cancelar -->  
+            <!-- Botón de Visualizar -->
+            <button id="visualizar-button" 
+                class="btn btn-outline-secondary fas fa-eye" 
+                title="Visualizar" 
+                type="button"
+                onclick="visualizarDetalles();">
+            </button>
+            <!-- Botones de Guardar y Cancelar -->
             <button id="save-button" 
-            class="btn btn-outline-success fas fa-save d-none" 
-            title="Guardar" 
-            type="button" 
-            onclick="saveRow();">
+                class="btn btn-outline-success fas fa-save d-none" 
+                title="Guardar" 
+                type="button" 
+                onclick="saveRow();">
             </button>
             <button id="cancel-button" 
-            class="btn btn-outline-danger fas fa-times d-none" 
-            title="Cancelar" 
-            type="button"
-            onclick="cancelEdit();">
+                class="btn btn-outline-danger fas fa-times d-none" 
+                title="Cancelar" 
+                type="button"
+                onclick="cancelEdit();">
             </button>
         </div>
     </div>
+
     <div class="card-footer text-muted">
         <div class="table-responsive">
-            <form id="delete-form" method="POST" action="{% url 'total_costos_indirectos_eliminar' %}">
+            <form id="delete-form" action="{% url 'total_costos_indirectos_eliminar' %}">
                 {% csrf_token %}
                 <table class="table table-primary">
                     <thead>
@@ -63,11 +73,17 @@
                     </thead>
                     <tbody>
                         {% for item in total_costos_indirectos_data %}
-                        <tr id="row-{{ item.id}}">
-                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{item.id}}"></td>
-                            <td><input type="text" name="Anio" class="form-control-plaintext" value="{{ item.Anio }}" readonly></td>
-                            <td><input type="text" name="Mes" class="form-control-plaintext" value="{{ item.Mes }}" readonly></td>
-                            <td><input type="text" name="Total" class="form-control-plaintext" value="{{ item.Total }}" readonly></td>
+                        <tr id="row-{{ item.id }}">
+                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ item.id }}"></td>
+                            <td>{{ item.Anio }}</td>
+                            <td>{{ item.Mes }}</td>
+                            <td id="total-{{ item.Anio }}-{{ item.Mes }}">{{ item.Total }} </td>
+                            <td>
+                                <a href="{% url 'total_costos_crear_detalle' item.id %}" class="btn btn-success btn-sm" title="Agregar Detalle">
+                                    <i class="fas fa-plus"></i> <!-- Icono de agregar -->
+                                </a>
+                            </td>
+                    
                         </tr>
                         {% empty %}
                         <tr>
@@ -77,24 +93,42 @@
                     </tbody>
                 </table>
             </form>
-             <!-- Modal de confirmación -->
-             <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                <div class="modal-content">
-                <div class="modal-header">
-                 <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                 </div>
-                <div class="modal-body">
-                ¿Estás seguro de que deseas eliminar este módulo?
-                </div>
-                <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                <button id="confirm-delete-btn" type="button" class="btn btn-danger">Sí</button>
-               </div>
-            </div>
+        </div>
+    </div>
+    <!-- Tabla de Detalles de Costos Indirectos (editable) -->
+<div class="card mt-4 d-none" id="tabla-detalles-container">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Detalles de Costos Indirectos</h5>
+        <button id="guardar-detalles" class="btn btn-success d-none" onclick="saveDetails()">Guardar Cambios</button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped" id="tabla-detalles">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all-detalles"></th>
+                        <th>Año</th>
+                        <th>Mes</th>
+                        <th>Costos</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-detalles-tbody">
+                    {% for detalle in detalles_costos_indirectos %}
+                    <tr data-id="{{ detalle.Id }}">
+                        <td><input type="checkbox" class="detail-select" value="{{ detalle.Id }}"></td>
+                        <td><input type="text" name="Anio" value="{{ detalle.Anio }}"></td>
+                        <td><input type="text" name="Mes" value="{{ detalle.Mes }}"></td>
+                        <td><select type="text" name="CostosId" value="{{ detalle.CostosId_id }}"></td>
+                        <td><input type="text" name="Valor" value="{{ detalle.Valor }}"></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
+</div>
+
 <script src="{% static 'JS/totalCostos.js' %}"></script>
 {% endblock %}

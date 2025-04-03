@@ -52,7 +52,6 @@ def filtrar_historial_cargos(form, historial):
 
 # Vista para mostrar el informe historial de cargos
 def historial_cargos_filtrado(request):
-    print("La vista se está ejecutando")  # Verifica si la vista se ejecuta
     historial_info = []
     show_data = False  
     
@@ -75,11 +74,9 @@ def historial_cargos_filtrado(request):
                 } 
                 for h in historial
             ]
-            print("Datos enviados al template:",historial_info)  # Verificar en la terminal los datos
             show_data = bool(historial_info)
     else:
         form = HistorialCargosFilterForm()
-        print("Datos obtenidos:", historial_info)
         
 
     context = {
@@ -110,15 +107,9 @@ def exportar_historial_cargos_excel(request):
             'Linea': lineas,  
             'Cargo': cargos  
         }
-
-        print(f"Parámetros recibidos: {request.GET}")  
-        print(f"Parámetros filtrados: {data}")  
-
         form = HistorialCargosFilterForm(data)
 
         if form.is_valid():
-            print(f"Datos del formulario: {form.cleaned_data}")  
-
             historial = Historial_Cargos.objects.select_related('documentoId', 'documentoId__LineaId', 'cargoId')
 
             empleados = form.cleaned_data.get('Empleado') or []  
@@ -131,8 +122,6 @@ def exportar_historial_cargos_excel(request):
                 historial = historial.filter(documentoId__LineaId__in=lineas)
             if cargos:
                 historial = historial.filter(cargoId__in=cargos)
-
-            print(f"🔎 Total registros después de filtros: {historial.count()}")
 
             if historial.count() == 0:
                 return HttpResponse("No se encontraron resultados para los filtros aplicados.")

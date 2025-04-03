@@ -12,8 +12,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 def nomina_index(request):
     nomina_data = Nomina.objects.all().order_by('-Anio','Mes')
-    
-    return render(request, 'nomina/nomina_index.html', {'nomina_data': nomina_data})
+    form=NominaForm()
+    return render(request, 'nomina/nomina_index.html', {'nomina_data': nomina_data, 'form': form})
 
 def nomina_crear(request):
     if request.method == 'POST':
@@ -28,25 +28,24 @@ def nomina_crear(request):
     
 @csrf_exempt 
 def nomina_editar(request, id):
-   print("llego hasta views")
-   if request.method == 'POST':
+    print("llego hasta editar")
+    if request.method == 'POST':
         try:
-            data = json.loads(request.body.decode('utf-8'))
-            nomina = Nomina.objects.get(pk=id)
-            form = NominaForm(data, instance=nomina)
-
-            if form.is_valid():
-                form.save()
-                return JsonResponse({'status': 'success'})
-            else:
-                return JsonResponse({'errors': form.errors}, status=400)
+            data = json.loads(request.body)
+            nomina = get_object_or_404(Nomina, pk=id)
+            nomina.Salario = data.get('Salario', nomina.Salario)
+            cliente_id = data.get('Cliente')
+            if cliente_id:
+                nomina.Cliente = get_object_or_404(Clientes, pk=cliente_id)
+            nomina.save()
+            return JsonResponse({'status': 'success'})
         except Nomina.DoesNotExist:
-            return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
+            return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-   else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-   
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405) 
+    
 def nomina_eliminar(request):
     print("llego hasta nomina eliminar")
     if request.method == 'POST':
@@ -57,7 +56,7 @@ def nomina_eliminar(request):
     return redirect('nomina_index')
   
 def verificar_relaciones(request):
-   if request.method == 'POST':
+    if request.method == 'POST':
         import json
         data = json.loads(request.body)
         ids = data.get('ids', [])
@@ -78,7 +77,7 @@ def verificar_relaciones(request):
             })
         else:
             return JsonResponse({'isRelated': False})
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
     
 def nomina_descargar_excel(request):
     if request.method == 'POST':
