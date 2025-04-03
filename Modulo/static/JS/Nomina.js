@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'Mes': row.querySelector('input[name="mes"]').value,
             'Documento': row.querySelector('input[name="documento"]').value,
             'Salario': row.querySelector('input[name="salario"]').value,
-            'Cliente': row.querySelector('input[name="cliente"]').value
+            'Cliente': row.querySelector('select[name="Cliente"]').value
         };
         let id = selected[0].value;
         // Deshabilitar los checkboxes y el botón de edición
@@ -97,44 +97,54 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
     window.enableEdit = function() {
-       
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length === 0) {
-            alert('No has seleccionado ningúna Nomina para editar.');
+            alert('No has seleccionado ninguna Nómina para editar.');
             return false;
         }
         if (selected.length > 1) {
-            alert('Solo puedes editar una Nomina a la vez.');
+            alert('Solo puedes editar una Nómina a la vez.');
             return false;
         }
-
+    
         let row = selected[0].closest('tr');
         let inputs = row.querySelectorAll('input.form-control-plaintext');
-
-        // Guardar valores originales en un atributo personalizado 
+    
+        // Guardar valores originales en un atributo personalizado
         inputs.forEach(input => { 
-        input.setAttribute('data-original-value', input.value);
+            input.setAttribute('data-original-value', input.value);
         });
-
-        // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
+    
+        // Desactivar todos los checkboxes y el botón de edición
         document.getElementById('select-all').disabled = true;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
-
-        // Convertir inputs en editables
-         const InputsList = ['salario', 'cliente'];
-         for (let i = 0; i < InputsList.length; i++) {
+    
+        // Habilitar los campos editables
+        const InputsList = ['salario', 'Cliente']; // Lista de campos que son inputs de texto
+        for (let i = 0; i < InputsList.length; i++) {
             let input = row.querySelector(`[name="${InputsList[i]}"]`);
             if (input) {
-            input.classList.remove('form-control-plaintext');
-            input.classList.add('form-control');
-             input.readOnly = false;
-         }
+                input.classList.remove('form-control-plaintext');
+                input.classList.add('form-control');
+                input.readOnly = false;
+            }
         }
-        // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
+    
+        // Habilitar el <select> de cliente
+        let selectCliente = row.querySelector(`select[name="Cliente"]`);
+        if (selectCliente && selectCliente.options.length > 1) {
+        selectCliente.disabled = false; // Activar el <select>
+        } else {
+            console.error("El select de cliente no tiene opciones disponibles.");
+        }
+        if (selectCliente) {
+            console.log("Opciones en el select de cliente:", selectCliente.innerHTML);
+        }
+    
+        // Mostrar botones de "Guardar" y "Cancelar"
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
-
     };
 
     document.getElementById('select-all').addEventListener('click', function(event) {

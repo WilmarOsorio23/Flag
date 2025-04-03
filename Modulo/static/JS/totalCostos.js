@@ -1,310 +1,312 @@
 document.addEventListener('DOMContentLoaded', function() {
-    window.cancelEdit = function() {
-        console.log("esta en cancel")
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length == 1) {
-            let row = selected[0].closest('tr');
-            // Restaurar los valores originales desde el atributo personalizado
-            row.querySelectorAll('input.form-control').forEach(input => {
-                if (input.hasAttribute('data-original-value')) {
-                    input.value = input.getAttribute('data-original-value');
-                }
-            });
-            selected.disabled = false;
-            selected.checked = false;
-            window.location.reload();
-            disableEditMode(selected,row);
-            showMessage('Cambios cancelados.', 'danger');
-        }
-    };
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    // Clonar checkboxes seleccionados en el formulario de descarga
-    document.getElementById('download-form').addEventListener('submit', function(event) {
-    let selectedCheckboxes = document.querySelectorAll('.row-select:checked');
-    if (selectedCheckboxes.length === 0) {
-        alert('No has seleccionado ningún elemento para descargar.');
-        event.preventDefault(); // Evita el envío si no hay elementos seleccionados
+// Habilitar edición en los detalles seleccionados
+window.enableEditDetails = function() {
+    let selected = document.querySelectorAll('.detail-select:checked');
+    if (selected.length === 0) {
+        alert('No has seleccionado ningún detalle para editar.');
         return;
     }
 
-    // Captura los valores de los checkboxes seleccionados
-    let selectedValues = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
-     // Asigna los valores seleccionados al campo oculto
-     document.getElementById('items_to_download').value = selectedValues.join(',');
-   });
+    selected.forEach(checkbox => {
+        let row = checkbox.closest('tr');
+        row.querySelectorAll('input, select').forEach(field => {
+            field.setAttribute('data-original-value', field.value);
+            field.readOnly = false;
+            field.classList.remove('form-control-plaintext');
+            field.classList.add('form-control');
+        });
 
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        // Habilitar el select
+        let select = row.querySelector('select[name="CostosId"]');
+        if (select) {
+            select.removeAttribute('disabled');  // Remover disabled para permitir edición
+        }
+    });
 
-    window.saveRow = function() {
-        
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length != 1) {
-            showMessage('Error al guardar: No hay un detalle seleccionado.', 'danger');
+    document.getElementById('guardar-detalles').classList.remove('d-none');
+};
+
+    
+    // Guardar los cambios en los detalles seleccionados
+    window.saveDetails = function() {
+        let selected = document.querySelectorAll('.detail-select:checked');
+        if (selected.length === 0) {
+            showMessage('No hay detalles seleccionados para guardar.', 'danger');
             return;
         }
-
-        let row = selected[0].closest('tr');
-       
-        let data = {
-            'Total': row.querySelector('input[name="Total"]').value
-        };
-        let id = selected[0].value;
-        // Deshabilitar los checkboxes y el botón de edición
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
-        document.getElementById('edit-button').disabled = true;
-
-       console.log(id)
-       console.log(data)
-       fetch(`/total_costos_indirectos/editar/${id}/`, {
+    
+        let details = [];
+        let anio = "", mes = "";
+    
+        selected.forEach(checkbox => {
+            let row = checkbox.closest('tr');
+            let detalleId = row.getAttribute("data-id");
+    
+            if (!detalleId || detalleId.trim() === "") {
+                console.error("❌ ID no válido en fila:", row);
+                return;
+            }
+    
+            let detalle = {
+                Id: detalleId.trim(),
+                Anio: row.querySelector('input[name="Anio"]').value,
+                Mes: row.querySelector('input[name="Mes"]').value,
+                CostosId_id: row.querySelector('select[name="CostosId"]').value,
+                Valor: row.querySelector('input[name="Valor"]').value
+            };
+    
+            anio = detalle.Anio;  // Guardamos el año para la actualización
+            mes = detalle.Mes;    // Guardamos el mes para la actualización
+    
+            details.push(detalle);
+        });
+    
+        fetch('/total_costos_indirectos/detalles/editar/', {  
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({ detalles: details })
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error al guardar los cambios');
-            }
-            return response.json();
-        })
-        .then(data => { 
-            if (data.status == 'success') {
-                showMessage('Cambios guardados correctamente.', 'success');
-                window.location.reload()
-
-                row.querySelectorAll('input.form-control').forEach(input => {
-                    input.classList.add('highlighted');
-                    setTimeout(() => input.classList.remove('highlighted'), 2000);
-                });
-
-                disableEditMode(selected,row);
-
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showMessage('Detalles guardados correctamente.', 'success');
+                actualizarTotal(anio, mes);  // Llamar a actualizarTotal para recalcular el total
+                deshabilitarCampos();  // ✅ Deshabilitar campos después de guardar
             } else {
-                showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger');
+                showMessage('Error al guardar los detalles.', 'danger');
             }
-
         })
         .catch(error => {
-            console.error('Error al guardar los cambios:', error);
-            showMessage('Error al guardar los cambios: ' + error.message, 'danger');
-
-            disableEditMode(selected,row);
+            console.error('❌ Error al guardar detalles:', error);
+            showMessage('Error al guardar los detalles.', 'danger');
         });
     };
-
-    window.enableEdit = function() {
-       
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length === 0) {
-            alert('No has seleccionado ningúna Nomina para editar.');
-            return false;
-        }
-        if (selected.length > 1) {
-            alert('Solo puedes editar una Nomina a la vez.');
-            return false;
-        }
-
-        let row = selected[0].closest('tr');
-        let inputs = row.querySelectorAll('input.form-control-plaintext');
-
-        // Guardar valores originales en un atributo personalizado 
-        inputs.forEach(input => { 
-        input.setAttribute('data-original-value', input.value);
-        });
-
-        // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
-        document.getElementById('select-all').disabled = true;
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
-        document.getElementById('edit-button').disabled = true;
-
-        // Convertir inputs en editables
-        let input = row.querySelector(`[name="Total"]`);
-        input.classList.remove('form-control-plaintext');
-        input.classList.add('form-control');
-        input.readOnly = false;
-      
-        // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
-        document.getElementById('save-button').classList.remove('d-none');
-        document.getElementById('cancel-button').classList.remove('d-none');
-
-    };
-
-    document.getElementById('select-all').addEventListener('click', function(event) {
-        let checkboxes = document.querySelectorAll('.row-select');
-        for (let checkbox of checkboxes) {
-            checkbox.checked = event.target.checked;
-        }
-    });
-
-    // Obtener el valor del token CSRF para ser utilizado en las solicitudes POST
-   
-
-    // Inhabilitar la tecla Enter para evitar que envíen formularios accidentalmente
-    preventFormSubmissionOnEnter();
-
-    // Inicialización del modal de confirmación y botón de confirmación de eliminación
-    const deleteForm = document.getElementById('delete-form');
-    const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-    const confirmDeleteButton = document.getElementById('confirm-delete-btn');
-
-    // Asociar el evento de clic al botón de seleccionar/deseleccionar todos los checkboxes
-    document.getElementById('select-all').addEventListener('click', toggleCheckboxSelection);
-
-    // Configurar el evento de clic para el botón de eliminación
-    document.querySelector('.btn-outline-danger.fas.fa-trash-alt').addEventListener('click', function (event) {
-        handleDeleteConfirmation(event, confirmDeleteModal, confirmDeleteButton, deleteForm, csrfToken);
-    });
     
- 
-    // Funciones reutilizables
-
-    // Prevenir el envío del formulario al presionar la tecla Enter
-    function preventFormSubmissionOnEnter() {
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('keydown', function (event) {
-                if (event.key == "Enter") {
-                    event.preventDefault(); // Prevenir la acción predeterminada de la tecla Enter
-                }
+    // Función para deshabilitar campos después de guardar
+    function deshabilitarCampos() {
+        let selected = document.querySelectorAll('.detail-select:checked');
+        selected.forEach(checkbox => {
+            let row = checkbox.closest('tr');
+            row.querySelectorAll('input, select').forEach(field => {
+                field.readOnly = true;  // Poner inputs en solo lectura
+                field.classList.add('form-control-plaintext');
+                field.classList.remove('form-control');
             });
-        });
-    }
-
-    // Alternar la selección de todos los checkboxes al hacer clic en el checkbox "Seleccionar todo"
-    function toggleCheckboxSelection(event) {
-        const checkboxes = document.querySelectorAll('.row-select');
-        checkboxes.forEach(checkbox => checkbox.checked = event.target.checked);
-    }
-
-     // Obtener los IDs de los elementos seleccionados (checkboxes marcados)
-     function getSelectedIds() {
-        return Array.from(document.querySelectorAll('.row-select:checked')).map(el => el.value);
-    }
-
-    // Manejar la confirmación de eliminación
-    async function handleDeleteConfirmation(event, modal, confirmButton, form, csrfToken) {
-        event.preventDefault(); // Prevenir la acción predeterminada del evento
-        console.log("si esta entrando en handledelete")
-        const selectedIds = getSelectedIds(); // Obtener los IDs de los elementos seleccionados
-        if (selectedIds.length == 0) {
-            showMessage('No has seleccionado ningún elemento para eliminar.', 'danger'); // Mostrar mensaje si no hay elementos seleccionados
-            return;
-        }
-
-        modal.show(); // Mostrar el modal de confirmación de eliminación
-
-        confirmButton.onclick = async function () {
-            const itemsToDelete = document.getElementById('items_to_delete');
-            if (itemsToDelete) {
-                itemsToDelete.value = selectedIds.join(',');
-            } else {
-                console.error("El elemento con ID 'items_to_delete' no se encuentra en el DOM.");
+    
+            // Deshabilitar el select
+            let select = row.querySelector('select[name="CostosId"]');
+            if (select) {
+                select.setAttribute('disabled', true);  // Volver a deshabilitar el select
             }
-                   
-            form.submit(); // Enviar el formulario para realizar la eliminación
-
-        };
+        });
+    
+        // Ocultar el botón de guardar
+        document.getElementById('guardar-detalles').classList.add('d-none');
     }
-
-   
-
-    // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
-    async function verifyRelations(ids, csrfToken) {
-        try {
-            const response = await fetch('verificar-relaciones/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken,
-                },
-                body: JSON.stringify({ ids }), // Enviar los IDs en el cuerpo de la solicitud
+    
+    
+    
+    
+    window.cancelEditDetails = function() {
+        let selected = document.querySelectorAll('.detail-select:checked');
+        selected.forEach(checkbox => {
+            let row = checkbox.closest('tr');
+            row.querySelectorAll('input').forEach(input => {
+                if (input.hasAttribute('data-original-value')) {
+                    input.value = input.getAttribute('data-original-value');  // Restaurar valores originales
+                }
+                input.readOnly = true;
+                input.classList.add('form-control-plaintext');
+                input.classList.remove('form-control');
             });
-            const data = await response.json(); // Obtener la respuesta como JSON
-            return data.isRelated || false; // Si la respuesta indica que están relacionados, retornar true
-        } catch (error) {
-            console.error('Error verificando relaciones:', error);
-            return true; // Asumir que están relacionados en caso de error
-        }
-    }
+            checkbox.checked = false;  // Desmarcar los checkboxes
+        });
+    
+        document.getElementById('guardar-detalles').classList.add('d-none');  // Ocultar botón de guardar
+    };
 
     function showMessage(message, type) {
         const alertBox = document.getElementById('message-box');
-        const alertIcon = document.getElementById('alert-icon');
-        const alertMessage = document.getElementById('alert-message');
-  
-
-        // Asignar el mensaje y el tipo de alerta
-        alertMessage.textContent = message;
+        alertBox.textContent = message;
         alertBox.className = `alert alert-${type} alert-dismissible fade show`;
-
-        // Asignar íconos según el tipo
-        const icons = {
-            success: '✔️', // Puedes usar clases de FontAwesome o Bootstrap Icons
-            danger: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
-        };
-        alertIcon.textContent = icons[type] || '';
-
-        // Mostrar la alerta
         alertBox.style.display = 'block';
+        setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
+    }
+});
 
-        // Ocultar la alerta después de 3 segundos
-        setTimeout(() => {
-            alertBox.classList.remove('show');
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-            }, 300); // Tiempo para que la transición termine
-        }, 800);
+window.visualizarDetalles = function() {
+    let selected = document.querySelectorAll('.row-select:checked');
+
+    if (selected.length !== 1) {
+        showMessage('Debes seleccionar un solo elemento para visualizar.', 'danger');
+        return;
     }
 
+    let id = selected[0].value;
+    document.querySelectorAll('.row-select').forEach(checkbox => checkbox.checked = false);
 
-    // Confirmación antes de descargar
-    window.confirmDownload = function() {
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length == 0) {
-            showMessage('No has seleccionado ningún elemento para descargar.', 'danger');
-            return false;
-        }
-
-        let itemIds = [];
-        selected.forEach(function(checkbox) {
-            itemIds.push(checkbox.value);
+    fetch(`/total_costos_indirectos/visualizar/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            actualizarTablaDetalles(data);
+        })
+        .catch(error => {
+            console.error('❌ Error al obtener los detalles:', error);
+            showMessage('Error al cargar los detalles.', 'danger');
         });
-        document.getElementById('items_to_delete').value = itemIds.join(',');
+};
 
-        return true;
+
+// Función para actualizar la tabla con los detalles
+function actualizarTablaDetalles(data) {
+    let detalles = data.detalles;
+    let costosDisponibles = data.costos_disponibles;
+
+    let tbody = document.getElementById('tabla-detalles-tbody');
+    tbody.innerHTML = '';
+
+    if (!detalles || detalles.length === 0) {
+        document.getElementById('tabla-detalles-container').classList.add('d-none');
+        console.warn("⚠ No se encontraron detalles.");
+        return;
+    }
+
+    detalles.forEach(detalle => {
+        // Crear el select para "CostosId" como readonly y con "disabled" para que no sea seleccionable
+        let selectCostos = `<select name="CostosId" class="form-control-plaintext" disabled>`;
+        costosDisponibles.forEach(costo => {
+            let selected = costo.CostoId == detalle.CostosId ? 'selected' : '';
+            selectCostos += `<option value="${costo.CostoId}" ${selected}>${costo.Costo}</option>`;
+        });
+        selectCostos += '</select>';
+
+        let row = `<tr data-id="${detalle.Id}">
+            <td><input type="checkbox" class="detail-select" value="${detalle.Id}"></td>
+            <td><input type="text" name="Anio" value="${detalle.Anio}" class="form-control-plaintext" readonly></td>
+            <td><input type="text" name="Mes" value="${detalle.Mes}" class="form-control-plaintext" readonly></td>
+            <td>${selectCostos}</td>
+            <td><input type="text" name="Valor" value="${detalle.Valor}" class="form-control-plaintext detalle-valor" readonly></td>
+        </tr>`;
+        tbody.innerHTML += row;
+    });
+
+    document.getElementById('tabla-detalles-container').classList.remove('d-none');
+}
+
+window.crearDetalle = function() {
+    let selected = document.querySelectorAll('.row-select:checked');
+
+    if (selected.length !== 1) {
+        showMessage('Debes seleccionar un solo elemento para agregar un detalle.', 'danger');
+        return;
+    }
+
+    let row = selected[0].closest('tr');
+    let anio = row.getAttribute('data-anio');
+    let mes = row.getAttribute('data-mes');
+
+    if (!anio || !mes) {
+        showMessage('No se pudo obtener el Año y Mes.', 'danger');
+        return;
+    }
+
+    // Mostrar modal o formulario para ingresar solo "Costo" y "Valor"
+    document.getElementById('detalle-anio').value = anio;
+    document.getElementById('detalle-mes').value = mes;
+    document.getElementById('modal-crear-detalle').classList.remove('d-none');
+
+    actualizarTotal(anio, mes);
+};
+
+function actualizarTotal(anio, mes) {
+    // Primero, seleccionamos todas las filas de la tabla de detalles
+    let total = 0;
+    document.querySelectorAll('#tabla-detalles-tbody tr').forEach(row => {
+        let rowAnio = row.querySelector('input[name="Anio"]').value;
+        let rowMes = row.querySelector('input[name="Mes"]').value;
+
+        // Si la fila corresponde al año y mes seleccionados, sumamos el valor
+        if (rowAnio === anio && rowMes === mes) {
+            let valor = parseFloat(row.querySelector('input[name="Valor"]').value) || 0;
+            total += valor;  // Sumar el valor de la fila
+        }
+    });
+
+    // Ahora actualizamos el total en la tabla principal
+    let totalCell = document.querySelector(`#total-${anio}-${mes}`);
+    if (totalCell) {
+        totalCell.textContent = total.toFixed(2);  // Actualizamos el total con dos decimales
+    }
+}
+
+function eliminarSeleccionados(event) {
+    event.preventDefault();  // Evita el envío del formulario por defecto
+
+    let seleccionados = {
+        totales: [],
+        detalles: []
     };
 
+    document.querySelectorAll(".row-select:checked").forEach((checkbox) => {
+        seleccionados.totales.push(checkbox.value);
+    });
 
-    // Deshabilitar modo edición
-    function disableEditMode(selected,row) {
-        // Cambiar inputs a solo lectura
-        row.querySelectorAll('input.form-control').forEach(input => {
-            input.classList.add('form-control-plaintext');
-            input.classList.remove('form-control');
-            input.readOnly = true;
-        });
+    document.querySelectorAll(".detail-select:checked").forEach((checkbox) => {
+        seleccionados.detalles.push(checkbox.value);
+    });
 
-        // Desmarcar y habilitar el checkbox de la fila
-        selected[0].checked = false;
-        selected[0].disabled = false;
-
-        // Habilitar todos los checkboxes y el botón de edición
-        document.getElementById('select-all').disabled = false;
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
-        document.getElementById('edit-button').disabled = false;
-
-        // Ocultar los botones de guardar y cancelar
-        document.getElementById('save-button').classList.add('d-none');
-        document.getElementById('cancel-button').classList.add('d-none');
-        
+    // Si no hay elementos seleccionados, no enviar la petición
+    if (seleccionados.totales.length === 0 && seleccionados.detalles.length === 0) {
+        alert("⚠️ No hay elementos seleccionados para eliminar.");
+        return;
     }
 
-   
-    
-    
+    fetch("/total_costos_indirectos/eliminar/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(seleccionados)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            let anio = "", mes = "";
 
-    
-});
+            // Eliminar filas seleccionadas de la tabla
+            seleccionados.detalles.forEach((id) => {
+                let fila = document.querySelector(`tr[data-id='${id}']`);
+                if (fila) {
+                    anio = fila.querySelector('input[name="Anio"]').value;
+                    mes = fila.querySelector('input[name="Mes"]').value;
+                    fila.remove();
+                }
+            });
+
+            seleccionados.totales.forEach((id) => {
+                let fila = document.querySelector(`#row-${id}`);
+                if (fila) fila.remove();
+            });
+
+            // Llamar a actualizarTotal solo si tenemos el año y mes
+            if (anio && mes) {
+                actualizarTotal(anio, mes);
+            }
+
+            alert("✅ Elemento(s) eliminado(s) correctamente.");
+        } else {
+            alert("⚠️ Error al eliminar: " + data.error);
+        }
+    })
+    .catch(error => console.error("❌ Error en la petición:", error));
+}
+
+function getCSRFToken() {
+    return document.querySelector("[name=csrfmiddlewaretoken]").value;
+}

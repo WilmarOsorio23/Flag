@@ -621,6 +621,24 @@ class GastoForm(forms.ModelForm):
             'Gasto': 'Gasto',
         }
 
+class DetalleGastosFormOpcion2(forms.ModelForm):
+
+    GastosId=forms.ModelChoiceField(
+        queryset=Gastos.objects.all(),
+        widget=forms.Select(attrs={'class':'form-control'}),
+        label='Gastos'
+    )
+    Valor = forms.DecimalField(
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control', 
+            'placeholder': 'Ingrese el Valor'}),
+        label='Valor'
+    )
+
+    class Meta:
+        model = Detalle_Gastos
+        exclude = ['Anio', 'Mes', 'TotalGastos']
+
 class DetalleGastosForm(forms.ModelForm):
 
     GastosId=forms.ModelChoiceField(
@@ -676,7 +694,7 @@ class DetalleGastosForm(forms.ModelForm):
 class TotalGastosForm(forms.ModelForm):
     class Meta:
         model = Total_Gastos
-        fields = '__all__'
+        fields = ['Anio', 'Mes']  
         widgets = {
             'Anio': forms.TextInput(attrs={
                 'type': 'text',
@@ -688,22 +706,17 @@ class TotalGastosForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'Total': forms.NumberInput(attrs={
-                'type': 'number',
-                'class': 'form-control',
-                'placeholder': 'Ingrese el Total'
-            }),
+
         }
         labels = {
             'Anio': 'Año',
             'Mes': 'Mes',
-            'Total': 'Total',
         }
 
 class Total_Costos_IndirectosForm(forms.ModelForm):
     class Meta:
         model = Total_Costos_Indirectos
-        fields = '__all__'
+        fields = ['Anio', 'Mes']  
         widgets = {
             'Anio': forms.TextInput(attrs={
                 'type': 'text',
@@ -715,17 +728,36 @@ class Total_Costos_IndirectosForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ingrese el mes'
             }),
-            'Total': forms.NumberInput(attrs={
-                'type': 'number',
-                'class': 'form-control',
-                'placeholder': 'Ingrese el Total'
-            }),
         }
         labels = {
             'Anio': 'Año',
             'Mes': 'Mes',
-            'Total': 'Total',
         }
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.Total = 0  # Se asegura de que siempre empiece en 0
+        if commit:
+            instance.save()
+        return instance
+
+class DetalleCostosIndirectosFormOpcion2(forms.ModelForm):
+    CostosId = forms.ModelChoiceField(
+        queryset=Costos_Indirectos.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Costos Indirectos'
+    )
+    Valor = forms.DecimalField(
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control', 
+            'placeholder': 'Ingrese el Valor'}),
+        label='Valor'
+    )
+
+    class Meta:
+        model = Detalle_Costos_Indirectos
+        exclude = ['Anio', 'Mes', 'TotalCostosIndirectos']
+
 
 class DetalleCostosIndirectosForm(forms.ModelForm):
 
@@ -736,6 +768,10 @@ class DetalleCostosIndirectosForm(forms.ModelForm):
         }),
         label='CostosId'
     )
+
+    class Meta:
+        model = Detalle_Costos_Indirectos
+        fields = ['CostosId', 'Valor']
 
     class Meta:
         model = Detalle_Costos_Indirectos
@@ -762,6 +798,7 @@ class DetalleCostosIndirectosForm(forms.ModelForm):
             'Mes': 'Mes',
             'Valor': 'Valor',
         }
+        
         
     def clean(self):
             cleaned_data = super().clean()

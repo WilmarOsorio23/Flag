@@ -303,19 +303,43 @@ class Detalle_Gastos(models.Model):
 
     class Meta:
         db_table = 'Detalle_Gastos'
+
+    def save(self, *args, **kwargs):
+        """ Guarda el detalle y actualiza el total del costo indirecto correspondiente. """
+        super().save(*args, **kwargs)
+        total_gastos = Total_Gastos.objects.filter(Anio=self.Anio, Mes=self.Mes).first()
+        if total_gastos:
+            total_gastos.actualizar_total()
+
+    def delete(self, *args, **kwargs):
+        """ Elimina el detalle y actualiza el total del costo indirecto correspondiente. """
+        total_gastos = Total_Gastos.objects.filter(Anio=self.Anio, Mes=self.Mes).first()
+        super().delete(*args, **kwargs)
+        if total_gastos:
+            total_gastos.actualizar_total()
+
         
 
 class Total_Gastos(models.Model):
     id = models.AutoField(primary_key=True)
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
-    Total = models.DecimalField(max_digits=15, decimal_places=2)
+    Total = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
 
     def __str__(self):
-        return f"id:{self.id}, Año: {self.Anio}, Mes: {self.Mes}, Total: {self.Total}"
+        return f"Año: {self.Anio}, Mes: {self.Mes}, Total: {self.Total}"
 
     class Meta:
         db_table = 'Total_Gastos'
+
+    def actualizar_total(self):
+        """ Calcula la suma de los valores de los detalles asociados según Año y Mes. """
+        total = Detalle_Gastos.objects.filter(Anio=self.Anio, Mes=self.Mes).aggregate(
+            total=models.Sum('Valor')
+        )['total'] or 0
+        self.Total = total
+        self.save()
+
         
 
 class Costos_Indirectos(models.Model):
@@ -340,12 +364,27 @@ class Detalle_Costos_Indirectos(models.Model):
 
     class Meta:
         db_table = 'Detalle_Costos_Indirectos'
+        
+    def save(self, *args, **kwargs):
+        """ Guarda el detalle y actualiza el total del costo indirecto correspondiente. """
+        super().save(*args, **kwargs)
+        total_costos = Total_Costos_Indirectos.objects.filter(Anio=self.Anio, Mes=self.Mes).first()
+        if total_costos:
+            total_costos.actualizar_total()
+
+    def delete(self, *args, **kwargs):
+        """ Elimina el detalle y actualiza el total del costo indirecto correspondiente. """
+        total_costos = Total_Costos_Indirectos.objects.filter(Anio=self.Anio, Mes=self.Mes).first()
+        super().delete(*args, **kwargs)
+        if total_costos:
+            total_costos.actualizar_total()
 
 class Total_Costos_Indirectos(models.Model):
     id = models.AutoField(primary_key=True)
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
-    Total = models.DecimalField(max_digits=15, decimal_places=2)
+    Total = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    
 
     def __str__(self):
         return f"Año: {self.Anio}, Mes: {self.Mes}, Total: {self.Total}"
@@ -355,6 +394,13 @@ class Total_Costos_Indirectos(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['Anio', 'Mes'], name='unique_total_costos_indirectos')
         ]
+    def actualizar_total(self):
+        """ Calcula la suma de los valores de los detalles asociados según Año y Mes. """
+        total = Detalle_Costos_Indirectos.objects.filter(Anio=self.Anio, Mes=self.Mes).aggregate(
+            total=models.Sum('Valor')
+        )['total'] or 0
+        self.Total = total
+        self.save()
 
 class Nomina(models.Model):
     NominaId = models.AutoField(primary_key=True)
