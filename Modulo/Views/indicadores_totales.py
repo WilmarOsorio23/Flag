@@ -1,4 +1,4 @@
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from decimal import Decimal, InvalidOperation
 from collections import defaultdict
 from django.shortcuts import render
@@ -104,41 +104,41 @@ def calcular_facturado(anio: str, mes: str, cliente: Clientes, lineas: list, hor
     return {'horas': horas, 'valor': valor}
 
 # 5. Función para pendientes de facturación
-def calcular_pendiente(anio: str, mes: str, cliente: Clientes, lineas: list, 
-                      trabajado_actual: Decimal, facturado_actual: Decimal, 
-                      horas_habiles: dict) -> dict:
-    """Calcula pendientes de facturación con histórico del mes anterior"""
+def calcular_pendiente(anio: str, mes: str, cliente: Clientes, lineas: list, trabajado_actual: Decimal, facturado_actual: Decimal, horas_habiles: dict, pendiente_anterior: Decimal = None ) -> dict:
+    """Calcula pendientes de facturación considerando el pendiente anterior si existe"""
     try:
-        mes_int = int(mes)
-        anio_anterior = int(anio)
-        mes_anterior = mes_int - 1
+        if pendiente_anterior is None:
+            # Lógica original para Enero (busca trabajado_anterior)
+            mes_int = int(mes)
+            anio_anterior = int(anio)
+            mes_anterior = mes_int - 1
+            
+            if mes_anterior == 0:
+                mes_anterior = 12
+                anio_anterior -= 1
+            
+            mes_anterior_str = str(mes_anterior)
+            
+            trabajado_anterior = Tiempos_Cliente.objects.filter(
+                Anio=str(anio_anterior),
+                Mes=mes_anterior_str,
+                ClienteId=cliente.ClienteId,
+                LineaId__in=lineas
+            ).aggregate(total=Sum('Horas'))['total'] or Decimal('0.00')
+            
+            pendiente_horas = (trabajado_anterior + trabajado_actual) - facturado_actual
+        else:
+            # Usa el pendiente_anterior pasado como argumento
+            pendiente_horas = (pendiente_anterior + trabajado_actual) - facturado_actual
+            trabajado_anterior = pendiente_anterior  # Para consistencia en el return
         
-        if mes_anterior == 0:
-            mes_anterior = 12
-            anio_anterior -= 1
-        
-        # Normalizar mes anterior a formato de la base de datos
-        mes_anterior_str = str(mes_anterior)
-        
-        # Obtener horas trabajadas del mes anterior 
-        trabajado_anterior = Tiempos_Cliente.objects.filter(
-            Anio=str(anio_anterior),
-            Mes=mes_anterior_str,
-            ClienteId=cliente.ClienteId,
-            LineaId__in=lineas
-        ).aggregate(total=Sum('Horas'))['total'] or Decimal('0.00')
-        
-        # Calcular pendiente
-        pendiente_horas = (trabajado_anterior + trabajado_actual) - facturado_actual
-        
-        # Obtener tarifa cliente 
+        # Cálculo de tarifa (igual que antes)
         tarifa = Tarifa_Clientes.objects.filter(
-            clienteId=cliente.ClienteId,
-            anio=int(anio),
-            mes=int(mes)
-        ).order_by('-id').first()
+            clienteId=cliente.ClienteId
+        ).filter(
+            Q(anio__lt=int(anio)) | Q(anio=int(anio), mes__lte=int(mes))
+        ).order_by('-anio', '-mes').first()
         
-        # Calcular valor hora según tarifa
         tarifa_valor = Decimal('0.00')
         if tarifa:
             if tarifa.valorHora:
@@ -249,13 +249,13 @@ def indicadores_totales(request):
     
     if form.is_valid():
         anio = form.cleaned_data['Anio']
-        meses = [str(m) for m in form.cleaned_data['Mes']] if form.cleaned_data['Mes'] else [str(m) for m in range(1, 13)]
+        meses = [str(m) for m in sorted(form.cleaned_data['Mes'])] if form.cleaned_data['Mes'] else [str(m) for m in range(1, 13)]
         lineas_seleccionadas = form.cleaned_data['LineaId'] or Linea.objects.all()
         clientes = form.cleaned_data['ClienteId'] or Clientes.objects.all()
         
         horas_habiles = obtener_horas_habiles(anio)
         resultados['conceptos'] = Concepto.objects.all()
-
+        
         # Procesamiento general (existente)
         for mes in meses:
             if mes not in horas_habiles:
@@ -279,12 +279,31 @@ def indicadores_totales(request):
                 trabajado = calcular_trabajado(anio, mes, cliente, lineas_seleccionadas)
                 costo = calcular_costo(anio, mes, cliente, lineas_seleccionadas, horas_habiles)
                 facturado = calcular_facturado(anio, mes, cliente, lineas_seleccionadas, horas_habiles)
-                pendiente = calcular_pendiente(
-                    anio, mes, cliente, lineas_seleccionadas, 
-                    trabajado, 
-                    facturado['horas'],
-                    horas_habiles
-                )
+                if mes == '1':
+                    # Enero: cálculo normal sin pendiente anterior
+                    pendiente = calcular_pendiente(
+                        anio, mes, cliente, lineas_seleccionadas, 
+                        trabajado, 
+                        facturado['horas'],
+                        horas_habiles
+                    )
+                else:
+                    # Meses posteriores: obtener pendiente anterior de resultados
+                    mes_anterior = str(int(mes) - 1)
+                    if (mes_anterior in resultados['general'] and 
+                        cliente.Nombre_Cliente in resultados['general'][mes_anterior]['Clientes']):
+                        pendiente_anterior = resultados['general'][mes_anterior]['Clientes'][cliente.Nombre_Cliente]['Pendiente']['horas']
+                    else:
+                        pendiente_anterior = Decimal('0.00')
+                    
+                    # Llamada a calcular_pendiente con el pendiente anterior
+                    pendiente = calcular_pendiente(
+                        anio, mes, cliente, lineas_seleccionadas, 
+                        trabajado, 
+                        facturado['horas'],
+                        horas_habiles,
+                        pendiente_anterior  # Pasar el valor acumulado
+                    )
                 
                 resultados['general'][mes]['Clientes'][cliente.Nombre_Cliente] = {
                     'Trabajado': trabajado,
