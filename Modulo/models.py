@@ -541,8 +541,8 @@ class Tarifa_Consultores(models.Model):
     valorDia = models.DecimalField(max_digits=10, decimal_places=2, db_column='valorDia')
     valorMes = models.DecimalField(max_digits=10, decimal_places=2, db_column='valorMes')
     monedaId = models.ForeignKey('moneda', on_delete=models.CASCADE, db_column='monedaId')
-    iva = models.DecimalField(max_digits=10, decimal_places=2, db_column='iva')
-    rteFte = models.DecimalField(max_digits=10, decimal_places=2, db_column='rteFte')
+    iva = models.DecimalField(max_digits=10, decimal_places=2, db_column='iva', null=True, blank=True)
+    rteFte = models.DecimalField(max_digits=10, decimal_places=2, db_column='rteFte', null=True, blank=True)
 
     def __str__(self):
         return f"id: {self.id}, DocumentoId: {self.documentoId}, Año: {self.anio}, Mes: {self.mes}, ClienteId: {self.clienteID}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, Moneda: {self.id}, IVA: {self.iva}, RteFte: {self.rteFte}"
