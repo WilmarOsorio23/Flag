@@ -1214,6 +1214,8 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             'valorHora': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor hora', 'step': '0.01'}),
             'valorDia': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor día', 'step': '0.01'}),
             'valorMes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor mes', 'step': '0.01'}),
+            'iva': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor iva', 'step': '0.01'}),
+            'rteFte': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el valor rtefte', 'step': '0.01'}),
             
         }
         labels = {
@@ -1222,6 +1224,8 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             'valorHora': 'Valor Hora',
             'valorDia': 'Valor Día',
             'valorMes': 'Valor Mes',
+            'iva': 'IVA',
+            'rteFte': 'RteFte',
         }
 
     def __init__(self, *args, **kwargs):
