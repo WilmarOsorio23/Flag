@@ -6,8 +6,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
 from django.db import models
 from django.contrib import messages
-from Modulo.forms import ContratosOtrosSiForm
+from Modulo.forms import ContratosOtrosSiForm, ClientesContratos
 from Modulo.models import ContratosOtrosSi
+from django.db import IntegrityError
 
 
 def contratos_otros_si_index(request):
@@ -45,6 +46,7 @@ def contratos_otros_si_editar(request, id):
             contrato.PolizasDesc = data.get('PolizasDesc', contrato.PolizasDesc) or None
             contrato.FirmadoFlag = data.get('FirmadoFlag', contrato.FirmadoFlag)
             contrato.FirmadoCliente = data.get('FirmadoCliente', contrato.FirmadoCliente)
+            contrato.Contrato = data.get('Contrato', contrato.Contrato)
 
 
             # Validar y asignar monedaId
@@ -54,7 +56,18 @@ def contratos_otros_si_editar(request, id):
             
             # Guardar los cambios en la base de datos
             contrato.save()
-            
+            # Retornar una respuesta exitosa
+            return JsonResponse({'status': 'success'})
+        except IntegrityError as e:
+            if "FOREIGN KEY" in str(e):
+                return JsonResponse({'error': 'No existe un contrato válido para la fecha de inicio seleccionada.'}, status=400)
+            return JsonResponse({'error': 'Error de integridad: ' + str(e)}, status=400)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos JSON'}, status=400)
+        except Exception as e:
+            # Capturar cualquier excepción y retornar un mensaje de error
+            return JsonResponse({'error': str(e)}, status=500)
+            '''
             # Retornar una respuesta exitosa
             return JsonResponse({'status': 'success'})
         except json.JSONDecodeError:
@@ -62,9 +75,14 @@ def contratos_otros_si_editar(request, id):
         except Exception as e:
             # Capturar cualquier excepción y retornar un mensaje de error
             return JsonResponse({'error': str(e)}, status=500)
-    
+    contratos_cliente = ClientesContratos.objects.filter(ClienteId=contrato.ClienteId)
+    form = ContratosOtrosSiForm(instance=contrato, cliente_id=contrato.ClienteId_id)
+    return render(request, 'contratos_otros_si/contratos_otros_si_form.html', {
+        'form': form,
+        'contratos_cliente': contratos_cliente,
+    })
     return JsonResponse({'error': 'Método no permitido'}, status=405)
-
+'''
 def contratos_otros_si_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -94,9 +112,10 @@ def contratos_otros_si_descargar_excel(request):
                          contratosotrosi.PolizasDesc,
                          contratosotrosi.FirmadoFlag,
                          contratosotrosi.FirmadoCliente,
-                         contratosotrosi.monedaId.Nombre])
+                         contratosotrosi.monedaId.Nombre,
+                         contratosotrosi.Contrato])
         df = pd.DataFrame(data, columns=['Id', 'Cliente', 'FechaInicio', 'FechaFin', 'NumeroOtroSi', 'ValorOtroSi',
-                                         'ValorIncluyeIva', 'Polizas', 'PolizasDesc', 'FirmadoFlag', 'FirmadoCliente', 'Moneda'])
+                                         'ValorIncluyeIva', 'Polizas', 'PolizasDesc', 'FirmadoFlag', 'FirmadoCliente', 'Moneda', 'Contrato'])
         df.to_excel(response, index=False)
         return response
     return redirect('contratos_otros_si_index')

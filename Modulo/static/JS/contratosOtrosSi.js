@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'FirmadoFlag': row.querySelector('input[name="FirmadoFlag"]').checked,
             'FirmadoCliente': row.querySelector('input[name="FirmadoCliente"]').checked,
             'monedaId': row.querySelector('select[name="moneda"]').value,
+            'Contrato': row.querySelector('select[name="Contrato"]').value,
         };
         
         let id = selected[0].value;
@@ -72,7 +73,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Error al guardar los cambios');
+                return response.json().then(errorData => {
+                    throw new Error(errorData.error || 'Error desconocido');
+                });
             }
             return response.json();
         })
@@ -83,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 row.querySelectorAll('input.form-control').forEach(input => {
                     input.classList.add('highlighted');
-                    setTimeout(() => input.classList.remove('highlighted'), 2000);
+                    setTimeout(() => input.classList.remove('highlighted'), 5000);
                 });
 
                 disableEditMode(selected,row);
@@ -96,9 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error al guardar los cambios:', error);
-            showMessage('Error al guardar los cambios: ' + error.message, 'danger');
-
-            disableEditMode(selected,row);
+            showMessage(error.message, 'danger'); // Muestra el mensaje de error específico
         });
     };
 
@@ -137,7 +138,8 @@ document.addEventListener('DOMContentLoaded', function() {
             { name: "PolizasDesc", type: "text" },
             { name: "FirmadoFlag", type: "checkbox" },
             { name: "FirmadoCliente", type: "checkbox" },
-            { name: "moneda", type: "select" }
+            { name: "moneda", type: "select" },
+            { name: "Contrato", type: "select" }
         ];
         
         editables.forEach(field => {
@@ -288,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 alertBox.style.display = 'none';
             }, 300); // Tiempo para que la transición termine
-        }, 800);
+        }, 5000);
     }
 
 

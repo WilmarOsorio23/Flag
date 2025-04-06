@@ -5,9 +5,10 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
 from Modulo.forms import ClientesContratosForm
-from Modulo.models import ClientesContratos
+from Modulo.models import ClientesContratos, ContratosOtrosSi
 from django.db import models
 from django.contrib import messages
+from django.db import IntegrityError
 
 def clientes_contratos_index(request):
     clientes_contratos_data = ClientesContratos.objects.all()
@@ -74,9 +75,44 @@ def clientes_contratos_editar(request, id):
 
 def clientes_contratos_eliminar(request):
     if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        ClientesContratos.objects.filter(ClientesContratosId__in=item_ids).delete()
-        messages.success(request, 'Los contratos seleccionados se han eliminado correctamente.')
+        item_ids = request.POST.getlist('items_to_delete')  # Obtener los IDs seleccionados desde el formulario
+
+        try:
+            item_ids = [int(id) for id in item_ids]  # Convertir los IDs a enteros
+        except ValueError:
+            messages.error(request, 'Error: Uno o más IDs no son válidos.')
+            return redirect('clientes_contratos_index')
+
+        # Verificar relaciones con la tabla Contratos_OtrosSi
+        relaciones = {}
+        for id in item_ids:
+            tablas_relacionadas = []
+            if ContratosOtrosSi.objects.filter(ClienteId=id).exists():
+                tablas_relacionadas.append('Contratos Otros Sí')
+            
+            if tablas_relacionadas:
+                relaciones[id] = tablas_relacionadas
+
+        if relaciones:
+            # Construir un mensaje detallado
+            mensaje = "No se pueden eliminar los contratos seleccionados porque están relacionados con las siguientes tablas:<br>"
+            for contrato_id, tablas in relaciones.items():
+                mensaje += f"<strong>Contrato ID {contrato_id}:</strong> {', '.join(tablas)}<br>"
+            messages.error(request, mensaje)
+            return redirect('clientes_contratos_index')
+
+        # Intentar eliminar los registros
+        try:
+            ClientesContratos.objects.filter(ClientesContratosId__in=item_ids).delete()
+            messages.success(request, 'Clientes Contratos eliminados correctamente.')
+        except IntegrityError:
+            # Mensaje amigable para el usuario
+            messages.error(
+                request,
+                "No se pueden eliminar los contratos seleccionados porque están relacionados con otras tablas, como 'Contratos Otros Sí'."
+            )
+
+        return redirect('clientes_contratos_index')
     return redirect('clientes_contratos_index')
 
 def clientes_contratos_descargar_excel(request):
@@ -116,3 +152,55 @@ def clientes_contratos_descargar_excel(request):
         df.to_excel(response, index=False)
         return response
     return redirect('clientes_contratos_index')
+
+def verificar_relaciones_contratos(request):
+    """
+    Verifica si los contratos de clientes están relacionados con otros registros.
+
+    Parámetros:
+        - request: La solicitud HTTP.
+
+    Métodos:
+        - POST: Recibe una lista de IDs de contratos y verifica sus relaciones.
+
+    Respuestas:
+        - JsonResponse con detalles de las relaciones si existen.
+        - JsonResponse con error si no se envían IDs o si ocurre un error.
+    """
+    if request.method == 'POST':
+        try:
+            # Cargar los datos del cuerpo de la solicitud
+            data = json.loads(request.body)
+            ids = data.get('ids', [])
+
+            # Verifica que los ids estén presentes y bien formados
+            if not ids:
+                return JsonResponse({'error': 'No se han enviado IDs'}, status=400)
+
+            # Diccionario para almacenar los detalles de las relaciones
+            relaciones = {}
+
+            for id in ids:
+                # Verifica si el contrato está relacionado con otros registros
+                relaciones_contrato = []
+                if ContratosOtrosSi.objects.filter(ClienteId=id).exists():
+                    relaciones_contrato.append('ContratosOtrosSi')
+
+                if relaciones_contrato:
+                    relaciones[id] = relaciones_contrato
+
+            # Responde con los detalles de las relaciones
+            if relaciones:
+                return JsonResponse({
+                    'isRelated': True,
+                    'relaciones': relaciones
+                })
+            else:
+                return JsonResponse({'isRelated': False})
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': f'Error en servidor: {str(e)}'}, status=500)
+
+    return JsonResponse({'error': 'Método no permitido'}, status=405)

@@ -475,7 +475,7 @@ class Contactos(models.Model):
     clienteId = models.ForeignKey(Clientes, on_delete=models.CASCADE, db_column='ClienteId')
     contactoId = models.ForeignKey(TiposContactos, on_delete=models.CASCADE, db_column='contactoId')
     Nombre = models.CharField(max_length=100)
-    Telefono = models.CharField(max_length=20, null=True, blank=True)
+    Telefono = models.CharField(max_length=20)
     Direccion = models.CharField(max_length=255, null=True, blank=True)
     Cargo = models.CharField(max_length=100)
     activo = models.BooleanField(default=True)
@@ -733,9 +733,11 @@ class ContratosOtrosSi(models.Model):
     FirmadoFlag = models.BooleanField(default=0)
     FirmadoCliente = models.BooleanField(default=0)
     monedaId = models.ForeignKey('moneda', on_delete=models.CASCADE, db_column='monedaId')
+    Contrato = models.CharField(max_length=50,null=True,blank=True) 
 
     class Meta:
         db_table = 'Contratos_OtrosSi'
+        unique_together = ('ClienteId', 'FechaInicio', 'Contrato')
 
     def __str__(self):
-        return f"ContratoId:{self.ContratosOtrosSiId} - Cliente: {self.ClienteId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - NumeroOtroSi: {self.NumeroOtroSi} - ValorOtroSi: {self.ValorOtroSi} - ValorIncluyeIva: {self.ValorIncluyeIva} - Polizas: {self.Polizas} - PolizasDesc: {self.PolizasDesc} - FirmadoFlag: {self.FirmadoFlag} - FirmadoCliente: {self.FirmadoCliente} - Moneda: {self.monedaId}"
+        return f"ContratoId:{self.ContratosOtrosSiId} - Cliente: {self.ClienteId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - NumeroOtroSi: {self.NumeroOtroSi} - ValorOtroSi: {self.ValorOtroSi} - ValorIncluyeIva: {self.ValorIncluyeIva} - Polizas: {self.Polizas} - PolizasDesc: {self.PolizasDesc} - FirmadoFlag: {self.FirmadoFlag} - FirmadoCliente: {self.FirmadoCliente} - Moneda: {self.monedaId} - Contrato: {self.Contrato}"

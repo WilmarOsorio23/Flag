@@ -2016,6 +2016,14 @@ class ContratosOtrosSiForm(forms.ModelForm):
         }),
         label='Cliente'
     )
+
+    Contrato = forms.ModelChoiceField(
+        queryset=ClientesContratos.objects.none(),  # Inicialmente vacío
+        required=False,
+        label='Contrato',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     class Meta:
         model = ContratosOtrosSi
         fields = '__all__'
@@ -2044,7 +2052,11 @@ class ContratosOtrosSiForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        cliente_id = kwargs.pop('cliente_id', None)
         super().__init__(*args, **kwargs)
+        if cliente_id:
+            # Filtrar los contratos asociados al cliente
+            self.fields['Contrato'].queryset = ClientesContratos.objects.filter(ClienteId=cliente_id)
         self.fields['monedaId'].required = True  # Campo obligatorio
         self.fields['monedaId'].label_from_instance = lambda obj: obj.Nombre  # Mostrar solo el nombre de la moneda
 

@@ -232,27 +232,36 @@ document.addEventListener('DOMContentLoaded', function() {
         return Array.from(document.querySelectorAll('.row-select:checked')).map(el => el.value);
     }
 
-    // Manejar la confirmación de eliminación
     async function handleDeleteConfirmation(event, modal, confirmButton, form, csrfToken) {
-        event.preventDefault(); // Prevenir la acción predeterminada del evento
-        const selectedIds = getSelectedIds(); // Obtener los IDs de los elementos seleccionados
+        event.preventDefault();
+        const selectedIds = getSelectedIds();
         if (selectedIds.length == 0) {
-            showMessage('No has seleccionado ningún elemento para eliminar.', 'danger'); // Mostrar mensaje si no hay elementos seleccionados
+            showMessage('No has seleccionado ningún cliente para eliminar.', 'danger');
             return;
         }
 
-        modal.show(); // Mostrar el modal de confirmación de eliminación
-
+        modal.show();
         confirmButton.onclick = async function () {
-            const itemsToDelete = document.getElementById('items_to_delete');
-            if (itemsToDelete) {
-                itemsToDelete.value = selectedIds.join(',');
-            } else {
-                console.error("El elemento con ID 'items_to_delete' no se encuentra en el DOM.");
+            const itemsToDeleteInput = document.getElementById('items_to_delete');
+            const relations = await verifyRelations(selectedIds, csrfToken);
+            if (!itemsToDeleteInput) {
+                console.error('El elemento con id="items_to_delete" no existe en el DOM.');
+                return;
             }
-                   
-            form.submit(); // Enviar el formulario para realizar la eliminación
+            if (relations.isRelated) {
+                let message = 'Algunos contratos clientes no pueden ser eliminados porque están relacionados con las siguientes tablas:\n';
+                for (const [id, tables] of Object.entries(relations.relaciones)) {
+                    message += `Cliente ID ${id}: ${tables.join(', ')}\n`;
+                }
+                showMessage(message, 'danger', 5000); // Mostrar el mensaje por 5 segundos
+                modal.hide();
+                document.getElementById('select-all').checked = false;
+                document.querySelectorAll('.row-select').forEach(checkbox => checkbox.checked = false);
+                return;
+            }
 
+            document.getElementById('items_to_delete').value = selectedIds.join(',');
+            form.submit();
         };
     }
 
@@ -261,19 +270,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
     async function verifyRelations(ids, csrfToken) {
         try {
-            const response = await fetch('verificar-relaciones/', {
+            const response = await fetch('/clientes/verificar-relaciones/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrfToken,
                 },
-                body: JSON.stringify({ ids }), // Enviar los IDs en el cuerpo de la solicitud
+                body: JSON.stringify({ ids }),
             });
-            const data = await response.json(); // Obtener la respuesta como JSON
-            return data.isRelated || false; // Si la respuesta indica que están relacionados, retornar true
+
+
+            if (!response.ok) {
+                throw new Error('Error al verificar relaciones');
+            }
+
+            const data = await response.json();
+            return data;
         } catch (error) {
             console.error('Error verificando relaciones:', error);
-            return true; // Asumir que están relacionados en caso de error
+            return { isRelated: true }; // Asumir que hay relaciones en caso de error
         }
     }
 
@@ -308,6 +323,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 800);
     }
 
+    // Confirmación antes de eliminar
+    window.confirmDelete = function () {
+        let selected = document.querySelectorAll('.row-select:checked').length;
+        if (selected === 0) {
+            alert('No has seleccionado ningún elemento para eliminar.');
+            return false;
+        }
+        return confirm('¿Estás seguro de que deseas eliminar los elementos seleccionados?');
+    };
 
     // Confirmación antes de descargar
     window.confirmDownload = function() {
