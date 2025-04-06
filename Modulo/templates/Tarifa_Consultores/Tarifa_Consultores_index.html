@@ -80,7 +80,7 @@
                             <td><input type="text" name="valorDia" class="form-control-plaintext" value="{{ tarifa.valorDia }}" readonly></td>
                             <td><input type="text" name="valorMes" class="form-control-plaintext" value="{{ tarifa.valorMes }}" readonly></td>
                             <td>
-                                <select name="moneda" class="form-control-plaintext">
+                                <select name="moneda" class="form-control-plaintext" disabled>
                                     {% for moneda in form.fields.monedaId.queryset %}
                                         <option value="{{moneda.id}}"{% if tarifa.monedaId.id == moneda.id %}selected{% endif %}>{{moneda.Nombre}}</option>
                                     {% endfor %}

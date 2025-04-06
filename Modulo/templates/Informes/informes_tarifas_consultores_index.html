@@ -114,6 +114,12 @@
 
                             <!-- Moneda -->
                             <th>Moneda</th>
+
+                            <!-- IVA -->
+                            <th>IVA</th>
+
+                            <!-- RteFte -->
+                            <th>rteFte</th>
                             
                     </thead>
 
@@ -136,12 +142,14 @@
                                         <td>{{ tarifa.tarifa_dia }}</td>
                                         <td>{{ tarifa.tarifa_mes }}</td>
                                         <td>{{ tarifa.moneda }}</td>
+                                        <td>{{ tarifa.iva|default_if_none:'' }}</td>
+                                        <td>{{ tarifa.rteFte|default_if_none:'' }}</td>
                                     </tr>
                                 {% endfor %}
                             {% endfor %}
                         {% empty %}
                             <tr>
-                                <td colspan="12">No hay datos disponibles.</td>
+                                <td colspan="14">No hay datos disponibles.</td>
                             </tr>
                         {% endfor %}
                     </tbody>

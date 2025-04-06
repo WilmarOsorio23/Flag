@@ -59,7 +59,9 @@ def obtener_tarifas_consultores(consultores, tarifas, anios):
                     'tarifa_hora': tarifa.valorHora,
                     'tarifa_dia': tarifa.valorDia,
                     'tarifa_mes': tarifa.valorMes,
-                    'moneda': tarifa.monedaId.Nombre
+                    'moneda': tarifa.monedaId.Nombre,
+                    'iva': tarifa.iva,
+                    'rteFte': tarifa.rteFte,
                 })
 
         # Ordenar las tarifas dentro de cada año, por cliente
@@ -151,7 +153,9 @@ def exportar_tarifas_consultores_excel(request):
                         tarifa['tarifa_hora'],
                         tarifa['tarifa_dia'],
                         tarifa['tarifa_mes'],
-                        tarifa['moneda']
+                        tarifa['moneda'],
+                        tarifa['iva'],
+                        tarifa['rteFte']
                     ])
         print("DATA:",data) 
         if data:
@@ -164,7 +168,7 @@ def exportar_tarifas_consultores_excel(request):
             encabezados = [ 
                 "Linea", "Documento", "Nombre", "Certificado", "Perfil", "Modulo", 
                 "Año", "Mes", "Cliente", "Tarifa por hora", "Tarifa por día", 
-                "Tarifa por mes", "Moneda"
+                "Tarifa por mes", "Moneda", "iva", "rteFte"
             ]
             for col_num, header in enumerate(encabezados, 1):
                 cell = ws.cell(row=1, column=col_num, value=header)

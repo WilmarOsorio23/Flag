@@ -130,14 +130,43 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('edit-button').disabled = true;
 
         // Convertir inputs en editables
-        let editables = ["valorHora", "valorDia", "valorMes","bolsaMes","iva","sitioTrabajo","moneda","referencia","centroCostos","valorBolsa"];
+        let editables = [
+            { name: "valorHora", type: "text" },
+            { name: "valorDia", type: "text" },
+            { name: "valorMes", type: "text" },
+            { name: "bolsaMes", type: "text" },
+            { name: "iva", type: "text" },
+            { name: "sitioTrabajo", type: "text" },
+            { name: "moneda", type: "select" },
+            { name: "referencia", type: "select" },
+            { name: "centroCostos", type: "select" },
+            { name: "valorBolsa", type: "text" }
+        ];
         
-        for (let i = 0; i < editables.length; i++) {
-            let edit = row.querySelector(`[name="${editables[i]}"]`);
-            edit.classList.remove('form-control-plaintext');
-            edit.classList.add('form-control');
-            edit.readOnly = false; // Corregido aquí
-        }
+        editables.forEach(field => {
+            let element = row.querySelector(`[name="${field.name}"]`);
+            if (field.type === 'checkbox') {
+                // Manejar checkbox
+                let display = row.querySelector(`.boolean-display[data-field="${field.name}"]`);
+                let checkbox = row.querySelector(`.boolean-edit[name="${field.name}"]`);
+                if (display && checkbox) {
+                    display.classList.add('d-none'); // Ocultar texto en modo edición
+                    checkbox.classList.remove('d-none'); // Mostrar checkbox en modo edición
+                }
+            } else if (field.type === 'select') {
+                // Manejar select
+                element.disabled = false; // Habilitar el select en modo edición
+                element.classList.remove('form-control-plaintext'); // Quitar estilo de solo lectura
+                element.classList.add('form-control'); // Agregar estilo editable
+            } else {
+                // Manejar input de texto
+                element.classList.remove('form-control-plaintext');
+                element.classList.add('form-control');
+                element.readOnly = false;
+            }
+        });
+
+        
         // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
@@ -301,10 +330,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Cambiar selects a solo lectura
-        row.querySelectorAll('select.form-control').forEach(select => {
-            select.classList.add('form-control-plaintext');
-            select.classList.remove('form-control');
-            select.readOnly = true;
+        row.querySelectorAll('select').forEach(select => {
+            select.disabled = true;
         });
 
         // Desmarcar y habilitar el checkbox de la fila

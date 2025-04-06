@@ -105,7 +105,7 @@
                             <td><input type="text" name="valorBolsa" class="form-control-plaintext" value="{{ tarifa.valorBolsa }}" readonly></td>
                             <td style="overflow: visible; text-overflow: ellipsis; min-width: 80px;"><input type="text" name="iva" class="form-control-plaintext" value="{{ tarifa.iva }}" readonly></td>
                             <td>
-                                <select name="moneda" class="form-control-plaintext">
+                                <select name="moneda" class="form-control-plaintext" disabled>
                                     {% for moneda in form.fields.monedaId.queryset %}
                                         <option value="{{moneda.id}}"{% if tarifa.monedaId.id == moneda.id %}selected{% endif %}>{{moneda.Nombre}}</option>
                                     {% endfor %}

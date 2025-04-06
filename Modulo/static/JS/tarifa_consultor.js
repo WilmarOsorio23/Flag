@@ -302,10 +302,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Cambiar selects a solo lectura
-        row.querySelectorAll('select.form-control').forEach(select => {
-            select.classList.add('form-control-plaintext');
-            select.classList.remove('form-control');
-            select.readOnly = true;
+        row.querySelectorAll('select').forEach(select => {
+            select.disabled = true;
         });
 
         // Desmarcar y habilitar el checkbox de la fila
