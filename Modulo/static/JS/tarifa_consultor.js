@@ -51,6 +51,8 @@ document.addEventListener('DOMContentLoaded', function() {
             'valorDia': row.querySelector('input[name="valorDia"]').value,
             'valorMes': row.querySelector('input[name="valorMes"]').value,
             'monedaId': row.querySelector('select[name="moneda"]').value,
+            'iva': row.querySelector('input[name="iva"]').value.trim() || null,
+            'rteFte': row.querySelector('input[name="rteFte"]').value.trim() || null,
         };
         let idd = selected[0].value;
         // Deshabilitar los checkboxes y el botón de edición
@@ -87,12 +89,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             } else {
                 showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger');
+                restoreOriginalValues(row); // Restaurar valores originales en caso de error
             }
 
         })
         .catch(error => {
             console.error('Error al guardar los cambios:', error);
             showMessage('Error al guardar los cambios: ' + error.message, 'danger');
+            restoreOriginalValues(row); // Restaurar valores originales en caso de error
 
             disableEditMode(selected,row);
         });
@@ -134,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Convertir inputs en editables
-        let editables = ["valorHora", "valorDia", "valorMes","moneda"];
+        let editables = ["valorHora", "valorDia", "valorMes","moneda", "iva", "rteFte"];
         
         for (let i = 0; i < editables.length; i++) {
             let edit = row.querySelector(`[name="${editables[i]}"]`);
@@ -319,6 +323,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
     }
 
+    function restoreOriginalValues(row) {
+        row.querySelectorAll('input.form-control').forEach(input => {
+            if (input.hasAttribute('data-original-value')) {
+                input.value = input.getAttribute('data-original-value'); // Restaurar valor original
+            }
+        });
+    
+        row.querySelectorAll('select.form-control').forEach(select => {
+            if (select.hasAttribute('data-original-value')) {
+                select.value = select.getAttribute('data-original-value'); // Restaurar valor original
+            }
+        });
+    }
    
     
     

@@ -25,6 +25,11 @@ def tarifa_consultores_crear(request):
             new_id = max_id + 1 if max_id is not None else 1
             nuevo_tarifa_consultores = form.save(commit=False)
             nuevo_tarifa_consultores.id = new_id
+            # Convertir valores en blanco a None
+            if not nuevo_tarifa_consultores.iva:
+                nuevo_tarifa_consultores.iva = None
+            if not nuevo_tarifa_consultores.rteFte:
+                nuevo_tarifa_consultores.rteFte = None
             nuevo_tarifa_consultores.save()
             return redirect('tarifa_consultores_index')
     else:
@@ -42,6 +47,8 @@ def tarifa_consultores_editar(request, idd):
             tarifa.valorDia = data.get('valorDia', tarifa.valorDia)
             tarifa.valorMes = data.get('valorMes', tarifa.valorMes)
             tarifa.monedaId_id = data.get('monedaId', tarifa.monedaId_id)
+            tarifa.iva = data.get('iva', tarifa.iva) or None
+            tarifa.rteFte = data.get('rteFte', tarifa.rteFte) or None
            
             
             tarifa.save()
@@ -82,7 +89,9 @@ def tarifa_consultores_descargar_excel(request):
                     detalle.clienteID.Nombre_Cliente,
                     detalle.valorHora,
                     detalle.valorDia,
-                    detalle.valorMes
+                    detalle.valorMes,
+                    detalle.iva,
+                    detalle.rteFte
                 ])
             except Tarifa_Consultores.DoesNotExist:
                 print(f"detalle con ID {item_id} no encontrada.")
@@ -92,7 +101,7 @@ def tarifa_consultores_descargar_excel(request):
             return HttpResponse("No se encontraron registros de tarifas de consultores.", status=404)
 
         # Crear DataFrame de pandas
-        df = pd.DataFrame(detalles_data, columns=['Id','Consultor documento','Consultor Nombre','Año','Mes','Cliente','Valor Hora','Valor Dia','Valo Mes'])
+        df = pd.DataFrame(detalles_data, columns=['Id','Consultor documento','Consultor Nombre','Año','Mes','Cliente','Valor Hora','Valor Dia','Valor Mes','IVA','RteFte'])
         
         # Configurar la respuesta HTTP con el archivo Excel
         response = HttpResponse(

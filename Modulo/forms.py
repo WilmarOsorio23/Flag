@@ -1277,6 +1277,14 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
         mes = cleaned_data.get('mes')
         clienteID = cleaned_data.get('clienteID')
 
+        iva = cleaned_data.get('iva')
+        rteFte = cleaned_data.get('rteFte')
+        # Convertir valores en blanco a None
+        if iva == '':
+            cleaned_data['iva'] = None
+        if rteFte == '':
+            cleaned_data['rteFte'] = None
+
         if Tarifa_Consultores.objects.filter(
             documentoId=documentoId,
             anio=anio,
