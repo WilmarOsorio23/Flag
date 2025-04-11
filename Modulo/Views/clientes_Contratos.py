@@ -36,6 +36,22 @@ def clientes_contratos_editar(request, id):
             
             # Obtener el contrato a editar
             contrato = get_object_or_404(ClientesContratos, pk=id)
+
+            # Validar el campo ContratoValor
+            contrato_valor = data.get('ContratoValor')
+            if contrato_valor:
+                try:
+                    contrato_valor = float(contrato_valor)
+                    if contrato_valor > 99999999.99:
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': 'El valor ingresado para ContratoValor excede el límite permitido (99,999,999.99).'
+                        }, status=400)
+                except ValueError:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'El valor ingresado para ContratoValor no es válido.'
+                    }, status=400)
             
             # Actualizar los campos del contrato
             contrato.FechaFin = data.get('FechaFin', contrato.FechaFin)
@@ -83,13 +99,16 @@ def clientes_contratos_eliminar(request):
             messages.error(request, 'Error: Uno o más IDs no son válidos.')
             return redirect('clientes_contratos_index')
 
-        # Verificar relaciones con la tabla Contratos_OtrosSi
+        # Verificar relaciones con la tabla ContratosOtrosSi
         relaciones = {}
         for id in item_ids:
+            contrato = ClientesContratos.objects.get(pk=id)
             tablas_relacionadas = []
-            if ContratosOtrosSi.objects.filter(ClienteId=id).exists():
+
+            # Verificar si el contrato está siendo usado en ContratosOtrosSi
+            if ContratosOtrosSi.objects.filter(ClienteId=contrato.ClienteId, Contrato=contrato.Contrato).exists():
                 tablas_relacionadas.append('Contratos Otros Sí')
-            
+
             if tablas_relacionadas:
                 relaciones[id] = tablas_relacionadas
 

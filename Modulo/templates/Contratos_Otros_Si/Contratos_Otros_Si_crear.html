@@ -11,3 +11,46 @@
         <a href="{% url 'contratos_otros_si_index' %}" class="btn btn-danger">Cancelar</a>
     </form>
 {% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    console.log("✅ Script cargado correctamente");
+
+    const clienteSelect = document.getElementById('id_ClienteId');
+    const contratoSelect = document.getElementById('id_Contrato');
+
+    if (!clienteSelect || !contratoSelect) {
+        console.error("No se encontraron los campos Cliente o Contrato.");
+        return;
+    }
+
+    clienteSelect.addEventListener('change', function () {
+        const clienteId = this.value;
+        console.log("➡️ Cliente seleccionado:", clienteId);
+
+        contratoSelect.innerHTML = '<option value="">Cargando contratos...</option>';
+
+        if (clienteId) {
+            fetch(`/contratos_otros_si/obtener-contratos/${clienteId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("📦 Contratos recibidos:", data);
+                    contratoSelect.innerHTML = '<option value="">Seleccione un contrato</option>';
+                    data.contratos.forEach(c => {
+                        const option = document.createElement('option');
+                        option.value = c.id;
+                        option.textContent = c.nombre;
+                        contratoSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('❌ Error cargando contratos:', error);
+                    contratoSelect.innerHTML = '<option value="">Error cargando contratos</option>';
+                });
+        } else {
+            contratoSelect.innerHTML = '<option value="">Seleccione un cliente primero</option>';
+        }
+    });
+});
+</script>
+{% endblock %}

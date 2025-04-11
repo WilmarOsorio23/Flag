@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Convertir inputs en editables
         let editables = [
             { name: "FechaFin", type: "date" },
-            { name: "Contrato", type: "text" },
+            //{ name: "Contrato", type: "text" },
             { name: "ContratoVigente", type: "checkbox" },
             { name: "OC_Facturar", type: "checkbox" },
             { name: "Parafiscales", type: "checkbox" },
@@ -242,14 +242,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         modal.show();
         confirmButton.onclick = async function () {
-            const itemsToDeleteInput = document.getElementById('items_to_delete');
             const relations = await verifyRelations(selectedIds, csrfToken);
-            if (!itemsToDeleteInput) {
-                console.error('El elemento con id="items_to_delete" no existe en el DOM.');
-                return;
-            }
             if (relations.isRelated) {
-                let message = 'Algunos contratos clientes no pueden ser eliminados porque están relacionados con las siguientes tablas:\n';
+                let message = 'Algunos clientes no pueden ser eliminados porque están relacionados con las siguientes tablas:\n';
                 for (const [id, tables] of Object.entries(relations.relaciones)) {
                     message += `Cliente ID ${id}: ${tables.join(', ')}\n`;
                 }
@@ -292,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function showMessage(message, type) {
+    function showMessage(message, type, duration = 3000) {
         const alertBox = document.getElementById('message-box');
         const alertIcon = document.getElementById('alert-icon');
         const alertMessage = document.getElementById('alert-message');
@@ -302,25 +297,21 @@ document.addEventListener('DOMContentLoaded', function() {
         alertMessage.textContent = message;
         alertBox.className = `alert alert-${type} alert-dismissible fade show`;
 
-        // Asignar íconos según el tipo
         const icons = {
-            success: '✔️', // Puedes usar clases de FontAwesome o Bootstrap Icons
+            success: '✔️',
             danger: '❌',
             warning: '⚠️',
             info: 'ℹ️'
         };
         alertIcon.textContent = icons[type] || '';
 
-        // Mostrar la alerta
         alertBox.style.display = 'block';
-
-        // Ocultar la alerta después de 3 segundos
         setTimeout(() => {
             alertBox.classList.remove('show');
             setTimeout(() => {
                 alertBox.style.display = 'none';
-            }, 300); // Tiempo para que la transición termine
-        }, 800);
+            }, 300);
+        }, duration);
     }
 
     // Confirmación antes de eliminar

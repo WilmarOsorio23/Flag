@@ -725,7 +725,7 @@ class ContratosOtrosSi(models.Model):
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
     FechaInicio = models.DateField(null=False, blank=False)
     FechaFin = models.DateField(null=True, blank=True)
-    NumeroOtroSi = models.CharField(max_length=20,null=True,blank=True) 
+    NumeroOtroSi = models.CharField(max_length=20, null=False, blank=False) 
     ValorOtroSi = models.DecimalField(max_digits=10, decimal_places=2, null=True,blank=True)
     ValorIncluyeIva = models.BooleanField(default = 0)
     Polizas = models.BooleanField(default=0)

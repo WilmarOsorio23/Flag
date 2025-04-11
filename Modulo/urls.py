@@ -171,6 +171,7 @@ urlpatterns = [
     path('contratos_otros_si/editar/<int:id>/', ContratosOtrosSi.contratos_otros_si_editar, name='contratos_otros_si_editar'),
     path('contratos_otros_si/eliminar', ContratosOtrosSi.contratos_otros_si_eliminar, name='contratos_otros_si_eliminar'),
     path('contratos_otros_si/descargar_excel', ContratosOtrosSi.contratos_otros_si_descargar_excel, name='contratos_otros_si_descargar_excel'),
+    path('contratos_otros_si/obtener-contratos/<int:cliente_id>/', ContratosOtrosSi.obtener_contratos_por_cliente, name='obtener_contratos_por_cliente'),
 
     # Rutas para Centros de Costos
     path('centros_costos/', centrosCostos.centros_costos_index, name='centros_costos_index'),

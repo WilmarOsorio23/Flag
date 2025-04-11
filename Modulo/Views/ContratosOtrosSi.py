@@ -18,13 +18,20 @@ def contratos_otros_si_index(request):
 
 def contratos_otros_si_crear(request):
     if request.method == 'POST':
-        form = ContratosOtrosSiForm(request.POST)
+        cliente_id = request.POST.get('ClienteId')
+        contrato_id = request.POST.get('Contrato')  # Obtener el ID del contrato seleccionado
+        form = ContratosOtrosSiForm(request.POST, cliente_id=cliente_id)
         if form.is_valid():
-            form.save()
-            return redirect('contratos_otros_si_index')
+            contrato_cliente = ClientesContratos.objects.filter(ClientesContratosId=contrato_id).first()
+            if contrato_cliente:
+                # Asignar el valor del campo Contrato al campo Contrato de ContratosOtrosSi
+                contrato_otros_si = form.save(commit=False)
+                contrato_otros_si.Contrato = contrato_cliente.Contrato
+                contrato_otros_si.save()
+                return redirect('contratos_otros_si_index')
     else:
         form = ContratosOtrosSiForm()
-    return render(request, 'contratos_otros_si/contratos_otros_si_form.html', {'form': form})
+    return render(request, 'contratos_otros_si/Contratos_Otros_Si_crear.html', {'form': form})
 
 def contratos_otros_si_editar(request, id):
     logger = logging.getLogger(__name__)
@@ -33,6 +40,12 @@ def contratos_otros_si_editar(request, id):
         try:
             # Decodificar los datos JSON recibidos
             data = json.loads(request.body)
+
+            numero_otro_si = data.get('NumeroOtroSi', '').strip()
+
+            if not numero_otro_si:
+                return JsonResponse({'error': 'El campo Número Otro Sí no puede estar vacío.'}, status=400)
+
             
             # Obtener el contrato a editar
             contrato = get_object_or_404(ContratosOtrosSi, pk=id)
@@ -120,3 +133,10 @@ def contratos_otros_si_descargar_excel(request):
         return response
     return redirect('contratos_otros_si_index')
   
+def obtener_contratos_por_cliente(request, cliente_id):
+    contratos = ClientesContratos.objects.filter(ClienteId=cliente_id, ContratoVigente=True)
+    data = [
+        {'id': contrato.ClientesContratosId, 'nombre': contrato.Contrato}
+        for contrato in contratos
+    ]
+    return JsonResponse({'contratos': data})

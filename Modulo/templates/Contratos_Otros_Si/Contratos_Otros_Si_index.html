@@ -132,7 +132,7 @@
                             </td>
                             <td>
                                 <select name="Contrato" class="form-control-plaintext" disabled>
-                                    <option value="">Ninguno</option> 
+                                    
                                     {% for contrato_cliente in contrato.ClienteId.clientescontratos_set.all %}
                                         <option value="{{ contrato_cliente.Contrato }}" {% if contrato_cliente.Contrato == contrato.Contrato %}selected{% endif %}>
                                             {{ contrato_cliente.Contrato }}

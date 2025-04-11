@@ -44,6 +44,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         let row = selected[0].closest('tr');
+
+        // Obtener el valor del campo NumeroOtroSi
+        let numeroOtroSi = row.querySelector('input[name="NumeroOtroSi"]').value.trim();
+
+
+        if (!numeroOtroSi) {
+            showMessage('El campo Número Otro Sí no puede estar vacío.', 'danger');
+            return;
+        }
        
         let data = {
             'FechaFin': row.querySelector('input[name="FechaFin"]').value || null, 
