@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %} Informe Otros Sí {% endblock %}
+
+{% block contenido %}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Informe Contratos - Otros Sí</h4>
+    </div>
+
+    <div class="card-body informes-table">
+        <div class="container-fluid mb-3">
+            <form method="GET">
+                <div class="row mb-3">
+
+                    <!-- Cliente -->
+                    <div class="col-md-3">
+                        <label for="id_Nombre_Cliente">{{ form.Nombre_Cliente.label }}</label>
+                        {{ form.Nombre_Cliente }}
+                    </div>
+
+                    <!-- Filtro Fecha Inicio -->
+                    <div class="col-md-3">
+                        <label for="fecha_inicio">{{ form.FechaInicio.label }}</label>
+                        {{ form.FechaInicio }}
+                    </div>
+
+                    <!-- Contrato -->
+                    <div class="col-md-3">
+                        <label for="id_Contrato">{{ form.Contrato.label }}</label>
+                        {{ form.Contrato }}
+                    </div>
+                    
+
+                    <div class="row">
+                        <div class="col-md-6 text-start">
+                            <button type="submit" name="buscar" class="btn btn-primary mt-3">
+                                <i class="fas fa-glasses"></i> Buscar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Botón de Descargar Excel -->
+            <div class="row">
+                <div class="col-md-6 text-end offset-md-6">
+                    <form id="download-form" method="GET" action="{% url 'exportar_otros_si_excel' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="Nombre_Cliente" value="{{ form.Nombre_Cliente.value }}">
+                        <input type="hidden" name="FechaInicio" value="{{ form.FechaInicio.value }}">
+                        <input type="hidden" name="Contrato" value="{{ form.Contrato.value }}">
+                        
+
+                        <button type="submit" class="btn btn-success mt-3">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if show_data %}
+        <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
+            <table class="table table-bordered table-hover table-primary w-100" id="otrosSiTable">
+                <thead>
+                    <tr>
+                        <th>Documento Cliente</th>
+                        <th>Nombre Cliente</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Número Otro Sí</th>
+                        <th>Contrato</th>
+                        <th>Valor Otro Sí</th>
+                        <th>Incluye IVA</th>
+                        <th>Polizas</th>
+                        <th>Descripción Polizas</th>
+                        <th>Firmado (Interno)</th>
+                        <th>Firmado Cliente</th>
+                        <th>Moneda</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cliente in cliente_otros_si_info %}
+                        {% for otro in cliente.otros_si %}
+                            <tr>
+                                <td>{{ cliente.documento }}</td>
+                                <td>{{ cliente.nombre }}</td>
+                                <td>{{ otro.FechaInicio|default_if_none:"" }}</td>
+                                <td>{{ otro.FechaFin|default_if_none:"" }}</td>
+                                <td>{{ otro.NumeroOtroSi }}</td>
+                                <td>{{ otro.Contrato }}</td>
+                                <td>{{ otro.ValorOtroSi|default_if_none:"" }}</td>
+                                <td>{{ otro.ValorIncluyeIva|yesno:"SI,NO" }}</td>
+                                <td>{{ otro.Polizas|yesno:"SI,NO" }}</td>
+                                <td>{{ otro.PolizasDesc|default_if_none:"" }}</td>
+                                <td>{{ otro.FirmadoFlag|yesno:"SI,NO" }}</td>
+                                <td>{{ otro.FirmadoCliente|yesno:"SI,NO" }}</td>
+                                <td>{{ otro.moneda }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% empty %}
+                        <tr>
+                            <td colspan="13">No hay datos disponibles.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif not cliente_otros_si_info %}
+        <div class="alert alert-warning" role="alert">
+            {{ mensaje }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="{% static 'JS/informes_otros_si.js' %}"></script>
+{% endblock %}

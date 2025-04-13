@@ -2074,3 +2074,35 @@ class ContratosOtrosSiForm(forms.ModelForm):
                 "Ya existe un registro con el mismo Cliente, Fecha de Inicio."
             )  
         return cleaned_data
+    
+class OtrosSiFilterForm(forms.Form):
+    Nombre_Cliente = forms.ModelChoiceField(
+        queryset=Clientes.objects.values_list('Nombre_Cliente', flat=True).distinct(),
+        required=False,
+        label='Cliente',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    FechaInicio = forms.DateField(
+        required=False,
+        label='Fecha Inicio',
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+    Contrato = forms.ChoiceField(
+        required=False,
+        label='Contrato',
+        choices=[],  # Se llenará dinámicamente en __init__
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_nombre()
+        self.populate_contratos()
+
+    def populate_nombre(self):
+        clientes = Clientes.objects.values_list('ClienteId', 'Nombre_Cliente').distinct()
+        self.fields['Nombre_Cliente'].choices = [('', 'Seleccione el Cliente')] + list(clientes)
+
+    def populate_contratos(self):
+        contratos = ContratosOtrosSi.objects.values_list('Contrato', 'Contrato').distinct().order_by('Contrato')
+        self.fields['Contrato'].choices = [('', 'Seleccione el Contrato')] + [(c, c) for c, _ in contratos if c]
