@@ -134,7 +134,8 @@ def contratos_otros_si_descargar_excel(request):
     return redirect('contratos_otros_si_index')
   
 def obtener_contratos_por_cliente(request, cliente_id):
-    contratos = ClientesContratos.objects.filter(ClienteId=cliente_id, ContratoVigente=True)
+    #contratos = ClientesContratos.objects.filter(ClienteId=cliente_id, ContratoVigente=True)
+    contratos = ClientesContratos.objects.filter(ClienteId=cliente_id)
     data = [
         {'id': contrato.ClientesContratosId, 'nombre': contrato.Contrato}
         for contrato in contratos

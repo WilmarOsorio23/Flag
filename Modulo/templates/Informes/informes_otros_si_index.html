@@ -33,6 +33,12 @@
                         {{ form.Contrato }}
                     </div>
                     
+                    <!-- Filtro Contrato Vigente -->
+                    <div class="col-md-3">
+                        <label for="id_ContratoVigente">{{ form.ContratoVigente.label }}</label>
+                        {{ form.ContratoVigente }}
+                    </div>
+                    
 
                     <div class="row">
                         <div class="col-md-6 text-start">
@@ -52,7 +58,7 @@
                         <input type="hidden" name="Nombre_Cliente" value="{{ form.Nombre_Cliente.value }}">
                         <input type="hidden" name="FechaInicio" value="{{ form.FechaInicio.value }}">
                         <input type="hidden" name="Contrato" value="{{ form.Contrato.value }}">
-                        
+                        <input type="hidden" name="ContratoVigente" value="{{ form.ContratoVigente.value }}">
 
                         <button type="submit" class="btn btn-success mt-3">
                             <i class="fas fa-file-excel"></i> Descargar Excel

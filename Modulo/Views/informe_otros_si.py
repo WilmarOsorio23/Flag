@@ -2,7 +2,7 @@ from django.shortcuts import render
 from collections import defaultdict
 from django.http import HttpResponse
 from Modulo.forms import OtrosSiFilterForm
-from Modulo.models import Clientes, ContratosOtrosSi
+from Modulo.models import Clientes, ContratosOtrosSi, ClientesContratos
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 from datetime import datetime
@@ -22,6 +22,7 @@ def filtrar_otros_si(form, clientes, otros_si):
     nombre = form.cleaned_data.get('Nombre_Cliente')
     fecha_inicio = form.cleaned_data.get('FechaInicio')
     contrato = form.cleaned_data.get('Contrato')
+    contrato_vigente = form.cleaned_data.get('ContratoVigente') 
 
     if nombre:
         clientes = clientes.filter(Nombre_Cliente=nombre)
@@ -29,6 +30,15 @@ def filtrar_otros_si(form, clientes, otros_si):
         otros_si = otros_si.filter(FechaInicio=fecha_inicio)
     if contrato:
         otros_si = otros_si.filter(Contrato=contrato)
+
+    if contrato_vigente in ('True', 'False'):
+        # Obtener contratos de ClientesContratos que tengan ese estado
+        contratos_filtrados = ClientesContratos.objects.filter(
+            ContratoVigente=(contrato_vigente == 'True')
+        ).values_list('Contrato', flat=True)
+
+        # Filtrar ContratosOtrosSi por los contratos que coincidan
+        otros_si = otros_si.filter(Contrato__in=contratos_filtrados)
     
     cliente_ids = otros_si.values_list('ClienteId', flat=True)
     clientes = clientes.filter(ClienteId__in=cliente_ids)

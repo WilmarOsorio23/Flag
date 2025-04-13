@@ -2093,6 +2093,12 @@ class OtrosSiFilterForm(forms.Form):
         choices=[],  # Se llenará dinámicamente en __init__
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+    ContratoVigente = forms.ChoiceField(
+    choices=[('', 'Seleccione'), ('True', 'Sí'), ('False', 'No')],
+    required=False,
+    label='Contrato Vigente',
+    widget=forms.Select(attrs={'class': 'form-control'})
+)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
