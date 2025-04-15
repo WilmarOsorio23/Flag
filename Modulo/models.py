@@ -690,3 +690,23 @@ class ContratosOtrosSi(models.Model):
 
     def __str__(self):
         return f"ContratoId:{self.ContratosOtrosSiId} - Cliente: {self.ClienteId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - NumeroOtroSi: {self.NumeroOtroSi} - ValorOtroSi: {self.ValorOtroSi} - ValorIncluyeIva: {self.ValorIncluyeIva} - Polizas: {self.Polizas} - PolizasDesc: {self.PolizasDesc} - FirmadoFlag: {self.FirmadoFlag} - FirmadoCliente: {self.FirmadoCliente}"
+
+class Ind_Totales_Diciembre(models.Model):
+    Id = models.AutoField(primary_key=True)
+    Anio = models.IntegerField()
+    Mes = models.IntegerField()
+    ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
+    Pendiente = models.FloatField()
+    ValorPendiente = models.FloatField()
+
+    class Meta:
+        db_table = 'Ind_Totales_Diciembre'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['Anio', 'Mes', 'ClienteId'], 
+                name='unique_ind_totales_diciembre'
+            )
+        ]
+
+    def __str__(self):
+        return f"Año {self.Anio} - Mes {self.Mes} - Cliente {self.ClienteId.Nombre_Cliente}"

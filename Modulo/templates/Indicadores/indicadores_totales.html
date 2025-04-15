@@ -160,6 +160,50 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <!-- Fila para Diciembre del Año Anterior (solo si hay Enero en los meses seleccionados) -->
+                                {% if '1' in resultados.general.keys %}
+                                <tr class="bg-light">
+                                    <td>Diciembre {{ anio|add:"-1" }}</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    {% for cliente in Clientes %}
+                                    <td>
+                                        <input type="number" step="0.01" 
+                                            name="diciembre_trabajado_{{ cliente.ClienteId }}" 
+                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'trabajado' }}" 
+                                            class="form-control mb-2" placeholder="Horas Trabajadas">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" 
+                                            name="diciembre_costo_{{ cliente.ClienteId }}" 
+                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'costo' }}" 
+                                            class="form-control mb-2" placeholder="Costo">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" 
+                                            name="diciembre_facturado_{{ cliente.ClienteId }}" 
+                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'facturado' }}" 
+                                            class="form-control mb-2" placeholder="Horas Facturadas">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" 
+                                            name="diciembre_valor_facturado_{{ cliente.ClienteId }}" 
+                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'valor_facturado' }}" 
+                                            class="form-control" placeholder="Valor Facturado">
+                                    </td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    {% endfor %}
+                                    <!-- Celdas vacías para conceptos y totales -->
+                                    {% for concepto in Conceptos %}
+                                    <td>-</td>
+                                    {% endfor %}
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                                {% endif %}
                                 {% for mes, datos in resultados.general.items %}
                                 <tr>
                                     <td>{{ MESES|get_item:mes }}</td>
