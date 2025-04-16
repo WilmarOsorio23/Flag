@@ -12,7 +12,8 @@
 
     <div class="card-body informes-table">
         <div class="container-fluid mb-3">
-            <form method="GET">
+            <form id="filtro-otros-si-form" method="GET">
+                
                 <div class="row mb-3">
 
                     <!-- Cliente -->
@@ -122,6 +123,19 @@
         {% endif %}
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasParams = ['Nombre_Cliente', 'Contrato', 'FechaInicio', 'ContratoVigente'].some(param => urlParams.has(param));
+        const alreadySubmitted = sessionStorage.getItem('otros_si_autosubmit');
 
+        if (hasParams && !alreadySubmitted) {
+            sessionStorage.setItem('otros_si_autosubmit', '1');
+            document.getElementById('filtro-otros-si-form').submit();
+        } else {
+            sessionStorage.removeItem('otros_si_autosubmit');  // Limpiar en búsquedas normales
+        }
+    });
+</script>
 <script src="{% static 'JS/informes_otros_si.js' %}"></script>
 {% endblock %}

@@ -6,6 +6,8 @@ from Modulo.models import Clientes, ClientesContratos
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 from datetime import datetime
+from Modulo.models import ContratosOtrosSi
+from django.db import models
 
 #Función para filtrar Contratos de clientes
 def filtrar_clientes_contratos(form, clientes, clientes_contratos):
@@ -32,9 +34,14 @@ def obtener_clientes_contratos(clientes, contratos):
     cliente_contratos_info = []
     contratos_por_cliente = defaultdict(list)
 
+
     # Organizar los contratos por ClienteId para optimizar consultas
     for contrato in contratos:
         contratos_por_cliente[contrato.ClienteId_id].append(contrato)
+
+    # Obtener conteo de otros sí por contrato
+    otros_si_counts = ContratosOtrosSi.objects.values('Contrato').annotate(total=models.Count('ContratosOtrosSiId'))
+    contrato_to_otros_si_count = {item['Contrato']: item['total'] for item in otros_si_counts}
 
     for cliente in clientes:
         # Obtener contratos del cliente
@@ -64,7 +71,9 @@ def obtener_clientes_contratos(clientes, contratos):
                 'ServicioRemoto': contrato.ServicioRemoto,
                 'documento': cliente.DocumentoId,
                 'Nombre_Cliente': cliente.Nombre_Cliente,
-                'monedaId': contrato.monedaId}
+                'monedaId': contrato.monedaId,
+                'otros_si_count': contrato_to_otros_si_count.get(contrato.Contrato, 0)
+                }
                 for contrato in contratos_cliente]  # Corrected variable name here
         }
 
@@ -134,25 +143,24 @@ def exportar_clientes_contratos_excel(request):
         for cliente in cliente_contratos_info:
             for contrato in cliente['contratos']:
                 data.append([
-                    cliente['documento'],
-                    cliente['nombre'],
-                    contrato['FechaInicio'],
-                    contrato['FechaFin'],
-                    contrato['Contrato'],
-                    'SI' if contrato['ContratoVigente'] else 'NO',
-                    'SI' if contrato['OC_Facturar'] else 'NO',
-                    'SI' if contrato['Parafiscales'] else 'NO',
-                    contrato['HorarioServicio'],
-                    contrato['FechaFacturacion'],
-                    contrato['TipoFacturacion'],
-                    contrato['Observaciones'],
-                    'SI' if contrato['Polizas'] else 'NO',
-                    contrato['PolizasDesc'],
-                    contrato['ContratoValor'],
-                    'SI' if contrato['IncluyeIvaValor'] else 'NO',
-                    contrato['ContratoDesc'],
-                    'SI' if contrato['ServicioRemoto'] else 'NO',
-                    contrato['monedaId'].Nombre if contrato['monedaId'] else "Sin Moneda",  # Manejo de moneda
+                    cliente['nombre'],                                      # 1. Nombre Cliente
+                    contrato['Contrato'],                                   # 2. Contrato
+                    contrato['ContratoDesc'],                               # 3. Descripción Contrato
+                    contrato['FechaInicio'],                                # 4. Fecha Inicio
+                    contrato['FechaFin'],                                   # 5. Fecha Fin
+                    'SI' if contrato['ContratoVigente'] else 'NO',          # 6. Contrato Vigente
+                    contrato['ContratoValor'],                              # 7. Valor Contrato
+                    contrato['monedaId'].Nombre if contrato['monedaId'] else "Sin Moneda",  # 8. Moneda
+                    'SI' if contrato['IncluyeIvaValor'] else 'NO',          # 9. Incluye IVA
+                    contrato['otros_si_count'],                             # 10. # Otros Sí
+                    'SI' if contrato['Polizas'] else 'NO',                  # 11. Pólizas
+                    contrato['PolizasDesc'],                                # 12. Descripción Pólizas
+                    'SI' if contrato['OC_Facturar'] else 'NO',              # 13. OC Facturar
+                    'SI' if contrato['Parafiscales'] else 'NO',             # 14. Parafiscales
+                    contrato['HorarioServicio'],                            # 15. Horario Servicio
+                    contrato['FechaFacturacion'],                           # 16. Fecha Facturación
+                    contrato['TipoFacturacion'],                            # 17. Tipo Facturación
+                    'SI' if contrato['ServicioRemoto'] else 'NO',           # 18. Servicio Remoto
                 ])
 
         if data:
@@ -163,25 +171,24 @@ def exportar_clientes_contratos_excel(request):
 
             # Definir los encabezados
             encabezados = [
-                'Documento Cliente',
-                'Nombre Cliente',
-                'Fecha Inicio',
-                'Fecha Fin',
-                'Contrato',
-                'Contrato Vigente',
-                'OC Facturar',
-                'Parafiscales',
-                'Horario Servicio',
-                'Fecha Facturación',
-                'Tipo Facturación',
-                'Observaciones',
-                'Polizas',
-                'Polizas Desc',
-                'Valor Contrato',
-                'Incluye IVA',
-                'Descripción Contrato',
-                'Servicio Remoto',
-                'Moneda',
+                'Nombre Cliente',            # 1
+                'Contrato',                  # 2
+                'Descripción Contrato',      # 3
+                'Fecha Inicio',              # 4
+                'Fecha Fin',                 # 5
+                'Contrato Vigente',          # 6
+                'Valor Contrato',            # 7
+                'Moneda',                    # 8
+                'Incluye IVA Valor',         # 9
+                '# Otros Sí',                # 10
+                'Polizas',                   # 11
+                'Polizas Desc',              # 12
+                'OC Facturar',               # 13
+                'Parafiscales',              # 14
+                'Horario Servicio',          # 15
+                'Fecha Facturación',         # 16
+                'Tipo Facturación',          # 17
+                'Servicio Remoto',           # 18
             ]
             for col_num, header in enumerate(encabezados, 1):
                 cell = ws.cell(row=1, column=col_num, value=header)

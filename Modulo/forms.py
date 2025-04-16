@@ -2019,7 +2019,7 @@ class ContratosOtrosSiForm(forms.ModelForm):
 
     Contrato = forms.CharField(
     max_length=50,
-    required=False,
+    required=True,
     widget=forms.Select(attrs={'class': 'form-control'}),
     label='Contrato'
 )
@@ -2094,21 +2094,45 @@ class OtrosSiFilterForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'})
     )
     ContratoVigente = forms.ChoiceField(
-    choices=[('', 'Seleccione'), ('True', 'Sí'), ('False', 'No')],
-    required=False,
-    label='Contrato Vigente',
-    widget=forms.Select(attrs={'class': 'form-control'})
-)
+        choices=[('', 'Seleccione'), ('True', 'Sí'), ('False', 'No')],
+        required=False,
+        label='Contrato Vigente',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.populate_nombre()
-        self.populate_contratos()
 
+        contrato_actual = self.data.get('Contrato') or self.initial.get('Contrato')
+        cliente_nombre = self.data.get('Nombre_Cliente') or self.initial.get('Nombre_Cliente')
+
+        contratos_choices = [('', 'Seleccione un Contrato')]
+
+        if cliente_nombre:
+            self.fields['Nombre_Cliente'].initial = cliente_nombre
+            cliente = Clientes.objects.filter(Nombre_Cliente=cliente_nombre).first()
+            if cliente:
+                contratos = ContratosOtrosSi.objects.filter(
+                    ClienteId=cliente.ClienteId
+                ).values_list('Contrato', flat=True).distinct()
+                contratos_choices += [(c, c) for c in contratos]
+
+        # Asegurar que el contrato actual esté disponible
+        if contrato_actual and (contrato_actual, contrato_actual) not in contratos_choices:
+            contratos_choices.append((contrato_actual, contrato_actual))
+
+        self.fields['Contrato'].choices = contratos_choices
+
+        # Si el contrato está en choices, seleccionarlo
+        if contrato_actual:
+            self.fields['Contrato'].initial = contrato_actual
+        
+        if self.data.get('ContratoVigente') in ['True', 'False']:
+            self.fields['ContratoVigente'].initial = self.data['ContratoVigente']
+    
     def populate_nombre(self):
         clientes = Clientes.objects.values_list('ClienteId', 'Nombre_Cliente').distinct()
         self.fields['Nombre_Cliente'].choices = [('', 'Seleccione el Cliente')] + list(clientes)
 
-    def populate_contratos(self):
-        contratos = ContratosOtrosSi.objects.values_list('Contrato', 'Contrato').distinct().order_by('Contrato')
-        self.fields['Contrato'].choices = [('', 'Seleccione el Contrato')] + [(c, c) for c, _ in contratos if c]
+    

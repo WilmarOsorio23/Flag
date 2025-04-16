@@ -116,4 +116,30 @@ document.addEventListener('DOMContentLoaded', function() {
         )
     );
 
+      // Botón "Otros Sí" para abrir informe con filtros desde registro seleccionado
+        const otrosSiBtn = document.getElementById('otrosSi-button');
+       
+        if (otrosSiBtn) {
+            otrosSiBtn.addEventListener('click', function () {
+                const selectedCheckboxes = document.querySelectorAll('.row-select:checked');
+
+                if (selectedCheckboxes.length !== 1) {
+                    alert('Debes seleccionar exactamente un contrato para ver sus Otros Sí.');
+                    return;
+                }
+
+                const selectedRow = selectedCheckboxes[0].closest('tr');
+                const cells = selectedRow.querySelectorAll('td');
+
+                const cliente = cells[3].textContent.trim();         // Nombre Cliente
+                const contrato = cells[4].textContent.trim();        // Contrato
+                const vigenteText = cells[8].textContent.trim();     // Contrato Vigente (col 8)
+                const contratoVigente = vigenteText.trim().toLowerCase() === 'si' ? 'True' : 'False';
+
+                const url = `/informes/informes_otros_si/?Nombre_Cliente=${encodeURIComponent(cliente)}&Contrato=${encodeURIComponent(contrato)}&ContratoVigente=${contratoVigente}`;
+  
+
+                window.open(url, '_blank');
+            });
+        }
 });

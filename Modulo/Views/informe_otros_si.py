@@ -29,7 +29,7 @@ def filtrar_otros_si(form, clientes, otros_si):
     if fecha_inicio:
         otros_si = otros_si.filter(FechaInicio=fecha_inicio)
     if contrato:
-        otros_si = otros_si.filter(Contrato=contrato)
+        otros_si = otros_si.filter(Contrato__iexact=contrato.strip())
 
     if contrato_vigente in ('True', 'False'):
         # Obtener contratos de ClientesContratos que tengan ese estado

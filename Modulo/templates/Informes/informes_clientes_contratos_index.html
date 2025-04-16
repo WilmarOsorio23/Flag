@@ -49,6 +49,16 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Botón Otros Sí -->
+                    <div class="row">
+                        <div class="col-md-6 text-start mt-2">
+                            <button id="otrosSi-button" type="button" class="btn btn-success">
+                                <i class="fas fa-file-contract"></i> Otros Sí
+                            </button>
+                        </div>
+                    </div>
+
                 </div>   
             </form>
 
@@ -76,65 +86,29 @@
 
                     <!-- Encabezado de la tabla -->
                     <thead>
-                        <!-- Filas dentro del encabezado -->
                         <tr>
-
-                            <!-- Cliente ID-->
+                            <th><input type="checkbox" id="select-all"></th>
                             <th>Documento Cliente</th>
-
-                            <!-- Nombre Cliente -->
-                            <th>Nombre</th>
-
-                            <!-- Fecha Inicio -->
-                            <th>Fecha Inicio</th>
-
-                            <!-- Fecha Fin -->
-                            <th>Fecha Fin</th>
-
-                            <!-- Contrato -->
-                            <th>Contrato</th>
-
-                            <!-- Contrato Vigente -->
-                            <th>Contrato Vigente</th>
-
-                            <!-- OC Facturar -->
-                            <th>OC Facturar</th>
-
-                            <!-- Parafiscales -->
-                            <th>Parafiscales</th>
-
-                            <!-- Horario Servicio -->
-                            <th>Horario Servicio</th>
-
-                            <!-- Fecha Facturación -->
-                            <th>Fecha Facturación</th>
-
-                            <!-- Tipo Facturación -->
-                            <th>Tipo Facturación</th>
-
-                            <!-- Observaciones -->
                             <th>Observaciones</th>
-
-                            <!-- Polizas -->
-                            <th>Polizas</th>
-
-                            <!-- Descripción Polizas -->
-                            <th>Descripción Polizas</th>
-
-                            <!--Contrato Valor -->
-                            <th>Contrato Valor</th>
-
-                            <!-- Incluye Iva Valor -->
-                            <th>Incluye Iva Valor</th>
-
-                            <!-- Descripción Contrato -->
+                            <th>Nombre</th>
+                            <th>Contrato</th>
                             <th>Descripción Contrato</th>
-
-                            <!-- Servicio Remoto -->
-                            <th>Servicio Remoto</th>
-
-                            <!-- Moneda -->
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Contrato Vigente</th>
+                            <th>Contrato Valor</th>
                             <th>Moneda</th>
+                            <th>Incluye Iva Valor</th>
+                            <th># Otros Sí</th>
+                            <th>Polizas</th>
+                            <th>Descripción Polizas</th>
+                            <th>OC Facturar</th>
+                            <th>Parafiscales</th>
+                            <th>Horario Servicio</th>
+                            <th>Fecha Facturación</th>
+                            <th>Tipo Facturación</th>
+                            <th>Servicio Remoto</th>
+                        </tr>
                     </thead>
 
                     <!-- Lectura de campos para mostrar -->
@@ -142,30 +116,32 @@
                         {% for cliente_contratos in cliente_contratos_info %}
                             {% for contrato in cliente_contratos.contratos %}
                                 <tr>
+                                    <td><input type="checkbox" class="row-select" value="{{ contrato.ClienteId.id }}"></td>
                                     <td>{{ contrato.documento }}</td>
+                                    <td>{{ contrato.Observaciones|default_if_none:"" }}</td>
                                     <td>{{ contrato.Nombre_Cliente }}</td>
-                                    <td>{{ contrato.FechaInicio|default_if_none:""  }}</td>
-                                    <td>{{ contrato.FechaFin|default_if_none:""  }}</td>
                                     <td>{{ contrato.Contrato }}</td>
-                                    <td>{{ contrato.ContratoVigente|yesno:"SI,NO"  }}</td>
-                                    <td>{{ contrato.OC_Facturar|yesno:"SI,NO"  }}</td>
-                                    <td>{{ contrato.Parafiscales|yesno:"SI,NO"  }}</td>
+                                    <td>{{ contrato.ContratoDesc|default_if_none:"" }}</td>
+                                    <td data-fecha="{{ contrato.FechaInicio|date:'Y-m-d' }}">{{ contrato.FechaInicio|date:'d/m/Y' }}</td>
+                                    <td>{{ contrato.FechaFin|default_if_none:"" }}</td>
+                                    <td>{{ contrato.ContratoVigente|yesno:"SI,NO" }}</td>
+                                    <td>{{ contrato.ContratoValor|default_if_none:"" }}</td>
+                                    <td>{{ contrato.monedaId.Nombre }}</td>
+                                    <td>{{ contrato.IncluyeIvaValor|yesno:"SI,NO" }}</td>
+                                    <td>{{ contrato.otros_si_count }}</td>
+                                    <td>{{ contrato.Polizas|yesno:"SI,NO" }}</td>
+                                    <td>{{ contrato.PolizasDesc|default_if_none:"" }}</td>
+                                    <td>{{ contrato.OC_Facturar|yesno:"SI,NO" }}</td>
+                                    <td>{{ contrato.Parafiscales|yesno:"SI,NO" }}</td>
                                     <td>{{ contrato.HorarioServicio }}</td>
                                     <td>{{ contrato.FechaFacturacion }}</td>
                                     <td>{{ contrato.TipoFacturacion }}</td>
-                                    <td>{{ contrato.Observaciones|default_if_none:"" }}</td>
-                                    <td>{{ contrato.Polizas|yesno:"SI,NO" }}</td>
-                                    <td>{{ contrato.PolizasDesc|default_if_none:"" }}</td>
-                                    <td>{{ contrato.ContratoValor|default_if_none:"" }}</td>
-                                    <td>{{ contrato.IncluyeIvaValor|yesno:"SI,NO" }}</td>
-                                    <td>{{ contrato.ContratoDesc|default_if_none:"" }}</td>
                                     <td>{{ contrato.ServicioRemoto|yesno:"SI,NO" }}</td>
-                                    <td>{{ contrato.monedaId.Nombre }}</td>
                                 </tr>
                             {% endfor %}
                         {% empty %}
                             <tr>
-                                <td colspan="18">No hay datos disponibles.</td>
+                                <td colspan="21">No hay datos disponibles.</td>
                             </tr>
                         {% endfor %}
                     </tbody>

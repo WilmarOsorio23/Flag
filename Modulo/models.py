@@ -584,7 +584,7 @@ class ClientesContratos(models.Model):
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
     FechaInicio = models.DateField(null=False, blank=False)
     FechaFin = models.DateField(null=True, blank=True)
-    Contrato = models.CharField(max_length=50,null=True,blank=True)  # Cambiado a CharField
+    Contrato = models.CharField(max_length=50,null=False,blank=False)  
     ContratoVigente = models.BooleanField(default=True)
     OC_Facturar =  models.BooleanField(default=True)
     Parafiscales =  models.BooleanField(default=True)
