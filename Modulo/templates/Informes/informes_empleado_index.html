@@ -151,32 +151,32 @@
             <tbody>
               {% for empleado in empleados_info %}
                 <tr>
-                  <td>{{ empleado.TipoDocumento }}</td>
-                  <td>{{ empleado.Documento }}</td>
-                  <td>{{ empleado.Nombre }}</td>
-                  <td>{{ empleado.FechaNacimiento }}</td>
-                  <td>{{ empleado.FechaIngreso }}</td>
-                  <td>{{ empleado.FechaOperacion }}</td>
-                  <td>{{ empleado.Modulo }}</td>
-                  <td>{{ empleado.Perfil }}</td>
-                  <td>{{ empleado.Linea }}</td>
-                  <td>{{ empleado.CargoId }}</td>
-                  <td>{{ empleado.TituloProfesional }}</td>
-                  <td>{{ empleado.FechaGrado }}</td>
-                  <td>{{ empleado.Universidad }}</td>
-                  <td>{{ empleado.ProfesionRealizada }}</td>
+                  <td class="text-start">{{ empleado.TipoDocumento }}</td>
+                  <td class="text-end">{{ empleado.Documento }}</td>
+                  <td class="text-start">{{ empleado.Nombre }}</td>
+                  <td>{{ empleado.FechaNacimiento|date:'d/m/Y' }}</td>
+                  <td>{{ empleado.FechaIngreso|date:'d/m/Y' }}</td>
+                  <td>{{ empleado.FechaOperacion|date:'d/m/Y' }}</td>
+                  <td class="text-start">{{ empleado.Modulo }}</td>
+                  <td class="text-start">{{ empleado.Perfil }}</td>
+                  <td class="text-start">{{ empleado.Linea }}</td>
+                  <td class="text-start">{{ empleado.CargoId }}</td>
+                  <td class="text-start">{{ empleado.TituloProfesional }}</td>
+                  <td>{{ empleado.FechaGrado|date:'d/m/Y' }}</td>
+                  <td class="text-start">{{ empleado.Universidad }}</td>
+                  <td class="text-start">{{ empleado.ProfesionRealizada }}</td>
                   <td>{{ empleado.AcademiaSAP }}</td>
                   <td>{{ empleado.CertificadoSAP }}</td>
                   <td>{{ empleado.OtrasCertificaciones }}</td>
                   <td>{{ empleado.Postgrados }}</td>                  
                   <td>{{ empleado.Activo }}</td>
-                  <td>{{ empleado.FechaRetiro }}</td>
-                  <td>{{ empleado.Direccion }}</td>
-                  <td>{{ empleado.Ciudad }}</td>
-                  <td>{{ empleado.Departamento }}</td>
-                  <td>{{ empleado.DireccionAlterna }}</td>
-                  <td>{{ empleado.Telefono1 }}</td>
-                  <td>{{ empleado.Telefono2 }}</td>
+                  <td>{{ empleado.FechaRetiro|date:'d/m/Y' }}</td>
+                  <td class="text-start">{{ empleado.Direccion }}</td>
+                  <td class="text-start">{{ empleado.Ciudad }}</td>
+                  <td class="text-start">{{ empleado.Departamento }}</td>
+                  <td class="text-start">{{ empleado.DireccionAlterna }}</td>
+                  <td class="text-end">{{ empleado.Telefono1 }}</td>
+                  <td class="text-end">{{ empleado.Telefono2 }}</td>
                 </tr>
               {% endfor %}
             </tbody>

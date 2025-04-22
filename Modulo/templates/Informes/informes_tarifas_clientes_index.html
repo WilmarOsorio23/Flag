@@ -199,21 +199,21 @@
                             {% for anio, tarifas in cliente.tarifas.items %}
                                 {% for tarifa in tarifas %}
                                     <tr>
-                                        <td>{{ cliente.documento }}</td>
-                                        <td>{{ cliente.nombre_cliente }}</td>
+                                        <td class="text-end">{{ cliente.documento }}</td>
+                                        <td class="text-start">{{ cliente.nombre_cliente }}</td>
                                         <td>{{ cliente.activo }}</td>
-                                        <td>{{ tarifa.linea }}</td>
-                                        <td>{{ tarifa.modulo }}</td>
-                                        <td>{{ anio }}</td> <!-- Mostrar el año en cada fila -->
-                                        <td>{{ tarifa.mes }}</td>
-                                        <td>{{ tarifa.tarifa_hora }}</td>
-                                        <td>{{ tarifa.tarifa_dia }}</td>
-                                        <td>{{ tarifa.tarifa_mes }}</td>
-                                        <td>{{ tarifa.tarifa_bolsa }}</td>
-                                        <td>{{ tarifa.referencia }}</td>
-                                        <td>{{ tarifa.centro_costos }}</td>
-                                        <td>{{ tarifa.iva }}</td>
-                                        <td>{{ tarifa.sitio_trabajo }}</td>
+                                        <td class="text-start">{{ tarifa.linea }}</td>
+                                        <td class="text-start">{{ tarifa.modulo }}</td>
+                                        <td class="text-end">{{ anio }}</td> <!-- Mostrar el año en cada fila -->
+                                        <td class="text-end">{{ tarifa.mes }}</td>
+                                        <td class="text-end">{{ tarifa.tarifa_hora }}</td>
+                                        <td class="text-end">{{ tarifa.tarifa_dia }}</td>
+                                        <td class="text-end">{{ tarifa.tarifa_mes }}</td>
+                                        <td class="text-end">{{ tarifa.tarifa_bolsa }}</td>
+                                        <td class="text-start">{{ tarifa.referencia }}</td>
+                                        <td class="text-start">{{ tarifa.centro_costos }}</td>
+                                        <td class="text-end">{{ tarifa.iva }}</td>
+                                        <td class="text-start">{{ tarifa.sitio_trabajo }}</td>
                                         <td>{{ tarifa.moneda }}</td>
                                     </tr>
                                 {% endfor %}

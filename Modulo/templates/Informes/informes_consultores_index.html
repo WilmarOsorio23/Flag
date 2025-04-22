@@ -158,25 +158,25 @@
                     <tbody>
                         {% for consultor in consultor_info %}
                             <tr>
-                                <td>{{ consultor.documento }}</td>
-                                <td>{{ consultor.tipo_documento }}</td>
-                                <td>{{ consultor.nombre }}</td>
-                                <td>{{ consultor.empresa }}</td>
-                                <td>{{ consultor.profesion }}</td>
-                                <td>{{ consultor.linea }}</td>
-                                <td>{{ consultor.modulo }}</td>
-                                <td>{{ consultor.perfil }}</td>
-                                <td>{{ consultor.estado }}</td>
+                                <td class="text-end">{{ consultor.documento }}</td>
+                                <td class="text-start">{{ consultor.tipo_documento }}</td>
+                                <td class="text-start">{{ consultor.nombre }}</td>
+                                <td class="text-start">{{ consultor.empresa }}</td>
+                                <td class="text-start">{{ consultor.profesion }}</td>
+                                <td class="text-start">{{ consultor.linea }}</td>
+                                <td class="text-start">{{ consultor.modulo }}</td>
+                                <td class="text-start">{{ consultor.perfil }}</td>
+                                <td class="text-start">{{ consultor.estado }}</td>
                                 <td>{{ consultor.fecha_ingreso }}</td>
                                 <td>{{ consultor.fecha_retiro }}</td>
                                 <td>{{ consultor.fecha_operacion }}</td>
                                 <td>{{ consultor.certificado }}</td>
-                                <td>{{ consultor.certificaciones }}</td>
+                                <td class="text-start">{{ consultor.certificaciones }}</td>
                                 <td>{{ consultor.fecha_nacimiento }}</td>
-                                <td>{{ consultor.anio_evaluacion }}</td>
-                                <td>{{ consultor.nota_evaluacion }}</td>
-                                <td>{{ consultor.direccion }}</td>
-                                <td>{{ consultor.telefono }}</td>
+                                <td class="text-end">{{ consultor.anio_evaluacion }}</td>
+                                <td class="text-end">{{ consultor.nota_evaluacion }}</td>
+                                <td class="text-start">{{ consultor.direccion }}</td>
+                                <td class="text-en">{{ consultor.telefono }}</td>
                             </tr>
                         {% empty %}
                             <tr>

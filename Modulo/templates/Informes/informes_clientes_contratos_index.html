@@ -89,7 +89,6 @@
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
                             <th>Documento Cliente</th>
-                            <th>Observaciones</th>
                             <th>Nombre</th>
                             <th>Contrato</th>
                             <th>Descripción Contrato</th>
@@ -108,6 +107,7 @@
                             <th>Fecha Facturación</th>
                             <th>Tipo Facturación</th>
                             <th>Servicio Remoto</th>
+                            <th>Observaciones</th>
                         </tr>
                     </thead>
 
@@ -117,26 +117,26 @@
                             {% for contrato in cliente_contratos.contratos %}
                                 <tr>
                                     <td><input type="checkbox" class="row-select" value="{{ contrato.ClienteId.id }}"></td>
-                                    <td>{{ contrato.documento }}</td>
-                                    <td>{{ contrato.Observaciones|default_if_none:"" }}</td>
-                                    <td>{{ contrato.Nombre_Cliente }}</td>
-                                    <td>{{ contrato.Contrato }}</td>
-                                    <td>{{ contrato.ContratoDesc|default_if_none:"" }}</td>
+                                    <td class="text-end">{{ contrato.documento }}</td>
+                                    <td class="text-start">{{ contrato.Nombre_Cliente }}</td>
+                                    <td class="text-end">{{ contrato.Contrato }}</td>
+                                    <td class="text-start">{{ contrato.ContratoDesc|default_if_none:"" }}</td>
                                     <td data-fecha="{{ contrato.FechaInicio|date:'Y-m-d' }}">{{ contrato.FechaInicio|date:'d/m/Y' }}</td>
-                                    <td>{{ contrato.FechaFin|default_if_none:"" }}</td>
+                                    <td>{{ contrato.FechaFin|date:'d/m/Y'|default_if_none:"" }}</td>
                                     <td>{{ contrato.ContratoVigente|yesno:"SI,NO" }}</td>
-                                    <td>{{ contrato.ContratoValor|default_if_none:"" }}</td>
+                                    <td class="text-end">{{ contrato.ContratoValor|default_if_none:"" }}</td>
                                     <td>{{ contrato.monedaId.Nombre }}</td>
                                     <td>{{ contrato.IncluyeIvaValor|yesno:"SI,NO" }}</td>
                                     <td>{{ contrato.otros_si_count }}</td>
                                     <td>{{ contrato.Polizas|yesno:"SI,NO" }}</td>
-                                    <td>{{ contrato.PolizasDesc|default_if_none:"" }}</td>
+                                    <td class="text-start">{{ contrato.PolizasDesc|default_if_none:"" }}</td>
                                     <td>{{ contrato.OC_Facturar|yesno:"SI,NO" }}</td>
                                     <td>{{ contrato.Parafiscales|yesno:"SI,NO" }}</td>
-                                    <td>{{ contrato.HorarioServicio }}</td>
-                                    <td>{{ contrato.FechaFacturacion }}</td>
-                                    <td>{{ contrato.TipoFacturacion }}</td>
+                                    <td class="text-start">{{ contrato.HorarioServicio }}</td>
+                                    <td class="text-start">{{ contrato.FechaFacturacion }}</td>
+                                    <td class="text-start">{{ contrato.TipoFacturacion }}</td>
                                     <td>{{ contrato.ServicioRemoto|yesno:"SI,NO" }}</td>
+                                    <td class="text-start">{{ contrato.Observaciones|default_if_none:"" }}</td>
                                 </tr>
                             {% endfor %}
                         {% empty %}

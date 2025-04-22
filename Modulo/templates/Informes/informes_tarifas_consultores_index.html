@@ -129,21 +129,21 @@
                             {% for anio, tarifas in consultor.tarifas.items %}
                                 {% for tarifa in tarifas %}
                                     <tr>
-                                        <td>{{ consultor.linea }}</td>
-                                        <td>{{ consultor.documento }}</td>
-                                        <td>{{ consultor.nombre }}</td>
+                                        <td class="text-start">{{ consultor.linea }}</td>
+                                        <td class="text-end">{{ consultor.documento }}</td>
+                                        <td class="text-start">{{ consultor.nombre }}</td>
                                         <td>{{ consultor.certificado }}</td>
-                                        <td>{{ consultor.perfil }}</td>
-                                        <td>{{ consultor.modulo }}</td>
-                                        <td>{{ anio }}</td> <!-- Mostrar el año en cada fila -->
-                                        <td>{{ tarifa.mes }}</td>
-                                        <td>{{ tarifa.clienteID }}</td>
-                                        <td>{{ tarifa.tarifa_hora }}</td>
-                                        <td>{{ tarifa.tarifa_dia }}</td>
-                                        <td>{{ tarifa.tarifa_mes }}</td>
+                                        <td class="text-start">{{ consultor.perfil }}</td>
+                                        <td class="text-start">{{ consultor.modulo }}</td>
+                                        <td class="text-end">{{ anio }}</td> <!-- Mostrar el año en cada fila -->
+                                        <td class="text-end">{{ tarifa.mes }}</td>
+                                        <td class="text-start">{{ tarifa.clienteID }}</td>
+                                        <td class="text-end">{{ tarifa.tarifa_hora }}</td>
+                                        <td class="text-end">{{ tarifa.tarifa_dia }}</td>
+                                        <td class="text-end">{{ tarifa.tarifa_mes }}</td>
                                         <td>{{ tarifa.moneda }}</td>
-                                        <td>{{ tarifa.iva|default_if_none:'' }}</td>
-                                        <td>{{ tarifa.rteFte|default_if_none:'' }}</td>
+                                        <td class="text-end">{{ tarifa.iva|default_if_none:'' }}</td>
+                                        <td class="text-end">{{ tarifa.rteFte|default_if_none:'' }}</td>
                                     </tr>
                                 {% endfor %}
                             {% endfor %}

@@ -93,16 +93,16 @@
                     {% for cliente in cliente_otros_si_info %}
                         {% for otro in cliente.otros_si %}
                             <tr>
-                                <td>{{ cliente.documento }}</td>
-                                <td>{{ cliente.nombre }}</td>
-                                <td>{{ otro.FechaInicio|default_if_none:"" }}</td>
-                                <td>{{ otro.FechaFin|default_if_none:"" }}</td>
-                                <td>{{ otro.NumeroOtroSi }}</td>
-                                <td>{{ otro.Contrato }}</td>
-                                <td>{{ otro.ValorOtroSi|default_if_none:"" }}</td>
+                                <td class="text-end">{{ cliente.documento }}</td>
+                                <td class="text-start">{{ cliente.nombre }}</td>
+                                <td>{{ otro.FechaInicio|date:'d/m/Y'|default_if_none:"" }}</td>
+                                <td>{{ otro.FechaFin|date:'d/m/Y'|default_if_none:"" }}</td>
+                                <td class="text-end">{{ otro.NumeroOtroSi }}</td>
+                                <td class="text-end">{{ otro.Contrato }}</td>
+                                <td class="text-end">{{ otro.ValorOtroSi|default_if_none:"" }}</td>
                                 <td>{{ otro.ValorIncluyeIva|yesno:"SI,NO" }}</td>
                                 <td>{{ otro.Polizas|yesno:"SI,NO" }}</td>
-                                <td>{{ otro.PolizasDesc|default_if_none:"" }}</td>
+                                <td class="text-start">{{ otro.PolizasDesc|default_if_none:"" }}</td>
                                 <td>{{ otro.FirmadoFlag|yesno:"SI,NO" }}</td>
                                 <td>{{ otro.FirmadoCliente|yesno:"SI,NO" }}</td>
                                 <td>{{ otro.moneda }}</td>

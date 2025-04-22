@@ -117,15 +117,15 @@
                 <tbody>
                     {% for empleado in certificaciones_info %}
                         <tr>
-                            <td>{{ empleado.Documento }}</td>
-                            <td>{{ empleado.Nombre }}</td>
-                            <td>{{ empleado.Linea }}</td>
-                            <td>{{ empleado.Cargo }}</td>
-                            <td>{{ empleado.Perfil }}</td>
-                            <td>{{ empleado.Modulo }}</td>
-                            <td>{{ empleado.CertificacionId }}</td>
-                            <td>{{ empleado.Certificacion }}</td>
-                            <td>{{ empleado.Fecha_Certificacion }}</td>
+                            <td class="text-end">{{ empleado.Documento }}</td>
+                            <td class="text-start">{{ empleado.Nombre }}</td>
+                            <td class="text-start">{{ empleado.Linea }}</td>
+                            <td class="text-start">{{ empleado.Cargo }}</td>
+                            <td class="text-start">{{ empleado.Perfil }}</td>
+                            <td class="text-start">{{ empleado.Modulo }}</td>
+                            <td class="text-end">{{ empleado.CertificacionId }}</td>
+                            <td class="text-start">{{ empleado.Certificacion }}</td>
+                            <td>{{ empleado.Fecha_Certificacion|date:'d/m/Y' }}</td>
                         </tr>
                     {% empty %}
                         <tr>

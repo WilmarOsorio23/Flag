@@ -125,19 +125,19 @@
                 <tbody>
                     {% for empleado in empleado_info %}
                         <tr>
-                            <td>{{ empleado.nombre_linea }}</td>
-                            <td>{{ empleado.documento_colaborador }}</td>
-                            <td>{{ empleado.nombre_colaborador }}</td>
-                            <td>{{ empleado.cargo }}</td>
-                            <td>{{ empleado.perfil }}</td>
-                            <td>{{ empleado.modulo }}</td>
+                            <td class="text-start">{{ empleado.nombre_linea }}</td>
+                            <td class="text-end">{{ empleado.documento_colaborador }}</td>
+                            <td class="text-start">{{ empleado.nombre_colaborador }}</td>
+                            <td class="text-start">{{ empleado.cargo }}</td>
+                            <td class="text-start">{{ empleado.perfil }}</td>
+                            <td class="text-start">{{ empleado.modulo }}</td>
                             <td>{{ empleado.certificado }}</td>
-                            <td>{{ empleado.fecha_ingreso }}</td>
-                            <td>{{ empleado.años_en_flag }}</td>
-                            <td>{{ empleado.año }}</td>
+                            <td>{{ empleado.fecha_ingreso|date:'d/m/Y' }}</td>
+                            <td class="text-end">{{ empleado.años_en_flag }}</td>
+                            <td class="text-end">{{ empleado.año }}</td>
                             {% for mes_data in empleado.meses %}
-                                <td>{{ mes_data.salario }}</td>
-                                <td>{{ mes_data.cliente }}</td>
+                                <td class="text-end">{{ mes_data.salario }}</td>
+                                <td class="text-start">{{ mes_data.cliente }}</td>
                             {% endfor %}
                         </tr>
                         {% empty %}

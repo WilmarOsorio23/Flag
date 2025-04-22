@@ -86,11 +86,11 @@
           </div>
           <div class="row mb-3">            
             <div class="col-md-4">
-              <label for="FechaInicio">{{ form.FechaInicio.label }}</label>
+              <label for="FechaInicio">{{ form.FechaInicio.label|date:'d/m/Y' }}</label>
               {{ form.FechaInicio }}
             </div>
             <div class="col-md-4">
-              <label for="FechaFin">{{ form.FechaFin.label }}</label>
+              <label for="FechaFin">{{ form.FechaFin.label|date:'d/m/Y' }}</label>
               {{ form.FechaFin }}
             </div>
           </div>
@@ -142,11 +142,11 @@
               {% if historial_cargos_info %}
                 {% for historial in historial_cargos_info %}
                 <tr>
-                    <td>{{ historial.Documento }}</td>
-                    <td>{{ historial.Nombre }}</td>
-                    <td>{{ historial.Linea }}</td>
-                    <td>{{ historial.Cargo }}</td>
-                    <td>{{ historial.DescripcionCargo }}</td>
+                    <td class="text-end">{{ historial.Documento }}</td>
+                    <td class="text-start">{{ historial.Nombre }}</td>
+                    <td class="text-start">{{ historial.Linea }}</td>
+                    <td class="text-start">{{ historial.Cargo }}</td>
+                    <td class="text-start">{{ historial.DescripcionCargo }}</td>
                     <td>{{ historial.FechaInicio }}</td>
                     <td>{{ historial.FechaFin }}</td>
                 </tr>

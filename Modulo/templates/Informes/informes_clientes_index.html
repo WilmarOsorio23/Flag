@@ -159,21 +159,21 @@
             <tbody>
               {% for cliente in clientes_info %}
                 <tr>
-                    <td>{{ cliente.DocumentoId }}</td>
-                    <td>{{ cliente.TipoDocumentoID }}</td>
-                    <td>{{ cliente.Nombre_Cliente }}</td>
+                    <td class="text-end">{{ cliente.DocumentoId }}</td>
+                    <td class="text-start">{{ cliente.TipoDocumentoID }}</td>
+                    <td class="text-start">{{ cliente.Nombre_Cliente }}</td>
                     <td>{{ cliente.Activo }}</td>
-                    <td>{{ cliente.Fecha_Inicio }}</td>
-                    <td>{{ cliente.Fecha_Retiro|default_if_none:'' }}</td>
-                    <td>{{ cliente.Direccion|default_if_none:'' }}</td>
-                    <td>{{ cliente.Telefono|default_if_none:'' }}</td>
-                    <td>{{ cliente.CorreoElectronico|default_if_none:'' }}</td>
-                    <td>{{ cliente.ContactoID|default_if_none:'' }}</td>
-                    <td>{{ cliente.BuzonFacturacion|default_if_none:'' }}</td>
-                    <td>{{ cliente.TipoCliente|default_if_none:'' }}</td>
-                    <td>{{ cliente.Ciudad|default_if_none:'' }}</td>
-                    <td>{{ cliente.Departamento|default_if_none:'' }}</td>
-                    <td>{{ cliente.Pais|default_if_none:'' }}</td>
+                    <td>{{ cliente.Fecha_Inicio|date:'d/m/Y' }}</td>
+                    <td>{{ cliente.Fecha_Retiro|date:'d/m/Y'|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.Direccion|default_if_none:'' }}</td>
+                    <td class="text-end">{{ cliente.Telefono|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.CorreoElectronico|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.ContactoID|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.BuzonFacturacion|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.TipoCliente|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.Ciudad|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.Departamento|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.Pais|default_if_none:'' }}</td>
                     <td>{{ cliente.Nacional|default_if_none:'' }}</td>
                 </tr>
               {% endfor %}
