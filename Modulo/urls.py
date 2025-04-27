@@ -294,8 +294,8 @@ urlpatterns = [
     path('registro_tiempos/horas_habiles/', registro_tiempos.obtener_horas_habiles_view, name='obtener_horas_habiles'),
 
     # Rutas para informe de certificación
-    path('informes/certificaciones', Informe_certificaciones.empleado_filtrado, name='informes_certificacion_index'),
-    path('informes/certificaciones/exportar_certificaciones_excel/', Informe_certificaciones.exportar_certificaciones_excel, name='exportar_certificaciones_excel'),
+    path('informes/certificaciones/', Informe_certificaciones.empleado_filtrado, name='informes_certificacion_index'),
+    path('informes/certificaciones/exportar_certificaciones_excel', Informe_certificaciones.exportar_certificaciones_excel, name='exportar_certificaciones_excel'),
 
     # Rutas para informe de salario
     path('informes/salarios/', empleado_nomina_filtrado.empleado_nomina_filtrado, name='informes_salarios_index'),

@@ -37,7 +37,7 @@
             <div class="col-md-6 text-end offset-md-6">
               <form id="download-form" method="GET" action="{% url 'exportar_certificaciones_excel' %}">
                 {% csrf_token %}
-                <input type="hidden" name="Documento" value="{{ form.Documento.value }}" />
+                
                 <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}" />
                 <input type="hidden" name="Certificacion" value="{{ form.Certificacion.value }}" />
                 <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}" />

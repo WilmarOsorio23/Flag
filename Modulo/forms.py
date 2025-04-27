@@ -2135,4 +2135,23 @@ class OtrosSiFilterForm(forms.Form):
         clientes = Clientes.objects.values_list('ClienteId', 'Nombre_Cliente').distinct()
         self.fields['Nombre_Cliente'].choices = [('', 'Seleccione el Cliente')] + list(clientes)
 
+class CertificacionesFilterForm(forms.Form):
+    Nombre = forms.CharField(
+        label='Nombre del Empleado',
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
     
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),
+        label='Línea',
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    Certificacion = forms.ModelChoiceField(
+        queryset=Certificacion.objects.all(),
+        label='Certificación',
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )

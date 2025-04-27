@@ -4,7 +4,7 @@ from PIL import ImageFont
 from django.http import HttpResponse
 from django.shortcuts import render
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, Border, Side
+from openpyxl.styles import Alignment, Border, Side, Font
 from Modulo.forms import EmpleadoFilterForm
 from Modulo.models import Certificacion, Detalle_Certificacion, Empleado
 from django.views.decorators.csrf import csrf_exempt
@@ -94,11 +94,15 @@ def exportar_certificaciones_excel(request):
             print('LLEGO AQUI 2',certificaciones)
             print('LLEGO AQUI 3', detalles)
             # Aplicar filtros
-            certificaciones = filtrar_empleado(form, certificaciones)
-            empleados = filtrar_empleado(form, empleados)
-            detalles = filtrar_empleado(form, detalles)
+            #certificaciones = filtrar_empleado(form, certificaciones)
+            #empleados = filtrar_empleado(form, empleados)
+            #detalles = filtrar_empleado(form, detalles)
 
-            # Obtener los datos del informe
+            empleados = Empleado.objects.all()
+            certificaciones = Certificacion.objects.all()
+            detalles = Detalle_Certificacion.objects.all()
+
+            empleados, certificaciones, detalles = filtrar_empleado(form, empleados, certificaciones, detalles)
             certificaciones_info = obtener_informe_certificacion(certificaciones, empleados, detalles)
 
         if not certificaciones_info:
