@@ -82,17 +82,20 @@ def obtener_otros_si(clientes, otros_si):
 def informe_otros_si(request):
     cliente_otros_si_info = []
     show_data = False
+    busqueda_realizada = False
 
     if request.method == 'GET':
         form = OtrosSiFilterForm(request.GET)
 
-        if form.is_valid():
-            clientes = Clientes.objects.only('Nombre_Cliente', 'ClienteId').filter(Activo=True)
-            otros_si = ContratosOtrosSi.objects.select_related('ClienteId', 'monedaId').all()
+        if request.GET:
+            busqueda_realizada = True
+            if form.is_valid():
+                clientes = Clientes.objects.only('Nombre_Cliente', 'ClienteId').filter(Activo=True)
+                otros_si = ContratosOtrosSi.objects.select_related('ClienteId', 'monedaId').all()
 
-            clientes, otros_si = filtrar_otros_si(form, clientes, otros_si)
-            cliente_otros_si_info = obtener_otros_si(clientes, otros_si)
-            show_data = bool(cliente_otros_si_info)
+                clientes, otros_si = filtrar_otros_si(form, clientes, otros_si)
+                cliente_otros_si_info = obtener_otros_si(clientes, otros_si)
+                show_data = bool(cliente_otros_si_info)
         else:
             print("Errores del formulario:", form.errors)
     else:
@@ -102,7 +105,8 @@ def informe_otros_si(request):
         'form': form,
         'cliente_otros_si_info': cliente_otros_si_info,
         'show_data': show_data,
-        'mensaje': "No se encontraron resultados para los filtros aplicados." if not cliente_otros_si_info else "",
+        'busqueda_realizada': busqueda_realizada,
+        'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
     return render(request, 'informes/informes_otros_si_index.html', context)

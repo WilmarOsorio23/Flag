@@ -57,7 +57,8 @@ def obtener_info_clientes(clientes):
             'Direccion': cliente.Direccion,
             'Telefono': cliente.Telefono,
             'CorreoElectronico': cliente.CorreoElectronico,
-            'ContactoID': cliente.ContactoID,
+            #'ContactoID': cliente.ContactoID,
+            'ContactoID': cliente.ContactoID.Nombre if cliente.ContactoID else '',
             'BuzonFacturacion': cliente.BuzonFacturacion,
             'TipoCliente': cliente.TipoCliente,
             'Ciudad': cliente.Ciudad,
@@ -72,15 +73,18 @@ def obtener_info_clientes(clientes):
 def clientes_filtrado(request):
     clientes_info = []
     show_data = False  
+    busqueda_realizada = False
 
     if request.method == 'GET':
         form = ClienteFilterForm(request.GET)
         clientes = Clientes.objects.all()  # Definir clientes antes de la validación
 
-        if form.is_valid():
-            clientes = filtrar_clientes(form, clientes)
-            clientes_info = obtener_info_clientes(clientes)
-            show_data = bool(clientes_info)
+        if request.GET:
+            busqueda_realizada = True
+            if form.is_valid():
+                clientes = filtrar_clientes(form, clientes)
+                clientes_info = obtener_info_clientes(clientes)
+                show_data = bool(clientes_info)
     else: 
         form = ClienteFilterForm()
 
@@ -88,7 +92,8 @@ def clientes_filtrado(request):
         'form': form,
         'clientes_info': clientes_info,      
         'show_data': show_data,
-        'mensaje': "No se encontraron resultados para los filtros aplicados." if not clientes_info else ""
+        'busqueda_realizada': busqueda_realizada,
+        'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
     return render(request, 'informes/informes_clientes_index.html', context)

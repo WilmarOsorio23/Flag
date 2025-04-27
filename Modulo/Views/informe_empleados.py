@@ -72,13 +72,13 @@ def obtener_informe_empleados(empleados):
             'OtrasCertificaciones': 'SI' if empleado.OtrasCertificaciones else 'NO', 
             'Postgrados':  'SI' if empleado.Postgrados else 'NO',             
             'Activo': 'SI' if empleado.Activo else 'NO' ,
-            'FechaRetiro': empleado.FechaRetiro if empleado.FechaRetiro else '-', 
-            'Direccion': empleado.Direccion if empleado.Direccion else '-' ,
-            'Ciudad': empleado.Ciudad if empleado.Ciudad else '-', 
-            'Departamento': empleado.Departamento if empleado.Departamento else '-', 
-            'DireccionAlterna': empleado.DireccionAlterna if empleado.DireccionAlterna else '-', 
-            'Telefono1': empleado.Telefono1 if empleado.Telefono1 else '-', 
-            'Telefono2': empleado.Telefono2 if empleado.Telefono2 else '-',
+            'FechaRetiro': empleado.FechaRetiro,
+            'Direccion': empleado.Direccion if empleado.Direccion else '' ,
+            'Ciudad': empleado.Ciudad if empleado.Ciudad else '', 
+            'Departamento': empleado.Departamento if empleado.Departamento else '', 
+            'DireccionAlterna': empleado.DireccionAlterna if empleado.DireccionAlterna else '', 
+            'Telefono1': empleado.Telefono1 if empleado.Telefono1 else '', 
+            'Telefono2': empleado.Telefono2 if empleado.Telefono2 else '',
         }
 
         empleado_info.append(datos_empleado)
@@ -91,20 +91,24 @@ def informe_empleados(request):
     """
     empleados_info = []
     show_data = False
+    busqueda_realizada = False
 
     if request.method == 'GET':
         form = EmpleadoFilterForm(request.GET)
 
-        if form.is_valid():
-            empleados = Empleado.objects.all()
+        if request.GET:
+            busqueda_realizada = True
 
-            # Aplicar filtros
-            empleados = filtrar_empleados(form, empleados)
+            if form.is_valid():
+                empleados = Empleado.objects.all()
 
-            # Obtener la información del informe solo si hay resultados
-            if empleados.exists():
-                empleados_info = obtener_informe_empleados(empleados)
-                show_data = True
+                # Aplicar filtros
+                empleados = filtrar_empleados(form, empleados)
+
+                # Obtener la información del informe solo si hay resultados
+                if empleados.exists():
+                    empleados_info = obtener_informe_empleados(empleados)
+                    show_data = True
 
     else:
         form = EmpleadoFilterForm()
@@ -113,7 +117,8 @@ def informe_empleados(request):
         'form': form,
         'empleados_info': empleados_info,
         'show_data': show_data,
-        'mensaje': "No se encontraron resultados para los filtros aplicados." if not empleados_info else ""
+        'busqueda_realizada': busqueda_realizada,
+        'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
     return render(request, 'informes/informes_empleado_index.html', context)

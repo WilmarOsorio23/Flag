@@ -85,25 +85,29 @@ def obtener_clientes_contratos(clientes, contratos):
 def clientes_contratos_filtrado(request):
     cliente_contratos_info = []
     show_data = False  
+    busqueda_realizada = False
 
     if request.method == 'GET':
         form = ClientesContratosFilterForm(request.GET)
 
-        if form.is_valid():
-            # Filtrar clientes y contratos
-            clientes = Clientes.objects.only('Nombre_Cliente', 'ClienteId').filter(Activo=True)
-            contratos = ClientesContratos.objects.select_related('ClienteId', 'monedaId').all()
-            clientes, contratos = filtrar_clientes_contratos(form, clientes, contratos)
-            
-            print("Clientes filtrados:", clientes)
-            print("Contratos filtrados:", contratos)
+        if request.GET:
+            busqueda_realizada = True
 
-            # Obtener información de los contratos de los clientes
-            cliente_contratos_info = obtener_clientes_contratos(clientes, contratos)
+            if form.is_valid():
+                # Filtrar clientes y contratos
+                clientes = Clientes.objects.only('Nombre_Cliente', 'ClienteId').filter(Activo=True)
+                contratos = ClientesContratos.objects.select_related('ClienteId', 'monedaId').all()
+                clientes, contratos = filtrar_clientes_contratos(form, clientes, contratos)
+                
+                print("Clientes filtrados:", clientes)
+                print("Contratos filtrados:", contratos)
 
-            print("Información de contratos de clientes:", cliente_contratos_info)
+                # Obtener información de los contratos de los clientes
+                cliente_contratos_info = obtener_clientes_contratos(clientes, contratos)
 
-            show_data = bool(cliente_contratos_info)  # Mostrar datos si hay resultados       
+                print("Información de contratos de clientes:", cliente_contratos_info)
+
+                show_data = bool(cliente_contratos_info)  # Mostrar datos si hay resultados       
     else:
         form = ClientesContratosFilterForm()
     
@@ -111,7 +115,8 @@ def clientes_contratos_filtrado(request):
         'form': form,
         'cliente_contratos_info': cliente_contratos_info,
         'show_data': show_data,
-        'mensaje': "No se encontraron resultados para los filtros aplicados." if not cliente_contratos_info else "",
+        'busqueda_realizada': busqueda_realizada,
+        'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
     return render(request, 'informes/informes_clientes_contratos_index.html', context)

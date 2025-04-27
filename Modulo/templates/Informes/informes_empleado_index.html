@@ -55,11 +55,15 @@
           <div class="col-md-6 text-end offset-md-6">
             <form id="download-form" method="GET" action="{% url 'exportar_empleados_excel' %}">
               {% csrf_token %}
-              <input type="hidden" name="Documento" value="{{ form.Documento.value }}" />
+              <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}" />
               <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}" />
-              <input type="hidden" name="Certificacion" value="{{ form.Certificacion.value }}" />
+              <input type="hidden" name="Cargo" value="{{ form.Cargo.value }}" />
+              <input type="hidden" name="CertificadoSAP" value="{{ form.CertificadoSAP.value }}" />
               <input type="hidden" name="PerfilId" value="{{ form.PerfilId.value }}" />
-              <button type="submit" class="btn btn-success"><i class="fas fa-file-excel"></i> Descargar Excel</button>
+              <input type="hidden" name="Activo" value="{{ form.Activo.value }}" />
+              <button type="submit" class="btn btn-success">
+                  <i class="fas fa-file-excel"></i> Descargar Excel
+              </button>
             </form>
           </div>
         </div>
@@ -171,20 +175,28 @@
                   <td>{{ empleado.Postgrados }}</td>                  
                   <td>{{ empleado.Activo }}</td>
                   <td>{{ empleado.FechaRetiro|date:'d/m/Y' }}</td>
-                  <td class="text-start">{{ empleado.Direccion }}</td>
-                  <td class="text-start">{{ empleado.Ciudad }}</td>
-                  <td class="text-start">{{ empleado.Departamento }}</td>
-                  <td class="text-start">{{ empleado.DireccionAlterna }}</td>
-                  <td class="text-end">{{ empleado.Telefono1 }}</td>
-                  <td class="text-end">{{ empleado.Telefono2 }}</td>
+                  <td class="text-start">{{ empleado.Direccion|default_if_none:"" }}</td>
+                  <td class="text-start">{{ empleado.Ciudad|default_if_none:"" }}</td>
+                  <td class="text-start">{{ empleado.Departamento|default_if_none:"" }}</td>
+                  <td class="text-start">{{ empleado.DireccionAlterna|default_if_none:"" }}</td>
+                  <td class="text-end">{{ empleado.Telefono1|default_if_none:"" }}</td>
+                  <td class="text-end">{{ empleado.Telefono2|default_if_none:"" }}</td>
                 </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
       {% else %}
-        <div class="alert alert-warning">{{ mensaje }}</div>
+        <div class="alert alert-warning" role="alert">
+              {% if not busqueda_realizada %}
+                  No se ha realizado ninguna búsqueda aún.
+              {% else %}
+                  No se encontraron resultados para los filtros aplicados.
+              {% endif %}
+        </div>
       {% endif %}
+        
+                
     </div>
   </div>
 {% endblock %}

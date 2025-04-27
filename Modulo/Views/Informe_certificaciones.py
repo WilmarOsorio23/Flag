@@ -54,13 +54,17 @@ def empleado_filtrado(request):
     detalles = Detalle_Certificacion.objects.all()
     certificaciones_info = []
     show_data = False
+    busqueda_realizada = False
 
     if request.method == 'GET':
         form = EmpleadoFilterForm(request.GET)
-        if form.is_valid():
-            empleados, certificaciones, detalles = filtrar_empleado(form, empleados, certificaciones, detalles)
-            certificaciones_info = obtener_informe_certificacion(certificaciones, empleados, detalles)
-            show_data = bool(certificaciones_info)
+
+        if request.GET:
+            busqueda_realizada = True
+            if form.is_valid():
+                empleados, certificaciones, detalles = filtrar_empleado(form, empleados, certificaciones, detalles)
+                certificaciones_info = obtener_informe_certificacion(certificaciones, empleados, detalles)
+                show_data = bool(certificaciones_info)
     else:
         form = EmpleadoFilterForm()
 
@@ -68,7 +72,8 @@ def empleado_filtrado(request):
         'form': form,
         'certificaciones_info': certificaciones_info,
         'show_data': show_data,
-        'mensaje': "No se encontraron resultados para los filtros aplicados"
+        'busqueda_realizada': busqueda_realizada,
+        'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     })
 
 @csrf_exempt

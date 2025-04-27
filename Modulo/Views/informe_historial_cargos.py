@@ -54,27 +54,30 @@ def filtrar_historial_cargos(form, historial):
 def historial_cargos_filtrado(request):
     historial_info = []
     show_data = False  
-    
+    busqueda_realizada = False
 
     if request.method == 'GET':
         form = HistorialCargosFilterForm(request.GET)
         historial = Historial_Cargos.objects.select_related('documentoId', 'cargoId', 'documentoId__LineaId')
 
-        if form.is_valid():
-            historial = filtrar_historial_cargos(form, historial)
-            historial_info = [
-                {
-                    'Documento': h.documentoId.Documento,
-                    'Nombre': h.documentoId.Nombre,
-                    'Linea': h.documentoId.LineaId.Linea if h.documentoId.LineaId else '',
-                    'Cargo': h.cargoId.CargoId if h.cargoId else '',
-                    'DescripcionCargo':h.cargoId.Cargo if h.cargoId else '',
-                    'FechaInicio': h.FechaInicio.strftime('%Y-%m-%d') if h.FechaInicio else '',
-                    'FechaFin': h.FechaFin.strftime('%Y-%m-%d') if h.FechaFin else 'Activo',
-                } 
-                for h in historial
-            ]
-            show_data = bool(historial_info)
+        if request.GET:
+            busqueda_realizada = True
+        
+            if form.is_valid():
+                historial = filtrar_historial_cargos(form, historial)
+                historial_info = [
+                    {
+                        'Documento': h.documentoId.Documento,
+                        'Nombre': h.documentoId.Nombre,
+                        'Linea': h.documentoId.LineaId.Linea if h.documentoId.LineaId else '',
+                        'Cargo': h.cargoId.Cargo if h.cargoId else '',
+                        'DescripcionCargo':h.cargoId.Cargo if h.cargoId else '',
+                        'FechaInicio': h.FechaInicio.strftime('%Y-%m-%d') if h.FechaInicio else '',
+                        'FechaFin': h.FechaFin.strftime('%Y-%m-%d') if h.FechaFin else 'Activo',
+                    } 
+                    for h in historial
+                ]
+                show_data = bool(historial_info)
     else:
         form = HistorialCargosFilterForm()
         
@@ -83,7 +86,8 @@ def historial_cargos_filtrado(request):
         'form': form,
         'historial_cargos_info': historial_info,
         'show_data': show_data,
-        'mensaje': "No se encontraron resultados para los filtros aplicados." if not historial_info else ""
+        'busqueda_realizada': busqueda_realizada,
+        'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
     return render(request, 'informes/informes_historial_cargos_index.html', context)
@@ -121,7 +125,8 @@ def exportar_historial_cargos_excel(request):
             if lineas:
                 historial = historial.filter(documentoId__LineaId__in=lineas)
             if cargos:
-                historial = historial.filter(cargoId__in=cargos)
+                historial = historial.filter(cargoId__CargoId__in=cargos)
+                
 
             if historial.count() == 0:
                 return HttpResponse("No se encontraron resultados para los filtros aplicados.")

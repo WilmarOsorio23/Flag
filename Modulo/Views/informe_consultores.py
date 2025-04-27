@@ -59,7 +59,7 @@ def obtener_consultores(consultores):
             'fecha_retiro': consultor.Fecha_Retiro.strftime('%Y-%m-%d') if consultor.Fecha_Retiro else '',
             'fecha_operacion': consultor.Fecha_Operacion.strftime('%Y-%m-%d') if consultor.Fecha_Operacion else '',
             'certificado':  'SI' if consultor.Certificado else 'NO',
-            'certificaciones': consultor.Certificaciones,
+            'certificaciones': consultor.Certificaciones if consultor.Certificaciones else '',
             'fecha_nacimiento': fecha_nacimiento.strftime('%Y-%m-%d') if fecha_nacimiento else '',
             'anio_evaluacion': consultor.Anio_Evaluacion if consultor.Anio_Evaluacion else '',
             'nota_evaluacion': consultor.NotaEvaluacion if consultor.NotaEvaluacion else '',
@@ -73,20 +73,24 @@ def obtener_consultores(consultores):
 def consultores_filtrado(request):
     consultor_info = []
     show_data = False  
+    busqueda_realizada = False
 
     if request.method == 'GET':
         form = ConsultorFilterForm(request.GET)
 
-        if form.is_valid():
-            # Inicializar consultores
-            consultores = Consultores.objects.all()
+        if request.GET:
+            busqueda_realizada = True
 
-            # Relizar el filtro de los consultores
-            consultores = filtrar_consultores(form, consultores)
+            if form.is_valid():
+                # Inicializar consultores
+                consultores = Consultores.objects.all()
 
-            #Obtener informacion de consultores 
-            consultor_info = obtener_consultores(consultores)
-            show_data = bool(consultor_info)  # Mostrar datos si hay resultados
+                # Relizar el filtro de los consultores
+                consultores = filtrar_consultores(form, consultores)
+
+                #Obtener informacion de consultores 
+                consultor_info = obtener_consultores(consultores)
+                show_data = bool(consultor_info)  # Mostrar datos si hay resultados
         
     else: 
         form = ConsultorFilterForm()
@@ -95,7 +99,8 @@ def consultores_filtrado(request):
         'form': form,
         'consultor_info': consultor_info,      
         'show_data': show_data,
-        'mensaje': "No se encontraron resultados para los filtros aplicados." if not consultor_info else ""
+        'busqueda_realizada': busqueda_realizada,
+        'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
     return render(request, 'informes/informes_consultores_index.html', context)

@@ -62,9 +62,9 @@ def obtener_empleado_info(empleados, nominas, meses):
 
                 if mes_nomina:
                     salario = mes_nomina.Salario
-                    cliente = mes_nomina.Cliente.Nombre_Cliente if mes_nomina and mes_nomina.Cliente else "-"
+                    cliente = mes_nomina.Cliente.Nombre_Cliente if mes_nomina and mes_nomina.Cliente else ""
                 else:
-                    salario = cliente = "-"
+                    salario = cliente = ""
                 salarios_meses.append({'salario': salario, 'cliente': cliente})
             # Calcular "Años en Flag"
             fecha_actual = date.today()
@@ -91,21 +91,25 @@ def empleado_nomina_filtrado(request):
     meses = "Enero Febrero Marzo Abril Mayo Junio Julio Agosto Septiembre Octubre Noviembre Diciembre".split()
     empleado_info = []  
     show_data = False  
+    busqueda_realizada = False
 
     if request.method == 'GET':
         form = EmpleadoFilterForm(request.GET)
 
-        if form.is_valid():
-            # Inicializar empleados y nominas
-            empleados = Empleado.objects.all()
-            nominas = Nomina.objects.all()
+        if request.GET:
+            busqueda_realizada = True
+        
+            if form.is_valid():
+                # Inicializar empleados y nominas
+                empleados = Empleado.objects.all()
+                nominas = Nomina.objects.all()
 
-            # Obtener información de los empleados filtrada
-            empleados, nominas = filtrar_empleados_y_nominas(form, empleados, nominas)
-            
-            # Obtener información de los empleados
-            empleado_info = obtener_empleado_info(empleados, nominas, meses)
-            show_data = bool(empleado_info)  # Mostrar datos si hay resultados
+                # Obtener información de los empleados filtrada
+                empleados, nominas = filtrar_empleados_y_nominas(form, empleados, nominas)
+                
+                # Obtener información de los empleados
+                empleado_info = obtener_empleado_info(empleados, nominas, meses)
+                show_data = bool(empleado_info)  # Mostrar datos si hay resultados
             
     else: 
         form = EmpleadoFilterForm()
@@ -117,7 +121,8 @@ def empleado_nomina_filtrado(request):
         'form': form,
         'empleado_info': empleado_info,      
         'show_data': show_data,
-        'mensaje': "No se encontraron resultados para los filtros aplicados." if not empleado_info else ""
+        'busqueda_realizada': busqueda_realizada,
+        'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
     return render(request, 'informes/informes_salarios_index.html', context)

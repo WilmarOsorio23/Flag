@@ -62,39 +62,36 @@ def obtener_empleado_estudio(empleados, estudios):
 def empleado_estudio_filtrado(request):
     empleado_estudio_info = []  
     show_data = False  
+    busqueda_realizada = False
 
     if request.method == 'GET':
-        #form = EmpleadoFilterForm(request.GET)
         form = EstudiosFilterForm(request.GET)
 
-        if form.is_valid():
-            # Inicializar empleados y estudios
-            empleados = Empleado.objects.all()
-            estudios = Empleados_Estudios.objects.all()
+        if request.GET:
+            busqueda_realizada = True
 
-            # Debug: Imprimir los datos obtenidos de la base de datos
-           # print("Empleados obtenidos:", empleados)
-           # print("Estudios obtenidos:", estudios)
+            if form.is_valid():
 
-            # Obtener información de los empleados filtrada
-            empleados, estudios = filtrar_empleados_y_estudios(form, empleados, estudios)
-            
-            # Obtener información de los estudios de los empleados
-            empleado_estudio_info = obtener_empleado_estudio(empleados, estudios)
-            show_data = bool(empleado_estudio_info)  # Mostrar datos si hay resultados
+                # Inicializar empleados y estudios
+                empleados = Empleado.objects.all()
+                estudios = Empleados_Estudios.objects.all()
 
-             # Debug: Imprimir la información de estudios de empleados
-            #print("Información de estudios de empleados:", empleado_estudio_info)
+                # Obtener información de los empleados filtrada
+                empleados, estudios = filtrar_empleados_y_estudios(form, empleados, estudios)
+                
+                # Obtener información de los estudios de los empleados
+                empleado_estudio_info = obtener_empleado_estudio(empleados, estudios)
+                show_data = bool(empleado_estudio_info)  # Mostrar datos si hay resultados
 
     else: 
-        #form = EmpleadoFilterForm()
         form = EstudiosFilterForm()
 
     context = {
         'form': form,
         'empleado_estudio_info': empleado_estudio_info,      
         'show_data': show_data,
-        'mensaje': "No se encontraron resultados para los filtros aplicados." if not empleado_estudio_info else ""
+        'busqueda_realizada': busqueda_realizada,
+        'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
     return render(request, 'informes/informes_estudios_index.html', context)

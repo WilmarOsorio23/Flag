@@ -111,10 +111,12 @@
               {% for emp in form.Empleado.value %}
               <input type="hidden" name="Empleado" value="{{ emp }}" />
               {% endfor %}
-              <input type="hidden" name="Cargo" value="{{ form.Cargo.value|default:'' }}" />
-              <input type="hidden" name="Linea" value="{{ form.Linea.value|default:'' }}" />
-              <input type="hidden" name="FechaInicio" value="{{ form.FechaInicio.value|default:'' }}" />
-              <input type="hidden" name="FechaFin" value="{{ form.FechaFin.value|default:'' }}" />
+              {% for cargo in form.Cargo.value %}
+                <input type="hidden" name="Cargo" value="{{ cargo }}" />
+              {% endfor %}
+              {% for linea in form.Linea.value %}
+                <input type="hidden" name="Linea" value="{{ linea }}" />
+              {% endfor %}
               <button type="submit" class="btn btn-success">
                 <i class="fas fa-file-excel"></i> Descargar Excel
               </button>
@@ -160,7 +162,13 @@
           </table>
         </div>
       {% else %}
-        <div class="alert alert-warning">{{ mensaje }}</div>
+        <div class="alert alert-warning" role="alert">
+            {% if not busqueda_realizada %}
+                No se ha realizado ninguna búsqueda aún.
+            {% else %}
+                No se encontraron resultados para los filtros aplicados.
+            {% endif %}
+        </div>
       {% endif %}
     </div>
   </div>

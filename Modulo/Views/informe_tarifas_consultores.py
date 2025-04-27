@@ -76,24 +76,28 @@ def obtener_tarifas_consultores(consultores, tarifas, anios):
 def tarifas_consultores_filtrado(request):
     consultor_tarifas_info = []
     show_data = False  
+    busqueda_realizada = False
 
     if request.method == 'GET':
         form = TarifaConsultorFilterForm(request.GET)
 
-        if form.is_valid():
-            # Inicializar consultores y tarifas
-            consultores = Consultores.objects.all()
-            tarifas = Tarifa_Consultores.objects.all()
+        if request.GET:
+            busqueda_realizada = True
 
-            # Obtener información de los consultores y tarifas filtrados
-            consultores, tarifas = filtrar_tarifas_consultores(form, consultores, tarifas)
+            if form.is_valid():
+                # Inicializar consultores y tarifas
+                consultores = Consultores.objects.all()
+                tarifas = Tarifa_Consultores.objects.all()
 
-            # Obtener los años seleccionados por el usuario
-            anios = form.cleaned_data.get('anio')
+                # Obtener información de los consultores y tarifas filtrados
+                consultores, tarifas = filtrar_tarifas_consultores(form, consultores, tarifas)
 
-            #Obtener informacion de las tarifas de los consultores
-            consultor_tarifas_info = obtener_tarifas_consultores(consultores, tarifas, anios)
-            show_data = bool(consultor_tarifas_info)  # Mostrar datos si hay resultados
+                # Obtener los años seleccionados por el usuario
+                anios = form.cleaned_data.get('anio')
+
+                #Obtener informacion de las tarifas de los consultores
+                consultor_tarifas_info = obtener_tarifas_consultores(consultores, tarifas, anios)
+                show_data = bool(consultor_tarifas_info)  # Mostrar datos si hay resultados
         
     else: 
         form = TarifaConsultorFilterForm()
@@ -102,7 +106,8 @@ def tarifas_consultores_filtrado(request):
         'form': form,
         'consultor_tarifas_info': consultor_tarifas_info,      
         'show_data': show_data,
-        'mensaje': "No se encontraron resultados para los filtros aplicados." if not consultor_tarifas_info else ""
+        'busqueda_realizada': busqueda_realizada,
+        'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
     return render(request, 'informes/informes_tarifas_consultores_index.html', context)
@@ -132,7 +137,7 @@ def exportar_tarifas_consultores_excel(request):
 
         else:
                 print("Errores del formulario:", form.errors)
-                return HttpResponse("No se encontraron resultados para los filtros aplicadosssss.")
+                return HttpResponse("No se encontraron resultados para los filtros aplicados.")
         
         # Preparar los datos para Excel
         data = []
@@ -210,3 +215,6 @@ def exportar_tarifas_consultores_excel(request):
             wb.save(response)
 
             return response
+
+        else:
+            return HttpResponse("No se encontraron datos para exportar.", status=404)

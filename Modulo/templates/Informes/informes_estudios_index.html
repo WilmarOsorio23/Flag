@@ -167,10 +167,14 @@
                     </tbody>
                 </table>
             </div>
-            {% elif not empleado_estudio_info %}
-            <div class="alert alert-warning" role="alert">
-                {{ mensaje }}
-            </div>
+            {% else %}
+                <div class="alert alert-warning" role="alert">
+                    {% if not busqueda_realizada %}
+                        No se ha realizado ninguna búsqueda aún.
+                    {% else %}
+                        No se encontraron resultados para los filtros aplicados.
+                    {% endif %}
+                </div>
             {% endif %}
     </div>
 </div>
