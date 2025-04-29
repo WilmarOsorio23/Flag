@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}
+  Informe de Tiempos Consultores
+{% endblock %}
+
+{% block contenido %}
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4 class="card-title">Informe de Tiempos Consultores</h4>
+    </div>
+    <div class="card-body informes-table">
+      <div class="container-fluid mb-3">
+        <!-- Formulario de filtros -->
+        <form method="GET">
+          <div class="row mb-3">
+            <!-- Filtro Año -->
+            <div class="col-md-3">
+              <label for="Anio" class="form-label">{{ form.Anio.label }}</label>
+              <div class="dropdown">
+                <button 
+                  class="btn btn-outline-primary dropdown-toggle w-100" 
+                  type="button" 
+                  id="dropdownAnio" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false"
+                  data-selected-text="Seleccione Año">
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownAnio">
+                  {% for value, label in form.Anio.field.choices %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                        <input type="radio" name="Anio" value="{{ value }}" {% if form.Anio.value == value %}checked{% endif %}>{{ label }}
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+
+            <!-- Filtro Documento -->
+            <div class="col-md-3">
+              <label for="documento" class="form-label">{{ form.documento.label }}</label> 
+              <div class="dropdown">
+                <button 
+                  class="btn btn-outline-primary dropdown-toggle w-100" 
+                  type="button" 
+                  id="dropdownDocumento" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false"
+                  data-selected-text="Seleccione Documento">
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownDocumento">
+                  {% for checkbox in form.documento %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+
+            <!-- Filtro Línea -->
+            <div class="col-md-3">
+              <label for="LineaId" class="form-label">{{ form.LineaId.label }}</label>
+              <div class="dropdown">
+                <button 
+                  class="btn btn-outline-primary dropdown-toggle w-100" 
+                  type="button" 
+                  id="dropdownLinea" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false"
+                  data-selected-text="Seleccione Línea">
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
+                  {% for checkbox in form.LineaId %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+
+            <!-- Filtro Mes -->
+            <div class="col-md-3">
+              <label for="Mes" class="form-label">{{ form.Mes.label }}</label>
+              <div class="dropdown">
+                <button 
+                  class="btn btn-outline-primary dropdown-toggle w-100" 
+                  type="button" 
+                  id="dropdownMes" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false"
+                  data-selected-text="Seleccione Mes">
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownMes">
+                  {% for checkbox in form.Mes %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          
+
+          <!-- Botón de búsqueda -->
+          <div class="row">
+            <div class="col-md-6 text-start">
+              <button type="submit" name="buscar" class="btn btn-primary">
+                <i class="fas fa-search"></i> Buscar
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Botón para descargar Excel -->
+        <div class="row mt-3">
+          <div class="col-md-6 text-end offset-md-6">
+            <form method="GET" action="{% url 'exportar_tiempos_clientes_excel' %}">
+              <input type="hidden" name="Anio" value="{{ form.Anio.value|default:'' }}">
+              <input type="hidden" name="Mes" value="{{ form.Mes.value|default:'' }}">
+              <input type="hidden" name="Documento" value="{{ form.documento.value|default:'' }}">
+              <input type="hidden" name="LineaId" value="{{ form.LineaId.value|default:'' }}">
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Descargar Excel
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {% if show_data %}
+        <!-- Tabla de tiempos consultores -->
+        <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
+          <table class="table table-bordered table-hover table-primary w-100">
+            <thead>
+              <tr>
+                <th>Documento</th>
+                <th>Nombre Consultor</th>
+                <th>Año</th>
+                <th>Mes</th>
+                <th>Línea</th>
+                <th>Cliente</th>
+                <th>Módulo</th>
+                <th>Horas</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if tiempos_info %}
+                {% for registro in tiempos_info %}
+                <tr>
+                  <td class="text-end">{{ registro.Documento }}</td>
+                  <td class="text-start">{{ registro.Nombre }}</td>
+                  <td class="text-end">{{ registro.Anio }}</td>
+                  <td class="text-end">{{ registro.Mes }}</td>
+                  <td class="text-start">{{ registro.Linea }}</td>
+                  <td class="text-start">{{ registro.Cliente }}</td>
+                  <td class="text-start">{{ registro.Modulo }}</td>
+                  <td class="text-end">{{ registro.Horas }}</td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="8">No hay datos disponibles.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="alert alert-warning">{{ mensaje }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script src="{% static 'JS/informes_tiempos_consultores.js' %}"></script>
+
+{% endblock %}

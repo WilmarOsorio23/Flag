@@ -2135,4 +2135,52 @@ class OtrosSiFilterForm(forms.Form):
         clientes = Clientes.objects.values_list('ClienteId', 'Nombre_Cliente').distinct()
         self.fields['Nombre_Cliente'].choices = [('', 'Seleccione el Cliente')] + list(clientes)
 
-    
+class inforTiempoEmpleadosFilterForm(forms.Form):
+    documento = forms.ModelMultipleChoiceField(
+        queryset=Consultores.objects.all(),
+        required=False,
+        label='Documento',
+        widget=forms.CheckboxSelectMultiple(),
+        to_field_name='Documento',
+    )
+
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=False,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-control'})
+
+    )
+
+    Mes = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Mes',
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Linea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_mes()
+
+        # Personalizar cómo se muestra cada consultor
+        self.fields['documento'].label_from_instance = lambda obj: f'{obj.Nombre} - {obj.Documento}'
+
+        # Llenar dinámicamente el campo de años
+        years = Tiempos_Cliente.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in years]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = meses
