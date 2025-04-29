@@ -1,5 +1,5 @@
 from django.urls import path
-from Modulo.Views import Informe_clientes, clientes_factura, indicadores_operatividad, indicadores_totales, modulo
+from Modulo.Views import Informe_clientes, clientes_factura, indicadores_operatividad, indicadores_totales, informe_tiempos_consultores, modulo
 from Modulo.Views import ipc
 from Modulo.Views import ind
 from Modulo.Views import TipoDocumento
@@ -45,7 +45,6 @@ from Modulo.Views import referencia
 from Modulo.Views import centrosCostos
 from Modulo.Views import informe_facturacion
 from Modulo.Views import informe_historial_cargos
-
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -343,6 +342,11 @@ urlpatterns = [
     path('api/get_cliente_id_by_nombre/', informe_otros_si.get_cliente_id_by_nombre, name='get_cliente_id_by_nombre'),
     path('contratos_otros_si/obtener-contratos/<int:cliente_id>/', ContratosOtrosSi.obtener_contratos_por_cliente, name='obtener_contratos_por_cliente'),
     
+
+    #Ruta para informe tiempos consultores
+    path('informes/tiempo_consultores/', informe_tiempos_consultores.tiempos_clientes_filtrado, name='informes_tiempos_consultores'),
+    path("informes/tiempo_consultores/exportar_tiempo_consultores/",informe_tiempos_consultores.exportar_tiempos_clientes_excel, name="exportar_tiempos_clientes_excel"),
+
     # Rutas para tabla Historial Cargos
     path('historial_cargos/', historial_cargos.historial_cargos_index, name='historial_cargos_index'),
     path('historial_cargos/crear/', historial_cargos.historial_cargos_crear, name='historial_cargos_crear'),
