@@ -125,9 +125,16 @@
         <!-- Contenido de las pestañas -->
         <div class="tab-content" id="myTabContent">
             <!-- Pestaña de Indicadores -->
-            <div class="tab-pane fade show active p-3" id="totales" role="tabpanel" aria-labelledby="totales-tab">
-                    {% if resultados.general %}
-                    <!-- Tabla Principal -->
+            <div class="tab-pane fade show active p-1" id="totales" role="tabpanel" aria-labelledby="totales-tab">
+                {% if resultados.general %}
+                <!-- Tabla Principal -->
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Guardar Datos
+                        </button>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped">
                             <thead class="table-dark">
@@ -168,28 +175,36 @@
                                     <td>-</td>
                                     {% for cliente in Clientes %}
                                     <td>
-                                        <input type="number" step="0.01" 
-                                            name="diciembre_trabajado_{{ cliente.ClienteId }}" 
-                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'trabajado' }}" 
-                                            class="form-control mb-2" placeholder="Horas Trabajadas">
+                                        <input type="number" step="0.01"
+                                            name="diciembre_trabajado_{{ cliente.ClienteId }}"
+                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'trabajado' }}"
+                                            class="form-control mb-2"
+                                            placeholder="Horas Trabajadas"
+                                            data-toggle-target="diciembre_facturado_{{ cliente.ClienteId }}">
                                     </td>
                                     <td>
-                                        <input type="number" step="0.01" 
-                                            name="diciembre_costo_{{ cliente.ClienteId }}" 
-                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'costo' }}" 
-                                            class="form-control mb-2" placeholder="Costo">
+                                        <input type="number" step="0.01"
+                                            name="diciembre_costo_{{ cliente.ClienteId }}"
+                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'costo' }}"
+                                            class="form-control mb-2"
+                                            placeholder="Costo"
+                                            data-toggle-target="diciembre_valor_facturado_{{ cliente.ClienteId }}">
                                     </td>
                                     <td>
-                                        <input type="number" step="0.01" 
-                                            name="diciembre_facturado_{{ cliente.ClienteId }}" 
-                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'facturado' }}" 
-                                            class="form-control mb-2" placeholder="Horas Facturadas">
+                                        <input type="number" step="0.01"
+                                            name="diciembre_facturado_{{ cliente.ClienteId }}"
+                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'facturado' }}"
+                                            class="form-control mb-2"
+                                            placeholder="Horas Facturadas"
+                                            data-toggle-target="diciembre_trabajado_{{ cliente.ClienteId }}">
                                     </td>
                                     <td>
-                                        <input type="number" step="0.01" 
-                                            name="diciembre_valor_facturado_{{ cliente.ClienteId }}" 
-                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'valor_facturado' }}" 
-                                            class="form-control" placeholder="Valor Facturado">
+                                        <input type="number" step="0.01"
+                                            name="diciembre_valor_facturado_{{ cliente.ClienteId }}"
+                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'valor_facturado' }}"
+                                            class="form-control"
+                                            placeholder="Valor Facturado"
+                                            data-toggle-target="diciembre_costo_{{ cliente.ClienteId }}">
                                     </td>
                                     <td>-</td>
                                     <td>-</td>
@@ -283,6 +298,7 @@
                         No se encontraron datos con los filtros seleccionados
                     </div>
                     {% endif %}
+                </form>
             </div>
             <!-- Pestaña de Totales por Línea -->
             <div class="tab-pane fade p-3" id="lineas" role="tabpanel" aria-labelledby="lineas-tab">

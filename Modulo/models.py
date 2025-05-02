@@ -696,8 +696,10 @@ class Ind_Totales_Diciembre(models.Model):
     Anio = models.IntegerField()
     Mes = models.IntegerField()
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
-    Pendiente = models.FloatField()
-    ValorPendiente = models.FloatField()
+    Trabajado = models.DecimalField(max_digits=15, decimal_places=2)
+    Facturado = models.DecimalField(max_digits=15, decimal_places=2)
+    Costo = models.DecimalField(max_digits=15, decimal_places=2)
+    ValorFacturado = models.DecimalField(max_digits=15, decimal_places=2)
 
     class Meta:
         db_table = 'Ind_Totales_Diciembre'

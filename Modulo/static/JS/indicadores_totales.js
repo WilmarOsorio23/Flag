@@ -46,3 +46,23 @@ document.addEventListener('DOMContentLoaded', function() {
         )
     );
 });
+
+document.querySelectorAll('input[data-toggle-partner]').forEach(input => {
+    input.addEventListener('input', function(e) {
+        const targetName = e.target.dataset.togglePartner;
+        const targetInput = document.querySelector(`[name="${targetName}"]`);
+        
+        // Lógica de deshabilitación
+        if (e.target.value !== "" && e.target.value > 0) {
+            targetInput.disabled = true;
+            targetInput.value = "";
+        } else {
+            targetInput.disabled = false;
+        }
+    });
+    
+    // Inicializar estado
+    const partnerName = input.dataset.togglePartner;
+    const partnerInput = document.querySelector(`[name="${partnerName}"]`);
+    partnerInput.disabled = input.value !== "" && input.value > 0;
+});

@@ -4,7 +4,7 @@ from collections import defaultdict
 from django.shortcuts import render
 from django.core.cache import cache
 from Modulo.forms import Ind_Totales_FilterForm
-from Modulo.models import Clientes, Concepto, FacturacionClientes, Horas_Habiles, Linea, Nomina, Tarifa_Clientes, Tarifa_Consultores, Tiempos_Cliente, TiemposConcepto
+from Modulo.models import Clientes, Concepto, FacturacionClientes, Horas_Habiles, Ind_Totales_Diciembre, Linea, Nomina, Tarifa_Clientes, Tarifa_Consultores, Tiempos_Cliente, TiemposConcepto
 
 MESES = {
     '1': 'Enero', '2': 'Febrero', '3': 'Marzo', '4': 'Abril',
@@ -204,16 +204,16 @@ def calcular_pendiente(anio: str, mes: str, cliente: Clientes, lineas_ids: list,
                       pendiente_anterior: Decimal = None) -> dict:    
     try:
         if pendiente_anterior is None:
-            mes_int = int(mes)
-            anio_anterior = str(int(anio) - (1 if mes_int == 1 else 0))
-            mes_anterior = str(12 if mes_int == 1 else mes_int - 1)
+            # Obtener datos de diciembre usando la nueva estructura
+            datos_diciembre = calcular_pendiente_diciembre(anio, cliente)
+            trabajado_anterior = datos_diciembre['trabajado']
+            facturado_anterior = datos_diciembre['facturado']
             
-            trabajado_anterior = sum(
-                t.Horas for t in tiempos_data 
-                if t.ClienteId_id == cliente.ClienteId and t.Anio == anio_anterior 
-                and t.Mes == mes_anterior and t.LineaId_id in lineas_ids
-            )
-            pendiente_horas = (trabajado_anterior + trabajado_actual) - facturado_actual
+            # Asegurar que todos los valores son Decimal
+            trabajado_actual = Decimal(trabajado_actual)
+            facturado_actual = Decimal(facturado_actual)
+            
+            pendiente_horas = (trabajado_anterior + trabajado_actual) - (facturado_anterior + facturado_actual)
         else:
             pendiente_horas = (pendiente_anterior + trabajado_actual) - facturado_actual
             trabajado_anterior = pendiente_anterior
@@ -244,6 +244,87 @@ def calcular_pendiente(anio: str, mes: str, cliente: Clientes, lineas_ids: list,
     except Exception as e:
         print(f"Error calculando pendiente: {str(e)}")
         return {'trabajado_anterior': Decimal('0.00'), 'horas': Decimal('0.00'), 'valor': Decimal('0.00')}
+
+def calcular_pendiente_diciembre(anio: str, cliente: Clientes):
+    """Obtiene los valores de diciembre del año anterior desde la nueva estructura"""
+    try:
+        registro = Ind_Totales_Diciembre.objects.get(
+            Anio=int(anio)-1,
+            Mes=12,
+            ClienteId=cliente
+        )
+        return {
+            'trabajado': Decimal(str(registro.Trabajado)),
+            'facturado': Decimal(str(registro.Facturado)), 
+            'costo': Decimal(str(registro.Costo)),
+            'valor_facturado': Decimal(str(registro.ValorFacturado))
+        }
+    except Ind_Totales_Diciembre.DoesNotExist:
+        return {
+            'trabajado': Decimal('0'),
+            'facturado': Decimal('0'),
+            'costo': Decimal('0'),
+            'valor_facturado': Decimal('0')
+        }
+    
+def guardar_pendiente_diciembre(
+    anio: str,
+    cliente_id: int,
+    trabajado: Decimal,
+    facturado: Decimal,
+    costo: Decimal,
+    valor_facturado: Decimal
+):
+    """Guarda los valores en Decimal sin redondear"""
+    try:
+        trabajado = max(trabajado, Decimal('0'))
+        facturado = max(facturado, Decimal('0'))
+        costo = max(costo, Decimal('0'))
+        valor_facturado = max(valor_facturado, Decimal('0'))
+
+        Ind_Totales_Diciembre.objects.update_or_create(
+            Anio=int(anio)-1,
+            Mes=12,
+            ClienteId_id=cliente_id,
+            defaults={
+                'Trabajado': trabajado,
+                'Facturado': facturado,
+                'Costo': costo,
+                'ValorFacturado': valor_facturado
+            }
+        )
+    except Exception as e:
+        print(f"Error guardando diciembre: {e}")
+
+def guardar_pendiente_anual(
+    anio: int,
+    cliente_id: int,
+    pendiente_horas: Decimal,
+    pendiente_valor: Decimal
+):
+    """Guarda pendientes anuales con Decimal"""
+    try:
+        trabajado = max(pendiente_horas, Decimal('0'))
+        facturado = abs(min(pendiente_horas, Decimal('0')))
+        costo = max(pendiente_valor, Decimal('0'))
+        valor_facturado = abs(min(pendiente_valor, Decimal('0')))
+
+        if trabajado == 0 and facturado == 0 and costo == 0 and valor_facturado == 0:
+            return
+
+        Ind_Totales_Diciembre.objects.update_or_create(
+            Anio=anio,
+            Mes=12,
+            ClienteId_id=cliente_id,
+            defaults={
+                'Trabajado': trabajado,
+                'Facturado': facturado,
+                'Costo': costo,
+                'ValorFacturado': valor_facturado
+            }
+        )
+    except Exception as e:
+        print(f"Error guardando anual: {e}")
 
 # 6. Función para obtener conceptos
 def obtener_conceptos(anio: str, mes: str) -> dict:
@@ -369,27 +450,7 @@ def indicadores_totales(request):
         # Calcular valores de diciembre del año anterior
         anio_anterior = str(int(anio) - 1)
         for cliente in clientes:
-            trabajado_anterior = calcular_trabajado(cliente.ClienteId, anio_anterior, '12', lineas_ids, tiempos_data)
-            facturado_anterior = calcular_facturado(anio_anterior, '12', cliente, lineas_ids, datos_precargados['facturacion_data'])
-            pendiente_anterior = calcular_pendiente(
-                anio_anterior, '12', cliente, lineas_ids,
-                trabajado_anterior, facturado_anterior['horas'],
-                horas_habiles, datos_precargados['tarifas_por_cliente'],
-                tiempos_data
-            )
-
-            # Distribuir valores según las reglas
-            trabajado_input = pendiente_anterior['horas'] if pendiente_anterior['horas'] > 0 else Decimal('0.00')
-            facturado_input = abs(pendiente_anterior['horas']) if pendiente_anterior['horas'] < 0 else Decimal('0.00')
-            costo_input = pendiente_anterior['valor'] if pendiente_anterior['valor'] > 0 else Decimal('0.00')
-            valor_facturado_input = abs(pendiente_anterior['valor']) if pendiente_anterior['valor'] < 0 else Decimal('0.00')
-
-            valores_diciembre[cliente.ClienteId] = {
-                'trabajado': trabajado_input,
-                'costo': costo_input,
-                'facturado': facturado_input,
-                'valor_facturado': valor_facturado_input
-            }
+            valores_diciembre[cliente.ClienteId] = calcular_pendiente_diciembre(anio, cliente)
         
         # Procesamiento general
         for mes in meses:
@@ -536,6 +597,45 @@ def indicadores_totales(request):
         calcular_totales_generales(resultados, num_meses)
         calcular_diferencias_margen(resultados)
 
+    if request.method == 'POST':
+        anio_actual = int(anio)
+        
+        # Guardar datos de diciembre del año anterior (inputs manuales)
+        for cliente in clientes:
+            cliente_id = cliente.ClienteId
+            
+            trabajado = Decimal(request.POST.get(f'diciembre_trabajado_{cliente_id}', 0) or Decimal(0))
+            facturado = Decimal(request.POST.get(f'diciembre_facturado_{cliente_id}', 0) or Decimal(0))
+            costo = Decimal(request.POST.get(f'diciembre_costo_{cliente_id}', 0) or Decimal(0))
+            valor_facturado = Decimal(request.POST.get(f'diciembre_valor_facturado_{cliente_id}', 0) or Decimal(0))
+
+            # Guardar para diciembre del año anterior
+            guardar_pendiente_diciembre(
+                anio=str(anio_actual),
+                cliente_id=cliente_id,
+                trabajado=trabajado,  # Mantener como Decimal
+                facturado=facturado,
+                costo=costo,
+                valor_facturado=valor_facturado
+            )
+        
+        # Guardar pendientes finales del año actual
+        for cliente in clientes:
+            if meses:
+                ultimo_mes = meses[-1]
+                # Verificar que el último mes existe en los resultados
+                if ultimo_mes in resultados['general']:
+                    ultimo_pendiente = resultados['general'][ultimo_mes]['Clientes'][cliente.Nombre_Cliente]['Pendiente']
+                else:
+                    ultimo_pendiente = {'horas': Decimal('0'), 'valor': Decimal('0')}
+            
+            guardar_pendiente_anual(
+                anio=anio_actual,
+                cliente_id=cliente.ClienteId,
+                pendiente_horas=ultimo_pendiente['horas'],
+                pendiente_valor=ultimo_pendiente['valor']
+            )
+            
     resultados['general'] = dict(resultados['general'])
     context = {
         'form': form,
