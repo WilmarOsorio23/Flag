@@ -55,6 +55,7 @@ def obtener_clientes_contratos(clientes, contratos):
                 'ClienteId': contrato.ClienteId,
                 'FechaInicio': contrato.FechaInicio,
                 'FechaFin': contrato.FechaFin,
+                'por_vencer': contrato.FechaFin and (contrato.FechaFin - datetime.today().date()).days <= 30,
                 'Contrato': contrato.Contrato,
                 'ContratoVigente': contrato.ContratoVigente,
                 'OC_Facturar': contrato.OC_Facturar,
@@ -118,6 +119,32 @@ def clientes_contratos_filtrado(request):
         'busqueda_realizada': busqueda_realizada,
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
+
+
+    total_contratos = 0
+    contratos_por_vencer = 0
+    contratos_no_vigentes = 0
+    valor_total_contratos = 0
+    contratos_con_polizas = 0
+
+    for cliente in cliente_contratos_info:
+        for c in cliente['contratos']:
+            total_contratos += 1
+            valor_total_contratos += c['ContratoValor'] or 0
+            if c['por_vencer']:
+                contratos_por_vencer += 1
+            if not c['ContratoVigente']:
+                contratos_no_vigentes += 1
+            if c['Polizas']:
+                contratos_con_polizas += 1
+
+    context.update({
+        'total_contratos': total_contratos,
+        'valor_total_contratos': valor_total_contratos,
+        'contratos_por_vencer': contratos_por_vencer,
+        'contratos_no_vigentes': contratos_no_vigentes,
+        'contratos_con_polizas': contratos_con_polizas,
+    })
 
     return render(request, 'informes/informes_clientes_contratos_index.html', context)
 

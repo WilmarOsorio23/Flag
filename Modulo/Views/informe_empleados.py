@@ -90,6 +90,7 @@ def informe_empleados(request):
     Vista para generar el informe de empleados con filtros opcionales.
     """
     empleados_info = []
+    empleados = Empleado.objects.none()
     show_data = False
     busqueda_realizada = False
 
@@ -120,6 +121,27 @@ def informe_empleados(request):
         'busqueda_realizada': busqueda_realizada,
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
+
+    # Cálculo para tarjetas 
+    empleados_totales = empleados.count()
+    empleados_activos = empleados.filter(Activo=True).count()
+    empleados_inactivos = empleados_totales - empleados_activos
+    total_empleados = len(empleados_info)
+    activos = sum(1 for e in empleados_info if e["Activo"] == "SI")
+    certificados_sap = sum(1 for e in empleados_info if e["CertificadoSAP"] == "SI")
+    otras_certificaciones = sum(1 for e in empleados_info if e["OtrasCertificaciones"] == "SI")
+    postgrados = sum(1 for e in empleados_info if e["Postgrados"] == "SI")
+
+    context.update({
+        'total_empleados': total_empleados,
+        'activos': activos,
+        'certificados_sap': certificados_sap,
+        'otras_certificaciones': otras_certificaciones,
+        'postgrados': postgrados,
+        'empleados_totales': empleados_totales,
+        'empleados_activos': empleados_activos,
+        'empleados_inactivos': empleados_inactivos,
+    })
 
     return render(request, 'informes/informes_empleado_index.html', context)
 

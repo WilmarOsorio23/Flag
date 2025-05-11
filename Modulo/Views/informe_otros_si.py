@@ -62,6 +62,7 @@ def obtener_otros_si(clientes, otros_si):
             'otros_si': [{
                 'FechaInicio': registro.FechaInicio,
                 'FechaFin': registro.FechaFin,
+                'por_vencer': registro.FechaFin and (registro.FechaFin - datetime.today().date()).days <= 30,
                 'NumeroOtroSi': registro.NumeroOtroSi,
                 'ValorOtroSi': registro.ValorOtroSi,
                 'ValorIncluyeIva': registro.ValorIncluyeIva,
@@ -108,6 +109,43 @@ def informe_otros_si(request):
         'busqueda_realizada': busqueda_realizada,
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
+
+    total_contratos = 0
+    valor_total = 0
+    contratos_firmados = 0
+    contratos_firmados_cliente = 0
+    contratos_con_polizas = 0
+
+    for cliente in cliente_otros_si_info:
+        for otro in cliente['otros_si']:
+            total_contratos += 1
+            valor_total += otro['ValorOtroSi'] or 0
+            if otro['FirmadoFlag']:
+                contratos_firmados += 1
+            if otro['FirmadoCliente']:
+                contratos_firmados_cliente += 1
+            if otro['Polizas']:
+                contratos_con_polizas += 1
+
+    porcentaje_firmado_cliente = 0
+    porcentaje_firmado_interno = 0
+    porcentaje_con_polizas = 0
+
+    if total_contratos > 0:
+        porcentaje_firmado_cliente = round((contratos_firmados_cliente / total_contratos) * 100)
+        porcentaje_firmado_interno = round((contratos_firmados / total_contratos) * 100)
+        porcentaje_con_polizas = round((contratos_con_polizas / total_contratos) * 100)
+
+    context.update({
+        'total_contratos': total_contratos,
+        'valor_total': valor_total,
+        'contratos_firmados': contratos_firmados,
+        'contratos_firmados_cliente': contratos_firmados_cliente,
+        'contratos_con_polizas': contratos_con_polizas,
+        'porcentaje_firmado_cliente': porcentaje_firmado_cliente,
+        'porcentaje_firmado_interno': porcentaje_firmado_interno,
+        'porcentaje_con_polizas': porcentaje_con_polizas,
+    })
 
     return render(request, 'informes/informes_otros_si_index.html', context)
 

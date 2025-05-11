@@ -50,6 +50,78 @@
             </div>
           </div>
         </form>
+
+        {% if show_data %}
+        <div class="mt-4 mb-3">
+          <div class="d-flex flex-row flex-nowrap overflow-auto gap-2">
+
+            <!-- Total Empleados -->
+            <div class="card shadow-sm p-3 text-info text-start" style="min-width: 220px;">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">{{ total_empleados }}</h5>
+                <i class="fas fa-users fa-2x"></i>
+              </div>
+              <small class="text-muted mt-2 d-block">Total Empleados</small>
+            </div>
+
+            <!-- Tarjeta: Empleados Activos/Inactivos -->
+            <div class="card shadow-sm p-3" style="min-width: 220px;">
+              <div class="card-body p-0">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div>
+                    <div class="fw-bold">
+                      <span class="text-success">{{ empleados_activos }}</span>
+                      /
+                      <span class="text-danger">{{ empleados_inactivos }}</span>
+                    </div>
+                    <small class="text-muted">Activos / Inactivos</small>
+                  </div>
+                  <i class="fas fa-users fa-2x text-primary"></i>
+                </div>
+                <div class="progress" style="height: 6px;">
+                  {% with total=empleados_activos|add:empleados_inactivos %}
+                    {% if total > 0 %}
+                      {% widthratio empleados_activos total 100 as porcentaje_activos %}
+                      {% widthratio empleados_inactivos total 100 as porcentaje_inactivos %}
+                      <div class="progress-bar bg-success" role="progressbar" style="width: {{ porcentaje_activos }}%;" aria-valuenow="{{ porcentaje_activos }}" aria-valuemin="0" aria-valuemax="100"></div>
+                      <div class="progress-bar bg-danger" role="progressbar" style="width: {{ porcentaje_inactivos }}%;" aria-valuenow="{{ porcentaje_inactivos }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    {% endif %}
+                  {% endwith %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Certificados SAP -->
+            <div class="card shadow-sm p-3 text-primary text-start" style="min-width: 220px;">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">{{ certificados_sap }}</h5>
+                <i class="fas fa-certificate fa-2x"></i>
+              </div>
+              <small class="text-muted mt-2 d-block">Certificados SAP</small>
+            </div>
+
+            <!-- Otras Certificaciones -->
+            <div class="card shadow-sm p-3 text-warning text-start" style="min-width: 220px;">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">{{ otras_certificaciones }}</h5>
+                <i class="fas fa-award fa-2x"></i>
+              </div>
+              <small class="text-muted mt-2 d-block">Otras Certificaciones</small>
+            </div>
+
+            <!-- Con Postgrado -->
+            <div class="card shadow-sm p-3 text-danger text-start" style="min-width: 220px;">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">{{ postgrados }}</h5>
+                <i class="fas fa-user-graduate fa-2x"></i>
+              </div>
+              <small class="text-muted mt-2 d-block">Postgrados</small>
+            </div>
+
+          </div>
+        </div>
+        {% endif %}
+
         <!-- Botón de Descargar Excel -->
         <div class="row">
           <div class="col-md-6 text-end offset-md-6">
