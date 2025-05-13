@@ -199,6 +199,9 @@ class Tiempos_Cliente(models.Model):
 
     class Meta:
         db_table = 'Tiempos_Cliente'
+        indexes = [
+            models.Index(fields=['ClienteId', 'Anio', 'Mes', 'LineaId']),
+        ]
         constraints = [
             models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento', 'ClienteId', 'LineaId'], name='unique_tiempos_cliente')
         ]
@@ -480,6 +483,9 @@ class Horas_Habiles(models.Model):
 
     class Meta:
         db_table = 'Horas_Habiles'
+        indexes = [
+            models.Index(fields=['Anio', 'Mes']),
+        ]
         constraints = [
             models.UniqueConstraint(fields=['Anio', 'Mes'], name='unique_horas_habiles')
         ]

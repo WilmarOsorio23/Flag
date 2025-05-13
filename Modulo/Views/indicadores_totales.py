@@ -1,8 +1,11 @@
 from django.db.models import Sum, Q, F
 from decimal import Decimal, InvalidOperation
 from collections import defaultdict
-from django.shortcuts import render
+from django.db import transaction
+from django.shortcuts import redirect, render
 from django.core.cache import cache
+from django.http import JsonResponse
+import json
 from Modulo.forms import Ind_Totales_FilterForm
 from Modulo.models import Clientes, Concepto, FacturacionClientes, Horas_Habiles, Ind_Totales_Diciembre, Linea, Nomina, Tarifa_Clientes, Tarifa_Consultores, Tiempos_Cliente, TiemposConcepto
 
@@ -53,6 +56,8 @@ def precargar_datos(anio: str, meses: list, clientes: list, lineas: list, horas_
         Mes__in=meses_tiempos,
         ClienteId__in=clientes_ids,
         LineaId__in=lineas_ids
+    ).select_related('ClienteId', 'LineaId').values(
+        'Anio', 'Mes', 'Documento', 'ClienteId', 'LineaId', 'Horas'
     )
     tiempos_data = list(tiempos)
     
@@ -60,26 +65,25 @@ def precargar_datos(anio: str, meses: list, clientes: list, lineas: list, horas_
     meses_facturacion = [int(m) for m in meses]
     facturacion = FacturacionClientes.objects.filter(
         Anio=int(anio),
-        Mes__in=meses_facturacion,  
-        ClienteId__in=clientes_ids,
-        LineaId__in=lineas_ids
-    )
+        Mes__in=meses_facturacion
+    ).values('ClienteId', 'LineaId', 'Mes', 'HorasFactura', 'DiasFactura', 'MesFactura', 'Valor')
+    
     facturacion_data = defaultdict(lambda: {'horas': Decimal('0.00'), 'valor': Decimal('0.00')})
     for f in facturacion:
-        mes = str(f.Mes)
+        mes = str(f['Mes'])  # Corregido
         hh = horas_habiles.get(mes, {})
         horas = Decimal('0.00')
         
-        if f.HorasFactura:
-            horas += Decimal(str(f.HorasFactura))
-        elif f.DiasFactura:
-            horas += Decimal(str(f.DiasFactura)) * hh.get('horas_diarias', Decimal('0.00'))
-        elif f.MesFactura:
-            horas += Decimal(str(f.MesFactura)) * hh.get('horas_mes', Decimal('0.00'))
+        if f['HorasFactura']: 
+            horas += Decimal(str(f['HorasFactura']))
+        elif f['DiasFactura']: 
+            horas += Decimal(str(f['DiasFactura'])) * hh.get('horas_diarias', Decimal('0.00'))
+        elif f['MesFactura']:  
+            horas += Decimal(str(f['MesFactura'])) * hh.get('horas_mes', Decimal('0.00'))
         
-        key = (f.ClienteId.ClienteId, anio, mes, f.LineaId.LineaId)
+        key = (f['ClienteId'], anio, mes, f['LineaId'])  
         facturacion_data[key]['horas'] += horas
-        facturacion_data[key]['valor'] += Decimal(str(f.Valor or '0'))
+        facturacion_data[key]['valor'] += Decimal(str(f['Valor'] or '0')) 
     
     # Precargar nóminas y tarifas consultores
     nominas = Nomina.objects.all().values('Documento', 'Anio', 'Mes', 'Salario')
@@ -114,7 +118,10 @@ def precargar_datos(anio: str, meses: list, clientes: list, lineas: list, horas_
         tarifas_consultores_dict[doc].sort(key=lambda x: (-x[0], -x[1]))
     
     # Precargar tarifas clientes
-    tarifas_clientes = Tarifa_Clientes.objects.filter(clienteId__in=clientes_ids).select_related('clienteId')
+    tarifas_clientes = Tarifa_Clientes.objects.filter(clienteId__in=clientes_ids
+    ).select_related('clienteId').only(
+        'clienteId', 'anio', 'mes', 'valorHora', 'valorDia', 'valorMes'
+    )
     tarifas_por_cliente = defaultdict(list)
     for tarifa in tarifas_clientes:
         tarifas_por_cliente[tarifa.clienteId_id].append(tarifa)
@@ -131,8 +138,11 @@ def precargar_datos(anio: str, meses: list, clientes: list, lineas: list, horas_
 def calcular_trabajado(cliente_id: str, anio: str, mes: str, lineas_ids: list, tiempos_data: list) -> Decimal:
     """Calcula horas trabajadas usando datos precargados"""
     return sum(
-        t.Horas for t in tiempos_data 
-        if t.ClienteId_id == cliente_id and t.Anio == anio and t.Mes == mes and t.LineaId_id in lineas_ids
+        t['Horas'] for t in tiempos_data 
+        if t['ClienteId'] == cliente_id
+        and t['Anio'] == anio 
+        and t['Mes'] == mes 
+        and t['LineaId'] in lineas_ids
     )
 
 # 3. Función para calcular costos
@@ -141,11 +151,11 @@ def calcular_costo(cliente_id: str, mes: str, lineas_ids: list, tiempos_data: li
     mes_int = int(mes)
     
     for tiempo in tiempos_data:
-        if tiempo.ClienteId_id != cliente_id or tiempo.Mes != mes or tiempo.LineaId_id not in lineas_ids:
+        if tiempo['ClienteId'] != cliente_id or tiempo['Mes'] != mes or tiempo['LineaId'] not in lineas_ids:
             continue
 
-        documento = tiempo.Documento
-        anio_int = int(tiempo.Anio)
+        documento = tiempo['Documento']
+        anio_int = int(tiempo['Anio'])
         costo_hora = Decimal('0.00')  # Inicializar con valor por defecto
         
         # Lógica para empleados
@@ -173,7 +183,7 @@ def calcular_costo(cliente_id: str, mes: str, lineas_ids: list, tiempos_data: li
                 elif valorMes > 0:
                     costo_hora = valorMes / horas_mes_total
 
-        total += tiempo.Horas * costo_hora
+        total += tiempo['Horas'] * costo_hora
     
     return total
 
@@ -200,14 +210,19 @@ def calcular_facturado(anio: str, mes: str, cliente: Clientes, lineas_ids: list,
 
 # 5. Función para pendientes de facturación
 def calcular_pendiente(anio: str, mes: str, cliente: Clientes, lineas_ids: list, trabajado_actual: Decimal, facturado_actual: Decimal, horas_habiles: dict, tarifas_por_cliente: dict, 
-                      tiempos_data: list,
-                      pendiente_anterior: Decimal = None) -> dict:    
+                    tiempos_data: list,
+                    pendiente_anterior: Decimal = None,
+                    diciembre_data: dict = None) -> dict:    
     try:
         if pendiente_anterior is None:
-            # Obtener datos de diciembre usando la nueva estructura
-            datos_diciembre = calcular_pendiente_diciembre(anio, cliente)
-            trabajado_anterior = datos_diciembre['trabajado']
-            facturado_anterior = datos_diciembre['facturado']
+
+            if diciembre_data is not None:
+                trabajado_anterior = diciembre_data.get('trabajado', Decimal('0'))
+                facturado_anterior = diciembre_data.get('facturado', Decimal('0'))
+            else:
+                datos_diciembre = calcular_pendiente_diciembre(anio, cliente)
+                trabajado_anterior = datos_diciembre['trabajado']
+                facturado_anterior = datos_diciembre['facturado']
             
             # Asegurar que todos los valores son Decimal
             trabajado_actual = Decimal(trabajado_actual)
@@ -241,6 +256,7 @@ def calcular_pendiente(anio: str, mes: str, cliente: Clientes, lineas_ids: list,
             'horas': pendiente_horas,
             'valor': pendiente_horas * tarifa_valor
         }
+    
     except Exception as e:
         print(f"Error calculando pendiente: {str(e)}")
         return {'trabajado_anterior': Decimal('0.00'), 'horas': Decimal('0.00'), 'valor': Decimal('0.00')}
@@ -266,66 +282,65 @@ def calcular_pendiente_diciembre(anio: str, cliente: Clientes):
             'costo': Decimal('0'),
             'valor_facturado': Decimal('0')
         }
-    
-def guardar_pendiente_diciembre(
-    anio: str,
-    cliente_id: int,
-    trabajado: Decimal,
-    facturado: Decimal,
-    costo: Decimal,
-    valor_facturado: Decimal
-):
-    """Guarda los valores en Decimal sin redondear"""
-    try:
-        trabajado = max(trabajado, Decimal('0'))
-        facturado = max(facturado, Decimal('0'))
-        costo = max(costo, Decimal('0'))
-        valor_facturado = max(valor_facturado, Decimal('0'))
 
-        Ind_Totales_Diciembre.objects.update_or_create(
-            Anio=int(anio)-1,
-            Mes=12,
-            ClienteId_id=cliente_id,
-            defaults={
-                'Trabajado': trabajado,
-                'Facturado': facturado,
-                'Costo': costo,
-                'ValorFacturado': valor_facturado
-            }
-        )
-    except Exception as e:
-        print(f"Error guardando diciembre: {e}")
-
-def guardar_pendiente_anual(
-    anio: int,
-    cliente_id: int,
-    pendiente_horas: Decimal,
-    pendiente_valor: Decimal
-):
-    """Guarda pendientes anuales con Decimal"""
-    try:
-        trabajado = max(pendiente_horas, Decimal('0'))
-        facturado = abs(min(pendiente_horas, Decimal('0')))
-        costo = max(pendiente_valor, Decimal('0'))
-        valor_facturado = abs(min(pendiente_valor, Decimal('0')))
-
-        if trabajado == 0 and facturado == 0 and costo == 0 and valor_facturado == 0:
-            return
-
-        Ind_Totales_Diciembre.objects.update_or_create(
+def guardar_pendientes_masivo(registros, es_anual=False):
+    with transaction.atomic():
+        a_crear = []
+        a_actualizar = []
+        
+        # Obtener anio y mes basado en es_anual
+        anio = registros[0]['anio'] if es_anual else registros[0]['anio'] - 1
+        mes = 12
+        
+        # Obtener lista de IDs de clientes
+        cliente_ids = [r['cliente_id'] for r in registros]
+        
+        # Obtener registros existentes
+        existentes_queryset = Ind_Totales_Diciembre.objects.filter(
+            ClienteId_id__in=cliente_ids,
             Anio=anio,
-            Mes=12,
-            ClienteId_id=cliente_id,
-            defaults={
-                'Trabajado': trabajado,
-                'Facturado': facturado,
-                'Costo': costo,
-                'ValorFacturado': valor_facturado
-            }
+            Mes=mes
         )
-    except Exception as e:
-        print(f"Error guardando anual: {e}")
-
+        
+        # Crear diccionario manual para manejar posibles duplicados
+        existentes = {}
+        for obj in existentes_queryset:
+            cliente_id = obj.ClienteId_id
+            if cliente_id not in existentes:
+                existentes[cliente_id] = obj
+            else:
+                print(f"Advertencia: Duplicado encontrado para ClienteId {cliente_id} en {anio}-{mes}")
+                pass
+        
+        # Procesar registros
+        for registro in registros:
+            cliente_id = registro['cliente_id']
+            defaults = {
+                'Trabajado': registro['trabajado'],
+                'Facturado': registro['facturado'],
+                'Costo': registro['costo'],
+                'ValorFacturado': registro['valor_facturado']
+            }
+            
+            if cliente_id in existentes:
+                # Actualizar registro existente
+                obj = existentes[cliente_id]
+                for key, value in defaults.items():
+                    setattr(obj, key, value)
+                a_actualizar.append(obj)
+            else:
+                # Crear nuevo registro
+                a_crear.append(Ind_Totales_Diciembre(
+                    Anio=anio,
+                    Mes=mes,
+                    ClienteId_id=cliente_id,
+                    **defaults
+                ))
+        
+        # Ejecutar operaciones bulk
+        Ind_Totales_Diciembre.objects.bulk_update(a_actualizar, ['Trabajado', 'Facturado', 'Costo', 'ValorFacturado'])
+        Ind_Totales_Diciembre.objects.bulk_create(a_crear)
+        
 # 6. Función para obtener conceptos
 def obtener_conceptos(anio: str, mes: str) -> dict:
     """Obtiene horas por concepto para un mes específico"""
@@ -356,10 +371,15 @@ def calcular_diferencias_margen(resultados: dict):
         try:
             datos['Dif_Fact_Horas'] = datos['Trabajado'] - datos['Facturado_horas'] - datos['Pendiente_horas']
             datos['Dif_Fact_Valor'] = (datos['Facturado_valor'] + datos['Pendiente_valor']) - datos['Costo']
-            datos['Margen_Bruto'] = ((datos['Facturado_valor'] + datos['Pendiente_valor'] - datos['Costo']) / (datos['Facturado_valor'] + datos['Pendiente_valor'])) * 100 if (datos['Facturado_valor'] + datos['Pendiente_valor']) != 0 else 0
+            # Usar la función calcular_margen_bruto para consistencia
+            datos['Margen_Bruto'] = calcular_margen_bruto(
+                datos['Facturado_valor'],
+                datos['Pendiente_valor'],
+                datos['Costo']
+            )
         except KeyError as e:
             print(f"Error calculando margen para {cliente_nombre}: {str(e)}")
-            datos['Margen_Bruto'] = 0
+            datos['Margen_Bruto'] = Decimal('0.00')
 
 def calcular_margen_bruto(facturado_total: Decimal, pendiente_total: Decimal, costo_total: Decimal) -> Decimal:
     """Calcula el porcentaje de margen bruto"""
@@ -371,41 +391,42 @@ def calcular_margen_bruto(facturado_total: Decimal, pendiente_total: Decimal, co
 def calcular_trabajado_por_linea(mes: str, linea_id: int, tiempos_data: list) -> Decimal:
     """Calcula horas trabajadas para una línea usando datos precargados"""
     return sum(
-        t.Horas for t in tiempos_data
-        if str(t.Mes) == mes and t.LineaId_id == linea_id
+        t['Horas'] for t in tiempos_data
+        if str(t['Mes']) == mes and t['LineaId'] == linea_id
     )
 
 def calcular_costo_por_linea(anio: str, mes: str, linea: Linea, horas_habiles: dict, clientes: list, datos_precargados: dict) -> Decimal:
     """Calcula costo total para una línea y mes específico sumando todos los clientes"""
     total = Decimal('0.00')
+    hh_mes = horas_habiles.get(mes, {})  # Obtener datos del mes específico
     for cliente in clientes:
         total += calcular_costo(
-            cliente.ClienteId,  # <-- Usar ID del cliente
+            cliente.ClienteId,
             mes,
-            [linea.LineaId],  # <-- Pasar lista de IDs de línea, no objetos
+            [linea.LineaId],
             datos_precargados['tiempos_data'],
-            horas_habiles,
-            datos_precargados['nominas_dict'], 
+            hh_mes,  # Pasar solo los datos del mes
+            datos_precargados['nominas_dict'],
             datos_precargados['tarifas_consultores_dict']
         )
     return total
 
-def calcular_facturado_por_linea(anio: str, mes: str, linea: Linea, horas_habiles: dict, clientes: list) -> dict:
+def calcular_facturado_por_linea(anio: str, mes: str, linea: Linea, clientes: list, facturacion_data: dict) -> dict:
     """Calcula facturación total para una línea y mes específico sumando todos los clientes"""
     total_horas = Decimal('0.00')
     total_valor = Decimal('0.00')
     for cliente in clientes:
-        facturado = calcular_facturado(anio, mes, cliente, [linea.LineaId], horas_habiles)
+        # Calcular facturación usando facturacion_data
+        facturado = calcular_facturado(anio, mes, cliente, [linea.LineaId], facturacion_data)
         total_horas += facturado['horas']
         total_valor += facturado['valor']
     return {'horas': total_horas, 'valor': total_valor}
 
-def calcular_pendiente_por_linea(anio: str, mes: str, linea: Linea, horas_habiles: dict, clientes: list, datos_precargados: dict) -> dict:
+def calcular_pendiente_por_linea(anio: str, mes: str, linea: Linea, horas_habiles: dict, clientes: list, datos_precargados: dict, valores_diciembre: dict) -> dict:
     """Calcula pendientes de facturación para una línea y mes específico sumando todos los clientes"""
     total_horas = Decimal('0.00')
     total_valor = Decimal('0.00')
     for cliente in clientes:
-
         trabajado_cliente = calcular_trabajado(
             cliente.ClienteId, 
             anio,
@@ -413,12 +434,21 @@ def calcular_pendiente_por_linea(anio: str, mes: str, linea: Linea, horas_habile
             [linea.LineaId], 
             datos_precargados['tiempos_data']
         )
-        facturado_cliente = calcular_facturado(anio, mes, cliente, [linea.LineaId], datos_precargados['facturacion_data'])['horas']
+        facturado_cliente = calcular_facturado(
+            anio, mes, cliente, [linea.LineaId], 
+            datos_precargados['facturacion_data']
+        )['horas']
+        
+        # Obtener datos de diciembre si es enero
+        dic_data = valores_diciembre.get(cliente.ClienteId, {}) if mes == '1' else None
+        
         pendiente_cliente = calcular_pendiente(
             anio, mes, cliente, [linea.LineaId], 
             trabajado_cliente, facturado_cliente, 
-            horas_habiles, datos_precargados['tarifas_por_cliente'],
-            datos_precargados['tiempos_data']
+            horas_habiles,
+            datos_precargados['tarifas_por_cliente'],
+            datos_precargados['tiempos_data'],
+            diciembre_data=dic_data
         )
         total_horas += pendiente_cliente['horas']
         total_valor += pendiente_cliente['valor']
@@ -432,9 +462,76 @@ def indicadores_totales(request):
         'lineas': {},
         'conceptos': Concepto.objects.all()
     }
-    valores_diciembre = {}  # Para almacenar los valores de diciembre del año anterior
-    anio = None  # Inicializar la variable anio
+    valores_diciembre = {}
+    anio = None
+    # Inicializar variables con valores por defecto
+    clientes = Clientes.objects.all()
+    lineas_seleccionadas = Linea.objects.all()
     
+    # Manejo de solicitud AJAX para recálculo
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            data = json.loads(request.body)
+            
+            # Validar que tengamos los datos necesarios
+            if 'filters' not in data or 'diciembre' not in data or 'action' not in data:
+                return JsonResponse({'error': 'Datos incompletos en la solicitud'}, status=400)
+            
+            # Procesar filtros
+            filters = data['filters']
+            form_ajax = Ind_Totales_FilterForm(filters)
+            
+            if not form_ajax.is_valid():
+                return JsonResponse({
+                    'error': 'Parámetros inválidos',
+                    'details': form_ajax.errors
+                }, status=400)
+
+            anio = form_ajax.cleaned_data['Anio']
+            meses = [str(m) for m in sorted(form_ajax.cleaned_data['Mes'])] if form_ajax.cleaned_data['Mes'] else [str(m) for m in range(1, 13)]
+            lineas_seleccionadas = form_ajax.cleaned_data['LineaId'] or Linea.objects.all()
+            clientes = form_ajax.cleaned_data['ClienteId'] or Clientes.objects.all()
+            
+            horas_habiles = obtener_horas_habiles(anio)
+            datos_precargados = precargar_datos(anio, meses, clientes, lineas_seleccionadas, horas_habiles)
+
+            # Procesar datos de diciembre
+            valores_diciembre = {}
+            for cliente_id, valores in data['diciembre'].items():
+                try:
+                    valores_diciembre[int(cliente_id)] = {
+                        'trabajado': Decimal(str(valores.get('trabajado', 0))),
+                        'facturado': Decimal(str(valores.get('facturado', 0))),
+                        'costo': Decimal(str(valores.get('costo', 0))),
+                        'valor_facturado': Decimal(str(valores.get('valor_facturado', 0)))
+                    }
+                except (ValueError, InvalidOperation) as e:
+                    print(f"Error procesando valores para cliente {cliente_id}: {e}")
+                    continue
+
+            # Recalcular
+            resultados = calcular_resultados(
+                anio, meses, lineas_seleccionadas, clientes, 
+                [l.LineaId for l in lineas_seleccionadas],
+                [c.ClienteId for c in clientes],
+                horas_habiles, 
+                datos_precargados, 
+                valores_diciembre
+            )
+            
+            return JsonResponse({
+                'general': resultados['general'],
+                'totales': resultados['totales'],
+                'lineas': resultados['lineas']
+            })
+            
+        except Exception as e:
+            print('Error en recálculo AJAX:', str(e))
+            return JsonResponse({
+                'error': 'Error interno del servidor',
+                'details': str(e)
+            }, status=500)
+
     if form.is_valid():
         anio = form.cleaned_data['Anio']
         meses = [str(m) for m in sorted(form.cleaned_data['Mes'])] if form.cleaned_data['Mes'] else [str(m) for m in range(1, 13)]
@@ -447,204 +544,261 @@ def indicadores_totales(request):
         datos_precargados = precargar_datos(anio, meses, clientes, lineas_seleccionadas, horas_habiles)
         tiempos_data = datos_precargados['tiempos_data']
 
-        # Calcular valores de diciembre del año anterior
-        anio_anterior = str(int(anio) - 1)
+        # Cargar valores iniciales de diciembre
         for cliente in clientes:
             valores_diciembre[cliente.ClienteId] = calcular_pendiente_diciembre(anio, cliente)
         
-        # Procesamiento general
-        for mes in meses:
-            if mes not in horas_habiles:
-                continue
-                
-            hh = horas_habiles[mes]
-            resultados['general'][mes] = {
-                'Dias': hh['dias'],
-                'Horas': hh['horas_mes'],
-                'Clientes': {},
-                'Conceptos_Horas': obtener_conceptos(anio, mes),
-                'totales_mes': {
-                    'costo_no_op': Decimal('0.00'),
-                    'costo_vacaciones': Decimal('0.00'),
-                    'costo_incapacidades': Decimal('0.00'),
-                    'total_horas': sum(obtener_conceptos(anio, mes).values())
-                }
-            }
-            
-            for cliente in clientes:
-                trabajado = calcular_trabajado(cliente.ClienteId,anio, mes, lineas_ids, tiempos_data)
-                costo = calcular_costo(cliente.ClienteId, mes, lineas_ids, tiempos_data, hh, datos_precargados['nominas_dict'], datos_precargados['tarifas_consultores_dict'])
-                fact_key = (cliente.ClienteId, anio, mes, lineas_ids[0])  # Ajustar según estructura real
-                facturado = datos_precargados['facturacion_data'].get(fact_key, {'horas': Decimal('0.00'), 'valor': Decimal('0.00')})
-                
-                if mes == '1':
-                    pendiente = calcular_pendiente(
-                        anio, mes, cliente, lineas_ids, 
-                        trabajado, facturado['horas'], 
-                        horas_habiles, 
-                        datos_precargados['tarifas_por_cliente'],
-                        tiempos_data 
-                    )
-                else:
-                    mes_anterior = str(int(mes) - 1)
-                    pendiente_anterior = (
-                        resultados['general'][mes_anterior]['Clientes'][cliente.Nombre_Cliente]['Pendiente']['horas']
-                        if mes_anterior in resultados['general'] and cliente.Nombre_Cliente in resultados['general'][mes_anterior]['Clientes']
-                        else Decimal('0.00')
-                    )
-                    pendiente = calcular_pendiente(
-                        anio, mes, cliente, lineas_ids, 
-                        trabajado, facturado['horas'], 
-                        horas_habiles, 
-                        datos_precargados['tarifas_por_cliente'],
-                        tiempos_data, 
-                        pendiente_anterior
-                    )
-                
-                # Actualizar resultados
-                resultados['general'][mes]['Clientes'][cliente.Nombre_Cliente] = {
-                    'Trabajado': trabajado,
-                    'Costo': costo,
-                    'Facturado': facturado,
-                    'Pendiente': pendiente,
-                    'Trabajado_Anterior': pendiente['trabajado_anterior']
-                }
+        resultados = calcular_resultados(
+            anio, meses, lineas_seleccionadas, clientes, 
+            lineas_ids, clientes_ids, horas_habiles, 
+            datos_precargados, valores_diciembre
+        )
 
-                # Acumular totales
-                for campo in ['Trabajado', 'Costo']:
-                    resultados['totales'][cliente.Nombre_Cliente][campo] += resultados['general'][mes]['Clientes'][cliente.Nombre_Cliente][campo]
-                for tipo in ['horas', 'valor']:
-                    resultados['totales'][cliente.Nombre_Cliente][f'Facturado_{tipo}'] += facturado[tipo]
-                    resultados['totales'][cliente.Nombre_Cliente][f'Pendiente_{tipo}'] = pendiente[tipo]
-        
-        # Procesamiento por línea
-        for linea in lineas_seleccionadas:
-            line_data = {
-                'nombre': linea.Linea,
-                'general': {},
-                'totales': {
-                    'Trabajado': Decimal('0.00'),
-                    'Costo': Decimal('0.00'),
-                    'Facturado_horas': Decimal('0.00'),
-                    'Facturado_valor': Decimal('0.00'),
-                    'Pendiente_horas': Decimal('0.00'),
-                    'Pendiente_valor': Decimal('0.00'),
-                    'TotalFacturado_horas': Decimal('0.00'),
-                    'TotalFacturado_valor': Decimal('0.00'),
-                    'Dif_Horas': Decimal('0.00'),
-                    'Dif_Valor': Decimal('0.00'),
-                    'Margen': Decimal('0.00'),
-                }
-            }
-
-            for mes in meses:
-                if mes not in horas_habiles:
-                    continue
-
-                hh = horas_habiles[mes]
-
-                trabajado = calcular_trabajado_por_linea(mes, linea.LineaId, datos_precargados['tiempos_data'])
-                costo = calcular_costo_por_linea(anio, mes, linea, horas_habiles, clientes, datos_precargados)
-                facturado = calcular_facturado_por_linea(anio, mes, linea, horas_habiles, clientes)
-                pendiente = calcular_pendiente_por_linea(anio, mes, linea, horas_habiles, clientes, datos_precargados)
-
-                total_facturado_horas = facturado['horas'] + pendiente['horas']
-                total_facturado_valor = facturado['valor'] + pendiente['valor']
-                dif_horas = trabajado - total_facturado_horas
-                dif_valor = (facturado['valor'] + pendiente['valor']) - costo
-                margen = calcular_margen_bruto(facturado['valor'], pendiente['valor'], costo)
-
-                line_mes_data = {
-                    'Dias': hh['dias'],
-                    'Horas': hh['horas_mes'],
-                    'Trabajado': trabajado,
-                    'Costo': costo,
-                    'Facturado': facturado,
-                    'Pendiente': pendiente,
-                    'TotalFacturado': {
-                        'horas': total_facturado_horas,
-                        'valor': total_facturado_valor
-                    },
-                    'Dif_Horas': dif_horas,
-                    'Dif_Valor': dif_valor,
-                    'Margen': margen
-                }
-
-                # Acumular totales de la línea
-                line_data['totales']['Trabajado'] += trabajado
-                line_data['totales']['Costo'] += costo
-                line_data['totales']['Facturado_horas'] += facturado['horas']
-                line_data['totales']['Facturado_valor'] += facturado['valor']
-                line_data['totales']['Pendiente_horas'] = pendiente['horas']
-                line_data['totales']['Pendiente_valor'] = pendiente['valor']
-                line_data['totales']['TotalFacturado_horas'] += total_facturado_horas
-                line_data['totales']['TotalFacturado_valor'] += total_facturado_valor
-                line_data['totales']['Dif_Horas'] += dif_horas
-                line_data['totales']['Dif_Valor'] += dif_valor
-
-                line_data['general'][mes] = line_mes_data
-
-            # Calcular margen total para la línea
-            total_facturado_valor = line_data['totales']['Facturado_valor'] + line_data['totales']['Pendiente_valor']
-            total_costo = line_data['totales']['Costo']
-            margen_total = calcular_margen_bruto(total_facturado_valor, line_data['totales']['Pendiente_valor'], total_costo)
-            line_data['totales']['Margen'] = margen_total
-
-            resultados['lineas'][linea.LineaId] = line_data
-
-        # Cálculos finales generales
-        num_meses = len(resultados['general']) or 1
-        calcular_totales_generales(resultados, num_meses)
-        calcular_diferencias_margen(resultados)
-
-    if request.method == 'POST':
+    # Manejo de POST normal (guardado)
+    if request.method == 'POST' and not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = Ind_Totales_FilterForm(request.POST)
         anio_actual = int(anio)
         
         # Guardar datos de diciembre del año anterior (inputs manuales)
+        registros_diciembre = []
+        registros_anuales = []
         for cliente in clientes:
             cliente_id = cliente.ClienteId
+            datos = {
+                'cliente_id': cliente_id,
+                'anio': anio_actual,
+                'trabajado': Decimal(request.POST.get(f'diciembre_trabajado_{cliente_id}', 0) or Decimal(0)),
+                'facturado' : Decimal(request.POST.get(f'diciembre_facturado_{cliente_id}', 0) or Decimal(0)),
+                'costo' : Decimal(request.POST.get(f'diciembre_costo_{cliente_id}', 0) or Decimal(0) ),
+                'valor_facturado' : Decimal(request.POST.get(f'diciembre_valor_facturado_{cliente_id}', 0) or Decimal(0) )
+            }
+            registros_diciembre.append(datos)
             
-            trabajado = Decimal(request.POST.get(f'diciembre_trabajado_{cliente_id}', 0) or Decimal(0))
-            facturado = Decimal(request.POST.get(f'diciembre_facturado_{cliente_id}', 0) or Decimal(0))
-            costo = Decimal(request.POST.get(f'diciembre_costo_{cliente_id}', 0) or Decimal(0))
-            valor_facturado = Decimal(request.POST.get(f'diciembre_valor_facturado_{cliente_id}', 0) or Decimal(0))
-
-            # Guardar para diciembre del año anterior
-            guardar_pendiente_diciembre(
-                anio=str(anio_actual),
-                cliente_id=cliente_id,
-                trabajado=trabajado,  # Mantener como Decimal
-                facturado=facturado,
-                costo=costo,
-                valor_facturado=valor_facturado
-            )
-        
-        # Guardar pendientes finales del año actual
-        for cliente in clientes:
+            # Guardar pendientes finales del año actual
             if meses:
                 ultimo_mes = meses[-1]
-                # Verificar que el último mes existe en los resultados
                 if ultimo_mes in resultados['general']:
                     ultimo_pendiente = resultados['general'][ultimo_mes]['Clientes'][cliente.Nombre_Cliente]['Pendiente']
                 else:
                     ultimo_pendiente = {'horas': Decimal('0'), 'valor': Decimal('0')}
+                
+                try:
+                    trabajado = max(ultimo_pendiente['horas'], Decimal('0'))
+                    facturado = abs(min(ultimo_pendiente['horas'], Decimal('0')))
+                    costo = max(ultimo_pendiente['valor'], Decimal('0'))
+                    valor_facturado = abs(min(ultimo_pendiente['valor'], Decimal('0')))
+
+                    if trabajado == 0 and facturado == 0 and costo == 0 and valor_facturado == 0:
+                        return
             
-            guardar_pendiente_anual(
-                anio=anio_actual,
-                cliente_id=cliente.ClienteId,
-                pendiente_horas=ultimo_pendiente['horas'],
-                pendiente_valor=ultimo_pendiente['valor']
+                    registros_anuales.append({
+                        'cliente_id': cliente_id,
+                        'anio': anio_actual,
+                        'trabajado': trabajado,
+                        'facturado': facturado,
+                        'costo': costo,
+                        'valor_facturado': valor_facturado
+                    })
+                except Exception as e:
+                    print(f"Error guardando anual: {e}")
+            # Guardado masivo
+            guardar_pendientes_masivo(registros_diciembre)
+            guardar_pendientes_masivo(registros_anuales, es_anual=True)
+        
+        # Recargar valores de diciembre DESPUÉS de guardar
+        for cliente in clientes:
+            valores_diciembre[cliente.ClienteId] = calcular_pendiente_diciembre(anio, cliente)
+        
+        # Recalcular resultados con nuevos valores
+        if form.is_valid():
+            resultados = calcular_resultados(
+                anio, meses, lineas_seleccionadas, clientes, 
+                lineas_ids, clientes_ids, horas_habiles, 
+                datos_precargados, valores_diciembre
             )
-            
+        
+        # Redireccionar para evitar reenvío de formulario
+        return redirect(request.get_full_path())
+
+    # Preparar contexto
     resultados['general'] = dict(resultados['general'])
     context = {
         'form': form,
         'resultados': resultados,
-        'valores_diciembre': valores_diciembre,  # Pasar los valores de diciembre al contexto
+        'valores_diciembre': valores_diciembre,
         'anio': anio,
         'MESES': MESES,
-        'Clientes': clientes if form.is_valid() else [],
-        'Lineas': lineas_seleccionadas if form.is_valid() else [],
-        'Conceptos': resultados['conceptos']
+        'Clientes': clientes,
+        'Lineas': lineas_seleccionadas,
+        'Conceptos': resultados['conceptos'],
+        'Clientes_json': json.dumps([
+            {'ClienteId': c.ClienteId, 'Nombre_Cliente': c.Nombre_Cliente} 
+            for c in clientes
+        ])
     }
     return render(request, 'Indicadores/indicadores_totales.html', context)
+
+def calcular_resultados(anio, meses, lineas_seleccionadas, clientes, lineas_ids, clientes_ids, horas_habiles, datos_precargados, valores_diciembre):
+    """Función encapsulada para recalcular resultados con los mismos parámetros"""
+    resultados = {
+        'general': defaultdict(dict),
+        'totales': defaultdict(lambda: defaultdict(Decimal)),
+        'lineas': {},
+        'conceptos': Concepto.objects.all()
+    }
+    
+    tiempos_data = datos_precargados['tiempos_data']
+    
+    for mes in meses:
+        if mes not in horas_habiles:
+            continue
+            
+        hh = horas_habiles[mes]
+        resultados['general'][mes] = {
+            'Dias': hh['dias'],
+            'Horas': hh['horas_mes'],
+            'Clientes': {},
+            'Conceptos_Horas': obtener_conceptos(anio, mes),
+            'totales_mes': {
+                'costo_no_op': Decimal('0.00'),
+                'costo_vacaciones': Decimal('0.00'),
+                'costo_incapacidades': Decimal('0.00'),
+                'total_horas': sum(obtener_conceptos(anio, mes).values())
+            }
+        }
+        
+        for cliente in clientes:
+            trabajado = calcular_trabajado(cliente.ClienteId, anio, mes, lineas_ids, tiempos_data)
+            costo = calcular_costo(cliente.ClienteId, mes, lineas_ids, tiempos_data, hh, datos_precargados['nominas_dict'], datos_precargados['tarifas_consultores_dict'])
+            fact_key = (cliente.ClienteId, anio, mes, lineas_ids[0])
+            facturado = datos_precargados['facturacion_data'].get(fact_key, {'horas': Decimal('0.00'), 'valor': Decimal('0.00')})
+            
+            if mes == '1':
+                # Obtener datos de diciembre del contexto (valores del usuario)
+                dic_data = valores_diciembre.get(cliente.ClienteId, {
+                    'trabajado': Decimal('0'),
+                    'facturado': Decimal('0'),
+                    'costo': Decimal('0'),
+                    'valor_facturado': Decimal('0')
+                })
+                
+                # Llamar a calcular_pendiente con diciembre_data
+                pendiente = calcular_pendiente(
+                    anio, mes, cliente, lineas_ids, 
+                    trabajado, facturado['horas'], 
+                    horas_habiles, 
+                    datos_precargados['tarifas_por_cliente'],
+                    tiempos_data,
+                    None,  # Sin pendiente anterior
+                    diciembre_data=dic_data  # Pasar los datos de diciembre
+                )
+            else:
+                # Código existente para otros meses
+                mes_anterior = str(int(mes) - 1)
+                pendiente_anterior = (
+                    resultados['general'][mes_anterior]['Clientes'][cliente.Nombre_Cliente]['Pendiente']['horas']
+                    if mes_anterior in resultados['general'] and cliente.Nombre_Cliente in resultados['general'][mes_anterior]['Clientes']
+                    else Decimal('0.00')
+                )
+                pendiente = calcular_pendiente(
+                    anio, mes, cliente, lineas_ids, 
+                    trabajado, facturado['horas'], 
+                    horas_habiles, 
+                    datos_precargados['tarifas_por_cliente'],
+                    tiempos_data, 
+                    pendiente_anterior
+                )
+            
+            resultados['general'][mes]['Clientes'][cliente.Nombre_Cliente] = {
+                'Trabajado': trabajado,
+                'Costo': costo,
+                'Facturado': facturado,
+                'Pendiente': pendiente,
+                'Trabajado_Anterior': pendiente['trabajado_anterior']
+            }
+
+            # Acumular totales
+            for campo in ['Trabajado', 'Costo']:
+                resultados['totales'][cliente.Nombre_Cliente][campo] += resultados['general'][mes]['Clientes'][cliente.Nombre_Cliente][campo]
+            for tipo in ['horas', 'valor']:
+                resultados['totales'][cliente.Nombre_Cliente][f'Facturado_{tipo}'] += facturado[tipo]
+                resultados['totales'][cliente.Nombre_Cliente][f'Pendiente_{tipo}'] = pendiente[tipo]
+    
+    # Procesamiento por línea (igual que antes)
+    for linea in lineas_seleccionadas:
+        line_data = {
+            'nombre': linea.Linea,
+            'general': {},
+            'totales': {
+                'Trabajado': Decimal('0.00'),
+                'Costo': Decimal('0.00'),
+                'Facturado_horas': Decimal('0.00'),
+                'Facturado_valor': Decimal('0.00'),
+                'Pendiente_horas': Decimal('0.00'), 
+                'Pendiente_valor': Decimal('0.00'),
+                'TotalFacturado_horas': Decimal('0.00'),
+                'TotalFacturado_valor': Decimal('0.00'),
+                'Dif_Horas': Decimal('0.00'),
+                'Dif_Valor': Decimal('0.00'),
+                'Margen': Decimal('0.00'),
+            }
+        }
+
+        for mes in meses:
+            if mes not in horas_habiles:
+                continue
+
+            hh = horas_habiles[mes]
+
+            trabajado = calcular_trabajado_por_linea(mes, linea.LineaId, datos_precargados['tiempos_data'])
+            costo = calcular_costo_por_linea(anio, mes, linea, horas_habiles, clientes, datos_precargados)
+            facturado = calcular_facturado_por_linea(anio, mes, linea, clientes, datos_precargados['facturacion_data'])
+            pendiente = calcular_pendiente_por_linea(anio, mes, linea, horas_habiles, clientes, datos_precargados, valores_diciembre)
+
+            total_facturado_horas = facturado['horas'] + pendiente['horas']
+            total_facturado_valor = facturado['valor'] + pendiente['valor']
+            dif_horas = trabajado - total_facturado_horas
+            dif_valor = (facturado['valor'] + pendiente['valor']) - costo
+            margen = calcular_margen_bruto(facturado['valor'], pendiente['valor'], costo)
+
+            line_mes_data = {
+                'Dias': hh['dias'],
+                'Horas': hh['horas_mes'],
+                'Trabajado': trabajado,
+                'Costo': costo,
+                'Facturado': facturado,
+                'Pendiente': pendiente,
+                'TotalFacturado': {
+                    'horas': total_facturado_horas,
+                    'valor': total_facturado_valor
+                },
+                'Dif_Horas': dif_horas,
+                'Dif_Valor': dif_valor,
+                'Margen': margen
+            }
+
+            line_data['general'][mes] = line_mes_data
+            line_data['totales']['Trabajado'] += trabajado
+            line_data['totales']['Costo'] += costo
+            line_data['totales']['Facturado_horas'] += facturado['horas']
+            line_data['totales']['Facturado_valor'] += facturado['valor']
+            line_data['totales']['Pendiente_horas'] = pendiente['horas']
+            line_data['totales']['Pendiente_valor'] = pendiente['valor']
+            line_data['totales']['TotalFacturado_horas'] += total_facturado_horas
+            line_data['totales']['TotalFacturado_valor'] += total_facturado_valor
+            line_data['totales']['Dif_Horas'] += dif_horas
+            line_data['totales']['Dif_Valor'] += dif_valor
+
+        total_facturado_valor = line_data['totales']['Facturado_valor'] + line_data['totales']['Pendiente_valor']
+        total_costo = line_data['totales']['Costo']
+        margen_total = calcular_margen_bruto(total_facturado_valor, line_data['totales']['Pendiente_valor'], total_costo)
+        line_data['totales']['Margen'] = margen_total
+
+        resultados['lineas'][linea.LineaId] = line_data
+
+    # Cálculos finales generales
+    num_meses = len(resultados['general']) or 1
+    calcular_totales_generales(resultados, num_meses)
+    calcular_diferencias_margen(resultados)
+
+    return resultados
