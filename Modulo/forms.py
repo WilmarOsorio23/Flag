@@ -1444,6 +1444,14 @@ class FacturacionFilterForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
+    Mes_Cobro = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label="Mes a Cobrar",
+        widget=forms.Select(attrs={'class': 'form-control'})
+        )
+
+
     ClienteId = forms.ModelChoiceField(
         queryset=Clientes.objects.all(), 
         required=False, 
@@ -1464,12 +1472,20 @@ class FacturacionFilterForm(forms.Form):
         label="Modulo",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+    Consultor = forms.ModelChoiceField(
+        queryset=Consultores.objects.all(),
+        required=False, 
+        label='Consultor',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.populate_anio()
         self.populate_mes()
+        self.populate_mes_cobro()
         self.populate_cliente()
+        self.populate_consultor()
         self.populate_linea()
 
     def populate_anio(self):
@@ -1482,10 +1498,22 @@ class FacturacionFilterForm(forms.Form):
             ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
         ]
         self.fields['Mes'].choices = [('', 'Seleccione el mes')] + meses
+    
+    def populate_mes_cobro(self):
+        meses2 = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes_Cobro'].choices = [('', 'Seleccione el mes')] + meses2
 
     def populate_cliente(self):
         clientes = Clientes.objects.values_list('ClienteId', 'Nombre_Cliente').distinct()
         self.fields['ClienteId'].choices = [('', 'Seleccione el cliente')] + list(clientes)
+
+    def populate_consultor(self):
+        consultores = Consultores.objects.values_list('Documento', 'Nombre').distinct()
+        self.fields['Consultor'].choices = [('', 'Seleccione el Consultor')] + list(consultores)
 
     def populate_linea(self):
         linea = Linea.objects.values_list('LineaId', 'Linea').distinct()

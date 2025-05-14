@@ -191,6 +191,8 @@ class Tiempos_Cliente(models.Model):
     Documento = models.CharField(max_length=20)
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
     Horas = models.DecimalField(max_digits=10, decimal_places=2)
+    ModuloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='ModuloId')
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
 
     def __str__(self):
         return f"Año: {self.Anio}, Mes: {self.Mes}, Documento: {self.Documento}, Cliente: {self.ClienteId}, Horas: {self.Horas}"
@@ -538,6 +540,8 @@ class Tarifa_Consultores(models.Model):
     valorDia = models.DecimalField(max_digits=10, decimal_places=2, db_column='valorDia')
     valorMes = models.DecimalField(max_digits=10, decimal_places=2, db_column='valorMes')
     monedaId = models.ForeignKey('moneda', on_delete=models.CASCADE, db_column='monedaId')
+    iva  = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    rteFte  = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return f"id: {self.id}, DocumentoId: {self.documentoId}, Año: {self.anio}, Mes: {self.mes}, ClienteId: {self.clienteID}, ValorHora: {self.valorHora}, ValorDia: {self.valorDia}, ValorMes: {self.valorMes}, Moneda: {self.id}"
@@ -707,3 +711,38 @@ class Ind_Operat_Conceptos(models.Model):
 
     def __str__(self):
         return f"ID {self.Id} - Año {self.Anio} - Mes {self.Mes} - Linea {self.LineaId} - Concepto {self.ConceptoId}"
+    
+class Facturacion_Consultores(models.Model):
+    id = models.AutoField(primary_key=True)
+    Anio = models.IntegerField(blank=True, null=True)
+    Mes = models.IntegerField(blank=True, null=True)
+    Documento = models.ForeignKey('Consultores', on_delete=models.CASCADE, db_column='Documento')
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    Cta_Cobro = models.CharField(max_length=50, blank=True, null=True)
+    Periodo_Cobrado = models.CharField(max_length=100)
+    Aprobado_Por = models.CharField(max_length=100, blank=True, null=True)
+    Fecha_Cobro = models.DateField(blank=True, null=True)
+    Fecha_Pago = models.DateField(blank=True, null=True)
+    ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
+    ModuloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='ModuloId')
+    Horas = models.DecimalField(max_digits=10, decimal_places=2)
+    Valor_Unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    Valor_Cobro = models.DecimalField(max_digits=12, decimal_places=2)
+    IVA = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    Valor_Neto = models.FloatField(blank=True, null=True)
+    Retencion_Fuente = models.DecimalField(max_digits=10, decimal_places=2)
+    Valor_Pagado = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    Factura = models.CharField(max_length=100, blank=True, null=True)
+    Valor_Fcta_Cliente = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    Fecha = models.DateField(blank=True, null=True)
+    Deuda_Tecnica = models.TextField(blank=True, null=True)
+    Factura_Pendiente = models.TextField(blank=True, null=True)
+    Dif = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    Diferencia_Bruta = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    Observaciones = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'Facturacion_Consultores'
+
+    def __str__(self):
+        return f"Facturación {self.id} - Año {self.Anio} - Mes {self.Mes} - Consultor {self.Documento} - Línea {self.Linea}"

@@ -43,6 +43,8 @@ from Modulo.Views import referencia
 from Modulo.Views import centrosCostos
 from Modulo.Views import informe_facturacion
 from Modulo.Views import informe_historial_cargos
+from Modulo.Views import facturacion_consultores
+
 
 
 urlpatterns = [
@@ -341,6 +343,15 @@ urlpatterns = [
     path('clientes_factura/obtener_factura/', clientes_factura.obtener_tarifa, name='obtener_tarifa'),
     path('clientes_factura/get_lineas_modulos/', clientes_factura.get_lineas_modulos, name='get_lineas_modulos'),
     path('clientes_factura/eliminar/', clientes_factura.eliminar_facturas, name='eliminar_facturas'),
+
+    # Rutas para la tabla Facturacion consultores
+    path('facturacion_consultores/', facturacion_consultores.facturacion_consultores, name='facturacion_consultores_index'),
+    path('facturacion_consultores/eliminar/', facturacion_consultores.eliminar_facturacion_consultores, name='eliminar_facturacion_consultores'),
+    path('facturacion_consultores/guardar/', facturacion_consultores.guardar_facturacion_consultores, name='guardar_facturacion_consultores'),
+
+
+
+
 
     # Rutas para la tabla Indicadores de Operatividad
     path('indicadores_operatividad/', indicadores_operatividad.indicadores_operatividad_index, name='indicadores_operatividad_index'),
