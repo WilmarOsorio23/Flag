@@ -192,6 +192,7 @@ class Tiempos_Cliente(models.Model):
     Documento = models.CharField(max_length=20)
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
     LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    ModuloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='ModuloId')
     Horas = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
@@ -203,7 +204,7 @@ class Tiempos_Cliente(models.Model):
             models.Index(fields=['ClienteId', 'Anio', 'Mes', 'LineaId']),
         ]
         constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento', 'ClienteId', 'LineaId'], name='unique_tiempos_cliente')
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento', 'ClienteId', 'LineaId', 'ModuloId'], name='unique_tiempos_cliente')
         ]
 
 class Consultores(models.Model):
@@ -540,6 +541,7 @@ class Horas_Habiles(models.Model):
 class Tarifa_Consultores(models.Model):
     id = models.AutoField(primary_key=True)
     documentoId = models.ForeignKey('Consultores', on_delete=models.CASCADE, db_column='documentoId')
+    moduloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='moduloId')
     anio = models.CharField(max_length=4, db_column='anio')
     mes = models.CharField(max_length=2, db_column='mes')
     clienteID = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='clienteID')
@@ -555,6 +557,12 @@ class Tarifa_Consultores(models.Model):
 
     class Meta:
         db_table = 'Tarifa_Consultores'
+        constraints = [
+            models.UniqueConstraint( 
+                fields=['documentoId', 'anio', 'mes', 'clienteID', 'moduloId'], 
+                name='unique_tarifa_consultores'
+            )
+        ]
 
 class Moneda(models.Model):
     id = models.AutoField(primary_key=True) 

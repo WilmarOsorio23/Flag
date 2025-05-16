@@ -60,6 +60,7 @@
                             <th scope="col">Año</th>
                             <th scope="col">Mes</th>
                             <th scope="col">Cliente ID</th>
+                            <th scope="col">Módulo</th>
                             <th scope="col">Valor Hora</th>
                             <th scope="col">Valor Día</th>
                             <th scope="col">Valor Mes</th>
@@ -76,6 +77,16 @@
                             <td><input type="text" name="anio" class="form-control-plaintext" value="{{ tarifa.anio }}" readonly></td>
                             <td><input type="text" name="mes" class="form-control-plaintext" value="{{ tarifa.mes }}" readonly></td>
                             <td><input type="text" name="clienteID" class="form-control-plaintext" value="{{ tarifa.clienteID.Nombre_Cliente }}" readonly></td>
+                            <td>
+                                <select name="moduloId" class="form-control-plaintext" disabled>
+                                    {% for modulo in form.fields.moduloId.queryset %}
+                                        <option value="{{ modulo.ModuloId }}" 
+                                            {% if tarifa.moduloId.ModuloId == modulo.ModuloId %}selected{% endif %}>
+                                            {{ modulo.Modulo }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
                             <td><input type="text" name="valorHora" class="form-control-plaintext" value="{{ tarifa.valorHora }}" readonly></td>
                             <td><input type="text" name="valorDia" class="form-control-plaintext" value="{{ tarifa.valorDia }}" readonly></td>
                             <td><input type="text" name="valorMes" class="form-control-plaintext" value="{{ tarifa.valorMes }}" readonly></td>
@@ -86,7 +97,7 @@
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td><input type="text" name="iva" class="form-control-plaintext" value="{{ tarifa.iva|default_if_none:'' }}" readonly></td>
+                            <td><input type="text" name="iva" class="form-control-plaintext" placeholder="IVA" value="{{ tarifa.iva|default_if_none:'' }}" readonly></td>
                             <td><input type="text" name="rteFte" class="form-control-plaintext" value="{{ tarifa.rteFte|default_if_none:'' }}" readonly></td>
                          </tr>   
                         {% endfor %}
