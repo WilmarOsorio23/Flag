@@ -140,6 +140,46 @@
                 </div>
             </div>
 
+            <!-- Card Monedas -->
+        <div class="card shadow-sm p-3" id="cardMonedas" style="min-width: 220px; font-size: 0.85rem;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold mb-0">
+                        <span class="text-primary">{{ total_usd }}</span> /
+                        <span class="text-success">{{ total_cop }}</span> /
+                        <span class="text-warning">{{ total_mxn }}</span>
+                    </h5>
+                    <small class="text-muted">USD / COP / MXN</small>
+                </div>
+                <i class="fas fa-coins fa-2x text-primary"></i>
+            </div>
+            <div class="progress mt-3" style="height: 5px;">
+                {% if total_usd > 0 %}
+                <div class="progress-bar bg-primary" role="progressbar"
+                    style="width: {{ porcentaje_usd_display }}%;" 
+                    aria-valuenow="{{ total_usd }}" aria-valuemin="0" aria-valuemax="{{ total_contratos }}">
+                </div>
+                {% endif %}
+                
+                {% if total_cop > 0 %}
+                <div class="progress-bar bg-success" role="progressbar"
+                    style="width: {{ porcentaje_cop_display }}%;" 
+                    aria-valuenow="{{ total_cop }}" aria-valuemin="0" aria-valuemax="{{ total_contratos }}">
+                </div>
+                {% endif %}
+                
+                {% if total_mxn > 0 %}
+                <div class="progress-bar bg-warning" role="progressbar"
+                    style="width: {{ porcentaje_mxn_display }}%;" 
+                    aria-valuenow="{{ total_mxn }}" aria-valuemin="0" aria-valuemax="{{ total_contratos }}">
+                </div>
+                {% endif %}
+            </div>
+            <div class="text-end mt-1" style="font-size: 0.75rem; color: #888;">
+                {{ total_monedas }}/{{ total_contratos }}
+            </div>
+        </div>
+
             </div>
             </div>
         {% endif %}
@@ -159,6 +199,7 @@
                     </form>
                 </div>
             </div>
+        
         {% if show_data %}
         <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
             <table class="table table-bordered table-hover table-primary w-100" id="otrosSiTable">
@@ -238,4 +279,64 @@
     });
 </script>
 <script src="{% static 'JS/informes_otros_si.js' %}"></script>
+
+
+<!-- Modal Gráfico Monedas -->
+<div class="modal fade" id="graficoMonedasModal" tabindex="-1" aria-labelledby="graficoMonedasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoMonedasLabel">Distribución de Monedas</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoMonedasCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const cardMonedas = document.getElementById('cardMonedas');
+    const modal = new bootstrap.Modal(document.getElementById('graficoMonedasModal'));
+
+    cardMonedas.addEventListener('click', function () {
+        const ctx = document.getElementById('graficoMonedasCanvas').getContext('2d');
+
+        // Si ya existe un gráfico previo, destrúyelo para evitar superposición
+        if (window.monedaChart) {
+            window.monedaChart.destroy();
+        }
+
+        // Datos desde Django Context
+        const data = {
+            labels: ['USD', 'COP', 'MXN'],
+            datasets: [{
+                label: 'Cantidad de Contratos',
+                data: [{{ total_usd }}, {{ total_cop }}, {{ total_mxn }}],
+                backgroundColor: ['#0d6efd', '#198754', '#ffc107'],
+                hoverOffset: 4
+            }]
+        };
+
+        window.monedaChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.raw}` } }
+                }
+            }
+        });
+
+        modal.show();
+    });
+});
+</script>
 {% endblock %}

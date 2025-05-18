@@ -122,7 +122,7 @@ def informe_empleados(request):
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
-    # Cálculo para tarjetas 
+    #Aplicar lógica para cards
     empleados_totales = empleados.count()
     empleados_activos = empleados.filter(Activo=True).count()
     empleados_inactivos = empleados_totales - empleados_activos

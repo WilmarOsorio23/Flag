@@ -47,6 +47,50 @@
                 </div>   
             </form>
 
+            <!-- Apartado para cards -->
+            {% if busqueda_realizada %}
+            <div class="mt-4 mb-3">
+                <div class="d-flex flex-row flex-nowrap overflow-auto gap-2">
+
+                    <!-- Total de Estudios -->
+                    <div class="card shadow-sm p-3 text-primary text-start h-100" style="min-width: 220px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0">{{ total_estudios }}</h5>
+                            <i class="fas fa-graduation-cap fa-2x"></i>
+                        </div>
+                        <small class="text-muted mt-2 d-block">Total de Estudios</small>
+                    </div>
+
+                    <!-- Por Institución -->
+                    <div class="card shadow-sm p-3 text-success text-start h-100" style="min-width: 220px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <i class="fas fa-university fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 mt-2">
+                            <small class="text-muted d-block">Por Institución</small>
+                            {% for institucion, cantidad in conteo_instituciones.items %}
+                                <p class="mb-1">{{ institucion }}: <strong>{{ cantidad }}</strong></p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Por Línea -->
+                    <div class="card shadow-sm p-3 text-info text-start h-100" style="min-width: 220px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <i class="fas fa-stream fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 mt-2">
+                            <small class="text-muted d-block">Por Línea</small>
+                            {% for linea, cantidad in conteo_lineas.items %}
+                                <p class="mb-1">{{ linea }}: <strong>{{ cantidad }}</strong></p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            {% endif %}
+
              <!-- Botón de Descargar Excel -->
              <div class="row">
                 <div class="col-md-6 text-end offset-md-6">
