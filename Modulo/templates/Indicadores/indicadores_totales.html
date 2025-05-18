@@ -125,9 +125,16 @@
         <!-- Contenido de las pestañas -->
         <div class="tab-content" id="myTabContent">
             <!-- Pestaña de Indicadores -->
-            <div class="tab-pane fade show active p-3" id="totales" role="tabpanel" aria-labelledby="totales-tab">
-                    {% if resultados.general %}
-                    <!-- Tabla Principal -->
+            <div class="tab-pane fade show active p-1" id="totales" role="tabpanel" aria-labelledby="totales-tab">
+                {% if resultados.general %}
+                <!-- Tabla Principal -->
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Guardar Datos
+                        </button>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped">
                             <thead class="table-dark">
@@ -160,7 +167,59 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for mes, datos in resultados.general.items %}
+                                <!-- Fila para Diciembre del Año Anterior (solo si hay Enero en los meses seleccionados) -->
+                                {% if '1' in resultados.general.keys %}
+                                <tr class="bg-light diciembre-anterior">
+                                    <td>Diciembre {{ anio|add:"-1" }}</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    {% for cliente in Clientes %}
+                                    <td>
+                                        <input type="number" step="0.01"
+                                            name="diciembre_trabajado_{{ cliente.ClienteId }}"
+                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'trabajado' }}"
+                                            class="form-control mb-2"
+                                            placeholder="Horas Trabajadas"
+                                            data-toggle-target="diciembre_facturado_{{ cliente.ClienteId }}">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01"
+                                            name="diciembre_costo_{{ cliente.ClienteId }}"
+                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'costo' }}"
+                                            class="form-control mb-2"
+                                            placeholder="Costo"
+                                            data-toggle-target="diciembre_valor_facturado_{{ cliente.ClienteId }}">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01"
+                                            name="diciembre_facturado_{{ cliente.ClienteId }}"
+                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'facturado' }}"
+                                            class="form-control mb-2"
+                                            placeholder="Horas Facturadas"
+                                            data-toggle-target="diciembre_trabajado_{{ cliente.ClienteId }}">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01"
+                                            name="diciembre_valor_facturado_{{ cliente.ClienteId }}"
+                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'valor_facturado' }}"
+                                            class="form-control"
+                                            placeholder="Valor Facturado"
+                                            data-toggle-target="diciembre_costo_{{ cliente.ClienteId }}">
+                                    </td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    {% endfor %}
+                                    <!-- Celdas vacías para conceptos y totales -->
+                                    {% for concepto in Conceptos %}
+                                    <td>-</td>
+                                    {% endfor %}
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                                {% endif %}
+                                {% for mes, datos in resultados.general.items|slice:":12" %} 
                                 <tr>
                                     <td>{{ MESES|get_item:mes }}</td>
                                     <td>{{ datos.Dias }}</td>
@@ -168,17 +227,12 @@
                                     
                                     {% for cliente in Clientes %}
                                         {% with c=datos.Clientes|get_item:cliente.Nombre_Cliente %}
-                                        <td>
-                                            {% if mes == '1' %}
-                                            <div class="text-muted small">ant: {{ c.Pendiente.trabajado_anterior|default:0|floatformat:2 }}</div>
-                                            {% endif %}
-                                            {{ c.Trabajado|default:0|floatformat:2 }}
-                                        </td>
-                                        <td>${{ c.Costo|default:0|floatformat:2 }}</td>
-                                        <td>{{ c.Facturado.horas|default:0|floatformat:2 }}</td>
-                                        <td>${{ c.Facturado.valor|default:0|floatformat:2 }}</td>
-                                        <td>{{ c.Pendiente.horas|default:0|floatformat:2 }}</td>
-                                        <td>${{ c.Pendiente.valor|default:0|floatformat:2 }}</td>
+                                        <td data-cliente="{{ cliente.Nombre_Cliente }}">{{ c.Trabajado|default:0|floatformat:2 }}</td>
+                                        <td data-cliente="{{ cliente.Nombre_Cliente }}">${{ c.Costo|default:0|floatformat:2 }}</td>
+                                        <td data-cliente="{{ cliente.Nombre_Cliente }}">{{ c.Facturado.horas|default:0|floatformat:2 }}</td>
+                                        <td data-cliente="{{ cliente.Nombre_Cliente }}">${{ c.Facturado.valor|default:0|floatformat:2 }}</td>
+                                        <td data-cliente="{{ cliente.Nombre_Cliente }}">{{ c.Pendiente.horas|default:0|floatformat:2 }}</td>
+                                        <td data-cliente="{{ cliente.Nombre_Cliente }}">${{ c.Pendiente.valor|default:0|floatformat:2 }}</td>
                                         {% endwith %}
                                     {% endfor %}
                                     
@@ -200,12 +254,12 @@
                                     <th>{{ resultados.totales.Horas|default:0|floatformat:2 }}</th>
                                     {% for cliente in Clientes %}
                                         {% with total=resultados.totales|get_item:cliente.Nombre_Cliente %}
-                                            <th>{{ total.Trabajado|default:0|floatformat:2 }}</th>
-                                            <th>${{ total.Costo|default:0|floatformat:2 }}</th>
-                                            <th>{{ total.Facturado_horas|default:0|floatformat:2 }}</th>
-                                            <th>${{ total.Facturado_valor|default:0|floatformat:2 }}</th>
-                                            <th>{{ total.Pendiente_horas|default:0|floatformat:2 }}</th>
-                                            <th>${{ total.Pendiente_valor|default:0|floatformat:2 }}</th>
+                                        <th data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Trabajado|default:0|floatformat:2 }}</th>
+                                        <th data-cliente="{{ cliente.Nombre_Cliente }}">${{ total.Costo|default:0|floatformat:2 }}</th>
+                                        <th data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Facturado_horas|default:0|floatformat:2 }}</th>
+                                        <th data-cliente="{{ cliente.Nombre_Cliente }}">${{ total.Facturado_valor|default:0|floatformat:2 }}</th>
+                                        <th data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Pendiente_horas|default:0|floatformat:2 }}</th>
+                                        <th data-cliente="{{ cliente.Nombre_Cliente }}">${{ total.Pendiente_valor|default:0|floatformat:2 }}</th>
                                         {% endwith %}
                                     {% endfor %}
                                     {% for concepto in Conceptos %}
@@ -239,6 +293,7 @@
                         No se encontraron datos con los filtros seleccionados
                     </div>
                     {% endif %}
+                </form>
             </div>
             <!-- Pestaña de Totales por Línea -->
             <div class="tab-pane fade p-3" id="lineas" role="tabpanel" aria-labelledby="lineas-tab">
@@ -317,7 +372,8 @@
         </div>
     </div>
 </div>
-{% endblock %}
-{% block scripts %}
+<script>
+    const Clientes = JSON.parse('{{ Clientes_json|escapejs|safe }}');
+</script>
 <script src="{% static 'JS/indicadores_totales.js' %}"></script>
 {% endblock %}
