@@ -5,21 +5,29 @@ from django.forms import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import render
 from Modulo.forms import ColaboradorFilterForm
-from Modulo.models import Clientes, Concepto, Consultores, Empleado, Horas_Habiles, Ind_Operat_Clientes, Ind_Operat_Conceptos, Linea, Tiempos_Cliente, TiemposConcepto, TiemposFacturables
+from Modulo.models import Clientes, Concepto, Consultores, Empleado, Horas_Habiles, Ind_Operat_Clientes, Ind_Operat_Conceptos, Linea, Modulo, Tiempos_Cliente, TiemposConcepto, TiemposFacturables
 from django.shortcuts import render
 from collections import defaultdict
 from django.db import transaction
 
-def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, horas):
+def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, modulo_id, horas):
     try:
+        # Validar que modulo_id esté presente y sea válido
+        if not modulo_id:
+            raise ValidationError("El campo ModuloId es requerido.")
+        if not str(modulo_id).isdigit():
+            raise ValidationError("ModuloId debe ser un número entero válido.")
+        
+        modulo_id = int(modulo_id)  # Asegurar que es un entero
         # Verificar si existe el registro
         tiempo_cliente, creado = Tiempos_Cliente.objects.get_or_create(
             Anio=anio,
             Mes=mes,
             Documento=documento,
-            defaults={'Horas': horas},
             ClienteId_id=cliente_id,
-            LineaId_id=linea_id
+            LineaId_id=linea_id,
+            ModuloId_id=modulo_id,
+            defaults={'Horas': horas}
         )
         if creado:
             if horas == '0':
@@ -166,11 +174,12 @@ def registro_tiempos_guardar(request):
                     anio = row.get('Anio')
                     mes = row.get('Mes')
                     linea_id = row.get('LineaId')
+                    modulo_id = row.get('ModuloId')
 
                     if 'ClienteId' in row and 'Tiempo_Clientes' in row:
                         cliente_id = row.get('ClienteId')
                         horas = row.get('Tiempo_Clientes')
-                        guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, horas)
+                        guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, modulo_id, horas)
 
                     elif 'ConceptoId' in row and 'Tiempo_Conceptos' in row:
                         concepto_id = row.get('ConceptoId')
@@ -298,12 +307,19 @@ def obtener_colaborador_info(empleados, consultores, clientes, conceptos, tiempo
 
 
 # Función para obtener la información de un colaborador (empleado o consultor)
-def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes, tiempo_conceptos):
+def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes, tiempo_conceptos, modulo=None):
     cliente_info = {cliente.ClienteId: cliente for cliente in clientes}
     concepto_info = {concepto.ConceptoId: concepto for concepto in conceptos}
 
+    if modulo:
+        modulo_id = modulo.ModuloId
+        modulo_nombre = modulo.Modulo
+    else:
+        modulo_id = colaborador.ModuloId.ModuloId
+        modulo_nombre = colaborador.ModuloId.Modulo
+
     # Obtener horas trabajadas por cliente
-    horas_trabajadas_cliente = tiempo_clientes.filter(Documento=colaborador.Documento)
+    horas_trabajadas_cliente = tiempo_clientes.filter(Documento=colaborador.Documento, ModuloId=modulo_id)
     clientes_colaborador = {cliente.ClienteId: 0 for cliente in clientes}
 
     for tiempo_cliente in horas_trabajadas_cliente:
@@ -339,7 +355,8 @@ def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes, 
             'Linea': colaborador.LineaId.Linea,
             'LineaId': colaborador.LineaId.LineaId,     
             'Perfil': colaborador.PerfilId.Perfil,
-            'Modulo': colaborador.ModuloId.Modulo,
+            'ModuloId': modulo_id,
+            'Modulo': modulo_nombre,
             'Empresa': "Flag Soluciones" if isinstance(colaborador, Empleado) else colaborador.Empresa,
             'Clientes': {cliente_id: {'Cliente': cliente_info[cliente_id].Nombre_Cliente, 'ClienteId': cliente_id, 'tiempo_clientes': horas} for cliente_id, horas in clientes_colaborador.items()},
             'Total_Clientes': total_horas_clientes,
@@ -406,11 +423,31 @@ def registro_tiempos_index(request):
                 if info:  # Solo agregar si el colaborador tiene horas registradas o está activo
                     colaborador_info.append(info)
 
+            # Procesar consultores con módulos de Tarifa_Consultores O Tiempos_Cliente
             for consultor in consultores:
-                info = obtener_info_colaborador(consultor, clientes, conceptos, tiempo_clientes, tiempo_conceptos)
+                # Obtener módulos únicos de ambas fuentes
+                modulos_tarifa = Modulo.objects.filter(
+                    tarifa_consultores__documentoId=consultor.Documento
+                ).distinct()
+                
+                modulos_tiempos = Modulo.objects.filter(
+                    tiempos_cliente__Documento=consultor.Documento
+                ).distinct()
+                
+                # Combinar ambos querysets y eliminar duplicados
+                modulos = (modulos_tarifa | modulos_tiempos).distinct()
 
-                if info:  # Solo agregar si el consultor tiene horas registradas o está activo
-                    colaborador_info.append(info)
+                if modulos.exists():
+                    for modulo in modulos:
+                        info = obtener_info_colaborador(consultor, clientes, conceptos, tiempo_clientes, tiempo_conceptos, modulo)
+                        if info:
+                            colaborador_info.append(info)
+                else:
+                    # Usar módulo por defecto solo si no hay registros
+                    info = obtener_info_colaborador(consultor, clientes, conceptos, tiempo_clientes, tiempo_conceptos)
+                    if info:
+                        colaborador_info.append(info)
+
             
             # Ordenar colaboradores alfabéticamente por nombre
             colaborador_info =sorted(colaborador_info, key=lambda x: ( x.get('Nombre', ''),     x.get('Empresa', '')))

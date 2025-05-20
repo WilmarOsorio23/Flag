@@ -1239,6 +1239,13 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
         }),
         label='Moneda'
     )
+
+    moduloId = forms.ModelChoiceField( 
+        queryset=Modulo.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Módulo',
+        to_field_name='ModuloId'
+    )
     
     class Meta:
         model = Tarifa_Consultores
@@ -1276,6 +1283,8 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
         anio = cleaned_data.get('anio')
         mes = cleaned_data.get('mes')
         clienteID = cleaned_data.get('clienteID')
+        moduloId = cleaned_data.get('moduloId')
+        print(moduloId)
 
         iva = cleaned_data.get('iva')
         rteFte = cleaned_data.get('rteFte')
@@ -1289,11 +1298,10 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             documentoId=documentoId,
             anio=anio,
             mes=mes,
-            clienteID=clienteID
+            clienteID=clienteID,
+            moduloId=moduloId
         ).exists():
-            raise ValidationError(
-                "Ya existe un registro con el mismo Documento, Año, Mes y Cliente."
-            )
+            raise ValidationError("Ya existe un registro con el mismo Documento, Año, Mes, Cliente y Módulo.")
         
         return cleaned_data
 
