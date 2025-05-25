@@ -231,7 +231,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         'Tiempo_Clientes': tiempoCliente,
                         'Anio': window.originalAnio,
                         'Mes': window.originalMes,
-                        'LineaId': lineaId
+                        'LineaId': lineaId,
+                        'ModuloId': rowData.ModuloId
                     });
                 });
 
@@ -279,7 +280,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        console.log('Data:', data);
         showSavingMessage(true);
     
         // Realizar la petición para guardar los datos

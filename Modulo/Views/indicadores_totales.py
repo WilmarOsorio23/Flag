@@ -57,7 +57,7 @@ def precargar_datos(anio: str, meses: list, clientes: list, lineas: list, horas_
         ClienteId__in=clientes_ids,
         LineaId__in=lineas_ids
     ).select_related('ClienteId', 'LineaId').values(
-        'Anio', 'Mes', 'Documento', 'ClienteId', 'LineaId', 'Horas'
+        'Anio', 'Mes', 'Documento', 'ClienteId', 'LineaId', 'Horas', 'ModuloId'
     )
     tiempos_data = list(tiempos)
     
@@ -99,23 +99,26 @@ def precargar_datos(anio: str, meses: list, clientes: list, lineas: list, horas_
 
     # Precargar todas las tarifas de consultores históricas
     tarifas_consultores = Tarifa_Consultores.objects.all().values(
-        'documentoId', 'anio', 'mes', 'valorHora', 'valorDia', 'valorMes'
+    'documentoId', 'anio', 'mes', 'valorHora', 'valorDia', 'valorMes', 'moduloId'
     )
-    tarifas_consultores_dict = defaultdict(list)
+    tarifas_consultores_dict = defaultdict(lambda: defaultdict(list))
     for t in tarifas_consultores:
         doc = t['documentoId']
+        modulo_id = t['moduloId']  # Asumiendo que el modelo tiene este campo
         anio_int = int(t['anio'])
         mes_int = int(t['mes'])
-        tarifas_consultores_dict[doc].append((
+        tarifas_consultores_dict[doc][modulo_id].append((
             anio_int, 
             mes_int,
             Decimal(str(t['valorHora'] or '0')),
             Decimal(str(t['valorDia'] or '0')),
             Decimal(str(t['valorMes'] or '0'))
         ))
-    # Ordenar por año y mes descendente
+
+    # Ordenar cada lista por año y mes descendente
     for doc in tarifas_consultores_dict:
-        tarifas_consultores_dict[doc].sort(key=lambda x: (-x[0], -x[1]))
+        for modulo in tarifas_consultores_dict[doc]:
+            tarifas_consultores_dict[doc][modulo].sort(key=lambda x: (-x[0], -x[1]))
     
     # Precargar tarifas clientes
     tarifas_clientes = Tarifa_Clientes.objects.filter(clienteId__in=clientes_ids
@@ -156,6 +159,7 @@ def calcular_costo(cliente_id: str, mes: str, lineas_ids: list, tiempos_data: li
 
         documento = tiempo['Documento']
         anio_int = int(tiempo['Anio'])
+        modulo_id = tiempo['ModuloId']
         costo_hora = Decimal('0.00')  # Inicializar con valor por defecto
         
         # Lógica para empleados
@@ -169,7 +173,7 @@ def calcular_costo(cliente_id: str, mes: str, lineas_ids: list, tiempos_data: li
         
         # Lógica para consultores
         else:
-            entradas_tarifa = tarifas_consultores_dict.get(documento, [])
+            entradas_tarifa = tarifas_consultores_dict[documento].get(modulo_id, [])
             entrada = encontrar_entrada_anterior(entradas_tarifa, anio_int, mes_int)
             if entrada:
                 valorHora, valorDia, valorMes = entrada[2], entrada[3], entrada[4]

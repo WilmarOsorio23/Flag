@@ -47,6 +47,7 @@ def tarifa_consultores_editar(request, idd):
             tarifa.valorDia = data.get('valorDia', tarifa.valorDia)
             tarifa.valorMes = data.get('valorMes', tarifa.valorMes)
             tarifa.monedaId_id = data.get('monedaId', tarifa.monedaId_id)
+            tarifa.moduloId_id = data.get('moduloId', tarifa.moduloId_id)  
             tarifa.iva = data.get('iva', tarifa.iva) or None
             tarifa.rteFte = data.get('rteFte', tarifa.rteFte) or None
            
