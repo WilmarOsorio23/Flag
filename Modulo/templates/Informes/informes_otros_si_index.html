@@ -264,79 +264,33 @@
         {% endif %}
     </div>
 </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const hasParams = ['Nombre_Cliente', 'Contrato', 'FechaInicio', 'ContratoVigente'].some(param => urlParams.has(param));
-        const alreadySubmitted = sessionStorage.getItem('otros_si_autosubmit');
 
-        if (hasParams && !alreadySubmitted) {
-            sessionStorage.setItem('otros_si_autosubmit', '1');
-            document.getElementById('filtro-otros-si-form').submit();
-        } else {
-            sessionStorage.removeItem('otros_si_autosubmit');  // Limpiar en búsquedas normales
-        }
-    });
-</script>
-<script src="{% static 'JS/informes_otros_si.js' %}"></script>
-
-
-<!-- Modal Gráfico Monedas -->
+<!-- ============================= -->
+<!-- MODAL DE GRÁFICO DE MONEDAS -->
+<!-- ============================= -->
 <div class="modal fade" id="graficoMonedasModal" tabindex="-1" aria-labelledby="graficoMonedasLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="graficoMonedasLabel">Distribución de Monedas</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="graficoMonedasLabel">Distribución de Monedas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <canvas id="graficoMonedasCanvas"
+                        width="400" height="400"
+                        data-usd="{{ total_usd }}"
+                        data-cop="{{ total_cop }}"
+                        data-mxn="{{ total_mxn }}">
+                </canvas>
+            </div>
         </div>
-        <div class="modal-body">
-          <canvas id="graficoMonedasCanvas" width="400" height="400"></canvas>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
-<!-- Chart.js CDN -->
+<!-- ============================= -->
+<!-- INYECCIÓN DE JAVASCRIPT      -->
+<!-- ============================= -->
+<script src="{% static 'JS/informes_otros_si.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const cardMonedas = document.getElementById('cardMonedas');
-    const modal = new bootstrap.Modal(document.getElementById('graficoMonedasModal'));
-
-    cardMonedas.addEventListener('click', function () {
-        const ctx = document.getElementById('graficoMonedasCanvas').getContext('2d');
-
-        // Si ya existe un gráfico previo, destrúyelo para evitar superposición
-        if (window.monedaChart) {
-            window.monedaChart.destroy();
-        }
-
-        // Datos desde Django Context
-        const data = {
-            labels: ['USD', 'COP', 'MXN'],
-            datasets: [{
-                label: 'Cantidad de Contratos',
-                data: [{{ total_usd }}, {{ total_cop }}, {{ total_mxn }}],
-                backgroundColor: ['#0d6efd', '#198754', '#ffc107'],
-                hoverOffset: 4
-            }]
-        };
-
-        window.monedaChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: data,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' },
-                    tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.raw}` } }
-                }
-            }
-        });
-
-        modal.show();
-    });
-});
-</script>
 {% endblock %}
