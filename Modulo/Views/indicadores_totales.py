@@ -469,7 +469,7 @@ def indicadores_totales(request):
     valores_diciembre = {}
     anio = None
     # Inicializar variables con valores por defecto
-    clientes = Clientes.objects.all()
+    clientes = Clientes.objects.all().order_by('Nombre_Cliente')
     lineas_seleccionadas = Linea.objects.all()
     
     # Manejo de solicitud AJAX para recálculo
@@ -494,7 +494,7 @@ def indicadores_totales(request):
             anio = form_ajax.cleaned_data['Anio']
             meses = [str(m) for m in sorted(form_ajax.cleaned_data['Mes'])] if form_ajax.cleaned_data['Mes'] else [str(m) for m in range(1, 13)]
             lineas_seleccionadas = form_ajax.cleaned_data['LineaId'] or Linea.objects.all()
-            clientes = form_ajax.cleaned_data['ClienteId'] or Clientes.objects.all()
+            clientes = form_ajax.cleaned_data['ClienteId'] or Clientes.objects.all().order_by('Nombre_Cliente')
             
             horas_habiles = obtener_horas_habiles(anio)
             datos_precargados = precargar_datos(anio, meses, clientes, lineas_seleccionadas, horas_habiles)
@@ -540,7 +540,7 @@ def indicadores_totales(request):
         anio = form.cleaned_data['Anio']
         meses = [str(m) for m in sorted(form.cleaned_data['Mes'])] if form.cleaned_data['Mes'] else [str(m) for m in range(1, 13)]
         lineas_seleccionadas = form.cleaned_data['LineaId'] or Linea.objects.all()
-        clientes = form.cleaned_data['ClienteId'] or Clientes.objects.all()
+        clientes = form.cleaned_data['ClienteId'] or Clientes.objects.all().order_by('Nombre_Cliente')
         lineas_ids = [l.LineaId for l in lineas_seleccionadas]
         clientes_ids = [c.ClienteId for c in clientes]
         
@@ -637,7 +637,7 @@ def indicadores_totales(request):
         'Conceptos': resultados['conceptos'],
         'Clientes_json': json.dumps([
             {'ClienteId': c.ClienteId, 'Nombre_Cliente': c.Nombre_Cliente} 
-            for c in clientes
+            for c in clientes.order_by('Nombre_Cliente')
         ])
     }
     return render(request, 'Indicadores/indicadores_totales.html', context)
