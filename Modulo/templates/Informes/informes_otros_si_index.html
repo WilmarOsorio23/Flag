@@ -140,6 +140,46 @@
                 </div>
             </div>
 
+            <!-- Card Monedas -->
+        <div class="card shadow-sm p-3" id="cardMonedas" style="min-width: 220px; font-size: 0.85rem;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold mb-0">
+                        <span class="text-primary">{{ total_usd }}</span> /
+                        <span class="text-success">{{ total_cop }}</span> /
+                        <span class="text-warning">{{ total_mxn }}</span>
+                    </h5>
+                    <small class="text-muted">USD / COP / MXN</small>
+                </div>
+                <i class="fas fa-coins fa-2x text-primary"></i>
+            </div>
+            <div class="progress mt-3" style="height: 5px;">
+                {% if total_usd > 0 %}
+                <div class="progress-bar bg-primary" role="progressbar"
+                    style="width: {{ porcentaje_usd_display }}%;" 
+                    aria-valuenow="{{ total_usd }}" aria-valuemin="0" aria-valuemax="{{ total_contratos }}">
+                </div>
+                {% endif %}
+                
+                {% if total_cop > 0 %}
+                <div class="progress-bar bg-success" role="progressbar"
+                    style="width: {{ porcentaje_cop_display }}%;" 
+                    aria-valuenow="{{ total_cop }}" aria-valuemin="0" aria-valuemax="{{ total_contratos }}">
+                </div>
+                {% endif %}
+                
+                {% if total_mxn > 0 %}
+                <div class="progress-bar bg-warning" role="progressbar"
+                    style="width: {{ porcentaje_mxn_display }}%;" 
+                    aria-valuenow="{{ total_mxn }}" aria-valuemin="0" aria-valuemax="{{ total_contratos }}">
+                </div>
+                {% endif %}
+            </div>
+            <div class="text-end mt-1" style="font-size: 0.75rem; color: #888;">
+                {{ total_monedas }}/{{ total_contratos }}
+            </div>
+        </div>
+
             </div>
             </div>
         {% endif %}
@@ -159,6 +199,7 @@
                     </form>
                 </div>
             </div>
+        
         {% if show_data %}
         <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
             <table class="table table-bordered table-hover table-primary w-100" id="otrosSiTable">
@@ -223,19 +264,33 @@
         {% endif %}
     </div>
 </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const hasParams = ['Nombre_Cliente', 'Contrato', 'FechaInicio', 'ContratoVigente'].some(param => urlParams.has(param));
-        const alreadySubmitted = sessionStorage.getItem('otros_si_autosubmit');
 
-        if (hasParams && !alreadySubmitted) {
-            sessionStorage.setItem('otros_si_autosubmit', '1');
-            document.getElementById('filtro-otros-si-form').submit();
-        } else {
-            sessionStorage.removeItem('otros_si_autosubmit');  // Limpiar en búsquedas normales
-        }
-    });
-</script>
+<!-- ============================= -->
+<!-- MODAL DE GRÁFICO DE MONEDAS -->
+<!-- ============================= -->
+<div class="modal fade" id="graficoMonedasModal" tabindex="-1" aria-labelledby="graficoMonedasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="graficoMonedasLabel">Distribución de Monedas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <canvas id="graficoMonedasCanvas"
+                        width="400" height="400"
+                        data-usd="{{ total_usd }}"
+                        data-cop="{{ total_cop }}"
+                        data-mxn="{{ total_mxn }}">
+                </canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================= -->
+<!-- INYECCIÓN DE JAVASCRIPT      -->
+<!-- ============================= -->
 <script src="{% static 'JS/informes_otros_si.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 {% endblock %}

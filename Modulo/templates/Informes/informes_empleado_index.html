@@ -51,6 +51,7 @@
           </div>
         </form>
 
+        <!-- Apartado para cards -->
         {% if show_data %}
         <div class="mt-4 mb-3">
           <div class="d-flex flex-row flex-nowrap overflow-auto gap-2">
@@ -92,30 +93,51 @@
             </div>
 
             <!-- Certificados SAP -->
-            <div class="card shadow-sm p-3 text-primary text-start" style="min-width: 220px;">
+            <div class="card shadow-sm p-3 text-primary text-start" style="min-width: 220px; cursor: pointer;" id="cardCertificadosSAP">
               <div class="d-flex justify-content-between align-items-center">
                 <h5 class="fw-bold mb-0">{{ certificados_sap }}</h5>
                 <i class="fas fa-certificate fa-2x"></i>
               </div>
               <small class="text-muted mt-2 d-block">Certificados SAP</small>
+
+              <div class="mt-2">
+                <small class="text-muted">Por Línea</small><br>
+                {% for linea, total in certificados_sap_por_linea.items %}
+                  <span class="text-primary">{{ linea }}: <strong>{{ total }}</strong></span><br>
+                {% endfor %}
+              </div>
             </div>
 
             <!-- Otras Certificaciones -->
-            <div class="card shadow-sm p-3 text-warning text-start" style="min-width: 220px;">
+            <div class="card shadow-sm p-3 text-warning text-start" style="min-width: 220px;" id="cardOtrasCertificaciones">
               <div class="d-flex justify-content-between align-items-center">
                 <h5 class="fw-bold mb-0">{{ otras_certificaciones }}</h5>
                 <i class="fas fa-award fa-2x"></i>
               </div>
               <small class="text-muted mt-2 d-block">Otras Certificaciones</small>
+
+              <div class="mt-2">
+                <small class="text-muted">Por Línea</small><br>
+                {% for linea, total in otras_certificaciones_por_linea.items %}
+                  <span class="text-warning">{{ linea }}: <strong>{{ total }}</strong></span><br>
+                {% endfor %}
+              </div>
             </div>
 
             <!-- Con Postgrado -->
-            <div class="card shadow-sm p-3 text-danger text-start" style="min-width: 220px;">
+            <div class="card shadow-sm p-3 text-danger text-start" style="min-width: 220px;" id="cardPostgrados">
               <div class="d-flex justify-content-between align-items-center">
                 <h5 class="fw-bold mb-0">{{ postgrados }}</h5>
                 <i class="fas fa-user-graduate fa-2x"></i>
               </div>
               <small class="text-muted mt-2 d-block">Postgrados</small>
+
+              <div class="mt-2">
+                <small class="text-muted">Por Línea</small><br>
+                {% for linea, total in postgrados_por_linea.items %}
+                  <span class="text-danger">{{ linea }}: <strong>{{ total }}</strong></span><br>
+                {% endfor %}
+              </div>
             </div>
 
           </div>
@@ -271,4 +293,73 @@
                 
     </div>
   </div>
+
+    <!-- Modal Gráfico Certificados SAP -->
+  <div class="modal fade" id="graficoCertificadosSAPModal" tabindex="-1" aria-labelledby="graficoCertificadosSAPLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoCertificadosSAPLabel">Certificados SAP por Línea</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoCertificadosSAPCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+    <!-- Modal Gráfico Otras Certificaciones -->
+  <div class="modal fade" id="graficoOtrasCertificacionesModal" tabindex="-1" aria-labelledby="graficoOtrasCertificacionesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoOtrasCertificacionesLabel">Otras Certificaciones por Línea</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoOtrasCertificacionesCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Gráfico Postgrados -->
+  <div class="modal fade" id="graficoPostgradosModal" tabindex="-1" aria-labelledby="graficoPostgradosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoPostgradosLabel">Postgrados por Línea</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoPostgradosCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% block extra_js %}
+    <!--
+      Inserta los datos de etiquetas y valores para los gráficos
+      en el DOM como scripts JSON.
+      Estos datos luego son leídos desde JavaScript para generar los gráficos.
+    -->
+    {{ certificados_sap_labels|json_script:"labels-data" }}
+    {{ certificados_sap_data|json_script:"values-data" }}
+
+    {{ otras_certificaciones_labels|json_script:"labels-otras" }}
+    {{ otras_certificaciones_data|json_script:"values-otras" }}
+
+    {{ postgrados_labels|json_script:"labels-postgrados" }}
+    {{ postgrados_data|json_script:"values-postgrados" }}
+
+    <!-- Cargar Chart.js desde CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Lógica JS -->
+    <script src="{% static 'JS/informes_empleados.js' %}"></script>
+  {% endblock %}
+
+
 {% endblock %}

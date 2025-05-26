@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from collections import defaultdict
+from collections import defaultdict, Counter
 from datetime import datetime
 from Modulo.forms import EstudiosFilterForm
 from Modulo.models import Empleado, Empleados_Estudios
@@ -86,11 +86,27 @@ def empleado_estudio_filtrado(request):
     else: 
         form = EstudiosFilterForm()
 
+    #Aplicar lógica para cards
+    
+    # Total de Estudios
+    total_estudios = sum(len(e['estudios']) for e in empleado_estudio_info)
+
+    # Estudios por Institución
+    instituciones = [estudio['institucion'] for e in empleado_estudio_info for estudio in e['estudios']]
+    conteo_instituciones = dict(Counter(instituciones))
+
+    # Estudios por Línea
+    lineas = [e['nombre_linea'] for e in empleado_estudio_info if e['nombre_linea']]
+    conteo_lineas = dict(Counter(lineas))
+
     context = {
         'form': form,
         'empleado_estudio_info': empleado_estudio_info,      
         'show_data': show_data,
         'busqueda_realizada': busqueda_realizada,
+        'total_estudios': total_estudios,
+        'conteo_instituciones': conteo_instituciones,
+        'conteo_lineas': conteo_lineas,
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 

@@ -1,6 +1,28 @@
-document.addEventListener('DOMContentLoaded', function () {
-    console.log("🟢 JS Informe Otros Sí activo");
+// ===========================================
+// JS PARA INFORME "CONTRATOS - OTROS SÍ"
+// ===========================================
 
+document.addEventListener('DOMContentLoaded', function () {
+    //console.log("🟢 JS Informe Otros Sí activo");
+
+    // ===========================================
+    // ENVÍO AUTOMÁTICO DEL FORMULARIO SI HAY FILTROS EN LA URL
+    // ===========================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasParams = ['Nombre_Cliente', 'Contrato', 'FechaInicio', 'ContratoVigente'].some(param => urlParams.has(param));
+    const alreadySubmitted = sessionStorage.getItem('otros_si_autosubmit');
+
+    if (hasParams && !alreadySubmitted) {
+        sessionStorage.setItem('otros_si_autosubmit', '1');
+        document.getElementById('filtro-otros-si-form').submit();
+    } else {
+        sessionStorage.removeItem('otros_si_autosubmit');
+    }
+    
+
+    // ===========================================
+    // EVENTO CAMBIO DE CLIENTE: ACTUALIZA CONTRATOS
+    // ===========================================
     const clienteSelect = document.getElementById('id_Nombre_Cliente');
     const contratoSelect = document.getElementById('id_Contrato');
 
@@ -39,4 +61,55 @@ document.addEventListener('DOMContentLoaded', function () {
             contratoSelect.innerHTML = '<option value="">Seleccione un cliente primero</option>';
         }
     });
+
+
+    // ===========================================
+    // GRÁFICO DE MONEDAS EN MODAL
+    // ===========================================
+    const cardMonedas = document.getElementById('cardMonedas');
+    const modalMonedas = new bootstrap.Modal(document.getElementById('graficoMonedasModal'));
+
+    if (cardMonedas) {
+        cardMonedas.addEventListener('click', function () {
+            const ctx = document.getElementById('graficoMonedasCanvas').getContext('2d');
+
+            // Destruir gráfico anterior si existe
+            if (window.monedaChart) {
+                window.monedaChart.destroy();
+            }
+
+            // Crear gráfico Doughnut de monedas
+            window.monedaChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['USD', 'COP', 'MXN'],
+                    datasets: [{
+                        label: 'Cantidad de Contratos',
+                        data: [
+                            parseInt(document.getElementById('graficoMonedasCanvas').dataset.usd) || 0,
+                            parseInt(document.getElementById('graficoMonedasCanvas').dataset.cop) || 0,
+                            parseInt(document.getElementById('graficoMonedasCanvas').dataset.mxn) || 0
+                        ],
+                        backgroundColor: ['#0d6efd', '#198754', '#ffc107'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.label}: ${ctx.raw}`
+                            }
+                        }
+                    }
+                }
+            });
+
+            modalMonedas.show();
+        });
+    }
+
+
 });

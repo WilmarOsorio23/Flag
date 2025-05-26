@@ -5,6 +5,7 @@ from Modulo.models import Consultores
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 from datetime import datetime
+from collections import Counter
 
 #Función para filtrar Consultores
 #Filtros: Nombre Consultor, Linea, Modulo, Certificación, Perfil
@@ -95,11 +96,35 @@ def consultores_filtrado(request):
     else: 
         form = ConsultorFilterForm()
 
+    # 1. Total de Consultores
+    total_consultores = len(consultor_info)
+
+    # 2. Activos/Inactivos
+    activos = sum(1 for c in consultor_info if c['estado'] == 'Activo')
+    inactivos = total_consultores - activos
+
+    # 3. Consultores con Certificación
+    certificados = sum(1 for c in consultor_info if c['certificado'] == 'SI')
+
+    # 4. Distribución por Línea
+    lineas = [c['linea'] for c in consultor_info if c['linea']]
+    conteo_lineas = dict(Counter(lineas))
+
+    # 5. Distribución por Módulo
+    modulos = [c['modulo'] for c in consultor_info if c['modulo']]
+    conteo_modulos = dict(Counter(modulos))
+
     context = {
         'form': form,
         'consultor_info': consultor_info,      
         'show_data': show_data,
         'busqueda_realizada': busqueda_realizada,
+        'total_consultores': total_consultores,
+        'activos': activos,
+        'inactivos': inactivos,
+        'certificados': certificados,
+        'conteo_lineas': conteo_lineas,
+        'conteo_modulos': conteo_modulos,
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
