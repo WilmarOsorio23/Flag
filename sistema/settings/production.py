@@ -5,23 +5,25 @@ SECRET_KEY = 'tu-clave-secreta-muy-segura-para-produccion'  # Cambiar esto por u
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['web.flagsoluciones.com']  # Ajusta esto a tu dominio de producción
+ALLOWED_HOSTS = ['web.flagsoluciones.com', 'www.web.flagsoluciones.com']  # Ajusta esto a tu dominio de producción
 
 # Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'analisis_prod',  # Base de datos de producción
-        'USER': 'usuario_prod',   # Usuario de producción
-        'PASSWORD': 'contraseña_prod',  # Contraseña de producción
+        'NAME': 'analisisproduc',  # Base de datos de producción
+        'USER': 'analisisproduc',   # Usuario de producción
+        'PASSWORD': 'Admdev2024.*',  # Contraseña de producción
         'HOST': 'web.flagsoluciones.com',
         'PORT': '3306'
     }
 }
 
 # Configuración de archivos estáticos
-STATIC_ROOT = '/var/www/static/'
+STATIC_ROOT = '/home/tu_usuario/public_html/static/'
 STATIC_URL = '/static/'
+MEDIA_ROOT = '/home/tu_usuario/public_html/media/'
+MEDIA_URL = '/media/'
 
 # Configuración de seguridad
 SECURE_SSL_REDIRECT = True
@@ -39,7 +41,7 @@ LOGGING = {
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': '/var/log/django/production.log',
+            'filename': '/home/tu_usuario/logs/django_production.log',
         },
     },
     'loggers': {
