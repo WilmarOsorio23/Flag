@@ -1,21 +1,29 @@
 import sys, os
 
-# Configuración de directorios
-VENV_NAME = 'venv'
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-VENV_PATH = os.path.join(PROJECT_ROOT, VENV_NAME)
-VENV_PYTHON = os.path.join(VENV_PATH, 'bin', 'python')
+# Configuración de la aplicación
+ApplicationDirectory = '/'
+ApplicationName = 'sistema'
+VirtualEnvDirectory = 'venv'
 
-# Activar el entorno virtual
-if sys.executable != VENV_PYTHON:
-    os.execl(VENV_PYTHON, VENV_PYTHON, *sys.argv)
+# Configuración del entorno virtual
+VirtualEnv = os.path.join(os.getcwd(), VirtualEnvDirectory, 'bin', 'python')
+if sys.executable != VirtualEnv: 
+    os.execl(VirtualEnv, VirtualEnv, *sys.argv)
 
-# Añadir rutas al path de Python
-sys.path.insert(0, PROJECT_ROOT)
+# Configuración de rutas
+sys.path.insert(0, os.path.join(os.getcwd(), ApplicationDirectory))
+sys.path.insert(0, os.path.join(os.getcwd(), ApplicationDirectory, ApplicationName))
+sys.path.insert(0, os.path.join(os.getcwd(), VirtualEnvDirectory, 'bin'))
 
-# Configurar el entorno de desarrollo
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sistema.settings.development')
+# Cambiar al directorio de la aplicación
+os.chdir(os.path.join(os.getcwd(), ApplicationDirectory))
 
-# Importar la aplicación WSGI
+# Configurar el módulo de settings según el dominio
+if 'devgif.flagsoluciones.com' in os.getcwd():
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sistema.settings.development')
+else:
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sistema.settings.production')
+
+# Importar y configurar la aplicación WSGI
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application() 
