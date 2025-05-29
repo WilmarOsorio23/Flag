@@ -202,8 +202,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         
             // Recalcular totales
-            Clientes.forEach(cliente => {
-                const clienteKey = cliente.Nombre_Cliente;
+                Clientes.forEach(cliente => {
+                    const clienteKey = cliente.Nombre_Cliente;
                 let totales = {
                     trabajado: 0,
                     costo: 0,

@@ -20,9 +20,9 @@ DATABASES = {
 }
 
 # Configuración de archivos estáticos
-STATIC_ROOT = '/home/tu_usuario/public_html/static/'
+STATIC_ROOT = '/var/www/vhosts/[tu-dominio]/httpdocs/static/'
 STATIC_URL = '/static/'
-MEDIA_ROOT = '/home/tu_usuario/public_html/media/'
+MEDIA_ROOT = '/var/www/vhosts/[tu-dominio]/httpdocs/media/'
 MEDIA_URL = '/media/'
 
 # Configuración de seguridad
