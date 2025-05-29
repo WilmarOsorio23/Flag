@@ -1,4 +1,5 @@
 from .base import *
+import os
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-03wz*^i+6am@4m6_--r7()a429+u&rq8o=e38p*(druigcq1t)'
@@ -38,4 +39,14 @@ LOGGING = {
             'propagate': True,
         },
     },
-} 
+}
+
+# Configuración de archivos estáticos
+STATIC_URL = '/static/'
+STATIC_ROOT = '/var/www/vhosts/devgif.flagsoluciones.com/httpdocs/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'Modulo', 'static'),
+]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = '/var/www/vhosts/devgif.flagsoluciones.com/httpdocs/media/' 
