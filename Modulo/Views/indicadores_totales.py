@@ -288,6 +288,9 @@ def calcular_pendiente_diciembre(anio: str, cliente: Clientes):
         }
 
 def guardar_pendientes_masivo(registros, es_anual=False):
+    if not registros:  # Si no hay registros, salir
+        return
+
     with transaction.atomic():
         a_crear = []
         a_actualizar = []
@@ -299,51 +302,58 @@ def guardar_pendientes_masivo(registros, es_anual=False):
         # Obtener lista de IDs de clientes
         cliente_ids = [r['cliente_id'] for r in registros]
         
-        # Obtener registros existentes
-        existentes_queryset = Ind_Totales_Diciembre.objects.filter(
-            ClienteId_id__in=cliente_ids,
-            Anio=anio,
-            Mes=mes
-        )
-        
-        # Crear diccionario manual para manejar posibles duplicados
-        existentes = {}
-        for obj in existentes_queryset:
-            cliente_id = obj.ClienteId_id
-            if cliente_id not in existentes:
-                existentes[cliente_id] = obj
-            else:
-                print(f"Advertencia: Duplicado encontrado para ClienteId {cliente_id} en {anio}-{mes}")
-                pass
-        
-        # Procesar registros
-        for registro in registros:
-            cliente_id = registro['cliente_id']
-            defaults = {
-                'Trabajado': registro['trabajado'],
-                'Facturado': registro['facturado'],
-                'Costo': registro['costo'],
-                'ValorFacturado': registro['valor_facturado']
-            }
+        try:
+            # Obtener registros existentes
+            existentes_queryset = Ind_Totales_Diciembre.objects.filter(
+                ClienteId_id__in=cliente_ids,
+                Anio=anio,
+                Mes=mes
+            )
             
-            if cliente_id in existentes:
-                # Actualizar registro existente
-                obj = existentes[cliente_id]
-                for key, value in defaults.items():
-                    setattr(obj, key, value)
-                a_actualizar.append(obj)
-            else:
-                # Crear nuevo registro
-                a_crear.append(Ind_Totales_Diciembre(
-                    Anio=anio,
-                    Mes=mes,
-                    ClienteId_id=cliente_id,
-                    **defaults
-                ))
-        
-        # Ejecutar operaciones bulk
-        Ind_Totales_Diciembre.objects.bulk_update(a_actualizar, ['Trabajado', 'Facturado', 'Costo', 'ValorFacturado'])
-        Ind_Totales_Diciembre.objects.bulk_create(a_crear)
+            # Crear diccionario manual para manejar posibles duplicados
+            existentes = {obj.ClienteId_id: obj for obj in existentes_queryset}
+            
+            # Procesar registros
+            for registro in registros:
+                if not all(k in registro for k in ['cliente_id', 'trabajado', 'facturado', 'costo', 'valor_facturado']):
+                    print(f"Registro incompleto ignorado: {registro}")
+                    continue
+
+                cliente_id = registro['cliente_id']
+                defaults = {
+                    'Trabajado': registro['trabajado'],
+                    'Facturado': registro['facturado'],
+                    'Costo': registro['costo'],
+                    'ValorFacturado': registro['valor_facturado']
+                }
+                
+                if cliente_id in existentes:
+                    # Actualizar registro existente
+                    obj = existentes[cliente_id]
+                    for key, value in defaults.items():
+                        setattr(obj, key, value)
+                    a_actualizar.append(obj)
+                else:
+                    # Crear nuevo registro
+                    a_crear.append(Ind_Totales_Diciembre(
+                        Anio=anio,
+                        Mes=mes,
+                        ClienteId_id=cliente_id,
+                        **defaults
+                    ))
+            
+            # Ejecutar operaciones bulk
+            if a_actualizar:
+                Ind_Totales_Diciembre.objects.bulk_update(
+                    a_actualizar, 
+                    ['Trabajado', 'Facturado', 'Costo', 'ValorFacturado']
+                )
+            if a_crear:
+                Ind_Totales_Diciembre.objects.bulk_create(a_crear)
+                
+        except Exception as e:
+            print(f"Error en guardar_pendientes_masivo: {e}")
+            raise
         
 # 6. Función para obtener conceptos
 def obtener_conceptos(anio: str, mes: str) -> dict:
@@ -469,7 +479,7 @@ def indicadores_totales(request):
     valores_diciembre = {}
     anio = None
     # Inicializar variables con valores por defecto
-    clientes = Clientes.objects.all()
+    clientes = Clientes.objects.all().order_by('Nombre_Cliente')
     lineas_seleccionadas = Linea.objects.all()
     
     # Manejo de solicitud AJAX para recálculo
@@ -494,7 +504,7 @@ def indicadores_totales(request):
             anio = form_ajax.cleaned_data['Anio']
             meses = [str(m) for m in sorted(form_ajax.cleaned_data['Mes'])] if form_ajax.cleaned_data['Mes'] else [str(m) for m in range(1, 13)]
             lineas_seleccionadas = form_ajax.cleaned_data['LineaId'] or Linea.objects.all()
-            clientes = form_ajax.cleaned_data['ClienteId'] or Clientes.objects.all()
+            clientes = form_ajax.cleaned_data['ClienteId'] or Clientes.objects.all().order_by('Nombre_Cliente')
             
             horas_habiles = obtener_horas_habiles(anio)
             datos_precargados = precargar_datos(anio, meses, clientes, lineas_seleccionadas, horas_habiles)
@@ -540,7 +550,7 @@ def indicadores_totales(request):
         anio = form.cleaned_data['Anio']
         meses = [str(m) for m in sorted(form.cleaned_data['Mes'])] if form.cleaned_data['Mes'] else [str(m) for m in range(1, 13)]
         lineas_seleccionadas = form.cleaned_data['LineaId'] or Linea.objects.all()
-        clientes = form.cleaned_data['ClienteId'] or Clientes.objects.all()
+        clientes = form.cleaned_data['ClienteId'] or Clientes.objects.all().order_by('Nombre_Cliente')
         lineas_ids = [l.LineaId for l in lineas_seleccionadas]
         clientes_ids = [c.ClienteId for c in clientes]
         
@@ -582,29 +592,33 @@ def indicadores_totales(request):
             if meses:
                 ultimo_mes = meses[-1]
                 if ultimo_mes in resultados['general']:
-                    ultimo_pendiente = resultados['general'][ultimo_mes]['Clientes'][cliente.Nombre_Cliente]['Pendiente']
+                    cliente_data = resultados['general'][ultimo_mes].get('Clientes', {}).get(cliente.Nombre_Cliente, {})
+                    if cliente_data:
+                        ultimo_pendiente = cliente_data.get('Pendiente', {'horas': Decimal('0'), 'valor': Decimal('0')})
+                    else:
+                        ultimo_pendiente = {'horas': Decimal('0'), 'valor': Decimal('0')}
                 else:
                     ultimo_pendiente = {'horas': Decimal('0'), 'valor': Decimal('0')}
-                
-                try:
-                    trabajado = max(ultimo_pendiente['horas'], Decimal('0'))
-                    facturado = abs(min(ultimo_pendiente['horas'], Decimal('0')))
-                    costo = max(ultimo_pendiente['valor'], Decimal('0'))
-                    valor_facturado = abs(min(ultimo_pendiente['valor'], Decimal('0')))
 
-                    if trabajado == 0 and facturado == 0 and costo == 0 and valor_facturado == 0:
-                        return
-            
-                    registros_anuales.append({
-                        'cliente_id': cliente_id,
-                        'anio': anio_actual,
-                        'trabajado': trabajado,
-                        'facturado': facturado,
-                        'costo': costo,
-                        'valor_facturado': valor_facturado
-                    })
+                try:
+                    trabajado = max(ultimo_pendiente.get('horas', Decimal('0')), Decimal('0'))
+                    facturado = abs(min(ultimo_pendiente.get('horas', Decimal('0')), Decimal('0')))
+                    costo = max(ultimo_pendiente.get('valor', Decimal('0')), Decimal('0'))
+                    valor_facturado = abs(min(ultimo_pendiente.get('valor', Decimal('0')), Decimal('0')))
+
+                    # Solo agregar registros si hay valores diferentes de cero
+                    if any([trabajado, facturado, costo, valor_facturado]):
+                        registros_anuales.append({
+                            'cliente_id': cliente_id,
+                            'anio': anio_actual,
+                            'trabajado': trabajado,
+                            'facturado': facturado,
+                            'costo': costo,
+                            'valor_facturado': valor_facturado
+                        })
                 except Exception as e:
-                    print(f"Error guardando anual: {e}")
+                    print(f"Error procesando datos para cliente {cliente.Nombre_Cliente}: {e}")
+                    continue
             # Guardado masivo
             guardar_pendientes_masivo(registros_diciembre)
             guardar_pendientes_masivo(registros_anuales, es_anual=True)
@@ -637,7 +651,7 @@ def indicadores_totales(request):
         'Conceptos': resultados['conceptos'],
         'Clientes_json': json.dumps([
             {'ClienteId': c.ClienteId, 'Nombre_Cliente': c.Nombre_Cliente} 
-            for c in clientes
+            for c in clientes.order_by('Nombre_Cliente')
         ])
     }
     return render(request, 'Indicadores/indicadores_totales.html', context)
