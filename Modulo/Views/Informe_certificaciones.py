@@ -82,7 +82,7 @@ def empleado_filtrado(request):
     lineas = [cert['Linea'] for cert in certificaciones_info if cert['Linea']]
     conteo_lineas = dict(Counter(lineas))
 
-    return render(request, 'informes/informes_certificacion_index.html', {
+    context = {
         'form': form,
         'certificaciones_info': certificaciones_info,
         'show_data': show_data,
@@ -90,8 +90,14 @@ def empleado_filtrado(request):
         'total_certificaciones': total_certificaciones,
         'conteo_modulos': conteo_modulos,
         'conteo_lineas': conteo_lineas,
+        'modulos_labels': list(conteo_modulos.keys()),
+        'modulos_data': list(conteo_modulos.values()),
+        'lineas_labels': list(conteo_lineas.keys()),
+        'lineas_data': list(conteo_lineas.values()),
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
-    })
+    }
+
+    return render(request, 'informes/informes_certificacion_index.html', context)
 
 @csrf_exempt
 def exportar_certificaciones_excel(request):

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block titulo %} Informe Certificados {% endblock %}
 
@@ -45,7 +46,7 @@
                 </div>
         
                 <!-- Total por Módulo -->
-                <div class="card shadow-sm p-3 text-success text-start" style="min-width: 220px;">
+                <div class="card shadow-sm p-3 text-success text-start" style="min-width: 220px; cursor: pointer;" id="cardModulo">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="fw-bold mb-0"><i class="fas fa-layer-group"></i></h5>
                     </div>
@@ -56,7 +57,7 @@
                 </div>
         
                 <!-- Total por Línea -->
-                <div class="card shadow-sm p-3 text-info text-start" style="min-width: 220px;">
+                <div class="card shadow-sm p-3 text-info text-start" style="min-width: 220px; cursor: pointer;" id="cardLinea">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="fw-bold mb-0"><i class="fas fa-stream fa-2x"></i></h5>
                     </div>
@@ -184,4 +185,48 @@
         {% endif %}
     </div>
 </div>
+
+
+<!-- Modal Gráfico por Módulo -->
+<div class="modal fade" id="graficoModuloModal" tabindex="-1" aria-labelledby="graficoModuloLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoModuloLabel">Certificaciones por Módulo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoModuloCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Gráfico por Línea -->
+  <div class="modal fade" id="graficoLineaModal" tabindex="-1" aria-labelledby="graficoLineaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoLineaLabel">Certificaciones por Línea</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoLineaCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% block extra_js %}
+    {{ modulos_labels|json_script:"labels-modulo" }}
+    {{ modulos_data|json_script:"values-modulo" }}
+    {{ lineas_labels|json_script:"labels-linea" }}
+    {{ lineas_data|json_script:"values-linea" }}
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'JS/informes_certificaciones.js' %}"></script>
+    
+  {% endblock %}
+
+
 {% endblock %}

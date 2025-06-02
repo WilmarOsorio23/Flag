@@ -107,6 +107,10 @@ def empleado_estudio_filtrado(request):
         'total_estudios': total_estudios,
         'conteo_instituciones': conteo_instituciones,
         'conteo_lineas': conteo_lineas,
+        'lineas_labels': list(conteo_lineas.keys()),
+        'lineas_data': list(conteo_lineas.values()),
+        'instituciones_labels': list(conteo_instituciones.keys()),
+        'instituciones_data': list(conteo_instituciones.values()),
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 

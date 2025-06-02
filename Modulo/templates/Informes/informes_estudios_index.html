@@ -62,7 +62,7 @@
                     </div>
 
                     <!-- Por Institución -->
-                    <div class="card shadow-sm p-3 text-success text-start h-100" style="min-width: 220px;">
+                    <div class="card shadow-sm p-3 text-success text-start h-100" style="min-width: 220px; cursor:pointer;" id="cardInstitucion">
                         <div class="d-flex justify-content-between align-items-center">
                             <i class="fas fa-university fa-2x"></i>
                         </div>
@@ -75,7 +75,7 @@
                     </div>
 
                     <!-- Por Línea -->
-                    <div class="card shadow-sm p-3 text-info text-start h-100" style="min-width: 220px;">
+                    <div class="card shadow-sm p-3 text-info text-start h-100" style="min-width: 220px; cursor:pointer;" id="cardLinea">
                         <div class="d-flex justify-content-between align-items-center">
                             <i class="fas fa-stream fa-2x"></i>
                         </div>
@@ -222,5 +222,46 @@
             {% endif %}
     </div>
 </div>
-<script src="{% static 'JS/informes_estudios.js' %}"></script>
+
+<!-- Modal Gráfico por Línea -->
+<div class="modal fade" id="graficoLineaModal" tabindex="-1" aria-labelledby="graficoLineaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoLineaLabel">Estudios por Línea</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoLineaCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Gráfico por Institución -->
+<div class="modal fade" id="graficoInstitucionModal" tabindex="-1" aria-labelledby="graficoInstitucionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoInstitucionLabel">Estudios por Institución</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoInstitucionCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% block extra_js %}
+    {{ lineas_labels|json_script:"labels-linea" }}
+    {{ lineas_data|json_script:"values-linea" }}
+
+    {{ instituciones_labels|json_script:"labels-institucion" }}
+    {{ instituciones_data|json_script:"values-institucion" }}
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'JS/informes_estudios.js' %}"></script>
+    {% endblock %}
+
 {% endblock %}

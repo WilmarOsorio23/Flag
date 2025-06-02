@@ -133,6 +133,8 @@ def empleado_nomina_filtrado(request):
         'busqueda_realizada': busqueda_realizada,
         'total_certificados': total_certificados,
         'conteo_lineas': conteo_lineas,
+        'lineas_labels': list(conteo_lineas.keys()),
+        'lineas_data': list(conteo_lineas.values()),
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
