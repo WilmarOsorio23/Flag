@@ -1,11 +1,12 @@
 from .base import *
+import os
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'tu-clave-secreta-muy-segura-para-produccion'  # Cambiar esto por una clave segura
+SECRET_KEY = 'django-insecure-xg$8kvggebts&j%)(_%!ez(4z9-za&cg28wc98gq(u)din5m(1'
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['web.flagsoluciones.com', 'www.web.flagsoluciones.com']  # Ajusta esto a tu dominio de producción
+ALLOWED_HOSTS = ['gif.flagsoluciones.com']
 
 # Database
 DATABASES = {
@@ -20,10 +21,15 @@ DATABASES = {
 }
 
 # Configuración de archivos estáticos
-STATIC_ROOT = '/var/www/vhosts/[tu-dominio]/httpdocs/static/'
 STATIC_URL = '/static/'
-MEDIA_ROOT = '/var/www/vhosts/[tu-dominio]/httpdocs/media/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'Modulo', 'static'),
+]
+STATIC_ROOT = '/var/www/vhosts/gif.flagsoluciones.com/httpdocs/staticfiles'
+
+# Media files
 MEDIA_URL = '/media/'
+MEDIA_ROOT = '/var/www/vhosts/gif.flagsoluciones.com/httpdocs/media'
 
 # Configuración de seguridad
 SECURE_SSL_REDIRECT = True
@@ -41,7 +47,7 @@ LOGGING = {
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': '/home/tu_usuario/logs/django_production.log',
+            'filename': 'django_production.log',
         },
     },
     'loggers': {

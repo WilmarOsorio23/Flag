@@ -21,6 +21,13 @@ DATABASES = {
     }
 }
 
+# Mensaje de debug para mostrar la configuración
+print("\n=== Configuración de Base de Datos ===")
+print(f"Nombre de BD: {DATABASES['default']['NAME']}")
+print(f"Usuario: {DATABASES['default']['USER']}")
+print(f"Host: {DATABASES['default']['HOST']}")
+print("=====================================\n")
+
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
