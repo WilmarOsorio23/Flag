@@ -630,6 +630,47 @@ input[type="checkbox"]:disabled {
 .table-responsive-informes::-webkit-scrollbar-thumb:hover {
     background-color: #0056b3; /* Color al pasar el mouse */
 }
+
+/* ========================== */
+/*    Columnas fijas Tablas   */
+/* ========================== */
+.table-fixed-columns {
+    overflow-x: auto;
+    position: relative;
+    max-height: 70vh;
+}
+
+/* Columnas fijas */
+th.fixed-column,
+td.fixed-column {
+    position: sticky;
+    z-index: 10;
+}
+
+/* Encabezados */
+th.fixed-column {
+    z-index: 20;
+}
+
+/* Pie de tabla */
+tfoot th.fixed-column {
+    z-index: 30;
+}
+
+/* Posiciones específicas */
+.fixed-column-1 { 
+    left: 0;
+    min-width: 150px;
+}
+.fixed-column-2 {
+    left: 150px;
+    min-width: 80px;
+}
+.fixed-column-3 {
+    left: 230px;
+    min-width: 100px;
+}
+
 /* ========================== */
 /*        BUTTONS STYLING     */
 /* ========================== */
