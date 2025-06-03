@@ -164,11 +164,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function actualizarTabla(data) {
-            
             const actualizarFila = (mesNum, datosMes) => {
                 const mesNombre = MESES_ES[parseInt(mesNum) - 1];
-                
-                // Buscar fila por nombre de mes
                 const $fila = $(`#totales tbody tr:not(.diciembre-anterior):has(td:first-child:contains("${mesNombre}"))`);
                 
                 if ($fila.length) {
@@ -178,29 +175,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     $celdas.eq(1).text(datosMes.Dias);
                     $celdas.eq(2).text(parseFloat(datosMes.Horas).toFixed(2));
                     
-                    // Índice inicial para datos de clientes (después de las 3 primeras columnas)
                     let indice = 3;
-                    
-                    // Iterar por cada cliente usando la variable global
                     Clientes.forEach(cliente => {
                         const clienteKey = cliente.Nombre_Cliente;
                         if (datosMes.Clientes[clienteKey]) {
                             const clienteData = datosMes.Clientes[clienteKey];
                             
-                            // Trabajado
                             $celdas.eq(indice++).text(parseFloat(clienteData.Trabajado).toFixed(2));
-                            // Costo
                             $celdas.eq(indice++).text('$' + parseFloat(clienteData.Costo).toFixed(2));
-                            // Facturado horas
                             $celdas.eq(indice++).text(parseFloat(clienteData.Facturado.horas).toFixed(2));
-                            // Facturado valor
                             $celdas.eq(indice++).text('$' + parseFloat(clienteData.Facturado.valor).toFixed(2));
-                            // Pendiente horas
                             $celdas.eq(indice++).text(parseFloat(clienteData.Pendiente.horas).toFixed(2));
-                            // Pendiente valor
                             $celdas.eq(indice++).text('$' + parseFloat(clienteData.Pendiente.valor).toFixed(2));
                         } else {
-                            indice += 6; // Saltar 6 columnas si no hay datos
+                            indice += 6;
                         }
                     });
                 }
@@ -213,33 +201,88 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         
-            // Actualizar totales
-            if (data.totales) {
-                const $filaTotales = $('#totales tfoot tr:first');
-                let indice = 3;
-                
+            // Recalcular totales
                 Clientes.forEach(cliente => {
                     const clienteKey = cliente.Nombre_Cliente;
-                    if (data.totales[clienteKey]) {
-                        const totales = data.totales[clienteKey];
-                        
-                        $filaTotales.find(`td:eq(${indice})`).text(parseFloat(totales.Trabajado).toFixed(2));
-                        indice++;
-                        $filaTotales.find(`td:eq(${indice})`).text('$' + parseFloat(totales.Costo).toFixed(2));
-                        indice++;
-                        $filaTotales.find(`td:eq(${indice})`).text(parseFloat(totales.Facturado_horas).toFixed(2));
-                        indice++;
-                        $filaTotales.find(`td:eq(${indice})`).text('$' + parseFloat(totales.Facturado_valor).toFixed(2));
-                        indice++;
-                        $filaTotales.find(`td:eq(${indice})`).text(parseFloat(totales.Pendiente_horas).toFixed(2));
-                        indice++;
-                        $filaTotales.find(`td:eq(${indice})`).text('$' + parseFloat(totales.Pendiente_valor).toFixed(2));
-                        indice++;
-                    } else {
-                        indice += 6;
+                let totales = {
+                    trabajado: 0,
+                    costo: 0,
+                    facturado_horas: 0,
+                    facturado_valor: 0
+                };
+
+                // Sumar valores de diciembre si existe
+                const $diciembreInputs = $(`.diciembre-anterior input[name^="diciembre_"][name$="${cliente.ClienteId}"]`);
+                if ($diciembreInputs.length) {
+                    totales.trabajado += parseFloat($diciembreInputs.filter('[name^="diciembre_trabajado_"]').val() || 0);
+                    totales.costo += parseFloat($diciembreInputs.filter('[name^="diciembre_costo_"]').val() || 0);
+                    totales.facturado_horas += parseFloat($diciembreInputs.filter('[name^="diciembre_facturado_"]').val() || 0);
+                    totales.facturado_valor += parseFloat($diciembreInputs.filter('[name^="diciembre_valor_facturado_"]').val() || 0);
+                }
+
+                // Sumar valores de cada mes
+                $(`#totales tbody tr:not(.diciembre-anterior) td[data-cliente="${clienteKey}"]`).each(function() {
+                    const $td = $(this);
+                    const valor = parseFloat($td.text().replace('$', '').replace(',', '') || 0);
+                    const index = $td.index();
+                    
+                    // Determinar qué tipo de valor es basado en su posición
+                    const posicionRelativa = (index - 3) % 6; // 3 es el offset por las columnas fijas
+                    switch(posicionRelativa) {
+                        case 0: totales.trabajado += valor; break;
+                        case 1: totales.costo += valor; break;
+                        case 2: totales.facturado_horas += valor; break;
+                        case 3: totales.facturado_valor += valor; break;
                     }
                 });
-            }
+
+                // Actualizar los totales calculados
+                $(`.total-trabajado[data-cliente="${clienteKey}"]`).text(totales.trabajado.toFixed(2));
+                $(`.total-costo[data-cliente="${clienteKey}"]`).text('$' + totales.costo.toFixed(2));
+                $(`.total-facturado-horas[data-cliente="${clienteKey}"]`).text(totales.facturado_horas.toFixed(2));
+                $(`.total-facturado-valor[data-cliente="${clienteKey}"]`).text('$' + totales.facturado_valor.toFixed(2));
+
+                // Usar los valores de pendientes del backend
+                if (data.totales && data.totales[clienteKey]) {
+                    $(`.total-pendiente-horas[data-cliente="${clienteKey}"]`).text(
+                        parseFloat(data.totales[clienteKey].Pendiente_horas || 0).toFixed(2)
+                    );
+                    $(`.total-pendiente-valor[data-cliente="${clienteKey}"]`).text(
+                        '$' + parseFloat(data.totales[clienteKey].Pendiente_valor || 0).toFixed(2)
+                    );
+
+                    // Actualizar diferencias y margen usando los valores del backend para pendientes
+                    const pendienteHoras = parseFloat(data.totales[clienteKey].Pendiente_horas || 0);
+                    const pendienteValor = parseFloat(data.totales[clienteKey].Pendiente_valor || 0);
+                    
+                    const difHoras = totales.trabajado - totales.facturado_horas - pendienteHoras;
+                    const difValor = (totales.facturado_valor + pendienteValor) - totales.costo;
+                    const margenBruto = totales.facturado_valor + pendienteValor !== 0 
+                        ? ((totales.facturado_valor + pendienteValor - totales.costo) / 
+                           (totales.facturado_valor + pendienteValor) * 100)
+                        : 0;
+
+                    $(`tr:contains("Dif fact / Tbjo") th[data-cliente="${clienteKey}"]`)
+                        .text(difHoras.toFixed(2))
+                        .next('th')
+                        .text('$' + difValor.toFixed(2));
+
+                    $(`tr:contains("% Margen Bruto") th[data-cliente="${clienteKey}"]`)
+                        .text(margenBruto.toFixed(2) + '%');
+                }
+            });
+
+            // Calcular totales de días y horas
+            let totalDias = 0;
+            let totalHoras = 0;
+            $('#totales tbody tr:not(.diciembre-anterior)').each(function() {
+                totalDias += parseFloat($(this).find('td:eq(1)').text() || 0);
+                totalHoras += parseFloat($(this).find('td:eq(2)').text() || 0);
+            });
+            
+            const numMeses = $('#totales tbody tr:not(.diciembre-anterior)').length || 1;
+            $('.total-dias').text((totalDias / numMeses).toFixed(2));
+            $('.total-horas').text((totalHoras / numMeses).toFixed(2));
         }
     }
 });

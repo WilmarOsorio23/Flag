@@ -9,7 +9,7 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Indicadores de Totales</h4>
     </div>
-    <div class="card-body" style="overflow: hidden;">
+    <div class="card-body" style="overflow: visible; position: relative;">
         <div class="container-fluid mb-3">
             <form method="GET">
                 <div class="row mb-3">
@@ -135,13 +135,13 @@
                             <i class="fas fa-save"></i> Guardar Datos
                         </button>
                     </div>
-                    <div class="table-responsive">
+                    <div class="table-responsive table-fixed-columns">
                         <table class="table table-bordered table-striped">
                             <thead class="table-dark">
                                 <tr>
-                                    <th rowspan="2">Mes</th>
-                                    <th rowspan="2">Días</th>
-                                    <th rowspan="2">Horas</th>
+                                    <th class="fixed-column fixed-column-1" rowspan="2">Mes</th>
+                                    <th class="fixed-column fixed-column-2" rowspan="2">Días</th>
+                                    <th class="fixed-column fixed-column-3" rowspan="2">Horas</th>
                                     {% for cliente in Clientes %}
                                         {% with nombre_cliente=cliente.Nombre_Cliente %}
                                         <th colspan="6">{{ nombre_cliente }}</th>
@@ -170,9 +170,9 @@
                                 <!-- Fila para Diciembre del Año Anterior (solo si hay Enero en los meses seleccionados) -->
                                 {% if '1' in resultados.general.keys %}
                                 <tr class="bg-light diciembre-anterior">
-                                    <td>Diciembre {{ anio|add:"-1" }}</td>
-                                    <td>-</td>
-                                    <td>-</td>
+                                    <td class="fixed-column fixed-column-1">Diciembre {{ anio|add:"-1" }}</td>
+                                    <td class="fixed-column fixed-column-2">-</td>
+                                    <td class="fixed-column fixed-column-3">-</td>
                                     {% for cliente in Clientes %}
                                     <td>
                                         <input type="number" step="0.01"
@@ -221,9 +221,9 @@
                                 {% endif %}
                                 {% for mes, datos in resultados.general.items|slice:":12" %} 
                                 <tr>
-                                    <td>{{ MESES|get_item:mes }}</td>
-                                    <td>{{ datos.Dias }}</td>
-                                    <td>{{ datos.Horas|floatformat:2 }}</td>
+                                    <td class="fixed-column fixed-column-1">{{ MESES|get_item:mes }}</td>
+                                    <td class="fixed-column fixed-column-2">{{ datos.Dias }}</td>
+                                    <td class="fixed-column fixed-column-3">{{ datos.Horas|floatformat:2 }}</td>
                                     
                                     {% for cliente in Clientes %}
                                         {% with c=datos.Clientes|get_item:cliente.Nombre_Cliente %}
@@ -249,17 +249,17 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <th>TOTALES</th>
-                                    <th>{{ resultados.totales.Dias|default:0|floatformat:2 }}</th>
-                                    <th>{{ resultados.totales.Horas|default:0|floatformat:2 }}</th>
+                                    <th class="fixed-column fixed-column-1">TOTALES</th>
+                                    <th class="fixed-column fixed-column-2 total-dias">{{ resultados.totales.Dias|default:0|floatformat:2 }}</th>
+                                    <th class="fixed-column fixed-column-3 total-horas">{{ resultados.totales.Horas|default:0|floatformat:2 }}</th>
                                     {% for cliente in Clientes %}
                                         {% with total=resultados.totales|get_item:cliente.Nombre_Cliente %}
-                                        <th data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Trabajado|default:0|floatformat:2 }}</th>
-                                        <th data-cliente="{{ cliente.Nombre_Cliente }}">${{ total.Costo|default:0|floatformat:2 }}</th>
-                                        <th data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Facturado_horas|default:0|floatformat:2 }}</th>
-                                        <th data-cliente="{{ cliente.Nombre_Cliente }}">${{ total.Facturado_valor|default:0|floatformat:2 }}</th>
-                                        <th data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Pendiente_horas|default:0|floatformat:2 }}</th>
-                                        <th data-cliente="{{ cliente.Nombre_Cliente }}">${{ total.Pendiente_valor|default:0|floatformat:2 }}</th>
+                                        <th class="total-trabajado" data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Trabajado|default:0|floatformat:2 }}</th>
+                                        <th class="total-costo" data-cliente="{{ cliente.Nombre_Cliente }}">${{ total.Costo|default:0|floatformat:2 }}</th>
+                                        <th class="total-facturado-horas" data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Facturado_horas|default:0|floatformat:2 }}</th>
+                                        <th class="total-facturado-valor" data-cliente="{{ cliente.Nombre_Cliente }}">${{ total.Facturado_valor|default:0|floatformat:2 }}</th>
+                                        <th class="total-pendiente-horas" data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Pendiente_horas|default:0|floatformat:2 }}</th>
+                                        <th class="total-pendiente-valor" data-cliente="{{ cliente.Nombre_Cliente }}">${{ total.Pendiente_valor|default:0|floatformat:2 }}</th>
                                         {% endwith %}
                                     {% endfor %}
                                     {% for concepto in Conceptos %}
@@ -267,7 +267,7 @@
                                     {% endfor %}
                                 </tr>
                                 <tr>
-                                    <th>Dif fact / Tbjo</th>
+                                    <th class="fixed-column fixed-column-1">Dif fact / Tbjo</th>
                                     {% for cliente in Clientes %}
                                         {% with total=resultados.totales|get_item:cliente.Nombre_Cliente %}
                                             <td colspan="4"></td>
@@ -277,7 +277,7 @@
                                     {% endfor %}
                                 </tr>
                                 <tr>
-                                    <th>% Margen Bruto</th>
+                                    <th class="fixed-column fixed-column-1">% Margen Bruto</th>
                                     {% for cliente in Clientes %}
                                         {% with total=resultados.totales|get_item:cliente.Nombre_Cliente %}
                                             <td colspan="5"></td>
