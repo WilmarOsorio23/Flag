@@ -66,7 +66,7 @@
             </div>
 
             <!-- Tarjeta: Empleados Activos/Inactivos -->
-            <div class="card shadow-sm p-3" style="min-width: 220px;">
+            <div class="card shadow-sm p-3" style="min-width: 220px; cursor: pointer;" id="cardActivosInactivos">
               <div class="card-body p-0">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <div>
@@ -339,6 +339,22 @@
     </div>
   </div>
 
+  
+  <!-- Modal Gráfico Activos/Inactivos -->
+  <div class="modal fade" id="graficoActivosInactivosModal" tabindex="-1" aria-labelledby="graficoActivosInactivosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoActivosInactivosLabel">Distribución Activos / Inactivos</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoActivosInactivosCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
   {% block extra_js %}
     <!--
       Inserta los datos de etiquetas y valores para los gráficos
@@ -353,6 +369,9 @@
 
     {{ postgrados_labels|json_script:"labels-postgrados" }}
     {{ postgrados_data|json_script:"values-postgrados" }}
+
+    {{ activos_inactivos_labels|json_script:"labels-activos" }}
+    {{ activos_inactivos_data|json_script:"values-activos" }}
 
     <!-- Cargar Chart.js desde CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
