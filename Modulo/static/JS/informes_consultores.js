@@ -1,110 +1,144 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Función de ordenamiento mejorada
-    function sortTable(column, direction) {
-        const table = document.getElementById('consultoresTable');
-        const tbody = table.querySelector('tbody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
+document.addEventListener('DOMContentLoaded', function () {
 
-        // Actualizar indicadores visuales en todos los encabezados
-        document.querySelectorAll('.sortable').forEach(header => {
-            // Resetear todos los encabezados a 'default'
-            header.dataset.direction = header.dataset.sort === column ? direction : 'default';
-        });
+  //=============================
+  // LÓGICA DE CARDS Y GRÁFICOS
+  //=============================
 
-        rows.sort((a, b) => {
-            const aValue = a.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent.trim();
-            const bValue = b.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent.trim();
-            
-            // Comparación numérica para documentos y años
-            if (['documento_colaborador', 'año'].includes(column)) {
-                return direction === 'asc' 
-                    ? Number(aValue || 0) - Number(bValue || 0)
-                    : direction === 'desc'
-                    ? Number(bValue || 0) - Number(aValue || 0)
-                    : 0;
+  function crearGraficoCard({
+    cardId,
+    modalId,
+    canvasId,
+    labelsScriptId,
+    valuesScriptId,
+    chartVarName,
+    labelText,
+    bgColor,
+    borderColor,
+    type = 'bar'
+  }) {
+    const card = document.getElementById(cardId);
+    const modal = new bootstrap.Modal(document.getElementById(modalId));
+
+    card.addEventListener('click', function () {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+
+      if (window[chartVarName]) {
+        window[chartVarName].destroy();
+      }
+
+      window[chartVarName] = new Chart(ctx, {
+        type: type,
+        data: {
+          labels: JSON.parse(document.getElementById(labelsScriptId).textContent),
+          datasets: [{
+            label: labelText,
+            data: JSON.parse(document.getElementById(valuesScriptId).textContent),
+            backgroundColor: bgColor,
+            borderColor: borderColor,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: type === 'doughnut' }
+          },
+          scales: type === 'bar' ? {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Cantidad' }
             }
-            
-            // Comparación de cadenas para otros campos
-            return direction === 'asc'
-                ? aValue.localeCompare(bValue)
-                : direction === 'desc'
-                ? bValue.localeCompare(aValue)
-                : 0;
-        });
-
-        // Reinsert sorted rows
-        rows.forEach(row => tbody.appendChild(row));
-
-        // Mejora de accesibilidad: Actualizar etiquetas ARIA
-        document.querySelectorAll('.sortable').forEach(header => {
-            const column = header.dataset.sort;
-            const direction = header.dataset.direction;
-            
-            header.setAttribute('aria-label', 
-                `Ordenar por ${column} ${direction === 'asc' ? 'ascendente' : direction === 'desc' ? 'descendente' : ''}`
-            );
-        });
-    }
-
-    // Función para obtener índice de columna
-    function getColumnIndex(sortColumn) {
-        const headers = document.querySelectorAll('#consultoresTable thead th');
-        for (let i = 0; i < headers.length; i++) {
-            if (headers[i].dataset.sort === sortColumn) {
-                return i + 1;
-            }
+          } : {}
         }
-        return 1;
-    }
+      });
 
-    // Manejar clics en encabezados con soporte para teclado
-    document.querySelectorAll('.sortable').forEach(header => {
-        // Evento de clic
-        header.addEventListener('click', function() {
-            triggerSort(this);
-        });
+      modal.show();
+    });
+  }
 
-        // Soporte para teclado (Enter y Espacio)
-        header.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                triggerSort(this);
-            }
-        });
+  // Gráfico por Módulo
+  crearGraficoCard({
+    cardId: 'cardModulo',
+    modalId: 'graficoModuloModal',
+    canvasId: 'graficoModuloCanvas',
+    labelsScriptId: 'labels-modulo',
+    valuesScriptId: 'values-modulo',
+    chartVarName: 'moduloChart',
+    labelText: 'Consultores por Módulo',
+    bgColor: 'rgba(255, 193, 7, 0.5)',
+    borderColor: 'rgba(255, 193, 7, 1)',
+    type: 'bar'
+  });
 
-        // Establecer dirección inicial a 'default'
-        header.dataset.direction = 'default';
+  // Gráfico por Línea
+  crearGraficoCard({
+    cardId: 'cardLinea',
+    modalId: 'graficoLineaModal',
+    canvasId: 'graficoLineaCanvas',
+    labelsScriptId: 'labels-linea',
+    valuesScriptId: 'values-linea',
+    chartVarName: 'lineaChart',
+    labelText: 'Consultores por Línea',
+    bgColor: 'rgba(13, 202, 240, 0.5)',
+    borderColor: 'rgba(13, 202, 240, 1)',
+    type: 'bar'
+  });
+
+  // Gráfico por Estado (Doughnut)
+  crearGraficoCard({
+    cardId: 'cardEstado',
+    modalId: 'graficoEstadoModal',
+    canvasId: 'graficoEstadoCanvas',
+    labelsScriptId: 'labels-estado',
+    valuesScriptId: 'values-estado',
+    chartVarName: 'estadoChart',
+    labelText: 'Consultores por Estado',
+    bgColor: ['rgba(25, 135, 84, 0.7)', 'rgba(220, 53, 69, 0.7)'],
+    borderColor: ['rgba(25, 135, 84, 1)', 'rgba(220, 53, 69, 1)'],
+    type: 'doughnut'
+  });
+
+  //==============================
+  // LÓGICA DE ORDENAMIENTO TABLA
+  //==============================
+
+  const table = document.getElementById('consultoresTable');
+  if (table) {
+    const headers = table.querySelectorAll('th.sortable');
+
+    headers.forEach(header => {
+      header.addEventListener('click', () => {
+        const column = header.getAttribute('data-sort');
+        const direction = header.getAttribute('data-direction') || 'asc';
+        const newDirection = direction === 'asc' ? 'desc' : 'asc';
+
+        sortTableByColumn(table, column, newDirection);
+
+        headers.forEach(h => h.setAttribute('data-direction', 'default'));
+        header.setAttribute('data-direction', newDirection);
+      });
     });
 
-    // Función centralizada para ordenar
-    function triggerSort(header) {
-        const column = header.dataset.sort;
-        const currentDirection = header.dataset.direction;
-        
-        let newDirection;
-        switch(currentDirection) {
-            case 'default':
-                newDirection = 'asc';
-                break;
-            case 'asc':
-                newDirection = 'desc';
-                break;
-            case 'desc':
-                newDirection = 'default';
-                break;
+    function sortTableByColumn(table, columnName, direction) {
+      const rows = Array.from(table.querySelectorAll('tbody tr'));
+      const columnIndex = Array.from(table.querySelectorAll('thead th'))
+        .findIndex(th => th.getAttribute('data-sort') === columnName);
+
+      rows.sort((a, b) => {
+        const cellA = a.cells[columnIndex].innerText.trim();
+        const cellB = b.cells[columnIndex].innerText.trim();
+
+        if (!isNaN(cellA) && !isNaN(cellB)) {
+          return direction === 'asc' ? cellA - cellB : cellB - cellA;
         }
 
-        sortTable(column, newDirection);
-    }
+        return direction === 'asc'
+          ? cellA.localeCompare(cellB)
+          : cellB.localeCompare(cellA);
+      });
 
-    // Mejora de accesibilidad: Tooltip descriptivo
-    function addTooltips() {
-        document.querySelectorAll('.sortable').forEach(header => {
-            header.setAttribute('title', 'Haga clic para ordenar');
-            header.setAttribute('tabindex', '0'); // Hacerlo enfocable con teclado
-        });
+      const tbody = table.querySelector('tbody');
+      rows.forEach(row => tbody.appendChild(row));
     }
-
-    // Inicializar tooltips
-    addTooltips();
+  }
 });

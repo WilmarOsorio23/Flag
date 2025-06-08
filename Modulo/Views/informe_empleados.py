@@ -167,6 +167,9 @@ def informe_empleados(request):
 
         'postgrados_labels': list(postgrados_por_linea.keys()),
         'postgrados_data': list(postgrados_por_linea.values()),
+
+        'activos_inactivos_labels': ['Activos', 'Inactivos'],
+        'activos_inactivos_data': [empleados_activos, empleados_inactivos],
     })
 
     return render(request, 'informes/informes_empleado_index.html', context)

@@ -86,10 +86,10 @@ def consultores_filtrado(request):
                 # Inicializar consultores
                 consultores = Consultores.objects.all()
 
-                # Relizar el filtro de los consultores
+                # Realizar el filtro de los consultores
                 consultores = filtrar_consultores(form, consultores)
 
-                #Obtener informacion de consultores 
+                # Obtener información de consultores 
                 consultor_info = obtener_consultores(consultores)
                 show_data = bool(consultor_info)  # Mostrar datos si hay resultados
         
@@ -114,6 +114,16 @@ def consultores_filtrado(request):
     modulos = [c['modulo'] for c in consultor_info if c['modulo']]
     conteo_modulos = dict(Counter(modulos))
 
+    # 6. Preparar datos para gráficos en JSON
+    lineas_labels = list(conteo_lineas.keys())
+    lineas_data = list(conteo_lineas.values())
+
+    modulos_labels = list(conteo_modulos.keys())
+    modulos_data = list(conteo_modulos.values())
+
+    estado_labels = ['Activo', 'Inactivo']
+    estado_data = [activos, inactivos]
+
     context = {
         'form': form,
         'consultor_info': consultor_info,      
@@ -125,7 +135,17 @@ def consultores_filtrado(request):
         'certificados': certificados,
         'conteo_lineas': conteo_lineas,
         'conteo_modulos': conteo_modulos,
-        'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
+        'lineas_labels': lineas_labels,
+        'lineas_data': lineas_data,
+        'modulos_labels': modulos_labels,
+        'modulos_data': modulos_data,
+        'estado_labels': estado_labels,
+        'estado_data': estado_data,
+        'mensaje': (
+            "No se encontraron resultados para los filtros aplicados."
+            if busqueda_realizada and not show_data
+            else "No se ha realizado ninguna búsqueda aún."
+        )
     }
 
     return render(request, 'informes/informes_consultores_index.html', context)
