@@ -18,6 +18,7 @@ from .models import Tarifa_Clientes
 from .models import Referencia
 from .models import CentrosCostos
 from datetime import date
+from django.utils import timezone
 
 
 class ModuloForm(forms.ModelForm):
@@ -2213,3 +2214,43 @@ class CertificacionesFilterForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+
+class Ind_Facturacion_FilterForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    Mes = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Mes',
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_anio()
+        self.populate_mes()
+
+    def populate_anio(self):
+        years = range(2020, timezone.now().year + 1)
+        self.fields['Anio'].choices = [(str(year), str(year)) for year in years]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'),
+            ('4', 'Abril'), ('5', 'Mayo'), ('6', 'Junio'),
+            ('7', 'Julio'), ('8', 'Agosto'), ('9', 'Septiembre'),
+            ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = meses

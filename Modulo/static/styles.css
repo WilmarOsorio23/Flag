@@ -904,3 +904,55 @@ a.fas, .fa {
     }
 
 }
+
+/* Estilos para los indicadores de facturación */
+.checkbox-group {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.checkbox-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-label {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+/* Estilos para las tablas de indicadores */
+.table-bordered th,
+.table-bordered td {
+    text-align: right;
+}
+
+.table-bordered th:first-child,
+.table-bordered td:first-child {
+    text-align: left;
+}
+
+/* Estilos para las tarjetas */
+.card {
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.card-header h4 {
+    margin: 0;
+    color: #333;
+}
+
+/* Estilos para el gráfico */
+canvas#graficoFacturacion {
+    min-height: 300px;
+    margin: 20px 0;
+}
