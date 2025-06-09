@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block titulo %}Indicadores de Facturación{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title">Indicadores de Facturación</h4>
+    </div>
+    <div class="card-body" style="overflow: hidden;">
+        <div class="container-fluid mb-3">
+            <form method="POST">
+                <div class="row mb-3">
+                    <!-- Filtro Año -->
+                    <div class="col-md-3">
+                        <label for="anio" class="form-label">{{ form.Anio.label }}</label>
+                        {{ form.Anio }}
+                    </div>
+                
+                    <!-- Filtro Mes -->
+                    <div class="col-md-3">
+                        <label for="mes" class="form-label">{{ form.Mes.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownMes"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Meses"
+                            >
+                                Seleccione Meses
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownMes">
+                                {% for checkbox in form.Mes %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <!-- Filtro Línea -->
+                    <div class="col-md-3">
+                        <label for="linea" class="form-label">{{ form.LineaId.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownLinea"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Líneas"
+                            >
+                                Seleccione Líneas
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
+                                {% for checkbox in form.LineaId %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>                
+                                            
+                <div class="row container-fluid">
+                    <div class="col-md-6 text-start">
+                        <button type="submit" name="buscar" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Generar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Pestañas -->
+        <ul class="nav nav-tabs justify-content-center mb-4" id="myTab" role="tablist">
+            <!-- Primera pestaña -->
+            <li class="nav-item w-50" role="presentation">
+                <button class="nav-link active w-100 btn btn-light text-primary" id="indicadores-tab" 
+                        data-bs-toggle="tab" data-bs-target="#indicadores" 
+                        type="button" role="tab" aria-controls="indicadores" aria-selected="true">
+                    Indicadores
+                </button>
+            </li>
+            <!-- Segunda pestaña -->
+            <li class="nav-item w-50" role="presentation">
+                <button class="nav-link w-100 btn btn-light text-primary" id="graficos-tab" 
+                        data-bs-toggle="tab" data-bs-target="#graficos" 
+                        type="button" role="tab" aria-controls="graficos" aria-selected="false">
+                    Gráficos Indicadores
+                </button>
+            </li>
+        </ul>
+
+        <!-- Contenido de las pestañas -->
+        <div class="tab-content" id="myTabContent">
+            <!-- Pestaña de Indicadores -->
+            {% if resultados %}
+            <div class="tab-pane fade show active p-3" id="indicadores" role="tabpanel" aria-labelledby="indicadores-tab">
+                {% for resultado in resultados %}
+                <h4>{{ resultado.nombre }}</h4>
+                <div class="table-responsive mb-4">  
+                    <table class="table table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Indicador</th>
+                                {% for mes in meses_seleccionados %}
+                                <th>{{ mes }}</th>
+                                {% endfor %}
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Trabajado</td>
+                                {% for mes in meses_seleccionados %}
+                                <td>{{ resultado.meses|get_item:mes|get_item:'trabajado'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.trabajado|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td>Facturable</td>
+                                {% for mes in meses_seleccionados %}
+                                <td>{{ resultado.meses|get_item:mes|get_item:'facturable'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.facturable|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td>Facturado</td>
+                                {% for mes in meses_seleccionados %}
+                                <td>{{ resultado.meses|get_item:mes|get_item:'facturado'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.facturado|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td>Índ.Fact</td>
+                                {% for mes in meses_seleccionados %}
+                                <td>{{ resultado.meses|get_item:mes|get_item:'ind_fact'|floatformat:0 }}%</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.ind_fact|floatformat:0 }}%</td>
+                            </tr>
+                            <tr>
+                                <td>Meta 90%</td>
+                                {% for mes in meses_seleccionados %}
+                                <td>90%</td>
+                                {% endfor %}
+                                <td>90%</td>
+                            </tr>
+                            <tr>
+                                <td>Pend.Fact</td>
+                                {% for mes in meses_seleccionados %}
+                                <td>{{ resultado.meses|get_item:mes|get_item:'pend_fact'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.pend_fact|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td>No Facturable</td>
+                                {% for mes in meses_seleccionados %}
+                                <td>{{ resultado.meses|get_item:mes|get_item:'no_facturable'|floatformat:2 }}</td>
+                                {% endfor %}
+                                <td>{{ resultado.totales.no_facturable|floatformat:2 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                {% empty %}
+                    <div class="alert alert-warning text-center" role="alert">
+                        No hay resultados disponibles para mostrar.
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Pestaña de Gráficos -->
+            <div class="tab-pane fade p-3" id="graficos" role="tabpanel" aria-labelledby="graficos-tab">
+                <div class="row g-3">
+                    <div class="col-12 col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header text-center bg-primary text-white py-2">  <!-- Reduced padding -->
+                                Indicadores Línea
+                            </div>
+                            <div class="card-body">
+                                <canvas id="graficoFacturacion"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% if datos_grafico %}
+<script>
+    window.datosGrafico = {{ datos_grafico|safe }};
+</script>
+{% endif %}
+<script src="{% static 'JS/indicadores_facturacion.js' %}"></script>
+{% endblock %}

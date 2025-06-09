@@ -564,17 +564,25 @@ def obtener_tarifa(request):
         except ValueError:
             return JsonResponse({'error': 'clienteId, lineaId, anio, mes y moduloId deben ser números enteros.'}, status=400)
 
-       # Buscar la tarifa en la base de datos
-        try:
-            # Buscar la tarifa más reciente
+        # Buscar la tarifa más reciente (año y mes anteriores o iguales)
+        tarifa = Tarifa_Clientes.objects.filter(
+            clienteId=cliente_id,
+            lineaId=linea_id,
+            moduloId=modulo_id,
+            anio__lte=anio,
+            mes__lte=mes
+        ).order_by('-anio', '-mes').first()
+
+        # Si no se encuentra tarifa, buscar cualquier tarifa del cliente
+        if not tarifa:
             tarifa = Tarifa_Clientes.objects.filter(
                 clienteId=cliente_id,
                 lineaId=linea_id,
-                moduloId=modulo_id,
-                anio__lte=anio,
-                mes__lte=mes
+                moduloId=modulo_id
             ).order_by('-anio', '-mes').first()
-            # Construir la respuesta JSON con los datos de la tarifa encontrada
+
+        # Construir respuesta
+        if tarifa:
             data = {
                 'valorHora': float(tarifa.valorHora) if tarifa.valorHora else 0.0,
                 'valorDia': float(tarifa.valorDia) if tarifa.valorDia else 0.0,
@@ -589,27 +597,22 @@ def obtener_tarifa(request):
                 },
                 'sitioTrabajo': tarifa.sitioTrabajo if tarifa.sitioTrabajo else ''
             }
-        except Tarifa_Clientes.DoesNotExist:
-            # Si no se encuentra la tarifa, devolver un objeto con valores vacíos
+        else:
+            # Datos por defecto si no hay ninguna tarifa
             data = {
                 'valorHora': 0.0,
                 'valorDia': 0.0,
                 'valorMes': 0.0,
                 'valorBolsa': 0.0,
                 'iva': 0.0,
-                'referenciaId': {
-                    'codigoReferencia': ''
-                },
-                'centrocostosId': {
-                    'codigoCeCo': ''
-                },
+                'referenciaId': {'codigoReferencia': ''},
+                'centrocostosId': {'codigoCeCo': ''},
                 'sitioTrabajo': ''
             }
 
         return JsonResponse(data)
 
     except Exception as e:
-        # Manejar cualquier otro error inesperado
         return JsonResponse({'error': f'Error interno del servidor: {str(e)}'}, status=500)
 
 def get_lineas_modulos(request):
@@ -621,12 +624,24 @@ def get_lineas_modulos(request):
         return JsonResponse({'error': 'ClienteId, anio y mes son requeridos.'}, status=400)
 
     try:
-        # Filtrar tarifas por cliente, año y mes
+        cliente_id = int(cliente_id)
+        anio = int(anio)
+        mes = int(mes)
+        
+        # Primero buscar tarifas exactas para el año y mes
         tarifas = Tarifa_Clientes.objects.filter(
             clienteId=cliente_id,
             anio=anio,
             mes=mes
         ).select_related('lineaId', 'moduloId').distinct()
+
+        # Si no hay tarifas exactas, buscar las más recientes
+        if not tarifas.exists():
+            tarifas = Tarifa_Clientes.objects.filter(
+                clienteId=cliente_id,
+                anio__lte=anio,
+                mes__lte=mes
+            ).order_by('-anio', '-mes').distinct()
 
         lineas = []
         modulos = []

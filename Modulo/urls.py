@@ -45,6 +45,7 @@ from Modulo.Views import referencia
 from Modulo.Views import centrosCostos
 from Modulo.Views import informe_facturacion
 from Modulo.Views import informe_historial_cargos
+from .Views import indicadores_facturacion
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -375,6 +376,7 @@ urlpatterns = [
 
     # Rutas para la tabla Indicadores de totales
     path('indicadores_totales/', indicadores_totales.indicadores_totales, name='indicadores_totales_index'),
+    path('indicadores_facturacion/', indicadores_facturacion.indicadores_facturacion, name='indicadores_facturacion_index'),
 
     ]
 
