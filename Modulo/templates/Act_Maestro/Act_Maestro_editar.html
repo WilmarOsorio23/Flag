@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Editar Actividad{% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Editando: {{ actividad.Act_PagareId }}</h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Código</label>
+                {{ form.Act_PagareId }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                {{ form.Descripcion_Act }}
+            </div>
+            <button type="submit" class="btn btn-success">Actualizar</button>
+            <a href="{% url 'actividad_pagare_index' %}" class="btn btn-danger">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

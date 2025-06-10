@@ -1,5 +1,5 @@
 from django import forms
-from .models import FacturacionClientes, Horas_Habiles, Modulo, IPC, IND, Linea, Perfil, TipoDocumento, Clientes, Consultores, Certificacion, Costos_Indirectos
+from .models import FacturacionClientes, Horas_Habiles, Modulo, IPC, IND, Linea, Pagare, Perfil, TipoDocumento, Clientes, Consultores, Certificacion, Costos_Indirectos, TipoPagare
 from .models import Concepto, Gastos, Detalle_Gastos, Total_Gastos, Total_Costos_Indirectos
 from .models import Detalle_Costos_Indirectos, TiemposConcepto, Tiempos_Cliente, Nomina, Detalle_Certificacion, Empleado
 from .models import Cargos
@@ -17,7 +17,8 @@ from .models import ContratosOtrosSi
 from .models import Tarifa_Clientes
 from .models import Referencia
 from .models import CentrosCostos
-from datetime import date
+from datetime import date, datetime
+from .models import ActividadPagare
 
 
 class ModuloForm(forms.ModelForm):
@@ -2205,3 +2206,82 @@ class CertificacionesFilterForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+
+class ActividadPagareForm(forms.ModelForm):
+    class Meta:
+        model = ActividadPagare
+        fields = ['Act_PagareId', 'Descripcion_Act']  # Incluir el código
+        labels = {
+            'Act_PagareId': 'Código',
+            'Descripcion_Act': 'Descripción'
+        }
+        widgets = {
+            'Act_PagareId': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: 1001'
+            }),
+            'Descripcion_Act': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Descripción de la actividad'
+            })
+        }
+
+class PagareFilterForm(forms.Form):
+    documento = forms.ModelMultipleChoiceField(
+        queryset=Empleado.objects.filter(Activo=True),  # Filtra solo empleados activos
+        required=False,
+        label='Empleado',
+        widget=forms.CheckboxSelectMultiple(),
+        to_field_name='Documento',  # Campo que se usará para identificar al empleado
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Personalizar cómo se muestra cada consultor
+        self.fields['documento'].label_from_instance = lambda obj: f'{obj.Nombre} - {obj.Documento}'
+
+class EmpleadoConPagareFilterForm(forms.Form):
+    empleados_con_pagare = forms.ModelMultipleChoiceField(
+        queryset=Empleado.objects.filter(
+            Documento__in=Pagare.objects.values_list('Documento', flat=True)
+        ).distinct().order_by('Nombre'),
+        required=False,
+        label='Empleados con pagaré',
+        widget=forms.CheckboxSelectMultiple(),  # Cambiado a CheckboxSelectMultiple
+        to_field_name='Documento',
+    )
+
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=False,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-control'})
+
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.CheckboxSelectMultiple()  # Cambiado a CheckboxSelectMultiple
+    )
+
+    tipo_pagare = forms.ModelMultipleChoiceField(
+        queryset=TipoPagare.objects.all(),
+        required=False,
+        label='Tipo de pagaré',
+        widget=forms.CheckboxSelectMultiple(),  # Cambiado a CheckboxSelectMultiple
+        to_field_name='Tipo_PagareId',
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Personalizar cómo se muestra cada empleado (nombre y documento en dos líneas)
+        self.fields['empleados_con_pagare'].label_from_instance = lambda obj: f'{obj.Nombre}<br>{obj.Documento}'
+        
+        # Llenar dinámicamente el campo de años
+        current_year = datetime.now().year
+        available_years = range(2023, current_year + 1)
+
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in available_years]

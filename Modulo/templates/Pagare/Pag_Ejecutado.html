@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label>Seleccionar Actividades Ejecutadas:</label>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" 
+                                id="dropdownActividadesEjecutado" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                            Seleccionar actividades
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownActividadesEjecutado">
+                            {% for actividad in todas_actividades %}
+                            <li>
+                                <label class="dropdown-item">
+                                    <input type="checkbox" class="actividad-ejecutado-checkbox" 
+                                           value="{{ actividad.id }}" 
+                                           data-nombre="{{ actividad.Descripcion_Act }}">
+                                    {{ actividad.Descripcion_Act }}
+                                </label>
+                            </li>
+                            <button type="button" 
+                                    class="btn btn-success mt-2" 
+                                    id="btn-agregar-ejecutado">
+                                    <i class="fas fa-plus"></i> Agregar Actividad
+                            </button>
+
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Horas Ejecutadas</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-ejecutado">
+                    {% for ejecutado in pagare.pagareejecutado_set.all %}
+                    <tr data-actividad-id="{{ ejecutado.Actividad.id }}">
+                        <td>{{ ejecutado.Actividad.Descripcion_Act }}</td>
+                        <td>
+                            <input type="number" 
+                                   name="horas_ejecutadas_{{ ejecutado.Actividad.id }}" 
+                                   value="{{ ejecutado.Horas_Ejecutadas }}"
+                                   class="form-control">
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-eliminar-ejecutado">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </form>
+    </div>
+</div>
+
+<script>
+
+
+        document.getElementById('btn-agregar-ejecutado').addEventListener('click', function() {
+            const tablaEjecutado = document.getElementById('tabla-ejecutado');
+            const checkboxes = document.querySelectorAll('.actividad-ejecutado-checkbox:checked');
+        
+            checkboxes.forEach(cb => {
+                const actividadId = cb.value;
+                const nombre = cb.dataset.nombre;
+        
+                const existe = tablaEjecutado.querySelector(`tr[data-actividad-id="${actividadId}"]`);
+                if (!existe) {
+                    const nuevaFila = document.createElement('tr');
+                    nuevaFila.dataset.actividadId = actividadId;
+                    nuevaFila.innerHTML = `
+                        <td>${nombre}</td>
+                        <td>
+                            <input type="number" 
+                                   name="horas_ejecutadas_${actividadId}" 
+                                   value="0"
+                                   class="form-control">
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-eliminar-ejecutado">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tablaEjecutado.appendChild(nuevaFila);
+                }
+        
+                cb.checked = false;
+            });
+        });
+        
+        // Manejar eliminación
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.btn-eliminar-ejecutado')) {
+                const row = e.target.closest('tr');
+                const actividadId = row.dataset.actividadId;
+                const cb = document.querySelector(`.actividad-ejecutado-checkbox[value="${actividadId}"]`);
+                if (cb) cb.checked = false;
+                row.remove();
+            }
+        });        
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdownEjecutado = document.getElementById('dropdownActividadesEjecutado');
+    const checkboxesEjecutado = document.querySelectorAll('.actividad-ejecutado-checkbox');
+    const tablaEjecutado = document.getElementById('tabla-ejecutado');
+
+    function actualizarBotonEjecutado() {
+        const seleccionados = Array.from(checkboxesEjecutado)
+            .filter(cb => cb.checked)
+            .map(cb => cb.parentElement.textContent.trim());
+
+        dropdownEjecutado.textContent = seleccionados.length > 0 
+            ? seleccionados.join(', ') 
+            : 'Seleccionar actividades';
+    }
+
+    function actualizarTablaEjecutado() {
+        const seleccionados = Array.from(checkboxesEjecutado)
+            .filter(cb => cb.checked)
+            .map(cb => ({
+                id: cb.value,
+                nombre: cb.dataset.nombre
+            }));
+
+        // Eliminar filas no seleccionadas
+        Array.from(tablaEjecutado.rows).forEach(row => {
+            const id = row.dataset.actividadId;
+            if (!seleccionados.some(a => a.id === id)) {
+                row.remove();
+            }
+        });
+
+        // Agregar nuevas filas
+        seleccionados.forEach(actividad => {
+            const existe = Array.from(tablaEjecutado.rows).some(
+                row => row.dataset.actividadId === actividad.id
+            );
+
+            if (!existe) {
+                const nuevaFila = `
+                    <tr data-actividad-id="${actividad.id}">
+                        <td>${actividad.nombre}</td>
+                        <td>
+                            <input type="number" 
+                                   name="horas_ejecutadas_${actividad.id}" 
+                                   value="0"
+                                   class="form-control">
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-eliminar-ejecutado">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                tablaEjecutado.insertAdjacentHTML('beforeend', nuevaFila);
+            }
+        });
+    }
+
+    checkboxesEjecutado.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            actualizarBotonEjecutado();
+            actualizarTablaEjecutado();
+        });
+    });
+
+    tablaEjecutado.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-eliminar-ejecutado')) {
+            const row = e.target.closest('tr');
+            const checkbox = Array.from(checkboxesEjecutado).find(
+                cb => cb.value === row.dataset.actividadId
+            );
+            if (checkbox) checkbox.checked = false;
+            row.remove();
+            actualizarBotonEjecutado();
+        }
+    });
+
+    // Marcar las que ya están cargadas
+    {% for ejecutado in pagare.pagareejecutado_set.all %}
+    const cbEjecutado = Array.from(checkboxesEjecutado).find(
+        cb => cb.value === "{{ ejecutado.Actividad.id }}"
+    );
+    if (cbEjecutado) cbEjecutado.checked = true;
+    {% endfor %}
+    actualizarBotonEjecutado();
+});
+</script>
+{% endblock %}

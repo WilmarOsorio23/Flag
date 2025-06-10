@@ -3,6 +3,7 @@ from django.forms import ValidationError
 from django.utils import timezone
 from django.core.validators import EmailValidator
 from django.core.exceptions import ValidationError
+from dateutil.relativedelta import relativedelta
 import re
 
 # Modelos base
@@ -741,3 +742,104 @@ class ContratosOtrosSi(models.Model):
 
     def __str__(self):
         return f"ContratoId:{self.ContratosOtrosSiId} - Cliente: {self.ClienteId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - NumeroOtroSi: {self.NumeroOtroSi} - ValorOtroSi: {self.ValorOtroSi} - ValorIncluyeIva: {self.ValorIncluyeIva} - Polizas: {self.Polizas} - PolizasDesc: {self.PolizasDesc} - FirmadoFlag: {self.FirmadoFlag} - FirmadoCliente: {self.FirmadoCliente} - Moneda: {self.monedaId} - Contrato: {self.Contrato}"
+    
+class TipoPagare(models.Model):
+    Tipo_PagareId = models.AutoField(primary_key=True, db_column='Tipo_PagareId')
+    Desc_Tipo_Pagare = models.CharField(max_length=100, db_column='Desc_Tipo_Pagare')
+
+    class Meta:
+        db_table = 'Tipo_Pagare'
+
+    def __str__(self):
+        return self.Desc_Tipo_Pagare
+
+
+class ActividadPagare(models.Model):
+    Act_PagareId = models.IntegerField(primary_key=True, db_column='Act_PagareId', unique=True)
+    Descripcion_Act = models.CharField(max_length=100, db_column='Descripcion_Act')
+
+    class Meta:
+        db_table = 'Actividades_Pagare'
+
+    def __str__(self):
+        return self.Descripcion_Act
+
+
+class Pagare(models.Model):
+    Pagare_Id = models.AutoField(primary_key=True, db_column='Pagare_Id')
+    Documento = models.CharField(max_length=20)
+    Fecha_Creacion_Pagare = models.DateField()
+    Tipo_Pagare = models.ForeignKey(
+        TipoPagare,
+        on_delete=models.PROTECT,
+        db_column='Tipo_PagareId',
+        related_name='pagares'
+    )
+    Fecha_inicio_Condonacion = models.DateField(null=True, blank=True)
+    Fecha_fin_Condonacion = models.DateField(null=True, blank=True)
+    Meses_de_condonacion = models.IntegerField(null=True, blank=True)
+    Valor_Pagare = models.DecimalField(max_digits=15, decimal_places=2)
+    porcentaje_ejecucion = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    estado = models.CharField(max_length=50)
+
+    class Meta:
+        db_table = 'Pagare'
+
+    def __str__(self):
+        return f"Pagare {self.Pagare_Id} – {self.Documento}"
+
+
+class PagarePlaneado(models.Model):
+    Pagare = models.ForeignKey(
+        Pagare,
+        on_delete=models.CASCADE,
+        db_column='Pagare_Id',
+        related_name='planeados'
+    )
+    Actividad = models.ForeignKey(
+        ActividadPagare,
+        on_delete=models.CASCADE,
+        db_column='Act_PagareId',
+        related_name='planeados'
+    )
+    Horas_Planeadas = models.IntegerField()
+
+    class Meta:
+        db_table = 'Pagare_Planeado'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['Pagare', 'Actividad'],
+                name='unique_pagare_planeado'
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.Pagare} → {self.Actividad}: {self.Horas_Planeadas}h planeadas"
+
+
+class PagareEjecutado(models.Model):
+    Pagare = models.ForeignKey(
+        Pagare,
+        on_delete=models.CASCADE,
+        db_column='Pagare_Id',
+        related_name='ejecutados'
+    )
+    Actividad = models.ForeignKey(
+        ActividadPagare,
+        on_delete=models.CASCADE,
+        db_column='Act_PagareId',
+        related_name='ejecutados'
+    )
+    Horas_Ejecutadas = models.IntegerField()
+
+    class Meta:
+        db_table = 'Pagare_Ejecutado'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['Pagare', 'Actividad'],
+                name='unique_pagare_ejecutado'
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.Pagare} → {self.Actividad}: {self.Horas_Ejecutadas}h ejecutadas"
