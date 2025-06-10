@@ -6,7 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from Modulo import models
 from Modulo.forms import PerfilForm
-from Modulo.models import Consultores, Empleado, Nomina, Perfil, Actividad, Cargo
+from Modulo.models import Consultores, Empleado, Nomina, Perfil
 from django.db import models
 import pandas as pd
 from django.contrib import messages
