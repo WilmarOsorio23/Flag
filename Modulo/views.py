@@ -25,6 +25,10 @@ from .models import Referencia
 from .forms import ReferenciaForm
 from .models import CentrosCostos
 from .forms import CentrosCostosForm
+from .forms import ActividadPagare
+from .forms import PagareFilterForm
+from .models import Pagare
+
 
 def inicio(request):
     return render(request, 'paginas/Inicio.html')

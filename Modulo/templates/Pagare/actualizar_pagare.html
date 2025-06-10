@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Actualizar Pagaré{% endblock %}
+
+{% block contenido %}
+<h2 class="mb-4">Actualizar Pagaré</h2>
+
+<form method="post" id="form-actualizar-pagare">
+    {% csrf_token %}
+    <div id="lista-pagares">
+        <input type="checkbox" checked hidden value="{{ empleado.Documento }}">
+    </div>
+
+    <input type="hidden" name="pagare_id" value="{{ pagare.Pagare_Id }}">
+
+    <div class="form-group mb-3">
+        <label for="fecha_creacion_{{ pagare.Documento.Documento }}">Fecha de Creación del Pagaré</label>
+        <input type="date" class="form-control" name="fecha_creacion_{{ empleado.Documento }} "id="fecha_creacion_{{ empleado.Documento }}" value="{{ pagare.Fecha_Creacion_Pagare|date:'Y-m-d' }}">
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="valor_pagare_{{ pagare.Documento.Documento }}">Valor del Pagaré</label>
+        <input type="number" step="0.01" class="form-control" id="valor_pagare_{{ empleado.Documento }}"name="valor_pagare_{{ empleado.Documento }}" value="{{ pagare.Valor_Pagare|floatformat:0 }}"">
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="meses_condonacion_{{ pagare.Documento.Documento }}">Meses de Condonación</label>
+        <input type="number" class="form-control"  id="meses_condonacion_{{ empleado.Documento }}" name="meses_condonacion_{{ empleado.Documento }}" value="{{ pagare.Meses_de_Condonacion }}">
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="tipo_pagare_{{ empleado.Documento }}">Tipo de Pagaré</label>
+        <select class="form-control" id="tipo_pagare_{{ empleado.Documento }}" name="tipo_pagare_{{ empleado.Documento }}">
+            {% for tipo in tipos_pagare %}
+                <option value="{{ tipo.Tipo_PagareId }}" {% if tipo.Tipo_PagareId == pagare.Tipo_Pagare_id %}selected{% endif %}>
+                    {{ tipo.Desc_Tipo_Pagare }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="estado_{{ pagare.Documento.Documento }}">Estado</label>
+        <select class="form-control" id="estado_{{ empleado.Documento }}" name="estado_{{ empleado.Documento }}">
+            <option value="Activo" {% if pagare.estado == 'Activo' %}selected{% endif %}>Activo</option>
+            <option value="Condonado" {% if pagare.estado == 'Condonado' %}selected{% endif %}>Condonado</option>
+            <option value="Finalizado" {% if pagare.estado == 'Finalizado' %}selected{% endif %}>Finalizado</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="valor_capacitacion_{{ pagare.Documento.Documento }}">Valor de la Capacitación</label>
+        <input type="number" step="0.01" class="form-control" id="valor_capacitacion_{{ empleado.Documento }}" name="valor_capacitacion_{{ empleado.Documento }}" value="{{ pagare.Valor_Capacitacion }}">
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="fecha_inicio_{{ pagare.Documento.Documento }}">Fecha Inicio Condonación</label>
+        <input type="date" class="form-control" name="fecha_inicio_{{ empleado.Documento }}" id="fecha_inicio_{{ empleado.Documento }}" value="{{ pagare.Fecha_inicio_Condonacion|date:'Y-m-d' }}">
+    </div>
+
+    <div class="form-group mb-4">
+        <label for="fecha_fin_{{ pagare.Documento.Documento }}">Fecha Fin Condonación</label>
+        <input type="date" class="form-control" name="fecha_fin_{{ empleado.Documento }}" id="fecha_fin_{{ empleado.Documento }}" value="{{ pagare.Fecha_fin_Condonacion|date:'Y-m-d' }}">
+    </div>
+
+    <hr>
+
+    <h4>Actividades Ejecutadas</h4>
+    <table class="table" id="ejecutado-{{ pagare.Documento.Documento }}">
+        <thead>
+            <tr>
+                <th>Actividad</th>
+                <th>Horas Ejecutadas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for act in actividades %}
+            <tr data-actividad-id="{{ act.Act_PagareId }}">
+                <td>{{ act.Descripcion_Act }}</td>
+                <td>
+                    <input type="number" step="0.01"
+                        name="horas_ejecutadas_{{ pagare.Documento.Documento }}_{{ act.Act_PagareId }}"
+                        value="{% for ejecutada in ejecutadas %}{% if ejecutada.Actividad_id == act.Act_PagareId %}{{ ejecutada.Horas_Ejecutadas }}{% endif %}{% endfor %}"
+                        class="form-control">
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <input type="checkbox" checked hidden value="{{ pagare.Documento.Documento }}">
+
+    <button type="button" id="guardar-pagares-btn" class="btn btn-success">Guardar</button>
+    <a href="{% url 'ruta_lista_pagares' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+
+<script>
+    const csrfToken = "{{ csrf_token }}";
+</script>
+
+<script src="{% static 'js/tu_archivo.js' %}"></script>  {# Asegúrate de que aquí cargas el JS que pegaste antes #}
+{% endblock %}
