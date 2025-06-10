@@ -4,7 +4,7 @@ import io
 import json
 from django import template
 from django.core.cache import cache
-from tkinter.font import Font
+# from tkinter.font import Font # Eliminada ya que no es necesaria para la web
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import redirect, render
