@@ -21,6 +21,7 @@ def clientes_factura_guardar(request):
         try:
             data = json.loads(request.body) 
             rows = data.get('data', [])
+                
             # Aquí puedes procesar cada fila
             for row in rows:
                 # Validar campos obligatorios
@@ -38,17 +39,17 @@ def clientes_factura_guardar(request):
                 linea_id = int(row.get('LineaId', 0)) if row.get('LineaId') else 0
                 modulo_id = int(row.get('ModuloId', 0)) if row.get('ModuloId') else 0
                 
-                horas_factura = float(row.get('Horas', 0)) if row.get('Horas') else 0.0
+                horas_factura = float(row.get('Horas', 0)) if row.get('Horas') and row.get('Horas').lower() != 'none' else 0.0
                 valor_horas = float(row.get('Valor_Horas', 0)) if row.get('Valor_Horas') and row.get('Valor_Horas').lower() != 'none' else 0.0
-                dias_factura = float(row.get('Dias', 0)) if row.get('Dias') else 0.0
+                dias_factura = float(row.get('Dias', 0)) if row.get('Dias') and row.get('Dias').lower() != 'none' else 0.0
                 valor_dias = float(row.get('Valor_Dias', 0)) if row.get('Valor_Dias') and row.get('Valor_Dias').lower() != 'none' else 0.0
-                mes_factura = int(row.get('Meses', 0)) if row.get('Meses') else 0   
+                mes_factura = int(row.get('Meses', 0)) if row.get('Meses') and row.get('Meses').lower() != 'none' else 0   
                 valor_meses = float(row.get('Valor_Meses', 0)) if row.get('Valor_Meses') and row.get('Valor_Meses').lower() != 'none' else 0.0
 
-                bolsa = float(row.get('Bolsa', 0)) if row.get('Bolsa') else 0.0
+                bolsa = float(row.get('Bolsa', 0)) if row.get('Bolsa') and row.get('Bolsa').lower() != 'none' else 0.0
                 valor_bolsa = float(row.get('Valor_Bolsa', 0)) if row.get('Valor_Bolsa') and row.get('Valor_Bolsa').lower() != 'none' else 0.0
 
-                iva = float(row.get('IVA', 0)) if row.get('IVA') else 0.0
+                iva = float(row.get('IVA', 0)) if row.get('IVA') and row.get('IVA').lower() != 'none' else 0.0
 
                 descripcion = row.get('Descripcion', "") or ""
                 numero_factura = row.get('Numero_Factura', "") or ""
