@@ -49,6 +49,11 @@
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuDatosMaestros">
                                 <li>
+                                    <a class="nav-item nav-link" href="{% url 'actividad_pagare_index' %}">
+                                        <i class="fas fa-table"></i> Actividades Maestros
+                                    </a>
+                                </li>
+                                <li>
                                     <a class="nav-item nav-link" href="{% url 'cargos_index' %}">
                                         <i class="fas fa-table"></i> Cargos
                                     </a>
@@ -228,7 +233,11 @@
                                         <i class="fas fa-file-contract"></i> Informe Contratos Otros Si
                                     </a>
                                 </li>
-
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'informe_pagares' %}">
+                                        <i class="fas fa-file-contract"></i> Informe Pagarés
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     </ul> 
@@ -247,6 +256,11 @@
                                 <li>
                                     <a class="nav-item nav-link" href="{% url 'contratos_otros_si_index' %}">
                                         <i class="fas fa-table"></i> Contrato Otro Si
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'pagare_index' %}">
+                                        <i class="fas fa-table"></i> Creación Pagare
                                     </a>
                                 </li>
                                 <li>

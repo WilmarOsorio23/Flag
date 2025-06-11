@@ -15,7 +15,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'analisisdev',
         'USER': 'analisisdev',
-        'PASSWORD': 'Admdev2024.*',
+        'PASSWORD': 'Admdev2024*.',
         'HOST': 'web.flagsoluciones.com',
         'PORT': '3306'
     }

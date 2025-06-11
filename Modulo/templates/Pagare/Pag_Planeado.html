@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block contenido %}
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label>Seleccionar Actividades:</label>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" 
+                                id="dropdownActividades" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                            Seleccionar actividades
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownActividades">
+                            {% for actividad in todas_actividades %}
+                            <li>
+                                <label class="dropdown-item">
+                                    <input type="checkbox" class="actividad-checkbox" 
+                                           value="{{ actividad.id }}">
+                                    {{ actividad.Descripcion_Act }}
+                                </label>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Horas Planeadas</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-actividades">
+                    {% for planeado in pagare.pagareplaneado_set.all %}
+                    <tr data-actividad-id="{{ planeado.Actividad.id }}">
+                        <td>{{ planeado.Actividad.Descripcion_Act }}</td>
+                        <td>
+                            <input type="number" 
+                                   name="horas_planeadas_{{ planeado.Actividad.id }}" 
+                                   value="{{ planeado.Horas_Planeadas }}"
+                                   class="form-control">
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdown = document.getElementById('dropdownActividades');
+    const checkboxes = document.querySelectorAll('.actividad-checkbox');
+    const tabla = document.getElementById('tabla-actividades');
+
+    // Actualizar texto del botón dropdown
+    function actualizarBotonDropdown() {
+        const seleccionados = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.parentElement.textContent.trim());
+            
+        dropdown.textContent = seleccionados.length > 0 
+            ? seleccionados.join(', ') 
+            : 'Seleccionar actividades';
+    }
+
+    // Agregar/eliminar filas
+    function actualizarTabla() {
+        const seleccionados = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => ({
+                id: cb.value,
+                nombre: cb.parentElement.textContent.trim()
+            }));
+
+        // Eliminar filas no seleccionadas
+        Array.from(tabla.rows).forEach(row => {
+            const id = row.dataset.actividadId;
+            if (!seleccionados.some(a => a.id === id)) {
+                row.remove();
+            }
+        });
+
+        // Agregar nuevas filas
+        seleccionados.forEach(actividad => {
+            const existe = Array.from(tabla.rows).some(
+                row => row.dataset.actividadId === actividad.id
+            );
+            
+            if (!existe) {
+                const nuevaFila = `
+                    <tr data-actividad-id="${actividad.id}">
+                        <td>${actividad.nombre}</td>
+                        <td>
+                            <input type="number" 
+                                   name="horas_planeadas_${actividad.id}" 
+                                   value="0"
+                                   class="form-control">
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                tabla.insertAdjacentHTML('beforeend', nuevaFila);
+            }
+        });
+    }
+
+    // Event listeners
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            actualizarBotonDropdown();
+            actualizarTabla();
+        });
+    });
+
+    tabla.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-eliminar')) {
+            const row = e.target.closest('tr');
+            const checkbox = Array.from(checkboxes).find(
+                cb => cb.value === row.dataset.actividadId
+            );
+            if (checkbox) checkbox.checked = false;
+            row.remove();
+            actualizarBotonDropdown();
+        }
+    });
+
+    // Inicializar con actividades existentes
+    {% for planeado in pagare.pagareplaneado_set.all %}
+    const checkbox = Array.from(checkboxes).find(
+        cb => cb.value === "{{ planeado.Actividad.id }}"
+    );
+    if (checkbox) checkbox.checked = true;
+    {% endfor %}
+    actualizarBotonDropdown();
+});
+</script>
+{% endblock %}

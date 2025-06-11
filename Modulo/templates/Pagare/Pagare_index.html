@@ -1,0 +1,413 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block titulo %} Creación Pagaré {% endblock %}
+
+{% block contenido %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title">Creación Pagaré</h4>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{% url 'pagare_index' %}">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="dropdown">
+                        <button
+                            class="btn btn-outline-primary dropdown-toggle w-100"
+                            type="button"
+                            id="dropdownEmpleado"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            data-selected-text="Seleccione Empleados"
+                        >
+                            Seleccione Empleados Activos
+                        </button>
+                        <ul class="dropdown-menu w-100" aria-labelledby="dropdownEmpleado">
+                            {% for checkbox in form.documento %}
+                                <li class="dropdown-item">
+                                    <label for="{{ checkbox.id_for_label }}" class="ms-2">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}  <!-- Esto mostrará "Nombre - Documento" -->
+                                    </label>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Agrega este div oculto para almacenar los datos -->
+                <div id="pagares-data" style="display: none;">
+                    {% for pagare in pagares %}
+                        <div data-documento="{{ pagare.Documento }}"
+                             data-pagare-id="{{ pagare.Pagare_Id }}"
+                             data-tipo="{{ pagare.Tipo_Pagare.Desc_Tipo_Pagare }}"
+                             data-fecha="{{ pagare.Fecha_Creacion_Pagare|date:'d/m/Y' }}"
+                             data-estado="{{ pagare.estado }}">
+                        </div>
+                    {% endfor %}
+                </div>                
+
+                <div class="col-md-6" id="contenedor-pagares">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-info dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownPagares"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                            Seleccionar Pagaré
+                        </button>
+                        <ul class="dropdown-menu w-100" id="lista-pagares">
+                            {% for pagare in pagar_list %}
+                                <li class="dropdown-item">
+                                    <label class="ms-2">
+                                        <input type="radio" name="pagares_seleccionados" value="{{ pagare.id }}">
+                                        {{ pagare.Nombre }} - {{ pagare.Documento }}
+                                    </label>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="d-flex align-items-center mt-2">
+                <!-- Botón Filtrar a la izquierda -->
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fas fa-search"></i> Filtrar
+                </button>
+            
+                <!-- Botones a la derecha -->
+                <div class="d-flex gap-2 ms-auto"  id="acciones-pagares" style="display: none;">
+                    <button type="button" 
+                            class="btn btn-danger btn-sm" 
+                            id="btn-eliminar-pagares">
+                        <i class="fas fa-trash me-1"></i>Eliminar
+                    </button>
+                    <button id="btn-actualizar-pagares" 
+                            class="btn btn-success btn-sm" 
+                            type="button">
+                        <i class="fas fa-sync-alt me-1"></i> Actualizar
+                    </button>
+
+                    <button id="guardar-pagares-btn"
+                            class="btn btn-success btn-sm mt-2 d-none"
+                            type="submit"
+                            >
+                        <i class="fas fa-save me-1"></i> Guardar
+                    </button>
+
+                    <button id="cancelar-pagares-btn"
+                            class="btn btn-danger btn-sm mt-2 d-none">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </button>
+
+                </div>
+                
+            </div>
+
+        </form>
+        <!-- Fuera del form -->
+        <input type="hidden" id="csrf-token" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+
+        <div class="table-responsive mt-4">
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Cédula</th>
+                        <th>Nombre</th>
+                        <th>Línea</th>
+                        <th>Cargo</th>
+                        <th>Fecha Ingreso</th>
+                        <th>Fecha Retiro</th>
+                        <th>Fecha Ingreso Operación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for empleado in empleados %}
+                    <tr>
+                        <td>{{ empleado.Documento }}</td>
+                        <td>{{ empleado.Nombre }}</td>
+                        <td>{{ empleado.LineaId.Linea|default:"Sin Linea" }}</td>
+                        <td>{{ empleado.CargoId.Cargo|default:"Sin Cargo" }}</td>
+                        <td>{{ empleado.FechaIngreso }}</td>
+                        <td>{{ empleado.FechaRetiro }}</td>
+                        <td>{{ empleado.FechaOperacion }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No se encontraron empleados activos.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if empleados %}
+            {% for empleado in empleados %}
+                <div class="card mb-4" data-doc="{{ empleado.Documento }}">
+                    <div class="card-header">
+                    
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                            
+                    
+                            <!-- Botón -->
+                            <button id="btn-guardar-pagare" 
+                                    class="btn btn-success btn-guardar-pagare" 
+                                    data-doc="{{empleado.Documento}}"
+                                    >
+                                <i class="fas fa-save"></i> Crear Pagaré
+                            </button>
+                        </div>
+                    
+                    <div>
+
+                                    
+                    <div id="mensaje-alerta" class="alert alert-info text-center mt-3" style="display:none;"></div>
+                    
+                    <div class="table-responsive">
+                        
+                            <table class="table table-bordered" id="tabla-principal-pagares">
+                                <thead class="table-dark text-center">
+                                    <tr>
+                                        <th>Fecha Creacion</th>
+                                        <th>Tipo Pagaré</th>
+                                        <th>Fecha Inicio Condonación</th>
+                                        <th>Fecha Fin Condonación</th>
+                                        <th>Meses de Condonación</th>
+                                        <th>Valor Pagaré</th>
+                                        <th>% Ejecución</th>
+                                        <th>Valor Capacitación otorgada</th>
+                                        <th style="min-width: 120px">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="fila-condonacion">
+                                        <input type="hidden" class="pagare-id" name="pagare_id_{{ empleado.Documento }}" id="pagare_id_{{ empleado.Documento }}" data-doc="{{ empleado.Documento }}" value="{{ pagare.id }}">
+                                        <td><input 
+                                            type="date" 
+                                            class="form-control w-auto fecha-creacion-input"
+                                            id="fecha_creacion_{{ empleado.Documento }}" 
+                                            name="fecha_creacion_{{ empleado.Documento}}"
+                                            value="{{ pagare.Fecha_Creacion|date:'Y-m-d' }}"
+                                            data-doc="{{ empleado.Documento }}"
+                                        ></td>
+                                        <td>
+                                            <select name="tipo_pagare_{{ empleado.Documento }}" class="form-select" id="tipo_pagare_{{ empleado.Documento }}" data-doc="{{ empleado.Documento }}" required>
+                                                {% for tipo in tipos_pagare %}
+                                                    <option value="{{ tipo.Tipo_PagareId }}">
+                                                        {{ tipo.Desc_Tipo_Pagare }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                        <td><input type="date" name="fecha_inicio_{{ empleado.Documento }}" id="fecha_inicio_{{ empleado.Documento }}" class="fecha-inicio form-control" data-documento="{{ empleado.Documento }}" {% if pagare.porcentaje_ejecucion != 100 %}disabled{% endif %}/></td>
+                                        <td><input type="date" name="fecha_fin_{{ empleado.Documento }}" id="fecha_fin_{{ empleado.Documento }}"class="fecha-fin form-control" data-documento="{{ empleado.Documento }}" readonly /></td>
+                                        <td><input type="text" name="meses_condonacion_{{ empleado.Documento }}" id="meses_condonacion_{{ empleado.Documento }}" data-documento="{{ empleado.Documento }}" class="meses-condonacion form-control" required/></td>
+                                        <td><input type="number" name="valor_pagare_{{ empleado.Documento }}" id="valor_pagare_{{ empleado.Documento }}"class="valor-pagare form-control" data-documento="{{ empleado.Documento }}" required/></td>
+                                        <td><input type="text" name="ejecucion_{{ empleado.Documento }}" class="ejecucion form-control" id="ejecucion_{{ empleado.Documento }}" data-documento="{{ empleado.Documento }}" readonly/></td>
+                                        <td><input type="text" name="valor_capacitacion_{{ empleado.Documento }}" id="valor_capacitacion_{{ empleado.Documento }}" class="valor-capacitacion form-control" data-documento="{{ empleado.Documento }}"readonly /></td>
+                                        <td>
+                                            <select class="form-control" name="estado_{{ empleado.Documento }}" id="estado_{{ empleado.Documento }}" data-doc="{{ empleado.Documento }}" required>
+                                                <option value="proceso" selected>Proceso</option>
+                                                <option value="terminado">Terminado</option>
+                                                <option value="cancelado">Cancelado</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                    </div> 
+                </div>
+
+
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Pagaré Planeado</h5>
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <div class="dropdown">
+                                            <button
+                                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                                type="button"
+                                                id="dropdownActividades_{{ empleado.Documento }}" 
+                                                data-bs-toggle="dropdown"
+                                                aria-expanded="false"
+                                            >
+                                                Seleccionar Actividades
+                                            </button>
+                                            <ul class="dropdown-menu" aria-labelledby="dropdownActividades_{{ empleado.Documento }}">
+                                                {% for actividad in actividades %}
+                                                <li class="dropdown-item">
+                                                    <label class="d-flex align-items-center">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            class="form-check-input actividad-checkbox me-2" 
+                                                            value="{{ actividad.Act_PagareId }}"
+                                                            data-nombre="{{ actividad.Descripcion_Act }}">
+                                                        {{ actividad.Descripcion_Act }}
+                                                    </label>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            class="btn btn-primary mt-2 w-100 btn-agregar-actividades"
+                                            data-documento="{{ empleado.Documento }}"
+                                        >
+                                            <i class="fas fa-plus"></i> Agregar Actividad
+                                        </button>
+                                    </div>
+                                </div>
+                    
+                                <table class="table table-bordered">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Actividad</th>
+                                            <th>Horas</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="actividades-agregadas" id="actividades-{{ empleado.Documento }}">
+                                        {% for planeado in empleado.pagareplaneado_set.all %}
+                                        <tr data-actividad-id="{{ planeado.Actividad.id }}">
+                                            <td>{{ planeado.Actividad.Descripcion_Act }}</td>
+                                            <td>
+                                                <input type="number" 
+                                                       name="horas_{{ empleado.Documento }}_{{ planeado.Actividad.id }}" 
+                                                       value="{{ planeado.Horas_Planeadas }}"
+                                                       class="form-control horas-planeadas">
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm btn-remover">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                            <tr class="no-actividades">
+                                                <td colspan="3" class="text-center py-3 bg-light">
+                                                    <i class="fas fa-info-circle"></i> No hay actividades
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot style="display:none;">
+                                        <tr>
+                                            <th class="text-end">Total Planeado:</th>
+                                            <td>
+                                                <input type="text" 
+                                                       class="total-planeado form-control" 
+                                                       id="total-planeado-{{ empleado.Documento }}"
+                                                       name="total-planeado-{{ empleado.Documento }}" 
+                                                       readonly
+                                                       >
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+
+                            <div class="col-md-6">
+                                <h5>Pagaré Ejecutado</h5>
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <div class="actividad-ejecutado-wrapper" style="display: none;">
+                                            <div class="dropdown">
+                                                <button
+                                                    class="btn btn-outline-success dropdown-toggle w-100"
+                                                    type="button"
+                                                    id="dropdownActividadesEjecutado_{{ empleado.Documento }}" 
+                                                    data-bs-toggle="dropdown"
+                                                    aria-expanded="false"
+                                                >
+                                                    Seleccionar Actividades
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownActividadesEjecutado_{{ empleado.Documento }}">
+                                                    {% for actividad in actividades %}
+                                                    <li class="dropdown-item">
+                                                        <label class="d-flex align-items-center">
+                                                            <input 
+                                                                type="checkbox" 
+                                                                class="form-check-input actividad-ejecutado-checkbox me-2" 
+                                                                value="{{ actividad.Act_PagareId }}"
+                                                                data-nombre="{{ actividad.Descripcion_Act }}">
+                                                            {{ actividad.Descripcion_Act }}
+                                                        </label>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                            <button 
+                                                type="button" 
+                                                class="btn btn-success mt-2 w-100 btn-agregar-ejecutado"
+                                                data-documento="{{ empleado.Documento }}"
+                                            >
+                                                <i class="fas fa-plus"></i> Agregar Actividad
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <table class="table table-bordered" >
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Temas</th>
+                                            <th>Horas Ejecutadas</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ejecutado-{{ empleado.Documento }}">
+                                        {% for ejecutado in empleado.pagare.pagareejecutado_set.all %}
+                                        <tr data-actividad-id="{{ ejecutado.Actividad.Act_PagareId }}" class="fila-ejecutado">
+                                            <td>{{ ejecutado.Actividad.Descripcion_Act }}</td>
+                                            <td>
+                                                <input 
+                                                    type="number" 
+                                                    class="horas-ejecutadas form-control" 
+                                                    value="{{ ejecutado.Horas_Ejecutadas }}"
+                                                >
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm btn-remover-ejecutado">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th class="text-end">Total Ejecutado:</th>
+                                            <td>
+                                                <input 
+                                                    type="text" 
+                                                    class="total-ejecutado form-control" 
+                                                    id="total-ejecutado-{{ empleado.Documento}}" 
+                                                    name="total-ejecutado-{{ empleado.Documento }}"
+                                                    readonly
+                                                >
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                   
+                </div>
+            {% endfor %}
+        {% endif %}
+    
+    </div>
+</div>
+<script src="{% static 'JS/Pagare.js' %}"></script>
+{% endblock %}

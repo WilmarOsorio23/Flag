@@ -1,5 +1,5 @@
 from django.urls import path
-from Modulo.Views import Informe_clientes, clientes_factura, indicadores_operatividad, indicadores_totales, informe_tiempos_consultores, modulo
+from Modulo.Views import Act_Maestro, Informe_clientes, clientes_factura, indicadores_operatividad, indicadores_totales, informe_tiempos_consultores, modulo
 from Modulo.Views import ipc
 from Modulo.Views import ind
 from Modulo.Views import TipoDocumento
@@ -21,7 +21,10 @@ from Modulo.Views import empleado
 from Modulo.Views import consultores
 from Modulo.Views import Nomina
 from Modulo.Views import Informe_certificaciones
+from Modulo.Views.Informe_Pagare import exportar_pagares_excel, informe_pagares
+from Modulo.Views.Pagare import actualizar_pagare, eliminar_pagares, guardar_pagare, obtener_datos_pagares, obtener_pagares_empleado, pag_ejecutado, pag_planeado, pagare_index
 from Modulo.models import TiposContactos
+from Modulo.views import ActividadPagare
 from . import views
 from Modulo.Views import perfil
 from Modulo.Views import linea
@@ -46,6 +49,8 @@ from Modulo.Views import centrosCostos
 from Modulo.Views import informe_facturacion
 from Modulo.Views import informe_historial_cargos
 from .Views import indicadores_facturacion
+
+
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -129,6 +134,14 @@ urlpatterns = [
     path('consultores/eliminar/', consultores.consultores_eliminar, name='consultores_eliminar'),
     path('consultores/verificar-relaciones/', consultores.verificar_relaciones, name='consultores_verificar_relaciones'),
     path('consultores/descargar_excel/', consultores.consultores_descargar_excel, name='consultores_descargar_excel'),
+
+    #Ruta para tabla Actividades Maestro
+    path('Act_Maestro/', Act_Maestro.actividad_pagare_index, name='actividad_pagare_index'),
+    path('Act_Maestro/crear/', Act_Maestro.actividad_pagare_crear, name='actividad_pagare_crear'),
+    path('Act_Maestro/editar/<int:id>/', Act_Maestro.actividad_pagare_editar, name='actividad_pagare_editar'),
+    path('Act_Maestro/eliminar/', Act_Maestro.actividad_pagare_eliminar, name='actividad_pagare_eliminar'),
+    path('Act_Maestro/descargar_excel/', Act_Maestro.actividad_pagare_descargar_excel, name='actividad_pagare_descargar_excel'),
+
 
     # Rutas para tabla Certificacion
     path('certificacion/', Certificacion.certificacion_index, name='certificacion_index'),
@@ -223,10 +236,6 @@ urlpatterns = [
     path('total_costos_indirectos/detalles/editar/', totalCostos.editar_detalles_costos, name='editar_detalles_costos'),
     path('total_costos_indirectos/<int:total_costos_id>/agregar_detalle/', totalCostos.crear_detalle_costos, name='total_costos_crear_detalle'),
     path('total_costos_indirectos/actualizar_total/<int:anio>/<int:mes>/', totalCostos.actualizar_total, name='actualizar_total'),
-
-
-    
-
 
 
     # Rutas para tabla Detalle Costos Indirectos
@@ -377,6 +386,23 @@ urlpatterns = [
     # Rutas para la tabla Indicadores de totales
     path('indicadores_totales/', indicadores_totales.indicadores_totales, name='indicadores_totales_index'),
     path('indicadores_facturacion/', indicadores_facturacion.indicadores_facturacion, name='indicadores_facturacion_index'),
+
+    #Ruta para la tabla Pagare
+    path('Pagare/Pagare/', pagare_index, name="pagare_index"),
+    path('pagare/<int:pagare_id>/planeado/', pag_planeado, name='pag_planeado'),
+    path('guardar_pagare/', guardar_pagare, name='guardar_pagare'),
+    path('pagare/<int:pagare_id>/ejecutado/', pag_ejecutado, name='pag_ejecutado'),
+    path('obtener_pagares/', obtener_pagares_empleado, name='obtener_pagares'),
+    path('pagare/eliminar/', eliminar_pagares, name='eliminar_pagares'),
+    path('pagares/obtener_datos/', obtener_datos_pagares, name='obtener_datos_pagares'),
+    path('pagares/actualizar/', actualizar_pagare, name='actualizar_pagare'),
+
+    #Ruta de informes Pagare
+    path('informes/pagares/', informe_pagares, name='informe_pagares'),
+    path('informes/pagares/exportar_pagares_excel/', exportar_pagares_excel, name='exportar_pagares_excel'),
+
+
+
 
     ]
 
