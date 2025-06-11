@@ -38,48 +38,4 @@ document.addEventListener('DOMContentLoaded', function() {// Inicializar tabs
         )
     );
     
-    const graficoElement = document.getElementById('graficoFacturacion');
-    if (graficoElement && window.datosGrafico) {
-        const ctx = graficoElement.getContext('2d');
-        
-        new Chart(ctx, {
-            type: 'bar',
-            data: window.datosGrafico,
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Horas'
-                        }
-                    },
-                    porcentaje: {
-                        beginAtZero: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Porcentaje'
-                        },
-                        min: 0,
-                        max: 150,
-                        grid: {
-                            drawOnChartArea: false
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Indicadores de Facturación por Línea'
-                    }
-                }
-            }
-        });
-    }
 }); 

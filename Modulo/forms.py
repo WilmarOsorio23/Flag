@@ -466,14 +466,14 @@ class ColaboradorFilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
         required=True,
-        label='Año (Obligatorio)',  
+        label='Año *Obligatorio*',  # Modificado aquí
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     Mes = forms.ChoiceField(
         choices=[],
         required=True,
-        label='Mes (Obligatorio)',  
+        label='Mes *Obligatorio*',  # Modificado aquí
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
@@ -1490,14 +1490,14 @@ class FacturacionFilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
         required=True,
-        label='Año',  
+        label='Año *Obligatorio*',  # Modificado aquí
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     Mes = forms.ChoiceField(
         choices=[],
         required=True,
-        label='Mes',  
+        label='Mes *Obligatorio*',  # Modificado aquí
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
@@ -1677,7 +1677,7 @@ class Ind_Operatividad_FilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
         required=True,
-        label='Año',
+        label='Año *Obligatorio*', # Modificado aquí
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
@@ -1701,7 +1701,8 @@ class Ind_Operatividad_FilterForm(forms.Form):
         self.populate_mes()
 
     def populate_anio(self):
-        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
+        years = Horas_Habiles.objects.values_list('Anio', flat=True).distinct().order_by('Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in years]
 
     def populate_mes(self):
         meses = [
@@ -1715,7 +1716,7 @@ class Ind_Totales_FilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
         required=True,
-        label='Año',
+        label='Año *Obligatorio*', # Modificado aquí
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
@@ -1749,7 +1750,8 @@ class Ind_Totales_FilterForm(forms.Form):
         self.fields['ClienteId'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente} - {obj.DocumentoId}"
 
     def populate_anio(self):
-        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
+        years = Horas_Habiles.objects.values_list('Anio', flat=True).distinct().order_by('Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in years]
 
     def populate_mes(self):
         meses = [
@@ -2032,7 +2034,7 @@ class ContratosOtrosSiForm(forms.ModelForm):
     max_length=50,
     required=True,
     widget=forms.Select(attrs={'class': 'form-control'}),
-    label='Contrato'
+    label='Contrato *Obligatorio*' # Modificado aquí
 )
 
     class Meta:
@@ -2300,7 +2302,7 @@ class Ind_Facturacion_FilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
         required=True,
-        label='Año',
+        label='Año *Obligatorio*', # Corregido aquí
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
@@ -2324,8 +2326,8 @@ class Ind_Facturacion_FilterForm(forms.Form):
         self.populate_mes()
 
     def populate_anio(self):
-        years = range(2020, timezone.now().year + 1)
-        self.fields['Anio'].choices = [(str(year), str(year)) for year in years]
+        years = Horas_Habiles.objects.values_list('Anio', flat=True).distinct().order_by('Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in years]
 
     def populate_mes(self):
         meses = [
