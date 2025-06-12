@@ -121,6 +121,17 @@ def clientes_filtrado(request):
         'conteo_paises': dict(conteo_paises),
         'clientes_nacionales': clientes_nacionales,
         'clientes_internacionales': clientes_internacionales,
+        # Datos para gráficos de barras
+        'labels_tipo_cliente': list(conteo_tipo_cliente.keys()),
+        'values_tipo_cliente': list(conteo_tipo_cliente.values()),
+
+        'labels_paises': list(conteo_paises.keys()),
+        'values_paises': list(conteo_paises.values()),
+        # Para etiquetas y datos de gráficos
+        'labels_nacionalidad': ['Nacionales', 'Internacionales'],
+        'values_nacionalidad': [clientes_nacionales, clientes_internacionales],
+        'labels_activos': ['Activos', 'Inactivos'],
+        'values_activos': [clientes_activos, clientes_inactivos],
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
