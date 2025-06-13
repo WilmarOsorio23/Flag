@@ -3,7 +3,7 @@ from django.db.models import Sum, F, Q, Case, When, Value, DecimalField, FloatFi
 from django.db.models.functions import Coalesce
 from decimal import Decimal
 from Modulo.models import (
-    Linea, Tiempos_Cliente, TiemposConcepto, FacturacionClientes,
+    Ind_Operat_Clientes, Linea, Tiempos_Cliente, TiemposConcepto, FacturacionClientes,
     Horas_Habiles
 )
 from Modulo.forms import Ind_Facturacion_FilterForm
@@ -37,25 +37,16 @@ def calcular_trabajado(linea_id: int, anio: str, mes: str) -> Decimal:
         total=Coalesce(Sum('Horas'), Decimal('0'), output_field=DecimalField())
     )['total'] or Decimal('0')
 
-    # Horas trabajadas en conceptos
-    horas_conceptos = TiemposConcepto.objects.filter(
-        LineaId=linea_id,
-        Anio=anio,
-        Mes=mes
-    ).aggregate(
-        total=Coalesce(Sum('Horas'), Decimal('0'), output_field=DecimalField())
-    )['total'] or Decimal('0')
-
-    return horas_clientes + horas_conceptos
+    return horas_clientes
 
 def calcular_facturable(linea_id: int, anio: str, mes: str) -> Decimal:
     """Calcula las horas facturables para una línea en un mes específico"""
-    return Tiempos_Cliente.objects.filter(
+    return Ind_Operat_Clientes.objects.filter(
         LineaId=linea_id,
         Anio=anio,
         Mes=mes
     ).aggregate(
-        total=Coalesce(Sum('Horas'), Decimal('0'), output_field=DecimalField())
+        total=Coalesce(Sum('HorasFacturables'), Decimal('0'), output_field=DecimalField())
     )['total'] or Decimal('0')
 
 def calcular_facturado(linea_id: int, anio: str, mes: str) -> Decimal:
