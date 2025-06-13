@@ -195,8 +195,6 @@ class Tiempos_Cliente(models.Model):
     LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
     ModuloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='ModuloId')
     Horas = models.DecimalField(max_digits=10, decimal_places=2)
-    ModuloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='ModuloId')
-    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
 
     def __str__(self):
         return f"Año: {self.Anio}, Mes: {self.Mes}, Documento: {self.Documento}, Cliente: {self.ClienteId}, Horas: {self.Horas}"

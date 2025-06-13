@@ -389,7 +389,6 @@ urlpatterns = [
     path('informes/informes_Serv_consultor/', informe_serv_consultor.informe_totales, name='informes_serv_consultor_index'),
     path('informes/informes_Serv_consultor/descargar_informe_totales_excel', informe_serv_consultor.descargar_reporte_excel_totales_por_mes, name='descargar_reporte_excel_totales_por_mes'),
 
-
     # Rutas para la tabla Indicadores de Operatividad
     path('indicadores_operatividad/', indicadores_operatividad.indicadores_operatividad_index, name='indicadores_operatividad_index'),
 
