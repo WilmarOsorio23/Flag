@@ -1,3 +1,4 @@
+from collections import defaultdict
 from django import template
 
 register = template.Library()
@@ -7,9 +8,46 @@ def add_class(field, css_class):
     return field.as_widget(attrs={'class': css_class})
 
 @register.filter
-def get_item(dictionary, key):
-    return dictionary.get(key, 0)  # Devuelve 0 si la clave no existe
+@register.filter
+def get_item(value, key):
+    """Filtro seguro para diccionarios y defaultdicts."""
+    if hasattr(value, 'get'):  # Si es un diccionario o defaultdict
+        return value.get(key, {})  # Devuelve un diccionario vacío si no existe
+    return {}  # Si no es un diccionario, devuelve un diccionario vacío  # Devuelve 0 si la clave no existe
 
 @register.filter
 def items(dictionary):
     return dictionary.items()  # Devuelve los items del diccionario
+
+@register.filter
+def get_item_safe(dictionary, key):
+    if not isinstance(dictionary, dict):
+        return {}
+    return dictionary.get(key, {})
+
+@register.filter
+def get_item3(dictionary, key):
+    return dictionary.get(key, {})
+
+@register.filter
+def get_item2(value, key):
+    """Filtro seguro para obtener valores de diccionarios"""
+    try:
+        if isinstance(value, (dict, defaultdict)):
+            return value.get(key, 0)
+        return 0
+    except (AttributeError, TypeError):
+        return 0
+@register.filter
+def mul(value, arg):
+    try:
+        return int(value) * int(arg)
+    except (ValueError, TypeError):
+        return ''
+@register.filter
+def enumerate_items(iterable):
+    return enumerate(iterable)
+@register.filter
+def multiply(value, arg):
+    """Multiplica el valor por el argumento"""
+    return float(value) * float(arg)       

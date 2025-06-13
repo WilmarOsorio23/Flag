@@ -176,8 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('diferencia-bruta-actual').textContent = diferenciaBruta.toFixed(2);
 
         // Calcular % Dif
-        const promedio = (valorFacturaCliente + valorCobro) / 2 || 1;
-        const porcentajeDif = (Math.abs(diferenciaBruta) / promedio) * 100;
+        const porcentajeDif = (Math.abs(diferenciaBruta) / valorFacturaCliente) * 100;
         document.getElementById('porcentaje-dif-actual').textContent = porcentajeDif.toFixed(2);
     }
 
@@ -189,3 +188,54 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+document.addEventListener('DOMContentLoaded', function () {
+    function actualizarCalculo(i) {
+        console.log("Actualizando fila:", i);
+        const valorCobroInput = document.querySelector(`input[name="Valor_Cobro_${i}"]`);
+        const valorFacturaInput = document.querySelector(`input[name="Valor_Factura_Cliente_${i}"]`);
+        const porcentajeTd = document.getElementById(`porcentaje-dif-${i}`);
+        const diferenciaTd = document.getElementById(`diferencia-bruta-${i}`);
+
+        const hiddenPorcentaje = document.querySelector(`input[name="Porcentaje_Dif_${i}"]`);
+        const hiddenDiferencia = document.querySelector(`input[name="Diferencia_Bruta_${i}"]`);
+
+        const valCobro = parseFloat(valorCobroInput?.value) || 0;
+        const valFactura = parseFloat(valorFacturaInput?.value);
+
+        // Validar que factura no esté vacía o cero
+        if (isNaN(valFactura) || valFactura === 0) {
+            if (porcentajeTd?.querySelector('span')) porcentajeTd.querySelector('span').textContent = "0.00";
+            if (diferenciaTd?.querySelector('span')) diferenciaTd.querySelector('span').textContent = "0.00";
+
+            if (hiddenPorcentaje) hiddenPorcentaje.value = "0.00";
+            if (hiddenDiferencia) hiddenDiferencia.value = "0.00";
+            return;
+        }
+
+        const diferencia = valFactura - valCobro;
+        const porcentaje = Math.abs((diferencia / valFactura) * 100);
+
+        if (porcentajeTd?.querySelector('span')) porcentajeTd.querySelector('span').textContent = porcentaje.toFixed(2);
+        if (diferenciaTd?.querySelector('span')) diferenciaTd.querySelector('span').textContent = diferencia.toFixed(2);
+
+        if (hiddenPorcentaje) hiddenPorcentaje.value = porcentaje.toFixed(2);
+        if (hiddenDiferencia) hiddenDiferencia.value = diferencia.toFixed(2);
+    }
+
+    const filas = document.querySelectorAll('tbody tr[id^="row-"]');
+    filas.forEach(fila => {
+        const id = fila.id.replace('row-', '');
+
+        const inputCobro = document.querySelector(`input[name="Valor_Cobro_${id}"]`);
+        const inputFactura = document.querySelector(`input[name="Valor_Factura_Cliente_${id}"]`);
+
+        [inputCobro, inputFactura].forEach(input => {
+            if (input) {
+                input.addEventListener('input', () => actualizarCalculo(id));
+            }
+        });
+
+        actualizarCalculo(id);
+    });
+});
+

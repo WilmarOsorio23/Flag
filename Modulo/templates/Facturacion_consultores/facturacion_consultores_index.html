@@ -34,30 +34,6 @@
                     <i class="fas fa-trash me-1"></i> Eliminar
                 </button>
             </div>
-            
-            <div id="resumen-calculadora" 
-                 style="padding: 12px; 
-                        border: 1px solid #ddd; 
-                        border-radius: 8px; 
-                        background: #f8f9fa; 
-                        display: flex;
-                        gap: 15px;
-                        align-items: center;">
-                
-                <div style="width: 110px;">
-                    <p style="margin: 0; font-size: 14px; color: #495057; line-height: 1.2;">
-                        <strong>Diferencia Bruta</strong><br>
-                        <span id="diferencia-bruta-actual" style="font-size: 14px; color: #2c3e50;">0.00</span>
-                    </p>
-                </div>
-                
-                <div style="width: 80;">
-                    <p style="margin: 0; font-size: 14px; color: #495057; line-height: 1.2;">
-                        <strong>% Dif</strong><br>
-                        <span id="porcentaje-dif-actual" style="font-size: 14px; color: #2c3e50;">0.00</span>%
-                    </p>
-                </div>
-            </div>
         </div>
     <!-- Panel de Resumen -->
 
@@ -101,7 +77,7 @@
                     <tbody>
                         {% for row in facturacion_info %}
                         {% with i=forloop.counter0 %}
-                        <tr id="row-{{ row.id }}">
+                        <tr id="row-{{ i }}">
                             <input type="hidden" name="factura_{{ i }}" value="{{ row.id|default:'new' }}">
 
                             <td><input type="checkbox" class="row-checkbox" value="{{ row.id }}"></td>
@@ -115,8 +91,8 @@
                             <td>{{ row.Consultor }}
                                 <input type="hidden" name="ConsultorId_{{ i }}" value="{{ row.ConsultorId }}">
                             </td>
-                            <td>{{ row.Linea }}
-                                <input type="hidden" name="LineaId_{{ i }}" value="{{ row.LineaId.LineaId }}">
+                            <td>{{ row.LineaId }}
+                                <input type="hidden" name="LineaId_{{ i }}" value="{{ row.LineaId }}">
                             </td>
                             <td><input type="text" name="Numero_Factura_{{ i }}" value="{{ row.Numero_Factura }}" class="form-control"></td>
                             <td>{{ row.Periodo_Cobrado }} 
@@ -152,11 +128,13 @@
                             <td><input type="date" name="Fecha_{{ i }}" value="{{ row.Fecha|date:'Y-m-d' }}" class="form-control"></td>
                             <td><input type="text" name="Deuda_Tecnica_{{ i }}" value="{{ row.Deuda_Tecnica }}" class="form-control"></td>
                             <td><input type="text" name="Factura_Pendiente_{{ i }}" value="{{ row.Factura_Pendiente }}" class="form-control"></td>
-                            <td>{{ row.Porcentaje_Dif }}
-                                <input type="hidden" name="Porcentaje_Dif_{{ i }}" value="{{ row.Porcentaje_Dif }}">
+                            <td id="porcentaje-dif-{{ i }}">
+                                <span>{{ row.Porcentaje_Dif|default:"0.00" }}</span>
+                                <input type="hidden" name="Porcentaje_Dif_{{ i }}" value="{{ row.Porcentaje_Dif|default:"0.00" }}">
                             </td>
-                            <td>{{ row.Diferencia_Bruta }}
-                                <input type="hidden" name="Diferencia_Bruta_{{ i }}" value="{{ row.Diferencia_Bruta }}">
+                            <td id="diferencia-bruta-{{ i }}">
+                                <span>{{ row.Diferencia_Bruta|default:"0.00" }}</span>
+                                <input type="hidden" name="Diferencia_Bruta_{{ i }}" value="{{ row.Diferencia_Bruta|default:"0.00" }}">
                             </td>
                             <td><input type="text" name="Observaciones_{{ i }}" value="{{ row.Observaciones }}" class="form-control"></td>
 

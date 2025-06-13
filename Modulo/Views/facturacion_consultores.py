@@ -2,7 +2,7 @@ from django.shortcuts import render
 from Modulo.models import Facturacion_Consultores, Tiempos_Cliente, Tarifa_Consultores,Consultores,Linea,Clientes,Modulo
 from Modulo.forms import FacturacionFilterForm
 from decimal import Decimal
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
 from django.urls import reverse
@@ -19,8 +19,6 @@ def filtrar_facturacion_consultores(form, facturacion_consultores):
     consultor = form.cleaned_data.get('Consultor')
     linea = form.cleaned_data.get('LineaId')
     
-    print(f"Filtros aplicados: Anio={anio}, Mes={mes_factura}, Mes_Cobro={mes_cobro}, Consultor={consultor}, Linea={linea}")
-
 
     if anio:
         facturacion_consultores = facturacion_consultores.filter(Anio=anio)
@@ -46,11 +44,8 @@ def facturacion_consultores(request):
 
         if form.is_valid():
             facturacion_consultores = filtrar_facturacion_consultores(form, facturacion_consultores)
-            print(f"Registros encontrados en Facturacion_Consultores: {facturacion_consultores.count()}")
             if facturacion_consultores.exists():
-                for registro in facturacion_consultores:
-                    print(f"Registro encontrado: {registro.Anio}, {registro.Mes}, {registro.Documento.Documento}, {registro.LineaId.Linea}")
-        
+                for registro in facturacion_consultores:        
                     facturacion_info.append({
                     'id': registro.id,  # <-- ESTE ES FUNDAMENTAL
                     'Anio': registro.Anio,
@@ -145,9 +140,9 @@ def facturacion_consultores(request):
                             'Consultor': consultor.Documento,
                             'ConsultorId': consultor.Documento,      # 🔥 Este es el valor que necesitas para el POST
                             'Linea': nombre_linea,
-                            'LineaId': linea,
+                            'LineaId': linea.LineaId,
                             'Numero_Factura': None,
-                            'Periodo_Cobrado': periodo_cobrado_real,
+                            'Periodo_Cobrado': mes_cobro,
                             'Aprobado_Por': None,  # Aquí puedes poner lo que desees
                             'Fecha_Cobro': None,
                             'Fecha_Pago': None,
@@ -191,11 +186,17 @@ def facturacion_consultores(request):
 
     return render(request, 'Facturacion_Consultores/facturacion_consultores_index.html', context)
 
+def safe_decimal(value):
+    try:
+        if value in [None, '', 'None']:
+            return Decimal('0')
+        return Decimal(value)
+    except (InvalidOperation, ValueError, TypeError):
+        return Decimal('0')
+
 @csrf_exempt
 def guardar_facturacion_consultores(request):
     if request.method == 'POST':
-        print('Datos recibidos:', request.POST)
-
         try:
             indices = [
                 key.split('_')[1] for key in request.POST.keys() if key.startswith('factura_')
@@ -204,56 +205,59 @@ def guardar_facturacion_consultores(request):
 
             for i in indices:
                 row_id = request.POST.get(f'factura_{i}')
-                print(f"\nProcesando fila {i} con row_id: {row_id}")
 
                 # Obtener o crear instancia
                 if row_id == 'new':
                     row = Facturacion_Consultores()
                 else:
                     row = Facturacion_Consultores.objects.filter(id=row_id).first() or Facturacion_Consultores()
-
+                    
                 # Campos comunes
-                row.Anio = request.POST.get(f'Anio_{i}')
-                row.Mes = request.POST.get(f'Mes_{i}')
+                row.Anio = request.POST.get(f'Anio_{i}') or ''
+                row.Mes = request.POST.get(f'Mes_{i}') or ''
                 row.Documento = Consultores.objects.get(Documento=request.POST.get(f'ConsultorId_{i}'))
-                row.LineaId = Linea.objects.get(LineaId=request.POST.get(f'LineaId_{i}'))
-                row.Cta_Cobro = request.POST.get(f'Numero_Factura_{i}')
-                row.Aprobado_Por = request.POST.get(f'Aprobado_Por_{i}')
-                row.Fecha_Cobro = request.POST.get(f'Fecha_Cobro_{i}') or None
-                row.Fecha_Pago = request.POST.get(f'Fecha_Pago_{i}') or None
                 row.ClienteId = Clientes.objects.get(ClienteId=request.POST.get(f'ClienteId_{i}'))
                 row.ModuloId = Modulo.objects.get(ModuloId=request.POST.get(f'ModuloId_{i}'))
-                row.Periodo_Cobrado = request.POST.get(f'Periodo_Cobrado_{i}')
-                row.Horas = Decimal(request.POST.get(f'Cantidad_Horas_{i}') or 0)
-                row.Valor_Unitario = Decimal(request.POST.get(f'Valor_Unitario_{i}') or 0)
-                row.IVA = Decimal(request.POST.get(f'IVA_{i}') or 0)
-                row.Retencion_Fuente = Decimal(request.POST.get(f'Retencion_Fuente_{i}') or 0)
-                row.Valor_Cobro = Decimal(request.POST.get(f'Valor_Cobro_{i}') or 0)
-                row.Valor_Neto = Decimal(request.POST.get(f'Valor_Neto_{i}') or 0)
-                row.Valor_Pagado = Decimal(request.POST.get(f'Valor_Pagado_{i}') or 0)
-                row.Factura = request.POST.get(f'Factura_{i}')
-                row.Valor_Fcta_Cliente = Decimal(request.POST.get(f'Valor_Factura_Cliente_{i}') or 0)
+                row.LineaId = Linea.objects.get(LineaId=request.POST.get(f'LineaId_{i}'))
+                row.Cta_Cobro = request.POST.get(f'Numero_Factura_{i}') or ''
+                row.Aprobado_Por = request.POST.get(f'Aprobado_Por_{i}') or ''
+                row.Fecha_Cobro = request.POST.get(f'Fecha_Cobro_{i}') or date.today()
+                row.Fecha_Pago = request.POST.get(f'Fecha_Pago_{i}') or date.today()
+                row.Periodo_Cobrado = request.POST.get(f'Periodo_Cobrado_{i}') or ''
+                row.Factura = request.POST.get(f'Factura_{i}') or ''
                 row.Fecha = request.POST.get(f'Fecha_{i}') or None
-                row.Deuda_Tecnica = request.POST.get(f'Deuda_Tecnica_{i}')
-                row.Factura_Pendiente = request.POST.get(f'Factura_Pendiente_{i}')
-                row.Observaciones = request.POST.get(f'Observaciones_{i}')
+                row.Deuda_Tecnica = request.POST.get(f'Deuda_Tecnica_{i}') or ''
+                row.Factura_Pendiente = request.POST.get(f'Factura_Pendiente_{i}') or ''
+                row.Observaciones = request.POST.get(f'Observaciones_{i}') or ''
+
+                # Campos decimales protegidos
+                row.Horas = safe_decimal(request.POST.get(f'Cantidad_Horas_{i}'))
+                row.Valor_Unitario = safe_decimal(request.POST.get(f'Valor_Unitario_{i}'))
+                row.IVA = safe_decimal(request.POST.get(f'IVA_{i}'))
+                row.Retencion_Fuente = safe_decimal(request.POST.get(f'Retencion_Fuente_{i}'))
+                row.Valor_Cobro = safe_decimal(request.POST.get(f'Valor_Cobro_{i}'))
+                row.Valor_Neto = safe_decimal(request.POST.get(f'Valor_Neto_{i}'))
+                row.Valor_Pagado = safe_decimal(request.POST.get(f'Valor_Pagado_{i}'))
+                row.Valor_Fcta_Cliente = safe_decimal(request.POST.get(f'Valor_Factura_Cliente_{i}'))
 
                 # Cálculos
                 valor_cliente = row.Valor_Fcta_Cliente
                 valor_cobro = row.Valor_Cobro
-                diferencia_bruta = valor_cliente - valor_cobro
+                if valor_cliente  == 0:
+                    diferencia_bruta = Decimal('0')
+                    porcentaje_dif = Decimal('0')
+                else:
+                    diferencia_bruta = valor_cliente - valor_cobro
+                    porcentaje_dif = abs(diferencia_bruta / valor_cliente) * 100
+
                 row.Diferencia_Bruta = diferencia_bruta
-                promedio = (valor_cliente + valor_cobro) / 2 if (valor_cliente + valor_cobro) != 0 else 1
-                porcentaje_dif = (abs(valor_cliente - valor_cobro) / promedio) * 100
                 row.Dif = porcentaje_dif
 
-                print(f"[{row_id}] Dif: {porcentaje_dif:.2f}%, Diferencia Bruta: {diferencia_bruta}")
                 row.save()
 
             return redirect('facturacion_consultores_index')
 
         except Exception as e:
-            print('Error general:', e)
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
@@ -264,14 +268,11 @@ def eliminar_facturacion_consultores(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            print(f"Datos recibidos: {data}")
-
             ids = data.get('ids', [])
             if not ids:
                 raise ValueError("No se proporcionaron IDs para eliminar.")
             Facturacion_Consultores.objects.filter(id__in=ids).delete()
             return JsonResponse({'status': 'success'})
         except Exception as e:
-            print("Error:", e)  # Agregar para depurar
             return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
     return JsonResponse({'status': 'error'}, status=400)

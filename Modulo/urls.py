@@ -44,6 +44,8 @@ from Modulo.Views import centrosCostos
 from Modulo.Views import informe_facturacion
 from Modulo.Views import informe_historial_cargos
 from Modulo.Views import facturacion_consultores
+from Modulo.Views import informe_facturacion_consultores
+from Modulo.Views import informe_serv_consultor
 
 
 
@@ -349,8 +351,13 @@ urlpatterns = [
     path('facturacion_consultores/eliminar/', facturacion_consultores.eliminar_facturacion_consultores, name='eliminar_facturacion_consultores'),
     path('facturacion_consultores/guardar/', facturacion_consultores.guardar_facturacion_consultores, name='guardar_facturacion_consultores'),
 
+    #Ruta para informe de Facturacion Consultores
+    path('informes/informes_facturacion_consultores/', informe_facturacion_consultores.informe_totales_por_mes, name='informes_facturacion_consultores_index'),
+    path('informes/informes_facturacion_consultores/reporte_excel_totales_por_mes', informe_facturacion_consultores.reporte_excel_totales_por_mes , name='reporte_excel_totales_por_mes'),
 
-
+#Ruta para informe de Facturacion Consultores
+    path('informes/informes_Serv_consultor/', informe_serv_consultor.informe_totales, name='informes_serv_consultor_index'),
+    path('informes/informes_Serv_consultor/descargar_informe_totales_excel', informe_serv_consultor.descargar_reporte_excel_totales_por_mes, name='descargar_reporte_excel_totales_por_mes'),
 
 
     # Rutas para la tabla Indicadores de Operatividad
