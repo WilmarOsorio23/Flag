@@ -45,6 +45,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sistema.wsgi.application'
 
+
+# Database
+# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'analisisdev',
+        'USER': 'analisisdev',
+        'PASSWORD': 'Admdev2024.*',
+        'HOST': 'web.flagsoluciones.com',
+        'PORT': '3306'
+    }
+}
+
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {

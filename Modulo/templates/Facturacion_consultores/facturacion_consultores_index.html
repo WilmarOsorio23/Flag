@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block titulo %} Facturación de Consultores {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title">Facturación de Consultores</h4>
+    </div>
+    <div class="card-body">
+        <!-- Filtros -->
+        <form method="GET">
+            <div class="row mb-3">
+                <div class="col-md-2">{{ form.Anio.label }} {{ form.Anio }}</div>
+                <div class="col-md-2">{{ form.Mes.label }} {{ form.Mes }}</div>
+                <div class="col-md-2">{{ form.Mes_Cobro.label }} {{ form.Mes_Cobro }}</div>
+                <div class="col-md-3">{{ form.Consultor.label }} {{ form.Consultor }}</div>
+                <div class="col-md-3">{{ form.LineaId.label }} {{ form.LineaId }}</div>
+            </div>
+            <div class="mb-3 text-start">
+                <button type="submit" name="buscar" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+        </form>
+
+        <!-- Botones -->
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex">
+                <button id="save-button" class="btn btn-success me-2" onclick="saveAllRows()">
+                    <i class="fas fa-save me-1"></i> Guardar
+                </button>
+                <button id="delete-button" class="btn btn-danger me-2" onclick="eliminarSeleccionados()" disabled>
+                    <i class="fas fa-trash me-1"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    <!-- Panel de Resumen -->
+
+        <!-- Tabla de resultados -->
+        <div class="table-responsive">
+            <form id="delete-form" method="POST">
+                {% csrf_token %}
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th><input type="checkbox" id="select-all"></th>
+                            <th>Año</th>
+                            <th>Mes</th>
+                            <th>Consultor</th>
+                            <th>Línea</th>
+                            <th>N° Factura</th>
+                            <th>Periodo Cobrado</th>
+                            <th>Aprobad Por</th>
+                            <th>Fecha de Cobro</th>
+                            <th>Fecha de Pago</th>                            
+                            <th>Cliente</th>
+                            <th>Módulo</th>
+                            <th>Horas</th>
+                            <th>Valor Unitario</th>
+                            <th>Valor Cobro</th>
+                            <th>IVA</th>
+                            <th>Valor Neto</th>
+                            <th>Retención Fuente</th>
+                            <th>Valor Pagado</th>
+                            <th>Factura</th>
+                            <th>Valor Factura Cliente</th>   
+                            <th>Fecha</th>
+                            <th>Deuda Técnica</th>
+                            <th>Factura Pendiente</th>
+                            <th>% Dif</th>
+                            <th>Diferencia Bruta</th>
+                            <th>Observaciones</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in facturacion_info %}
+                        {% with i=forloop.counter0 %}
+                        <tr id="row-{{ i }}">
+                            <input type="hidden" name="factura_{{ i }}" value="{{ row.id|default:'new' }}">
+
+                            <td><input type="checkbox" class="row-checkbox" value="{{ row.id }}"></td>
+                            <td>{{ row.Anio }}
+                                <input type="hidden" name="Anio_{{ i }}" value="{{ row.Anio }}">
+                            </td>
+                            
+                            <td>{{ row.Mes }}
+                                <input type="hidden" name="Mes_{{ i }}" value="{{ row.Mes }}">
+                            </td>
+                            <td>{{ row.Consultor }}
+                                <input type="hidden" name="ConsultorId_{{ i }}" value="{{ row.ConsultorId }}">
+                            </td>
+                            <td>{{ row.LineaId }}
+                                <input type="hidden" name="LineaId_{{ i }}" value="{{ row.LineaId }}">
+                            </td>
+                            <td><input type="text" name="Numero_Factura_{{ i }}" value="{{ row.Numero_Factura }}" class="form-control"></td>
+                            <td>{{ row.Periodo_Cobrado }} 
+                                <input type="hidden" name="Periodo_Cobrado_{{ i }}" value="{{ row.Periodo_Cobrado }}">
+                            </td>
+                            <td><input type="text" name="Aprobado_Por_{{ i }}" value="{{ row.Aprobado_Por }}" class="form-control"></td>
+                            <td><input type="date" name="Fecha_Cobro_{{ i }}" value="{{ row.Fecha_Cobro|date:'Y-m-d' }}" class="form-control"></td>
+                            <td><input type="date" name="Fecha_Pago_{{ i }}" value="{{ row.Fecha_Pago|date:'Y-m-d' }}" class="form-control"></td>
+                            <td>{{ row.Cliente }}
+                                <input type="hidden" name="ClienteId_{{ i }}" value="{{ row.ClienteId }}">
+                            </td>
+                            <td>{{ row.Modulo }}
+                                <input type="hidden" name="ModuloId_{{ i }}" value="{{ row.ModuloId }}">
+                            </td>
+                            <td>{{ row.Cantidad_Horas }}
+                                <input type="hidden" name="Cantidad_Horas_{{ i }}" value="{{ row.Cantidad_Horas }}">
+                            </td>
+                            <td>{{ row.Valor_Unitario }}
+                                <input type="hidden" name="Valor_Unitario_{{ i }}" value="{{ row.Valor_Unitario }}">
+                            </td>
+                            <td><input type="text" name="Valor_Cobro_{{ i }}" value="{{ row.Valor_Cobro }}" class="form-control"></td>
+                            <td>{{ row.IVA }}
+                                <input type="hidden" name="IVA_{{ i }}" value="{{ row.IVA }}">
+                            </td>
+                            <td><input type="text" name="Valor_Neto_{{ i }}" value="{{ row.Valor_Neto }}" class="form-control"></td>
+                            <td>{{ row.Retencion_Fuente }}
+                                <input type="hidden" name="Retencion_Fuente_{{ i }}" value="{{ row.Retencion_Fuente }}">
+                            </td>
+
+                            <td><input type="text" name="Valor_Pagado_{{ i }}" value="{{ row.Valor_Pagado }}" class="form-control"></td>
+                            <td><input type="text" name="Factura_{{ i }}" value="{{ row.Factura }}" class="form-control"></td>
+                            <td><input type="text" name="Valor_Factura_Cliente_{{ i }}" value="{{ row.Valor_Factura_Cliente }}" class="form-control"></td>
+                            <td><input type="date" name="Fecha_{{ i }}" value="{{ row.Fecha|date:'Y-m-d' }}" class="form-control"></td>
+                            <td><input type="text" name="Deuda_Tecnica_{{ i }}" value="{{ row.Deuda_Tecnica }}" class="form-control"></td>
+                            <td><input type="text" name="Factura_Pendiente_{{ i }}" value="{{ row.Factura_Pendiente }}" class="form-control"></td>
+                            <td id="porcentaje-dif-{{ i }}">
+                                <span>{{ row.Porcentaje_Dif|default:"0.00" }}</span>
+                                <input type="hidden" name="Porcentaje_Dif_{{ i }}" value="{{ row.Porcentaje_Dif|default:"0.00" }}">
+                            </td>
+                            <td id="diferencia-bruta-{{ i }}">
+                                <span>{{ row.Diferencia_Bruta|default:"0.00" }}</span>
+                                <input type="hidden" name="Diferencia_Bruta_{{ i }}" value="{{ row.Diferencia_Bruta|default:"0.00" }}">
+                            </td>
+                            <td><input type="text" name="Observaciones_{{ i }}" value="{{ row.Observaciones }}" class="form-control"></td>
+
+                        </tr>
+                        {% endwith %}
+                        {% empty %}
+                        <tr><td colspan="25">No hay registros para mostrar.</td></tr>
+                        {% endfor %} 
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
+    <span id="alert-icon" class="alert-heading"></span>
+    <span id="alert-message"></span>
+</div>
+<!-- Modal de éxito -->
+<div id="modalConfirmacion" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;">
+    <div style="background:#fff; padding:30px; max-width:400px; margin:100px auto; border-radius:8px; position:relative;">
+      <h3 style="margin-top:0;">✅ Datos actualizados</h3>
+      <p>La información de facturación se ha guardado correctamente.</p>
+    </div>
+</div>
+<!-- Modal de eliminacion -->
+<div id="modaleliminacion" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;">
+    <div style="background:#fff; padding:30px; max-width:400px; margin:100px auto; border-radius:8px; position:relative;">
+      <h3 style="margin-top:0;">✅ Datos Eliminados</h3>
+      <p>La información de facturación se ha eliminado correctamente.</p>
+    </div>
+</div>
+  
+<script src="{% static 'JS/facturacion_consultores.js' %}"></script>
+
+{% endblock %}
