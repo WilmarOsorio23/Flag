@@ -65,7 +65,7 @@
               </div>
       
               <!-- Clientes Activos / Inactivos -->
-              <div class="card shadow-sm p-3 h-100" style="min-width: 220px;">
+              <div class="card shadow-sm p-3 h-100" style="min-width: 220px; cursor:pointer;" id="cardActivosInactivos">
                   <div class="card-body p-0">
                       <div class="d-flex justify-content-between align-items-center mb-2">
                           <div>
@@ -91,7 +91,7 @@
               </div>
       
               <!-- Distribución por Tipo de Cliente -->
-              <div class="card shadow-sm p-3 text-warning text-start h-100" style="min-width: 220px;">
+              <div class="card shadow-sm p-3 text-warning text-start h-100" style="min-width: 220px; cursor:pointer;" id="cardTipoCliente">
                   <div class="d-flex justify-content-between align-items-center">
                       <i class="fas fa-user-tag fa-2x"></i>
                   </div>
@@ -102,7 +102,7 @@
               </div>
       
               <!-- Distribución por País -->
-              <div class="card shadow-sm p-3 text-info text-start h-100" style="min-width: 220px;">
+              <div class="card shadow-sm p-3 text-info text-start h-100" style="min-width: 220px; cursor:pointer;" id="cardPaises">
                   <div class="d-flex justify-content-between align-items-center">
                       <i class="fas fa-globe fa-2x"></i>
                   </div>
@@ -113,7 +113,7 @@
               </div>
       
               <!-- Nacionales / Internacionales -->
-              <div class="card shadow-sm p-3 text-secondary text-start h-100" style="min-width: 220px;">
+              <div class="card shadow-sm p-3 text-secondary text-start h-100" style="min-width: 220px;  cursor:pointer;" id="cardNacionalidad">
                   <div class="d-flex justify-content-between align-items-center">
                       <h5 class="fw-bold mb-0">
                           {{ clientes_nacionales }} / {{ clientes_internacionales }}
@@ -268,4 +268,79 @@
     {% endif %}
     </div>
   </div>
+
+<!-- Modales para Gráficos -->
+<div class="modal fade" id="graficoActivosInactivosModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Distribución Activos / Inactivos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <canvas id="graficoActivosInactivosCanvas" width="400" height="400"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="graficoTipoClienteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Clientes por Tipo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <canvas id="graficoTipoClienteCanvas" width="400" height="400"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="graficoPaisesModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Clientes por País</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <canvas id="graficoPaisesCanvas" width="400" height="400"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="graficoNacionalidadModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nacionales / Internacionales</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <canvas id="graficoNacionalidadCanvas" width="400" height="400"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+  {{ labels_tipo_cliente|json_script:"labels-tipo-cliente" }}
+  {{ values_tipo_cliente|json_script:"values-tipo-cliente" }}
+
+  {{ labels_paises|json_script:"labels-paises" }}
+  {{ values_paises|json_script:"values-paises" }}
+
+  {{ labels_nacionalidad|json_script:"labels-nacionalidad" }}
+  {{ values_nacionalidad|json_script:"values-nacionalidad" }}
+
+  {{ labels_activos|json_script:"labels-activos" }}
+  {{ values_activos|json_script:"values-activos" }}
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{% static 'JS/informes_clientes.js' %}"></script>
+{% endblock %}
+
 {% endblock %}
