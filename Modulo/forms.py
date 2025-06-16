@@ -2432,3 +2432,124 @@ class Ind_Facturacion_FilterForm(forms.Form):
             ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
         ]
         self.fields['Mes'].choices = meses
+
+class FacturacionConsultoresFilterForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Año *Obligatorio*',  # Modificado aquí
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    Mes = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Mes *Obligatorio*',  # Modificado aquí
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    Mes_Cobro = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label="Mes a Cobrar *Obligatorio*",
+        widget=forms.Select(attrs={'class': 'form-control'})
+        )
+
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    Consultor = forms.ModelChoiceField(
+        queryset=Consultores.objects.all(),
+        required=False, 
+        label='Consultor',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_anio()
+        self.populate_mes()
+        self.populate_mes_cobro()
+        self.populate_consultor()
+        self.populate_linea()
+
+    def populate_anio(self):
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2021, 2026)]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = [('', 'Seleccione el mes')] + meses
+    
+    def populate_mes_cobro(self):
+        meses2 = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes_Cobro'].choices = [('', 'Seleccione el mes')] + meses2
+
+    def populate_consultor(self):
+        consultores = Consultores.objects.values_list('Documento', 'Nombre').distinct()
+        self.fields['Consultor'].choices = [('', 'Seleccione el Consultor')] + list(consultores)
+
+    def populate_linea(self):
+        linea = Linea.objects.values_list('LineaId', 'Linea').distinct()
+        self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)
+
+class FacturacionClientesFilterForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=False,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    Mes = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Mes',
+        widget=forms.CheckboxSelectMultiple()
+    )
+    Ceco = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Ceco',
+        widget=forms.CheckboxSelectMultiple()
+    )  
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_mes()
+        self.populate_ceco()
+        
+    def populate_ceco(self):
+        # Obtener valores únicos de Ceco, excluyendo vacíos y nulos, sin duplicados
+        cecos = FacturacionClientes.objects.exclude(Ceco__isnull=True).exclude(Ceco__exact='').values_list('Ceco', flat=True).distinct().order_by('Ceco')        
+        self.fields['Ceco'].choices = [('', 'Seleccione Ceco')] + [(ceco, ceco) for ceco in cecos]
+
+        # Llenar el campo de años dinámicamente
+        years = FacturacionClientes.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in years]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = [('', 'Seleccione el mes')] + meses    
