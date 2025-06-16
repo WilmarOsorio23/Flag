@@ -1,5 +1,5 @@
 from django.urls import path
-from Modulo.Views import Act_Maestro, Informe_clientes, clientes_factura, indicadores_operatividad, indicadores_totales, informe_tiempos_consultores, modulo
+from Modulo.Views import Act_Maestro, Informe_clientes, clientes_factura, indicadores_operatividad, indicadores_totales, informe_facturacion_clientes, informe_tiempos_consultores, modulo
 from Modulo.Views import ipc
 from Modulo.Views import ind
 from Modulo.Views import TipoDocumento
@@ -385,7 +385,7 @@ urlpatterns = [
     path('informes/informes_facturacion_consultores/', informe_facturacion_consultores.informe_totales_por_mes, name='informes_facturacion_consultores_index'),
     path('informes/informes_facturacion_consultores/reporte_excel_totales_por_mes', informe_facturacion_consultores.reporte_excel_totales_por_mes , name='reporte_excel_totales_por_mes'),
 
-#Ruta para informe de Facturacion Consultores
+    #Ruta para informe de servicio Facturacion Consultores
     path('informes/informes_Serv_consultor/', informe_serv_consultor.informe_totales, name='informes_serv_consultor_index'),
     path('informes/informes_Serv_consultor/descargar_informe_totales_excel', informe_serv_consultor.descargar_reporte_excel_totales_por_mes, name='descargar_reporte_excel_totales_por_mes'),
 
@@ -418,7 +418,8 @@ urlpatterns = [
     path('informes/pagares/', informe_pagares, name='informe_pagares'),
     path('informes/pagares/exportar_pagares_excel/', exportar_pagares_excel, name='exportar_pagares_excel'),
 
-
+    #Ruta para informe de Facturacion Clientes
+    path('informes/informes_facturacion_clientes/', informe_facturacion_clientes.informe_facturacion_clientes, name='informes_facturacion_clientes_index'),
 
 
     ]

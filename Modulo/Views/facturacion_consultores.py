@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from Modulo.models import Facturacion_Consultores, Tiempos_Cliente, Tarifa_Consultores,Consultores,Linea,Clientes,Modulo
-from Modulo.forms import FacturacionFilterForm
+from Modulo.forms import FacturacionConsultoresFilterForm
 from decimal import Decimal
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
@@ -40,7 +40,7 @@ def facturacion_consultores(request):
     facturacion_consultores = Facturacion_Consultores.objects.all()
 
     if request.method == 'GET':
-        form = FacturacionFilterForm(request.GET)
+        form = FacturacionConsultoresFilterForm(request.GET)
 
         if form.is_valid():
             facturacion_consultores = filtrar_facturacion_consultores(form, facturacion_consultores)
@@ -175,7 +175,7 @@ def facturacion_consultores(request):
                 }
 
     else:
-        form = FacturacionFilterForm()
+        form = FacturacionConsultoresFilterForm()
 
     context = {
         'form': form,
