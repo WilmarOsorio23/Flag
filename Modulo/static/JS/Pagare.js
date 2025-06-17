@@ -284,6 +284,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }, interval);
     }
 
+    function calcularPorcentajeEjecucion(documento) {
+        const card = document.querySelector(`.card[data-doc="${documento}"]`);
+        if (!card) return;
+    
+        const totalPlaneado = card.querySelector('.total-planeado');
+        const totalEjecutado = card.querySelector('.total-ejecutado');
+        const porcentajeEjecucion = card.querySelector('.ejecucion');
+    
+        if (totalPlaneado && totalEjecutado && porcentajeEjecucion) {
+            const planeado = parseFloat(totalPlaneado.value) || 0;
+            const ejecutado = parseFloat(totalEjecutado.value) || 0;
+            const porcentaje = planeado > 0 ? (ejecutado / planeado) * 100 : 0;
+    
+            porcentajeEjecucion.value = porcentaje.toFixed(2) + '%';
+        }
+    }
 /***************************** */
 
 
@@ -315,6 +331,7 @@ function llenarFormularioPagares(data) {
         setValue(`meses_condonacion_${doc}`, pagare.meses_condonacion);
         setValue(`valor_capacitacion_${doc}`, pagare.valor_capacitacion || '0.00');
         setValue(`estado_${doc}`, pagare.estado || 'proceso');
+        setValue(`descripcion_${doc}`, pagare.descripcion || '');
 
         const inputPagareId = document.getElementById(`pagare_id_${doc}`);
         if (inputPagareId) {
@@ -336,9 +353,11 @@ function llenarFormularioPagares(data) {
             inputTipoPagare.value = pagare.tipo_pagare.id;
         }
 
+        setDateValue(`ejecucion_${doc}`, pagare.porcentaje_ejecucion);
+
         const inputEjecucion = document.getElementById(`ejecucion_${doc}`);
         if (inputEjecucion) {
-            const porcentaje = parseFloat(pagare.porcentaje_ejecucion || 0).toFixed(2);
+            const porcentaje = parseFloat(pagare.ejecucion || 0).toFixed(2);
             inputEjecucion.value = `${porcentaje}%`;
 
             const inputFechaInicio = document.getElementById(`fecha_inicio_${doc}`);
@@ -413,8 +432,8 @@ function llenarFormularioPagares(data) {
                 `;
                 contenedorEjecutadas.appendChild(fila);
             });
-            calcularTotalEjecutado();
         }
+        calcularTotalEjecutado();
     });
     document.querySelectorAll('.card.mb-4').forEach(card => {
         const totalPlaneado = card.querySelector('.total-planeado');
@@ -493,10 +512,17 @@ document.getElementById('guardar-pagares-btn').addEventListener('click', functio
         const doc = fila.querySelector('input[data-doc]').dataset.doc;
         const pagareId = fila.querySelector('input.pagare-id[data-doc="' + doc + '"]').value;
 
+        const descripcionInput = fila.querySelector(`#descripcion_${doc}`);
+        if (!descripcionInput || descripcionInput.value.trim() === '') {
+            mostrarMensaje(`El campo "Descripción" es obligatorio para el documento ${doc}.`);
+            return;
+        }
+
         data[doc] = {
             pagare_id: pagareId,
             fecha_creacion: fila.querySelector(`#fecha_creacion_${doc}`).value,
             tipo_pagare: fila.querySelector(`#tipo_pagare_${doc}`).value,
+            descripcion: descripcionInput.value.trim(),
             fecha_inicio: fila.querySelector(`#fecha_inicio_${doc}`).value || '',
             fecha_fin: fila.querySelector(`#fecha_fin_${doc}`).value || '',
             meses_condonacion: fila.querySelector(`#meses_condonacion_${doc}`).value,
@@ -693,56 +719,54 @@ function waitForElement(selector, callback, maxAttempts = 50, interval = 100) {
         }
     }
 
-    // Configurar eventos para todas las filas
-    document.addEventListener('DOMContentLoaded', function () {
+    
         // Configurar eventos para todas las filas
-        document.querySelectorAll('.fila-condonacion').forEach(fila => {
-            const fechaInicioInput = fila.querySelector('.fecha-inicio');
-            const fechaFinInput = fila.querySelector('.fecha-fin');
-            const mesesInput = fila.querySelector('.meses-condonacion');
-    
-            const calcularFechaFin = () => {
-                if (!fechaInicioInput.value || fechaInicioInput.disabled) {
-                    // Si la fecha inicio está vacía o deshabilitada, reiniciar fecha fin
-                    fechaFinInput.value = '';
-                    return;
-                }
-    
-                if (!mesesInput.value) {
-                    fechaFinInput.value = '';
-                    return;
-                }
-    
-                const fechaInicio = new Date(fechaInicioInput.value);
-                const meses = parseInt(mesesInput.value) || 0;
-    
-                // Calcular nueva fecha fin
-                const nuevaFecha = new Date(fechaInicio);
-                nuevaFecha.setMonth(nuevaFecha.getMonth() + meses);
-    
-                // Ajustar día si es necesario (ej: 31 de enero + 1 mes)
-                if (nuevaFecha.getDate() !== fechaInicio.getDate()) {
-                    nuevaFecha.setDate(0); // Último día del mes anterior
-                }
-    
-                // Formatear a YYYY-MM-DD
-                const year = nuevaFecha.getFullYear();
-                const month = String(nuevaFecha.getMonth() + 1).padStart(2, '0');
-                const day = String(nuevaFecha.getDate()).padStart(2, '0');
-    
-                fechaFinInput.value = `${year}-${month}-${day}`;
-            };
-    
-            // Eventos para cambios
-            fechaInicioInput.addEventListener('change', calcularFechaFin);
-            mesesInput.addEventListener('input', calcularFechaFin);
-    
-            // Detectar si la fecha inicio se deshabilita
-            fechaInicioInput.addEventListener('input', () => {
-                if (fechaInicioInput.disabled) {
-                    fechaFinInput.value = ''; // Reiniciar fecha fin si fecha inicio está deshabilitada
-                }
-            });
+    document.querySelectorAll('.fila-condonacion').forEach(fila => {
+        const fechaInicioInput = fila.querySelector('.fecha-inicio');
+        const fechaFinInput = fila.querySelector('.fecha-fin');
+        const mesesInput = fila.querySelector('.meses-condonacion');
+
+        const calcularFechaFin = () => {
+            if (!fechaInicioInput.value || fechaInicioInput.disabled) {
+                // Si la fecha inicio está vacía o deshabilitada, reiniciar fecha fin
+                fechaFinInput.value = '';
+                return;
+            }
+
+            if (!mesesInput.value) {
+                fechaFinInput.value = '';
+                return;
+            }
+
+            const fechaInicio = new Date(fechaInicioInput.value);
+            const meses = parseInt(mesesInput.value) || 0;
+
+            // Calcular nueva fecha fin
+            const nuevaFecha = new Date(fechaInicio);
+            nuevaFecha.setMonth(nuevaFecha.getMonth() + meses);
+
+            // Ajustar día si es necesario (ej: 31 de enero + 1 mes)
+            if (nuevaFecha.getDate() !== fechaInicio.getDate()) {
+                nuevaFecha.setDate(0); // Último día del mes anterior
+            }
+
+            // Formatear a YYYY-MM-DD
+            const year = nuevaFecha.getFullYear();
+            const month = String(nuevaFecha.getMonth() + 1).padStart(2, '0');
+            const day = String(nuevaFecha.getDate()).padStart(2, '0');
+
+            fechaFinInput.value = `${year}-${month}-${day}`;
+        };
+
+        // Eventos para cambios
+        fechaInicioInput.addEventListener('change', calcularFechaFin);
+        mesesInput.addEventListener('input', calcularFechaFin);
+
+        // Detectar si la fecha inicio se deshabilita
+        fechaInicioInput.addEventListener('input', () => {
+            if (fechaInicioInput.disabled) {
+                fechaFinInput.value = ''; // Reiniciar fecha fin si fecha inicio está deshabilitada
+            }
         });
     });
 
@@ -1221,6 +1245,7 @@ function waitForElement(selector, callback, maxAttempts = 50, interval = 100) {
             document.querySelectorAll('.card[data-doc]').forEach(card => {
                 const doc = card.dataset.doc;
                 console.log(`Procesando empleado: ${doc}`);
+                
 
                 
                 // 1. Elementos obligatorios
@@ -1230,6 +1255,7 @@ function waitForElement(selector, callback, maxAttempts = 50, interval = 100) {
                     valor_pagare: card.querySelector('.valor-pagare'),
                     estado: card.querySelector(`[name="estado_${doc}"]`),
                     meses_condonacion: card.querySelector('.meses-condonacion'),
+                    descripcion:card.querySelector(`#descripcion_${doc}`),
                 };
                 
 
@@ -1245,6 +1271,7 @@ function waitForElement(selector, callback, maxAttempts = 50, interval = 100) {
                     !elementosObligatorios.fecha_creacion?.value || 
                     !elementosObligatorios.valor_pagare?.value || 
                     !elementosObligatorios.meses_condonacion?.value ||
+                    !elementosObligatorios.descripcion?.value ||
                     !elementosObligatorios.estado?.value) {
 
                     console.log('Campos vacíos en:', {
@@ -1252,10 +1279,11 @@ function waitForElement(selector, callback, maxAttempts = 50, interval = 100) {
                         fecha_creacion: elementosObligatorios.fecha_creacion?.value,
                         valor_pagare: elementosObligatorios.valor_pagare?.value,
                         meses_condonacion: elementosObligatorios.meses_condonacion?.value,
-                        estado: elementosObligatorios.estado?.value
+                        estado: elementosObligatorios.estado?.value,
+                        descripcion: elementosObligatorios.descripcion?.value
                     });
 
-                    mostrarMensaje(`Faltan campos obligatorios para el documento ${doc}. Verifica Tipo Pagaré, Fecha Creación, Valor Pagaré, Meses condonación y Estado.`);
+                    mostrarMensaje(`Faltan campos obligatorios para el documento ${doc}. Verifica Tipo Pagaré, Fecha Creación, Valor Pagaré, Meses condonación, Descripción y Estado.`);
                     todoCorrecto = false;
                     return;
                 }
@@ -1274,12 +1302,13 @@ function waitForElement(selector, callback, maxAttempts = 50, interval = 100) {
                     general: {
                         fecha_creacion: elementosObligatorios.fecha_creacion.value,
                         tipo_pagare: elementosObligatorios.tipo_pagare.value,
+                        descripcion: elementosObligatorios.descripcion.value,
                         fecha_inicio: card.querySelector('.fecha-inicio')?.value || null,
                         fecha_fin:card.querySelector('.fecha-fin')?.value || null,
                         meses_condonacion: elementosObligatorios.meses_condonacion.value,                        
                         valor_pagare:elementosObligatorios.valor_pagare.value,
                         estado: elementosObligatorios.estado.value,
-                        ejecucion: card.querySelector('.ejecucion')?.value ||null
+                        ejecucion: card.querySelector(`#ejecucion_${doc}`)?.value || null
                     },
                     planeado: [],
                     ejecutado: []

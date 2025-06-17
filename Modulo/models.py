@@ -818,6 +818,7 @@ class Pagare(models.Model):
     Valor_Pagare = models.DecimalField(max_digits=15, decimal_places=2)
     porcentaje_ejecucion = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     estado = models.CharField(max_length=50)
+    descripcion = models.CharField(max_length=150, default="Sin descripción")
 
     class Meta:
         db_table = 'Pagare'
