@@ -173,6 +173,7 @@
                                     <tr>
                                         <th>Fecha Creacion</th>
                                         <th>Tipo Pagaré</th>
+                                        <th>Descripción</th>
                                         <th>Fecha Inicio Condonación</th>
                                         <th>Fecha Fin Condonación</th>
                                         <th>Meses de Condonación</th>
@@ -183,7 +184,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr class="fila-condonacion">
+                                    <tr class="fila-condonacion" >
                                         <input type="hidden" class="pagare-id" name="pagare_id_{{ empleado.Documento }}" id="pagare_id_{{ empleado.Documento }}" data-doc="{{ empleado.Documento }}" value="{{ pagare.id }}">
                                         <td><input 
                                             type="date" 
@@ -201,6 +202,17 @@
                                                     </option>
                                                 {% endfor %}
                                             </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" 
+                                                name="descripcion_{{ empleado.Documento }}" 
+                                                id="descripcion_{{ empleado.Documento }}" 
+                                                class="form-control descripcion" 
+                                                value="{{ pagare.descripcion|default:'' }}" 
+                                                data-doc="{{ empleado.Documento }}" 
+                                                maxlength="150" 
+                                                required
+                                                placeholder="Ingrese la descripción del pagaré">
                                         </td>
                                         <td><input type="date" name="fecha_inicio_{{ empleado.Documento }}" id="fecha_inicio_{{ empleado.Documento }}" class="fecha-inicio form-control" data-documento="{{ empleado.Documento }}" {% if pagare.porcentaje_ejecucion != 100 %}disabled{% endif %}/></td>
                                         <td><input type="date" name="fecha_fin_{{ empleado.Documento }}" id="fecha_fin_{{ empleado.Documento }}"class="fecha-fin form-control" data-documento="{{ empleado.Documento }}" readonly /></td>

@@ -156,6 +156,8 @@
                 <th><input type="checkbox" id="selectAll"></th>
                 <th>Documento</th>
                 <th>Nombre</th>
+                <th>Tipo Pagaré</th>
+                <th>Descripción</th>
                 <th>Línea</th>
                 <th>Cargo</th>
                 <th>F. Ingreso</th>
@@ -186,6 +188,8 @@
                   </td>
                   <td>{{ registro.Documento }}</td>
                   <td>{{ registro.Nombre }}</td>
+                  <td>{{ registro.TipoPagare }}</td>
+                  <td>{{ registro.Descripcion}}</td>
                   <td>{{ registro.Linea }}</td>
                   <td>{{ registro.Cargo }}</td>
                   <td>{% if registro.FechaIngreso %}{{ registro.FechaIngreso }}{% else %}-{% endif %}</td>

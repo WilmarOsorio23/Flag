@@ -86,6 +86,7 @@ def actualizar_pagare(request):
                     # Actualizar campos principales del pagaré
                     pagare.Fecha_Creacion_Pagare = valores['fecha_creacion']
                     pagare.Tipo_Pagare_id = valores['tipo_pagare']
+                    pagare.descripcion = valores.get('descripcion', pagare.descripcion)
                     pagare.Fecha_inicio_Condonacion = valores.get('fecha_inicio') or None
 
                     # Si la fecha inicio está vacía o deshabilitada, reiniciar fecha fin
@@ -177,6 +178,11 @@ def obtener_datos_pagares(request):
 
             pagares_data = []
             for pagare in pagarés:
+                # Calcular el valor de capacitación otorgado
+                valor_capacitacion_otorgado = 0
+                if pagare.Valor_Pagare and pagare.porcentaje_ejecucion:
+                    valor_capacitacion_otorgado = (float(pagare.Valor_Pagare) * float(pagare.porcentaje_ejecucion)) / 100
+
                 pagares_data.append({
                     'id': pagare.Pagare_Id,
                     'documento': pagare.Documento,
@@ -185,12 +191,13 @@ def obtener_datos_pagares(request):
                         'id': pagare.Tipo_Pagare.Tipo_PagareId,
                         'descripcion': pagare.Tipo_Pagare.Desc_Tipo_Pagare,
                     },
+                    'descripcion': pagare.descripcion,
                     'fecha_inicio': pagare.Fecha_inicio_Condonacion.strftime('%Y-%m-%d') if pagare.Fecha_inicio_Condonacion else None,
                     'fecha_fin': pagare.Fecha_fin_Condonacion.strftime('%Y-%m-%d') if pagare.Fecha_fin_Condonacion else None,
                     'meses_condonacion': pagare.Meses_de_condonacion,
                     'valor_pagare': str(pagare.Valor_Pagare),
-                    'ejecucion': str(pagare.porcentaje_ejecucion) if pagare.porcentaje_ejecucion is not None else '0',
-                    'valor_capacitacion': getattr(pagare, 'valor_capacitacion', None),
+                    'ejecucion': round(pagare.porcentaje_ejecucion, 2) if pagare.porcentaje_ejecucion is not None else 0,   
+                    'valor_capacitacion': round(valor_capacitacion_otorgado, 2),
                     'estado': pagare.estado,
                 })
             # En obtener_datos_pagares, verifica que el Tipo_PagareId=3 exista:
@@ -351,17 +358,27 @@ def guardar_pagare(request):
             # Versión para AJAX (JSON)
             if request.content_type == 'application/json':
                 data = json.loads(request.body)
+                print("\nDatos JSON recibidos:")
+                print(json.dumps(data, indent=4, ensure_ascii=False))
                 
                 for pagare_data in data:
+                    ejecucion = pagare_data['general'].get('ejecucion', None)
+                    if ejecucion:
+                        try:
+                            ejecucion = float(ejecucion.replace('%', '').strip())  # Eliminar el símbolo '%' y convertir a float
+                        except ValueError:
+                            ejecucion = None  
                     # Crear/Actualizar Pagare principal
                     pagare = Pagare.objects.create(
                         Documento=pagare_data['documento'],
                         Fecha_Creacion_Pagare=pagare_data['general']['fecha_creacion'],
                         Tipo_Pagare_id=pagare_data['general']['tipo_pagare'],
+                        descripcion=pagare_data['general'].get('descripcion', 'Sin descripción'),
                         Fecha_inicio_Condonacion=pagare_data['general']['fecha_inicio'],
                         Fecha_fin_Condonacion=pagare_data['general']['fecha_fin'],
                         Meses_de_condonacion=pagare_data['general']['meses_condonacion'],
                         Valor_Pagare=pagare_data['general']['valor_pagare'],
+                        porcentaje_ejecucion=ejecucion,
                         estado=pagare_data['general']['estado']
                     )
 
