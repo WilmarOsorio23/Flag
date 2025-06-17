@@ -51,9 +51,11 @@ document.addEventListener('DOMContentLoaded', function() {
             'valorDia': row.querySelector('input[name="valorDia"]').value,
             'valorMes': row.querySelector('input[name="valorMes"]').value,
             'monedaId': row.querySelector('select[name="moneda"]').value,
+            'moduloId': row.querySelector('select[name="moduloId"]').value,
             'iva': row.querySelector('input[name="iva"]').value.trim() || null,
             'rteFte': row.querySelector('input[name="rteFte"]').value.trim() || null,
         };
+
         let idd = selected[0].value;
         // Deshabilitar los checkboxes y el botón de edición
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);

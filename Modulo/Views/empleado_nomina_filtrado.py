@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from datetime import date
 from datetime import datetime
-from collections import defaultdict
+from collections import defaultdict, Counter
 from dateutil.relativedelta import relativedelta
 from Modulo.forms import EmpleadoFilterForm
 from Modulo.models import Empleado, Nomina
@@ -115,6 +115,15 @@ def empleado_nomina_filtrado(request):
         form = EmpleadoFilterForm()
         print("Datos obtenidos:", empleado_info)
 
+    #Aplicar lógica para cards
+    
+    # Total con Certificación SAP
+    total_certificados = sum(1 for e in empleado_info if e['certificado'] == 'SI')
+
+    # Conteo por Línea
+    lineas = [e['nombre_linea'] for e in empleado_info if e['nombre_linea']]
+    conteo_lineas = dict(Counter(lineas))
+
 
     context = {
         "meses": meses,
@@ -122,6 +131,10 @@ def empleado_nomina_filtrado(request):
         'empleado_info': empleado_info,      
         'show_data': show_data,
         'busqueda_realizada': busqueda_realizada,
+        'total_certificados': total_certificados,
+        'conteo_lineas': conteo_lineas,
+        'lineas_labels': list(conteo_lineas.keys()),
+        'lineas_data': list(conteo_lineas.values()),
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 

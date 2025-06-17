@@ -1,5 +1,5 @@
 from django.urls import path
-from Modulo.Views import Act_Maestro, Informe_clientes, clientes_factura, indicadores_operatividad, indicadores_totales, informe_tiempos_consultores, modulo
+from Modulo.Views import Act_Maestro, Informe_clientes, clientes_factura, indicadores_operatividad, indicadores_totales, informe_facturacion_clientes, informe_tiempos_consultores, modulo
 from Modulo.Views import ipc
 from Modulo.Views import ind
 from Modulo.Views import TipoDocumento
@@ -48,6 +48,11 @@ from Modulo.Views import referencia
 from Modulo.Views import centrosCostos
 from Modulo.Views import informe_facturacion
 from Modulo.Views import informe_historial_cargos
+from Modulo.Views import indicadores_facturacion
+
+from Modulo.Views import facturacion_consultores
+from Modulo.Views import informe_facturacion_consultores
+from Modulo.Views import informe_serv_consultor
 
 
 
@@ -371,6 +376,19 @@ urlpatterns = [
     path('clientes_factura/get_lineas_modulos/', clientes_factura.get_lineas_modulos, name='get_lineas_modulos'),
     path('clientes_factura/eliminar/', clientes_factura.eliminar_facturas, name='eliminar_facturas'),
 
+    # Rutas para la tabla Facturacion consultores
+    path('facturacion_consultores/', facturacion_consultores.facturacion_consultores, name='facturacion_consultores_index'),
+    path('facturacion_consultores/eliminar/', facturacion_consultores.eliminar_facturacion_consultores, name='eliminar_facturacion_consultores'),
+    path('facturacion_consultores/guardar/', facturacion_consultores.guardar_facturacion_consultores, name='guardar_facturacion_consultores'),
+
+    #Ruta para informe de Facturacion Consultores
+    path('informes/informes_facturacion_consultores/', informe_facturacion_consultores.informe_totales_por_mes, name='informes_facturacion_consultores_index'),
+    path('informes/informes_facturacion_consultores/reporte_excel_totales_por_mes', informe_facturacion_consultores.reporte_excel_totales_por_mes , name='reporte_excel_totales_por_mes'),
+
+    #Ruta para informe de servicio Facturacion Consultores
+    path('informes/informes_Serv_consultor/', informe_serv_consultor.informe_totales, name='informes_serv_consultor_index'),
+    path('informes/informes_Serv_consultor/descargar_informe_totales_excel', informe_serv_consultor.descargar_reporte_excel_totales_por_mes, name='descargar_reporte_excel_totales_por_mes'),
+
     # Rutas para la tabla Indicadores de Operatividad
     path('indicadores_operatividad/', indicadores_operatividad.indicadores_operatividad_index, name='indicadores_operatividad_index'),
 
@@ -384,6 +402,7 @@ urlpatterns = [
 
     # Rutas para la tabla Indicadores de totales
     path('indicadores_totales/', indicadores_totales.indicadores_totales, name='indicadores_totales_index'),
+    path('indicadores_facturacion/', indicadores_facturacion.indicadores_facturacion, name='indicadores_facturacion_index'),
 
     #Ruta para la tabla Pagare
     path('Pagare/Pagare/', pagare_index, name="pagare_index"),
@@ -399,7 +418,8 @@ urlpatterns = [
     path('informes/pagares/', informe_pagares, name='informe_pagares'),
     path('informes/pagares/exportar_pagares_excel/', exportar_pagares_excel, name='exportar_pagares_excel'),
 
-
+    #Ruta para informe de Facturacion Clientes
+    path('informes/informes_facturacion_clientes/', informe_facturacion_clientes.informe_facturacion_clientes, name='informes_facturacion_clientes_index'),
 
 
     ]

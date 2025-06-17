@@ -200,7 +200,7 @@
                                 </li>
                                 <li>
                                     <a class="nav-item nav-link" href="{% url 'informes_facturacion_index' %}">
-                                        <i class="fas fa-comments-dollar"></i> Informe Facturacion
+                                        <i class="fas fa-comments-dollar"></i> Informe Facturacion Clientes
                                     </a>
                                 </li>
                                 <li>
@@ -238,6 +238,21 @@
                                         <i class="fas fa-file-contract"></i> Informe Pagarés
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'informes_facturacion_consultores_index' %}">
+                                        <i class="fas fa-file-contract"></i> Informe Fact Consultores Línea
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'informes_serv_consultor_index' %}">
+                                        <i class="fas fa-file-contract"></i> Informe Fact Consultores Detalle
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'informes_facturacion_clientes_index' %}">
+                                        <i class="fas fa-file-contract"></i> Informe Fact CeCo Clientes
+                                    </a>
+                                </li>                                
                             </ul>
                         </li>
                     </ul> 
@@ -318,6 +333,11 @@
                                         <i class="fas fa-table"></i> Facturación Clientes
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'facturacion_consultores_index' %}">
+                                        <i class="fas fa-table"></i> Facturación Consultores
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     </ul>
@@ -333,7 +353,10 @@
                                         <i class="fas fa-table"></i> Indicador Operatividad
                                     </a>
                                     <a class="nav-item nav-link" href="{% url 'indicadores_totales_index' %}">
-                                        <i class="fas fa-table"></i> Indicador Totales
+                                        <i class="fas fa-chart-line"></i> Indicadores Totales
+                                    </a>
+                                    <a class="nav-item nav-link" href="{% url 'indicadores_facturacion_index' %}">
+                                        <i class="fas fa-file-invoice-dollar"></i> Indicadores Facturación
                                     </a>
                                 </li>
                             </ul>

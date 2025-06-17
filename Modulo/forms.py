@@ -1,5 +1,5 @@
 from django import forms
-from .models import FacturacionClientes, Horas_Habiles, Modulo, IPC, IND, Linea, Pagare, Perfil, TipoDocumento, Clientes, Consultores, Certificacion, Costos_Indirectos, TipoPagare
+from .models import Facturacion_Consultores, FacturacionClientes, Horas_Habiles, Modulo, IPC, IND, Linea, Pagare, Perfil, TipoDocumento, Clientes, Consultores, Certificacion, Costos_Indirectos, TipoPagare
 from .models import Concepto, Gastos, Detalle_Gastos, Total_Gastos, Total_Costos_Indirectos
 from .models import Detalle_Costos_Indirectos, TiemposConcepto, Tiempos_Cliente, Nomina, Detalle_Certificacion, Empleado
 from .models import Cargos
@@ -19,6 +19,8 @@ from .models import Referencia
 from .models import CentrosCostos
 from datetime import date, datetime
 from .models import ActividadPagare
+from datetime import date
+from django.utils import timezone
 
 
 class ModuloForm(forms.ModelForm):
@@ -464,14 +466,14 @@ class ColaboradorFilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
         required=True,
-        label='Año (Obligatorio)',  
+        label='Año *Obligatorio*',  # Modificado aquí
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     Mes = forms.ChoiceField(
         choices=[],
         required=True,
-        label='Mes (Obligatorio)',  
+        label='Mes *Obligatorio*',  # Modificado aquí
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
@@ -1240,6 +1242,13 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
         }),
         label='Moneda'
     )
+
+    moduloId = forms.ModelChoiceField( 
+        queryset=Modulo.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Módulo',
+        to_field_name='ModuloId'
+    )
     
     class Meta:
         model = Tarifa_Consultores
@@ -1277,6 +1286,8 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
         anio = cleaned_data.get('anio')
         mes = cleaned_data.get('mes')
         clienteID = cleaned_data.get('clienteID')
+        moduloId = cleaned_data.get('moduloId')
+        print(moduloId)
 
         iva = cleaned_data.get('iva')
         rteFte = cleaned_data.get('rteFte')
@@ -1290,11 +1301,10 @@ class Tarifa_ConsultoresForm(forms.ModelForm):
             documentoId=documentoId,
             anio=anio,
             mes=mes,
-            clienteID=clienteID
+            clienteID=clienteID,
+            moduloId=moduloId
         ).exists():
-            raise ValidationError(
-                "Ya existe un registro con el mismo Documento, Año, Mes y Cliente."
-            )
+            raise ValidationError("Ya existe un registro con el mismo Documento, Año, Mes, Cliente y Módulo.")
         
         return cleaned_data
 
@@ -1480,14 +1490,14 @@ class FacturacionFilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
         required=True,
-        label='Año',  
+        label='Año *Obligatorio*',  # Modificado aquí
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     Mes = forms.ChoiceField(
         choices=[],
         required=True,
-        label='Mes',  
+        label='Mes *Obligatorio*',  # Modificado aquí
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
@@ -1537,7 +1547,7 @@ class FacturacionFilterForm(forms.Form):
     def populate_linea(self):
         linea = Linea.objects.values_list('LineaId', 'Linea').distinct()
         self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)
-
+        
 class ConsultorFilterForm(forms.Form):
     Nombre = forms.ModelChoiceField(
         queryset=Consultores.objects.values_list('Nombre', flat=True).distinct(),
@@ -1667,7 +1677,7 @@ class Ind_Operatividad_FilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
         required=True,
-        label='Año',
+        label='Año *Obligatorio*', # Modificado aquí
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
@@ -1691,7 +1701,8 @@ class Ind_Operatividad_FilterForm(forms.Form):
         self.populate_mes()
 
     def populate_anio(self):
-        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
+        years = Horas_Habiles.objects.values_list('Anio', flat=True).distinct().order_by('Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in years]
 
     def populate_mes(self):
         meses = [
@@ -1705,7 +1716,7 @@ class Ind_Totales_FilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
         required=True,
-        label='Año',
+        label='Año *Obligatorio*', # Modificado aquí
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
@@ -1739,7 +1750,8 @@ class Ind_Totales_FilterForm(forms.Form):
         self.fields['ClienteId'].label_from_instance = lambda obj: f"{obj.Nombre_Cliente} - {obj.DocumentoId}"
 
     def populate_anio(self):
-        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2022, 2026)]
+        years = Horas_Habiles.objects.values_list('Anio', flat=True).distinct().order_by('Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in years]
 
     def populate_mes(self):
         meses = [
@@ -1999,6 +2011,101 @@ class ClientesContratosFilterForm(forms.Form):
     def populate_nombre(self):
         clientes = Clientes.objects.values_list('ClienteId', 'Nombre_Cliente').distinct()
         self.fields['Nombre_Cliente'].choices = [('', 'Seleccione el Cliente')] + list(clientes)
+
+class TotalesPorMesFilterForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=False,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    Mes = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Mes',
+        widget=forms.CheckboxSelectMultiple()
+    )
+    Consultor = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Consultor',
+        widget=forms.CheckboxSelectMultiple()
+    )  
+   
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_mes()
+
+        # Llenar el campo de años dinámicamente
+        years = Facturacion_Consultores.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in years]
+
+        consultores = Consultores.objects.values_list('Documento', 'Nombre')
+        self.fields['Consultor'].choices = [(c[0], c[1]) for c in consultores]
+        
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = [('', 'Seleccione el mes')] + meses
+
+class TotalesPorMesFilterForm2(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=False,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    Mes = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Mes',
+        widget=forms.CheckboxSelectMultiple()
+    )
+    Consultor = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Consultor',
+        widget=forms.CheckboxSelectMultiple()
+    )  
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_mes()
+        
+        consultores = Consultores.objects.values_list('Documento', 'Nombre')
+        self.fields['Consultor'].choices = [(c[0], c[1]) for c in consultores]
+
+        # Llenar el campo de años dinámicamente
+        years = Facturacion_Consultores.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in years]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = [('', 'Seleccione el mes')] + meses
         
 class ContratosOtrosSiForm(forms.ModelForm):
 
@@ -2022,7 +2129,7 @@ class ContratosOtrosSiForm(forms.ModelForm):
     max_length=50,
     required=True,
     widget=forms.Select(attrs={'class': 'form-control'}),
-    label='Contrato'
+    label='Contrato *Obligatorio*' # Modificado aquí
 )
 
     class Meta:
@@ -2285,3 +2392,164 @@ class EmpleadoConPagareFilterForm(forms.Form):
         available_years = range(2023, current_year + 1)
 
         self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in available_years]
+
+class Ind_Facturacion_FilterForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Año *Obligatorio*', # Corregido aquí
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    Mes = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Mes',
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_anio()
+        self.populate_mes()
+
+    def populate_anio(self):
+        years = Horas_Habiles.objects.values_list('Anio', flat=True).distinct().order_by('Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in years]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'),
+            ('4', 'Abril'), ('5', 'Mayo'), ('6', 'Junio'),
+            ('7', 'Julio'), ('8', 'Agosto'), ('9', 'Septiembre'),
+            ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = meses
+
+class FacturacionConsultoresFilterForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Año *Obligatorio*',  # Modificado aquí
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    Mes = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Mes *Obligatorio*',  # Modificado aquí
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    Mes_Cobro = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label="Mes a Cobrar *Obligatorio*",
+        widget=forms.Select(attrs={'class': 'form-control'})
+        )
+
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    Consultor = forms.ModelChoiceField(
+        queryset=Consultores.objects.all(),
+        required=False, 
+        label='Consultor',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_anio()
+        self.populate_mes()
+        self.populate_mes_cobro()
+        self.populate_consultor()
+        self.populate_linea()
+
+    def populate_anio(self):
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in range(2021, 2026)]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = [('', 'Seleccione el mes')] + meses
+    
+    def populate_mes_cobro(self):
+        meses2 = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes_Cobro'].choices = [('', 'Seleccione el mes')] + meses2
+
+    def populate_consultor(self):
+        consultores = Consultores.objects.values_list('Documento', 'Nombre').distinct()
+        self.fields['Consultor'].choices = [('', 'Seleccione el Consultor')] + list(consultores)
+
+    def populate_linea(self):
+        linea = Linea.objects.values_list('LineaId', 'Linea').distinct()
+        self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)
+
+class FacturacionClientesFilterForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=False,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label="Línea",
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    Mes = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Mes',
+        widget=forms.CheckboxSelectMultiple()
+    )
+    Ceco = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Ceco',
+        widget=forms.CheckboxSelectMultiple()
+    )  
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_mes()
+        self.populate_ceco()
+        
+    def populate_ceco(self):
+        # Obtener valores únicos de Ceco, excluyendo vacíos y nulos, sin duplicados
+        cecos = FacturacionClientes.objects.exclude(Ceco__isnull=True).exclude(Ceco__exact='').values_list('Ceco', flat=True).distinct().order_by('Ceco')        
+        self.fields['Ceco'].choices = [('', 'Seleccione Ceco')] + [(ceco, ceco) for ceco in cecos]
+
+        # Llenar el campo de años dinámicamente
+        years = FacturacionClientes.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in years]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = [('', 'Seleccione el mes')] + meses    

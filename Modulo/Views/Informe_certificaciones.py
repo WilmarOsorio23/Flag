@@ -8,6 +8,7 @@ from openpyxl.styles import Alignment, Border, Side, Font
 from Modulo.forms import EmpleadoFilterForm
 from Modulo.models import Certificacion, Detalle_Certificacion, Empleado
 from django.views.decorators.csrf import csrf_exempt
+from collections import Counter
 
 def filtrar_empleado(form, empleados, certificaciones, detalles):
     linea = form.cleaned_data.get('LineaId')
@@ -68,13 +69,35 @@ def empleado_filtrado(request):
     else:
         form = EmpleadoFilterForm()
 
-    return render(request, 'informes/informes_certificacion_index.html', {
+    #Aplicar lógica para cards
+    
+    # Total de Certificaciones
+    total_certificaciones = len(certificaciones_info)
+
+    # Conteo por Módulo
+    modulos = [cert['Modulo'] for cert in certificaciones_info if cert['Modulo']]
+    conteo_modulos = dict(Counter(modulos))
+
+    # Conteo por Línea
+    lineas = [cert['Linea'] for cert in certificaciones_info if cert['Linea']]
+    conteo_lineas = dict(Counter(lineas))
+
+    context = {
         'form': form,
         'certificaciones_info': certificaciones_info,
         'show_data': show_data,
         'busqueda_realizada': busqueda_realizada,
+        'total_certificaciones': total_certificaciones,
+        'conteo_modulos': conteo_modulos,
+        'conteo_lineas': conteo_lineas,
+        'modulos_labels': list(conteo_modulos.keys()),
+        'modulos_data': list(conteo_modulos.values()),
+        'lineas_labels': list(conteo_lineas.keys()),
+        'lineas_data': list(conteo_lineas.values()),
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
-    })
+    }
+
+    return render(request, 'informes/informes_certificacion_index.html', context)
 
 @csrf_exempt
 def exportar_certificaciones_excel(request):

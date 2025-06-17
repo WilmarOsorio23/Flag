@@ -5,6 +5,7 @@ from Modulo.models import Consultores
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 from datetime import datetime
+from collections import Counter
 
 #Función para filtrar Consultores
 #Filtros: Nombre Consultor, Linea, Modulo, Certificación, Perfil
@@ -85,22 +86,66 @@ def consultores_filtrado(request):
                 # Inicializar consultores
                 consultores = Consultores.objects.all()
 
-                # Relizar el filtro de los consultores
+                # Realizar el filtro de los consultores
                 consultores = filtrar_consultores(form, consultores)
 
-                #Obtener informacion de consultores 
+                # Obtener información de consultores 
                 consultor_info = obtener_consultores(consultores)
                 show_data = bool(consultor_info)  # Mostrar datos si hay resultados
         
     else: 
         form = ConsultorFilterForm()
 
+    # 1. Total de Consultores
+    total_consultores = len(consultor_info)
+
+    # 2. Activos/Inactivos
+    activos = sum(1 for c in consultor_info if c['estado'] == 'Activo')
+    inactivos = total_consultores - activos
+
+    # 3. Consultores con Certificación
+    certificados = sum(1 for c in consultor_info if c['certificado'] == 'SI')
+
+    # 4. Distribución por Línea
+    lineas = [c['linea'] for c in consultor_info if c['linea']]
+    conteo_lineas = dict(Counter(lineas))
+
+    # 5. Distribución por Módulo
+    modulos = [c['modulo'] for c in consultor_info if c['modulo']]
+    conteo_modulos = dict(Counter(modulos))
+
+    # 6. Preparar datos para gráficos en JSON
+    lineas_labels = list(conteo_lineas.keys())
+    lineas_data = list(conteo_lineas.values())
+
+    modulos_labels = list(conteo_modulos.keys())
+    modulos_data = list(conteo_modulos.values())
+
+    estado_labels = ['Activo', 'Inactivo']
+    estado_data = [activos, inactivos]
+
     context = {
         'form': form,
         'consultor_info': consultor_info,      
         'show_data': show_data,
         'busqueda_realizada': busqueda_realizada,
-        'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
+        'total_consultores': total_consultores,
+        'activos': activos,
+        'inactivos': inactivos,
+        'certificados': certificados,
+        'conteo_lineas': conteo_lineas,
+        'conteo_modulos': conteo_modulos,
+        'lineas_labels': lineas_labels,
+        'lineas_data': lineas_data,
+        'modulos_labels': modulos_labels,
+        'modulos_data': modulos_data,
+        'estado_labels': estado_labels,
+        'estado_data': estado_data,
+        'mensaje': (
+            "No se encontraron resultados para los filtros aplicados."
+            if busqueda_realizada and not show_data
+            else "No se ha realizado ninguna búsqueda aún."
+        )
     }
 
     return render(request, 'informes/informes_consultores_index.html', context)

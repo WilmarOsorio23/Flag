@@ -193,6 +193,7 @@ class Tiempos_Cliente(models.Model):
     Documento = models.CharField(max_length=20)
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
     LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    ModuloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='ModuloId')
     Horas = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
@@ -200,8 +201,11 @@ class Tiempos_Cliente(models.Model):
 
     class Meta:
         db_table = 'Tiempos_Cliente'
+        indexes = [
+            models.Index(fields=['ClienteId', 'Anio', 'Mes', 'LineaId']),
+        ]
         constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento', 'ClienteId', 'LineaId'], name='unique_tiempos_cliente')
+            models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento', 'ClienteId', 'LineaId', 'ModuloId'], name='unique_tiempos_cliente')
         ]
 
 class Consultores(models.Model):
@@ -527,6 +531,9 @@ class Horas_Habiles(models.Model):
 
     class Meta:
         db_table = 'Horas_Habiles'
+        indexes = [
+            models.Index(fields=['Anio', 'Mes']),
+        ]
         constraints = [
             models.UniqueConstraint(fields=['Anio', 'Mes'], name='unique_horas_habiles')
         ]
@@ -535,6 +542,7 @@ class Horas_Habiles(models.Model):
 class Tarifa_Consultores(models.Model):
     id = models.AutoField(primary_key=True)
     documentoId = models.ForeignKey('Consultores', on_delete=models.CASCADE, db_column='documentoId')
+    moduloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='moduloId')
     anio = models.CharField(max_length=4, db_column='anio')
     mes = models.CharField(max_length=2, db_column='mes')
     clienteID = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='clienteID')
@@ -550,6 +558,12 @@ class Tarifa_Consultores(models.Model):
 
     class Meta:
         db_table = 'Tarifa_Consultores'
+        constraints = [
+            models.UniqueConstraint( 
+                fields=['documentoId', 'anio', 'mes', 'clienteID', 'moduloId'], 
+                name='unique_tarifa_consultores'
+            )
+        ]
 
 class Moneda(models.Model):
     id = models.AutoField(primary_key=True) 
@@ -741,6 +755,29 @@ class ContratosOtrosSi(models.Model):
         unique_together = ('ClienteId', 'FechaInicio', 'Contrato')
 
     def __str__(self):
+        return f"ContratoId:{self.ContratosOtrosSiId} - Cliente: {self.ClienteId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - NumeroOtroSi: {self.NumeroOtroSi} - ValorOtroSi: {self.ValorOtroSi} - ValorIncluyeIva: {self.ValorIncluyeIva} - Polizas: {self.Polizas} - PolizasDesc: {self.PolizasDesc} - FirmadoFlag: {self.FirmadoFlag} - FirmadoCliente: {self.FirmadoCliente}"
+
+class Ind_Totales_Diciembre(models.Model):
+    Id = models.AutoField(primary_key=True)
+    Anio = models.IntegerField()
+    Mes = models.IntegerField()
+    ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
+    Trabajado = models.DecimalField(max_digits=15, decimal_places=2)
+    Facturado = models.DecimalField(max_digits=15, decimal_places=2)
+    Costo = models.DecimalField(max_digits=15, decimal_places=2)
+    ValorFacturado = models.DecimalField(max_digits=15, decimal_places=2)
+
+    class Meta:
+        db_table = 'Ind_Totales_Diciembre'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['Anio', 'Mes', 'ClienteId'], 
+                name='unique_ind_totales_diciembre'
+            )
+        ]
+
+    def __str__(self):
+        return f"Año {self.Anio} - Mes {self.Mes} - Cliente {self.ClienteId.Nombre_Cliente}"
         return f"ContratoId:{self.ContratosOtrosSiId} - Cliente: {self.ClienteId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - NumeroOtroSi: {self.NumeroOtroSi} - ValorOtroSi: {self.ValorOtroSi} - ValorIncluyeIva: {self.ValorIncluyeIva} - Polizas: {self.Polizas} - PolizasDesc: {self.PolizasDesc} - FirmadoFlag: {self.FirmadoFlag} - FirmadoCliente: {self.FirmadoCliente} - Moneda: {self.monedaId} - Contrato: {self.Contrato}"
     
 class TipoPagare(models.Model):
@@ -844,3 +881,38 @@ class PagareEjecutado(models.Model):
 
     def __str__(self):
         return f"{self.Pagare} → {self.Actividad}: {self.Horas_Ejecutadas}h ejecutadas"
+    
+class Facturacion_Consultores(models.Model):
+    id = models.AutoField(primary_key=True)
+    Anio = models.IntegerField(blank=True, null=True)
+    Mes = models.IntegerField(blank=True, null=True)
+    Documento = models.ForeignKey('Consultores', on_delete=models.CASCADE, db_column='Documento')
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
+    Cta_Cobro = models.CharField(max_length=50, blank=True, null=True)
+    Periodo_Cobrado = models.CharField(max_length=100)
+    Aprobado_Por = models.CharField(max_length=100, blank=True, null=True)
+    Fecha_Cobro = models.DateField(blank=True, null=True)
+    Fecha_Pago = models.DateField(blank=True, null=True)
+    ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
+    ModuloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='ModuloId')
+    Horas = models.DecimalField(max_digits=10, decimal_places=2)
+    Valor_Unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    Valor_Cobro = models.DecimalField(max_digits=12, decimal_places=2)
+    IVA = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    Valor_Neto = models.FloatField(blank=True, null=True)
+    Retencion_Fuente = models.DecimalField(max_digits=10, decimal_places=2)
+    Valor_Pagado = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    Factura = models.CharField(max_length=100, blank=True, null=True)
+    Valor_Fcta_Cliente = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    Fecha = models.DateField(blank=True, null=True)
+    Deuda_Tecnica = models.TextField(blank=True, null=True)
+    Factura_Pendiente = models.TextField(blank=True, null=True)
+    Dif = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    Diferencia_Bruta = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    Observaciones = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'Facturacion_Consultores'
+
+    def __str__(self):
+        return f"Facturación {self.id} - Año {self.Anio} - Mes {self.Mes} - Consultor {self.Documento} - Línea {self.Linea}"

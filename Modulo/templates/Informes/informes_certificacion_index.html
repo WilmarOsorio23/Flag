@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block titulo %} Informe Certificados {% endblock %}
 
 {% block contenido %}
 <div class="card">
     <div class="card-header">
-        <h4 class="card-title">Filtrar Certificados</h4>
+        <h4 class="card-title">Informe Certificados</h4>
     </div>
     <div class="card-body informes-table">
         <div class="container-fluid mb-3">
@@ -20,10 +21,6 @@
                       <label for="Linea">{{ form.LineaId.label }}</label>
                       {{ form.LineaId }}
                     </div>
-                    <div class="col-md-3">
-                      <label for="Certificacion">{{ form.Certificacion.label }}</label>
-                      {{ form.Certificacion }}
-                    </div>
                 </div>
                  <!-- Botones en la parte inferior -->
                 <div class="row">
@@ -32,6 +29,48 @@
                     </div>
                 </div>        
             </form>
+        </div>
+        
+        <!-- Apartado para cards -->
+        {% if busqueda_realizada %}
+        <div class="mt-4 mb-3">
+            <div class="d-flex flex-row flex-nowrap overflow-auto gap-2">
+        
+                <!-- Total Certificaciones -->
+                <div class="card shadow-sm p-3 text-primary text-start" style="min-width: 220px;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">{{ total_certificaciones }}</h5>
+                        <i class="fas fa-certificate fa-2x"></i>
+                    </div>
+                    <small class="text-muted mt-2 d-block">Total Certificaciones</small>
+                </div>
+        
+                <!-- Total por Módulo -->
+                <div class="card shadow-sm p-3 text-success text-start" style="min-width: 220px; cursor: pointer;" id="cardModulo">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0"><i class="fas fa-layer-group"></i></h5>
+                    </div>
+                    <small class="text-muted mt-2 d-block">Por Módulo</small>
+                    {% for modulo, cantidad in conteo_modulos.items %}
+                        <p class="mb-1">{{ modulo }}: <strong>{{ cantidad }}</strong></p>
+                    {% endfor %}
+                </div>
+        
+                <!-- Total por Línea -->
+                <div class="card shadow-sm p-3 text-info text-start" style="min-width: 220px; cursor: pointer;" id="cardLinea">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0"><i class="fas fa-stream fa-2x"></i></h5>
+                    </div>
+                    <small class="text-muted mt-2 d-block">Por Línea</small>
+                    {% for linea, cantidad in conteo_lineas.items %}
+                        <p class="mb-1">{{ linea }}: <strong>{{ cantidad }}</strong></p>
+                    {% endfor %}
+                </div>
+        
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Botón de Descargar Excel -->
         <div class="row">
             <div class="col-md-6 text-end offset-md-6">
@@ -44,8 +83,8 @@
                 <button type="submit" class="btn btn-success"><i class="fas fa-file-excel"></i> Descargar Excel</button>
               </form> 
             </div>
-          </div>
         </div>
+    
 
         <!-- Resultados -->
         {% if show_data %}
@@ -146,4 +185,48 @@
         {% endif %}
     </div>
 </div>
+
+
+<!-- Modal Gráfico por Módulo -->
+<div class="modal fade" id="graficoModuloModal" tabindex="-1" aria-labelledby="graficoModuloLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoModuloLabel">Certificaciones por Módulo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoModuloCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Gráfico por Línea -->
+  <div class="modal fade" id="graficoLineaModal" tabindex="-1" aria-labelledby="graficoLineaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoLineaLabel">Certificaciones por Línea</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoLineaCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% block extra_js %}
+    {{ modulos_labels|json_script:"labels-modulo" }}
+    {{ modulos_data|json_script:"values-modulo" }}
+    {{ lineas_labels|json_script:"labels-linea" }}
+    {{ lineas_data|json_script:"values-linea" }}
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'JS/informes_certificaciones.js' %}"></script>
+    
+  {% endblock %}
+
+
 {% endblock %}

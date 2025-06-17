@@ -51,7 +51,139 @@
                 </div>
             </form>
 
-            <!-- Botón de Descargar Excel -->
+        </div>
+
+        <!-- Apartado para cards -->
+        {% if show_data %}
+            <div class="mb-3">
+            <div class="d-flex flex-row flex-nowrap overflow-auto gap-2">
+
+            <!-- Total Contratos -->
+            <div class="card shadow-sm p-3" style="min-width: 220px; font-size: 0.85rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="text-info fw-bold mb-0">{{ total_contratos }}</h5>
+                    <small class="text-muted">Total Contratos</small>
+                </div>
+                <i class="fas fa-file-contract fa-2x text-info"></i>
+                </div>
+            </div>
+
+            <!-- Valor Total Otro Sí -->
+            <div class="card shadow-sm p-3" style="min-width: 220px; font-size: 0.85rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="text-info fw-bold mb-0">${{ valor_total|floatformat:2 }}</h5>
+                    <small class="text-muted">Valor Total Otro Sí</small>
+                </div>
+                <i class="fas fa-hand-holding-usd fa-2x text-info"></i>
+                </div>
+            </div>
+
+            <!-- Firmado Interno -->
+            <div class="card shadow-sm p-3" style="min-width: 220px; font-size: 0.85rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="text-secondary fw-bold mb-0">{{ contratos_firmados }}</h5>
+                    <small class="text-muted">Firmado Interno</small>
+                </div>
+                <i class="fas fa-user-shield fa-2x text-secondary"></i>
+                </div>
+                <div class="progress mt-3" style="height: 5px;">
+                <div class="progress-bar bg-secondary" role="progressbar"
+                    style="width: {{ porcentaje_firmado_interno }}%;"
+                    aria-valuenow="{{ contratos_firmados }}" aria-valuemin="0"
+                    aria-valuemax="{{ total_contratos }}"></div>
+                </div>
+                <div class="text-end mt-1" style="font-size: 0.75rem; color: #888;">
+                {{ contratos_firmados }}/{{ total_contratos }}
+                </div>
+            </div>
+
+            <!-- Firmado Cliente -->
+            <div class="card shadow-sm p-3" style="min-width: 220px; font-size: 0.85rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="text-info fw-bold mb-0">{{ contratos_firmados_cliente }}</h5>
+                    <small class="text-muted">Firmado Cliente</small>
+                </div>
+                <i class="fas fa-user-check fa-2x text-info"></i>
+                </div>
+                <div class="progress mt-3" style="height: 5px;">
+                <div class="progress-bar bg-info" role="progressbar"
+                    style="width: {{ porcentaje_firmado_cliente }}%;"
+                    aria-valuenow="{{ contratos_firmados_cliente }}" aria-valuemin="0"
+                    aria-valuemax="{{ total_contratos }}"></div>
+                </div>
+                <div class="text-end mt-1" style="font-size: 0.75rem; color: #888;">
+                {{ contratos_firmados_cliente }}/{{ total_contratos }}
+                </div>
+            </div>
+
+            <!-- Con Pólizas -->
+            <div class="card shadow-sm p-3" style="min-width: 220px; font-size: 0.85rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="text-success fw-bold mb-0">{{ contratos_con_polizas }}</h5>
+                    <small class="text-muted">Con Pólizas</small>
+                </div>
+                <i class="fas fa-shield-alt fa-2x text-success"></i>
+                </div>
+                <div class="progress mt-3" style="height: 5px;">
+                <div class="progress-bar bg-success" role="progressbar"
+                    style="width: {{ porcentaje_con_polizas }}%;"
+                    aria-valuenow="{{ contratos_con_polizas }}" aria-valuemin="0"
+                    aria-valuemax="{{ total_contratos }}"></div>
+                </div>
+                <div class="text-end mt-1" style="font-size: 0.75rem; color: #888;">
+                {{ contratos_con_polizas }}/{{ total_contratos }}
+                </div>
+            </div>
+
+            <!-- Card Monedas -->
+        <div class="card shadow-sm p-3" id="cardMonedas" style="min-width: 220px; font-size: 0.85rem;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold mb-0">
+                        <span class="text-primary">{{ total_usd }}</span> /
+                        <span class="text-success">{{ total_cop }}</span> /
+                        <span class="text-warning">{{ total_mxn }}</span>
+                    </h5>
+                    <small class="text-muted">USD / COP / MXN</small>
+                </div>
+                <i class="fas fa-coins fa-2x text-primary"></i>
+            </div>
+            <div class="progress mt-3" style="height: 5px;">
+                {% if total_usd > 0 %}
+                <div class="progress-bar bg-primary" role="progressbar"
+                    style="width: {{ porcentaje_usd_display }}%;" 
+                    aria-valuenow="{{ total_usd }}" aria-valuemin="0" aria-valuemax="{{ total_contratos }}">
+                </div>
+                {% endif %}
+                
+                {% if total_cop > 0 %}
+                <div class="progress-bar bg-success" role="progressbar"
+                    style="width: {{ porcentaje_cop_display }}%;" 
+                    aria-valuenow="{{ total_cop }}" aria-valuemin="0" aria-valuemax="{{ total_contratos }}">
+                </div>
+                {% endif %}
+                
+                {% if total_mxn > 0 %}
+                <div class="progress-bar bg-warning" role="progressbar"
+                    style="width: {{ porcentaje_mxn_display }}%;" 
+                    aria-valuenow="{{ total_mxn }}" aria-valuemin="0" aria-valuemax="{{ total_contratos }}">
+                </div>
+                {% endif %}
+            </div>
+            <div class="text-end mt-1" style="font-size: 0.75rem; color: #888;">
+                {{ total_monedas }}/{{ total_contratos }}
+            </div>
+        </div>
+
+            </div>
+            </div>
+        {% endif %}
+        <!-- Botón de Descargar Excel -->
             <div class="row">
                 <div class="col-md-6 text-end offset-md-6">
                     <form id="download-form" method="GET" action="{% url 'exportar_otros_si_excel' %}">
@@ -67,8 +199,7 @@
                     </form>
                 </div>
             </div>
-        </div>
-
+        
         {% if show_data %}
         <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
             <table class="table table-bordered table-hover table-primary w-100" id="otrosSiTable">
@@ -78,6 +209,7 @@
                         <th>Nombre Cliente</th>
                         <th>Fecha Inicio</th>
                         <th>Fecha Fin</th>
+                        <th>Por Vencer</th>
                         <th>Número Otro Sí</th>
                         <th>Contrato</th>
                         <th>Valor Otro Sí</th>
@@ -97,6 +229,11 @@
                                 <td class="text-start">{{ cliente.nombre }}</td>
                                 <td>{{ otro.FechaInicio|date:'d/m/Y'|default_if_none:"" }}</td>
                                 <td>{{ otro.FechaFin|date:'d/m/Y'|default_if_none:"" }}</td>
+                                <td class="text-center align-middle">
+                                    {% if otro.por_vencer %}
+                                        <span class="text-warning" title="Por vencer" style="font-size: 1.2rem;">⚠️</span>
+                                    {% endif %}
+                                </td>
                                 <td class="text-end">{{ otro.NumeroOtroSi }}</td>
                                 <td class="text-end">{{ otro.Contrato }}</td>
                                 <td class="text-end">{{ otro.ValorOtroSi|default_if_none:"" }}</td>
@@ -127,19 +264,33 @@
         {% endif %}
     </div>
 </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const hasParams = ['Nombre_Cliente', 'Contrato', 'FechaInicio', 'ContratoVigente'].some(param => urlParams.has(param));
-        const alreadySubmitted = sessionStorage.getItem('otros_si_autosubmit');
 
-        if (hasParams && !alreadySubmitted) {
-            sessionStorage.setItem('otros_si_autosubmit', '1');
-            document.getElementById('filtro-otros-si-form').submit();
-        } else {
-            sessionStorage.removeItem('otros_si_autosubmit');  // Limpiar en búsquedas normales
-        }
-    });
-</script>
+<!-- ============================= -->
+<!-- MODAL DE GRÁFICO DE MONEDAS -->
+<!-- ============================= -->
+<div class="modal fade" id="graficoMonedasModal" tabindex="-1" aria-labelledby="graficoMonedasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="graficoMonedasLabel">Distribución de Monedas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <canvas id="graficoMonedasCanvas"
+                        width="400" height="400"
+                        data-usd="{{ total_usd }}"
+                        data-cop="{{ total_cop }}"
+                        data-mxn="{{ total_mxn }}">
+                </canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================= -->
+<!-- INYECCIÓN DE JAVASCRIPT      -->
+<!-- ============================= -->
 <script src="{% static 'JS/informes_otros_si.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 {% endblock %}

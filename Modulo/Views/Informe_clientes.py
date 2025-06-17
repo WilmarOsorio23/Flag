@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from collections import defaultdict
+from collections import defaultdict, Counter
 from django.http import HttpResponse
 from Modulo.forms import ClienteFilterForm
 from Modulo.models import Clientes
@@ -88,11 +88,50 @@ def clientes_filtrado(request):
     else: 
         form = ClienteFilterForm()
 
+    #Aplicar lógica para cards
+    
+    # Estadísticas de clientes
+    total_clientes = len(clientes_info)
+    clientes_activos = sum(1 for c in clientes_info if c['Activo'] == 'SI')
+    clientes_inactivos = total_clientes - clientes_activos
+
+    # Conteo por tipo de cliente y país
+    conteo_tipo_cliente = Counter(c['TipoCliente'] for c in clientes_info if c['TipoCliente'])
+    conteo_paises = Counter(c['Pais'] for c in clientes_info if c['Pais'])
+
+    # Nacionales / Internacionales
+    clientes_nacionales = sum(1 for c in clientes_info if c['Nacional'] == 'SI')
+    clientes_internacionales = total_clientes - clientes_nacionales
+
+    if not conteo_tipo_cliente:
+        conteo_tipo_cliente = {}
+
+    if not conteo_paises:
+        conteo_paises = {}
+
     context = {
         'form': form,
         'clientes_info': clientes_info,      
         'show_data': show_data,
         'busqueda_realizada': busqueda_realizada,
+        'total_clientes': total_clientes,
+        'clientes_activos': clientes_activos,
+        'clientes_inactivos': clientes_inactivos,
+        'conteo_tipo_cliente': dict(conteo_tipo_cliente),
+        'conteo_paises': dict(conteo_paises),
+        'clientes_nacionales': clientes_nacionales,
+        'clientes_internacionales': clientes_internacionales,
+        # Datos para gráficos de barras
+        'labels_tipo_cliente': list(conteo_tipo_cliente.keys()),
+        'values_tipo_cliente': list(conteo_tipo_cliente.values()),
+
+        'labels_paises': list(conteo_paises.keys()),
+        'values_paises': list(conteo_paises.values()),
+        # Para etiquetas y datos de gráficos
+        'labels_nacionalidad': ['Nacionales', 'Internacionales'],
+        'values_nacionalidad': [clientes_nacionales, clientes_internacionales],
+        'labels_activos': ['Activos', 'Inactivos'],
+        'values_activos': [clientes_activos, clientes_inactivos],
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 

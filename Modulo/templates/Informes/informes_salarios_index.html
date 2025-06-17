@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block titulo %} Filtrar Nomina {% endblock %}
+{% block titulo %} Informe Salarios {% endblock %}
 
 {% block contenido %}
 <div class="card">
     <div class="card-header">
-        <h4 class="card-title">Filtrar Nomina</h4>
+        <h4 class="card-title">Informe Salarios</h4>
     </div>
     <div class="card-body informes-table">
         <div class="container-fluid mb-3">
@@ -41,7 +41,38 @@
                     </div>
                 </div>
             </form>
-        
+
+            <!-- Apartado para cards -->
+            {% if busqueda_realizada %}
+            <div class="mt-4 mb-3">
+                <div class="d-flex flex-row flex-nowrap overflow-auto gap-2">
+                                
+                    <!-- Colaboradores con Certificación -->
+                    <div class="card shadow-sm p-3 text-success text-start" style="min-width: 220px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0">{{ total_certificados }}</h5>
+                            <i class="fas fa-certificate fa-2x"></i>
+                        </div>
+                        <small class="text-muted mt-2 d-block">Con Certificación SAP</small>
+                    </div>
+            
+                    <!-- Distribución por Línea -->
+                    <div class="card shadow-sm p-3 text-info text-start" style="min-width: 220px; cursor:pointer;" id="cardLinea">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <i class="fas fa-stream fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 mt-2">
+                            <small class="text-muted d-block">Por Línea</small>
+                            {% for linea, cantidad in conteo_lineas.items %}
+                                <p class="mb-1">{{ linea }}: <strong>{{ cantidad }}</strong></p>
+                            {% endfor %}
+                        </div>
+                    </div>
+            
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Botón de Descargar Excel -->
             <div class="row">
                 <div class="col-md-6 text-end offset-md-6">
@@ -159,5 +190,27 @@
         {% endif %}
     </div>
 </div>
-<script src="{% static 'JS/informes_salarios.js' %}"></script>
+
+<!-- Modal Gráfico por Línea -->
+<div class="modal fade" id="graficoLineaModal" tabindex="-1" aria-labelledby="graficoLineaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoLineaLabel">Colaboradores con Certificación por Línea</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoLineaCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% block extra_js %}
+    {{ lineas_labels|json_script:"labels-linea" }}
+    {{ lineas_data|json_script:"values-linea" }}
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'JS/informes_salarios.js' %}"></script>
+  {% endblock %}
 {% endblock %}

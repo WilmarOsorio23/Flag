@@ -65,6 +65,85 @@
                     </div>
                 </div>   
             </form>
+            
+            <!-- Apartado para cards -->
+            {% if busqueda_realizada %}
+            <div class="mt-4 mb-3">
+                <div class="d-flex flex-row flex-nowrap overflow-auto gap-2">
+
+                    <!-- Total Consultores -->
+                    <div class="card shadow-sm p-3 text-primary text-start h-100" style="min-width: 220px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0">{{ total_consultores }}</h5>
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                        <small class="text-muted mt-2 d-block">Total Consultores</small>
+                    </div>
+
+                    <!-- Activos/Inactivos -->
+                    <div class="card shadow-sm p-3 text-start h-100" id="cardEstado" style="min-width: 220px; cursor: pointer;">
+                        <div class="card-body p-0">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <div class="fw-bold">
+                                        <span class="text-success">{{ activos }}</span> /
+                                        <span class="text-danger">{{ inactivos }}</span>
+                                    </div>
+                                    <small class="text-muted">Activos / Inactivos</small>
+                                </div>
+                                <i class="fas fa-user-check fa-2x text-primary"></i>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                {% with total=activos|add:inactivos %}
+                                    {% if total > 0 %}
+                                        {% widthratio activos total 100 as porcentaje_activos %}
+                                        {% widthratio inactivos total 100 as porcentaje_inactivos %}
+                                        <div class="progress-bar bg-success" style="width: {{ porcentaje_activos }}%;"></div>
+                                        <div class="progress-bar bg-danger" style="width: {{ porcentaje_inactivos }}%;"></div>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Consultores Certificados -->
+                    <div class="card shadow-sm p-3 text-success text-start h-100" style="min-width: 220px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0">{{ certificados }}</h5>
+                            <i class="fas fa-certificate fa-2x"></i>
+                        </div>
+                        <small class="text-muted mt-2 d-block">Con Certificación</small>
+                    </div>
+
+                    <!-- Distribución por Línea -->
+                    <div class="card shadow-sm p-3 text-info text-start h-100" style="min-width: 220px; cursor:pointer;" id="cardLinea">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <i class="fas fa-stream fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 mt-2">
+                            <small class="text-muted d-block">Por Línea</small>
+                            {% for linea, cantidad in conteo_lineas.items %}
+                                <p class="mb-1">{{ linea }}: <strong>{{ cantidad }}</strong></p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Distribución por Módulo -->
+                    <div class="card shadow-sm p-3 text-warning text-start h-100" style="min-width: 220px; cursor:pointer;" id="cardModulo">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <i class="fas fa-layer-group fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 mt-2">
+                            <small class="text-muted d-block">Por Módulo</small>
+                            {% for modulo, cantidad in conteo_modulos.items %}
+                                <p class="mb-1">{{ modulo }}: <strong>{{ cantidad }}</strong></p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            {% endif %}
 
              <!-- Botón de Descargar Excel -->
              <div class="row">
@@ -92,67 +171,77 @@
 
                     <!-- Encabezado de la tabla -->
                     <thead>
-                        <!-- Filas dentro del encabezado -->
                         <tr>
-                            <!-- Documento -->
-                            <th>Documento</th>
-
-                            <!-- Tipo documento -->
-                            <th>Tipo documento</th>
-
-                            <!-- Nombre -->
-                            <th>Nombre</th>
-
-                            <!-- Empresa -->
-                            <th>Empresa</th>
-
-                            <!-- Profesion -->
-                            <th>Profesión</th>
-
-                            <!-- LineaId -->
-                            <th>Linea</th>
-
-                            <!-- ModuloId  -->
-                            <th>Modulo</th>
-
-                            <!-- PerfilId -->
-                            <th>Perfil</th>
-
-                            <!-- Estado -->
-                            <th>Estado</th>
-
-                            <!-- Fecha_Ingreso -->
-                            <th>Fecha ingreso</th>
-
-                            <!-- Fecha Retiro -->
-                            <th>Fecha Retiro</th>
-
-                            <!-- Fecha Operacion -->
-                            <th>Fecha Operacion</th>
-
-                            <!-- Certificado -->
-                            <th>Certificado</th>
-
-                            <!-- Certificaciones -->
-                            <th>Certificaciones</th>
-
-                            <!-- Fecha Nacimiento -->
-                            <th>Fecha Nacimiento</th>
-
-                            <!-- Año Evaluacion -->
-                            <th>Año Evaluacion</th>
-
-                            <!-- Nota Evaluacion -->
-                            <th>Nota Evaluacion</th>
-
-                            <!-- Direccion -->
-                            <th>Direccion</th>
-
-                            <!-- Telefono -->
-                            <th>Telefono</th>
-
+                          <th data-sort="documento" class="sortable" data-direction="default">
+                            Documento
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th data-sort="tipo_documento" class="sortable" data-direction="default">
+                            Tipo documento
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th data-sort="nombre" class="sortable" data-direction="default">
+                            Nombre
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th>Empresa</th>
+                          <th>Profesión</th>
+                          <th data-sort="linea" class="sortable" data-direction="default">
+                            Línea
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th data-sort="modulo" class="sortable" data-direction="default">
+                            Módulo
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th data-sort="perfil" class="sortable" data-direction="default">
+                            Perfil
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th data-sort="estado" class="sortable" data-direction="default">
+                            Estado
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th>Fecha ingreso</th>
+                          <th>Fecha Retiro</th>
+                          <th>Fecha Operacion</th>
+                          <th>Certificado</th>
+                          <th>Certificaciones</th>
+                          <th>Fecha Nacimiento</th>
+                          <th>Año Evaluacion</th>
+                          <th>Nota Evaluacion</th>
+                          <th>Direccion</th>
+                          <th>Telefono</th>
                         </tr>
-                    </thead>
+                      </thead>
 
                     <!-- Lectura de campos para mostrar -->
                     <tbody>
@@ -198,5 +287,63 @@
             {% endif %}
     </div>
 </div>
-<script src="{% static 'JS/informes_consultores.js' %}"></script>
+
+<!-- Modal por Línea -->
+<div class="modal fade" id="graficoLineaModal" tabindex="-1" aria-labelledby="modalLineaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLineaLabel">Distribución por Línea</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+            <canvas id="graficoLineaCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal por Módulo -->
+  <div class="modal fade" id="graficoModuloModal" tabindex="-1" aria-labelledby="modalModuloLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalModuloLabel">Distribución por Módulo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+            <canvas id="graficoModuloCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Activos/Inactivos -->
+<div class="modal fade" id="graficoEstadoModal" tabindex="-1" aria-labelledby="modalEstadoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEstadoLabel">Distribución por Estado</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoEstadoCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    {% block extra_js %}
+        {% if busqueda_realizada %}
+            {{ modulos_labels|json_script:"labels-modulo" }}
+            {{ modulos_data|json_script:"values-modulo" }}
+            {{ lineas_labels|json_script:"labels-linea" }}
+            {{ lineas_data|json_script:"values-linea" }}
+            {{ estado_labels|json_script:"labels-estado" }}
+            {{ estado_data|json_script:"values-estado" }}
+        {% endif %}
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="{% static 'JS/informes_consultores.js' %}"></script>
+    {% endblock %}
+
 {% endblock %}

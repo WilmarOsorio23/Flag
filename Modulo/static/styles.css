@@ -630,6 +630,47 @@ input[type="checkbox"]:disabled {
 .table-responsive-informes::-webkit-scrollbar-thumb:hover {
     background-color: #0056b3; /* Color al pasar el mouse */
 }
+
+/* ========================== */
+/*    Columnas fijas Tablas   */
+/* ========================== */
+.table-fixed-columns {
+    overflow-x: auto;
+    position: relative;
+    max-height: 70vh;
+}
+
+/* Columnas fijas */
+th.fixed-column,
+td.fixed-column {
+    position: sticky;
+    z-index: 10;
+}
+
+/* Encabezados */
+th.fixed-column {
+    z-index: 20;
+}
+
+/* Pie de tabla */
+tfoot th.fixed-column {
+    z-index: 30;
+}
+
+/* Posiciones específicas */
+.fixed-column-1 { 
+    left: 0;
+    min-width: 150px;
+}
+.fixed-column-2 {
+    left: 150px;
+    min-width: 80px;
+}
+.fixed-column-3 {
+    left: 230px;
+    min-width: 100px;
+}
+
 /* ========================== */
 /*        BUTTONS STYLING     */
 /* ========================== */
@@ -862,4 +903,56 @@ a.fas, .fa {
         flex-direction: row;
     }
 
+}
+
+/* Estilos para los indicadores de facturación */
+.checkbox-group {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.checkbox-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-label {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+/* Estilos para las tablas de indicadores */
+.table-bordered th,
+.table-bordered td {
+    text-align: right;
+}
+
+.table-bordered th:first-child,
+.table-bordered td:first-child {
+    text-align: left;
+}
+
+/* Estilos para las tarjetas */
+.card {
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.card-header h4 {
+    margin: 0;
+    color: #333;
+}
+
+/* Estilos para el gráfico */
+canvas#graficoFacturacion {
+    min-height: 300px;
+    margin: 20px 0;
 }

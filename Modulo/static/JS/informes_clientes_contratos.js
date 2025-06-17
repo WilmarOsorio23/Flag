@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const cliente = cells[2].textContent.trim();         // Nombre Cliente
                 const contrato = cells[3].textContent.trim();        // Contrato
-                const vigenteText = cells[7].textContent.trim();     // Contrato Vigente (col 8)
+                const vigenteText = cells[8].textContent.trim();     // Contrato Vigente (col 8)
                 const contratoVigente = vigenteText.trim().toLowerCase() === 'si' ? 'True' : 'False';
 
                 const url = `/informes/informes_otros_si/?Nombre_Cliente=${encodeURIComponent(cliente)}&Contrato=${encodeURIComponent(contrato)}&ContratoVigente=${contratoVigente}`;

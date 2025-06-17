@@ -90,6 +90,7 @@ def informe_empleados(request):
     Vista para generar el informe de empleados con filtros opcionales.
     """
     empleados_info = []
+    empleados = Empleado.objects.none()
     show_data = False
     busqueda_realizada = False
 
@@ -120,6 +121,56 @@ def informe_empleados(request):
         'busqueda_realizada': busqueda_realizada,
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
+
+    #Aplicar lógica para cards
+    empleados_totales = empleados.count()
+    empleados_activos = empleados.filter(Activo=True).count()
+    empleados_inactivos = empleados_totales - empleados_activos
+    total_empleados = len(empleados_info)
+    activos = sum(1 for e in empleados_info if e["Activo"] == "SI")
+
+    # Diccionarios para acumulación por línea
+    certificados_sap_por_linea = defaultdict(int)
+    otras_certificaciones_por_linea = defaultdict(int)
+    postgrados_por_linea = defaultdict(int)
+
+    # Agrupar por línea
+    for e in empleados_info:
+        linea = e['Linea']
+        if e['CertificadoSAP'] == 'SI':
+            certificados_sap_por_linea[linea] += 1
+        if e['OtrasCertificaciones'] == 'SI':
+            otras_certificaciones_por_linea[linea] += 1
+        if e['Postgrados'] == 'SI':
+            postgrados_por_linea[linea] += 1
+
+    context.update({
+        'total_empleados': total_empleados,
+        'activos': activos,
+        'empleados_totales': empleados_totales,
+        'empleados_activos': empleados_activos,
+        'empleados_inactivos': empleados_inactivos,
+
+        # Diccionarios originales (para mostrar en cards)
+        'certificados_sap_por_linea': dict(certificados_sap_por_linea),
+        'otras_certificaciones_por_linea': dict(otras_certificaciones_por_linea),
+        'postgrados_por_linea': dict(postgrados_por_linea),
+
+        # Datos para los gráficos en JS
+        #'certificados_sap_labels': [k for k in certificados_sap_por_linea.keys()],
+        #'certificados_sap_data': [v for v in certificados_sap_por_linea.values()],
+        'certificados_sap_labels': list(certificados_sap_por_linea.keys()),
+        'certificados_sap_data': list(certificados_sap_por_linea.values()),
+
+        'otras_certificaciones_labels': list(otras_certificaciones_por_linea.keys()),
+        'otras_certificaciones_data': list(otras_certificaciones_por_linea.values()),
+
+        'postgrados_labels': list(postgrados_por_linea.keys()),
+        'postgrados_data': list(postgrados_por_linea.values()),
+
+        'activos_inactivos_labels': ['Activos', 'Inactivos'],
+        'activos_inactivos_data': [empleados_activos, empleados_inactivos],
+    })
 
     return render(request, 'informes/informes_empleado_index.html', context)
 
