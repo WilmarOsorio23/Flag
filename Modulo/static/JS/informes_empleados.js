@@ -6,44 +6,51 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Lógica para gráfico Activos/Inactivos (tipo doughnut)
   const cardAI = document.getElementById('cardActivosInactivos');
-  const modalAI = new bootstrap.Modal(document.getElementById('graficoActivosInactivosModal'));
+  const modalAIElement = document.getElementById('graficoActivosInactivosModal');
 
-  cardAI.addEventListener('click', function () {
-    const ctx = document.getElementById('graficoActivosInactivosCanvas').getContext('2d');
+  if (cardAI && modalAIElement) {
+    const modalAI = new bootstrap.Modal(modalAIElement);
 
-    if (window.activosChart) {
-      window.activosChart.destroy();
-    }
+    cardAI.addEventListener('click', function () {
+      const ctx = document.getElementById('graficoActivosInactivosCanvas').getContext('2d');
 
-    window.activosChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: JSON.parse(document.getElementById('labels-activos').textContent),
-        datasets: [{
-          label: 'Estado',
-          data: JSON.parse(document.getElementById('values-activos').textContent),
-          backgroundColor: ['rgba(25, 135, 84, 0.7)', 'rgba(220, 53, 69, 0.7)'],
-          borderColor: ['rgba(25, 135, 84, 1)', 'rgba(220, 53, 69, 1)'],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'bottom'
+      if (window.activosChart) {
+        window.activosChart.destroy();
+      }
+
+      window.activosChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: JSON.parse(document.getElementById('labels-activos').textContent),
+          datasets: [{
+            label: 'Estado',
+            data: JSON.parse(document.getElementById('values-activos').textContent),
+            backgroundColor: ['rgba(25, 135, 84, 0.7)', 'rgba(220, 53, 69, 0.7)'],
+            borderColor: ['rgba(25, 135, 84, 1)', 'rgba(220, 53, 69, 1)'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
           }
         }
-      }
-    });
+      });
 
-    modalAI.show();
-  });
+      modalAI.show();
+    });
+  }
 
   // Función genérica para gráficos de barra
   function crearGraficoCard({ cardId, modalId, canvasId, labelsScriptId, valuesScriptId, chartVarName, labelText, bgColor, borderColor }) {
     const card = document.getElementById(cardId);
-    const modal = new bootstrap.Modal(document.getElementById(modalId));
+    const modalElement = document.getElementById(modalId);
+    if (!card || !modalElement) return;
+
+    const modal = new bootstrap.Modal(modalElement);
 
     card.addEventListener('click', function () {
       const ctx = document.getElementById(canvasId).getContext('2d');
@@ -121,42 +128,73 @@ document.addEventListener('DOMContentLoaded', function () {
   //==============================
   // LÓGICA DE ORDENAMIENTO TABLA
   //==============================
-
   const table = document.getElementById('nominaTable');
-  const headers = table.querySelectorAll('th.sortable');
+  if (table) {
+    const headers = table.querySelectorAll('th.sortable');
 
-  headers.forEach(header => {
-    header.addEventListener('click', () => {
-      const column = header.getAttribute('data-sort');
-      const direction = header.getAttribute('data-direction') || 'asc';
-      const newDirection = direction === 'asc' ? 'desc' : 'asc';
+    headers.forEach(header => {
+      header.addEventListener('click', () => {
+        const column = header.getAttribute('data-sort');
+        const direction = header.getAttribute('data-direction') || 'asc';
+        const newDirection = direction === 'asc' ? 'desc' : 'asc';
 
-      sortTableByColumn(table, column, newDirection);
+        sortTableByColumn(table, column, newDirection);
 
-      headers.forEach(h => h.setAttribute('data-direction', 'default'));
-      header.setAttribute('data-direction', newDirection);
-    });
-  });
-
-  function sortTableByColumn(table, columnName, direction) {
-    const rows = Array.from(table.querySelectorAll('tbody tr'));
-    const columnIndex = Array.from(table.querySelectorAll('thead th'))
-      .findIndex(th => th.getAttribute('data-sort') === columnName);
-
-    rows.sort((a, b) => {
-      const cellA = a.cells[columnIndex].innerText.trim();
-      const cellB = b.cells[columnIndex].innerText.trim();
-
-      if (!isNaN(cellA) && !isNaN(cellB)) {
-        return direction === 'asc' ? cellA - cellB : cellB - cellA;
-      }
-
-      return direction === 'asc'
-        ? cellA.localeCompare(cellB)
-        : cellB.localeCompare(cellA);
+        headers.forEach(h => h.setAttribute('data-direction', 'default'));
+        header.setAttribute('data-direction', newDirection);
+      });
     });
 
-    const tbody = table.querySelector('tbody');
-    rows.forEach(row => tbody.appendChild(row));
+    function sortTableByColumn(table, columnName, direction) {
+      const rows = Array.from(table.querySelectorAll('tbody tr'));
+      const columnIndex = Array.from(table.querySelectorAll('thead th'))
+        .findIndex(th => th.getAttribute('data-sort') === columnName);
+
+      rows.sort((a, b) => {
+        const cellA = a.cells[columnIndex].innerText.trim();
+        const cellB = b.cells[columnIndex].innerText.trim();
+
+        if (!isNaN(cellA) && !isNaN(cellB)) {
+          return direction === 'asc' ? cellA - cellB : cellB - cellA;
+        }
+
+        return direction === 'asc'
+          ? cellA.localeCompare(cellB)
+          : cellB.localeCompare(cellA);
+      });
+
+      const tbody = table.querySelector('tbody');
+      rows.forEach(row => tbody.appendChild(row));
+    }
   }
+
+  // =============================
+  // LÓGICA DE REINICIO DE FILTROS
+  // =============================
+  const resetBtn = document.getElementById('btn-reset-filtros');
+  const form = document.querySelector('form');
+
+  if (resetBtn && form) {
+    console.log('✔ Botón de reinicio y formulario encontrados');
+
+    resetBtn.addEventListener('click', function () {
+      console.log('🔄 Botón de reinicio clickeado');
+
+      const selects = form.querySelectorAll('select');
+      selects.forEach(select => {
+        console.log(`↩ Reiniciando select: ${select.name}`);
+        select.value = '';
+      });
+
+      const inputs = form.querySelectorAll('input');
+      inputs.forEach(input => {
+        console.log(`↩ Limpiando input: ${input.name}`);
+        input.value = '';
+      });
+    });
+  } else {
+    if (!resetBtn) console.error('❌ No se encontró el botón con id="btn-reset-filtros"');
+    if (!form) console.error('❌ No se encontró ningún formulario');
+  }
+
 });
