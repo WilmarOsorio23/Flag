@@ -35,17 +35,19 @@
                         <label for="anio">{{ form.anio.label }}</label>
                         {{ form.anio }}
                     </div>
-      
+                </div>
                     <!-- Botones debajo de filtros: Buscar y Descarga Excel -->
                     <!-- Botón Buscar -->
                     <div class = "row">
                         <div class="col-md-6 text-start">
-                            <button type="submit" name="buscar" class="btn btn-primary mt-3">
+                            <button type="submit" name="buscar" class="btn btn-primary">
                                 <i class="fas fa-glasses"></i>Buscar 
+                            </button>
+                            <button type="button" id="btn-reset-filtros" class="btn btn-secondary ms-2">
+                                <i class="fas fa-redo"></i> Reiniciar
                             </button>
                         </div>
                     </div>
-                </div>   
             </form>
 
              <!-- Botón de Descargar Excel -->
@@ -74,53 +76,128 @@
 
                     <!-- Encabezado de la tabla -->
                     <thead>
-                        <!-- Filas dentro del encabezado -->
                         <tr>
-                            <!-- Nombre Línea -->
-                            <th>Línea</th>
-
-                            <!-- Documento Consultor -->
-                            <th>Documento Consultor</th>
-
-                            <!-- Nombre Consultor -->
-                            <th>Nombre Consultor</th>
-
-                             <!-- Certificado -->
-                            <th>Certificado</th>
-
-                            <!-- Perfil  -->
-                            <th>Perfil</th>
-
-                            <!-- Módulo  -->
-                            <th>Módulo</th>
-
-                            <!-- Año -->
-                            <th>Año</th>
-
-                            <!-- Mes -->
-                            <th>Mes</th>
-
-                            <!-- Cliente ID -->
-                            <th>Cliente</th>
-
-                            <!-- Tarifa Hora -->
-                            <th>Tarifa Hora</th>
-
-                            <!-- Tarifa Día -->
-                            <th>Tarifa Día</th>
-
-                            <!-- Tarifa Mes -->
-                            <th>Tarifa Mes</th>
-
-                            <!-- Moneda -->
-                            <th>Moneda</th>
-
-                            <!-- IVA -->
-                            <th>IVA</th>
-
-                            <!-- RteFte -->
-                            <th>rteFte</th>
-                            
+                            <th data-sort="linea" class="sortable" data-direction="default">
+                                Línea
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="documento_colaborador" class="sortable" data-direction="default">
+                                Documento Consultor
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="nombre_consultor" class="sortable" data-direction="default">
+                                Nombre Consultor
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="certificado" class="sortable" data-direction="default">
+                                Certificado
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="perfil" class="sortable" data-direction="default">
+                                Perfil
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="modulo" class="sortable" data-direction="default">
+                                Módulo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="año" class="sortable" data-direction="default">
+                                Año
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="mes" class="sortable" data-direction="default">
+                                Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="cliente" class="sortable" data-direction="default">
+                                Cliente
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="tarifa_hora" class="sortable" data-direction="default">
+                                Tarifa Hora
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="tarifa_dia" class="sortable" data-direction="default">
+                                Tarifa Día
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="tarifa_mes" class="sortable" data-direction="default">
+                                Tarifa Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="moneda" class="sortable" data-direction="default">
+                                Moneda
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="iva" class="sortable" data-direction="default">
+                                IVA
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="rtefte" class="sortable" data-direction="default">
+                                rteFte
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                        </tr>
                     </thead>
 
                     <!-- Lectura de campos para mostrar -->

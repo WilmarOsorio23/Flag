@@ -142,4 +142,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.open(url, '_blank');
             });
         }
+
+    // =============================
+    // LÓGICA DE REINICIO DE FILTROS
+    // =============================
+    const resetBtn = document.getElementById('btn-reset-filtros');
+    const form = document.querySelector('form');
+
+    if (resetBtn && form) {
+        console.log('✔ Botón de reinicio y formulario encontrados');
+
+        resetBtn.addEventListener('click', function () {
+        console.log('🔄 Botón de reinicio clickeado');
+
+        const selects = form.querySelectorAll('select');
+        selects.forEach(select => {
+            console.log(`↩ Reiniciando select: ${select.name}`);
+            select.value = '';
+        });
+
+        const inputs = form.querySelectorAll('input');
+        inputs.forEach(input => {
+            console.log(`↩ Limpiando input: ${input.name}`);
+            input.value = '';
+        });
+        });
+    } else {
+        if (!resetBtn) console.error('❌ No se encontró el botón con id="btn-reset-filtros"');
+        if (!form) console.error('❌ No se encontró ningún formulario');
+    }
 });
