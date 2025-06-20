@@ -7,7 +7,7 @@ from django.core.cache import cache
 from django.http import JsonResponse
 import json
 from Modulo.forms import Ind_Totales_FilterForm
-from Modulo.models import Clientes, Concepto, FacturacionClientes, Horas_Habiles, Ind_Totales_Diciembre, Linea, Nomina, Tarifa_Clientes, Tarifa_Consultores, Tiempos_Cliente, TiemposConcepto
+from Modulo.models import Clientes, Concepto, FacturacionClientes, Horas_Habiles, Ind_Totales_Diciembre, Linea, Nomina, Tarifa_Clientes, Tarifa_Consultores, Tiempos_Cliente, TiemposConcepto, IPC
 
 MESES = {
     '1': 'Enero', '2': 'Febrero', '3': 'Marzo', '4': 'Abril',
@@ -168,8 +168,10 @@ def calcular_costo(cliente_id: str, mes: str, lineas_ids: list, tiempos_data: li
             entrada = encontrar_entrada_anterior(entradas_nomina, anio_int, mes_int)
             if entrada:
                 salario = entrada[2]
+                ipc = obtener_ipc_anio(anio_int)
+                salario_ajustado = salario * Decimal(str(ipc))
                 horas_mes_total = hh_mes.get('horas_mes', Decimal('1'))
-                costo_hora = salario / horas_mes_total if horas_mes_total else Decimal('0')
+                costo_hora = salario_ajustado / horas_mes_total if horas_mes_total else Decimal('0')
         
         # Lógica para consultores
         else:
@@ -364,7 +366,7 @@ def obtener_conceptos(anio: str, mes: str) -> dict:
     
     return {c['ConceptoId__Descripcion']: c['total'] for c in conceptos}
 
-def calcular_totales_generales(resultados: dict, num_meses: int):
+def calcular_totales_generales(resultados: dict, num_meses: int, valores_diciembre: dict = None):
     resultados['totales']['Dias'] = sum(
         mes['Dias'] for mes in resultados['general'].values()
     ) / num_meses if num_meses > 0 else 0
@@ -377,6 +379,29 @@ def calcular_totales_generales(resultados: dict, num_meses: int):
         for concepto, horas in mes_data['Conceptos_Horas'].items():
             conceptos_totales[concepto] += horas
     resultados['totales']['Conceptos_Horas'] = conceptos_totales
+    # Sumar diciembre anterior a los totales de cada cliente
+    if valores_diciembre:
+        for cliente_nombre, datos in resultados['totales'].items():
+            if cliente_nombre in ['Dias', 'Horas', 'Conceptos_Horas']:
+                continue
+            # Buscar el ClienteId correspondiente
+            cliente_id = None
+            for k, v in valores_diciembre.items():
+                if hasattr(v, 'get'):
+                    # dict
+                    if v.get('trabajado') is not None:
+                        cliente_id = k
+                        break
+                elif hasattr(v, 'Trabajado'):
+                    # objeto
+                    cliente_id = k
+                    break
+            if cliente_id and cliente_id in valores_diciembre:
+                dic = valores_diciembre[cliente_id]
+                datos['Trabajado'] += dic.get('trabajado', Decimal('0'))
+                datos['Costo'] += dic.get('costo', Decimal('0'))
+                datos['Facturado_horas'] += dic.get('facturado', Decimal('0'))
+                datos['Facturado_valor'] += dic.get('valor_facturado', Decimal('0'))
 
 def calcular_diferencias_margen(resultados: dict):
     for cliente_nombre, datos in resultados['totales'].items():
@@ -816,7 +841,18 @@ def calcular_resultados(anio, meses, lineas_seleccionadas, clientes, lineas_ids,
 
     # Cálculos finales generales
     num_meses = len(resultados['general']) or 1
-    calcular_totales_generales(resultados, num_meses)
+    calcular_totales_generales(resultados, num_meses, valores_diciembre)
     calcular_diferencias_margen(resultados)
 
     return resultados
+
+# Función auxiliar para obtener el IPC de un año (retorna 1 si no existe)
+def obtener_ipc_anio(anio):
+    try:
+        ipc = IPC.objects.filter(Anio=str(anio)).order_by('-Mes').first()
+        if ipc:
+            return ipc.Indice
+        else:
+            return 1
+    except Exception:
+        return 1
