@@ -143,6 +143,33 @@
               </div>
             </div>
 
+            <!-- Por Módulo -->
+            <div class="card shadow-sm p-3 text-info text-start" style="min-width: 220px; cursor: pointer;" id="cardPorModulo">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">{{ modulos_data|length }}</h5>
+                <i class="fas fa-puzzle-piece fa-2x"></i>
+              </div>
+              <small class="text-muted mt-2 d-block">Distribución por Módulo</small>
+            </div>
+
+            <!-- Por Perfil -->
+            <div class="card shadow-sm p-3 text-info text-start" style="min-width: 220px; cursor: pointer;" id="cardPorPerfil">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">{{ perfiles_data|length }}</h5>
+                <i class="fas fa-user-tag fa-2x"></i>
+              </div>
+              <small class="text-muted mt-2 d-block">Distribución por Perfil</small>
+            </div>
+
+            <!-- Por Línea -->
+            <div class="card shadow-sm p-3 text-info text-start" style="min-width: 220px; cursor: pointer;" id="cardPorLinea">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">{{ lineas_data|length }}</h5>
+                <i class="fas fa-project-diagram fa-2x"></i>
+              </div>
+              <small class="text-muted mt-2 d-block">Distribución por Línea</small>
+            </div>
+
           </div>
         </div>
         {% endif %}
@@ -358,6 +385,51 @@
     </div>
   </div>
 
+  <!-- Modal por Módulo -->
+  <div class="modal fade" id="graficoPorModuloModal" tabindex="-1" aria-labelledby="graficoPorModuloLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoPorModuloLabel">Empleados por Módulo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoPorModuloCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal por Perfil -->
+  <div class="modal fade" id="graficoPorPerfilModal" tabindex="-1" aria-labelledby="graficoPorPerfilLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoPorPerfilLabel">Empleados por Perfil</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoPorPerfilCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal por Línea -->
+  <div class="modal fade" id="graficoPorLineaModal" tabindex="-1" aria-labelledby="graficoPorLineaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoPorLineaLabel">Empleados por Línea</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoPorLineaCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
   {% block extra_js %}
     <!--
       Inserta los datos de etiquetas y valores para los gráficos
@@ -375,6 +447,15 @@
 
     {{ activos_inactivos_labels|json_script:"labels-activos" }}
     {{ activos_inactivos_data|json_script:"values-activos" }}
+
+    {{ modulos_labels|json_script:"labels-modulo" }}
+    {{ modulos_data|json_script:"values-modulo" }}
+
+    {{ perfiles_labels|json_script:"labels-perfil" }}
+    {{ perfiles_data|json_script:"values-perfil" }}
+
+    {{ lineas_labels|json_script:"labels-linea" }}
+    {{ lineas_data|json_script:"values-linea" }}
 
     <!-- Cargar Chart.js desde CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

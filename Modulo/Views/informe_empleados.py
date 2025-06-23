@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from datetime import date, datetime
-from collections import defaultdict
+from collections import defaultdict,Counter
 from Modulo.forms import EmpleadoFilterForm
 from Modulo.models import Empleado, Nomina
 from django.http import HttpResponse
@@ -134,6 +134,11 @@ def informe_empleados(request):
     otras_certificaciones_por_linea = defaultdict(int)
     postgrados_por_linea = defaultdict(int)
 
+    # Agrupar por módulo, perfil y línea
+    modulos_data = Counter([e['Modulo'] for e in empleados_info])
+    perfiles_data = Counter([e['Perfil'] for e in empleados_info])
+    lineas_data = Counter([e['Linea'] for e in empleados_info])
+
     # Agrupar por línea
     for e in empleados_info:
         linea = e['Linea']
@@ -170,6 +175,16 @@ def informe_empleados(request):
 
         'activos_inactivos_labels': ['Activos', 'Inactivos'],
         'activos_inactivos_data': [empleados_activos, empleados_inactivos],
+
+        'modulos_labels': list(modulos_data.keys()),
+        'modulos_data': list(modulos_data.values()),
+
+        'perfiles_labels': list(perfiles_data.keys()),
+        'perfiles_data': list(perfiles_data.values()),
+
+        'lineas_labels': list(lineas_data.keys()),
+        'lineas_data': list(lineas_data.values()),
+ 
     })
 
     return render(request, 'informes/informes_empleado_index.html', context)

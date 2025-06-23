@@ -125,6 +125,42 @@ document.addEventListener('DOMContentLoaded', function () {
     borderColor: 'rgba(220, 53, 69, 1)'
   });
 
+  crearGraficoCard({
+    cardId: 'cardPorModulo',
+    modalId: 'graficoPorModuloModal',
+    canvasId: 'graficoPorModuloCanvas',
+    labelsScriptId: 'labels-modulo',
+    valuesScriptId: 'values-modulo',
+    chartVarName: 'moduloChart',
+    labelText: 'Empleados por Módulo',
+    bgColor: 'rgba(54, 162, 235, 0.5)',
+    borderColor: 'rgba(54, 162, 235, 1)'
+  });
+
+  crearGraficoCard({
+    cardId: 'cardPorPerfil',
+    modalId: 'graficoPorPerfilModal',
+    canvasId: 'graficoPorPerfilCanvas',
+    labelsScriptId: 'labels-perfil',
+    valuesScriptId: 'values-perfil',
+    chartVarName: 'perfilChart',
+    labelText: 'Empleados por Perfil',
+    bgColor: 'rgba(255, 99, 132, 0.5)',
+    borderColor: 'rgba(255, 99, 132, 1)'
+  });
+
+  crearGraficoCard({
+    cardId: 'cardPorLinea',
+    modalId: 'graficoPorLineaModal',
+    canvasId: 'graficoPorLineaCanvas',
+    labelsScriptId: 'labels-linea',
+    valuesScriptId: 'values-linea',
+    chartVarName: 'lineaChart',
+    labelText: 'Empleados por Línea',
+    bgColor: 'rgba(75, 192, 192, 0.5)',
+    borderColor: 'rgba(75, 192, 192, 1)'
+  });
+
   //==============================
   // LÓGICA DE ORDENAMIENTO TABLA
   //==============================
