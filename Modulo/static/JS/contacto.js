@@ -36,30 +36,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
     window.saveRow = function() {
-        
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length != 1) {
-            showMessage('Error al guardar: No hay un detalle seleccionado.', 'danger');
+            showMessage('Error al guardar: No hay un contacto seleccionado.', 'danger');
             return;
         }
-
+    
         let row = selected[0].closest('tr');
-       
         let data = {
             'Nombre': row.querySelector('input[name="nombre"]').value,
             'Telefono': row.querySelector('input[name="telefono"]').value,
+            'Telefono_Fijo': row.querySelector('input[name="telefono_fijo"]').value, // Nuevo campo
+            'Correo': row.querySelector('input[name="correo"]').value, // Nuevo campo
             'Direccion': row.querySelector('input[name="Direccion"]').value,
             'Activo': row.querySelector('input[name="Activo"]').value,
             'Cargo': row.querySelector('input[name="Cargo"]').value,
         };
+    
         let id = selected[0].value;
-        // Deshabilitar los checkboxes y el botón de edición
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
-        document.getElementById('edit-button').disabled = true;
-
-       console.log(id)
-       console.log(data)
-       fetch(`/contactos/editar/${id}/`, {
+    
+        fetch(`/contactos/editar/${id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -73,69 +69,56 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return response.json();
         })
-        .then(data => { 
+        .then(data => {
             if (data.status == 'success') {
                 showMessage('Cambios guardados correctamente.', 'success');
-                window.location.reload()
-
-                row.querySelectorAll('input.form-control').forEach(input => {
-                    input.classList.add('highlighted');
-                    setTimeout(() => input.classList.remove('highlighted'), 2000);
-                });
-
-                disableEditMode(selected,row);
-
+                window.location.reload();
             } else {
                 showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger');
             }
-
         })
         .catch(error => {
             console.error('Error al guardar los cambios:', error);
             showMessage('Error al guardar los cambios: ' + error.message, 'danger');
-
-            disableEditMode(selected,row);
         });
     };
 
     window.enableEdit = function() {
-       
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length === 0) {
-            alert('No has seleccionado ningúna Nomina para editar.');
+            alert('No has seleccionado ningún contacto para editar.');
             return false;
         }
         if (selected.length > 1) {
-            alert('Solo puedes editar una Nomina a la vez.');
+            alert('Solo puedes editar un contacto a la vez.');
             return false;
         }
-
+    
         let row = selected[0].closest('tr');
         let inputs = row.querySelectorAll('input.form-control-plaintext');
-
-        // Guardar valores originales en un atributo personalizado 
-        inputs.forEach(input => { 
-        input.setAttribute('data-original-value', input.value);
+    
+        // Guardar valores originales en un atributo personalizado
+        inputs.forEach(input => {
+            input.setAttribute('data-original-value', input.value);
         });
-
-        // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
+    
+        // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, botón de editar
         document.getElementById('select-all').disabled = true;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
-
+    
         // Convertir inputs en editables
-        let editables = ["nombre", "telefono", "Direccion","Cargo","Activo"];
-        
+        let editables = ["nombre", "telefono", "telefono_fijo", "correo", "Direccion", "Cargo", "Activo"];
         for (let i = 0; i < editables.length; i++) {
             let edit = row.querySelector(`[name="${editables[i]}"]`);
             edit.classList.remove('form-control-plaintext');
             edit.classList.add('form-control');
-            edit.readOnly = false; // Corregido aquí
+            edit.readOnly = false;
         }
+    
         // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
-
     };
 
     document.getElementById('select-all').addEventListener('click', function(event) {

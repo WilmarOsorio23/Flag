@@ -18,34 +18,41 @@ def contactos_crear(request):
         if form.is_valid():
             max_id = Contactos.objects.all().aggregate(max_id=models.Max('id'))['max_id']
             new_id = max_id + 1 if max_id is not None else 1
-            nuevo_moneda = form.save(commit=False)
-            nuevo_moneda.id = new_id
-            nuevo_moneda.save()
+            nuevo_contacto = form.save(commit=False)
+            nuevo_contacto.id = new_id
+            nuevo_contacto.save()
         return redirect('contactos_index')
     else:
-     form = ContactosForm()
-     return render(request, 'Contactos/contactos_form.html', {'form': form})  # Se ajusta el redireccionamiento 
+        form = ContactosForm()
+    return render(request, 'Contactos/contactos_form.html', {'form': form}) 
 
 def contactos_editar(request, id):
-     print("llego hasta editar")
-     if request.method == 'POST':
+    print("Llego a editar")  # Confirmar que la función se está ejecutando
+    if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            detalle = get_object_or_404( Contactos, pk=id)
-            detalle.Nombre  = data.get('Nombre', detalle.Nombre)
-            detalle.Telefono = data.get('Telefono', detalle.Telefono)
-            detalle.Direccion = data.get('Direccion', detalle.Direccion)
-            detalle.activo = data.get('Activo', detalle.activo)
-            detalle.Cargo= data.get('Cargo', detalle.Cargo)
-            detalle.save()
-
-            print(JsonResponse({'status': 'success'}))
+            print("Datos recibidos:", data)  # Depuración de los datos recibidos
+            contacto = get_object_or_404(Contactos, pk=id)
+            contacto.Nombre = data.get('Nombre', contacto.Nombre)
+            contacto.Telefono = data.get('Telefono', contacto.Telefono)
+            contacto.telefono_fijo = data.get('Telefono_Fijo', contacto.telefono_fijo)  # Nuevo campo
+            contacto.correo = data.get('Correo', contacto.correo)  # Nuevo campo
+            contacto.Direccion = data.get('Direccion', contacto.Direccion)
+            contacto.activo = data.get('Activo', contacto.activo)
+            contacto.Cargo = data.get('Cargo', contacto.Cargo)
+            contacto.save()
+            print("Contacto actualizado correctamente.")  # Confirmar que se guardó
             return JsonResponse({'status': 'success'})
         except Contactos.DoesNotExist:
-            return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
+            print("Error: Contacto no encontrado.")  # Depuración
+            return JsonResponse({'error': 'Contacto no encontrado'}, status=404)
         except json.JSONDecodeError:
+            print("Error: Formato de datos inválido.")  # Depuración
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-     else:
+        except Exception as e:
+            print("Error inesperado:", str(e))  # Depuración
+            return JsonResponse({'error': 'Error inesperado: ' + str(e)}, status=500)
+    else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def contactos_eliminar(request):
