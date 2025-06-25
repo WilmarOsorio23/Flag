@@ -130,6 +130,23 @@
                 <!-- Tabla Principal -->
                 <form method="POST">
                     {% csrf_token %}
+                    {# Campos ocultos para los filtros activos #}
+                    <input type="hidden" name="Anio" value="{{ form.Anio.value }}">
+                    {% for mes in form.Mes.value %}
+                        <input type="hidden" name="Mes" value="{{ mes }}">
+                    {% endfor %}
+                    {% for linea in form.LineaId.value %}
+                        <input type="hidden" name="LineaId" value="{{ linea }}">
+                    {% endfor %}
+                    {% for cliente in form.ClienteId.value %}
+                        <input type="hidden" name="ClienteId" value="{{ cliente }}">
+                    {% endfor %}
+                    {# Mostrar errores del formulario si existen #}
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
                     <div class="text-end">
                         <button type="submit" class="btn btn-success">
                             <i class="fas fa-save"></i> Guardar Datos
@@ -144,7 +161,7 @@
                                     <th class="fixed-column fixed-column-3" rowspan="2">Horas</th>
                                     {% for cliente in Clientes %}
                                         {% with nombre_cliente=cliente.Nombre_Cliente %}
-                                        <th colspan="6">{{ nombre_cliente }}</th>
+                                        <th colspan="6" class="text-center">{{ nombre_cliente }}</th>
                                         {% endwith %}
                                     {% endfor %}
                                     {% for concepto in Conceptos %}
@@ -174,10 +191,11 @@
                                     <td class="fixed-column fixed-column-2">-</td>
                                     <td class="fixed-column fixed-column-3">-</td>
                                     {% for cliente in Clientes %}
+                                    {% with dic=valores_diciembre_cliente|get_item:cliente.ClienteId %}
                                     <td>
                                         <input type="number" step="0.01"
                                             name="diciembre_trabajado_{{ cliente.ClienteId }}"
-                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'trabajado' }}"
+                                            value="{{ dic|get_item:'trabajado' }}"
                                             class="form-control mb-2"
                                             placeholder="Horas Trabajadas"
                                             data-toggle-target="diciembre_facturado_{{ cliente.ClienteId }}">
@@ -185,7 +203,7 @@
                                     <td>
                                         <input type="number" step="0.01"
                                             name="diciembre_costo_{{ cliente.ClienteId }}"
-                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'costo' }}"
+                                            value="{{ dic|get_item:'costo' }}"
                                             class="form-control mb-2"
                                             placeholder="Costo"
                                             data-toggle-target="diciembre_valor_facturado_{{ cliente.ClienteId }}">
@@ -193,7 +211,7 @@
                                     <td>
                                         <input type="number" step="0.01"
                                             name="diciembre_facturado_{{ cliente.ClienteId }}"
-                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'facturado' }}"
+                                            value="{{ dic|get_item:'facturado' }}"
                                             class="form-control mb-2"
                                             placeholder="Horas Facturadas"
                                             data-toggle-target="diciembre_trabajado_{{ cliente.ClienteId }}">
@@ -201,13 +219,14 @@
                                     <td>
                                         <input type="number" step="0.01"
                                             name="diciembre_valor_facturado_{{ cliente.ClienteId }}"
-                                            value="{{ valores_diciembre|get_item:cliente.ClienteId|default:''|get_item:'valor_facturado' }}"
+                                            value="{{ dic|get_item:'valor_facturado' }}"
                                             class="form-control"
                                             placeholder="Valor Facturado"
                                             data-toggle-target="diciembre_costo_{{ cliente.ClienteId }}">
                                     </td>
                                     <td>-</td>
                                     <td>-</td>
+                                    {% endwith %}
                                     {% endfor %}
                                     <!-- Celdas vacías para conceptos y totales -->
                                     {% for concepto in Conceptos %}
