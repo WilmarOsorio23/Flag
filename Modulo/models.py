@@ -481,9 +481,12 @@ class Contactos(models.Model):
     contactoId = models.ForeignKey(TiposContactos, on_delete=models.CASCADE, db_column='contactoId')
     Nombre = models.CharField(max_length=100)
     Telefono = models.CharField(max_length=20)
+    telefono_fijo = models.CharField(max_length=30, null=True, blank=True)
+    correo = models.CharField(max_length=100, null=True, blank=True)
     Direccion = models.CharField(max_length=255, null=True, blank=True)
     Cargo = models.CharField(max_length=100)
     activo = models.BooleanField(default=True)
+    
 
     def __str__(self):
         #return f"id: {self.id}, ClienteId: {self.clienteId}, ContactoId: {self.contactoId}, Nombre: {self.Nombre}, Telefono: {self.Telefono}, Direccion: {self.Direccion}, CargoId: {self.Cargo}, Activo: {self.activo}"

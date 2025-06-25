@@ -252,17 +252,21 @@ class ContactosForm(forms.ModelForm):
         widgets = {
             'Nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre'}),
             'Telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono'}),
+            'telefono_fijo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono fijo'}),  # Nuevo campo
+            'correo': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el correo electrónico'}),  # Nuevo campo
             'Direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la dirección'}),
-            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'Cargo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el cargo'}),
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
-        labels ={
+        labels = {
             'Nombre': 'Nombre',
             'Telefono': 'Teléfono',
-            'Direccion': 'Dirección',  
+            'telefono_fijo': 'Teléfono Fijo',  # Nuevo campo
+            'correo': 'Correo Electrónico',  # Nuevo campo
+            'Direccion': 'Dirección',
+            'Cargo': 'Cargo',
             'activo': 'Activo',
-            'Cargo':'Cargo',
         }
 
 class ConsultoresForm(forms.ModelForm):
