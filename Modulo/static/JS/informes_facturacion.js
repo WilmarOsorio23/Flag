@@ -45,4 +45,75 @@ document.addEventListener('DOMContentLoaded', function () {
             selectAnio(this.getAttribute("data-value"), this.textContent);
         });
     });
+
+    console.log("Dropdowns inicializados correctamente.");
+
+    const graficosDataElement = document.getElementById('graficos-data');
+    if (graficosDataElement) {
+        const graficosPorLinea = JSON.parse(graficosDataElement.textContent);
+        console.log("Datos de gráficos recibidos:", graficosPorLinea);
+
+        graficosPorLinea.forEach((grafico, index) => {
+            const canvasId = `grafico-${index + 1}`;
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) {
+                console.log(`Canvas con ID ${canvasId} no encontrado.`);
+                return;
+            }
+
+            console.log(`Creando gráfica para: ${grafico.nombre}`);
+            console.log("Labels:", grafico.labels);
+            console.log("Data:", grafico.datasets[0].data);
+
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: grafico.datasets[0].type, // Tipo dinámico según el gráfico
+                data: {
+                    labels: grafico.labels,
+                    datasets: grafico.datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Meses'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: grafico.nombre === 'Total General' ? 'Totales Generales' : 'Porcentaje (%)'
+                            },
+                            ticks: {
+                                callback: function (value) {
+                                    return grafico.nombre === 'Total General' ? value.toLocaleString() : `${value}%`;
+                                }
+                            },
+                            max: grafico.nombre === 'Total General' ? undefined : 100 // Máximo dinámico para porcentajes
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            });
+
+            console.log(`Gráfica creada para: ${grafico.nombre}`);
+        });
+    } else {
+        console.log("Elemento graficos-data no encontrado.");
+    }
+    
+
+
 });

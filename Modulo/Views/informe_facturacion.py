@@ -1,3 +1,5 @@
+import random
+from django import template
 from django.shortcuts import render, HttpResponse
 from collections import defaultdict
 from django.db.models import Sum
@@ -12,25 +14,28 @@ from datetime import datetime
 # Función para filtrar datos
 def filtrar_datos(form):
     anio = form.cleaned_data.get('Anio')
-    lineas = form.cleaned_data.get('LineaId')
-    clientes = form.cleaned_data.get('ClienteId')
+    lineas_seleccionadas = form.cleaned_data.get('LineaId')
+    clientes_seleccionados = form.cleaned_data.get('ClienteId')
 
     facturas = FacturacionClientes.objects.all()
 
-    # Aplicar filtros solo si se seleccionan
     if anio:
         facturas = facturas.filter(Anio=anio)
-    if lineas:
-        facturas = facturas.filter(LineaId__in=lineas)
+    
+    if lineas_seleccionadas:
+        facturas = facturas.filter(LineaId__in=lineas_seleccionadas)
+        lineas = lineas_seleccionadas
     else:
-        lineas = Linea.objects.all()  # Traer todas las líneas si no se selecciona ninguna
-    if clientes:
-        facturas = facturas.filter(ClienteId__in=clientes)
+        lineas = Linea.objects.all()
+    
+    if clientes_seleccionados:
+        facturas = facturas.filter(ClienteId__in=clientes_seleccionados)
+        clientes = clientes_seleccionados
     else:
-        clientes = Clientes.objects.all()  # Traer todos los clientes si no se selecciona ninguno
+        clientes = Clientes.objects.all()
 
-    # Anotar el total por mes, línea y cliente
     facturas = facturas.values('Mes', 'LineaId', 'ClienteId').annotate(total=Sum('Valor'))
+    
     return facturas, lineas, clientes
 
 # Función para organizar los datos
@@ -53,62 +58,94 @@ def organizar_datos(facturas, lineas, clientes):
     }
 
     for f in facturas:
-        mes = f['Mes']  # Acceder al campo Mes
-        linea = f['LineaId']  # Acceder al campo LineaId
-        cliente = f['ClienteId']  # Acceder al campo ClienteId
-        total = f['total'] or 0  # Acceder al campo total
+        mes = f['Mes']
+        linea_id = f['LineaId']
+        cliente_id = f['ClienteId']
+        total = f['total'] or 0
 
-        totales['por_linea'][mes][linea] += total
-        totales['footer']['por_linea'][linea] += total
+        # Acumular por mes y línea
+        totales['por_linea'][mes][linea_id] += total
+        totales['footer']['por_linea'][linea_id] += total
 
+        # Acumular por mes (general)
         totales['general'][mes] += total
         totales['footer']['general'] += total
 
-        totales['clientes'][cliente][mes][linea] += total
-        totales['footer']['clientes'][cliente][linea] += total
+        # Acumular por cliente y línea
+        totales['clientes'][cliente_id][mes][linea_id] += total
+        totales['footer']['clientes'][cliente_id][linea_id] += total
+
+    # Depuración para verificar acumulación correcta
+    print("Totales generales por mes:", totales['general'])  # Verificar acumulación por mes
 
     rows = []
     for mes_num, mes_nombre in meses:
-        # Cambiar listas por diccionarios
         row = {
             'mes': mes_nombre,
-            'totales_linea': {linea.LineaId: totales['por_linea'][mes_num].get(linea.LineaId, 0) for linea in lineas},
-            'total_general': totales['general'].get(mes_num, 0),
+            'totales_linea': {},
+            'total_general': totales['general'].get(mes_num, 0),  # Obtener total general por mes
             'clientes': {}
         }
 
-        for cliente in clientes:    
-            # Diccionario para totales del cliente
-            row['clientes'][cliente.ClienteId] = {
-                'totales': {linea.LineaId: totales['clientes'][cliente.ClienteId][mes_num].get(linea.LineaId, 0) 
-                            for linea in lineas}
+        # Totales por línea para este mes
+        for linea in lineas:
+            linea_id = linea.LineaId
+            row['totales_linea'][linea_id] = totales['por_linea'][mes_num].get(linea_id, 0)
+
+        # Totales por cliente para este mes
+        for cliente in clientes:
+            cliente_id = cliente.ClienteId
+            row['clientes'][cliente_id] = {
+                'totales': {}
             }
+            for linea in lineas:
+                linea_id = linea.LineaId
+                row['clientes'][cliente_id]['totales'][linea_id] = totales['clientes'][cliente_id][mes_num].get(linea_id, 0)
 
         rows.append(row)
 
+    # Depuración para verificar filas generadas
+    print("Rows generados:", rows)
+
     footer = {
-        'totales_linea': {linea.LineaId: totales['footer']['por_linea'][linea.LineaId] for linea in lineas},
+        'totales_linea': {},
         'total_general': totales['footer']['general'],
         'clientes': {}
     }
 
-    for cliente in clientes:
-        footer['clientes'][cliente.ClienteId] = {
-            'totales': {linea.LineaId: totales['footer']['clientes'][cliente.ClienteId][linea.LineaId] 
-                        for linea in lineas}
-        }
+    # Footer: totales por línea
+    for linea in lineas:
+        linea_id = linea.LineaId
+        footer['totales_linea'][linea_id] = totales['footer']['por_linea'].get(linea_id, 0)
 
-    # Filtrar activos usando diccionarios
-    lineas_activas = [linea for linea in lineas if footer['totales_linea'].get(linea.LineaId, 0) != 0]
+    # Footer: totales por cliente
+    for cliente in clientes:
+        cliente_id = cliente.ClienteId
+        footer['clientes'][cliente_id] = {
+            'totales': {}
+        }
+        for linea in lineas:
+            linea_id = linea.LineaId
+            footer['clientes'][cliente_id]['totales'][linea_id] = totales['footer']['clientes'][cliente_id].get(linea_id, 0)
+
+    # Depuración para verificar datos del footer
+    print("Footer generado:", footer)
+
+    lineas_activas = [linea for linea in lineas if footer['totales_linea'].get(linea.LineaId, 0) > 0]
 
     clientes_activos = []
     for cliente in clientes:
-        for linea in lineas:
+        for linea in lineas_activas:
             total = footer['clientes'][cliente.ClienteId]['totales'].get(linea.LineaId, 0)
-            if total != 0:
+            if total > 0:
                 clientes_activos.append((cliente, linea))
 
+    # Depuración para verificar líneas y clientes activos
+    print("Líneas activas:", lineas_activas)
+    print("Clientes activos:", clientes_activos)
+
     return rows, footer, lineas, clientes, meses, lineas_activas, clientes_activos
+
 
 # Función para generar el reporte en el frontend
 def informes_facturacion_index(request):
@@ -153,6 +190,134 @@ def informes_facturacion_index(request):
     }
 
     return render(request, 'Informes/informes_facturacion_index.html', context)
+
+
+def generar_graficos_por_linea(rows, lineas_activas, clientes_activos, footer):
+    """Genera datos para gráficos por línea y cliente, incluyendo Total General"""
+    graficos = []
+
+    colores = [
+        'rgba(75, 192, 192, 0.5)',  # Azul claro
+        'rgba(255, 99, 132, 0.5)',  # Rojo claro
+        'rgba(255, 206, 86, 0.5)',  # Amarillo claro
+        'rgba(54, 162, 235, 0.5)',  # Azul oscuro
+        'rgba(153, 102, 255, 0.5)', # Morado claro
+        'rgba(201, 203, 207, 0.5)'  # Gris claro
+    ]
+
+    # Gráfico para Total General
+    labels = [row['mes'] for row in rows]
+    total_general = [row['total_general'] for row in rows]  # Extraer los totales generales
+
+    # Depuración para verificar datos de la gráfica
+    print("Labels para Total General:", labels)
+    print("Datos para Total General:", total_general)
+
+
+    graficos.append({
+        'nombre': 'Total General',
+        'labels': labels,
+        'datasets': [
+            {
+                'label': 'Total General',
+                'data': total_general,
+                'type': 'bar',
+                'backgroundColor': colores[0],  # Primer color de la lista
+                'borderColor': colores[0].replace('0.5', '1'),  # Color con opacidad completa
+                'borderWidth': 1
+            }
+        ]
+    })
+    
+
+    # Gráficos por línea
+    for index, linea in enumerate(lineas_activas):
+        total_linea = footer['totales_linea'].get(linea.LineaId, 0)
+        if total_linea <= 0:
+            continue
+
+        clientes_data = []
+        participacion_data = []
+
+        for cliente, linea_cliente in clientes_activos:
+            if linea_cliente.LineaId != linea.LineaId:
+                continue
+
+            total_cliente = footer['clientes'][cliente.ClienteId]['totales'].get(linea.LineaId, 0)
+            participacion = (total_cliente / total_linea) * 100 if total_linea > 0 else 0
+
+            clientes_data.append(cliente.Nombre_Cliente)
+            participacion_data.append(participacion)
+
+        if not clientes_data:
+            continue
+
+        # Asignar colores dinámicos
+        color_index = (index + 1) % len(colores)  # Ciclar colores si hay más líneas que colores
+        graficos.append({
+            'nombre': f'% Participación en {linea.Linea}',
+            'labels': clientes_data,
+            'datasets': [
+                {
+                    'label': f'% Participación en {linea.Linea}',
+                    'data': participacion_data,
+                    'type': 'bar',
+                    'backgroundColor': colores[color_index],
+                    'borderColor': colores[color_index].replace('0.5', '1'),
+                    'borderWidth': 1
+                }
+            ]
+        })
+
+    return graficos
+
+def informes_facturacion_index(request):
+    form = InformeFacturacionForm(request.GET or None)
+    mensaje = None
+    rows = None
+    footer = None
+    lineas = None
+    clientes = None
+    meses = None
+    graficos_por_linea = []
+
+    if 'buscar' in request.GET:
+        if form.is_valid():
+            facturas, lineas, clientes = filtrar_datos(form)
+            if facturas.exists():
+                rows, footer, lineas, clientes, meses, lineas_activas, clientes_activos = organizar_datos(facturas, lineas, clientes)
+                # Pasar footer como nuevo parámetro
+                graficos_por_linea = generar_graficos_por_linea(rows, lineas_activas, clientes_activos, footer)
+            else:
+                mensaje = "No se encontraron datos con los filtros seleccionados."
+        else:
+            mensaje = "Por favor, corrige los errores en el formulario."
+    else:
+        facturas = FacturacionClientes.objects.values('Mes', 'LineaId', 'ClienteId').annotate(total=Sum('Valor'))
+        lineas = Linea.objects.all()
+        clientes = Clientes.objects.all()
+        if facturas.exists():
+            rows, footer, lineas, clientes, meses, lineas_activas, clientes_activos = organizar_datos(facturas, lineas, clientes)
+            # Pasar footer como nuevo parámetro
+            graficos_por_linea = generar_graficos_por_linea(rows, lineas_activas, clientes_activos, footer)
+        else:
+            mensaje = "No se encontraron datos."
+
+    context = {
+        'form': form,
+        'rows': rows,
+        'footer': footer,
+        'lineas': lineas,
+        'clientes': clientes,
+        'meses': meses,
+        'mensaje': mensaje,
+        'lineas_activas': lineas_activas,
+        'clientes_activos': clientes_activos,
+        'graficos_por_linea': graficos_por_linea
+    }
+
+    return render(request, 'Informes/informes_facturacion_index.html', context)
+
 
 # Función para descargar el reporte en Excel
 def descargar_reporte_excel(request):
@@ -316,12 +481,41 @@ def descargar_reporte_excel(request):
         ]
         ws.append(fila_footer)
 
-        # Aplicar estilo al footer
         for cell in ws[ws.max_row]:
-            cell.fill = footer_fill
-            cell.font = header_font
-            cell.border = border
-            cell.alignment = alignment
+            cell.fill = PatternFill(start_color="99CCFF", end_color="99CCFF", fill_type="solid")  # Color amarillo
+            cell.font = Font(bold=True, color="000000")  # Texto en negro
+            cell.border = Border(left=Side(style='thin'), right=Side(style='thin'),
+                                top=Side(style='thin'), bottom=Side(style='thin'))
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+        # =========================================================================
+        # FILA DE % PARTICIPACIÓN
+        # =========================================================================
+        fila_participacion = [
+            "% Participación",
+            # Calcular % participación para líneas activas
+            *[
+                (footer['totales_linea'][linea.LineaId] / footer['total_general']) if footer['total_general'] > 0 else 0
+                for linea in lineas_activas
+            ],
+            1.00,  # Total General siempre será 100% (como porcentaje)
+            # Calcular % participación para clientes activos
+            *[
+                (footer['clientes'][cliente.ClienteId]['totales'][linea.LineaId] / footer['totales_linea'][linea.LineaId]) if footer['totales_linea'][linea.LineaId] > 0 else 0
+                for cliente, linea in clientes_activos
+            ]
+        ]
+        ws.append(fila_participacion)
+
+        # Aplicar estilo a la fila de % Participación
+        for cell in ws[ws.max_row]:
+            cell.fill = PatternFill(start_color="99CCFF", end_color="99CCFF", fill_type="solid")  # Color azul claro
+            cell.font = Font(bold=True, color="000000")  # Texto en negro
+            cell.border = Border(left=Side(style='thin'), right=Side(style='thin'),
+                                top=Side(style='thin'), bottom=Side(style='thin'))
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            if isinstance(cell.value, (int, float)):  # Aplicar formato de porcentaje
+                cell.number_format = '0.00%'
 
         # =========================================================================
         # FORMATO NUMÉRICO Y AJUSTES
@@ -330,7 +524,7 @@ def descargar_reporte_excel(request):
         for row in ws.iter_rows(min_row=3, max_row=ws.max_row-1):
             for cell in row[1:]:
                 if isinstance(cell.value, (int, float)):
-                    cell.number_format = '#,##0'
+                    cell.number_format = '#,#0.00'
 
         # Ajustar ancho de columnas
         for col_idx, col in enumerate(ws.columns, start=1):

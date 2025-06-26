@@ -50,3 +50,18 @@ def enumerate_items(iterable):
 def multiply(value, arg):
     """Multiplica el valor por el argumento"""
     return float(value) * float(arg)       
+
+@register.filter(name='get_item')
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+@register.filter(name='divide')
+def divide(value, arg):
+    try:
+        return float(value) / float(arg)
+    except (ValueError, ZeroDivisionError):
+        return 0
+
+@register.filter(name='multiply')
+def multiply(value, arg):
+    return float(value) * float(arg)
