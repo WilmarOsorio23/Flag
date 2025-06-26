@@ -7,12 +7,14 @@ register = template.Library()
 def add_class(field, css_class):
     return field.as_widget(attrs={'class': css_class})
 
-@register.filter(name='get_item')
+@register.filter
 def get_item(dictionary, key):
-    """Obtiene un elemento de un diccionario usando una clave"""
-    if dictionary is None:
+    try:
+        if hasattr(dictionary, 'get'):
+            return dictionary.get(key)
         return None
-    return dictionary.get(key)
+    except Exception:
+        return None
 
 @register.filter
 def items(dictionary):

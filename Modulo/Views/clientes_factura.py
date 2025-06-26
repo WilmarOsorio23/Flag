@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 from io import BytesIO
+from decimal import Decimal
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
@@ -40,14 +41,14 @@ def clientes_factura_guardar(request):
                 modulo_id = int(row.get('ModuloId', 0)) if row.get('ModuloId') else 0
                 
                 horas_factura = float(row.get('Horas', 0)) if row.get('Horas') and row.get('Horas').lower() != 'none' else 0.0
-                valor_horas = float(row.get('Valor_Horas', 0)) if row.get('Valor_Horas') and row.get('Valor_Horas').lower() != 'none' else 0.0
+                valor_horas = Decimal(row.get('Valor_Horas', '0')) if row.get('Valor_Horas') and row.get('Valor_Horas').lower() != 'none' else Decimal('0.0')
                 dias_factura = float(row.get('Dias', 0)) if row.get('Dias') and row.get('Dias').lower() != 'none' else 0.0
-                valor_dias = float(row.get('Valor_Dias', 0)) if row.get('Valor_Dias') and row.get('Valor_Dias').lower() != 'none' else 0.0
+                valor_dias = Decimal(row.get('Valor_Dias', '0')) if row.get('Valor_Dias') and row.get('Valor_Dias').lower() != 'none' else Decimal('0.0')
                 mes_factura = int(row.get('Meses', 0)) if row.get('Meses') and row.get('Meses').lower() != 'none' else 0   
-                valor_meses = float(row.get('Valor_Meses', 0)) if row.get('Valor_Meses') and row.get('Valor_Meses').lower() != 'none' else 0.0
+                valor_meses = Decimal(row.get('Valor_Meses', '0')) if row.get('Valor_Meses') and row.get('Valor_Meses').lower() != 'none' else Decimal('0.0')
 
-                bolsa = float(row.get('Bolsa', 0)) if row.get('Bolsa') and row.get('Bolsa').lower() != 'none' else 0.0
-                valor_bolsa = float(row.get('Valor_Bolsa', 0)) if row.get('Valor_Bolsa') and row.get('Valor_Bolsa').lower() != 'none' else 0.0
+                bolsa = Decimal(row.get('Bolsa', '0')) if row.get('Bolsa') and row.get('Bolsa').lower() != 'none' else Decimal('0.0')
+                valor_bolsa = Decimal(row.get('Valor_Bolsa', '0')) if row.get('Valor_Bolsa') and row.get('Valor_Bolsa').lower() != 'none' else Decimal('0.0')
 
                 iva = float(row.get('IVA', 0)) if row.get('IVA') and row.get('IVA').lower() != 'none' else 0.0
 
@@ -58,7 +59,7 @@ def clientes_factura_guardar(request):
                 sitio_serv = row.get('Sitio_Serv', "") or ""
 
                 # Calcular el valor
-                valor = (horas_factura * valor_horas if horas_factura else 0) + (dias_factura * valor_dias if dias_factura else 0) + (mes_factura * valor_meses if valor_meses else 0) + (bolsa * valor_bolsa if bolsa else 0)
+                valor = (Decimal(horas_factura) * valor_horas if horas_factura else Decimal('0.0')) + (Decimal(dias_factura) * valor_dias if dias_factura else Decimal('0.0')) + (Decimal(mes_factura) * valor_meses if valor_meses else Decimal('0.0')) + (bolsa * valor_bolsa if bolsa else Decimal('0.0'))
 
                 if (horas_factura > 0 or dias_factura > 0 or mes_factura > 0 or bolsa > 0):
 
@@ -305,13 +306,13 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
                         bolsa = facturacion.Bolsa or 0
 
                         # Obtener los valores unitarios (Valor_Horas, Valor_Dias, Valor_Meses)
-                        valor_horas = facturacion.Valor_Horas or (float(tarifa.valorHora) if tarifa and tarifa.valorHora is not None else 0)
-                        valor_dias = facturacion.Valor_Dias or (float(tarifa.valorDia) if tarifa and tarifa.valorDia is not None else 0)
-                        valor_meses = facturacion.Valor_Meses or (float(tarifa.valorMes) if tarifa and tarifa.valorMes is not None else 0)
-                        valor_bolsa = facturacion.Valor_Bolsa or (float(tarifa.valorBolsa) if tarifa and tarifa.valorBolsa is not None else 0)
+                        valor_horas = facturacion.Valor_Horas or (Decimal(str(tarifa.valorHora)) if tarifa and tarifa.valorHora is not None else Decimal('0.0'))
+                        valor_dias = facturacion.Valor_Dias or (Decimal(str(tarifa.valorDia)) if tarifa and tarifa.valorDia is not None else Decimal('0.0'))
+                        valor_meses = facturacion.Valor_Meses or (Decimal(str(tarifa.valorMes)) if tarifa and tarifa.valorMes is not None else Decimal('0.0'))
+                        valor_bolsa = facturacion.Valor_Bolsa or (Decimal(str(tarifa.valorBolsa)) if tarifa and tarifa.valorBolsa is not None else Decimal('0.0'))
 
                         # Calcular el valor total
-                        valor = (horas * float(valor_horas)) + (dias * float(valor_dias)) + (meses * float(valor_meses)) + (bolsa * float(valor_bolsa))
+                        valor = (Decimal(horas) * valor_horas) + (Decimal(dias) * valor_dias) + (Decimal(meses) * valor_meses) + (Decimal(bolsa) * valor_bolsa)
 
                         cliente_info['Facturas'].append({
                             'ConsecutivoId': facturacion.ConsecutivoId,
@@ -330,7 +331,7 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
                             'NumeroFactura': facturacion.Factura,
                             'Bolsa': bolsa,
                             'Valor_Bolsa': valor_bolsa,
-                            'IVA': facturacion.IVA or (tarifa.iva if tarifa else 0),
+                            'IVA': facturacion.IVA or (float(tarifa.iva) if tarifa else 0),
                             'Referencia': facturacion.Referencia or (tarifa.referenciaId.codigoReferencia if tarifa and tarifa.referenciaId else ''),
                             'Ceco': facturacion.Ceco or (tarifa.centrocostosId.codigoCeCo if tarifa and tarifa.centrocostosId else ''),
                             'Sitio_Serv': facturacion.Sitio_Serv or (tarifa.sitioTrabajo if tarifa else '')
@@ -381,14 +382,20 @@ def clientes_factura_index(request):
     return render(request, 'Clientes_Factura/clientes_factura_index.html', context)
 
 def calcular_totales_facturacion(facturacion_clientes):
-    totales = defaultdict(float)
+    totales = {
+        'Total_Horas': 0.0,
+        'Total_Dias': 0.0,
+        'Total_Meses': 0,
+        'Total_Bolsa': Decimal('0.0'),
+        'Total_Valor': Decimal('0.0'),
+    }
     
     for factura in facturacion_clientes:
-        totales['Total_Horas'] += factura.HorasFactura or 0
-        totales['Total_Dias'] += factura.DiasFactura or 0
+        totales['Total_Horas'] += factura.HorasFactura or 0.0
+        totales['Total_Dias'] += factura.DiasFactura or 0.0
         totales['Total_Meses'] += factura.MesFactura or 0
-        totales['Total_Bolsa'] += factura.Bolsa or 0
-        totales['Total_Valor'] += factura.Valor or 0
+        totales['Total_Bolsa'] += factura.Bolsa or Decimal('0.0')
+        totales['Total_Valor'] += factura.Valor or Decimal('0.0')
 
     return totales
 
@@ -585,10 +592,10 @@ def obtener_tarifa(request):
         # Construir respuesta
         if tarifa:
             data = {
-                'valorHora': float(tarifa.valorHora) if tarifa.valorHora else 0.0,
-                'valorDia': float(tarifa.valorDia) if tarifa.valorDia else 0.0,
-                'valorMes': float(tarifa.valorMes) if tarifa.valorMes else 0.0,
-                'valorBolsa': float(tarifa.valorBolsa) if tarifa.valorBolsa else 0.0,
+                'valorHora': str(Decimal(tarifa.valorHora)) if tarifa.valorHora else '0.0',
+                'valorDia': str(Decimal(tarifa.valorDia)) if tarifa.valorDia else '0.0',
+                'valorMes': str(Decimal(tarifa.valorMes)) if tarifa.valorMes else '0.0',
+                'valorBolsa': str(Decimal(tarifa.valorBolsa)) if tarifa.valorBolsa else '0.0',
                 'iva': float(tarifa.iva) if tarifa.iva else 0.0,
                 'referenciaId': {
                     'codigoReferencia': tarifa.referenciaId.codigoReferencia if tarifa.referenciaId else ''
@@ -601,10 +608,10 @@ def obtener_tarifa(request):
         else:
             # Datos por defecto si no hay ninguna tarifa
             data = {
-                'valorHora': 0.0,
-                'valorDia': 0.0,
-                'valorMes': 0.0,
-                'valorBolsa': 0.0,
+                'valorHora': '0.0',
+                'valorDia': '0.0',
+                'valorMes': '0.0',
+                'valorBolsa': '0.0',
                 'iva': 0.0,
                 'referenciaId': {'codigoReferencia': ''},
                 'centrocostosId': {'codigoCeCo': ''},

@@ -659,14 +659,14 @@ class FacturacionClientes(models.Model):
     ModuloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='ModuloId')
     Factura = models.TextField(null=True, blank=True)
     HorasFactura = models.FloatField(null=True, blank=True)
-    Valor_Horas = models.FloatField(null=True, blank=True)
+    Valor_Horas = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
     DiasFactura = models.FloatField(null=True, blank=True)
-    Valor_Dias = models.FloatField(null=True, blank=True)
+    Valor_Dias = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
     MesFactura = models.IntegerField(null=True, blank=True)
-    Valor_Meses = models.FloatField(null=True, blank=True)
-    Bolsa = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    Valor_Bolsa = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    Valor = models.FloatField(null=True, blank=True)
+    Valor_Meses = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    Bolsa = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    Valor_Bolsa = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    Valor = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
     Descripcion = models.TextField(null=True, blank=True)
     IVA = models.FloatField(null=True, blank=True)
     Referencia= models.TextField(null=True, blank=True)
@@ -764,6 +764,7 @@ class Ind_Totales_Diciembre(models.Model):
     Id = models.AutoField(primary_key=True)
     Anio = models.IntegerField()
     Mes = models.IntegerField()
+    LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
     Trabajado = models.DecimalField(max_digits=15, decimal_places=2)
     Facturado = models.DecimalField(max_digits=15, decimal_places=2)
@@ -774,14 +775,13 @@ class Ind_Totales_Diciembre(models.Model):
         db_table = 'Ind_Totales_Diciembre'
         constraints = [
             models.UniqueConstraint(
-                fields=['Anio', 'Mes', 'ClienteId'], 
+                fields=['Anio', 'Mes', 'LineaId', 'ClienteId'], 
                 name='unique_ind_totales_diciembre'
             )
         ]
 
     def __str__(self):
         return f"Año {self.Anio} - Mes {self.Mes} - Cliente {self.ClienteId.Nombre_Cliente}"
-        return f"ContratoId:{self.ContratosOtrosSiId} - Cliente: {self.ClienteId} - FechaInicio: {self.FechaInicio} - FechaFin: {self.FechaFin} - NumeroOtroSi: {self.NumeroOtroSi} - ValorOtroSi: {self.ValorOtroSi} - ValorIncluyeIva: {self.ValorIncluyeIva} - Polizas: {self.Polizas} - PolizasDesc: {self.PolizasDesc} - FirmadoFlag: {self.FirmadoFlag} - FirmadoCliente: {self.FirmadoCliente} - Moneda: {self.monedaId} - Contrato: {self.Contrato}"
     
 class TipoPagare(models.Model):
     Tipo_PagareId = models.AutoField(primary_key=True, db_column='Tipo_PagareId')
