@@ -53,10 +53,6 @@ def multiply(value, arg):
     """Multiplica el valor por el argumento"""
     return float(value) * float(arg)       
 
-@register.filter(name='get_item')
-def get_item(dictionary, key):
-    return dictionary.get(key)
-
 @register.filter(name='divide')
 def divide(value, arg):
     try:

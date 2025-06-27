@@ -420,6 +420,7 @@ urlpatterns = [
 
     #Ruta para informe de Facturacion Clientes
     path('informes/informes_facturacion_clientes/', informe_facturacion_clientes.informe_facturacion_clientes, name='informes_facturacion_clientes_index'),
+    path('informes/informes_facturacion_clientes/descargar_informe_facturacion_clientes_excel/', informe_facturacion_clientes.descargar_reporte_excel_facturacion_clientes, name='descargar_reporte_excel_facturacion_clientes'),
 
 
     ]
