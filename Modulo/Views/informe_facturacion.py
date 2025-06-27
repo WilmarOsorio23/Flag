@@ -10,6 +10,7 @@ from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 from openpyxl.cell import MergedCell
 from datetime import datetime
+from decimal import Decimal
 
 # Función para filtrar datos
 def filtrar_datos(form):
@@ -47,13 +48,13 @@ def organizar_datos(facturas, lineas, clientes):
     ]
 
     totales = {
-        'por_linea': defaultdict(lambda: defaultdict(float)),
-        'general': defaultdict(float),
-        'clientes': defaultdict(lambda: defaultdict(lambda: defaultdict(float))),
+        'por_linea': defaultdict(lambda: defaultdict(Decimal)),
+        'general': defaultdict(Decimal),
+        'clientes': defaultdict(lambda: defaultdict(lambda: defaultdict(Decimal))),
         'footer': {
-            'por_linea': defaultdict(float),
-            'general': 0,
-            'clientes': defaultdict(lambda: defaultdict(float))
+            'por_linea': defaultdict(Decimal),
+            'general': Decimal(0),
+            'clientes': defaultdict(lambda: defaultdict(Decimal))
         }
     }
 
@@ -61,7 +62,7 @@ def organizar_datos(facturas, lineas, clientes):
         mes = f['Mes']
         linea_id = f['LineaId']
         cliente_id = f['ClienteId']
-        total = f['total'] or 0
+        total = f['total'] or Decimal(0)
 
         # Acumular por mes y línea
         totales['por_linea'][mes][linea_id] += total
