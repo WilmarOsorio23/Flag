@@ -2,235 +2,274 @@
 {% load static %}
 {% load custom_filters %}
 
-{% block titulo %} Inf Fact CeCo Clientes {% endblock %}
+{% block titulo %} Inf Fact CeCo {% endblock %}
 
 {% block contenido %}
 <div class="card">
     <div class="card-header">
-        <h4 class="card-title">Inf Fact CeCo Clientes</h4>
+        <h4 class="card-title">Inf Fact CeCo </h4>
     </div>
+    
     <div class="card-body">
-        <div class="container-fluid mb-3">
-            <!-- Formulario principal -->
-            <form method="GET">
-                <div class="row mb-3">
-                    <!-- Filtro Año --> 
-                    <div class="col-md-3">
-                        <label for="{{ form.Anio.id_for_label }}" class="form-label">{{ form.Anio.label }}</label>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="dropdownAnio" data-bs-toggle="dropdown" aria-expanded="false" data-selected-text="Seleccionar Año">
-                                Seleccionar Año
-                            </button>
-                            <ul class="dropdown-menu w-100">
-                                {% for value, label in form.Anio.field.choices %}
-                                    <li><a class="dropdown-item anio-option" data-value="{{ value }}">{{ label }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        <input type="hidden" name="{{ form.Anio.html_name }}" id="selectedAnio">
-                    </div>
+                <div class="container-fluid mb-3">
+                    <!-- Formulario principal -->
+                    <form method="GET">
+                        <div class="row mb-3">
+                            <!-- Filtro Año --> 
+                            <div class="col-md-3">
+                                <label for="{{ form.Anio.id_for_label }}" class="form-label">{{ form.Anio.label }}</label>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="dropdownAnio" data-bs-toggle="dropdown" aria-expanded="false" data-selected-text="Seleccionar Año">
+                                        Seleccionar Año
+                                    </button>
+                                    <ul class="dropdown-menu w-100">
+                                        {% for value, label in form.Anio.field.choices %}
+                                            <li><a class="dropdown-item anio-option" data-value="{{ value }}">{{ label }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <input type="hidden" name="{{ form.Anio.html_name }}" id="selectedAnio">
+                            </div>
 
-                    <!-- Filtro Línea -->
-                    <div class="col-md-3">
-                        <label for="linea" class="form-label">{{ form.LineaId.label }}</label>
-                        <div class="dropdown">
-                            <button
-                                class="btn btn-outline-primary dropdown-toggle w-100"
-                                type="button"
-                                id="dropdownLinea"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                                data-selected-text="Seleccione Líneas"
-                            >
-                                Seleccione Líneas
-                            </button>
-                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
-                                {% for checkbox in form.LineaId %}
-                                    <li class="dropdown-item p-0">
-                                       <label style="cursor: pointer; display: block; width: 100%; padding: 0.5rem 1rem; margin: 0;">
-                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
-                                      </label>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
+                            <!-- Filtro Línea -->
+                            <div class="col-md-3">
+                                <label for="linea" class="form-label">{{ form.LineaId.label }}</label>
+                                <div class="dropdown">
+                                    <button
+                                        class="btn btn-outline-primary dropdown-toggle w-100"
+                                        type="button"
+                                        id="dropdownLinea"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                        data-selected-text="Seleccione Líneas"
+                                    >
+                                        Seleccione Líneas
+                                    </button>
+                                    <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
+                                        {% for checkbox in form.LineaId %}
+                                            <li class="dropdown-item p-0">
+                                               <label style="cursor: pointer; display: block; width: 100%; padding: 0.5rem 1rem; margin: 0;">
+                                                {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                              </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
 
-                    <!-- Filtro Mes -->
-                    <div class="col-md-3">
-                        <label for="mes" class="form-label">{{ form.Mes.label }}</label>
-                        <div class="dropdown">
-                            <button
-                                class="btn btn-outline-primary dropdown-toggle w-100"
-                                type="button"
-                                id="dropdownMes"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                                data-selected-text="Seleccione Mes"
-                            >
-                                Seleccione Mes
-                            </button>
-                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownMes">
-                                {% for checkbox in form.Mes %}
-                                    <li class="dropdown-item p-0">
-                                        <label style="cursor: pointer; display: block; width: 100%; padding: 0.5rem 1rem; margin: 0;">
-                                          {{ checkbox.tag }} {{ checkbox.choice_label }}
-                                       </label>                                    
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
+                            <!-- Filtro Mes -->
+                            <div class="col-md-3">
+                                <label for="mes" class="form-label">{{ form.Mes.label }}</label>
+                                <div class="dropdown">
+                                    <button
+                                        class="btn btn-outline-primary dropdown-toggle w-100"
+                                        type="button"
+                                        id="dropdownMes"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                        data-selected-text="Seleccione Mes"
+                                    >
+                                        Seleccione Mes
+                                    </button>
+                                    <ul class="dropdown-menu w-100" aria-labelledby="dropdownMes">
+                                        {% for checkbox in form.Mes %}
+                                            <li class="dropdown-item p-0">
+                                                <label style="cursor: pointer; display: block; width: 100%; padding: 0.5rem 1rem; margin: 0;">
+                                                  {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                               </label>                                    
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
 
-                    <!-- Filtro Consultor -->
-                    <div class="col-md-3">
-                        <label for="Ceco" class="form-label">{{ form.Ceco.label }}</label>
-                        <div class="dropdown">
-                            <button
-                                class="btn btn-outline-primary dropdown-toggle w-100"
-                                type="button"
-                                id="dropdownCeco"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                                data-selected-text="Seleccione Ceco"
-                            >
-                                Seleccione Ceco
-                            </button>
-                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownCeco">
-                                {% for checkbox in form.Ceco %}
-                                    <li class="dropdown-item p-0">
-                                       <label style="cursor: pointer; display: block; width: 100%; padding: 0.5rem 1rem; margin: 0;">
-                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
-                                      </label>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
+                            <!-- Filtro ceco -->
+                            <div class="col-md-3">
+                                <label for="Ceco" class="form-label">{{ form.Ceco.label }}</label>
+                                <div class="dropdown">
+                                    <button
+                                        class="btn btn-outline-primary dropdown-toggle w-100"
+                                        type="button"
+                                        id="dropdownCeco"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                        data-selected-text="Seleccione Ceco"
+                                    >
+                                        Seleccione Ceco
+                                    </button>
+                                    <ul class="dropdown-menu w-100" aria-labelledby="dropdownCeco">
+                                        {% for checkbox in form.Ceco %}
+                                            <li class="dropdown-item p-0">
+                                               <label style="cursor: pointer; display: block; width: 100%; padding: 0.5rem 1rem; margin: 0;">
+                                                {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                              </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
 
-                    <!-- Botón Buscar -->
-                    <div class="col-md-3 text-start">
-                        <button type="submit" name="buscar" class="btn btn-primary mt-3">
-                            <i class="fas fa-search"></i> Buscar
-                        </button>
-                    </div>
-                </div>   
-            </form>
-        </div>
-    </div>
-    <!-- Tabla de resultados -->
-<div class="table-responsive">
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th rowspan="2">Centro de Costos</th>
-                <th rowspan="2">Descripción</th>
-                <th rowspan="2">Línea</th>
-                <th rowspan="2">Módulo</th>
-                {% for mes_num, mes_nombre in meses %}
-                    <th class="text-center">{{ mes_nombre }}</th>
-                {% endfor %}
-                <th class="text-center">Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for ceco, descripciones in datos.items %}
-                {% with ceco_filas=0 %}
-                    {% for descripcion, lineas in descripciones.items %}
-                        {% for linea, modulos in lineas.items %}
-                            {% with ceco_filas=ceco_filas|add:modulos.items|length %}
-                            {% endwith %}
-                        {% endfor %}
-                    {% endfor %}
-                {% endwith %}
+                            <!-- Botón Buscar -->
+                            <div class="col-md-3 text-start">
+                                <button type="submit" name="buscar" class="btn btn-primary mt-3">
+                                    <i class="fas fa-search"></i> Buscar
+                                </button>
+                            </div>
+                        </div>   
+                    </form>
+                </div>
+                
+                <!-- Botón de Descargar Excel -->
+            <div class="d-flex flex-column gap-3"> 
+                <div class="row">
+                    <div class="col-md-12">
+                        <form method="GET" action="{% url 'descargar_reporte_excel_facturacion_clientes' %}">
+                            <input type="hidden" name="Anio" value="{{ form.Anio.value }}">
 
-                {% with ceco_imprimido=False %}
-                    {% for descripcion, lineas in descripciones.items %}
-                        {% with descripcion_filas=0 %}
-                            {% for linea, modulos in lineas.items %}
-                                {% with descripcion_filas=descripcion_filas|add:modulos.items|length %}
-                                {% endwith %}
+                            {% for linea in form.LineaId.value %}
+                                <input type="hidden" name="LineaId" value="{{ linea }}">
                             {% endfor %}
-                        {% endwith %}
 
-                        {% with descripcion_imprimida=False %}
-                            {% for linea, modulos in lineas.items %}
-                                {% with linea_filas=modulos.items|length %}
-                                    {% for modulo, meses_data in modulos.items %}
-                                        <tr>
-                                            {% if not ceco_imprimido %}
-                                                <td rowspan="{{ ceco_filas }}">{{ ceco }}</td>
-                                                {% with ceco_imprimido=True %}{% endwith %}
-                                            {% endif %}
+                            {% for mes in form.Mes.value %}
+                                <input type="hidden" name="Mes" value="{{ mes }}">
+                            {% endfor %}
 
-                                            {% if not descripcion_imprimida %}
-                                                <td rowspan="{{ descripcion_filas }}">{{ descripcion }}</td>
-                                                {% with descripcion_imprimida=True %}{% endwith %}
-                                            {% endif %}
-
-                                            {% if forloop.first %}
-                                                <td rowspan="{{ linea_filas }}">{{ linea }}</td>
-                                            {% endif %}
-
-                                            <td>{{ modulo }}</td>
-
+                            <button type="submit" class="btn btn-success mt-3">
+                                <i class="fas fa-file-excel"></i> Descargar Excel
+                            </button>
+                        </form>
+                    </div>
+                </div> 
+        <!-- Pestañas -->
+        <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active w-100" id="datos-tab" data-bs-toggle="tab" data-bs-target="#datos" type="button" role="tab" aria-controls="datos" aria-selected="true">
+                    Datos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link w-100" id="graficos-tab" data-bs-toggle="tab" data-bs-target="#graficos" type="button" role="tab" aria-controls="graficos" aria-selected="false">
+                    Gráficos
+                </button>
+            </li>
+        </ul>
+                <div class="tab-content" id="myTabContent">
+            <!-- Pestaña de Datos -->
+            <div class="tab-pane fade show active" id="datos" role="tabpanel" aria-labelledby="datos-tab">                
+                <!-- Tabla de datos -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Centro de Costos</th>
+                                <th class="text-center">Descripción</th>
+                                <th class="text-center">Línea</th>
+                                <th class="text-center">Módulo</th>
+                                {% for mes_num, mes_nombre in meses %}
+                                    <th class="text-center">{{ mes_nombre }}</th>
+                                {% endfor %}
+                                <th class="text-center">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ceco, descripciones in datos.items %}
+                                {% for descripcion, lineas in descripciones.items %}
+                                    {% for linea, modulos in lineas.items %}
+                                        {% with row_count=modulos.items|length %}
+                                        {% for modulo, meses_data in modulos.items %}
+                                            <tr>
+                                                {% if forloop.first %}
+                                                    <!-- Centro de Costos (rowspan) -->
+                                                    <td class="text-center align-middle" rowspan="{{ row_count }}">
+                                                        {{ ceco }}
+                                                    </td>
+                                                    
+                                                    <!-- Descripción (rowspan) -->
+                                                    <td class="text-center align-middle" rowspan="{{ row_count }}">
+                                                        {{ descripcion }}
+                                                    </td>
+                                                    
+                                                    <!-- Línea (rowspan) -->
+                                                    <td class="text-center align-middle" rowspan="{{ row_count }}">
+                                                        {{ linea|default_if_none:"" }}
+                                                    </td>
+                                                {% endif %}
+                                                
+                                                <!-- Módulo -->
+                                                <td class="text-center">{{ modulo }}</td>
+                                                
+                                                <!-- Datos por mes -->
+                                                {% for mes_num, mes_nombre in meses %}
+                                                    <td class="text-center text-nowrap">
+                                                        {{ meses_data|get_item:mes_num|get_item:'total_valor'|default:0|floatformat:2 }}
+                                                    </td>
+                                                {% endfor %}
+                                                
+                                                <!-- Total por módulo -->
+                                                <td class="text-center text-nowrap fw-bold">
+                                                    {% if "Total" in modulo %}
+                                                        {{ totales_por_ceco_linea|get_item:ceco|get_item:linea|default:0|floatformat:2 }}
+                                                    {% else %}
+                                                        {{ totales_por_ceco_linea_modulo|get_item:ceco|get_item:linea|get_item:modulo|default:0|floatformat:2 }}
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        
+                                        <!-- Fila de total por línea -->
+                                        <tr class="table-info">
+                                            <td colspan="4" class="text-center fw-bold">Total {{ linea }}</td>
                                             {% for mes_num, mes_nombre in meses %}
-                                                <td>{{ meses_data|get_item_safe:mes_num|get_item_safe:'total_valor'|floatformat:2|default:"0.00" }}</td>
+                                                <td class="text-center text-nowrap fw-bold">
+                                                    {{ totales_por_ceco_linea_mes|get_item:ceco|get_item:linea|get_item:mes_num|default:0|floatformat:2 }}
+                                                </td>
                                             {% endfor %}
-
-                                            <td class="fw-bold">
-                                                {{ totales_por_ceco_linea_modulo|get_item_safe:ceco|get_item_safe:linea|get_item_safe:modulo|get_item_safe:'total_valor'|floatformat:2|default:"0.00" }}
+                                            <td class="text-center text-nowrap fw-bold">
+                                                {{ totales_por_ceco_linea|get_item:ceco|get_item:linea|default:0|floatformat:2 }}
                                             </td>
                                         </tr>
+                                        {% endwith %}
                                     {% endfor %}
-                                {% endwith %}
-
-                                <!-- Totales por línea -->
-                                <tr class="table-info">
-                                    <td colspan="3" class="text-end fw-bold">Total {{ linea }}</td>
-                                    <td></td>
-                                    {% for mes_num, mes_nombre in meses %}
-                                        <td class="fw-bold">
-                                            {{ totales_por_ceco_linea|get_item_safe:ceco|get_item_safe:linea|get_item_safe:mes_num|get_item_safe:'total_valor'|floatformat:2|default:"0.00" }}
-                                        </td>
-                                    {% endfor %}
-                                    <td class="fw-bold">
-                                        {{ totales_por_ceco_linea|get_item_safe:ceco|get_item_safe:linea|get_item_safe:'total_valor'|floatformat:2|default:"0.00" }}
-                                    </td>
-                                </tr>
+                                {% endfor %}
                             {% endfor %}
-                        {% endwith %}
-                    {% endfor %}
-                {% endwith %}
-
-                <!-- Totales por Ceco -->
-                <tr class="table-warning">
-                    <td colspan="3" class="text-end fw-bold">Total {{ ceco }}</td>
-                    <td></td>
-                    {% for mes_num, mes_nombre in meses %}
-                        <td class="fw-bold">
-                            {{ totales_por_ceco|get_item_safe:ceco|get_item_safe:mes_num|get_item_safe:'total_valor'|floatformat:2|default:"0.00" }}
-                        </td>
-                    {% endfor %}
-                    <td class="fw-bold">
-                        {{ totales_por_ceco|get_item_safe:ceco|get_item_safe:'total_valor'|floatformat:2|default:"0.00" }}
-                    </td>
-                </tr>
-            {% endfor %}
-
-            <!-- Totales globales -->
-            <tr class="table-secondary fw-bold">
-                <td colspan="4">Total General</td>
-                {% for mes_num, mes_nombre in meses %}
-                    <td>{{ totales_por_mes|get_item_safe:mes_num|get_item_safe:'total_valor'|floatformat:2|default:"0.00" }}</td>
-                {% endfor %}
-                <td>{{ total_global.total_valor|floatformat:2|default:"0.00" }}</td>
-            </tr>
-        </tbody>
-    </table>
+                            
+                            <!-- Fila de total global -->
+                            <tr class="table-success">
+                                <td colspan="4" class="text-center fw-bold">TOTAL GENERAL</td>
+                                {% for mes_num, mes_nombre in meses %}
+                                    <td class="text-center text-nowrap fw-bold">
+                                        {{ totales_por_mes|get_item:mes_num|default:0|floatformat:2 }}
+                                    </td>
+                                {% endfor %}
+                                <td class="text-center text-nowrap fw-bold">
+                                    {{ total_global|default:0|floatformat:2 }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Pestaña de Gráficos -->
+<div class="tab-pane fade p-3" id="graficos" role="tabpanel">
+    <div class="row">
+        {% for grafico in graficos %}
+        <div class="col-12 mb-4">  <!-- Cambiado de col-md-6 a col-12 -->
+            <div class="card">
+                <div class="card-header text-white py-2 
+                    {% if grafico.tipo == 'cecos' %}bg-primary{% else %}bg-success{% endif %}">
+                    {{ grafico.nombre }}
+                </div>
+                <div class="card-body" style="height: 500px; position: relative;">
+                    <canvas id="grafico-{{ grafico.tipo }}"></canvas>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
-</div>
-
-<script src="{% static 'JS/informe_serv_consultor.js' %}"></script>
-
+<script src="{% static 'JS/informe_facturacion_clientes.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ graficos|json_script:"graficos-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 {% endblock %}
