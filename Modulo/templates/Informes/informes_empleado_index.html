@@ -193,6 +193,7 @@
         </div>
       </div>
 
+      <!-- Tabla con resultados filtrados -->
       {% if show_data %}
         <!-- Mostrar tabla de empleados -->
         <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
@@ -430,6 +431,7 @@
     </div>
   </div>
 
+  <!-- Carga dinámica de datos para los gráficos en JS -->
   {% block extra_js %}
     <!--
       Inserta los datos de etiquetas y valores para los gráficos

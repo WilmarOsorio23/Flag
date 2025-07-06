@@ -113,10 +113,10 @@ document.addEventListener('DOMContentLoaded', function() {
     addTooltips();
         
 
-//=============================
-//LÓGICA DE CARDS Y GRÁFICOS
-//=============================
-    // Línea
+  //=============================
+  //LÓGICA DE CARDS Y GRÁFICOS
+  //=============================
+  // Línea
   const cardLinea = document.getElementById('cardLinea');
   const modalLinea = new bootstrap.Modal(document.getElementById('graficoLineaModal'));
 
@@ -193,20 +193,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
 
     if (resetBtn && form) {
-        console.log('✔ Botón de reinicio y formulario encontrados');
 
         resetBtn.addEventListener('click', function () {
-        console.log('🔄 Botón de reinicio clickeado');
 
         const selects = form.querySelectorAll('select');
         selects.forEach(select => {
-            console.log(`↩ Reiniciando select: ${select.name}`);
             select.value = '';
         });
 
         const inputs = form.querySelectorAll('input');
         inputs.forEach(input => {
-            console.log(`↩ Limpiando input: ${input.name}`);
             input.value = '';
         });
         });

@@ -1,16 +1,33 @@
 # Informe de Certificación de Empleados
+
+# Librerías estándar y de terceros
 from datetime import datetime
-from PIL import ImageFont
+
+# Django
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+
+# Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Side, Font
+
+# Modelos y formularios del módulo
 from Modulo.forms import EmpleadoFilterForm
 from Modulo.models import Certificacion, Detalle_Certificacion, Empleado
-from django.views.decorators.csrf import csrf_exempt
+
+# Utilidad para conteo de elementos
 from collections import Counter
 
 def filtrar_empleado(form, empleados, certificaciones, detalles):
+    """
+    Aplica los filtros del formulario a los conjuntos de empleados y certificaciones.
+    - Filtra por nombre de empleado (como texto parcial).
+    - Filtra por línea (ID).
+    - Filtra por certificación (ID).
+    Devuelve los empleados con certificaciones asociadas según los filtros.
+    """
+
     linea = form.cleaned_data.get('LineaId')
     certificacion = form.cleaned_data.get('Certificacion')
     nombre = form.cleaned_data.get('Nombre')
@@ -29,6 +46,10 @@ def filtrar_empleado(form, empleados, certificaciones, detalles):
     return empleados_con_certificacion, certificaciones, detalles
 
 def obtener_informe_certificacion(certificaciones, empleados, detalles):
+    """
+    Une información entre empleados y detalles de certificaciones.
+    Devuelve una lista de diccionarios con los datos organizados para visualización.
+    """
     certificaciones_info = []
     detalles = detalles.select_related('Documento', 'CertificacionId')
     empleados_dict = {empleado.Documento: empleado for empleado in empleados}
@@ -50,6 +71,11 @@ def obtener_informe_certificacion(certificaciones, empleados, detalles):
     return certificaciones_info
 
 def empleado_filtrado(request):
+    """
+    Vista que construye el informe HTML con filtros, tabla de datos y resumenes (cards).
+    - Usa GET para aplicar filtros.
+    - Genera contexto con lista filtrada y datos agregados.
+    """
     empleados = Empleado.objects.all()
     certificaciones = Certificacion.objects.all()
     detalles = Detalle_Certificacion.objects.all()
@@ -69,16 +95,10 @@ def empleado_filtrado(request):
     else:
         form = EmpleadoFilterForm()
 
-    #Aplicar lógica para cards
-    
-    # Total de Certificaciones
+    #Cálculo de Cards
     total_certificaciones = len(certificaciones_info)
-
-    # Conteo por Módulo
     modulos = [cert['Modulo'] for cert in certificaciones_info if cert['Modulo']]
     conteo_modulos = dict(Counter(modulos))
-
-    # Conteo por Línea
     lineas = [cert['Linea'] for cert in certificaciones_info if cert['Linea']]
     conteo_lineas = dict(Counter(lineas))
 
@@ -102,32 +122,19 @@ def empleado_filtrado(request):
 @csrf_exempt
 def exportar_certificaciones_excel(request):
     """
-    Exporta el informe de certificaciones en formato Excel.
+    Exporta los datos filtrados a un archivo Excel.
+    - Aplica filtros mediante el mismo formulario.
+    - Reutiliza la lógica del informe.
+    - Formatea y decora el archivo generado con OpenPyXL.
     """
-    print('LLEGO AQUÍ')
     certificaciones_info = []  
     
 
     if request.method == 'GET':
-        print('LLEGO AQUI 2')
         form = EmpleadoFilterForm(request.GET)
-        print('LLEGO AQUÍ 3')
-        
         if form.is_valid():
             certificaciones = Certificacion.objects.all()
             empleados = Empleado.objects.all()
-            detalles = Detalle_Certificacion.objects.all()
-
-            print('LLEGO AQUÍ', empleados)
-            print('LLEGO AQUI 2',certificaciones)
-            print('LLEGO AQUI 3', detalles)
-            # Aplicar filtros
-            #certificaciones = filtrar_empleado(form, certificaciones)
-            #empleados = filtrar_empleado(form, empleados)
-            #detalles = filtrar_empleado(form, detalles)
-
-            empleados = Empleado.objects.all()
-            certificaciones = Certificacion.objects.all()
             detalles = Detalle_Certificacion.objects.all()
 
             empleados, certificaciones, detalles = filtrar_empleado(form, empleados, certificaciones, detalles)
@@ -139,7 +146,7 @@ def exportar_certificaciones_excel(request):
         if not form.is_valid():
             return HttpResponse("Filtros no válidos. Por favor, revisa los criterios ingresados.", status=400)
 
-    # Preparar los datos en formato de lista de diccionarios
+    # Prepara datos para exportación
     data = []
     for cert in certificaciones_info:
         fila = {
@@ -172,7 +179,7 @@ def exportar_certificaciones_excel(request):
             cell = ws.cell(row=r_idx, column=c_idx, value=value)
             cell.alignment = Alignment(horizontal='center')
 
-    # Ajustar el ancho de las columnas
+    # Ancho automático y bordes
     for column in ws.columns:
         max_length = 0
         column = [cell for cell in column]
@@ -183,8 +190,6 @@ def exportar_certificaciones_excel(request):
             except:
                 pass
         ws.column_dimensions[column[0].column_letter].width = max_length + 2
-
-    # Agregar bordes
     thin_border = Border(left=Side(style='thin'), right=Side(style='thin'),
                          top=Side(style='thin'), bottom=Side(style='thin'))
 
@@ -192,12 +197,10 @@ def exportar_certificaciones_excel(request):
         for cell in row:
             cell.border = thin_border
 
-    # Crear respuesta para descarga
+    # Generar archivo para descarga
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     filename = f"certificaciones_reporte_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
-
-    # Guardar el archivo en la respuesta
     wb.save(response)
 
     return response

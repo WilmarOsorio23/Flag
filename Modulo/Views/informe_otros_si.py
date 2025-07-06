@@ -1,15 +1,33 @@
-from django.shortcuts import render
+#Informe Contratos Otros Si
+
+# Librerías estándar y de terceros
 from collections import defaultdict
+from datetime import datetime
+
+# Django
 from django.http import HttpResponse
+from django.shortcuts import render
+from django.http import JsonResponse
+
+# Formularios y modelos del módulo
 from Modulo.forms import OtrosSiFilterForm
 from Modulo.models import Clientes, ContratosOtrosSi, ClientesContratos
-from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, Border, Side
-from datetime import datetime
-from django.http import JsonResponse
 from Modulo.models import Clientes
 
+# Librerías para Excel
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side
+
 def get_cliente_id_by_nombre(request):
+    """
+    Vista auxiliar que devuelve el ID de un cliente dado su nombre.
+
+    Parámetros:
+        request (HttpRequest): La solicitud GET con el nombre del cliente.
+
+    Retorna:
+        JsonResponse: Contiene el ID del cliente si se encuentra, o un error 404 si no existe.
+    """
     nombre = request.GET.get('nombre')
     cliente = Clientes.objects.filter(Nombre_Cliente=nombre).first()
     if cliente:
@@ -18,6 +36,17 @@ def get_cliente_id_by_nombre(request):
 
 # Filtrar OtrosSí por cliente y fecha de inicio
 def filtrar_otros_si(form, clientes, otros_si):
+    """
+    Aplica filtros al queryset de clientes y contratos Otros Sí basados en los datos del formulario.
+
+    Parámetros:
+        form (OtrosSiFilterForm): Formulario con los datos de filtro.
+        clientes (QuerySet): QuerySet inicial de clientes.
+        otros_si (QuerySet): QuerySet inicial de contratos Otros Sí.
+
+    Retorna:
+        tuple: Tupla con los clientes y contratos Otros Sí filtrados.
+    """
     clientes = clientes.order_by('Nombre_Cliente')
     nombre = form.cleaned_data.get('Nombre_Cliente')
     fecha_inicio = form.cleaned_data.get('FechaInicio')
@@ -47,6 +76,16 @@ def filtrar_otros_si(form, clientes, otros_si):
 
 # Obtener información del informe
 def obtener_otros_si(clientes, otros_si):
+    """
+    Agrupa los contratos Otros Sí por cliente y estructura la información para la vista.
+
+    Parámetros:
+        clientes (QuerySet): Lista de clientes filtrados.
+        otros_si (QuerySet): Lista de contratos Otros Sí filtrados.
+
+    Retorna:
+        list: Lista de diccionarios con los datos del cliente y sus contratos Otros Sí.
+    """
     cliente_otros_si_info = []
     otros_si_por_cliente = defaultdict(list)
 
@@ -79,8 +118,16 @@ def obtener_otros_si(clientes, otros_si):
 
     return cliente_otros_si_info
 
-# Vista HTML
 def informe_otros_si(request):
+    """
+    Vista principal que renderiza el informe HTML de contratos Otros Sí.
+
+    Parámetros:
+        request (HttpRequest): Solicitud GET con los filtros.
+
+    Retorna:
+        HttpResponse: Renderiza el template con el contexto que incluye resultados, métricas y formularios.
+    """
     cliente_otros_si_info = []
     show_data = False
     busqueda_realizada = False
@@ -157,7 +204,7 @@ def informe_otros_si(request):
 
     total_monedas = total_usd + total_cop + total_mxn
     # Asegurar un mínimo de visibilidad visual
-    min_display_percentage = 10  # Puedes ajustarlo a 5 si prefieres barras más finas
+    min_display_percentage = 10 
 
     porcentaje_usd_display = porcentaje_usd if porcentaje_usd == 0 else max(porcentaje_usd, min_display_percentage)
     porcentaje_cop_display = porcentaje_cop if porcentaje_cop == 0 else max(porcentaje_cop, min_display_percentage)
@@ -203,6 +250,15 @@ def informe_otros_si(request):
 
 # Exportar a Excel
 def exportar_otros_si_excel(request):
+    """
+    Vista que genera un archivo Excel con los contratos Otros Sí filtrados.
+
+    Parámetros:
+        request (HttpRequest): Solicitud GET con los filtros.
+
+    Retorna:
+        HttpResponse: Respuesta HTTP con el archivo Excel generado para descarga.
+    """
     cliente_otros_si_info = []
 
     if request.method == 'GET':
@@ -218,7 +274,6 @@ def exportar_otros_si_excel(request):
             if not cliente_otros_si_info:
                 return HttpResponse("No se encontraron resultados para los filtros aplicados.")
         else:
-            print("Errores del formulario:", form.errors)
             return HttpResponse("No se encontraron resultados para los filtros aplicados.")
 
         data = []

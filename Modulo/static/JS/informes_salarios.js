@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return 1;
     }
 
-    // Manejar clics en encabezados con soporte para teclado
+    // Manejar clics en encabezados
     document.querySelectorAll('.sortable').forEach(header => {
         // Evento de clic
         header.addEventListener('click', function() {
@@ -164,20 +164,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
 
     if (resetBtn && form) {
-        console.log('✔ Botón de reinicio y formulario encontrados');
 
         resetBtn.addEventListener('click', function () {
-        console.log('🔄 Botón de reinicio clickeado');
 
         const selects = form.querySelectorAll('select');
         selects.forEach(select => {
-            console.log(`↩ Reiniciando select: ${select.name}`);
             select.value = '';
         });
 
         const inputs = form.querySelectorAll('input');
         inputs.forEach(input => {
-            console.log(`↩ Limpiando input: ${input.name}`);
             input.value = '';
         });
         });

@@ -110,6 +110,7 @@
             </div>
         </div>
 
+            <!-- Tabla con resultados filtrados -->
             {% if show_data %}
             <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
                 <table class="table table-bordered table-hover table-primary w-100" id="estudiosTable">
@@ -256,6 +257,7 @@
     </div>
   </div>
 
+  <!-- Carga dinámica de datos para los gráficos en JS -->
   {% block extra_js %}
     {{ lineas_labels|json_script:"labels-linea" }}
     {{ lineas_data|json_script:"values-linea" }}

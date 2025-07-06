@@ -1,14 +1,32 @@
-from django.shortcuts import render
+# Informe de Clientes
+
+# Librerías estándar y de terceros
+from datetime import datetime
 from collections import defaultdict, Counter
+
+# Django
+from django.shortcuts import render
 from django.http import HttpResponse
+
+# Formularios y modelos del módulo
 from Modulo.forms import ClienteFilterForm
 from Modulo.models import Clientes
+
+# Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
-from datetime import datetime
 
 # Función para filtrar clientes
 def filtrar_clientes(form, clientes):
+    """
+    Aplica los filtros del formulario a la consulta de clientes.
+    Filtra por:
+    - Nombre del cliente
+    - Estado (activo/inactivo)
+    - País, ciudad
+    - Tipo de cliente
+    - Nacional o internacional
+    """
     # Obtener los parámetros de búsqueda del request
     clientes = clientes.order_by('Nombre_Cliente')
     nombre = form.cleaned_data.get('Nombre_Cliente')
@@ -18,10 +36,8 @@ def filtrar_clientes(form, clientes):
     tipo_cliente = form.cleaned_data.get('TipoCliente')
     nacional = form.cleaned_data.get('Nacional')
 
-    # Filtrar los clientes según los parámetros
     if nombre:
         nombre = nombre.Nombre_Cliente
-        # Manejar tanto objetos Cliente como IDs
         if isinstance(nombre, str):
             try:
                 clientes = clientes.filter(Nombre_Cliente=nombre)
@@ -29,7 +45,6 @@ def filtrar_clientes(form, clientes):
                 pass
         else:
             clientes = clientes.filter(Nombre_Cliente=nombre)
-            print(nombre)
     if activo:
         clientes = clientes.filter(Activo=activo == 'True')
     if pais:
@@ -45,6 +60,9 @@ def filtrar_clientes(form, clientes):
 
 # Función para obtener información de los clientes
 def obtener_info_clientes(clientes):
+    """
+    Estructura y transforma los datos de clientes en formato de diccionario.
+    """
     clientes_info = []
     for cliente in clientes:
         datos_cliente = {
@@ -57,7 +75,6 @@ def obtener_info_clientes(clientes):
             'Direccion': cliente.Direccion,
             'Telefono': cliente.Telefono,
             'CorreoElectronico': cliente.CorreoElectronico,
-            #'ContactoID': cliente.ContactoID,
             'ContactoID': cliente.ContactoID.Nombre if cliente.ContactoID else '',
             'BuzonFacturacion': cliente.BuzonFacturacion,
             'TipoCliente': cliente.TipoCliente,
@@ -71,6 +88,10 @@ def obtener_info_clientes(clientes):
 
 # Vista para mostrar el informe de clientes
 def clientes_filtrado(request):
+    """
+    Vista para mostrar la lista de clientes filtrados.
+    Además de mostrar los datos, genera métricas para tarjetas y gráficos.
+    """
     clientes_info = []
     show_data = False  
     busqueda_realizada = False
@@ -89,7 +110,6 @@ def clientes_filtrado(request):
         form = ClienteFilterForm()
 
     #Aplicar lógica para cards
-    
     # Estadísticas de clientes
     total_clientes = len(clientes_info)
     clientes_activos = sum(1 for c in clientes_info if c['Activo'] == 'SI')
@@ -121,12 +141,14 @@ def clientes_filtrado(request):
         'conteo_paises': dict(conteo_paises),
         'clientes_nacionales': clientes_nacionales,
         'clientes_internacionales': clientes_internacionales,
+
         # Datos para gráficos de barras
         'labels_tipo_cliente': list(conteo_tipo_cliente.keys()),
         'values_tipo_cliente': list(conteo_tipo_cliente.values()),
 
         'labels_paises': list(conteo_paises.keys()),
         'values_paises': list(conteo_paises.values()),
+
         # Para etiquetas y datos de gráficos
         'labels_nacionalidad': ['Nacionales', 'Internacionales'],
         'values_nacionalidad': [clientes_nacionales, clientes_internacionales],
@@ -137,9 +159,12 @@ def clientes_filtrado(request):
 
     return render(request, 'informes/informes_clientes_index.html', context)
 
-
 # Vista para exportar el informe a Excel
 def exportar_clientes_excel(request):
+    """
+    Exporta a Excel los datos de clientes filtrados.
+    Aplica los mismos filtros de búsqueda y estructura el Excel con formato.
+    """
     clientes_info = []
 
     if request.method == 'GET':

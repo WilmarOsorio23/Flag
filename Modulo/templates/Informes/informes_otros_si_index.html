@@ -203,6 +203,7 @@
                 </div>
             </div>
         
+        <!-- Tabla con resultados filtrados -->
         {% if show_data %}
         <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
             <table class="table table-bordered table-hover table-primary w-100" id="otrosSiTable">
@@ -268,9 +269,7 @@
     </div>
 </div>
 
-<!-- ============================= -->
 <!-- MODAL DE GRÁFICO DE MONEDAS -->
-<!-- ============================= -->
 <div class="modal fade" id="graficoMonedasModal" tabindex="-1" aria-labelledby="graficoMonedasLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -290,9 +289,6 @@
     </div>
 </div>
 
-<!-- ============================= -->
-<!-- INYECCIÓN DE JAVASCRIPT      -->
-<!-- ============================= -->
 <script src="{% static 'JS/informes_otros_si.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

@@ -1,42 +1,49 @@
 {% extends 'base.html' %}
 {% load static %}
 
+<!-- Titulo de la pestaña en navegador -->
 {% block titulo %} Informe Certificados {% endblock %}
 
 {% block contenido %}
 <div class="card">
+    <!-- Encabezado principal -->
     <div class="card-header">
         <h4 class="card-title">Informe Certificados</h4>
     </div>
     <div class="card-body informes-table">
+        <!-- Filtro de búsqueda -->
         <div class="container-fluid mb-3">
-            <!-- Formulario de búsqueda -->
             <form method="GET" >
                 <div class="row mb-3">
+
+                    <!-- Campo Nombre -->
                     <div class="col-md-3">
                       <label for="Nombre">{{ form.Nombre.label }}</label>
                       {{ form.Nombre }}
                     </div>
+
+                    <!-- Campo Línea -->
                     <div class="col-md-3">
                       <label for="Linea">{{ form.LineaId.label }}</label>
                       {{ form.LineaId }}
                     </div>
                 </div>
-                 <!-- Botones en la parte inferior -->
+
+                <!-- Botones de acción: buscar y reiniciar -->
                 <div class="row">
                     <div class="col-md-6 text-start">
-                    <button type="submit" name="buscar" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
-                    <!-- Botón Reiniciar sin recargar -->
+                    <button type="submit" name="buscar" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
                     <button type="button" id="btn-reset-filtros" class="btn btn-secondary ms-2">
                         <i class="fas fa-redo"></i> Reiniciar
                     </button>
                     </div>
                 </div>
-                        
             </form>
         </div>
         
-        <!-- Apartado para cards -->
+        <!-- Sección destinada a CARDS -->
         {% if busqueda_realizada %}
         <div class="mt-4 mb-3">
             <div class="d-flex flex-row flex-nowrap overflow-auto gap-2">
@@ -76,7 +83,7 @@
         </div>
         {% endif %}
 
-        <!-- Botón de Descargar Excel -->
+        <!-- Botón para descargar Excel con filtros aplicados -->
         <div class="row">
             <div class="col-md-6 text-end offset-md-6">
               <form id="download-form" method="GET" action="{% url 'exportar_certificaciones_excel' %}">
@@ -90,10 +97,8 @@
             </div>
         </div>
     
-
-        <!-- Resultados -->
+        <!-- Tabla con resultados filtrados -->
         {% if show_data %}
-        <!-- Tabla para mostrar los resultados -->
         <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
             <table class="table table-bordered table-hover table-primary w-100"  id="nominaTable">
                 <thead>
@@ -180,6 +185,7 @@
             </table>
         </div>
         {% else %}
+        <!-- Mensaje si aún no se ha hecho búsqueda o no hay datos -->
                 <div class="alert alert-warning" role="alert">
                     {% if not busqueda_realizada %}
                         No se ha realizado ninguna búsqueda aún.
@@ -192,7 +198,7 @@
 </div>
 
 
-<!-- Modal Gráfico por Módulo -->
+<!-- Sección de modales con gráficos -->
 <div class="modal fade" id="graficoModuloModal" tabindex="-1" aria-labelledby="graficoModuloLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
@@ -222,16 +228,14 @@
     </div>
   </div>
 
+  <!-- Carga dinámica de datos para los gráficos en JS -->
   {% block extra_js %}
     {{ modulos_labels|json_script:"labels-modulo" }}
     {{ modulos_data|json_script:"values-modulo" }}
     {{ lineas_labels|json_script:"labels-linea" }}
     {{ lineas_data|json_script:"values-linea" }}
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{% static 'JS/informes_certificaciones.js' %}"></script>
-    
   {% endblock %}
-
 
 {% endblock %}

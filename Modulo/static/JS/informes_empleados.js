@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function () {
   //=============================
   // LÓGICA DE CARDS Y GRÁFICOS
   //=============================
-
   // Lógica para gráfico Activos/Inactivos (tipo doughnut)
   const cardAI = document.getElementById('cardActivosInactivos');
   const modalAIElement = document.getElementById('graficoActivosInactivosModal');
@@ -211,20 +210,16 @@ document.addEventListener('DOMContentLoaded', function () {
   const form = document.querySelector('form');
 
   if (resetBtn && form) {
-    console.log('✔ Botón de reinicio y formulario encontrados');
 
     resetBtn.addEventListener('click', function () {
-      console.log('🔄 Botón de reinicio clickeado');
 
       const selects = form.querySelectorAll('select');
       selects.forEach(select => {
-        console.log(`↩ Reiniciando select: ${select.name}`);
         select.value = '';
       });
 
       const inputs = form.querySelectorAll('input');
       inputs.forEach(input => {
-        console.log(`↩ Limpiando input: ${input.name}`);
         input.value = '';
       });
     });

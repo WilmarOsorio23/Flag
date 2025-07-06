@@ -60,8 +60,6 @@
                         {% for anio in form.anio.value %}
                             <input type="hidden" name="anio" value="{{ anio }}">
                         {% endfor %}
-                        <!--<input type="hidden" name="anio" value="{{ form.anio.value|join:',' }}">-->
-                        <!--<input type="hidden" name="anio" value="{{ form.anio.value }}">-->
                         <button type="submit" class="btn btn-success mt-3">
                             <i class="fas fa-file-excel"></i> Descargar Excel
                         </button>

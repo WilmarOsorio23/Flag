@@ -1,22 +1,29 @@
-from django.shortcuts import render
+# Informe de Empleados
+
+# Librerías estándar y utilitarias
 from datetime import date, datetime
 from collections import defaultdict,Counter
-from Modulo.forms import EmpleadoFilterForm
-from Modulo.models import Empleado, Nomina
+
+# Django
 from django.http import HttpResponse
 from django.db.models import Q
-import pandas as pd
+from django.shortcuts import render
+
+# Formularios y modelos del módulo
+from Modulo.forms import EmpleadoFilterForm
+from Modulo.models import Empleado, Nomina
+
+# Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 
-# Función para filtrar empleados y nóminas
 def filtrar_empleados(form, empleados):
     """
-    Aplica filtros a un QuerySet de empleados basado en los datos del formulario.
-
-    :param form: Instancia de EmpleadoFilterForm con datos validados.
-    :param empleados: QuerySet de empleados.
-    :return: QuerySet filtrado.
+    Aplica los filtros del formulario sobre el queryset de empleados:
+    - Nombre exacto
+    - Línea, Cargo, Perfil
+    - Certificado SAP (valor booleano)
+    - Estado Activo (True/False)
     """
     nombre = form.cleaned_data.get('Nombre')
     linea = form.cleaned_data.get('LineaId')
@@ -33,23 +40,19 @@ def filtrar_empleados(form, empleados):
         empleados = empleados.filter(CargoId=cargo)
     if certificaciones:
         empleados = empleados.filter(CertificadoSAP=bool(int(certificaciones)))
-        print('Aqui', certificaciones)
     if perfil:
         empleados = empleados.filter(PerfilId=perfil)
     if activo:
         empleados = empleados.filter(Activo=activo == 'True')
     return empleados
 
-# Función para obtener la información del informe
 def obtener_informe_empleados(empleados):
     """
-    Genera el informe de empleados basado en un queryset dado.
-
-    :param queryset: QuerySet filtrado de empleados.
-    :return: Lista de diccionarios con los datos del informe.
+    Recorre el queryset de empleados y construye una lista de diccionarios
+    con los datos a mostrar y exportar. Incluye datos personales, académicos
+    y de certificación.
     """
     empleado_info = []
-
 
     for empleado in empleados: 
         datos_empleado = {
@@ -87,7 +90,10 @@ def obtener_informe_empleados(empleados):
 # Vista del informe de empleados
 def informe_empleados(request):
     """
-    Vista para generar el informe de empleados con filtros opcionales.
+    Vista que construye el informe de empleados:
+    - Aplica filtros si se recibe GET con parámetros.
+    - Genera estructura de datos para tabla y cards.
+    - Prepara diccionarios para gráficos por línea, módulo, perfil, etc.
     """
     empleados_info = []
     empleados = Empleado.objects.none()
@@ -134,12 +140,11 @@ def informe_empleados(request):
     otras_certificaciones_por_linea = defaultdict(int)
     postgrados_por_linea = defaultdict(int)
 
-    # Agrupar por módulo, perfil y línea
+    # Agrupaciones para gráficos
     modulos_data = Counter([e['Modulo'] for e in empleados_info])
     perfiles_data = Counter([e['Perfil'] for e in empleados_info])
     lineas_data = Counter([e['Linea'] for e in empleados_info])
 
-    # Agrupar por línea
     for e in empleados_info:
         linea = e['Linea']
         if e['CertificadoSAP'] == 'SI':
@@ -150,20 +155,19 @@ def informe_empleados(request):
             postgrados_por_linea[linea] += 1
 
     context.update({
+
+        # Cards
         'total_empleados': total_empleados,
         'activos': activos,
         'empleados_totales': empleados_totales,
         'empleados_activos': empleados_activos,
         'empleados_inactivos': empleados_inactivos,
 
-        # Diccionarios originales (para mostrar en cards)
+        # Diccionarios para gráficas
         'certificados_sap_por_linea': dict(certificados_sap_por_linea),
         'otras_certificaciones_por_linea': dict(otras_certificaciones_por_linea),
         'postgrados_por_linea': dict(postgrados_por_linea),
 
-        # Datos para los gráficos en JS
-        #'certificados_sap_labels': [k for k in certificados_sap_por_linea.keys()],
-        #'certificados_sap_data': [v for v in certificados_sap_por_linea.values()],
         'certificados_sap_labels': list(certificados_sap_por_linea.keys()),
         'certificados_sap_data': list(certificados_sap_por_linea.values()),
 
@@ -191,11 +195,14 @@ def informe_empleados(request):
 
 # Funcionalidad para descargar el informe de empleados en Excel
 def exportar_empleados_excel(request):
-    # Recuperar los mismos datos de filtrado
-    meses = "Enero Febrero Marzo Abril Mayo Junio Julio Agosto Septiembre Octubre Noviembre Diciembre".split()
+    """
+    Genera un archivo Excel con los datos del informe de empleados:
+    - Aplica los mismos filtros del formulario.
+    - Formatea y ajusta el archivo usando openpyxl.
+    - Devuelve un archivo descargable con timestamp.
+    """
     empleado_info = []  
     
-    # Reutilizar la lógica de filtrado de tu vista actual
     if request.method == 'GET':
         form = EmpleadoFilterForm(request.GET)
 
@@ -215,27 +222,22 @@ def exportar_empleados_excel(request):
         if not form.is_valid(): 
             return HttpResponse("Filtros no válidos. Por favor, revisa los criterios ingresados.", status=400)
 
-    # Preparar datos para Excel
+    # Preparar datos para exportación
     data = []
     for empleado in empleado_info:
         fila = {
             'Línea': empleado['Linea'],
             'Documento Colaborador': empleado['Documento'],
             'Nombre Colaborador': empleado['Nombre'],
-            #'Cargo': empleado['Cargo'],
             'Perfil': empleado['Perfil'],
             'Módulo': empleado['Modulo'],
             'Certificado SAP': empleado['CertificadoSAP'],
             'Fecha Ingreso': empleado['FechaIngreso'],
-            #'TipoDocumento': empleado['TipoDocumento.Nombre'], 
             'Documento': empleado['Documento'],
             'Nombre': empleado['Nombre'], 
             'FechaNacimiento': empleado['FechaNacimiento'], 
             'FechaIngreso': empleado['FechaIngreso'], 
             'FechaOperacion': empleado['FechaOperacion'],
-            #'Modulo': empleado['ModuloId.Modulo'], 
-            #'Perfil': empleado['PerfilId.Perfil'], 
-            #'Linea': empleado['LineaId.Linea'], 
             'TituloProfesional': empleado['TituloProfesional'], 
             'FechaGrado': empleado['FechaGrado'], 
             'Universidad': empleado['Universidad'],
@@ -245,7 +247,6 @@ def exportar_empleados_excel(request):
             'CertificadoSAP': empleado['CertificadoSAP'],
             'OtrasCertificaciones': empleado['OtrasCertificaciones'], 
             'Postgrados': empleado['Postgrados'], 
-            #'CargoId': empleado['CargoId.Cargo'], 
             'Activo': empleado['Activo'],
             'FechaRetiro': empleado['FechaRetiro'],
             'Direccion': empleado['Direccion'],
@@ -257,7 +258,7 @@ def exportar_empleados_excel(request):
         }
         data.append(fila)
 
-    # Crear un libro de trabajo y una hoja
+    # Crear y formatear archivo Excel
     wb = Workbook()
     ws = wb.active
     ws.title = "Informe de Empleados"

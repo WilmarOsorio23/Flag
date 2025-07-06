@@ -1,16 +1,30 @@
-from django.shortcuts import render
+# Informe de Estudios
+
+# Librerías estándar y de terceros
 from collections import defaultdict, Counter
 from datetime import datetime
+
+# Django
+from django.http import HttpResponse
+from django.shortcuts import render
+
+# Formularios y modelos del módulo
 from Modulo.forms import EstudiosFilterForm
 from Modulo.models import Empleado, Empleados_Estudios
-from django.http import HttpResponse
-import pandas as pd
+
+# Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 
-#HACE BIEN FILTRO
 # Función para filtrar Empleado y Empleados_Estudios
 def filtrar_empleados_y_estudios(form, empleados, empleados_estudios):
+    """
+    Aplica filtros del formulario sobre el queryset de empleados.
+    Filtros aplicados:
+    - Nombre 
+    - Línea
+    - Cargo
+    """
     empleados = empleados.order_by('Documento')
     nombre = form.cleaned_data.get('Nombre')
     linea = form.cleaned_data.get('LineaId')
@@ -28,9 +42,11 @@ def filtrar_empleados_y_estudios(form, empleados, empleados_estudios):
 
     return empleados, empleados_estudios
 
-#TRAE BIEN LA INFO
 # Función para calcular la información de estudio del empleado
 def obtener_empleado_estudio(empleados, estudios):
+    """
+    Agrupa los estudios de cada empleado en una lista de diccionarios
+    """
     empleado_estudio_info = []
     estudios_por_documento = defaultdict(list)
 
@@ -60,6 +76,10 @@ def obtener_empleado_estudio(empleados, estudios):
     return empleado_estudio_info
 
 def empleado_estudio_filtrado(request):
+    """
+    Vista principal del informe de estudios.
+    Permite aplicar filtros, calcular métricas y mostrar los resultados.
+    """
     empleado_estudio_info = []  
     show_data = False  
     busqueda_realizada = False
@@ -87,7 +107,7 @@ def empleado_estudio_filtrado(request):
         form = EstudiosFilterForm()
 
     #Aplicar lógica para cards
-    
+
     # Total de Estudios
     total_estudios = sum(len(e['estudios']) for e in empleado_estudio_info)
 
@@ -117,10 +137,12 @@ def empleado_estudio_filtrado(request):
     return render(request, 'informes/informes_estudios_index.html', context)
 
 def exportar_estudio_excel(request):
+    """
+    Exporta los datos filtrados de estudios de empleados a un archivo Excel.
+    """
     empleado_estudio_info = []
     
     if request.method == 'GET':
-        #form = EmpleadoFilterForm(request.GET)
         form = EstudiosFilterForm(request.GET)
 
         if form.is_valid():
@@ -136,12 +158,9 @@ def exportar_estudio_excel(request):
             
             if not empleado_estudio_info:
                 return HttpResponse("No se encontraron datos para exportar.")
-            
-            #if not form.is_valid():
-            #    return HttpResponse("Filtros no válidos,  revisa los criterios ingresados.", status=400)    
+              
         else: 
                 return HttpResponse("Filtros no válidos.", status=400)
-
 
         #Preparar datos para excel 
         data = []

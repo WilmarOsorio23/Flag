@@ -1,15 +1,27 @@
-from django.shortcuts import render
+# Informe de Tarifas de Consultores
+
+# Librerías estándar y de terceros
 from collections import defaultdict
-from django.http import HttpResponse
-from Modulo.forms import TarifaConsultorFilterForm
-from Modulo.models import Consultores, Tarifa_Consultores
-from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, Border, Side
 from datetime import datetime
 
-#Función para filtrar Tarifas de consultores
-#Filtros: Nombre Consultor, Linea, Cargo, Años(Checkbox)
+#Django
+from django.shortcuts import render
+from django.http import HttpResponse
+
+# Formularios y modelos del módulo
+from Modulo.forms import TarifaConsultorFilterForm
+from Modulo.models import Consultores, Tarifa_Consultores
+
+# Librerías para Excel
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side
+
 def filtrar_tarifas_consultores(form, consultores, consultores_tarifas):
+    """
+    Aplica filtros del formulario sobre consultores y tarifas.
+    - Filtra por nombre del consultor, línea y años.
+    Devuelve los consultores y tarifas que cumplen con los filtros.
+    """
     consultores = consultores.order_by('Nombre')
     nombre = form.cleaned_data.get('Nombre')
     linea = form.cleaned_data.get('LineaId')
@@ -27,8 +39,13 @@ def filtrar_tarifas_consultores(form, consultores, consultores_tarifas):
 
     return consultores, consultores_tarifas
 
-#Función para obtener información de las tarifas de consultores
 def obtener_tarifas_consultores(consultores, tarifas, anios):
+    """
+    Une información de consultores con sus tarifas registradas.
+    - Agrupa las tarifas por año.
+    - Ordena las tarifas por cliente.
+    Devuelve una lista de diccionarios con la información completa por consultor.
+    """
     consultor_tarifas_info = []
     tarifas_por_documento = defaultdict(list)
 
@@ -74,6 +91,12 @@ def obtener_tarifas_consultores(consultores, tarifas, anios):
         
 
 def tarifas_consultores_filtrado(request):
+    """
+    Vista que presenta el informe de tarifas de consultores.
+    - Aplica filtros GET desde el formulario.
+    - Crea contexto con datos filtrados y agrupados por año.
+    """
+
     consultor_tarifas_info = []
     show_data = False  
     busqueda_realizada = False
@@ -113,6 +136,11 @@ def tarifas_consultores_filtrado(request):
     return render(request, 'informes/informes_tarifas_consultores_index.html', context)
 
 def exportar_tarifas_consultores_excel(request):
+    """
+    Exporta a Excel la información filtrada de tarifas de consultores.
+    - Reutiliza los mismos filtros de la vista.
+    - Genera un archivo Excel con formato y datos por año y cliente.
+    """
     consultor_tarifas_info = []
 
     if request.method == 'GET':
@@ -136,7 +164,6 @@ def exportar_tarifas_consultores_excel(request):
                 return HttpResponse("No se encontraron resultados para los filtros aplicados.")
 
         else:
-                print("Errores del formulario:", form.errors)
                 return HttpResponse("No se encontraron resultados para los filtros aplicados.")
         
         # Preparar los datos para Excel
@@ -144,7 +171,6 @@ def exportar_tarifas_consultores_excel(request):
         for consultor in consultor_tarifas_info:
             for anio in anios:
                 for tarifa in consultor['tarifas'][anio]:
-                    # Aquí construyes las filas con la estructura correcta
                     data.append([
                         consultor['linea'],
                         consultor['documento'],
@@ -161,8 +187,7 @@ def exportar_tarifas_consultores_excel(request):
                         tarifa['moneda'],
                         tarifa['iva'],
                         tarifa['rteFte']
-                    ])
-        print("DATA:",data) 
+                    ]) 
         if data:
             # Crear un libro de trabajo y una hoja
             wb = Workbook()

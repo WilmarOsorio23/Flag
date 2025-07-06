@@ -1,16 +1,32 @@
-from django.shortcuts import render
+# Informe de Contratos de Clientes
+
+# Librerías estándar y de terceros
+from datetime import datetime
 from collections import defaultdict
+
+# Django
+from django.shortcuts import render
 from django.http import HttpResponse
+from django.db import models
+
+# Formularios y modelos del módulo
 from Modulo.forms import ClientesContratosFilterForm
 from Modulo.models import Clientes, ClientesContratos
+from Modulo.models import ContratosOtrosSi
+
+# Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
-from datetime import datetime
-from Modulo.models import ContratosOtrosSi
-from django.db import models
 
 #Función para filtrar Contratos de clientes
 def filtrar_clientes_contratos(form, clientes, clientes_contratos):
+    """
+    Aplica filtros del formulario sobre clientes y contratos.
+    - Filtra por nombre de cliente.
+    - Filtra por fecha de inicio del contrato.
+    - Filtra por contratos vigentes.
+    Devuelve los clientes con contratos que cumplen los filtros.
+    """
     clientes = clientes.order_by('Nombre_Cliente')
     nombre = form.cleaned_data.get('Nombre_Cliente')
     fecha_inicio = form.cleaned_data.get('FechaInicio')
@@ -31,9 +47,12 @@ def filtrar_clientes_contratos(form, clientes, clientes_contratos):
 
 #Función para obtener información de los contratos de clientes
 def obtener_clientes_contratos(clientes, contratos):
+    """
+    Combina la información de clientes con sus contratos asociados.
+    Devuelve una lista de diccionarios con toda la información necesaria para visualización o exportación.
+    """
     cliente_contratos_info = []
     contratos_por_cliente = defaultdict(list)
-
 
     # Organizar los contratos por ClienteId para optimizar consultas
     for contrato in contratos:
@@ -75,7 +94,7 @@ def obtener_clientes_contratos(clientes, contratos):
                 'monedaId': contrato.monedaId,
                 'otros_si_count': contrato_to_otros_si_count.get(contrato.Contrato, 0)
                 }
-                for contrato in contratos_cliente]  # Corrected variable name here
+                for contrato in contratos_cliente]  
         }
 
         cliente_contratos_info.append(datos_cliente)
@@ -84,6 +103,11 @@ def obtener_clientes_contratos(clientes, contratos):
 
 # Función para generar el informe de contratos de clientes
 def clientes_contratos_filtrado(request):
+    """
+    Vista que presenta el informe HTML de contratos de clientes.
+    - Aplica filtros GET desde el formulario.
+    - Crea contexto con datos filtrados y métricas agregadas.
+    """
     cliente_contratos_info = []
     show_data = False  
     busqueda_realizada = False
@@ -99,14 +123,9 @@ def clientes_contratos_filtrado(request):
                 clientes = Clientes.objects.only('Nombre_Cliente', 'ClienteId').filter(Activo=True)
                 contratos = ClientesContratos.objects.select_related('ClienteId', 'monedaId').all()
                 clientes, contratos = filtrar_clientes_contratos(form, clientes, contratos)
-                
-                print("Clientes filtrados:", clientes)
-                print("Contratos filtrados:", contratos)
 
                 # Obtener información de los contratos de los clientes
                 cliente_contratos_info = obtener_clientes_contratos(clientes, contratos)
-
-                print("Información de contratos de clientes:", cliente_contratos_info)
 
                 show_data = bool(cliente_contratos_info)  # Mostrar datos si hay resultados       
     else:
@@ -119,7 +138,6 @@ def clientes_contratos_filtrado(request):
         'busqueda_realizada': busqueda_realizada,
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
-
 
     total_contratos = 0
     contratos_por_vencer = 0
@@ -150,6 +168,11 @@ def clientes_contratos_filtrado(request):
 
 # Función para exportar el informe de contratos de clientes a Excel
 def exportar_clientes_contratos_excel(request):
+    """
+    Exporta a Excel la información filtrada de contratos de clientes.
+    - Aplica los filtros del formulario.
+    - Construye archivo Excel con formato y estilo adecuado.
+    """
     cliente_contratos_info = []
 
     if request.method == 'GET':
@@ -168,7 +191,6 @@ def exportar_clientes_contratos_excel(request):
                 return HttpResponse("No se encontraron resultados para los filtros aplicados.")
             
         else:
-                print("Errores del formulario:", form.errors)
                 return HttpResponse("No se encontraron resultados para los filtros aplicados.")
 
         data = []    

@@ -1,15 +1,27 @@
+# Informe de Consultores
+
+# Django
 from django.shortcuts import render
 from django.http import HttpResponse
+
+# Formularios y modelos del módulo
 from Modulo.forms import ConsultorFilterForm
 from Modulo.models import Consultores
+
+# Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
+
+# Librerías estándar y de terceros
 from datetime import datetime
 from collections import Counter
 
-#Función para filtrar Consultores
-#Filtros: Nombre Consultor, Linea, Modulo, Certificación, Perfil
 def filtrar_consultores(form, consultores):
+    """
+    Aplica los filtros del formulario al conjunto de consultores.
+    - Filtra por nombre, línea, módulo, certificación, perfil y estado.
+    Devuelve los consultores que cumplen con los criterios seleccionados.
+    """
     consultores = consultores.order_by('Nombre')
     nombre = form.cleaned_data.get('Nombre')
     linea = form.cleaned_data.get('LineaId')
@@ -35,6 +47,10 @@ def filtrar_consultores(form, consultores):
 
 #Función para obtener información de los consultores
 def obtener_consultores(consultores):
+    """
+    Procesa y organiza los datos de los consultores.
+    Devuelve una lista de diccionarios con la información estructurada para presentación o exportación.
+    """
     consultor_info = []
 
     for consultor in consultores:
@@ -72,6 +88,11 @@ def obtener_consultores(consultores):
     return consultor_info
 
 def consultores_filtrado(request):
+    """
+    Vista para renderizar el informe de consultores.
+    - Usa filtros vía GET para aplicar criterios.
+    - Construye contexto con métricas agregadas, datos y filtros.
+    """
     consultor_info = []
     show_data = False  
     busqueda_realizada = False
@@ -96,31 +117,22 @@ def consultores_filtrado(request):
     else: 
         form = ConsultorFilterForm()
 
-    # 1. Total de Consultores
+    # Cálculo de métricas y resumenes (cards)
     total_consultores = len(consultor_info)
-
-    # 2. Activos/Inactivos
     activos = sum(1 for c in consultor_info if c['estado'] == 'Activo')
     inactivos = total_consultores - activos
-
-    # 3. Consultores con Certificación
     certificados = sum(1 for c in consultor_info if c['certificado'] == 'SI')
 
-    # 4. Distribución por Línea
     lineas = [c['linea'] for c in consultor_info if c['linea']]
     conteo_lineas = dict(Counter(lineas))
 
-    # 5. Distribución por Módulo
     modulos = [c['modulo'] for c in consultor_info if c['modulo']]
     conteo_modulos = dict(Counter(modulos))
 
-    # 6. Preparar datos para gráficos en JSON
     lineas_labels = list(conteo_lineas.keys())
     lineas_data = list(conteo_lineas.values())
-
     modulos_labels = list(conteo_modulos.keys())
     modulos_data = list(conteo_modulos.values())
-
     estado_labels = ['Activo', 'Inactivo']
     estado_data = [activos, inactivos]
 
@@ -152,6 +164,11 @@ def consultores_filtrado(request):
 
 
 def exportar_consultores_excel(request):
+    """
+    Exporta los datos filtrados de consultores a un archivo Excel.
+    - Reutiliza lógica de filtrado y transformación.
+    - Aplica estilo y formato a los datos exportados usando OpenPyXL.
+    """
     consultor_info = []
     
     if request.method == 'GET':
@@ -171,7 +188,6 @@ def exportar_consultores_excel(request):
                 return HttpResponse("No se encontraron datos para exportar.")
                 
         else: 
-                print("Errores del formulario:", form.errors)
                 return HttpResponse("Filtros no válidos.", status=400)
 
         #Preparar datos para excel 

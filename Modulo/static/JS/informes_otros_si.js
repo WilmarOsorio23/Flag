@@ -1,9 +1,4 @@
-// ===========================================
-// JS PARA INFORME "CONTRATOS - OTROS SÍ"
-// ===========================================
-
 document.addEventListener('DOMContentLoaded', function () {
-    //console.log("🟢 JS Informe Otros Sí activo");
 
     // ===========================================
     // ENVÍO AUTOMÁTICO DEL FORMULARIO SI HAY FILTROS EN LA URL
@@ -19,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function () {
         sessionStorage.removeItem('otros_si_autosubmit');
     }
     
-
     // ===========================================
     // EVENTO CAMBIO DE CLIENTE: ACTUALIZA CONTRATOS
     // ===========================================
@@ -32,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     clienteSelect.addEventListener('change', function () {
-        const clienteId = this.value;  // ahora tomamos el ID directamente
+        const clienteId = this.value;
         console.log("➡️ Cliente seleccionado:", clienteId);
     
         contratoSelect.innerHTML = '<option value="">Cargando contratos...</option>';

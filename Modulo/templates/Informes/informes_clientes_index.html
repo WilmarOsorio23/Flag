@@ -149,6 +149,7 @@
         </div>
       </div>
       
+      <!-- Tabla con resultados filtrados -->
       {% if show_data %}
         <!-- Tabla de clientes -->
         <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
@@ -329,6 +330,7 @@
   </div>
 </div>
 
+<!-- Carga dinámica de datos para los gráficos en JS -->
 {% block extra_js %}
   {{ labels_tipo_cliente|json_script:"labels-tipo-cliente" }}
   {{ values_tipo_cliente|json_script:"values-tipo-cliente" }}

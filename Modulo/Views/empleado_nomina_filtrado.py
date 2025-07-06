@@ -1,19 +1,32 @@
-from django.shortcuts import render
+#Informe de Salarios
+
+# Librerías estándar y de terceros
 from datetime import date
 from datetime import datetime
 from collections import defaultdict, Counter
 from dateutil.relativedelta import relativedelta
+
+# Django
+from django.http import HttpResponse
+from django.shortcuts import render
+
+# Formularios y modelos del módulo
 from Modulo.forms import EmpleadoFilterForm
 from Modulo.models import Empleado, Nomina
-from django.http import HttpResponse
-import pandas as pd
+
+# Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 
 # Función para filtrar empleados y nóminas
 def filtrar_empleados_y_nominas(form, empleados, nominas):
-    empleados = empleados.order_by('Documento')  # Orden descendente por Documento (ajustar si otro campo es clave)
-    nominas = nominas.order_by('-Anio')  # Orden ascendente por Año
+    """
+    Aplica filtros del formulario sobre empleados y nóminas.
+    - Filtra por nombre, línea, cargo y año.
+    - Devuelve los empleados y nóminas que cumplen los filtros aplicados.
+    """
+    empleados = empleados.order_by('Documento')  
+    nominas = nominas.order_by('-Anio')  
 
     nombre = form.cleaned_data.get('Nombre')    
     linea = form.cleaned_data.get('LineaId')
@@ -37,6 +50,12 @@ def filtrar_empleados_y_nominas(form, empleados, nominas):
 
 # Función para calcular la información del empleado
 def obtener_empleado_info(empleados, nominas, meses):
+    """
+    Une la información de empleados con sus registros de nómina.
+    - Agrupa la información de salarios y clientes mes a mes.
+    - Calcula los años en la empresa.
+    Devuelve una lista de diccionarios con los datos completos por empleado.
+    """
     def limpiar_documento(doc):
         #Elimina puntos, espacios y convierte a string sin espacios adicionales
         return str(doc).replace('.', '').replace(' ', '').strip()
@@ -66,7 +85,8 @@ def obtener_empleado_info(empleados, nominas, meses):
                 else:
                     salario = cliente = ""
                 salarios_meses.append({'salario': salario, 'cliente': cliente})
-            # Calcular "Años en Flag"
+
+            # Calcular campo "Años en Flag"
             fecha_actual = date.today()
             años_en_flag = relativedelta(fecha_actual, empleado.FechaIngreso).years
 
@@ -88,6 +108,11 @@ def obtener_empleado_info(empleados, nominas, meses):
 
 # Informe de Nómina de Empleados
 def empleado_nomina_filtrado(request):
+    """
+    Vista para mostrar el informe de nómina de empleados.
+    - Aplica filtros GET desde el formulario.
+    - Genera contexto con información de salarios por mes.
+    """
     meses = "Enero Febrero Marzo Abril Mayo Junio Julio Agosto Septiembre Octubre Noviembre Diciembre".split()
     empleado_info = []  
     show_data = False  
@@ -113,17 +138,14 @@ def empleado_nomina_filtrado(request):
             
     else: 
         form = EmpleadoFilterForm()
-        print("Datos obtenidos:", empleado_info)
 
     #Aplicar lógica para cards
-    
     # Total con Certificación SAP
     total_certificados = sum(1 for e in empleado_info if e['certificado'] == 'SI')
 
     # Conteo por Línea
     lineas = [e['nombre_linea'] for e in empleado_info if e['nombre_linea']]
     conteo_lineas = dict(Counter(lineas))
-
 
     context = {
         "meses": meses,
@@ -142,7 +164,11 @@ def empleado_nomina_filtrado(request):
 
 # Funcionalidad para descargar los resultados en Excel
 def exportar_nomina_excel(request):
-    # Recuperar los mismos datos de filtrado
+    """
+    Exporta a Excel la información de nómina filtrada por el formulario.
+    - Recupera los mismos filtros de la vista.
+    - Genera un archivo Excel con la información mensual de salarios y clientes.
+    """
     meses = "Enero Febrero Marzo Abril Mayo Junio Julio Agosto Septiembre Octubre Noviembre Diciembre".split()
     empleado_info = []  
     
