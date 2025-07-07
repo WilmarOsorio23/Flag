@@ -49,6 +49,7 @@ from Modulo.Views import centrosCostos
 from Modulo.Views import informe_facturacion
 from Modulo.Views import informe_historial_cargos
 from Modulo.Views import indicadores_facturacion
+from Modulo.Views import indicadores_margen_cliente
 
 from Modulo.Views import facturacion_consultores
 from Modulo.Views import informe_facturacion_consultores
@@ -403,6 +404,7 @@ urlpatterns = [
     # Rutas para la tabla Indicadores de totales
     path('indicadores_totales/', indicadores_totales.indicadores_totales, name='indicadores_totales_index'),
     path('indicadores_facturacion/', indicadores_facturacion.indicadores_facturacion, name='indicadores_facturacion_index'),
+    path('indicadores_margen_cliente/', indicadores_margen_cliente.indicadores_margen_cliente, name='indicadores_margen_cliente_index'),
 
     #Ruta para la tabla Pagare
     path('Pagare/Pagare/', pagare_index, name="pagare_index"),

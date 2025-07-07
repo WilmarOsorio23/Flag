@@ -315,3 +315,184 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// --- GRAFICAS ---
+// Renderizar cada gráfica solo cuando se activa su pestaña
+let graficaTotalesRenderizada = false;
+let graficaLineasRenderizada = false;
+
+document.getElementById('grafico-totales-tab').addEventListener('shown.bs.tab', function () {
+    if (!graficaTotalesRenderizada) {
+        renderizarGraficaTotales();
+        graficaTotalesRenderizada = true;
+    }
+});
+document.getElementById('grafico-lineas-tab').addEventListener('shown.bs.tab', function () {
+    if (!graficaLineasRenderizada) {
+        renderizarGraficaLineas();
+        graficaLineasRenderizada = true;
+    }
+});
+
+// Paleta de colores pastel para las métricas
+function pastelColor(idx, total) {
+    const hue = (idx * 360 / total) % 360;
+    return `hsl(${hue}, 70%, 70%)`;
+}
+
+function renderizarGraficaTotales() {
+    // Obtener datos de la tabla de totales generales
+    const meses = [];
+    const clientes = Clientes.map(c => c.Nombre_Cliente);
+    const metricas = [
+        { key: 'Trabajado', label: 'Trabajado', color: '#1976d2' },
+        { key: 'FacturadoHoras', label: 'Facturado', color: '#fbc02d' },
+        { key: 'PendienteHoras', label: 'Pend.Fact', color: '#7b1fa2' }
+    ];
+    // cliente -> métrica -> array de valores por mes
+    const datosPorCliente = {};
+    clientes.forEach(cliente => {
+        datosPorCliente[cliente] = {};
+        metricas.forEach(m => datosPorCliente[cliente][m.key] = []);
+    });
+    const tabla = document.querySelector('#totales table');
+    if (tabla) {
+        const filas = tabla.querySelectorAll('tbody tr:not(.diciembre-anterior)');
+        filas.forEach(fila => {
+            const celdas = fila.querySelectorAll('td');
+            if (celdas.length > 0) {
+                meses.push(celdas[0].textContent.trim());
+                let idx = 3;
+                clientes.forEach(cliente => {
+                    datosPorCliente[cliente]['Trabajado'].push(parseFloat(celdas[idx]?.textContent.replace(',', '') || '0'));
+                    // Saltar $ Costo (idx+1)
+                    datosPorCliente[cliente]['FacturadoHoras'].push(parseFloat(celdas[idx+2]?.textContent.replace(',', '') || '0'));
+                    // Saltar $ Facturado (idx+3)
+                    datosPorCliente[cliente]['PendienteHoras'].push(parseFloat(celdas[idx+4]?.textContent.replace(',', '') || '0'));
+                    // Saltar $ Pend.Fact (idx+5)
+                    idx += 6;
+                });
+            }
+        });
+    }
+    // Para cada mes, para cada cliente, para cada métrica, crear una barra
+    const labels = [];
+    meses.forEach(mes => {
+        clientes.forEach(cliente => {
+            labels.push(`${cliente} - ${mes}`);
+        });
+    });
+    // Para cada ítem, un dataset, con los valores de todos los clientes y meses
+    const datasets = metricas.map((metrica, midx) => {
+        const data = [];
+        meses.forEach((mes, mesIdx) => {
+            clientes.forEach(cliente => {
+                data.push(datosPorCliente[cliente][metrica.key][mesIdx] || 0);
+            });
+        });
+        return {
+            label: metrica.label,
+            data: data,
+            backgroundColor: pastelColor(midx, metricas.length),
+            borderColor: pastelColor(midx, metricas.length),
+            borderWidth: 1
+        };
+    });
+    const ctx1 = document.getElementById('grafico-totales-generales').getContext('2d');
+    new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Indicadores por Cliente y Mes' }
+            },
+            scales: {
+                x: {
+                    stacked: false,
+                    barPercentage: 0.85,
+                    categoryPercentage: 0.6
+                },
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
+function renderizarGraficaLineas() {
+    if (window.Lineas && window.ResultadosLineas) {
+        const lineas = window.Lineas;
+        const resultados = window.ResultadosLineas;
+        
+        const metricas = [
+            { key: 'Trabajado', label: 'Trabajado', color: '#1976d2' },
+            { key: 'FacturadoHoras', label: 'Facturado', color: '#fbc02d' },
+            { key: 'PendienteHoras', label: 'Pend.Fact', color: '#7b1fa2' }
+        ];
+        // Obtener los meses de la primera línea (ordenados)
+        const mesesLinea = Object.keys(resultados[lineas[0].LineaId]?.general || {}).sort((a, b) => parseInt(a) - parseInt(b));
+        
+        // labels: para cada mes, para cada línea, el label será "Línea - Mes"
+        const labels = [];
+        mesesLinea.forEach(mes => {
+            lineas.forEach(linea => {
+                labels.push(`${linea.Linea} - ${MESES[mes] || mes}`);
+            });
+        });
+        
+        // Para cada ítem, un dataset, con los valores de todas las líneas y meses
+        const datasets = metricas.map((metrica, midx) => {
+            const data = [];
+            mesesLinea.forEach((mes, mesIdx) => {
+                lineas.forEach(linea => {
+                    let valor = 0;
+                    if (metrica.key === 'Trabajado')
+                        valor = parseFloat(resultados[linea.LineaId]?.general[mes]?.Trabajado || 0);
+                    else if (metrica.key === 'FacturadoHoras')
+                        valor = parseFloat(resultados[linea.LineaId]?.general[mes]?.Facturado?.horas || 0);
+                    else if (metrica.key === 'PendienteHoras')
+                        valor = parseFloat(resultados[linea.LineaId]?.general[mes]?.Pendiente?.horas || 0);
+                    
+                    data.push(valor);
+                });
+            });
+            return {
+                label: metrica.label,
+                data: data,
+                backgroundColor: pastelColor(midx, metricas.length),
+                borderColor: pastelColor(midx, metricas.length),
+                borderWidth: 1
+            };
+        });
+        
+        const ctx2 = document.getElementById('grafico-totales-linea').getContext('2d');
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Indicadores por Línea y Mes' }
+                },
+                scales: {
+                    x: {
+                        stacked: false,
+                        barPercentage: 0.85,
+                        categoryPercentage: 0.6
+                    },
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+}

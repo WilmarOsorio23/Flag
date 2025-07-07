@@ -1,7 +1,36 @@
 from collections import defaultdict
 from django import template
+from decimal import Decimal, InvalidOperation
 
 register = template.Library()
+
+@register.filter
+def sum_attr(items, attr_name):
+    """Suma un atributo específico de una lista de objetos/diccionarios"""
+    total = Decimal('0.00')
+    for item in items:
+        value = item.get(attr_name, Decimal('0.00')) if isinstance(item, dict) else getattr(item, attr_name, Decimal('0.00'))
+        try:
+            total += Decimal(str(value))
+        except (TypeError, ValueError, InvalidOperation):
+            continue
+    return total
+
+@register.filter
+def divide(value, divisor):
+    """División segura con manejo de errores"""
+    try:
+        return Decimal(value) / Decimal(divisor)
+    except (TypeError, ValueError, ZeroDivisionError, InvalidOperation):
+        return Decimal('0.00')
+
+@register.filter
+def multiply(value, multiplier):
+    """Multiplicación segura con manejo de errores"""
+    try:
+        return Decimal(value) * Decimal(multiplier)
+    except (TypeError, ValueError, InvalidOperation):
+        return Decimal('0.00')
 
 @register.filter
 def add_class(field, css_class):
