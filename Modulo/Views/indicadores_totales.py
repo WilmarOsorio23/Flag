@@ -716,6 +716,7 @@ def calcular_resultados(anio, meses, lineas_seleccionadas, clientes, lineas_ids,
         'conceptos': Concepto.objects.all()
     }
     
+    lineas_ids_calculo = [l.LineaId for l in lineas_seleccionadas]
     tiempos_data = datos_precargados['tiempos_data']
     
     for mes in meses:
@@ -737,9 +738,9 @@ def calcular_resultados(anio, meses, lineas_seleccionadas, clientes, lineas_ids,
         }
         
         for cliente in clientes:
-            trabajado = calcular_trabajado(cliente.ClienteId, anio, mes, lineas_ids, tiempos_data)
-            costo = calcular_costo(cliente.ClienteId, mes, lineas_ids, tiempos_data, hh, datos_precargados['nominas_dict'], datos_precargados['tarifas_consultores_dict'])
-            fact_key = (cliente.ClienteId, anio, mes, lineas_ids[0])
+            trabajado = calcular_trabajado(cliente.ClienteId, anio, mes, lineas_ids_calculo, tiempos_data)
+            costo = calcular_costo(cliente.ClienteId, mes, lineas_ids_calculo, tiempos_data, hh, datos_precargados['nominas_dict'], datos_precargados['tarifas_consultores_dict'])
+            fact_key = (cliente.ClienteId, anio, mes, lineas_ids_calculo[0])
             facturado = datos_precargados['facturacion_data'].get(fact_key, {'horas': Decimal('0.00'), 'valor': Decimal('0.00')})
             
             if mes == '1':
@@ -753,11 +754,11 @@ def calcular_resultados(anio, meses, lineas_seleccionadas, clientes, lineas_ids,
                 
                 # Llamar a calcular_pendiente con diciembre_data
                 pendiente = calcular_pendiente(
-                    anio, mes, cliente, lineas_ids, 
+                    anio, mes, cliente, lineas_ids_calculo,  # Corregido: usar lineas_ids_calculo
                     trabajado, facturado['horas'], 
                     horas_habiles, 
                     datos_precargados['tarifas_por_cliente'],
-                    tiempos_data,
+                    tiempos_data, 
                     None,  # Sin pendiente anterior
                     diciembre_data=dic_data  # Pasar los datos de diciembre
                 )
@@ -770,7 +771,7 @@ def calcular_resultados(anio, meses, lineas_seleccionadas, clientes, lineas_ids,
                     else Decimal('0.00')
                 )
                 pendiente = calcular_pendiente(
-                    anio, mes, cliente, lineas_ids, 
+                    anio, mes, cliente, lineas_ids_calculo,  # Corregido: usar lineas_ids_calculo
                     trabajado, facturado['horas'], 
                     horas_habiles, 
                     datos_precargados['tarifas_por_cliente'],

@@ -104,27 +104,43 @@
 
         <!-- Pestañas -->
         <ul class="nav nav-tabs justify-content-center mb-4" id="myTab" role="tablist">
-            <!-- Primera pestaña -->
-            <li class="nav-item w-50" role="presentation">
+            <!-- Totales -->
+            <li class="nav-item w-25" role="presentation">
                 <button class="nav-link active w-100 btn btn-light text-primary" id="totales-tab" 
                         data-bs-toggle="tab" data-bs-target="#totales" 
                         type="button" role="tab" aria-controls="totales" aria-selected="true">
                     Totales
                 </button>
             </li>
-            <!-- Segunda pestaña -->
-            <li class="nav-item w-50" role="presentation">
+            <!-- Totales por línea -->
+            <li class="nav-item w-25" role="presentation">
                 <button class="nav-link w-100 btn btn-light text-primary" id="lineas-tab" 
                         data-bs-toggle="tab" data-bs-target="#lineas" 
                         type="button" role="tab" aria-controls="lineas" aria-selected="false">
-                    Totales por linea
+                    Totales por línea
+                </button>
+            </li>
+            <!-- Gráfica Totales -->
+            <li class="nav-item w-25" role="presentation">
+                <button class="nav-link w-100 btn btn-light text-primary" id="grafico-totales-tab" 
+                        data-bs-toggle="tab" data-bs-target="#grafico-totales" 
+                        type="button" role="tab" aria-controls="grafico-totales" aria-selected="false">
+                    Gráfica Totales
+                </button>
+            </li>
+            <!-- Gráfica por Línea -->
+            <li class="nav-item w-25" role="presentation">
+                <button class="nav-link w-100 btn btn-light text-primary" id="grafico-lineas-tab" 
+                        data-bs-toggle="tab" data-bs-target="#grafico-lineas" 
+                        type="button" role="tab" aria-controls="grafico-lineas" aria-selected="false">
+                    Gráfica por Línea
                 </button>
             </li>
         </ul>
 
         <!-- Contenido de las pestañas -->
         <div class="tab-content" id="myTabContent">
-            <!-- Pestaña de Indicadores -->
+            <!-- Pestaña de Totales -->
             <div class="tab-pane fade show active p-1" id="totales" role="tabpanel" aria-labelledby="totales-tab">
                 {% if resultados.general %}
                 <!-- Tabla Principal -->
@@ -344,7 +360,8 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {% for mes, datos in linea_data.general.items %}
+                                            <!-- Cambio clave aquí: iterar directamente sobre linea_data.general.items -->
+                                            {% for mes, datos in linea_data.general.items|dictsort:0 %}
                                                 <tr>
                                                     <td>{{ MESES|get_item:mes }}</td>
                                                     <td>{{ datos.Dias }}</td>
@@ -366,6 +383,8 @@
                                         <tfoot>
                                             <tr>
                                                 <th>TOTALES</th>
+                                                <th>{{ linea_data.totales.Dias|default:0|floatformat:2 }}</th>
+                                                <th>{{ linea_data.totales.Horas|default:0|floatformat:2 }}</th>
                                                 <th>{{ linea_data.totales.Trabajado|default:0|floatformat:2 }}</th>
                                                 <th>${{ linea_data.totales.Costo|default:0|floatformat:2 }}</th>
                                                 <th>{{ linea_data.totales.Facturado_horas|default:0|floatformat:2 }}</th>
@@ -388,11 +407,84 @@
                     <div class="alert alert-warning">No hay datos</div>
                 {% endif %}
             </div>
+            <!-- Pestaña de Gráfica Totales -->
+            <div class="tab-pane fade p-3" id="grafico-totales" role="tabpanel" aria-labelledby="grafico-totales-tab">
+                {% if resultados.general %}
+                <div class="card h-100 w-100 border-0 shadow-none bg-transparent">
+                    <div class="card-header text-center bg-primary text-white py-2">
+                        Totales Generales por Cliente
+                    </div>
+                    <div class="card-body p-0" style="height: 70vh;">
+                        <canvas id="grafico-totales-generales" class="grafico-full"></canvas>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">No hay datos</div>
+                {% endif %}
+            </div>
+            <!-- Pestaña de Gráfica por Línea -->
+            <div class="tab-pane fade p-3" id="grafico-lineas" role="tabpanel" aria-labelledby="grafico-lineas-tab">
+                {% if resultados.lineas %}
+                <div class="card h-100 w-100 border-0 shadow-none bg-transparent">
+                    <div class="card-header text-center bg-primary text-white py-2">
+                        Totales por Línea
+                    </div>
+                    <div class="card-body p-0" style="height: 70vh;">
+                        <canvas id="grafico-totales-linea" class="grafico-full"></canvas>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">No hay datos</div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
 <script>
     const Clientes = JSON.parse('{{ Clientes_json|escapejs|safe }}');
+    
+    // Exponer Lineas y ResultadosLineas para las gráficas
+    window.Lineas = [
+        {% for linea in Lineas %}
+            {LineaId: {{ linea.LineaId }}, Linea: "{{ linea.Linea|escapejs }}"},
+        {% endfor %}
+    ];
+    
+    window.ResultadosLineas = {
+        {% for linea in Lineas %}
+            {{ linea.LineaId }}: {
+                general: {
+                    {% for mes in resultados.lineas|get_item:linea.LineaId|get_item:'general' %}
+                        {% with datos=resultados.lineas|get_item:linea.LineaId|get_item:'general'|get_item:mes %}
+                        '{{ mes }}': {
+                            Trabajado: {{ datos.Trabajado|default:0|floatformat:2 }},
+                            Facturado: { 
+                                "horas": {{ datos.Facturado.horas|default:0|floatformat:2 }},
+                                "valor": {{ datos.Facturado.valor|default:0|floatformat:2 }}
+                            },
+                            Pendiente: { 
+                                "horas": {{ datos.Pendiente.horas|default:0|floatformat:2 }},
+                                "valor": {{ datos.Pendiente.valor|default:0|floatformat:2 }}
+                            }
+                        },
+                        {% endwith %}
+                    {% endfor %}
+                }
+            },
+        {% endfor %}
+    };
 </script>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'JS/indicadores_totales.js' %}"></script>
 {% endblock %}
+
+<style>
+.grafico-full {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 400px;
+    max-height: 100vh;
+    aspect-ratio: 2/1;
+}
+</style>
