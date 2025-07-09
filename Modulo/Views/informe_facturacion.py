@@ -61,7 +61,7 @@ def organizar_datos(facturas, lineas, clientes):
         mes = f['Mes']
         linea_id = f['LineaId']
         cliente_id = f['ClienteId']
-        total = f['total'] or 0
+        total = float(f['total'] or 0)  # Convertir a float
 
         # Acumular por mes y línea
         totales['por_linea'][mes][linea_id] += total
@@ -75,22 +75,19 @@ def organizar_datos(facturas, lineas, clientes):
         totales['clientes'][cliente_id][mes][linea_id] += total
         totales['footer']['clientes'][cliente_id][linea_id] += total
 
-    # Depuración para verificar acumulación correcta
-    print("Totales generales por mes:", totales['general'])  # Verificar acumulación por mes
-
     rows = []
     for mes_num, mes_nombre in meses:
         row = {
             'mes': mes_nombre,
             'totales_linea': {},
-            'total_general': totales['general'].get(mes_num, 0),  # Obtener total general por mes
+            'total_general': float(totales['general'].get(mes_num, 0)),  # Convertir a float
             'clientes': {}
         }
 
         # Totales por línea para este mes
         for linea in lineas:
             linea_id = linea.LineaId
-            row['totales_linea'][linea_id] = totales['por_linea'][mes_num].get(linea_id, 0)
+            row['totales_linea'][linea_id] = float(totales['por_linea'][mes_num].get(linea_id, 0))  # Convertir a float
 
         # Totales por cliente para este mes
         for cliente in clientes:
@@ -100,23 +97,20 @@ def organizar_datos(facturas, lineas, clientes):
             }
             for linea in lineas:
                 linea_id = linea.LineaId
-                row['clientes'][cliente_id]['totales'][linea_id] = totales['clientes'][cliente_id][mes_num].get(linea_id, 0)
+                row['clientes'][cliente_id]['totales'][linea_id] = float(totales['clientes'][cliente_id][mes_num].get(linea_id, 0))  # Convertir a float
 
         rows.append(row)
 
-    # Depuración para verificar filas generadas
-    print("Rows generados:", rows)
-
     footer = {
         'totales_linea': {},
-        'total_general': totales['footer']['general'],
+        'total_general': float(totales['footer']['general']),  # Convertir a float
         'clientes': {}
     }
 
     # Footer: totales por línea
     for linea in lineas:
         linea_id = linea.LineaId
-        footer['totales_linea'][linea_id] = totales['footer']['por_linea'].get(linea_id, 0)
+        footer['totales_linea'][linea_id] = float(totales['footer']['por_linea'].get(linea_id, 0))  # Convertir a float
 
     # Footer: totales por cliente
     for cliente in clientes:
@@ -126,10 +120,7 @@ def organizar_datos(facturas, lineas, clientes):
         }
         for linea in lineas:
             linea_id = linea.LineaId
-            footer['clientes'][cliente_id]['totales'][linea_id] = totales['footer']['clientes'][cliente_id].get(linea_id, 0)
-
-    # Depuración para verificar datos del footer
-    print("Footer generado:", footer)
+            footer['clientes'][cliente_id]['totales'][linea_id] = float(totales['footer']['clientes'][cliente_id].get(linea_id, 0))  # Convertir a float
 
     lineas_activas = [linea for linea in lineas if footer['totales_linea'].get(linea.LineaId, 0) > 0]
 
@@ -139,10 +130,6 @@ def organizar_datos(facturas, lineas, clientes):
             total = footer['clientes'][cliente.ClienteId]['totales'].get(linea.LineaId, 0)
             if total > 0:
                 clientes_activos.append((cliente, linea))
-
-    # Depuración para verificar líneas y clientes activos
-    print("Líneas activas:", lineas_activas)
-    print("Clientes activos:", clientes_activos)
 
     return rows, footer, lineas, clientes, meses, lineas_activas, clientes_activos
 
@@ -193,7 +180,7 @@ def informes_facturacion_index(request):
 
 
 def generar_graficos_por_linea(rows, lineas_activas, clientes_activos, footer):
-    """Genera datos para gráficos por línea y cliente, incluyendo Total General"""
+    """Genera datos para gráficos por línea y cliente, incluyendo Total General y Total Línea"""
     graficos = []
 
     colores = [
@@ -207,12 +194,7 @@ def generar_graficos_por_linea(rows, lineas_activas, clientes_activos, footer):
 
     # Gráfico para Total General
     labels = [row['mes'] for row in rows]
-    total_general = [row['total_general'] for row in rows]  # Extraer los totales generales
-
-    # Depuración para verificar datos de la gráfica
-    print("Labels para Total General:", labels)
-    print("Datos para Total General:", total_general)
-
+    total_general = [row['total_general'] for row in rows]
 
     graficos.append({
         'nombre': 'Total General',
@@ -222,13 +204,42 @@ def generar_graficos_por_linea(rows, lineas_activas, clientes_activos, footer):
                 'label': 'Total General',
                 'data': total_general,
                 'type': 'bar',
-                'backgroundColor': colores[0],  # Primer color de la lista
-                'borderColor': colores[0].replace('0.5', '1'),  # Color con opacidad completa
+                'backgroundColor': colores[0],
+                'borderColor': colores[0].replace('0.5', '1'),
                 'borderWidth': 1
             }
         ]
     })
-    
+
+    # Gráfico para Total Línea (primeras 4 columnas: Desarrollo, Consultoría, Seguridad, Soporte)
+    columnas_interes = ['Desarrollo', 'Consultoria', 'Seguridad', 'Soporte']
+    labels_total_linea = columnas_interes  # Eje X: nombres de las columnas
+    data_total_linea = []
+
+    for columna in columnas_interes:
+        # Verificar que la columna exista en las líneas activas
+        total_columna = sum(
+            footer['totales_linea'].get(linea.LineaId, 0)
+            for linea in lineas_activas if linea.Linea.strip().lower() == columna.strip().lower()
+        )
+        # Calcular el porcentaje de participación
+        porcentaje = (total_columna / footer['total_general'] * 100) if footer['total_general'] > 0 else 0
+        data_total_linea.append(porcentaje)
+
+    graficos.append({
+        'nombre': 'Total Línea',
+        'labels': labels_total_linea,
+        'datasets': [
+            {
+                'label': 'Total Línea',
+                'data': data_total_linea,
+                'type': 'bar',
+                'backgroundColor': colores[1],
+                'borderColor': colores[1].replace('0.5', '1'),
+                'borderWidth': 1
+            }
+        ]
+    })
 
     # Gráficos por línea
     for index, linea in enumerate(lineas_activas):
@@ -252,8 +263,7 @@ def generar_graficos_por_linea(rows, lineas_activas, clientes_activos, footer):
         if not clientes_data:
             continue
 
-        # Asignar colores dinámicos
-        color_index = (index + 1) % len(colores)  # Ciclar colores si hay más líneas que colores
+        color_index = (index + 2) % len(colores)  # Ciclar colores si hay más líneas que colores
         graficos.append({
             'nombre': f'% Participación en {linea.Linea}',
             'labels': clientes_data,
