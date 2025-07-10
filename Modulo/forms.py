@@ -2533,7 +2533,7 @@ class FacturacionClientesFilterForm(forms.Form):
         choices=[],
         required=False,
         label='Ceco',
-        widget=forms.CheckboxSelectMultiple()
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'})
     )  
 
     def __init__(self, *args, **kwargs):
@@ -2543,8 +2543,20 @@ class FacturacionClientesFilterForm(forms.Form):
         
     def populate_ceco(self):
         # Obtener valores únicos de Ceco, excluyendo vacíos y nulos, sin duplicados
-        cecos = FacturacionClientes.objects.exclude(Ceco__isnull=True).exclude(Ceco__exact='').values_list('Ceco', flat=True).distinct().order_by('Ceco')        
-        self.fields['Ceco'].choices = [('', 'Seleccione Ceco')] + [(ceco, ceco) for ceco in cecos]
+        cecos_facturas = FacturacionClientes.objects.exclude(Ceco__isnull=True)\
+                                                .exclude(Ceco__exact='')\
+                                                .values_list('Ceco', flat=True)\
+                                                .distinct()
+    
+        cecos_validos = CentrosCostos.objects.filter(
+            codigoCeCo__in=cecos_facturas
+        ).order_by('codigoCeCo')
+    
+        # Crear choices asegurando valores simples (no listas)
+        self.fields['Ceco'].choices = [('', 'Seleccione Ceco')] + [
+            (str(ceco.codigoCeCo), f"{ceco.codigoCeCo}") 
+            for ceco in cecos_validos
+        ]
 
         # Llenar el campo de años dinámicamente
         years = FacturacionClientes.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
