@@ -38,113 +38,283 @@
             <div class="table-responsive">
                 <form id="delete-form" method="POST" action="{% url 'consultores_eliminar' %}">
                     {% csrf_token %}
-                    <table class="table table-primary">
+                    <table class="table table-primary" id="infoConsultoresTable">
                         <thead>
                             <tr>
                                 <th><input type="checkbox" id="select-all"></th>
-                                <th scope="col">Tipo Documento ID</th>
-                                <th scope="col">Documento ID</th>
-                                <th scope="col">Nombre</th>
-                                <th scope="col">Empresa</th>
-                                <th scope="col">Profesión</th>
-                                <th scope="col">Linea</th>
-                                <th scope="col">Modulo</th>
-                                <th scope="col">Perfil</th>
-                                <th scope="col">Estado</th>
-                                <th scope="col">Fecha Ingreso</th>
-                                <th scope="col">Fecha Retiro</th>
-                                <th scope="col">Fecha Operación</th>
-                                <th scope="col">Certificado</th>
-                                <th scope="col">Certificaciones</th>
-                                <th scope="col">Fecha Nacimiento</th>
-                                <th scope="col">Año Evaluación</th>
-                                <th scope="col">Nota Evaluación</th>
-                                <th scope="col">Telefono</th>
-                                <th scope="col">Dirección</th>
+                                <th data-sort="TipoDocumentoID" class="sortable" data-direction="default">
+                                    Tipo Documento ID
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="documento" class="sortable" data-direction="default">
+                                    Documento ID
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="nombre" class="sortable" data-direction="default">
+                                    Nombre
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="empresa" class="sortable" data-direction="default">
+                                    Empresa
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="profesion" class="sortable" data-direction="default">
+                                    Profesión
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="linea" class="sortable" data-direction="default">
+                                    Linea
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="modulo" class="sortable" data-direction="default">
+                                    Modulo
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="perfil" class="sortable" data-direction="default">
+                                    Perfil
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="estado" class="sortable" data-direction="default">
+                                    Estado
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="fecha_ingreso" class="sortable" data-direction="default">
+                                    Fecha Ingreso
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="fecha_retiro" class="sortable" data-direction="default">
+                                    Fecha Retiro
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="fecha_operacion" class="sortable" data-direction="default">
+                                    Fecha Operación
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="certificado" class="sortable" data-direction="default">
+                                    Certificado
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="certificaciones" class="sortable" data-direction="default">
+                                    Certificaciones
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="fecha_nacimiento" class="sortable" data-direction="default">
+                                    Fecha Nacimiento
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="año_evaluacion" class="sortable" data-direction="default">
+                                    Año Evaluación
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="nota_evaluacion" class="sortable" data-direction="default">
+                                    Nota Evaluación
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="telefono" class="sortable" data-direction="default">
+                                    Telefono
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
+                                <th data-sort="direccion" class="sortable" data-direction="default">
+                                    Dirección
+                                    <span class="sort-icon">
+                                        <i class="fas fa-sort sort-icon-default"></i>
+                                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                                    </span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="tbody">
-                            {% for consultor in consultores %}
-                            <tr id="row-{{ consultor.Documento }}">
-                                <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ consultor.Documento }}"></td>
-                                <td>
-                                    {{ consultor.TipoDocumentoID.Nombre }}
-                                    <select name="TipoDocumentoID" class="form-select d-none">
-                                        {% for tipo_doc in form.fields.TipoDocumentoID.queryset %}
-                                            <option value="{{ tipo_doc.TipoDocumentoID }}" {% if consultor.TipoDocumentoID.Nombre == tipo_doc.Nombre %}selected{% endif %}>
-                                                {{ tipo_doc.Nombre }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </td>
-                                <td>
-                                    {{ consultor.Documento }}
-                                    <input type="text" name="Documento" class="form-control-plaintext d-none" value="{{ consultor.Documento }}" readonly>
-                                </td>
-                                <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <input type="text" name="Nombre" class="form-control-plaintext" value="{{ consultor.Nombre }}" readonly style="width: 200px;">
-                                </td>
-                                <td>
-                                    <input type="text" name="Empresa" class="form-control-plaintext" value="{{ consultor.Empresa }}" readonly style="width: 150px;">
-                                </td>
-                                <td>
-                                    <input type="text" name="Profesion" class="form-control-plaintext" value="{{ consultor.Profesion }}" readonly style="width: 200px;">
-                                </td>
-                                <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <select name="LineaId" class="form-control-plaintext" disabled style="width: 150px;">
-                                        {% for linea in form.fields.LineaId.queryset %}
-                                            <option value="{{ linea.LineaId }}" {% if consultor.LineaId.Linea == linea.Linea %}selected{% endif %}>
-                                                {{ linea.Linea }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </td>
-                                <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <select name="ModuloId" class="form-control-plaintext" disabled style="width: 150px;">
-                                        {% for modulo in form.fields.ModuloId.queryset %}
-                                            <option value="{{ modulo.ModuloId }}" {% if consultor.ModuloId.Modulo == modulo.Modulo %}selected{% endif %}>
-                                                {{ modulo.Modulo }}
-                                            </option>       
-                                        {% endfor %}
-                                    </select>
-                                </td>
-                                <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <select name="PerfilId" class="form-control-plaintext" disabled style="width: 150px;">
-                                        {% for perfil in form.fields.PerfilId.queryset %}
-                                            <option value="{{ perfil.PerfilId }}" {% if consultor.PerfilId.Perfil == perfil.Perfil %}selected{% endif %}>
-                                                {{ perfil.Perfil }}
-                                            </option>   
-                                        {% endfor %}
-                                    </select>
-                                </td>
-                                <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <select name="Estado" class="form-control-plaintext" disabled style="width: 150px;">
-                                        <option value="True" {% if consultor.Estado %}selected{% endif %}>Activo</option>
-                                        <option value="False" {% if not consultor.Estado %}selected{% endif %}>Inactivo</option>
-                                    </select>
-                                </td>
-                                <td><input type="date" name="Fecha_Ingreso" class="form-control-plaintext" value="{{ consultor.Fecha_Ingreso|date:'Y-m-d' }}" readonly style="width: 150px;"></td>
-                                <td><input type="date" name="Fecha_Retiro" class="form-control-plaintext" value="{{ consultor.Fecha_Retiro|date:'Y-m-d' }}" readonly style="width: 150px;"></td>
-                                <td><input type="date" name="Fecha_Operacion" class="form-control-plaintext" value="{{ consultor.Fecha_Operacion|date:'Y-m-d' }}" readonly style="width: 150px;"></td>
-                                <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <select name="Certificado" class="form-control-plaintext" disabled style="width: 150px;">
-                                        <option value="True" {% if consultor.Certificado %}selected{% endif %}>SI</option>
-                                        <option value="False" {% if not consultor.Certificado %}selected{% endif %}>NO</option>
-                                    </select>
-                                </td>
-                                <td><input type="text" name="Certificaciones" class="form-control-plaintext" value="{{ consultor.Certificaciones|default_if_none:'' }}" readonly style="width: 150px;"></td>
-                                <td><input type="date" name="Fecha_Nacimiento" class="form-control-plaintext" value="{{ consultor.Fecha_Nacimiento|date:'Y-m-d' }}" readonly style="width: 150px;"></td>
-                                <td><input type="number" name="Anio_Evaluacion" class="form-control-plaintext" value="{{ consultor.Anio_Evaluacion|default_if_none:'' }}" readonly style="width: 150px;"></td>
-                                <td><input type="text" name="NotaEvaluacion" class="form-control-plaintext" value="{{ consultor.NotaEvaluacion|default_if_none:'' }}" readonly style="width: 150px;"></td>
-                                <td><input type="text" name="Telefono" class="form-control-plaintext" value="{{ consultor.Telefono|default_if_none:'' }}" readonly style="width: 150px;" maxlength="20"></td>
-                                <td><input type="text" name="Direccion" class="form-control-plaintext" value="{{ consultor.Direccion|default_if_none:'' }}" readonly style="width: 150px;" maxlength="255"></td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="100">No hay datos disponibles.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
+    {% for consultor in consultores %}
+    <tr id="row-{{ consultor.Documento }}">
+        <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ consultor.Documento }}"></td>
+        
+        <td data-field="TipoDocumentoID">
+            <span class="d-block text-end">{{ consultor.TipoDocumentoID.Nombre }}</span>
+            <select name="TipoDocumentoID" class="form-select d-none">
+                {% for tipo_doc in form.fields.TipoDocumentoID.queryset %}
+                    <option value="{{ tipo_doc.TipoDocumentoID }}" {% if consultor.TipoDocumentoID.Nombre == tipo_doc.Nombre %}selected{% endif %}>
+                        {{ tipo_doc.Nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+        </td>
+        
+        <td data-field="documento">
+            <span class="d-block text-start">{{ consultor.Documento }}</span>
+            <input type="text" name="Documento" class="form-control-plaintext d-none text-start" value="{{ consultor.Documento }}" readonly>
+        </td>
+        
+        <td data-field="nombre">
+            <input type="text" name="Nombre" class="form-control-plaintext text-end" value="{{ consultor.Nombre }}" readonly style="width: 200px; white-space: normal; overflow: visible;">
+        </td>
+        
+        <td data-field="empresa">
+            <input type="text" name="Empresa" class="form-control-plaintext text-end" value="{{ consultor.Empresa }}" readonly style="width: 150px; white-space: normal; overflow: visible;">
+        </td>
+        
+        <td data-field="profesion">
+            <input type="text" name="Profesion" class="form-control-plaintext text-end" value="{{ consultor.Profesion }}" readonly style="width: 200px; white-space: normal; overflow: visible;">
+        </td>
+        
+        <td data-field="linea">
+            <select name="LineaId" class="form-control-plaintext text-end" disabled style="width: 150px; text-align-last: right;">
+                {% for linea in form.fields.LineaId.queryset %}
+                    <option value="{{ linea.LineaId }}" {% if consultor.LineaId.Linea == linea.Linea %}selected{% endif %}>
+                        {{ linea.Linea }}
+                    </option>
+                {% endfor %}
+            </select>
+        </td>
+        
+        <td data-field="modulo">
+            <select name="ModuloId" class="form-control-plaintext text-end" disabled style="width: 150px; text-align-last: right;">
+                {% for modulo in form.fields.ModuloId.queryset %}
+                    <option value="{{ modulo.ModuloId }}" {% if consultor.ModuloId.Modulo == modulo.Modulo %}selected{% endif %}>
+                        {{ modulo.Modulo }}
+                    </option>       
+                {% endfor %}
+            </select>
+        </td>
+        
+        <td data-field="perfil">
+            <select name="PerfilId" class="form-control-plaintext text-end" disabled style="width: 150px; text-align-last: right;">
+                {% for perfil in form.fields.PerfilId.queryset %}
+                    <option value="{{ perfil.PerfilId }}" {% if consultor.PerfilId.Perfil == perfil.Perfil %}selected{% endif %}>
+                        {{ perfil.Perfil }}
+                    </option>   
+                {% endfor %}
+            </select>
+        </td>
+        
+        <td data-field="estado">
+            <select name="Estado" class="form-control-plaintext text-end" disabled style="width: 150px; text-align-last: right;">
+                <option value="True" {% if consultor.Estado %}selected{% endif %}>Activo</option>
+                <option value="False" {% if not consultor.Estado %}selected{% endif %}>Inactivo</option>
+            </select>
+        </td>
+        
+        <td data-field="fecha_ingreso">
+            <input type="date" name="Fecha_Ingreso" class="form-control-plaintext text-start" value="{{ consultor.Fecha_Ingreso|date:'Y-m-d' }}" readonly style="width: 150px;">
+        </td>
+        
+        <td data-field="fecha_retiro">
+            <input type="date" name="Fecha_Retiro" class="form-control-plaintext text-start" value="{{ consultor.Fecha_Retiro|date:'Y-m-d' }}" readonly style="width: 150px;">
+        </td>
+        
+        <td data-field="fecha_operacion">
+            <input type="date" name="Fecha_Operacion" class="form-control-plaintext text-start" value="{{ consultor.Fecha_Operacion|date:'Y-m-d' }}" readonly style="width: 150px;">
+        </td>
+        
+        <td data-field="certificado">
+            <select name="Certificado" class="form-control-plaintext text-end" disabled style="width: 150px; text-align-last: right;">
+                <option value="True" {% if consultor.Certificado %}selected{% endif %}>SI</option>
+                <option value="False" {% if not consultor.Certificado %}selected{% endif %}>NO</option>
+            </select>
+        </td>
+        
+        <td data-field="certificaciones">
+            <input type="text" name="Certificaciones" class="form-control-plaintext text-end" value="{{ consultor.Certificaciones|default_if_none:'' }}" readonly style="width: 150px; white-space: normal; overflow: visible;">
+        </td>
+        
+        <td data-field="fecha_nacimiento">
+            <input type="date" name="Fecha_Nacimiento" class="form-control-plaintext text-start" value="{{ consultor.Fecha_Nacimiento|date:'Y-m-d' }}" readonly style="width: 150px;">
+        </td>
+        
+        <td data-field="año_evaluacion">
+            <input type="number" name="Anio_Evaluacion" class="form-control-plaintext text-start" value="{{ consultor.Anio_Evaluacion|default_if_none:'' }}" readonly style="width: 150px;">
+        </td>
+        
+        <td data-field="nota_evaluacion">
+            <input type="text" name="NotaEvaluacion" class="form-control-plaintext text-start" value="{{ consultor.NotaEvaluacion|default_if_none:'' }}" readonly style="width: 150px;">
+        </td>
+        
+        <td data-field="telefono">
+            <input type="number" name="Telefono" class="form-control-plaintext text-start" value="{{ consultor.Telefono|default_if_none:'' }}" readonly style="width: 150px;">
+        </td>
+        
+        <td data-field="direccion">
+            <input type="text" name="Direccion" class="form-control-plaintext text-end" value="{{ consultor.Direccion|default_if_none:'' }}" readonly style="width: 150px; white-space: normal; overflow: visible;" maxlength="255">
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="100">No hay datos disponibles.</td>
+    </tr>
+    {% endfor %}
+</tbody>
                     </table>
                 </form>
             </div>

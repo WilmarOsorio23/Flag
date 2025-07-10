@@ -52,16 +52,58 @@
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'empleados_estudios_eliminar' %}">
                 {% csrf_token %}
-                <table class="table table-primary">
+                <table class="table table-primary" id="infoEstudiosTable">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Nombre Empleado</th>
-                            <th scope="col">Título</th>
-                            <th scope="col">Institución</th>
-                            <th scope="col">Fecha de Inicio</th>
-                            <th scope="col">Fecha de Fin</th>
-                            <th scope="col">Fecha de Graduación</th>
+                            <th data-sort="nombre" class="sortable" data-direction="default">
+                                Nombre Empleado
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="titulo" class="sortable" data-direction="default">
+                                Título
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="institucion" class="sortable" data-direction="default">
+                                Institución
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="fecha_inicio" class="sortable" data-direction="default">
+                                Fecha de Inicio
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="fecha_fin" class="sortable" data-direction="default">
+                                Fecha de Fin
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="fecha_graduacion" class="sortable" data-direction="default">
+                                Fecha de Graduación
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -69,12 +111,12 @@
                         <tr>
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ estudio.id }}"></td>
                             <!--<td><input type="text" name="documentoId_{{ forloop.counter }}" class="form-control-plaintext" value="{{ estudio.documentoId.Documento }}" readonly></td>-->
-                            <td><input type="text" name="NombreEmpleado" class="form-control-plaintext" value="{{ estudio.documentoId.Nombre }}" readonly></td>
-                            <td><input type="text" name="titulo" class="form-control-plaintext" value="{{ estudio.titulo }}" readonly></td>
-                            <td><input type="text" name="institucion" class="form-control-plaintext" value="{{ estudio.institucion }}" readonly></td>
-                            <td><input type="date" name="fecha_Inicio" class="form-control-plaintext" value="{{estudio.fecha_Inicio|date:'Y-m-d' }}" readonly></td>
-                            <td><input type="date" name="fecha_Fin" class="form-control-plaintext" value="{{estudio.fecha_Fin|date:'Y-m-d'}}" readonly></td>
-                            <td><input type="date" name="fecha_Graduacion" class="form-control-plaintext" value="{{ estudio.fecha_Graduacion|date:'Y-m-d' }}" readonly></td>
+                            <td data-field="nombre"><input type="text" name="NombreEmpleado" class="form-control-plaintext d-block text-start" value="{{ estudio.documentoId.Nombre }}" readonly></td>
+                            <td data-field="titulo"><input type="text" name="titulo" class="form-control-plaintext d-block text-start" value="{{ estudio.titulo }}" readonly></td>
+                            <td data-field="institucion"><input type="text" name="institucion" class="form-control-plaintext d-block text-start" value="{{ estudio.institucion }}" readonly></td>
+                            <td data-field="fecha_inicio"><input type="date" name="fecha_Inicio" class="form-control-plaintext d-block text-end" value="{{estudio.fecha_Inicio|date:'Y-m-d' }}" readonly></td>
+                            <td data-field="fecha_fin"><input type="date" name="fecha_Fin" class="form-control-plaintext d-block text-end" value="{{estudio.fecha_Fin|date:'Y-m-d'}}" readonly></td>
+                            <td data-field="fecha_graduacion"><input type="date" name="fecha_Graduacion" class="form-control-plaintext d-block text-end" value="{{ estudio.fecha_Graduacion|date:'Y-m-d' }}" readonly></td>
                         </tr>
                         {% endfor %}
                     </tbody>
