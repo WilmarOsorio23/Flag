@@ -128,29 +128,78 @@
       {% if show_data %}
         <!-- Tabla de historial de cargos -->
         <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
-          <table class="table table-bordered table-hover table-primary w-100">
+          <table class="table table-bordered table-hover table-primary w-100" id="infoHistorialCargosTable">
             <thead>
               <tr>
-                <th>Documento</th>
-                <th>Nombre</th>
-                <th>Linea</th>
-                <th>Cargo</th>
-                <th>Descripción del Cargo</th>
-                <th>Fecha Inicio</th>
-                <th>Fecha Fin</th>
+                <th th data-sort="documento" class="sortable" data-direction="default">
+                  Documento
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th th data-sort="nombre" class="sortable" data-direction="default">
+                  Nombre
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th th data-sort="linea" class="sortable" data-direction="default">
+                  Linea
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th th data-sort="cargo" class="sortable" data-direction="default">
+                  Cargo
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th th data-sort="descripcion" class="sortable" data-direction="default">
+                  Descripción del Cargo
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th th data-sort="fecha_inicio" class="sortable" data-direction="default">
+                  Fecha Inicio
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th th data-sort="fecha_fin" class="sortable" data-direction="default">
+                  Fecha Fin
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>                
+                </th>
               </tr>
             </thead>
             <tbody>
               {% if historial_cargos_info %}
                 {% for historial in historial_cargos_info %}
                 <tr>
-                    <td class="text-end">{{ historial.Documento }}</td>
-                    <td class="text-start">{{ historial.Nombre }}</td>
-                    <td class="text-start">{{ historial.Linea }}</td>
-                    <td class="text-start">{{ historial.Cargo }}</td>
-                    <td class="text-start">{{ historial.DescripcionCargo }}</td>
-                    <td>{{ historial.FechaInicio }}</td>
-                    <td>{{ historial.FechaFin }}</td>
+                    <td data-field="documento" class="text-end">{{ historial.Documento }}</td>
+                    <td data-field="nombre" class="text-start">{{ historial.Nombre }}</td>
+                    <td data-field="linea" class="text-start">{{ historial.Linea }}</td>
+                    <td data-field="cargo" class="text-start">{{ historial.Cargo }}</td>
+                    <td data-field="descripcion" class="text-start">{{ historial.DescripcionCargo }}</td>
+                    <td data-field="fecha_inicio" class="text-end">{{ historial.FechaInicio }}</td>
+                    <td data-field="fecha_fin" class="text-end">{{ historial.FechaFin }}</td>
                 </tr>
                 {% endfor %}
               {% else %}

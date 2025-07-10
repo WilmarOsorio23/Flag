@@ -38,44 +38,226 @@
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'empleado_eliminar' %}">
                 {% csrf_token %}
-                <table class="table table-primary">
+                <table class="table table-primary" id="infoEmpleadosTable">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Tipo Documento</th>
-                            <th scope="col">Documento</th>
-                            <th scope="col">Nombre</th>
-                            <th scope="col">Fecha Nacimiento</th>
-                            <th scope="col">Fecha Ingreso</th>
-                            <th scope="col">Fecha Operación</th>
-                            <th scope="col">Módulo</th>
-                            <th scope="col">Perfil</th>
-                            <th scope="col">Línea</th>
-                            <th scope="col">Cargo</th>
-                            <th scope="col">Título Profesional</th>
-                            <th scope="col">Fecha Grado</th>
-                            <th scope="col">Universidad</th>
-                            <th scope="col">Profesión Realizada</th>
-                            <th scope="col">Academia SAP</th>
-                            <th scope="col">Certificado SAP</th>
-                            <th scope="col">Otras Certificaciones</th>
-                            <th scope="col">Postgrados</th>
-                            <th scope="col">Activo</th>
-                            <th scope="col">Fecha Retiro</th>
-                            <th scope="col">Dirección</th>
-                            <th scope="col">Ciudad</th>
-                            <th scope="col">Departamento</th>
-                            <th scope="col">Dirección Alterna</th>
-                            <th scope="col">Teléfono 1</th>
-                            <th scope="col">Teléfono 2</th>
+                            <th data-sort="tipo_documento" class="sortable" data-direction="default">
+                                Tipo Documento
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="documento" class="sortable" data-direction="default">
+                                Documento
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="nombre" class="sortable" data-direction="default">
+                                Nombre
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="fecha_nacimiento" class="sortable" data-direction="default">
+                                Fecha Nacimiento
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="fecha_ingreso" class="sortable" data-direction="default">
+                                Fecha Ingreso
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="fecha_operacion" class="sortable" data-direction="default">
+                                Fecha Operación
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="modulo" class="sortable" data-direction="default">
+                                Módulo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="perfil" class="sortable" data-direction="default">
+                                Perfil
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="linea" class="sortable" data-direction="default">
+                                Línea
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="cargo" class="sortable" data-direction="default">
+                                Cargo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>                            
+                            </th>
+                            <th data-sort="titulo_profesional" class="sortable" data-direction="default">
+                                Título Profesional
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>                            
+                            </th>
+                            <th data-sort="fecha_grado" class="sortable" data-direction="default">
+                                Fecha Grado
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="universidad" class="sortable" data-direction="default">
+                                Universidad
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="profesion" class="sortable" data-direction="default">
+                                Profesión Realizada
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="academia" class="sortable" data-direction="default">
+                                Academia SAP
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="certificado" class="sortable" data-direction="default">
+                                Certificado SAP
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="otras_certificaciones" class="sortable" data-direction="default">
+                                Otras Certificaciones
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="postgrados" class="sortable" data-direction="default">
+                                Postgrados
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="activo" class="sortable" data-direction="default">
+                                Activo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="fecha_retiro" class="sortable" data-direction="default">
+                                Fecha Retiro
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="direccion" class="sortable" data-direction="default">
+                                Dirección
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>                            
+                            </th>
+                            <th data-sort="ciudad" class="sortable" data-direction="default">
+                                Ciudad
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="departamento" class="sortable" data-direction="default">
+                                Departamento
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="direccion_alterna" class="sortable" data-direction="default">
+                                Dirección Alterna
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="telefono1" class="sortable" data-direction="default">
+                                Teléfono 1
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="telefono2" class="sortable" data-direction="default">
+                                Teléfono 2
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for empleado in empleados %}
                         <tr id="row-{{ empleado.Documento }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ empleado.Documento }}"></td>
-                            <td>
-                                {{ empleado.TipoDocumento.Nombre }}
+                            <td data-field="tipo_documento">
+                                <span class="d-block text-start">{{ empleado.TipoDocumento.Nombre }}</span>
 
                                 <!-- Modo edición: Select de TipoDocumento -->
                                 <select name="TipoDocumento" class="form-select d-none">
@@ -86,24 +268,24 @@
                                     {% endfor %}
                                 </select>
                             </td>                            
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                {{ empleado.Documento }}
-                                <input type="text" name="Documento" class="form-control-plaintext d-none" value="{{ empleado.Documento }}" readonly>
+                            <td data-field="documento">
+                                <span class="d-block text-end">{{ empleado.Documento }}</span>
+                                <input type="text" name="Documento" class="form-control-plaintext d-none text-start" value="{{ empleado.Documento }}" readonly>
                             </td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                <input type="text" name="Nombre" class="form-control-plaintext" value="{{ empleado.Nombre }}" readonly>
+                            <td data-field="nombre" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                <input type="text" name="Nombre" class="form-control-plaintext d-block text-start" value="{{ empleado.Nombre }}" readonly>
                             </td>
-                            <td>
-                                <input type="date" name="FechaNacimiento" class="form-control-plaintext" value="{{ empleado.FechaNacimiento|date:'Y-m-d' }}" readonly>
+                            <td data-field="fecha_nacimiento">
+                                <input type="date" name="FechaNacimiento" class="form-control-plaintext d-block text-end" value="{{ empleado.FechaNacimiento|date:'Y-m-d' }}" readonly>
                             </td>
-                            <td>
-                                <input type="date" name="FechaIngreso" class="form-control-plaintext" value="{{ empleado.FechaIngreso|date:'Y-m-d' }}" readonly>
+                            <td data-field="fecha_ingreso">
+                                <input type="date" name="FechaIngreso" class="form-control-plaintext d-block text-end" value="{{ empleado.FechaIngreso|date:'Y-m-d' }}" readonly>
                             </td>
-                            <td>
-                                <input type="date" name="FechaOperacion" class="form-control-plaintext" value="{{ empleado.FechaOperacion|date:'Y-m-d' }}" readonly>
+                            <td data-field="fecha_operacion">
+                                <input type="date" name="FechaOperacion" class="form-control-plaintext d-block text-end" value="{{ empleado.FechaOperacion|date:'Y-m-d' }}" readonly>
                             </td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                <select name="ModuloId" class="form-control-plaintext" disabled>
+                            <td data-field="modulo" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                <select name="ModuloId" class="form-control-plaintext d-block text-start" disabled>
                                     {% for modulo in form.fields.ModuloId.queryset %}
                                         <option value="{{ modulo.ModuloId }}" {% if empleado.ModuloId.Modulo == modulo.Modulo %}selected{% endif %}>
                                             {{ modulo.Modulo }}
@@ -111,8 +293,8 @@
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                <select name="PerfilId" class="form-control-plaintext" disabled>
+                            <td data-field="perfil" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                <select name="PerfilId" class="form-control-plaintext d-block text-start" disabled>
                                     {% for perfil in form.fields.PerfilId.queryset %}
                                         <option value="{{ perfil.PerfilId }}" {% if empleado.PerfilId.Perfil == perfil.Perfil %}selected{% endif %}>
                                             {{ perfil.Perfil }}
@@ -120,8 +302,8 @@
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                <select name="LineaId" class="form-control-plaintext" disabled>
+                            <td data-field="linea" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                <select name="LineaId" class="form-control-plaintext d-block text-start" disabled>
                                     {% for linea in form.fields.LineaId.queryset %}
                                         <option value="{{ linea.LineaId }}" {% if empleado.LineaId.Linea == linea.Linea %}selected{% endif %}>
                                             {{ linea.Linea }}
@@ -129,8 +311,8 @@
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                <select name="CargoId" class="form-control-plaintext" disabled>
+                            <td data-field="cargo" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                <select name="CargoId" class="form-control-plaintext d-block text-start" disabled>
                                     {% for cargo in form.fields.CargoId.queryset %}
                                         <option value="{{ cargo.CargoId }}" {% if empleado.CargoId.Cargo == cargo.Cargo %}selected{% endif %}>
                                             {{ cargo.Cargo }}
@@ -138,46 +320,46 @@
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td><input type="text" name="TituloProfesional" class="form-control-plaintext" value="{{ empleado.TituloProfesional }}" readonly></td>
-                            <td><input type="date" name="FechaGrado" class="form-control-plaintext" value="{{ empleado.FechaGrado|date:'Y-m-d' }}" readonly></td>
-                            <td><input type="text" name="Universidad" class="form-control-plaintext" value="{{ empleado.Universidad }}" readonly></td>
-                            <td><input type="text" name="ProfesionRealizada" class="form-control-plaintext" value="{{ empleado.ProfesionRealizada }}" readonly></td>
-                            <td>
-                                <select name="AcademiaSAP" class="form-control-plaintext" disabled>
+                            <td data-field="titulo"><input type="text" name="TituloProfesional" class="form-control-plaintext d-block text-start" value="{{ empleado.TituloProfesional }}" readonly></td>
+                            <td data-field="fecha_grado"><input type="date" name="FechaGrado" class="form-control-plaintext d-block text-end" value="{{ empleado.FechaGrado|date:'Y-m-d' }}" readonly></td>
+                            <td data-field="universidad"><input type="text" name="Universidad" class="form-control-plaintext d-block text-start" value="{{ empleado.Universidad }}" readonly></td>
+                            <td data-field="profesion"><input type="text" name="ProfesionRealizada" class="form-control-plaintext d-block text-start" value="{{ empleado.ProfesionRealizada }}" readonly></td>
+                            <td data-field="academia">
+                                <select name="AcademiaSAP" class="form-control-plaintext d-block text-start" disabled>
                                     <option value="1" {% if empleado.AcademiaSAP == 1 %}selected{% endif %}>Sí</option>
                                     <option value="0" {% if empleado.AcademiaSAP == 0 %}selected{% endif %}>No</option>
                                 </select>                                
-                            <td>
-                                <select name="CertificadoSAP" class="form-control-plaintext" disabled>
+                            <td data-field="certificado">
+                                <select name="CertificadoSAP" class="form-control-plaintext d-block text-start" disabled>
                                     <option value="1" {% if empleado.CertificadoSAP == 1 %}selected{% endif %}>Sí</option>
                                     <option value="0" {% if empleado.CertificadoSAP == 0 %}selected{% endif %}>No</option>
                                 </select>
                             </td>
-                            <td>
-                                <select name="OtrasCertificaciones" class="form-control-plaintext" disabled>
+                            <td data-field="otras_certificaciones">
+                                <select name="OtrasCertificaciones" class="form-control-plaintext d-block text-start" disabled>
                                     <option value="1" {% if empleado.OtrasCertificaciones == 1 %}selected{% endif %}>Sí</option>
                                     <option value="0" {% if empleado.OtrasCertificaciones == 0 %}selected{% endif %}>No</option>
                                 </select>
                             </td>
-                            <td>
-                                <select name="Postgrados" class="form-control-plaintext" disabled>
+                            <td data-field="postgrados">
+                                <select name="Postgrados" class="form-control-plaintext d-block text-start" disabled>
                                     <option value="1" {% if empleado.Postgrados == 1 %}selected{% endif %}>Sí</option>
                                     <option value="0" {% if empleado.Postgrados == 0 %}selected{% endif %}>No</option>
                                 </select>
                             </td>
-                            <td>
-                                <select name="Activo" class="form-control-plaintext" disabled>
+                            <td data-field="activo">
+                                <select name="Activo" class="form-control-plaintext d-block text-start" disabled>
                                     <option value="1" {% if empleado.Activo == 1 %}selected{% endif %}>Sí</option>
                                     <option value="0" {% if empleado.Activo == 0 %}selected{% endif %}>No</option>
                                 </select>
                             </td>
-                            <td><input type="date" name="FechaRetiro" class="form-control-plaintext" value="{{ empleado.FechaRetiro|date:'Y-m-d' }}" readonly></td>
-                            <td><input type="text" name="Direccion" class="form-control-plaintext" value="{{ empleado.Direccion|default:"-" }}" readonly></td>
-                            <td><input type="text" name="Ciudad" class="form-control-plaintext" value="{{ empleado.Ciudad|default:"-" }}" readonly></td>
-                            <td><input type="text" name="Departamento" class="form-control-plaintext" value="{{ empleado.Departamento|default:"-" }}" readonly></td>
-                            <td><input type="text" name="DireccionAlterna" class="form-control-plaintext" value="{{ empleado.DireccionAlterna|default:"-" }}" readonly></td>
-                            <td><input type="text" name="Telefono1" class="form-control-plaintext" value="{{ empleado.Telefono1|default:"-" }}" readonly></td>
-                            <td><input type="text" name="Telefono2" class="form-control-plaintext" value="{{ empleado.Telefono2|default:"-" }}" readonly></td>
+                            <td data-field="fecha_retiro"><input type="date" name="FechaRetiro" class="form-control-plaintext d-block text-end" value="{{ empleado.FechaRetiro|date:'Y-m-d' }}" readonly></td>
+                            <td data-field="dirreccion"><input type="text" name="Direccion" class="form-control-plaintext d-block text-start" value="{{ empleado.Direccion|default:"-" }}" readonly></td>
+                            <td data-field="ciudad"><input type="text" name="Ciudad" class="form-control-plaintext d-block text-start" value="{{ empleado.Ciudad|default:"-" }}" readonly></td>
+                            <td data-field="departamento"><input type="text" name="Departamento" class="form-control-plaintext d-block text-start" value="{{ empleado.Departamento|default:"-" }}" readonly></td>
+                            <td data-field="direccion_alterna"><input type="text" name="DireccionAlterna" class="form-control-plaintext d-block text-start" value="{{ empleado.DireccionAlterna|default:"-" }}" readonly></td>
+                            <td data-field="telefono1"><input type="number" name="Telefono1" class="form-control-plaintext d-block text-end" value="{{ empleado.Telefono1|default:"-" }}" readonly></td>
+                            <td data-field="telefono2"><input type="number" name="Telefono2" class="form-control-plaintext d-block text-end" value="{{ empleado.Telefono2|default:"-" }}" readonly></td>
                         </tr>
                         {% empty %}
                         <tr>

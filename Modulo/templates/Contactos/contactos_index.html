@@ -53,34 +53,114 @@
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'contactos_eliminar' %}">
                 {% csrf_token %}
-                <table class="table table-primary">
+                <table class="table table-primary" id="infoContactosTable">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Cliente</th>
-                            <th scope="col">Contacto</th>
-                            <th scope="col">Nombre</th>
-                            <th scope="col">Telefono</th>
-                            <th scope="col">Telefono Fijo</th>
-                            <th scope="col">Correo</th>
-                            <th scope="col">Direccion</th>
-                            <th scope="col">Cargo</th>
-                            <th scope="col">Activo</th>
+                            <th data-sort="cliente" class="sortable" data-direction="default">
+                                Cliente
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>                                
+                            </th>
+                            <th data-sort="contacto" class="sortable" data-direction="default">
+                                Contacto
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="nombre" class="sortable" data-direction="default">
+                                Nombre
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="telefono" class="sortable" data-direction="default">
+                                Telefono
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>                                
+                            </th>
+                            <th data-sort="telefono_fijo" class="sortable" data-direction="default">
+                                Telefono Fijo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>                                
+                            </th>
+                            <th data-sort="correo" class="sortable" data-direction="default">
+                                Correo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>                                
+                            </th>
+                            <th data-sort="direccion" class="sortable" data-direction="default">
+                                Direccion
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>                                
+                            </th>
+                            <th data-sort="cargo" class="sortable" data-direction="default">
+                                Cargo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>                                
+                            </th>
+                            <th data-sort="action" class="sortable" data-direction="default">
+                                Activo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>                                
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for contacto in contactos %}
                             <tr id="row-{{contacto.id}}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{contacto.id}}"></td>
-                            <td><input type="text" name="ClienteId" value="{{ contacto.clienteId.Nombre_Cliente}}" class="form-control-plaintext" readonly></td>
-                            <td><input type="text" name="ContactoId" value="{{ contacto.contactoId.Descripcion}}" class="form-control-plaintext" readonly></td>
-                            <td><input type="text" name="nombre" value="{{ contacto.Nombre}}" class="form-control-plaintext"></td>
-                            <td><input type="text" name="telefono" value="{{ contacto.Telefono}}" class="form-control-plaintext"></td>
-                            <td><input type="text" name="telefono_fijo" value="{{ contacto.telefono_fijo }}" class="form-control-plaintext"></td>
-                            <td><input type="text" name="correo" value="{{ contacto.correo }}" class="form-control-plaintext"></td>
-                            <td><input type="text" name="Direccion" value="{{ contacto.Direccion}}" class="form-control-plaintext"></td>
-                            <td><input type="text" name="Cargo" value="{{contacto.Cargo}}" class="form-control-plaintext"></td>
-                            <td><input type="text" name="Activo" value="{{ contacto.activo}}" class="form-control-plaintext"></td>
+                            <td data-field="cliente">
+                                <input type="text" name="ClienteId" value="{{ contacto.clienteId.Nombre_Cliente}}" class="form-control-plaintext text-start" readonly></td>
+                            <td data-field="contacto">
+                                <input type="text" name="ContactoId" value="{{ contacto.contactoId.Descripcion}}" class="form-control-plaintext text-start" readonly>
+                            </td>
+                            <td data-field="nombre">
+                                <input type="text" name="nombre" value="{{ contacto.Nombre}}" class="form-control-plaintext text-start" readonly>
+                            </td>
+                            <td data-field="telefono">
+                                <input type="number" name="telefono" value="{{ contacto.Telefono}}" class="form-control-plaintext text-end" readonly>
+                            </td>
+                            <td data-field="telefono_fijo">
+                                <input type="number" name="telefono_fijo" value="{{ contacto.telefono_fijo }}" class="form-control-plaintext text-end" readonly>
+                            </td>
+                            <td data-field="correo">
+                                <input type="text" name="correo" value="{{ contacto.correo }}" class="form-control-plaintext text-start" readonly>
+                            </td>
+                            <td data-field="direccion">
+                                <input type="text" name="Direccion" value="{{ contacto.Direccion}}" class="form-control-plaintext text-start" readonly>
+                            </td>
+                            <td data-field="cargo">
+                                <input type="text" name="Cargo" value="{{contacto.Cargo}}" class="form-control-plaintext text-start" readonly>
+                            </td>
+                            <td data-field="activo">
+                                <input type="text" name="Activo" value="{{ contacto.activo}}" class="form-control-plaintext text-start" readonly>
+                            </td>
                          {% empty %}
                         <tr>
                             <td colspan="6">No hay datos disponibles.</td>
