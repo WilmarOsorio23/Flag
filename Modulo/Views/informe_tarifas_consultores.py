@@ -60,6 +60,7 @@ def obtener_tarifas_consultores(consultores, tarifas, anios):
         # Crear el diccionario con los datos del consultor y sus tarifas
         datos_consultor = {
             'linea': consultor.LineaId.Linea,
+            'empresa': consultor.Empresa,  # <-- Agregado
             'documento': consultor.Documento,
             'nombre': consultor.Nombre,
             'certificado': 'SI' if consultor.Certificado else 'NO',
@@ -173,6 +174,7 @@ def exportar_tarifas_consultores_excel(request):
                 for tarifa in consultor['tarifas'][anio]:
                     data.append([
                         consultor['linea'],
+                        consultor['empresa'],  # <-- Agregado
                         consultor['documento'],
                         consultor['nombre'],
                         consultor['certificado'],
@@ -196,7 +198,7 @@ def exportar_tarifas_consultores_excel(request):
 
             # Agregar encabezados
             encabezados = [ 
-                "Linea", "Documento", "Nombre", "Certificado", "Perfil", "Modulo", 
+                "Linea", "Empresa", "Documento", "Nombre", "Certificado", "Perfil", "Modulo", 
                 "Año", "Mes", "Cliente", "Tarifa por hora", "Tarifa por día", 
                 "Tarifa por mes", "Moneda", "iva", "rteFte"
             ]

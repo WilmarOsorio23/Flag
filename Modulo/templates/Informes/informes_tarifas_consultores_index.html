@@ -17,6 +17,29 @@
             <form method="GET">
                 <!-- Filtros en la parte superior: Consultor, Línea, Año -->
                 <div class="row mb-3">
+                    <!--Filtro Año -->
+                    <div class="col-md-3">
+                        <label for="anio" class="form-label">{{ form.anio.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownAnio"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Años"
+                            >
+                                Seleccione Años
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownAnio">
+                                {% for checkbox in form.anio %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
 
                     <!--Filtro Consultor --> 
                     <div class="col-md-3">
@@ -28,12 +51,6 @@
                     <div class="col-md-3">
                         <label for="linea">{{ form.LineaId.label }}</label>
                         {{ form.LineaId }}
-                    </div>
-
-                    <!--Filtro Año -->
-                    <div class="col-md-3">
-                        <label for="anio">{{ form.anio.label }}</label>
-                        {{ form.anio }}
                     </div>
                 </div>
                     <!-- Botones debajo de filtros: Buscar y Descarga Excel -->
@@ -77,6 +94,14 @@
                         <tr>
                             <th data-sort="linea" class="sortable" data-direction="default">
                                 Línea
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="empresa" class="sortable" data-direction="default">
+                                Empresa
                                 <span class="sort-icon">
                                     <i class="fas fa-sort sort-icon-default"></i>
                                     <i class="fas fa-sort-up sort-icon-asc"></i>
@@ -205,6 +230,7 @@
                                 {% for tarifa in tarifas %}
                                     <tr>
                                         <td class="text-start">{{ consultor.linea }}</td>
+                                        <td class="text-start">{{ consultor.empresa }}</td>
                                         <td class="text-end">{{ consultor.documento }}</td>
                                         <td class="text-start">{{ consultor.nombre }}</td>
                                         <td>{{ consultor.certificado }}</td>

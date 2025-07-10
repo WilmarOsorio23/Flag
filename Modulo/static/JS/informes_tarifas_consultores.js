@@ -138,4 +138,31 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!form) console.error('❌ No se encontró ningún formulario');
     }
 
+    // =============================
+    // SOPORTE PARA DROPDOWN DE AÑOS (igual que Mes)
+    // =============================
+    const anioDropdownBtn = document.getElementById('dropdownAnio');
+    const anioDropdownMenu = anioDropdownBtn ? anioDropdownBtn.nextElementSibling : null;
+    if (anioDropdownBtn && anioDropdownMenu) {
+        anioDropdownMenu.addEventListener('change', function () {
+            const checked = anioDropdownMenu.querySelectorAll('input[type="checkbox"]:checked');
+            if (checked.length > 0) {
+                anioDropdownBtn.textContent = Array.from(checked).map(cb => cb.value).join(', ');
+            } else {
+                anioDropdownBtn.textContent = 'Seleccione Años';
+            }
+        });
+        // Para que funcione al hacer click en el checkbox
+        anioDropdownMenu.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', function () {
+                const checked = anioDropdownMenu.querySelectorAll('input[type="checkbox"]:checked');
+                if (checked.length > 0) {
+                    anioDropdownBtn.textContent = Array.from(checked).map(cb => cb.value).join(', ');
+                } else {
+                    anioDropdownBtn.textContent = 'Seleccione Años';
+                }
+            });
+        });
+    }
+
 });

@@ -1781,8 +1781,8 @@ class TarifaConsultorFilterForm(forms.Form):
     )
     anio = forms.MultipleChoiceField(
         choices=[],  
-        required=False, 
-        label='Año',
+        required=True, 
+        label='Año *Obligatorio*',
         widget=forms.CheckboxSelectMultiple()
     )
 
