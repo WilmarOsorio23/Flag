@@ -6,8 +6,40 @@
     <h2>Crear Nueva Tarifa de Consultor</h2>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        <div id="form-fields">
+            {# Renderizar los campos uno a uno para insertar la empresa después de DocumentoId #}
+            {% for field in form.visible_fields %}
+                <div class="mb-3">
+                    {{ field.label_tag }}
+                    {{ field }}
+                </div>
+                {% if field.name == 'documentoId' %}
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Empresa</strong></label>
+                        <input type="text" id="empresa-consultor-value" class="form-control-plaintext" value="" readonly>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
         <button type="submit" class="btn btn-primary">Guardar</button>
         <a href="{% url 'tarifa_consultores_index' %}" class="btn btn-danger">Cancelar</a>
     </form>
+    <script>
+    // Este script obtiene la empresa del consultor seleccionado
+    const consultoresEmpresas = {};
+    {% for consultor in form.fields.documentoId.queryset %}
+        consultoresEmpresas['{{ consultor.Documento }}'] = `{{ consultor.Empresa|escapejs }}`;
+    {% endfor %}
+    const documentoSelect = document.getElementById('id_documentoId');
+    const empresaInput = document.getElementById('empresa-consultor-value');
+    if (documentoSelect && empresaInput) {
+        function updateEmpresa() {
+            const selected = documentoSelect.value;
+            empresaInput.value = consultoresEmpresas[selected] || '';
+        }
+        documentoSelect.addEventListener('change', updateEmpresa);
+        // Inicializar al cargar
+        updateEmpresa();
+    }
+    </script>
 {% endblock %}

@@ -57,6 +57,7 @@
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
                             <th scope="col">Nombre Consultor</th>
+                            <th scope="col">Empresa</th>
                             <th scope="col">Año</th>
                             <th scope="col">Mes</th>
                             <th scope="col">Cliente ID</th>
@@ -74,6 +75,7 @@
                          <tr id="row-{{ tarifa.id }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ tarifa.id }}"></td>
                             <td><input type="text" name="ConsultorNombre" class="form-control-plaintext" value="{{ tarifa.documentoId.Nombre}}" readonly></td>
+                            <td><input type="text" name="Empresa" class="form-control-plaintext empresa-field" value="{{ tarifa.documentoId.Empresa }}" readonly></td>
                             <td><input type="text" name="anio" class="form-control-plaintext" value="{{ tarifa.anio }}" readonly></td>
                             <td><input type="text" name="mes" class="form-control-plaintext" value="{{ tarifa.mes }}" readonly></td>
                             <td><input type="text" name="clienteID" class="form-control-plaintext" value="{{ tarifa.clienteID.Nombre_Cliente }}" readonly></td>

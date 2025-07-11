@@ -141,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Convertir inputs en editables
         let editables = ["valorHora", "valorDia", "valorMes","moneda", "iva", "rteFte"];
+        // El campo Empresa nunca debe ser editable
         
         for (let i = 0; i < editables.length; i++) {
             let edit = row.querySelector(`[name="${editables[i]}"]`);
