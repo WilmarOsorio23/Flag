@@ -41,8 +41,8 @@
         <div class="table-responsive">
             <form id="delete-form" method="POST">
                 {% csrf_token %}
-                <table class="table table-bordered table-sm">
-                    <thead class="table-light">
+                <table class="table table-primary" id="facturacionConsultoresTable">
+                    <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
                             <th>Año</th>
@@ -71,7 +71,6 @@
                             <th>% Dif</th>
                             <th>Diferencia Bruta</th>
                             <th>Observaciones</th>
-
                         </tr>
                     </thead>
                     <tbody>
@@ -149,6 +148,30 @@
         </div>
     </div>
 </div>
+
+<!-- Controles de paginación -->
+{% if total_paginas > 1 %}
+<div class="d-flex justify-content-center align-items-center my-3">
+    <nav aria-label="Paginación">
+        <ul class="pagination">
+            <li class="page-item {% if pagina_actual == 1 %}disabled{% endif %}">
+                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value|urlencode }}&{% endif %}{% endfor %}page={{ pagina_actual|add:'-1' }}">Anterior</a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link">Página {{ pagina_actual }} de {{ total_paginas }}</span>
+            </li>
+            <li class="page-item {% if pagina_actual == total_paginas %}disabled{% endif %}">
+                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value|urlencode }}&{% endif %}{% endfor %}page={{ pagina_actual|add:'1' }}">Siguiente</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+{% endif %}
+
+<!-- Mensaje si no hay filtros -->
+{% if mensaje %}
+<div class="alert alert-info text-center mt-3">{{ mensaje }}</div>
+{% endif %}
 <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
     <span id="alert-icon" class="alert-heading"></span>
     <span id="alert-message"></span>
