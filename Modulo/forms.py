@@ -2566,3 +2566,14 @@ class FacturacionClientesFilterForm(forms.Form):
             ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
         ]
         self.fields['Mes'].choices = [('', 'Seleccione el mes')] + meses    
+
+class TipoPagareForm(forms.ModelForm):
+    class Meta:
+        model = TipoPagare
+        fields = ['Tipo_PagareId', 'Desc_Tipo_Pagare']
+        widgets = {
+            'Desc_Tipo_Pagare': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la descripción del tipo de pagaré'}),
+        }
+        labels = {
+            'Desc_Tipo_Pagare': 'Descripción del Tipo de Pagaré',
+        }

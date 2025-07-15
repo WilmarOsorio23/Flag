@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Nuevo Tipo de Pagaré{% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Crear Tipo de Pagaré</h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Código</label>
+                {{ form.Tipo_PagareId }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                {{ form.Desc_Tipo_Pagare }}
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="{% url 'tipo_pagare_index' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

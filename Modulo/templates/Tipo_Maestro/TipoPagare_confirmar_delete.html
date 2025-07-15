@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %} Confirmar Eliminación {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-body">
+        <h5>¿Eliminar tipo de pagaré "{{ tipo_pagare.Desc_Tipo_Pagare }}"?</h5>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Confirmar</button>
+            <a href="{% url 'tipo_pagare_index' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
