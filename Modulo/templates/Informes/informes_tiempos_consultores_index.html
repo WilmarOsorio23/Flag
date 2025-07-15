@@ -143,31 +143,87 @@
       {% if show_data %}
         <!-- Tabla de tiempos consultores -->
         <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
-          <table class="table table-bordered table-hover table-primary w-100">
+          <table class="table table-bordered table-hover table-primary w-100" id="infoTiemposClienteTable">
             <thead>
               <tr>
-                <th>Documento</th>
-                <th>Nombre Consultor</th>
-                <th>Año</th>
-                <th>Mes</th>
-                <th>Línea</th>
-                <th>Cliente</th>
-                <th>Módulo</th>
-                <th>Horas</th>
+                <th data-sort="documento" class="sortable" data-direction="default">
+                  Documento
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="nombre" class="sortable" data-direction="default">
+                  Nombre Consultor
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="anio" class="sortable" data-direction="default">
+                  Año
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="mes" class="sortable" data-direction="default">
+                  Mes
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="linea" class="sortable" data-direction="default">
+                  Línea
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="cliente" class="sortable" data-direction="default">
+                  Cliente
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="modulo" class="sortable" data-direction="default">
+                  Módulo
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="horas" class="sortable" data-direction="default">
+                  Horas
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>        
+                </th>
               </tr>
             </thead>
             <tbody>
               {% if tiempos_info %}
                 {% for registro in tiempos_info %}
                 <tr>
-                  <td class="text-end">{{ registro.Documento }}</td>
-                  <td class="text-start">{{ registro.Nombre }}</td>
-                  <td class="text-end">{{ registro.Anio }}</td>
-                  <td class="text-end">{{ registro.Mes }}</td>
-                  <td class="text-start">{{ registro.Linea }}</td>
-                  <td class="text-start">{{ registro.Cliente }}</td>
-                  <td class="text-start">{{ registro.Modulo }}</td>
-                  <td class="text-end">{{ registro.Horas }}</td>
+                  <td data-field="documento" class="text-end">{{ registro.Documento }}</td>
+                  <td data-field="nombre" class="text-start">{{ registro.Nombre }}</td>
+                  <td data-field="anio" class="text-end">{{ registro.Anio }}</td>
+                  <td data-field="mes" class="text-end">{{ registro.Mes }}</td>
+                  <td data-field="linea" class="text-start">{{ registro.Linea }}</td>
+                  <td data-field="cliente" class="text-start">{{ registro.Cliente }}</td>
+                  <td data-field="modulo" class="text-start">{{ registro.Modulo }}</td>
+                  <td data-field="horas" class="text-end">{{ registro.Horas }}</td>
                 </tr>
                 {% endfor %}
               {% else %}

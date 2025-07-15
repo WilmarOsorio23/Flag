@@ -175,4 +175,5 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!resetBtn) console.error('❌ No se encontró el botón con id="btn-reset-filtros"');
         if (!form) console.error('❌ No se encontró ningún formulario');
     }
+
 });

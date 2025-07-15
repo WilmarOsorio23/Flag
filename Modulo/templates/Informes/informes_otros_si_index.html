@@ -209,44 +209,142 @@
             <table class="table table-bordered table-hover table-primary w-100" id="otrosSiTable">
                 <thead>
                     <tr>
-                        <th>Documento Cliente</th>
-                        <th>Nombre Cliente</th>
-                        <th>Fecha Inicio</th>
-                        <th>Fecha Fin</th>
-                        <th>Por Vencer</th>
-                        <th>Número Otro Sí</th>
-                        <th>Contrato</th>
-                        <th>Valor Otro Sí</th>
-                        <th>Incluye IVA</th>
-                        <th>Polizas</th>
-                        <th>Descripción Polizas</th>
-                        <th>Firmado (Interno)</th>
-                        <th>Firmado Cliente</th>
-                        <th>Moneda</th>
+                        <th data-sort="documento" class="sortable" data-direction="default">
+                            Documento Cliente
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="nombre" class="sortable" data-direction="default">
+                            Nombre Cliente
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="fecha_inicio" class="sortable" data-direction="default">
+                            Fecha Inicio
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="fecha_fin" class="sortable" data-direction="default">
+                            Fecha Fin
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="por_vencer" class="sortable" data-direction="default">
+                            Por Vencer
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="numero_otro" class="sortable" data-direction="default">
+                            Número Otro Sí
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="contrato" class="sortable" data-direction="default">
+                            Contrato
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="valor" class="sortable" data-direction="default">
+                            Valor Otro Sí
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="iva" class="sortable" data-direction="default">
+                            Incluye IVA
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="polizas" class="sortable" data-direction="default">
+                            Polizas
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="descripcion" class="sortable" data-direction="default">
+                            Descripción Polizas
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="firmado" class="sortable" data-direction="default">
+                            Firmado (Interno)
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="firmado_cliente" class="sortable" data-direction="default">
+                            Firmado Cliente
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="moneda" class="sortable" data-direction="default">
+                            Moneda
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for cliente in cliente_otros_si_info %}
                         {% for otro in cliente.otros_si %}
                             <tr>
-                                <td class="text-end">{{ cliente.documento }}</td>
-                                <td class="text-start">{{ cliente.nombre }}</td>
-                                <td>{{ otro.FechaInicio|date:'d/m/Y'|default_if_none:"" }}</td>
-                                <td>{{ otro.FechaFin|date:'d/m/Y'|default_if_none:"" }}</td>
-                                <td class="text-center align-middle">
+                                <td data-field="documento" class="text-end">{{ cliente.documento }}</td>
+                                <td data-field="nombre" class="text-start">{{ cliente.nombre }}</td>
+                                <td data-field="fecha_inicio" class="text-end">{{ otro.FechaInicio|date:'d/m/Y'|default_if_none:"" }}</td>
+                                <td data-field="fecha_fin0" class="text-end">{{ otro.FechaFin|date:'d/m/Y'|default_if_none:"" }}</td>
+                                <td data-field="por_vencer" class="text-center align-middle">
                                     {% if otro.por_vencer %}
                                         <span class="text-warning" title="Por vencer" style="font-size: 1.2rem;">⚠️</span>
                                     {% endif %}
                                 </td>
-                                <td class="text-end">{{ otro.NumeroOtroSi }}</td>
-                                <td class="text-end">{{ otro.Contrato }}</td>
-                                <td class="text-end">{{ otro.ValorOtroSi|default_if_none:"" }}</td>
-                                <td>{{ otro.ValorIncluyeIva|yesno:"SI,NO" }}</td>
-                                <td>{{ otro.Polizas|yesno:"SI,NO" }}</td>
-                                <td class="text-start">{{ otro.PolizasDesc|default_if_none:"" }}</td>
-                                <td>{{ otro.FirmadoFlag|yesno:"SI,NO" }}</td>
-                                <td>{{ otro.FirmadoCliente|yesno:"SI,NO" }}</td>
-                                <td>{{ otro.moneda }}</td>
+                                <td data-field="numero_otro" class="text-end">{{ otro.NumeroOtroSi }}</td>
+                                <td data-field="contrato" class="text-end">{{ otro.Contrato }}</td>
+                                <td data-field="valor" class="text-end">{{ otro.ValorOtroSi|default_if_none:"" }}</td>
+                                <td data-field="iva" class="text-end">{{ otro.ValorIncluyeIva|yesno:"SI,NO" }}</td>
+                                <td data-field="polizas" class="text-end">{{ otro.Polizas|yesno:"SI,NO" }}</td>
+                                <td data-field="descripcion" class="text-start">{{ otro.PolizasDesc|default_if_none:"" }}</td>
+                                <td data-field="firmado" class="text-end">{{ otro.FirmadoFlag|yesno:"SI,NO" }}</td>
+                                <td data-field="firmado_cliente" class="text-end">{{ otro.FirmadoCliente|yesno:"SI,NO" }}</td>
+                                <td data-field="moneda" class="text-end">{{ otro.moneda }}</td>
                             </tr>
                         {% endfor %}
                     {% empty %}
