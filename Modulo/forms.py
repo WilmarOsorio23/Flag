@@ -1953,9 +1953,6 @@ class TarifaClienteFilterForm(forms.Form):
         anios = Tarifa_Clientes.objects.values_list('anio', flat=True).distinct()
         self.fields['anio'].choices = [(anio, anio) for anio in anios]
 
-    from django import forms
-from .models import Empleado, Linea, Cargos
-
 class HistorialCargosFilterForm(forms.Form):
     Empleado = forms.ModelMultipleChoiceField(
         queryset=Empleado.objects.all(),

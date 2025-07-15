@@ -60,12 +60,21 @@ def obtener_tarifas_consultores(consultores, tarifas, anios):
         # Crear el diccionario con los datos del consultor y sus tarifas
         datos_consultor = {
             'linea': consultor.LineaId.Linea,
-            'empresa': consultor.Empresa,  # <-- Agregado
+            'empresa': consultor.Empresa,
             'documento': consultor.Documento,
             'nombre': consultor.Nombre,
-            'certificado': 'SI' if consultor.Certificado else 'NO',
-            'perfil': consultor.PerfilId.Perfil,
+            'cliente': None,  # Se llenará en la fila
             'modulo': consultor.ModuloId.Modulo,
+            'anio': None,  # Se llenará en la fila
+            'mes': None,   # Se llenará en la fila
+            'tarifa_hora': None,  # Se llenará en la fila
+            'tarifa_dia': None,   # Se llenará en la fila
+            'tarifa_mes': None,   # Se llenará en la fila
+            'moneda': None,      # Se llenará en la fila
+            'iva': None,         # Se llenará en la fila
+            'rteFte': None,      # Se llenará en la fila
+            'perfil': consultor.PerfilId.Perfil,
+            'certificado': 'SI' if consultor.Certificado else 'NO',
             'tarifas': {anio: [] for anio in anios}
         }
 
@@ -174,21 +183,21 @@ def exportar_tarifas_consultores_excel(request):
                 for tarifa in consultor['tarifas'][anio]:
                     data.append([
                         consultor['linea'],
-                        consultor['empresa'],  # <-- Agregado
+                        consultor['empresa'],
                         consultor['documento'],
                         consultor['nombre'],
-                        consultor['certificado'],
-                        consultor['perfil'],
+                        tarifa['clienteID'],
                         consultor['modulo'],
                         anio,
                         tarifa['mes'],
-                        tarifa['clienteID'],
                         tarifa['tarifa_hora'],
                         tarifa['tarifa_dia'],
                         tarifa['tarifa_mes'],
                         tarifa['moneda'],
                         tarifa['iva'],
-                        tarifa['rteFte']
+                        tarifa['rteFte'],
+                        consultor['perfil'],
+                        consultor['certificado']
                     ]) 
         if data:
             # Crear un libro de trabajo y una hoja
@@ -198,9 +207,7 @@ def exportar_tarifas_consultores_excel(request):
 
             # Agregar encabezados
             encabezados = [ 
-                "Linea", "Empresa", "Documento", "Nombre", "Certificado", "Perfil", "Modulo", 
-                "Año", "Mes", "Cliente", "Tarifa por hora", "Tarifa por día", 
-                "Tarifa por mes", "Moneda", "iva", "rteFte"
+                "Linea", "Empresa", "Documento", "Nombre", "Cliente", "Modulo", "Año", "Mes", "Tarifa por hora", "Tarifa por día", "Tarifa por mes", "Moneda", "iva", "rteFte", "Perfil", "Certificado"
             ]
             for col_num, header in enumerate(encabezados, 1):
                 cell = ws.cell(row=1, column=col_num, value=header)
