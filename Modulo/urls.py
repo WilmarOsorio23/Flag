@@ -23,6 +23,7 @@ from Modulo.Views import Nomina
 from Modulo.Views import Informe_certificaciones
 from Modulo.Views.Informe_Pagare import exportar_pagares_excel, informe_pagares
 from Modulo.Views.Pagare import actualizar_pagare, eliminar_pagares, guardar_pagare, obtener_datos_pagares, obtener_pagares_empleado, pag_ejecutado, pag_planeado, pagare_index
+from Modulo.Views.TipoPagare import tipo_pagare_confirmar_delete, tipo_pagare_crear, tipo_pagare_descargar_excel, tipo_pagare_editar, tipo_pagare_eliminar, tipo_pagare_index
 from Modulo.models import TiposContactos
 from Modulo.views import ActividadPagare
 from . import views
@@ -424,6 +425,12 @@ urlpatterns = [
     path('informes/informes_facturacion_clientes/', informe_facturacion_clientes.informe_facturacion_clientes, name='informes_facturacion_clientes_index'),
     path('informes/informes_facturacion_clientes/descargar_informe_facturacion_clientes_excel/', informe_facturacion_clientes.descargar_reporte_excel_facturacion_clientes, name='descargar_reporte_excel_facturacion_clientes'),
 
-
+    # URLs para TipoPagare
+    path('TipoPagare/', tipo_pagare_index, name='tipo_pagare_index'),
+    path('TipoPagare/crear/', tipo_pagare_crear, name='tipo_pagare_crear'),
+    path('TipoPagare/editar/<int:id>/', tipo_pagare_editar, name='tipo_pagare_editar'),
+    path('TipoPagare/eliminar/', tipo_pagare_eliminar, name='tipo_pagare_eliminar'),
+    path('TipoPagare/confirmar_delete/<int:id>/', tipo_pagare_confirmar_delete, name='tipo_pagare_confirmar_delete'),
+    path('TipoPagare/descargar_excel/', tipo_pagare_descargar_excel, name='tipo_pagare_descargar_excel'),
     ]
 
