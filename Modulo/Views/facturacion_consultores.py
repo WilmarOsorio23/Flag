@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from Modulo.models import Facturacion_Consultores, Tiempos_Cliente, Tarifa_Consultores,Consultores,Linea,Clientes,Modulo
+from Modulo.models import Facturacion_Consultores, Tiempos_Cliente, Tarifa_Consultores, Consultores, Linea, Clientes, Modulo
 from Modulo.forms import FacturacionConsultoresFilterForm
 from decimal import Decimal
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from django.urls import reverse
@@ -11,51 +11,40 @@ from django.http import JsonResponse
 import json
 from django.shortcuts import redirect
 
-
-def filtrar_facturacion_consultores(form, facturacion_consultores):
+def filtrar_tiempos_clientes(form):
     anio = form.cleaned_data.get('Anio')
-    mes_factura  = form.cleaned_data.get('Mes')
     mes_cobro = form.cleaned_data.get('Mes_Cobro')
     consultor = form.cleaned_data.get('Consultor')
     linea = form.cleaned_data.get('LineaId')
-    
-
+    filtros = {}
     if anio:
-        facturacion_consultores = facturacion_consultores.filter(Anio=anio)
-    if mes_factura :
-        facturacion_consultores = facturacion_consultores.filter(Mes=mes_factura )
+        filtros['Anio'] = anio
     if mes_cobro:
-        facturacion_consultores = facturacion_consultores.filter(Periodo_Cobrado=mes_cobro)
+        filtros['Mes'] = mes_cobro
     if consultor:
-        facturacion_consultores = facturacion_consultores.filter(Documento=consultor)
+        filtros['Documento'] = consultor
     if linea:
-        facturacion_consultores = facturacion_consultores.filter(LineaId=linea)
+        filtros['LineaId'] = linea
+    return Tiempos_Cliente.objects.filter(**filtros)
 
-    return facturacion_consultores
-
+def obtener_tarifa(anio, mes_cobro, documento, cliente_id):
+    mes_str = str(mes_cobro).zfill(2)
+    tarifa = Tarifa_Consultores.objects.filter(anio=anio, mes=mes_str, documentoId=documento, clienteID=cliente_id).first()
+    if not tarifa:
+        tarifa_anteriores = Tarifa_Consultores.objects.filter(anio=anio, documentoId=documento, clienteID=cliente_id, mes__lt=mes_str).order_by('-mes')
+        tarifa = tarifa_anteriores.first()
+    return tarifa
 
 def facturacion_consultores(request):
     facturacion_info = []
     totales_facturacion = {}
-    # OPTIMIZACIÓN: select_related, only y defer para máxima eficiencia
-    facturacion_consultores = Facturacion_Consultores.objects.select_related(
-        'Documento', 'LineaId', 'ClienteId', 'ModuloId'
-    ).only(
-        'id', 'Anio', 'Mes', 'Documento__Nombre', 'Documento__Documento', 'LineaId__Linea', 'LineaId__LineaId',
-        'Cta_Cobro', 'Periodo_Cobrado', 'Aprobado_Por', 'Fecha_Cobro', 'Fecha_Pago',
-        'ClienteId__Nombre_Cliente', 'ClienteId__ClienteId', 'ModuloId__Modulo', 'ModuloId__ModuloId',
-        'Horas', 'Valor_Unitario', 'IVA', 'Valor_Neto', 'Retencion_Fuente', 'Valor_Pagado', 'Valor_Cobro',
-        'Factura', 'Valor_Fcta_Cliente', 'Fecha', 'Deuda_Tecnica', 'Factura_Pendiente', 'Dif', 'Diferencia_Bruta', 'Observaciones'
-    ).defer('Observaciones', 'Deuda_Tecnica', 'Factura_Pendiente')
     mensaje = ""
-    page_size = 50  # Más eficiente para grandes volúmenes
+    page_size = 50
     page = int(request.GET.get('page', 1))
 
     if request.method == 'GET':
         form = FacturacionConsultoresFilterForm(request.GET)
-
         if form.is_valid():
-            # Solo buscar si hay al menos un filtro principal aplicado
             filtros = [
                 form.cleaned_data.get('Anio'),
                 form.cleaned_data.get('Mes'),
@@ -64,172 +53,140 @@ def facturacion_consultores(request):
                 form.cleaned_data.get('LineaId'),
             ]
             if any(filtros):
-                facturacion_consultores = filtrar_facturacion_consultores(form, facturacion_consultores)
-                total_registros = facturacion_consultores.count()
-                # Usar values para máxima eficiencia si no se editan los datos
-                facturacion_consultores_page = facturacion_consultores.values(
-                    'id', 'Anio', 'Mes', 'Documento__Nombre', 'Documento__Documento', 'LineaId__Linea', 'LineaId__LineaId',
-                    'Cta_Cobro', 'Periodo_Cobrado', 'Aprobado_Por', 'Fecha_Cobro', 'Fecha_Pago',
-                    'ClienteId__Nombre_Cliente', 'ClienteId__ClienteId', 'ModuloId__Modulo', 'ModuloId__ModuloId',
-                    'Horas', 'Valor_Unitario', 'IVA', 'Valor_Neto', 'Retencion_Fuente', 'Valor_Pagado', 'Valor_Cobro',
-                    'Factura', 'Valor_Fcta_Cliente', 'Fecha', 'Dif', 'Diferencia_Bruta'
-                )[(page-1)*page_size:page*page_size]
-                for registro in facturacion_consultores_page:
+                anio = form.cleaned_data['Anio']
+                mes_factura = form.cleaned_data['Mes']  # Mes de facturación
+                meses_cobro = form.cleaned_data['Mes_Cobro']  # Lista de meses a cobrar
+                consultor = form.cleaned_data.get('Consultor')
+                linea = form.cleaned_data.get('LineaId')
+
+                # 1. Buscar registros existentes en Facturacion_Consultores para todos los meses seleccionados
+                facturacion_existente = Facturacion_Consultores.objects.filter(
+                    Anio=anio, Mes=mes_factura, Periodo_Cobrado__in=meses_cobro
+                )
+                if consultor:
+                    facturacion_existente = facturacion_existente.filter(Documento=consultor)
+                if linea:
+                    facturacion_existente = facturacion_existente.filter(LineaId=linea)
+                total_registros = facturacion_existente.count()
+                facturacion_existente_page = facturacion_existente[(page-1)*page_size:page*page_size]
+                for registro in facturacion_existente_page:
                     facturacion_info.append({
-                        'id': registro['id'],
-                        'Anio': registro['Anio'],
-                        'Mes': registro['Mes'],
-                        'Consultor': registro['Documento__Nombre'],
-                        'ConsultorId': registro['Documento__Documento'],
-                        'Linea': registro['LineaId__Linea'],
-                        'LineaId': registro['LineaId__LineaId'],
-                        'Numero_Factura': registro['Cta_Cobro'],
-                        'Periodo_Cobrado': registro['Periodo_Cobrado'],
-                        'Aprobado_Por': registro['Aprobado_Por'],
-                        'Fecha_Cobro': registro['Fecha_Cobro'],
-                        'Fecha_Pago': registro['Fecha_Pago'],
-                        'Cliente': registro['ClienteId__Nombre_Cliente'],
-                        'ClienteId': registro['ClienteId__ClienteId'],
-                        'Modulo': registro['ModuloId__Modulo'],
-                        'ModuloId': registro['ModuloId__ModuloId'],
-                        'Cantidad_Horas': registro['Horas'],
-                        'Valor_Unitario': registro['Valor_Unitario'],
-                        'IVA': registro['IVA'],
-                        'Valor_Neto': registro['Valor_Neto'],
-                        'Retencion_Fuente': registro['Retencion_Fuente'],
-                        'Valor_Pagado': registro['Valor_Pagado'],
-                        'Valor_Cobro': registro['Valor_Cobro'],
-                        'Factura': registro['Factura'],
-                        'Valor_Factura_Cliente': registro['Valor_Fcta_Cliente'],
-                        'Fecha': registro['Fecha'],
-                        'Porcentaje_Dif': registro['Dif'],
-                        'Diferencia_Bruta': registro['Diferencia_Bruta'],
-                        'Observaciones': '',  # No se carga para máxima eficiencia
-                        'Deuda_Tecnica': '',
-                        'Factura_Pendiente': '',
+                        'id': registro.id,
+                        'Anio': registro.Anio,
+                        'Mes': registro.Mes,
+                        'Consultor': registro.Documento.Nombre if hasattr(registro.Documento, 'Nombre') else str(registro.Documento),
+                        'ConsultorId': registro.Documento.Documento if hasattr(registro.Documento, 'Documento') else registro.Documento,
+                        'Linea': registro.LineaId.Linea if hasattr(registro.LineaId, 'Linea') else str(registro.LineaId),
+                        'LineaId': registro.LineaId.LineaId if hasattr(registro.LineaId, 'LineaId') else registro.LineaId,
+                        'Numero_Factura': registro.Cta_Cobro,
+                        'Periodo_Cobrado': registro.Periodo_Cobrado,
+                        'Aprobado_Por': registro.Aprobado_Por,
+                        'Fecha_Cobro': registro.Fecha_Cobro,
+                        'Fecha_Pago': registro.Fecha_Pago,
+                        'Cliente': registro.ClienteId.Nombre_Cliente if hasattr(registro.ClienteId, 'Nombre_Cliente') else str(registro.ClienteId),
+                        'ClienteId': registro.ClienteId.ClienteId if hasattr(registro.ClienteId, 'ClienteId') else registro.ClienteId,
+                        'Modulo': registro.ModuloId.Modulo if hasattr(registro.ModuloId, 'Modulo') else str(registro.ModuloId),
+                        'ModuloId': registro.ModuloId.ModuloId if hasattr(registro.ModuloId, 'ModuloId') else registro.ModuloId,
+                        'Cantidad_Horas': registro.Horas,
+                        'Valor_Unitario': registro.Valor_Unitario,
+                        'Valor_Cobro': registro.Valor_Cobro,
+                        'IVA': registro.IVA,
+                        'Valor_Neto': registro.Valor_Neto,
+                        'Retencion_Fuente': registro.Retencion_Fuente,
+                        'Valor_Pagado': registro.Valor_Pagado,
+                        'Factura': registro.Factura,
+                        'Valor_Factura_Cliente': registro.Valor_Fcta_Cliente,
+                        'Fecha': registro.Fecha,
+                        'Porcentaje_Dif': registro.Dif,
+                        'Diferencia_Bruta': registro.Diferencia_Bruta,
+                        'Observaciones': registro.Observaciones,
+                        'Deuda_Tecnica': registro.Deuda_Tecnica,
+                        'Factura_Pendiente': registro.Factura_Pendiente,
                     })
-                # Si no hay registros en facturacion_consultores, buscar en tiempos_clientes y tarifa_consultores
-                if not facturacion_info:
-                    anio = form.cleaned_data['Anio']
-                    mes_factura = form.cleaned_data['Mes']
-                    mes_cobro = form.cleaned_data['Mes_Cobro']
-                    consultor = form.cleaned_data['Consultor']
-                    linea = form.cleaned_data['LineaId']
 
-                    # Si no hay consultor, trae todos
-                    if consultor:
-                        if isinstance(consultor, str):
-                            consultor_obj = Consultores.objects.only('Documento', 'Nombre').filter(Documento=consultor).first()
-                            consultores = [consultor_obj] if consultor_obj else []
-                        else:
-                            consultores = [consultor]
-                    else:
-                        consultores = Consultores.objects.only('Documento', 'Nombre').all()
-                    # Si no hay línea, trae todas
-                    if linea:
-                        if isinstance(linea, str):
-                            linea_obj = Linea.objects.only('LineaId', 'Linea').filter(LineaId=linea).first()
-                            lineas = [linea_obj] if linea_obj else []
-                        else:
-                            lineas = [linea]
-                    else:
-                        lineas = Linea.objects.only('LineaId', 'Linea').all()
-
-                    for cons in consultores:
-                        if cons is None:
+                # 2. Buscar en Tiempos_Cliente los que NO están en Facturacion_Consultores para todos los meses seleccionados
+                claves_facturadas = set(
+                    (
+                        r.Anio, r.Mes, str(r.Periodo_Cobrado), r.Documento_id, r.ClienteId_id, r.LineaId_id, r.ModuloId_id
+                    ) for r in facturacion_existente
+                )
+                for mes_cobro in meses_cobro:
+                    # Filtrar tiempos_clientes para cada mes_cobro
+                    form.cleaned_data['Mes_Cobro'] = mes_cobro
+                    tiempos_clientes = filtrar_tiempos_clientes(form)
+                    for tiempo in tiempos_clientes:
+                        clave = (
+                            anio,
+                            mes_factura,
+                            str(mes_cobro),
+                            tiempo.Documento,
+                            tiempo.ClienteId.ClienteId if hasattr(tiempo.ClienteId, 'ClienteId') else tiempo.ClienteId,
+                            tiempo.LineaId.LineaId if hasattr(tiempo.LineaId, 'LineaId') else tiempo.LineaId,
+                            tiempo.ModuloId.ModuloId if hasattr(tiempo.ModuloId, 'ModuloId') else tiempo.ModuloId,
+                        )
+                        if clave in claves_facturadas:
+                            continue  # Ya está facturado
+                        tarifa = obtener_tarifa(anio, mes_cobro, tiempo.Documento, tiempo.ClienteId)
+                        if not tarifa:
                             continue
-                        documento_consultor = cons.Documento
-                        for lin in lineas:
-                            if lin is None:
-                                continue
-                            nombre_linea = lin.Linea
-                            linea_id = lin.LineaId
+                        valor_hora = Decimal(tarifa.valorHora or 0)
+                        porcentaje_iva = Decimal(tarifa.iva or 0) / 100
+                        porcentaje_retencion = Decimal(tarifa.rteFte or 0) / 100
+                        horas = Decimal(tiempo.Horas or 0)
+                        valor_cobro = round(valor_hora * horas, 2)
+                        iva = round(porcentaje_iva * valor_cobro, 2)
+                        retencion = round(porcentaje_retencion * valor_cobro, 2)
+                        valor_neto = round(valor_cobro + iva, 2)
+                        valor_pagado = round(valor_neto - retencion, 2)
+                        consultor_nombre = None
+                        try:
+                            consultor_obj = Consultores.objects.get(Documento=tiempo.Documento)
+                            consultor_nombre = consultor_obj.Nombre
+                        except Consultores.DoesNotExist:
+                            consultor_nombre = str(tiempo.Documento)
+                        facturacion_info.append({
+                            'id': 'new',
+                            'Anio': anio,
+                            'Mes': mes_factura,
+                            'Consultor': consultor_nombre,
+                            'ConsultorId': tiempo.Documento,
+                            'Linea': tiempo.LineaId.Linea if hasattr(tiempo.LineaId, 'Linea') else str(tiempo.LineaId),
+                            'LineaId': tiempo.LineaId.LineaId if hasattr(tiempo.LineaId, 'LineaId') else tiempo.LineaId,
+                            'Numero_Factura': '',
+                            'Periodo_Cobrado': mes_cobro,
+                            'Aprobado_Por': '',
+                            'Fecha_Cobro': '',
+                            'Fecha_Pago': '',
+                            'Cliente': tiempo.ClienteId.Nombre_Cliente if hasattr(tiempo.ClienteId, 'Nombre_Cliente') else str(tiempo.ClienteId),
+                            'ClienteId': tiempo.ClienteId.ClienteId if hasattr(tiempo.ClienteId, 'ClienteId') else tiempo.ClienteId,
+                            'Modulo': tiempo.ModuloId.Modulo if hasattr(tiempo.ModuloId, 'Modulo') else str(tiempo.ModuloId),
+                            'ModuloId': tiempo.ModuloId.ModuloId if hasattr(tiempo.ModuloId, 'ModuloId') else tiempo.ModuloId,
+                            'Cantidad_Horas': horas,
+                            'Valor_Unitario': valor_hora,
+                            'Valor_Cobro': valor_cobro,
+                            'IVA': iva,
+                            'Valor_Neto': valor_neto,
+                            'Retencion_Fuente': retencion,
+                            'Valor_Pagado': valor_pagado,
+                            'Factura': '',
+                            'Valor_Factura_Cliente': '',
+                            'Fecha': '',
+                            'Porcentaje_Dif': '',
+                            'Diferencia_Bruta': '',
+                            'Observaciones': '',
+                            'Deuda_Tecnica': '',
+                            'Factura_Pendiente': '',
+                        })
 
-                            tiempos_clientes = Tiempos_Cliente.objects.filter(Anio=anio, Mes=mes_cobro, Documento=documento_consultor, LineaId=linea_id)
-                            mes_str = str(mes_cobro).zfill(2)
-                            tarifa_consultores = Tarifa_Consultores.objects.filter(anio=anio, mes=mes_str, documentoId=documento_consultor)
-                            periodo_cobrado_real = mes_cobro
-
-                            # Si no hay tarifa para ese mes, buscar la más reciente anterior
-                            if not tarifa_consultores.exists():
-                                tarifa_anteriores = (
-                                    Tarifa_Consultores.objects
-                                    .filter(anio=anio, documentoId=documento_consultor, mes__lt=mes_str)
-                                    .order_by('-mes')
-                                )
-                                tarifa_usada = tarifa_anteriores.first()
-                                if tarifa_usada:
-                                    periodo_cobrado_real = int(tarifa_usada.mes)
-                                    tarifa_consultores = Tarifa_Consultores.objects.filter(
-                                        anio=anio,
-                                        mes=tarifa_usada.mes,
-                                        documentoId=documento_consultor
-                                    )
-                            else:
-                                tarifa_usada = tarifa_consultores.first()
-                                if tarifa_usada:
-                                    periodo_cobrado_real = int(tarifa_usada.mes)
-
-                            # Calcular los valores pero sin insertar en la base de datos
-                            for tiempo in tiempos_clientes:
-                                tarifa = tarifa_consultores.filter(clienteID=tiempo.ClienteId).first()
-
-                                if tarifa:
-                                    valor_hora = Decimal(tarifa.valorHora or 0)
-                                    horas = Decimal(tiempo.Horas or 0)
-                                    valor_cobro = round(valor_hora * horas,2 or 0)
-                                    porcentaje_iva = Decimal(tarifa.iva or 0) / 100
-                                    porcentaje_retencion = Decimal(tarifa.rteFte or 0) / 100
-                                    iva = round(porcentaje_iva * valor_cobro,2)
-                                    retencion = round(porcentaje_retencion * valor_cobro,2)
-                                    valor_neto = round(valor_cobro + iva,2)
-                                    valor_pagado = round(valor_neto - retencion,2)
-
-                                    # Aquí ya no guardamos en Facturacion_Consultores, solo calculamos y visualizamos
-                                    facturacion_info.append({
-                                        'id': id,
-                                        'Anio': anio,
-                                        'Mes': mes_factura,
-                                        'Consultor': cons.Nombre,
-                                        'ConsultorId': cons.Documento,
-                                        'Linea': nombre_linea,
-                                        'LineaId': lin.LineaId,
-                                        'Numero_Factura': None,
-                                        'Periodo_Cobrado': mes_cobro,
-                                        'Aprobado_Por': None,
-                                        'Fecha_Cobro': None,
-                                        'Fecha_Pago': None,
-                                        'Cliente': tiempo.ClienteId.Nombre_Cliente,
-                                        'ClienteId': tiempo.ClienteId.ClienteId,
-                                        'Modulo': tiempo.ModuloId.Modulo,
-                                        'ModuloId': tiempo.ModuloId.ModuloId,
-                                        'Cantidad_Horas': tiempo.Horas,
-                                        'Valor_Unitario': valor_hora,
-                                        'Valor_Cobro': valor_cobro,
-                                        'IVA': iva,
-                                        'Valor_Neto': valor_neto,
-                                        'Retencion_Fuente': retencion,
-                                        'Valor_Pagado': valor_pagado,
-                                        'Factura': None,
-                                        'Valor_Factura_Cliente': None,
-                                        'Fecha': None,
-                                        'Porcentaje_Dif': None,
-                                        'Diferencia_Bruta': None,
-                                        'Observaciones': '',
-                                        'Deuda_Tecnica': '',
-                                        'Factura_Pendiente': '',
-                                    })
-
-                # Recalcular totales SOLO si hay datos y se muestran en la página
+                # Totales
                 if facturacion_info:
                     totales_facturacion = {
-                        'Total Valor Cobro': sum([row['Valor_Cobro'] for row in facturacion_info]),
-                        'Total IVA': sum([row['IVA'] for row in facturacion_info]),
-                        'Total Valor Pagado': sum([row['Valor_Pagado'] for row in facturacion_info]),
+                        'Total Valor Cobro': sum([float(row['Valor_Cobro']) for row in facturacion_info]),
+                        'Total IVA': sum([float(row['IVA']) for row in facturacion_info]),
+                        'Total Valor Pagado': sum([float(row['Valor_Pagado']) for row in facturacion_info]),
                     }
                 else:
                     totales_facturacion = {}
-                # Paginación
                 total_paginas = (total_registros + page_size - 1) // page_size
             else:
                 mensaje = "Por favor, aplica al menos un filtro para mostrar resultados."
@@ -246,14 +203,13 @@ def facturacion_consultores(request):
 
     context = {
         'form': form,
-        'facturacion_info': facturacion_info,
+        'facturacion_info': sorted(facturacion_info, key=lambda x: (str(x['Consultor']).lower(), str(x['Cliente']).lower())),
         'TotalesFacturacion': totales_facturacion,
         'mensaje': mensaje,
         'total_paginas': total_paginas,
         'pagina_actual': page,
         'total_registros': total_registros,
     }
-
     return render(request, 'Facturacion_Consultores/facturacion_consultores_index.html', context)
 
 def safe_decimal(value):

@@ -13,7 +13,28 @@
             <div class="row mb-3">
                 <div class="col-md-2">{{ form.Anio.label }} {{ form.Anio }}</div>
                 <div class="col-md-2">{{ form.Mes.label }} {{ form.Mes }}</div>
-                <div class="col-md-3">{{ form.Mes_Cobro.label }} {{ form.Mes_Cobro }}</div>
+                <div class="col-md-3">
+                    <label for="mes" class="form-label">{{ form.Mes_Cobro.label }}</label>
+                    <div class="dropdown">
+                        <button
+                            class="btn btn-outline-primary dropdown-toggle w-100"
+                            type="button"
+                            id="dropdownMesCobro"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            data-selected-text="Seleccione Meses"
+                        >
+                            Seleccione Meses
+                        </button>
+                        <ul class="dropdown-menu w-100" aria-labelledby="dropdownMesCobro">
+                            {% for checkbox in form.Mes_Cobro %}
+                                <li class="dropdown-item">
+                                    {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
                 <div class="col-md-3">{{ form.Consultor.label }} {{ form.Consultor }}</div>
                 <div class="col-md-2">{{ form.LineaId.label }} {{ form.LineaId }}</div>
             </div>
@@ -93,13 +114,13 @@
                             <td>{{ row.Linea }}
                                 <input type="hidden" name="LineaId_{{ i }}" value="{{ row.LineaId }}">
                             </td>
-                            <td><input type="text" name="Numero_Factura_{{ i }}" value="{{ row.Numero_Factura }}" class="form-control"></td>
+                            <td><input type="text" name="Numero_Factura_{{ i }}" value="{{ row.Numero_Factura }}" class="form-control" placeholder="N° Factura"></td>
                             <td>{{ row.Periodo_Cobrado }} 
                                 <input type="hidden" name="Periodo_Cobrado_{{ i }}" value="{{ row.Periodo_Cobrado }}">
                             </td>
-                            <td><input type="text" name="Aprobado_Por_{{ i }}" value="{{ row.Aprobado_Por }}" class="form-control"></td>
-                            <td><input type="date" name="Fecha_Cobro_{{ i }}" value="{{ row.Fecha_Cobro|date:'Y-m-d' }}" class="form-control"></td>
-                            <td><input type="date" name="Fecha_Pago_{{ i }}" value="{{ row.Fecha_Pago|date:'Y-m-d' }}" class="form-control"></td>
+                            <td><input type="text" name="Aprobado_Por_{{ i }}" value="{{ row.Aprobado_Por }}" class="form-control" placeholder="Aprobado por"></td>
+                            <td><input type="date" name="Fecha_Cobro_{{ i }}" value="{{ row.Fecha_Cobro|date:'Y-m-d' }}" class="form-control" placeholder="Fecha de cobro"></td>
+                            <td><input type="date" name="Fecha_Pago_{{ i }}" value="{{ row.Fecha_Pago|date:'Y-m-d' }}" class="form-control" placeholder="Fecha de pago"></td>
                             <td>{{ row.Cliente }}
                                 <input type="hidden" name="ClienteId_{{ i }}" value="{{ row.ClienteId }}">
                             </td>
@@ -112,21 +133,21 @@
                             <td>{{ row.Valor_Unitario }}
                                 <input type="hidden" name="Valor_Unitario_{{ i }}" value="{{ row.Valor_Unitario }}">
                             </td>
-                            <td><input type="text" name="Valor_Cobro_{{ i }}" value="{{ row.Valor_Cobro }}" class="form-control"></td>
+                            <td><input type="text" name="Valor_Cobro_{{ i }}" value="{{ row.Valor_Cobro }}" class="form-control" placeholder="Valor cobro"></td>
                             <td>{{ row.IVA }}
                                 <input type="hidden" name="IVA_{{ i }}" value="{{ row.IVA }}">
                             </td>
-                            <td><input type="text" name="Valor_Neto_{{ i }}" value="{{ row.Valor_Neto }}" class="form-control"></td>
+                            <td><input type="text" name="Valor_Neto_{{ i }}" value="{{ row.Valor_Neto }}" class="form-control" placeholder="Valor neto"></td>
                             <td>{{ row.Retencion_Fuente }}
                                 <input type="hidden" name="Retencion_Fuente_{{ i }}" value="{{ row.Retencion_Fuente }}">
                             </td>
 
-                            <td><input type="text" name="Valor_Pagado_{{ i }}" value="{{ row.Valor_Pagado }}" class="form-control"></td>
-                            <td><input type="text" name="Factura_{{ i }}" value="{{ row.Factura }}" class="form-control"></td>
-                            <td><input type="text" name="Valor_Factura_Cliente_{{ i }}" value="{{ row.Valor_Factura_Cliente }}" class="form-control"></td>
-                            <td><input type="date" name="Fecha_{{ i }}" value="{{ row.Fecha|date:'Y-m-d' }}" class="form-control"></td>
-                            <td><input type="text" name="Deuda_Tecnica_{{ i }}" value="{{ row.Deuda_Tecnica }}" class="form-control"></td>
-                            <td><input type="text" name="Factura_Pendiente_{{ i }}" value="{{ row.Factura_Pendiente }}" class="form-control"></td>
+                            <td><input type="text" name="Valor_Pagado_{{ i }}" value="{{ row.Valor_Pagado }}" class="form-control" placeholder="Valor pagado"></td>
+                            <td><input type="text" name="Factura_{{ i }}" value="{{ row.Factura }}" class="form-control" placeholder="Factura"></td>
+                            <td><input type="text" name="Valor_Factura_Cliente_{{ i }}" value="{{ row.Valor_Factura_Cliente }}" class="form-control" placeholder="Valor factura cliente"></td>
+                            <td><input type="date" name="Fecha_{{ i }}" value="{{ row.Fecha|date:'Y-m-d' }}" class="form-control" placeholder="Fecha"></td>
+                            <td><input type="text" name="Deuda_Tecnica_{{ i }}" value="{{ row.Deuda_Tecnica }}" class="form-control" placeholder="Deuda técnica"></td>
+                            <td><input type="text" name="Factura_Pendiente_{{ i }}" value="{{ row.Factura_Pendiente }}" class="form-control" placeholder="Factura pendiente"></td>
                             <td id="porcentaje-dif-{{ i }}">
                                 <span>{{ row.Porcentaje_Dif|default:"0.00" }}</span>
                                 <input type="hidden" name="Porcentaje_Dif_{{ i }}" value="{{ row.Porcentaje_Dif|default:"0.00" }}">
@@ -135,12 +156,12 @@
                                 <span>{{ row.Diferencia_Bruta|default:"0.00" }}</span>
                                 <input type="hidden" name="Diferencia_Bruta_{{ i }}" value="{{ row.Diferencia_Bruta|default:"0.00" }}">
                             </td>
-                            <td><input type="text" name="Observaciones_{{ i }}" value="{{ row.Observaciones }}" class="form-control"></td>
+                            <td><input type="text" name="Observaciones_{{ i }}" value="{{ row.Observaciones }}" class="form-control" placeholder="Observaciones"></td>
 
                         </tr>
                         {% endwith %}
                         {% empty %}
-                        <tr><td colspan="30" class"text-start">No hay registros para mostrar.</td></tr>
+                        <tr><td colspan="15" class"text-start">No hay registros para mostrar.</td></tr>
                         {% endfor %} 
                     </tbody>
                 </table>

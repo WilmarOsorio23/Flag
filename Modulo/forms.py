@@ -2449,12 +2449,12 @@ class FacturacionConsultoresFilterForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
-    Mes_Cobro = forms.ChoiceField(
+    Mes_Cobro = forms.MultipleChoiceField(
         choices=[],
         required=True,
         label="Mes a Cobrar *Obligatorio*",
-        widget=forms.Select(attrs={'class': 'form-control'})
-        )
+        widget=forms.CheckboxSelectMultiple()
+    )
 
     LineaId = forms.ChoiceField(
         choices=[],
@@ -2495,7 +2495,7 @@ class FacturacionConsultoresFilterForm(forms.Form):
             ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
             ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
         ]
-        self.fields['Mes_Cobro'].choices = [('', 'Seleccione el mes')] + meses2
+        self.fields['Mes_Cobro'].choices = meses2
 
     def populate_consultor(self):
         consultores = Consultores.objects.values_list('Documento', 'Nombre').distinct()
