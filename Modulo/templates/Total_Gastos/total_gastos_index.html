@@ -62,22 +62,43 @@
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'total_gastos_eliminar' %}">
                 {% csrf_token %}
-                <table class="table table-primary">
+                <table class="table table-primary" id="tablaTotalGastos">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Año</th>
-                            <th scope="col">Mes</th>
-                            <th scope="col">Total</th>
+                            <th data-sort="anio" class="sortable" data-direction="default">
+                                Año
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="mes" class="sortable" data-direction="default">
+                                Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="total" class="sortable" data-direction="default">
+                                Total
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in total_gastos_data %}
                         <tr id="row-{{ item.id }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ item.id }}"></td>
-                            <td>{{ item.Anio }}</td>
-                            <td>{{ item.Mes }}</td>
-                            <td id="total-{{ item.Anio }}-{{ item.Mes }}">{{ item.Total }} </td>
+                            <td data-field="anio" class="text-end">{{ item.Anio }}</td>
+                            <td data-field="mes" class="text-end">{{ item.Mes }}</td>
+                            <td data-field="total" class="text-end" id="total-{{ item.Anio }}-{{ item.Mes }}">{{ item.Total }} </td>
                             <td>
                                 <a href="{% url 'crear_detalle_gastos' item.id %}" class="btn btn-success btn-sm" title="Agregar Detalle">
                                     <i class="fas fa-plus"></i> <!-- Icono de agregar -->

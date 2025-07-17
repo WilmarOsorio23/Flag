@@ -127,11 +127,11 @@
                             <td>{{ row.Modulo }}
                                 <input type="hidden" name="ModuloId_{{ i }}" value="{{ row.ModuloId }}">
                             </td>
-                            <td>{{ row.Cantidad_Horas }}
-                                <input type="hidden" name="Cantidad_Horas_{{ i }}" value="{{ row.Cantidad_Horas }}">
+                            <td>
+                                <input type="text" name="Cantidad_Horas_{{ i }}" value="{{ row.Cantidad_Horas }}" class="form-control" placeholder="Cantidad Horas">
                             </td>
-                            <td>{{ row.Valor_Unitario }}
-                                <input type="hidden" name="Valor_Unitario_{{ i }}" value="{{ row.Valor_Unitario }}">
+                            <td>
+                                <input type="text" name="Valor_Unitario_{{ i }}" value="{{ row.Valor_Unitario }}" class="form-control" placeholder="Valor unitario">
                             </td>
                             <td><input type="text" name="Valor_Cobro_{{ i }}" value="{{ row.Valor_Cobro }}" class="form-control" placeholder="Valor cobro"></td>
                             <td>{{ row.IVA }}

@@ -70,6 +70,9 @@ def facturacion_consultores(request):
                 total_registros = facturacion_existente.count()
                 facturacion_existente_page = facturacion_existente[(page-1)*page_size:page*page_size]
                 for registro in facturacion_existente_page:
+                    horas = registro.Horas
+                    # Formatear para mostrar solo 1 decimal sin ceros adicionales
+                    horas_formateadas = format(horas, '.1f').rstrip('0').rstrip('.') if horas is not None else ''
                     facturacion_info.append({
                         'id': registro.id,
                         'Anio': registro.Anio,
@@ -87,7 +90,7 @@ def facturacion_consultores(request):
                         'ClienteId': registro.ClienteId.ClienteId if hasattr(registro.ClienteId, 'ClienteId') else registro.ClienteId,
                         'Modulo': registro.ModuloId.Modulo if hasattr(registro.ModuloId, 'Modulo') else str(registro.ModuloId),
                         'ModuloId': registro.ModuloId.ModuloId if hasattr(registro.ModuloId, 'ModuloId') else registro.ModuloId,
-                        'Cantidad_Horas': registro.Horas,
+                        'Cantidad_Horas': horas_formateadas,
                         'Valor_Unitario': registro.Valor_Unitario,
                         'Valor_Cobro': registro.Valor_Cobro,
                         'IVA': registro.IVA,
@@ -133,6 +136,7 @@ def facturacion_consultores(request):
                         porcentaje_iva = Decimal(tarifa.iva or 0) / 100
                         porcentaje_retencion = Decimal(tarifa.rteFte or 0) / 100
                         horas = Decimal(tiempo.Horas or 0)
+                        horas_formateadas = format(horas, '.1f').rstrip('0').rstrip('.') if horas else ''
                         valor_cobro = round(valor_hora * horas, 2)
                         iva = round(porcentaje_iva * valor_cobro, 2)
                         retencion = round(porcentaje_retencion * valor_cobro, 2)
@@ -161,7 +165,7 @@ def facturacion_consultores(request):
                             'ClienteId': tiempo.ClienteId.ClienteId if hasattr(tiempo.ClienteId, 'ClienteId') else tiempo.ClienteId,
                             'Modulo': tiempo.ModuloId.Modulo if hasattr(tiempo.ModuloId, 'Modulo') else str(tiempo.ModuloId),
                             'ModuloId': tiempo.ModuloId.ModuloId if hasattr(tiempo.ModuloId, 'ModuloId') else tiempo.ModuloId,
-                            'Cantidad_Horas': horas,
+                            'Cantidad_Horas': horas_formateadas,
                             'Valor_Unitario': valor_hora,
                             'Valor_Cobro': valor_cobro,
                             'IVA': iva,
