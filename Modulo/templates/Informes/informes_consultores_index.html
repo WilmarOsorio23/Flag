@@ -233,16 +233,86 @@
                               <i class="fas fa-sort-down sort-icon-desc"></i>
                             </span>
                           </th>
-                          <th>Fecha ingreso</th>
-                          <th>Fecha Retiro</th>
-                          <th>Fecha Operacion</th>
-                          <th>Certificado</th>
-                          <th>Certificaciones</th>
-                          <th>Fecha Nacimiento</th>
-                          <th>Año Evaluacion</th>
-                          <th>Nota Evaluacion</th>
-                          <th>Direccion</th>
-                          <th>Telefono</th>
+                          <th data-sort="fecha_ingreso" class="sortable" data-direction="default">
+                            Fecha ingreso
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th data-sort="fecha_retiro" class="sortable" data-direction="default">
+                            Fecha Retiro
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th data-sort="operacion" class="sortable" data-direction="default">
+                            Operacion
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>  
+                            </th>
+                          <th data-sort="certificado" class="sortable" data-direction="default">
+                            Certificado
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th data-sort="certificaciones" class="sortable" data-direction="default">
+                            Certificaciones
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th data-sort="fecha_nacimiento" class="sortable" data-direction="default">
+                            Fecha Nacimiento
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th data-sort="anio_evaluacion" class="sortable" data-direction="default">
+                            Año Evaluacion
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th data-sort="nota_evaluacion" class="sortable" data-direction="default">
+                            Nota Evaluacion
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th data-sort="direccion" class="sortable" data-direction="default">
+                            Direccion
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
+                          <th data-sort="telefono" class="sortable" data-direction="default">
+                            Telefono
+                            <span class="sort-icon">
+                              <i class="fas fa-sort sort-icon-default"></i>
+                              <i class="fas fa-sort-up sort-icon-asc"></i>
+                              <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                          </th>
                         </tr>
                       </thead>
 
@@ -259,12 +329,12 @@
                                 <td class="text-start">{{ consultor.modulo }}</td>
                                 <td class="text-start">{{ consultor.perfil }}</td>
                                 <td class="text-start">{{ consultor.estado }}</td>
-                                <td>{{ consultor.fecha_ingreso }}</td>
-                                <td>{{ consultor.fecha_retiro }}</td>
-                                <td>{{ consultor.fecha_operacion }}</td>
-                                <td>{{ consultor.certificado }}</td>
+                                <td class="text-end">{{ consultor.fecha_ingreso }}</td>
+                                <td class="text-end">{{ consultor.fecha_retiro }}</td>
+                                <td class="text-end">{{ consultor.fecha_operacion }}</td>
+                                <td class="text-end">{{ consultor.certificado }}</td>
                                 <td class="text-start">{{ consultor.certificaciones }}</td>
-                                <td>{{ consultor.fecha_nacimiento }}</td>
+                                <td class="text-end">{{ consultor.fecha_nacimiento }}</td>
                                 <td class="text-end">{{ consultor.anio_evaluacion }}</td>
                                 <td class="text-end">{{ consultor.nota_evaluacion }}</td>
                                 <td class="text-start">{{ consultor.direccion }}</td>
