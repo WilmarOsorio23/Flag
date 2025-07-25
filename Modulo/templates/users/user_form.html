@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>{{ form.instance.id|yesno:"Editar,Crear" }} Usuario</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}">Email:</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="alert alert-danger">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}">Nombre de Usuario:</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="alert alert-danger">{{ form.username.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        {% if not form.instance.pk %}
+                        <div class="mb-3">
+                            <label for="{{ form.password1.id_for_label }}">Contraseña:</label>
+                            {{ form.password1 }}
+                            {% if form.password1.errors %}
+                                <div class="alert alert-danger">{{ form.password1.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.password2.id_for_label }}">Confirmar Contraseña:</label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}
+                                <div class="alert alert-danger">{{ form.password2.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.role.id_for_label }}">Rol:</label>
+                            {{ form.role }}
+                            {% if form.role.errors %}
+                                <div class="alert alert-danger">{{ form.role.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    Usuario Activo
+                                </label>
+                            </div>
+                            {% if form.is_active.errors %}
+                                <div class="alert alert-danger">{{ form.is_active.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_staff }}
+                                <label class="form-check-label" for="{{ form.is_staff.id_for_label }}">
+                                    Staff (puede acceder al admin)
+                                </label>
+                            </div>
+                            {% if form.is_staff.errors %}
+                                <div class="alert alert-danger">{{ form.is_staff.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

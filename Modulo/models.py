@@ -4,7 +4,103 @@ from django.utils import timezone
 from django.core.validators import EmailValidator
 from django.core.exceptions import ValidationError
 from dateutil.relativedelta import relativedelta
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 import re
+
+class UserRole(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    description = models.TextField(null=True, blank=True)
+    
+    # Maestros permissions
+    can_manage_cargos = models.BooleanField(default=False)
+    can_manage_certificacion = models.BooleanField(default=False)
+    can_manage_clientes = models.BooleanField(default=False)
+    can_manage_conceptos = models.BooleanField(default=False)
+    can_manage_consultores = models.BooleanField(default=False)
+    can_manage_contactos = models.BooleanField(default=False)
+    can_manage_costos_indirectos = models.BooleanField(default=False)
+    can_manage_centros_costos = models.BooleanField(default=False)
+    can_manage_empleados = models.BooleanField(default=False)
+    can_manage_empleados_estudios = models.BooleanField(default=False)
+    can_manage_gastos = models.BooleanField(default=False)
+    can_manage_horas_habiles = models.BooleanField(default=False)
+    can_manage_ind = models.BooleanField(default=False)
+    can_manage_ipc = models.BooleanField(default=False)
+    can_manage_linea = models.BooleanField(default=False)
+    can_manage_modulo = models.BooleanField(default=False)
+    can_manage_moneda = models.BooleanField(default=False)
+    can_manage_perfil = models.BooleanField(default=False)
+    can_manage_referencias = models.BooleanField(default=False)
+    can_manage_tipo_documento = models.BooleanField(default=False)
+    can_manage_tipo_contactos = models.BooleanField(default=False)
+    
+    # Movimientos permissions
+    can_manage_clientes_contratos = models.BooleanField(default=False)
+    can_manage_detalle_certificacion = models.BooleanField(default=False)
+    can_manage_detalle_costos_indirectos = models.BooleanField(default=False)
+    can_manage_detalle_gastos = models.BooleanField(default=False)
+    can_manage_historial_cargos = models.BooleanField(default=False)
+    can_manage_nomina = models.BooleanField(default=False)
+    can_manage_registro_tiempos = models.BooleanField(default=False)
+    can_manage_tarifa_clientes = models.BooleanField(default=False)
+    can_manage_tarifa_consultores = models.BooleanField(default=False)
+    can_manage_facturacion_clientes = models.BooleanField(default=False)
+    can_manage_facturas_consultores = models.BooleanField(default=False)
+    can_manage_pagares = models.BooleanField(default=False)
+    
+    # Informes permissions
+    can_view_informe_certificaciones = models.BooleanField(default=False)
+    can_view_informe_empleados = models.BooleanField(default=False)
+    can_view_informe_salarios = models.BooleanField(default=False)
+    can_view_informe_estudios = models.BooleanField(default=False)
+    can_view_informe_consultores = models.BooleanField(default=False)
+    can_view_informe_tarifa_consultores = models.BooleanField(default=False)
+    can_view_informe_tarifa_clientes = models.BooleanField(default=False)
+    can_view_informe_facturacion = models.BooleanField(default=False)
+    can_view_informe_clientes = models.BooleanField(default=False)
+    
+    # Indicadores permissions
+    can_view_indicadores_operatividad = models.BooleanField(default=False)
+    can_view_indicadores_rentabilidad = models.BooleanField(default=False)
+    can_view_indicadores_facturacion = models.BooleanField(default=False)
+    can_view_indicadores_margen_linea = models.BooleanField(default=False)
+    can_view_indicadores_margen_cliente = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'user_roles'
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('Users must have an email address')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
+
+class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True)
+    role = models.ForeignKey(UserRole, on_delete=models.SET_NULL, null=True)
+    
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+
+    objects = CustomUserManager()
+
+    def __str__(self):
+        return self.email
+
+    class Meta:
+        db_table = 'custom_users'
 
 # Modelos base
 class Modulo(models.Model):

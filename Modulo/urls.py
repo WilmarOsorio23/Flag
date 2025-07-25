@@ -59,8 +59,23 @@ from Modulo.Views import informe_serv_consultor
 
 
 urlpatterns = [
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),
+    # Auth URLs
+    path('login/', auth_views.login_view, name='login'),
+    path('logout/', auth_views.logout_view, name='logout'),
+    
+    # Role management
+    path('roles/', auth_views.role_list, name='role_list'),
+    path('roles/create/', auth_views.role_create, name='role_create'),
+    path('roles/<int:role_id>/edit/', auth_views.role_edit, name='role_edit'),
+    
+    # User management
+    path('users/', auth_views.user_list, name='user_list'),
+    path('users/create/', auth_views.user_create, name='user_create'),
+    path('users/<int:user_id>/edit/', auth_views.user_edit, name='user_edit'),
+    
+    # Permission check endpoint
+    path('check-permission/', auth_views.check_permission, name='check_permission'),
+
     path('', views.inicio, name='inicio'),
     path('nosotros', views.nosotros, name='nosotros'),
 

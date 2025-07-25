@@ -92,3 +92,17 @@ def divide(value, arg):
 @register.filter(name='multiply')
 def multiply(value, arg):
     return float(value) * float(arg)
+
+@register.filter(name='has_permission')
+def has_permission(user, permission):
+    """
+    Template filter to check if a user has a specific permission through their role.
+    Usage: {% if user|has_permission:'can_manage_modulo' %}
+    """
+    if user.is_superuser or user.is_staff:
+        return True
+        
+    if not user.role:
+        return False
+        
+    return getattr(user.role, permission, False)
