@@ -59,6 +59,8 @@ from Modulo.Views import informe_serv_consultor
 
 
 urlpatterns = [
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     path('', views.inicio, name='inicio'),
     path('nosotros', views.nosotros, name='nosotros'),
 
