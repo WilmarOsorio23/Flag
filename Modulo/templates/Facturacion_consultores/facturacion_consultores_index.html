@@ -133,16 +133,21 @@
                             <td>
                                 <input type="text" name="Valor_Unitario_{{ i }}" value="{{ row.Valor_Unitario }}" class="form-control" placeholder="Valor unitario">
                             </td>
-                            <td><input type="text" name="Valor_Cobro_{{ i }}" value="{{ row.Valor_Cobro }}" class="form-control" placeholder="Valor cobro"></td>
-                            <td>{{ row.IVA }}
-                                <input type="hidden" name="IVA_{{ i }}" value="{{ row.IVA }}">
+                            <td><span id="valor-cobro-span-{{ i }}">{{ row.Valor_Cobro }}</span>
+                                <input type="hidden" name="Valor_Cobro_{{ i }}" value="{{ row.Valor_Cobro }}">
                             </td>
-                            <td><input type="text" name="Valor_Neto_{{ i }}" value="{{ row.Valor_Neto }}" class="form-control" placeholder="Valor neto"></td>
-                            <td>{{ row.Retencion_Fuente }}
-                                <input type="hidden" name="Retencion_Fuente_{{ i }}" value="{{ row.Retencion_Fuente }}">
+                            <td><input type="text" name="IVA_{{ i }}" value="{{ row.IVA }}" class="form-control" placeholder="IVA" id="iva-input-{{ i }}" data-manual="false">
+                                <input type="hidden" name="Porcentaje_IVA_{{ i }}" value="{{ row.Porcentaje_IVA }}">
                             </td>
-
-                            <td><input type="text" name="Valor_Pagado_{{ i }}" value="{{ row.Valor_Pagado }}" class="form-control" placeholder="Valor pagado"></td>
+                            <td><span id="valor-neto-span-{{ i }}">{{ row.Valor_Neto }}</span>
+                                <input type="hidden" name="Valor_Neto_{{ i }}" value="{{ row.Valor_Neto }}">
+                            </td>
+                            <td><input type="text" name="Retencion_Fuente_{{ i }}" value="{{ row.Retencion_Fuente }}" class="form-control" placeholder="Retención Fuente" id="retencion-input-{{ i }}" data-manual="false">
+                                <input type="hidden" name="Porcentaje_Retencion_{{ i }}" value="{{ row.Porcentaje_Retencion }}">
+                            </td>
+                            <td><span id="valor-pagado-span-{{ i }}">{{ row.Valor_Pagado }}</span>
+                                <input type="hidden" name="Valor_Pagado_{{ i }}" value="{{ row.Valor_Pagado }}">
+                            </td>
                             <td><input type="text" name="Factura_{{ i }}" value="{{ row.Factura }}" class="form-control" placeholder="Factura"></td>
                             <td><input type="text" name="Valor_Factura_Cliente_{{ i }}" value="{{ row.Valor_Factura_Cliente }}" class="form-control" placeholder="Valor factura cliente"></td>
                             <td><input type="date" name="Fecha_{{ i }}" value="{{ row.Fecha|date:'Y-m-d' }}" class="form-control" placeholder="Fecha"></td>

@@ -73,6 +73,16 @@ def facturacion_consultores(request):
                     horas = registro.Horas
                     # Formatear para mostrar solo 1 decimal sin ceros adicionales
                     horas_formateadas = format(horas, '.1f').rstrip('0').rstrip('.') if horas is not None else ''
+                    # Obtener porcentajes de IVA y Retención Fuente usando la función obtener_tarifa
+                    porcentaje_iva = 0
+                    porcentaje_retencion = 0
+                    try:
+                        tarifa = obtener_tarifa(registro.Anio, registro.Periodo_Cobrado, registro.Documento, registro.ClienteId)
+                        if tarifa:
+                            porcentaje_iva = float(tarifa.iva or 0)
+                            porcentaje_retencion = float(tarifa.rteFte or 0)
+                    except Exception:
+                        pass
                     facturacion_info.append({
                         'id': registro.id,
                         'Anio': registro.Anio,
@@ -105,6 +115,8 @@ def facturacion_consultores(request):
                         'Observaciones': registro.Observaciones,
                         'Deuda_Tecnica': registro.Deuda_Tecnica,
                         'Factura_Pendiente': registro.Factura_Pendiente,
+                        'Porcentaje_IVA': porcentaje_iva,
+                        'Porcentaje_Retencion': porcentaje_retencion,
                     })
 
                 # 2. Buscar en Tiempos_Cliente los que NO están en Facturacion_Consultores para todos los meses seleccionados
@@ -133,13 +145,15 @@ def facturacion_consultores(request):
                         if not tarifa:
                             continue
                         valor_hora = Decimal(tarifa.valorHora or 0)
-                        porcentaje_iva = Decimal(tarifa.iva or 0) / 100
-                        porcentaje_retencion = Decimal(tarifa.rteFte or 0) / 100
+                        porcentaje_iva = float(tarifa.iva or 0)
+                        porcentaje_retencion = float(tarifa.rteFte or 0)
+                        porcentaje_iva_decimal = Decimal(tarifa.iva or 0) / 100
+                        porcentaje_retencion_decimal = Decimal(tarifa.rteFte or 0) / 100
                         horas = Decimal(tiempo.Horas or 0)
                         horas_formateadas = format(horas, '.1f').rstrip('0').rstrip('.') if horas else ''
                         valor_cobro = round(valor_hora * horas, 2)
-                        iva = round(porcentaje_iva * valor_cobro, 2)
-                        retencion = round(porcentaje_retencion * valor_cobro, 2)
+                        iva = round(porcentaje_iva_decimal * valor_cobro, 2)
+                        retencion = round(porcentaje_retencion_decimal * valor_cobro, 2)
                         valor_neto = round(valor_cobro + iva, 2)
                         valor_pagado = round(valor_neto - retencion, 2)
                         consultor_nombre = None
@@ -180,6 +194,8 @@ def facturacion_consultores(request):
                             'Observaciones': '',
                             'Deuda_Tecnica': '',
                             'Factura_Pendiente': '',
+                            'Porcentaje_IVA': porcentaje_iva,
+                            'Porcentaje_Retencion': porcentaje_retencion,
                         })
 
                 # Totales

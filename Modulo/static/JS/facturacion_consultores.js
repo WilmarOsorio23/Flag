@@ -265,3 +265,87 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+// === RECÁLCULO EN LÍNEA DE CAMPOS DEPENDIENTES ===
+document.addEventListener('DOMContentLoaded', function () {
+    function recalcularValores(i) {
+        // Inputs de la fila
+        const horasInput = document.querySelector(`input[name="Cantidad_Horas_${i}"]`);
+        const valorUnitarioInput = document.querySelector(`input[name="Valor_Unitario_${i}"]`);
+        const valorCobroHidden = document.querySelector(`input[name="Valor_Cobro_${i}"]`);
+        const valorCobroSpan = document.getElementById(`valor-cobro-span-${i}`);
+        const ivaInput = document.getElementById(`iva-input-${i}`);
+        const ivaHidden = document.querySelector(`input[name="IVA_${i}"]`);
+        const valorNetoHidden = document.querySelector(`input[name="Valor_Neto_${i}"]`);
+        const valorNetoSpan = document.getElementById(`valor-neto-span-${i}`);
+        const retencionInput = document.getElementById(`retencion-input-${i}`);
+        const retencionHidden = document.querySelector(`input[name="Retencion_Fuente_${i}"]`);
+        const valorPagadoHidden = document.querySelector(`input[name="Valor_Pagado_${i}"]`);
+        const valorPagadoSpan = document.getElementById(`valor-pagado-span-${i}`);
+
+        // Porcentajes
+        const porcentajeIVA = parseFloat(document.querySelector(`input[name="Porcentaje_IVA_${i}"]`)?.value) || 0;
+        const porcentajeRetencion = parseFloat(document.querySelector(`input[name="Porcentaje_Retencion_${i}"]`)?.value) || 0;
+
+        // Valores actuales
+        const horas = parseFloat(horasInput.value) || 0;
+        const valorUnitario = parseFloat(valorUnitarioInput.value) || 0;
+
+        // Antes de calcular, si el input está vacío o no es un número, vuelve a modo automático
+        if (ivaInput && (ivaInput.value === '' || isNaN(parseFloat(ivaInput.value)))) {
+            ivaInput.dataset.manual = 'false';
+        }
+        if (retencionInput && (retencionInput.value === '' || isNaN(parseFloat(retencionInput.value)))) {
+            retencionInput.dataset.manual = 'false';
+        }
+
+        // Detectar si IVA o Retención han sido editados manualmente
+        const ivaManual = ivaInput && ivaInput.dataset.manual === 'true';
+        const retencionManual = retencionInput && retencionInput.dataset.manual === 'true';
+
+        // Cálculos automáticos solo si no han sido editados manualmente
+        let iva = ivaManual ? parseFloat(ivaInput.value) : (horas * valorUnitario) * porcentajeIVA / 100;
+        if (isNaN(iva)) iva = 0;
+        let retencion = retencionManual ? parseFloat(retencionInput.value) : (horas * valorUnitario) * porcentajeRetencion / 100;
+        if (isNaN(retencion)) retencion = 0;
+
+        // Cálculos
+        const valorCobro = horas * valorUnitario;
+        const valorNeto = valorCobro + iva;
+        const valorPagado = valorNeto - retencion;
+
+        // Actualizar campos visibles y ocultos
+        if (valorCobroSpan) valorCobroSpan.textContent = valorCobro.toFixed(2);
+        if (valorCobroHidden) valorCobroHidden.value = valorCobro.toFixed(2);
+        if (ivaHidden) ivaHidden.value = iva.toFixed(2);
+        if (ivaInput && !ivaManual) ivaInput.value = iva.toFixed(2);
+        if (valorNetoSpan) valorNetoSpan.textContent = valorNeto.toFixed(2);
+        if (valorNetoHidden) valorNetoHidden.value = valorNeto.toFixed(2);
+        if (retencionHidden) retencionHidden.value = retencion.toFixed(2);
+        if (retencionInput && !retencionManual) retencionInput.value = retencion.toFixed(2);
+        if (valorPagadoSpan) valorPagadoSpan.textContent = valorPagado.toFixed(2);
+        if (valorPagadoHidden) valorPagadoHidden.value = valorPagado.toFixed(2);
+    }
+
+    // Evento para marcar IVA y Retención como editados manualmente
+    document.querySelectorAll('input[name^="IVA_"], input[name^="Retencion_Fuente_"]').forEach(input => {
+        input.addEventListener('input', function () {
+            // Si el usuario escribe, marca como manual
+            this.dataset.manual = 'true';
+            // Si el usuario borra el valor, vuelve a automático
+            if (this.value === '') {
+                this.dataset.manual = 'false';
+            }
+            const i = this.name.split('_').pop();
+            recalcularValores(i);
+        });
+    });
+
+    // Evento para horas y valor unitario: siempre recalcula y solo sobreescribe IVA/Retención si no son manuales
+    document.querySelectorAll('input[name^="Cantidad_Horas_"], input[name^="Valor_Unitario_"]').forEach(input => {
+        input.addEventListener('input', function () {
+            const i = this.name.split('_').pop();
+            recalcularValores(i);
+        });
+    });
+});
+
