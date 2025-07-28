@@ -97,10 +97,19 @@
                     <tbody>
                         {% for row in facturacion_info %}
                         {% with i=forloop.counter0 %}
-                        <tr id="row-{{ i }}">
+                        <tr id="row-{{ i }}" {% if row.id == 'new' or not row.id %}class="table-light border-start border-success border-3"{% endif %}>
                             <input type="hidden" name="factura_{{ i }}" value="{{ row.id|default:'new' }}">
 
-                            <td><input type="checkbox" class="row-checkbox" value="{{ row.id }}"></td>
+                            <td>
+                                {% if row.id == 'new' or not row.id %}
+                                    <!-- Checkbox deshabilitado para registros nuevos -->
+                                    <input type="checkbox" class="row-checkbox form-check-input" value="{{ row.id|default:'new' }}" disabled title="No se pueden eliminar registros nuevos">
+                                    <small class="text-muted d-block mt-1">Nuevo</small>
+                                {% else %}
+                                    <!-- Checkbox normal para registros existentes -->
+                                    <input type="checkbox" class="row-checkbox form-check-input" value="{{ row.id }}">
+                                {% endif %}
+                            </td>
                             <td>{{ row.Anio }}
                                 <input type="hidden" name="Anio_{{ i }}" value="{{ row.Anio }}">
                             </td>

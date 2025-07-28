@@ -125,10 +125,18 @@ def facturacion_consultores(request):
                         r.Anio, r.Mes, str(r.Periodo_Cobrado), r.Documento_id, r.ClienteId_id, r.LineaId_id, r.ModuloId_id
                     ) for r in facturacion_existente
                 )
-                for mes_cobro in meses_cobro:
+                
+                # Ordenar los meses en orden descendente (de mayor a menor)
+                meses_cobro_ordenados = sorted(meses_cobro, reverse=True)
+                
+                # Procesar todos los registros de cada mes por separado
+                for mes_cobro in meses_cobro_ordenados:
                     # Filtrar tiempos_clientes para cada mes_cobro
                     form.cleaned_data['Mes_Cobro'] = mes_cobro
                     tiempos_clientes = filtrar_tiempos_clientes(form)
+                    
+                    # Procesar todos los registros de este mes
+                    registros_mes_actual = []
                     for tiempo in tiempos_clientes:
                         clave = (
                             anio,
@@ -162,7 +170,9 @@ def facturacion_consultores(request):
                             consultor_nombre = consultor_obj.Nombre
                         except Consultores.DoesNotExist:
                             consultor_nombre = str(tiempo.Documento)
-                        facturacion_info.append({
+                        
+                        # Agregar a la lista temporal de este mes
+                        registros_mes_actual.append({
                             'id': 'new',
                             'Anio': anio,
                             'Mes': mes_factura,
@@ -197,6 +207,9 @@ def facturacion_consultores(request):
                             'Porcentaje_IVA': porcentaje_iva,
                             'Porcentaje_Retencion': porcentaje_retencion,
                         })
+                    
+                    # Agregar todos los registros de este mes a la lista principal
+                    facturacion_info.extend(registros_mes_actual)
 
                 # Totales
                 if facturacion_info:
@@ -223,7 +236,7 @@ def facturacion_consultores(request):
 
     context = {
         'form': form,
-        'facturacion_info': sorted(facturacion_info, key=lambda x: (str(x['Consultor']).lower(), str(x['Cliente']).lower())),
+        'facturacion_info': sorted(facturacion_info, key=lambda x: (-int(x['Periodo_Cobrado']) if x['Periodo_Cobrado'].isdigit() else 0, str(x['Consultor']).lower(), str(x['Cliente']).lower())),
         'TotalesFacturacion': totales_facturacion,
         'mensaje': mensaje,
         'total_paginas': total_paginas,
@@ -244,13 +257,45 @@ def safe_decimal(value):
 def guardar_facturacion_consultores(request):
     if request.method == 'POST':
         try:
+            # Obtener solo los índices de registros que fueron enviados (editados)
             indices = [
                 key.split('_')[1] for key in request.POST.keys() if key.startswith('factura_')
             ]
             indices = list(set(indices))  # Evitar duplicados
 
+            print(f"Registros recibidos para procesar: {len(indices)}")
+            print(f"Índices: {indices}")
+
+            if not indices:
+                print("No hay registros para procesar")
+                return redirect('facturacion_consultores_index')
+
+            registros_procesados = 0
             for i in indices:
                 row_id = request.POST.get(f'factura_{i}')
+                
+                # Verificar si realmente hay datos para guardar
+                tiene_datos = False
+                campos_editables = [
+                    f'Numero_Factura_{i}', f'Aprobado_Por_{i}', f'Fecha_Cobro_{i}', 
+                    f'Fecha_Pago_{i}', f'Cantidad_Horas_{i}', f'Valor_Unitario_{i}',
+                    f'IVA_{i}', f'Retencion_Fuente_{i}', f'Factura_{i}', 
+                    f'Valor_Factura_Cliente_{i}', f'Fecha_{i}', f'Deuda_Tecnica_{i}',
+                    f'Factura_Pendiente_{i}', f'Observaciones_{i}'
+                ]
+                
+                for campo in campos_editables:
+                    valor = request.POST.get(campo, '')
+                    if valor and valor.strip() != '':
+                        tiene_datos = True
+                        break
+                
+                # Solo procesar si hay datos reales para guardar
+                if not tiene_datos and row_id == 'new':
+                    print(f"Saltando registro {i} (nuevo sin datos)")
+                    continue
+
+                print(f"Procesando registro {i} (ID: {row_id})")
 
                 # Obtener o crear instancia
                 if row_id == 'new':
@@ -258,20 +303,33 @@ def guardar_facturacion_consultores(request):
                 else:
                     row = Facturacion_Consultores.objects.filter(id=row_id).first() or Facturacion_Consultores()
                     
-                # Campos comunes
-                row.Anio = request.POST.get(f'Anio_{i}') or ''
-                row.Mes = request.POST.get(f'Mes_{i}') or ''
+                # Campos comunes con conversión de tipos
+                anio_val = request.POST.get(f'Anio_{i}')
+                row.Anio = int(anio_val) if anio_val and anio_val.isdigit() else None
+                
+                mes_val = request.POST.get(f'Mes_{i}')
+                row.Mes = int(mes_val) if mes_val and mes_val.isdigit() else None
+                
                 row.Documento = Consultores.objects.get(Documento=request.POST.get(f'ConsultorId_{i}'))
                 row.ClienteId = Clientes.objects.get(ClienteId=request.POST.get(f'ClienteId_{i}'))
                 row.ModuloId = Modulo.objects.get(ModuloId=request.POST.get(f'ModuloId_{i}'))
                 row.LineaId = Linea.objects.get(LineaId=request.POST.get(f'LineaId_{i}'))
                 row.Cta_Cobro = request.POST.get(f'Numero_Factura_{i}') or ''
                 row.Aprobado_Por = request.POST.get(f'Aprobado_Por_{i}') or ''
-                row.Fecha_Cobro = request.POST.get(f'Fecha_Cobro_{i}') or date.today()
-                row.Fecha_Pago = request.POST.get(f'Fecha_Pago_{i}') or date.today()
+                
+                # Fechas
+                fecha_cobro = request.POST.get(f'Fecha_Cobro_{i}')
+                row.Fecha_Cobro = fecha_cobro if fecha_cobro else date.today()
+                
+                fecha_pago = request.POST.get(f'Fecha_Pago_{i}')
+                row.Fecha_Pago = fecha_pago if fecha_pago else date.today()
+                
                 row.Periodo_Cobrado = request.POST.get(f'Periodo_Cobrado_{i}') or ''
                 row.Factura = request.POST.get(f'Factura_{i}') or ''
-                row.Fecha = request.POST.get(f'Fecha_{i}') or None
+                
+                fecha_val = request.POST.get(f'Fecha_{i}')
+                row.Fecha = fecha_val if fecha_val else None
+                
                 row.Deuda_Tecnica = request.POST.get(f'Deuda_Tecnica_{i}') or ''
                 row.Factura_Pendiente = request.POST.get(f'Factura_Pendiente_{i}') or ''
                 row.Observaciones = request.POST.get(f'Observaciones_{i}') or ''
@@ -282,14 +340,14 @@ def guardar_facturacion_consultores(request):
                 row.IVA = safe_decimal(request.POST.get(f'IVA_{i}'))
                 row.Retencion_Fuente = safe_decimal(request.POST.get(f'Retencion_Fuente_{i}'))
                 row.Valor_Cobro = safe_decimal(request.POST.get(f'Valor_Cobro_{i}'))
-                row.Valor_Neto = safe_decimal(request.POST.get(f'Valor_Neto_{i}'))
+                row.Valor_Neto = float(safe_decimal(request.POST.get(f'Valor_Neto_{i}')))  # FloatField
                 row.Valor_Pagado = safe_decimal(request.POST.get(f'Valor_Pagado_{i}'))
                 row.Valor_Fcta_Cliente = safe_decimal(request.POST.get(f'Valor_Factura_Cliente_{i}'))
 
                 # Cálculos
                 valor_cliente = row.Valor_Fcta_Cliente
                 valor_cobro = row.Valor_Cobro
-                if valor_cliente  == 0:
+                if valor_cliente == 0:
                     diferencia_bruta = Decimal('0')
                     porcentaje_dif = Decimal('0')
                 else:
@@ -300,10 +358,13 @@ def guardar_facturacion_consultores(request):
                 row.Dif = porcentaje_dif
 
                 row.save()
+                registros_procesados += 1
 
+            print(f"Registros procesados exitosamente: {registros_procesados}")
             return redirect('facturacion_consultores_index')
 
         except Exception as e:
+            print(f"Error al guardar: {str(e)}")
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
