@@ -54,13 +54,27 @@
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'horas_habiles_eliminar' %}">
                 {% csrf_token %}
-                <table class="table table-primary">
+                <table class="table table-primary" id="horasHabilTable">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
                             <th scope="col">ID</th>
-                            <th scope="col">Año</th>
-                            <th scope="col">Mes</th>
+                            <th data-sort="anio" class="sortable" data-direction="default">
+                                Año
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="mes" class="sortable" data-direction="default">
+                                Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                             <th scope="col">Días Hábiles</th>
                             <th scope="col">Horas Laborales</th>
                         </tr>
@@ -70,11 +84,11 @@
                         <tr id="row-{{ horas.id }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ horas.id }}"></td>
                             <td>{{ horas.id }}</td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                            <td data-field="anio" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
                                 {{  horas.Anio }}
                                 <input type="number" name="Anio" class="form-control d-none" value="{{  horas.Anio }}" readonly>
                             </td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                            <td data-field="mes" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
                                 {{  horas.Mes }}
                                 <input type="number" name="Mes" class="form-control d-none" value="{{  horas.Mes }}" readonly>
                             </td>

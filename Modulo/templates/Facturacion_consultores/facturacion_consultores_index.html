@@ -28,8 +28,10 @@
                         </button>
                         <ul class="dropdown-menu w-100" aria-labelledby="dropdownMesCobro">
                             {% for checkbox in form.Mes_Cobro %}
-                                <li class="dropdown-item">
-                                    {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                <li class="dropdown-item" style="cursor: pointer;">
+                                    <label style="margin: 0; cursor: pointer; width: 100%; display: block;">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </label>
                                 </li>
                             {% endfor %}
                         </ul>
@@ -69,6 +71,7 @@
                             <th>Año</th>
                             <th>Mes</th>
                             <th>Consultor</th>
+                            <th>Empresa</th>
                             <th>Línea</th>
                             <th>N° Factura</th>
                             <th>Periodo Cobrado</th>
@@ -120,6 +123,9 @@
                             <td>{{ row.Consultor }}
                                 <input type="hidden" name="ConsultorId_{{ i }}" value="{{ row.ConsultorId }}">
                             </td>
+                            <td>{{ row.Empresa }}
+                                <input type="hidden" name="Empresa_{{ i }}" value="{{ row.Empresa }}">
+                            </td>
                             <td>{{ row.Linea }}
                                 <input type="hidden" name="LineaId_{{ i }}" value="{{ row.LineaId }}">
                             </td>
@@ -145,7 +151,7 @@
                             <td><span id="valor-cobro-span-{{ i }}">{{ row.Valor_Cobro }}</span>
                                 <input type="hidden" name="Valor_Cobro_{{ i }}" value="{{ row.Valor_Cobro }}">
                             </td>
-                            <td><input type="text" name="IVA_{{ i }}" value="{{ row.IVA }}" class="form-control" placeholder="IVA" id="iva-input-{{ i }}" data-manual="false">
+                            <td><input type="text" name="IVA_{{ i }}" value="{{ row.IVA }}" placeholder="IVA" id="iva-input-{{ i }}" data-manual="false" style="width: 120px;">
                                 <input type="hidden" name="Porcentaje_IVA_{{ i }}" value="{{ row.Porcentaje_IVA }}">
                             </td>
                             <td><span id="valor-neto-span-{{ i }}">{{ row.Valor_Neto }}</span>
@@ -175,7 +181,7 @@
                         </tr>
                         {% endwith %}
                         {% empty %}
-                        <tr><td colspan="15" class"text-start">No hay registros para mostrar.</td></tr>
+                        <tr><td colspan="16" class="text-start">No hay registros para mostrar.</td></tr>
                         {% endfor %} 
                     </tbody>
                 </table>

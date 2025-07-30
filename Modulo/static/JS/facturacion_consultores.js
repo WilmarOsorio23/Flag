@@ -344,6 +344,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // Recálculo en línea de campos dependientes
 document.addEventListener('DOMContentLoaded', function () {
     function recalcularValores(i) {
+        console.log('Ejecutando recalcularValores para fila:', i);
         // Inputs de la fila
         const horasInput = document.querySelector(`input[name="Cantidad_Horas_${i}"]`);
         const valorUnitarioInput = document.querySelector(`input[name="Valor_Unitario_${i}"]`);
@@ -400,6 +401,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (retencionInput && !retencionManual) retencionInput.value = retencion.toFixed(2);
         if (valorPagadoSpan) valorPagadoSpan.textContent = valorPagado.toFixed(2);
         if (valorPagadoHidden) valorPagadoHidden.value = valorPagado.toFixed(2);
+        
+        console.log('Valores actualizados - Valor Neto:', valorNeto.toFixed(2), 'Valor Pagado:', valorPagado.toFixed(2));
     }
 
     // Evento para marcar IVA y Retención como editados manualmente
@@ -412,6 +415,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 this.dataset.manual = 'false';
             }
             const i = this.name.split('_').pop();
+            console.log('Recalculando valores para fila:', i, 'IVA:', this.value);
             recalcularValores(i);
         });
     });

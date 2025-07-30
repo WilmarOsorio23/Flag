@@ -2502,8 +2502,8 @@ class FacturacionConsultoresFilterForm(forms.Form):
         self.fields['Mes_Cobro'].choices = meses2
 
     def populate_consultor(self):
-        consultores = Consultores.objects.values_list('Documento', 'Nombre').distinct()
-        self.fields['Consultor'].choices = [('', 'Seleccione el Consultor')] + [(doc, f"{doc} - {nombre}") for doc, nombre in consultores]
+        consultores = Consultores.objects.values_list('Documento', 'Nombre', 'Empresa').distinct()
+        self.fields['Consultor'].choices = [('', 'Seleccione el Consultor')] + [(doc, f"{nombre} - {empresa}") for doc, nombre, empresa  in consultores]
 
     def populate_linea(self):
         lineas = Linea.objects.values_list('LineaId', 'Linea').distinct()

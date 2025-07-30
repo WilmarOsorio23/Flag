@@ -89,6 +89,7 @@ def facturacion_consultores(request):
                         'Mes': registro.Mes,
                         'Consultor': registro.Documento.Nombre if hasattr(registro.Documento, 'Nombre') else str(registro.Documento),
                         'ConsultorId': registro.Documento.Documento if hasattr(registro.Documento, 'Documento') else registro.Documento,
+                        'Empresa': registro.Empresa if hasattr(registro, 'Empresa') else '',
                         'Linea': registro.LineaId.Linea if hasattr(registro.LineaId, 'Linea') else str(registro.LineaId),
                         'LineaId': registro.LineaId.LineaId if hasattr(registro.LineaId, 'LineaId') else registro.LineaId,
                         'Numero_Factura': registro.Cta_Cobro,
@@ -171,6 +172,14 @@ def facturacion_consultores(request):
                         except Consultores.DoesNotExist:
                             consultor_nombre = str(tiempo.Documento)
                         
+                        # Obtener la empresa del consultor
+                        empresa_consultor = ''
+                        try:
+                            consultor_obj = Consultores.objects.get(Documento=tiempo.Documento)
+                            empresa_consultor = consultor_obj.Empresa if hasattr(consultor_obj, 'Empresa') else ''
+                        except Consultores.DoesNotExist:
+                            empresa_consultor = ''
+                        
                         # Agregar a la lista temporal de este mes
                         registros_mes_actual.append({
                             'id': 'new',
@@ -178,6 +187,7 @@ def facturacion_consultores(request):
                             'Mes': mes_factura,
                             'Consultor': consultor_nombre,
                             'ConsultorId': tiempo.Documento,
+                            'Empresa': empresa_consultor,
                             'Linea': tiempo.LineaId.Linea if hasattr(tiempo.LineaId, 'Linea') else str(tiempo.LineaId),
                             'LineaId': tiempo.LineaId.LineaId if hasattr(tiempo.LineaId, 'LineaId') else tiempo.LineaId,
                             'Numero_Factura': '',
@@ -314,6 +324,7 @@ def guardar_facturacion_consultores(request):
                 row.ClienteId = Clientes.objects.get(ClienteId=request.POST.get(f'ClienteId_{i}'))
                 row.ModuloId = Modulo.objects.get(ModuloId=request.POST.get(f'ModuloId_{i}'))
                 row.LineaId = Linea.objects.get(LineaId=request.POST.get(f'LineaId_{i}'))
+                row.Empresa = request.POST.get(f'Empresa_{i}') or ''
                 row.Cta_Cobro = request.POST.get(f'Numero_Factura_{i}') or ''
                 row.Aprobado_Por = request.POST.get(f'Aprobado_Por_{i}') or ''
                 

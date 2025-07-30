@@ -52,12 +52,19 @@
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'linea_eliminar' %}">
                 {% csrf_token %}
-                <table class="table table-primary">
+                <table class="table table-primary" id="lineaTable">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
                             <th scope="col">Id</th>
-                            <th scope="col">Nombre línea</th>
+                            <th data-sort="nombre_linea" class="sortable" data-direction="default">
+                                Nombre línea
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody> 
@@ -65,7 +72,7 @@
                         <tr id="row-{{ linea.LineaId }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{linea.LineaId}}"></td>
                             <td>{{ linea.LineaId }}</td>
-                            <td><input type="text" name="Nombre" class="form-control-plaintext" value="{{linea.Linea}}" readonly></td> 
+                            <td data-field="nombre_linea"><input type="text" name="Nombre" class="form-control-plaintext" value="{{linea.Linea}}" readonly></td> 
                         </tr>
                         {% empty %}
                         <tr>
