@@ -1,22 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    window.cancelEdit = function() {
-        console.log("esta en cancel")
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length == 1) {
-            let row = selected[0].closest('tr');
-            // Restaurar los valores originales desde el atributo personalizado
-            row.querySelectorAll('input.form-control').forEach(input => {
-                if (input.hasAttribute('data-original-value')) {
-                    input.value = input.getAttribute('data-original-value');
-                }
-            });
-            selected.disabled = false;
-            selected.checked = false;
-            window.location.reload();
-            disableEditMode(selected,row);
-            showMessage('Cambios cancelados.', 'danger');
-        }
-    };
+    
 
     // Clonar checkboxes seleccionados en el formulario de descarga
     document.getElementById('download-form').addEventListener('submit', function(event) {
@@ -104,55 +87,118 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    window.enableEdit = function() {
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length == 0) {
-            showMessage('Por favor, selecciona al menos un consultor.', 'danger');
+    window.enableEdit = function () {
+        const selected = document.querySelectorAll('.row-select:checked');
+        if (selected.length === 0) {
+            alert('No has seleccionado ningún registro para editar.');
             return false;
         }
         if (selected.length > 1) {
-            showMessage('Por favor, Selecciona un solo consultor para editar.', 'danger');
+            alert('Solo puedes editar un registro a la vez.');
             return false;
         }
 
-        let row = selected[0].closest('tr');
-        let inputs = row.querySelectorAll('input.form-control-plaintext');
-        let selects = row.querySelectorAll('select.form-control-plaintext');
+        const row = selected[0].closest('tr');
 
-        // Guardar valores originales en un atributo personalizado 
-        inputs.forEach(input => { 
-            input.setAttribute('data-original-value', input.value);
+        // Lista de campos específicos que son editables
+        const editableFields = [
+            { name: "rteFte", type: "text" },
+            { name: "valorHora", type: "text" },
+            { name: "valorDia", type: "text" },
+            { name: "valorMes", type: "text" },
+            { name: "moduloId", type: "select" },
+            { name: "iva", type: "text" },
+            { name: "moneda", type: "select" }
+        ];
+
+        // Guardar valores originales en un atributo personalizado
+        editableFields.forEach(field => {
+            const element = row.querySelector(`[name="${field.name}"]`);
+            const span = row.querySelector(`[data-field="${field.name}"] span.form-control-plaintext`);
+            if (element) {
+                element.setAttribute('data-original-value', element.value);
+            }
+            if (span) {
+                span.setAttribute('data-original-value', span.innerText.trim());
+            }
         });
 
-        selects.forEach(select => {
-            select.setAttribute('data-original-value', select.value);
+        // Habilitar los campos editables y ocultar los spans correspondientes
+        editableFields.forEach(field => {
+            const element = row.querySelector(`[name="${field.name}"]`);
+            const span = row.querySelector(`[data-field="${field.name}"] span.form-control-plaintext`);
+            if (element) {
+                if (field.type === "select") {
+                    element.disabled = false; // Habilitar el select
+                    element.classList.remove('form-control-plaintext');
+                    element.classList.remove('d-none'); // Mostrar el select si estaba oculto
+                    element.classList.add('form-control');
+                } else {
+                    element.classList.remove('d-none'); // Mostrar el input
+                    element.classList.remove('form-control-plaintext');
+                    element.classList.add('form-control');
+                    element.readOnly = false; // Habilitar el input
+                }
+            }
+            if (span) {
+                span.classList.add('d-none'); // Ocultar el span en modo edición
+            }
         });
 
-        // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
+        // Desactivar todos los checkboxes y botones de edición
         document.getElementById('select-all').disabled = true;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
 
-        selects.forEach(select => {
-            select.classList.remove("form-control-plaintext");
-            select.classList.add("form-control");
-            select.removeAttribute("disabled");
-        });
-
-        // Convertir inputs en editables
-        let editables = ["valorHora", "valorDia", "valorMes","moneda", "iva", "rteFte"];
-        // El campo Empresa nunca debe ser editable
-        
-        for (let i = 0; i < editables.length; i++) {
-            let edit = row.querySelector(`[name="${editables[i]}"]`);
-            edit.classList.remove('form-control-plaintext');
-            edit.classList.add('form-control');
-            edit.readOnly = false; // Corregido aquí
-        }
-        // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
+        // Mostrar botones de "Guardar" y "Cancelar"
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
+    };
 
+    window.cancelEdit = function () {
+        const selected = document.querySelectorAll('.row-select:checked');
+        if (selected.length === 1) {
+            const row = selected[0].closest('tr');
+
+            // Restaurar valores originales
+            const editableFields = [
+                "valorHora", "valorDia", "valorMes", "rteFte",
+                "iva", "moneda", "moduloId"
+            ];
+
+            editableFields.forEach(name => {
+                const element = row.querySelector(`[name="${name}"]`);
+                const span = row.querySelector(`[data-field="${name}"] span.form-control-plaintext`);
+                if (element) {
+                    if (element.tagName === "SELECT") {
+                        element.value = element.getAttribute('data-original-value');
+                        element.disabled = true; // Deshabilitar el select
+                        element.classList.add('form-control-plaintext');
+                        element.classList.remove('form-control');
+                        element.classList.add('d-none'); // Ocultar el select
+                    } else {
+                        element.value = element.getAttribute('data-original-value');
+                        element.classList.add('form-control-plaintext');
+                        element.classList.remove('form-control');
+                        element.readOnly = true;
+                        element.classList.add('d-none'); // Ocultar el input
+                    }
+                }
+                if (span) {
+                    span.innerText = span.getAttribute('data-original-value');
+                    span.classList.remove('d-none'); // Mostrar el span en modo solo lectura
+                }
+            });
+
+            // Restaurar botones y checkboxes
+            document.getElementById('select-all').disabled = false;
+            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+            document.getElementById('edit-button').disabled = false;
+
+            // Ocultar botones de "Guardar" y "Cancelar"
+            document.getElementById('save-button').classList.add('d-none');
+            document.getElementById('cancel-button').classList.add('d-none');
+        }
     };
 
     // Obtener el valor del token CSRF para ser utilizado en las solicitudes POST
@@ -339,7 +385,76 @@ document.addEventListener('DOMContentLoaded', function() {
     }
    
     
-    
+    const table = document.querySelector('.table-primary');
+    if (table) {
+        const headers = table.querySelectorAll('th.sortable');
+
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-sort');
+                const direction = header.getAttribute('data-direction') || 'asc';
+                const newDirection = direction === 'asc' ? 'desc' : 'asc';
+
+                sortTableByColumn(table, column, newDirection);
+
+                // Reset all headers to default
+                headers.forEach(h => {
+                    h.setAttribute('data-direction', 'default');
+                    h.querySelector('.sort-icon-default').style.display = 'inline';
+                    h.querySelector('.sort-icon-asc').style.display = 'none';
+                    h.querySelector('.sort-icon-desc').style.display = 'none';
+                });
+
+                // Set current header direction
+                header.setAttribute('data-direction', newDirection);
+                header.querySelector('.sort-icon-default').style.display = 'none';
+                header.querySelector(`.sort-icon-${newDirection}`).style.display = 'inline';
+            });
+        });
+        
+
+        function sortTableByColumn(table, columnName, direction) {
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+            rows.sort((a, b) => {
+                const cellA = a.querySelector(`[data-field="${columnName}"]`);
+                const cellB = b.querySelector(`[data-field="${columnName}"]`);
+        
+                if (!cellA || !cellB) return 0;
+        
+                // Obtener el texto o valor del elemento dentro de la celda
+                const getCellValue = (cell) => {
+                    const input = cell.querySelector('input');
+                    const span = cell.querySelector('span');
+                    const select = cell.querySelector('select');
+                    if (input && !input.classList.contains('d-none')) {
+                        return input.value.trim();
+                    } else if (span) {
+                        return span.innerText.trim();
+                    } else if (select) {
+                        return select.options[select.selectedIndex].text.trim();
+                    }
+                    return '';
+                };
+        
+                const textA = getCellValue(cellA);
+                const textB = getCellValue(cellB);
+        
+                // Numeric comparison
+                if (!isNaN(textA) && !isNaN(textB)) {
+                    return direction === 'asc' ? textA - textB : textB - textA;
+                }
+        
+                // String comparison
+                return direction === 'asc'
+                    ? textA.localeCompare(textB)
+                    : textB.localeCompare(textA);
+            });
+        
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    }
 
     
 });

@@ -109,42 +109,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    window.enableEdit = function() {
-       
-        let selected = document.querySelectorAll('.row-select:checked');
+    window.enableEdit = function () {
+        const selected = document.querySelectorAll('.row-select:checked');
         if (selected.length === 0) {
-            alert('No has seleccionado ningúna Nomina para editar.');
+            alert('No has seleccionado ningún registro para editar.');
             return false;
         }
         if (selected.length > 1) {
-            alert('Solo puedes editar una Nomina a la vez.');
+            alert('Solo puedes editar un registro a la vez.');
             return false;
         }
 
-        let row = selected[0].closest('tr');
-        let inputs = row.querySelectorAll('input.form-control-plaintext');
+        const row = selected[0].closest('tr');
 
-        // Guardar valores originales en un atributo personalizado 
-        inputs.forEach(input => { 
-        input.setAttribute('data-original-value', input.value);
-        });
-
-        // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
-        document.getElementById('select-all').disabled = true;
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
-        document.getElementById('edit-button').disabled = true;
-
-        // Convertir inputs en editables
-        let editables = [
+        // Lista de campos específicos que son editables
+        const editableFields = [
             { name: "FechaFin", type: "date" },
-            //{ name: "Contrato", type: "text" },
+            { name: "Contrato", type: "text" },
             { name: "ContratoVigente", type: "checkbox" },
             { name: "OC_Facturar", type: "checkbox" },
             { name: "Parafiscales", type: "checkbox" },
             { name: "HorarioServicio", type: "text" },
             { name: "FechaFacturacion", type: "text" },
             { name: "TipoFacturacion", type: "text" },
-            { name: "Observaciones", type: "text" },
+            { name: "Observaciones", type: "text" }, // Aseguramos que Observaciones esté incluido
             { name: "Polizas", type: "checkbox" },
             { name: "PolizasDesc", type: "text" },
             { name: "ContratoValor", type: "text" },
@@ -152,33 +140,125 @@ document.addEventListener('DOMContentLoaded', function() {
             { name: "ContratoDesc", type: "text" },
             { name: "ServicioRemoto", type: "checkbox" },
             { name: "moneda", type: "select" },
-
         ];
-        
-        editables.forEach(field => {
-            let element = row.querySelector(`[name="${field.name}"]`);
-            if (field.type === 'checkbox') {
-                let display = row.querySelector(`.boolean-display[data-field="${field.name}"]`);
-                let checkbox = row.querySelector(`.boolean-edit[name="${field.name}"]`);
-                if (display && checkbox) {
-                    display.classList.add('d-none'); // Ocultar texto en modo edición
-                    checkbox.classList.remove('d-none'); // Mostrar checkbox en modo edición
+
+        // Guardar valores originales en un atributo personalizado
+        editableFields.forEach(field => {
+            const element = row.querySelector(`[name="${field.name}"]`);
+            const span = row.querySelector(`[data-field="${field.name}"] span.form-control-plaintext`);
+            if (element) {
+                if (field.type === "checkbox") {
+                    element.setAttribute('data-original-value', element.checked);
+                } else {
+                    element.setAttribute('data-original-value', element.value);
                 }
-            } else if (field.type === 'select') {
-                element.disabled = false; // Habilitar el select en modo edición
-                element.classList.remove('form-control-plaintext'); // Quitar estilo de solo lectura
-                element.classList.add('form-control'); // Agregar estilo editable
-            } else {
-                element.classList.remove('form-control-plaintext');
-                element.classList.add('form-control');
-                element.readOnly = false;
+            }
+            if (span) {
+                span.setAttribute('data-original-value', span.innerText.trim());
             }
         });
 
-        // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
+        // Habilitar los campos editables y ocultar los spans correspondientes
+        editableFields.forEach(field => {
+            const element = row.querySelector(`[name="${field.name}"]`);
+            const span = row.querySelector(`[data-field="${field.name}"] span.form-control-plaintext`);
+            if (element) {
+                if (field.type === "checkbox") {
+                    const display = row.querySelector(`.boolean-display[data-field="${field.name}"]`);
+                    const checkbox = row.querySelector(`.boolean-edit[name="${field.name}"]`);
+                    if (display && checkbox) {
+                        display.classList.add('d-none'); // Ocultar texto en modo edición
+                        checkbox.classList.remove('d-none'); // Mostrar checkbox en modo edición
+                    }
+                } else if (field.type === "select") {
+                    element.disabled = false; // Habilitar el select en modo edición
+                    element.classList.remove('form-control-plaintext'); // Quitar estilo de solo lectura
+                    element.classList.add('form-control'); // Agregar estilo editable
+                } else {
+                    element.classList.remove('d-none'); // Mostrar el input
+                    element.classList.add('form-control');
+                    element.readOnly = false;
+                }
+            }
+            if (span) {
+                span.classList.add('d-none'); // Ocultar el span en modo edición
+            }
+        });
+
+        // Desactivar todos los checkboxes y botones de edición
+        document.getElementById('select-all').disabled = true;
+        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
+        document.getElementById('edit-button').disabled = true;
+
+        // Mostrar botones de "Guardar" y "Cancelar"
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
+    };
 
+    window.cancelEdit = function () {
+        const selected = document.querySelectorAll('.row-select:checked');
+        if (selected.length === 1) {
+            const row = selected[0].closest('tr');
+
+            // Restaurar valores originales
+            const editableFields = [
+                "FechaFin", "Contrato", "ContratoVigente", "OC_Facturar", "Parafiscales",
+                "HorarioServicio", "FechaFacturacion", "TipoFacturacion", "Observaciones",
+                "Polizas", "PolizasDesc", "ContratoValor", "IncluyeIvaValor",
+                "ContratoDesc", "ServicioRemoto", "moneda"
+            ];
+
+            editableFields.forEach(name => {
+                const element = row.querySelector(`[name="${name}"]`);
+                const span = row.querySelector(`[data-field="${name}"] span.form-control-plaintext`);
+                if (element) {
+                    if (element.type === "checkbox") {
+                        element.checked = element.getAttribute('data-original-value') === "true";
+                    } else {
+                        element.value = element.getAttribute('data-original-value');
+                    }
+                }
+                if (span) {
+                    span.innerText = span.getAttribute('data-original-value');
+                }
+            });
+
+            // Deshabilitar los campos y restaurar el modo de solo lectura
+            editableFields.forEach(name => {
+                const element = row.querySelector(`[name="${name}"]`);
+                const span = row.querySelector(`[data-field="${name}"] span.form-control-plaintext`);
+                if (element) {
+                    if (element.type === "checkbox") {
+                        const display = row.querySelector(`.boolean-display[data-field="${name}"]`);
+                        const checkbox = row.querySelector(`.boolean-edit[name="${name}"]`);
+                        if (display && checkbox) {
+                            display.classList.remove('d-none'); // Mostrar texto en modo solo lectura
+                            checkbox.classList.add('d-none'); // Ocultar checkbox en modo solo lectura
+                        }
+                    } else if (element.tagName === "SELECT") {
+                        element.disabled = true;
+                        element.classList.add('form-control-plaintext');
+                        element.classList.remove('form-control');
+                    } else {
+                        element.classList.add('d-none'); // Ocultar el input
+                        element.classList.remove('form-control');
+                        element.readOnly = true;
+                    }
+                }
+                if (span) {
+                    span.classList.remove('d-none'); // Mostrar el span en modo solo lectura
+                }
+            });
+
+            // Restaurar botones y checkboxes
+            document.getElementById('select-all').disabled = false;
+            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+            document.getElementById('edit-button').disabled = false;
+
+            // Ocultar botones de "Guardar" y "Cancelar"
+            document.getElementById('save-button').classList.add('d-none');
+            document.getElementById('cancel-button').classList.add('d-none');
+        }
     };
 
     document.getElementById('select-all').addEventListener('click', function(event) {
@@ -373,7 +453,82 @@ document.addEventListener('DOMContentLoaded', function() {
 
    
     
-    
+    const table = document.querySelector('.table-primary');
+    if (table) {
+        const headers = table.querySelectorAll('th.sortable');
+
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-sort');
+                const direction = header.getAttribute('data-direction') || 'asc';
+                const newDirection = direction === 'asc' ? 'desc' : 'asc';
+
+                sortTableByColumn(table, column, newDirection);
+
+                // Reset all headers to default
+                headers.forEach(h => {
+                    h.setAttribute('data-direction', 'default');
+                    h.querySelector('.sort-icon-default').style.display = 'inline';
+                    h.querySelector('.sort-icon-asc').style.display = 'none';
+                    h.querySelector('.sort-icon-desc').style.display = 'none';
+                });
+
+                // Set current header direction
+                header.setAttribute('data-direction', newDirection);
+                header.querySelector('.sort-icon-default').style.display = 'none';
+                header.querySelector(`.sort-icon-${newDirection}`).style.display = 'inline';
+            });
+        });
+        
+
+        function sortTableByColumn(table, columnName, direction) {
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+            rows.sort((a, b) => {
+                const cellA = a.querySelector(`[data-field="${columnName}"]`);
+                const cellB = b.querySelector(`[data-field="${columnName}"]`);
+        
+                if (!cellA || !cellB) return 0;
+        
+                // Obtener el texto o valor del elemento dentro de la celda
+                const getCellValue = (cell) => {
+                    const input = cell.querySelector('input');
+                    const span = cell.querySelector('span');
+                    if (input && !input.classList.contains('d-none')) {
+                        return input.value.trim();
+                    } else if (span) {
+                        return span.innerText.trim();
+                    }
+                    return '';
+                };
+        
+                const textA = getCellValue(cellA);
+                const textB = getCellValue(cellB);
+        
+                // Numeric comparison
+                if (!isNaN(textA) && !isNaN(textB)) {
+                    return direction === 'asc' ? textA - textB : textB - textA;
+                }
+        
+                // Date comparison
+                if (columnName.includes('Fecha')) {
+                    const dateA = new Date(textA);
+                    const dateB = new Date(textB);
+                    if (!isNaN(dateA) && !isNaN(dateB)) {
+                        return direction === 'asc' ? dateA - dateB : dateB - dateA;
+                    } 
+                }
+        
+                // String comparison
+                return direction === 'asc'
+                    ? textA.localeCompare(textB)
+                    : textB.localeCompare(textA);
+            });
+        
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    }
 
     
 });
