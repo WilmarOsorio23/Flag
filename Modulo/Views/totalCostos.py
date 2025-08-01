@@ -13,22 +13,19 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 
 def total_costos_indirectos_index(request):
-    total_costos_indirectos_data = Total_Costos_Indirectos.objects.all()
-    detalles = None
-    seleccionado = request.GET.get('seleccionado')  # Obtiene el ID seleccionado si lo hay
+    try:
+        # Obtener los datos de la base de datos
+        total_costos_indirectos_data = Total_Costos_Indirectos.objects.all()
 
-    if seleccionado:
-        total_seleccionado = get_object_or_404(Total_Costos_Indirectos, id=seleccionado)
-        detalles = Detalle_Costos_Indirectos.objects.filter(
-            Anio=total_seleccionado.Anio, 
-            Mes=total_seleccionado.Mes
-        )  # Filtra los detalles según el Año y Mes
-    
-    return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_index.html', {
-        'total_costos_indirectos_data': total_costos_indirectos_data,
-        'detalles': detalles,
-        'seleccionado': seleccionado,
-    })
+        # Pasar los datos al contexto
+        return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_index.html', {
+            'total_costos_indirectos_data': total_costos_indirectos_data
+        })
+    except Exception as e:
+        return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_index.html', {
+            'error_message': f'Error al cargar los datos: {str(e)}'
+        })
+
 def crear_detalle_costos(request, total_costos_id):
     total_costos = get_object_or_404(Total_Costos_Indirectos, id=total_costos_id)
 
@@ -131,7 +128,7 @@ def visualizar_detalle_costos(request, id):
     # 🔥 Convertimos los detalles en una lista con el formato correcto
     detalles = [
         {
-            "Id": d["Id"],
+            "id": d["Id"],
             "Anio": d["Anio"],
             "Mes": d["Mes"],
             "CostosId": d["CostosId"],  # ✅ Mantiene el mismo nombre esperado
@@ -140,13 +137,21 @@ def visualizar_detalle_costos(request, id):
         }
         for d in detalles_queryset
     ]
-
+    print("Detalles después de procesarlos:")
+    print(detalles)
     costos_disponibles = list(Costos_Indirectos.objects.values("CostoId", "Costo"))
-
-    return JsonResponse({
+    print("Costos disponibles:")
+    print(costos_disponibles)
+    response_data = {
         "detalles": detalles,
         "costos_disponibles": costos_disponibles
-    })
+    }
+
+    # 🔥 Imprime la respuesta final antes de enviarla
+    print("Datos enviados en la respuesta JSON:")
+    print(response_data)
+
+    return JsonResponse(response_data)
 
 @csrf_exempt
 def editar_detalles_costos(request):
@@ -188,22 +193,48 @@ def actualizar_total(request, anio, mes):
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)})
 
-'''
-def total_costos_indirectos_editar(request,id):
-   print("llego hasta editar")
-   if request.method == 'POST':
+@csrf_exempt
+def total_costos_indirectos_editar(request):
+    if request.method == 'POST':
         try:
+            # Parsear los datos enviados desde el cliente
             data = json.loads(request.body)
-            detalle = get_object_or_404( Total_Costos_Indirectos, pk=id)
-            detalle.Total = data.get('Total', detalle.Total)
-            detalle.save()
+            print(f"Datos recibidos: {data}")
 
-            print(JsonResponse({'status': 'success'}))
-            return JsonResponse({'status': 'success'})
+            # Obtener los valores enviados
+            detalle_id = data.get('id')
+            anio = data.get('Anio')
+            mes = data.get('Mes')
+            valor = data.get('Valor')
+
+            # Validar que los datos sean correctos
+            if not detalle_id or not anio or not mes or valor is None:
+                print("❌ Error: Datos incompletos.")
+                return JsonResponse({'status': 'error', 'message': 'Datos incompletos.'}, status=400)
+
+            # Buscar el registro correspondiente en la base de datos
+            print(f"Buscando Total_Costos_Indirectos con ID={detalle_id}")
+            total_costo = get_object_or_404(Total_Costos_Indirectos, id=detalle_id)
+
+            # Actualizar los valores
+            print(f"Actualizando Total_Costos_Indirectos con Total={valor}")
+            total_costo.Anio = anio
+            total_costo.Mes = mes
+            total_costo.Total = valor
+            total_costo.save()
+
+            print("✅ Total de costos indirectos actualizado correctamente.")
+            return JsonResponse({'status': 'success', 'message': 'Total de costos indirectos actualizado correctamente.'})
         except Total_Costos_Indirectos.DoesNotExist:
-            return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
+            print("❌ Error: Registro no encontrado.")
+            return JsonResponse({'status': 'error', 'message': 'Registro no encontrado.'}, status=404)
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-   else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-'''
+            print("❌ Error: Error al decodificar JSON.")
+            return JsonResponse({'status': 'error', 'message': 'Error al decodificar JSON.'}, status=400)
+        except Exception as e:
+            # Registrar el error en los logs del servidor
+            print(f"❌ Error interno: {str(e)}")
+            return JsonResponse({'status': 'error', 'message': f'Error interno: {str(e)}'}, status=500)
+    else:
+        print("❌ Error: Método no permitido.")
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)
