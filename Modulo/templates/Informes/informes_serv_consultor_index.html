@@ -146,6 +146,7 @@
             <tr>
                 <th rowspan="2">Línea</th>
                 <th rowspan="2">Consultor</th>
+                <th rowspan="2">Empresa</th> <!-- NUEVA COLUMNA -->
                 <th rowspan="2">Cliente</th>
                 {% for mes_num, mes_nombre in meses %}
                     <th colspan="4" class="text-center">{{ mes_nombre }}</th>
@@ -168,14 +169,15 @@
         <tbody>
             {% for linea, consultores in datos.items %}
                 {% with total_filas=0 %}
-                    {% for consultor, clientes in consultores.items %}
+                    {% for consultor_tuple, clientes in consultores.items %}
                         {% with total_filas=total_filas|add:clientes.items|length %}
                         {% endwith %}
                     {% endfor %}
                 {% endwith %}
 
                 {% with linea_imprimida=False %}
-                    {% for consultor, clientes in consultores.items %}
+                    {% for consultor_tuple, clientes in consultores.items %}
+                        {% with consultor=consultor_tuple.0 empresa=consultor_tuple.1 %}
                         {% with consultor_filas=clientes.items|length %}
                             {% for cliente, meses_data in clientes.items %}
                                 <tr>
@@ -186,6 +188,7 @@
 
                                     {% if forloop.first %}
                                         <td rowspan="{{ consultor_filas }}">{{ consultor }}</td>
+                                        <td rowspan="{{ consultor_filas }}">{{ empresa }}</td> <!-- NUEVA COLUMNA -->
                                     {% endif %}
 
                                     <td>{{ cliente }}</td>
@@ -208,20 +211,20 @@
                                 </tr>
                             {% endfor %}
                         {% endwith %}
-
+                        {% endwith %}
                         <!-- Totales por consultor -->
                         <tr class="table-info">
-                            <td colspan="2" class="text-end fw-bold">Total {{ consultor }}</td>
+                            <td colspan="3" class="text-end fw-bold">Total {{ consultor }}</td> <!-- colspan=3 por Línea, Consultor, Empresa -->
                             <td></td>
                             {% for mes_num, mes_nombre in meses %}
-                                {% with total_mes=totales_por_linea_consultor_mes|get_item_safe:linea|get_item_safe:consultor|get_item_safe:mes_num %}
+                                {% with total_mes=totales_por_linea_consultor_mes|get_item_safe:linea|get_item_safe:consultor_tuple|get_item_safe:mes_num %}
                                     <td>{{ total_mes.total_factura|floatformat:2|default:"0.00" }}</td>
                                     <td>{{ total_mes.total_cobro|floatformat:2|default:"0.00" }}</td>
                                     <td>{{ total_mes.total_diferencia|floatformat:2|default:"0.00" }}</td>
                                     <td>{{ total_mes.porcentaje_diferencia|floatformat:2|default:"0.00" }}%</td>
                                 {% endwith %}
                             {% endfor %}
-                            {% with total=totales_por_linea_consultor|get_item_safe:linea|get_item_safe:consultor %}
+                            {% with total=totales_por_linea_consultor|get_item_safe:linea|get_item_safe:consultor_tuple %}
                                 <td>{{ total.total_factura|floatformat:2|default:"0.00" }}</td>
                                 <td>{{ total.total_cobro|floatformat:2|default:"0.00" }}</td>
                                 <td>{{ total.total_diferencia|floatformat:2|default:"0.00" }}</td>
@@ -233,7 +236,7 @@
 
                 <!-- Totales por línea -->
                 <tr class="table-warning">
-                    <td colspan="2" class="text-end fw-bold">Total {{ linea }}</td>
+                    <td colspan="3" class="text-end fw-bold">Total {{ linea }}</td> <!-- colspan=3 por Línea, Consultor, Empresa -->
                     <td></td>
                     {% for mes_num, mes_nombre in meses %}
                         {% with total_mes=totales_por_linea_mes|get_item_safe:linea|get_item_safe:mes_num %}
@@ -254,7 +257,7 @@
 
             <!-- Totales globales -->
             <tr class="table-secondary fw-bold">
-                <td colspan="3">Total General</td>
+                <td colspan="4">Total General</td> <!-- Línea, Consultor, Empresa, Cliente -->
                 {% for mes_num, mes_nombre in meses %}
                     {% with total_mes=totales_por_mes|get_item_safe:mes_num %}
                         <td>{{ total_mes.total_factura|floatformat:2|default:"0.00" }}</td>

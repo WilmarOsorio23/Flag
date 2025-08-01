@@ -1,24 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    window.cancelEdit = function() {
-        console.log("esta en cancel")
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length == 1) {
-            let row = selected[0].closest('tr');
-            // Restaurar los valores originales desde el atributo personalizado
-            row.querySelectorAll('input.form-control').forEach(input => {
-                if (input.hasAttribute('data-original-value')) {
-                    input.value = input.getAttribute('data-original-value');
-                }
-            });
-            selected.disabled = false;
-            selected.checked = false;
-            window.location.reload();
-            disableEditMode(selected,row);
-            showMessage('Cambios cancelados.', 'danger');
-        }
-    };
-
     // Clonar checkboxes seleccionados en el formulario de descarga
     document.getElementById('download-form').addEventListener('submit', function(event) {
     let selectedCheckboxes = document.querySelectorAll('.row-select:checked');
@@ -34,118 +15,164 @@ document.addEventListener('DOMContentLoaded', function() {
      document.getElementById('items_to_download').value = selectedValues.join(',');
 });
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    window.saveRow = function() {
-        
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length != 1) {
-            showMessage('Error al guardar: No hay un Nomina seleccionado.', 'danger');
+    window.saveRow = function () {
+        const selected = document.querySelectorAll('.row-select:checked');
+        if (selected.length !== 1) {
+            showMessage('Error al guardar: No hay un registro seleccionado.', 'danger');
             return;
         }
 
-        let row = selected[0].closest('tr');
-       
-        let data = {
-            'Anio': row.querySelector('input[name="anio"]').value,
-            'Mes': row.querySelector('input[name="mes"]').value,
-            'Documento': row.querySelector('input[name="documento"]').value,
-            'Salario': row.querySelector('input[name="salario"]').value,
-            'Cliente': row.querySelector('select[name="Cliente"]').value
+        const row = selected[0].closest('tr');
+
+        // Capturar los valores de los campos editables
+        const data = {
+            Anio: row.querySelector('input[name="anio"]').value.trim(),
+            Mes: row.querySelector('input[name="mes"]').value.trim(),
+            Documento: row.querySelector('input[name="documento"]').value.trim(),
+            Salario: row.querySelector('input[name="salario"]').value.trim(),
+            Cliente: row.querySelector('select[name="Cliente"]').value.trim()
         };
-        let id = selected[0].value;
-        // Deshabilitar los checkboxes y el botón de edición
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
-        document.getElementById('edit-button').disabled = true;
-       console.log(id)
-       console.log(data)
-       fetch(`/nomina/editar/${id}/`, {
+
+        const id = selected[0].value;
+
+        // Validar que los campos requeridos no estén vacíos
+        if (!data.Anio || !data.Mes || !data.Documento || !data.Salario || !data.Cliente) {
+            showMessage('Todos los campos son obligatorios.', 'danger');
+            return;
+        }
+
+        // Enviar los datos al servidor
+        fetch(`/nomina/editar/${id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken
-
             },
             body: JSON.stringify(data)
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Error al guardar los cambios');
+                throw new Error('Error al guardar los cambios.');
             }
             return response.json();
         })
-        .then(data => { 
-            if (data.status == 'success') {
+        .then(data => {
+            if (data.status === 'success') {
                 showMessage('Cambios guardados correctamente.', 'success');
-                window.location.reload()
-
-                row.querySelectorAll('input.form-control').forEach(input => {
-                    input.classList.add('highlighted');
-                    setTimeout(() => input.classList.remove('highlighted'), 2000);
-                });
-
-                disableEditMode(selected,row);
-
+                window.location.reload();
             } else {
-                showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger');
+                showMessage(`Error al guardar los cambios: ${data.error || 'Error desconocido'}`, 'danger');
             }
-
         })
         .catch(error => {
             console.error('Error al guardar los cambios:', error);
-            showMessage('Error al guardar los cambios: ' + error.message, 'danger');
-
-            disableEditMode(selected,row);
+            showMessage(`Error al guardar los cambios: ${error.message}`, 'danger');
         });
     };
-    window.enableEdit = function() {
-        let selected = document.querySelectorAll('.row-select:checked');
+
+    window.enableEdit = function () {
+        const selected = document.querySelectorAll('.row-select:checked');
         if (selected.length === 0) {
-            alert('No has seleccionado ninguna Nómina para editar.');
+            alert('No has seleccionado ningún registro para editar.');
             return false;
         }
         if (selected.length > 1) {
-            alert('Solo puedes editar una Nómina a la vez.');
+            alert('Solo puedes editar un registro a la vez.');
             return false;
         }
-    
-        let row = selected[0].closest('tr');
-        let inputs = row.querySelectorAll('input.form-control-plaintext');
-    
+
+        const row = selected[0].closest('tr');
+
+        // Lista de campos específicos que son editables
+        const editableFields = [
+            { name: "salario", type: "text" },
+            { name: "Cliente", type: "select" }
+        ];
+
         // Guardar valores originales en un atributo personalizado
-        inputs.forEach(input => { 
-            input.setAttribute('data-original-value', input.value);
+        editableFields.forEach(field => {
+            const element = row.querySelector(`[name="${field.name}"]`);
+            const span = row.querySelector(`[data-field="${field.name}"] span.form-control-plaintext`);
+            if (element) {
+                element.setAttribute('data-original-value', element.value);
+            }
+            if (span) {
+                span.setAttribute('data-original-value', span.innerText.trim());
+            }
         });
-    
-        // Desactivar todos los checkboxes y el botón de edición
+
+        // Habilitar los campos editables y ocultar los spans correspondientes
+        editableFields.forEach(field => {
+            const element = row.querySelector(`[name="${field.name}"]`);
+            const span = row.querySelector(`[data-field="${field.name}"] span.form-control-plaintext`);
+            if (element) {
+                if (field.type === "select") {
+                    element.disabled = false; // Habilitar el select
+                    element.classList.remove('form-control-plaintext');
+                    element.classList.add('form-control');
+                } else {
+                    element.classList.remove('d-none'); // Mostrar el input
+                    element.classList.remove('form-control-plaintext');
+                    element.classList.add('form-control');
+                    element.readOnly = false; // Habilitar el input
+                }
+            }
+            if (span) {
+                span.classList.add('d-none'); // Ocultar el span en modo edición
+            }
+        });
+
+        // Desactivar todos los checkboxes y botones de edición
         document.getElementById('select-all').disabled = true;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
-    
-        // Habilitar los campos editables
-        const InputsList = ['salario', 'Cliente']; // Lista de campos que son inputs de texto
-        for (let i = 0; i < InputsList.length; i++) {
-            let input = row.querySelector(`[name="${InputsList[i]}"]`);
-            if (input) {
-                input.classList.remove('form-control-plaintext');
-                input.classList.add('form-control');
-                input.readOnly = false;
-            }
-        }
-    
-        // Habilitar el <select> de cliente
-        let selectCliente = row.querySelector(`select[name="Cliente"]`);
-        if (selectCliente && selectCliente.options.length > 1) {
-        selectCliente.disabled = false; // Activar el <select>
-        } else {
-            console.error("El select de cliente no tiene opciones disponibles.");
-        }
-        if (selectCliente) {
-            console.log("Opciones en el select de cliente:", selectCliente.innerHTML);
-        }
-    
+
         // Mostrar botones de "Guardar" y "Cancelar"
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
     };
+
+    window.cancelEdit = function () {
+        const selected = document.querySelectorAll('.row-select:checked');
+        if (selected.length === 1) {
+            const row = selected[0].closest('tr');
+
+            // Restaurar valores originales
+            const editableFields = ["anio", "mes", "documento", "salario", "Cliente"];
+
+            editableFields.forEach(name => {
+                const element = row.querySelector(`[name="${name}"]`);
+                const span = row.querySelector(`[data-field="${name}"] span.form-control-plaintext`);
+                if (element) {
+                    if (name === "Cliente") {
+                        element.disabled = true; // Deshabilitar el select
+                        element.classList.add('form-control-plaintext');
+                        element.classList.remove('form-control');
+                    } else {
+                        element.value = element.getAttribute('data-original-value');
+                        element.classList.add('form-control-plaintext');
+                        element.classList.remove('form-control');
+                        element.readOnly = true;
+                        element.classList.add('d-none'); // Ocultar el input
+                    }
+                }
+                if (span) {
+                    span.innerText = span.getAttribute('data-original-value');
+                    span.classList.remove('d-none'); // Mostrar el span en modo solo lectura
+                }
+            });
+
+            // Restaurar botones y checkboxes
+            document.getElementById('select-all').disabled = false;
+            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+            document.getElementById('edit-button').disabled = false;
+
+            // Ocultar botones de "Guardar" y "Cancelar"
+            document.getElementById('save-button').classList.add('d-none');
+            document.getElementById('cancel-button').classList.add('d-none');
+        }
+    };
+
 
     document.getElementById('select-all').addEventListener('click', function(event) {
         let checkboxes = document.querySelectorAll('.row-select');
@@ -317,7 +344,76 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
    
-    
+    const table = document.querySelector('.table-primary');
+    if (table) {
+        const headers = table.querySelectorAll('th.sortable');
+
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-sort');
+                const direction = header.getAttribute('data-direction') || 'asc';
+                const newDirection = direction === 'asc' ? 'desc' : 'asc';
+
+                sortTableByColumn(table, column, newDirection);
+
+                // Reset all headers to default
+                headers.forEach(h => {
+                    h.setAttribute('data-direction', 'default');
+                    h.querySelector('.sort-icon-default').style.display = 'inline';
+                    h.querySelector('.sort-icon-asc').style.display = 'none';
+                    h.querySelector('.sort-icon-desc').style.display = 'none';
+                });
+
+                // Set current header direction
+                header.setAttribute('data-direction', newDirection);
+                header.querySelector('.sort-icon-default').style.display = 'none';
+                header.querySelector(`.sort-icon-${newDirection}`).style.display = 'inline';
+            });
+        });
+        
+
+        function sortTableByColumn(table, columnName, direction) {
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+            rows.sort((a, b) => {
+                const cellA = a.querySelector(`[data-field="${columnName}"]`);
+                const cellB = b.querySelector(`[data-field="${columnName}"]`);
+        
+                if (!cellA || !cellB) return 0;
+        
+                // Obtener el texto o valor del elemento dentro de la celda
+                const getCellValue = (cell) => {
+                    const input = cell.querySelector('input');
+                    const span = cell.querySelector('span');
+                    const select = cell.querySelector('select');
+                    if (input && !input.classList.contains('d-none')) {
+                        return input.value.trim();
+                    } else if (span) {
+                        return span.innerText.trim();
+                    } else if (select) {
+                        return select.options[select.selectedIndex].text.trim();
+                    }
+                    return '';
+                };
+        
+                const textA = getCellValue(cellA);
+                const textB = getCellValue(cellB);
+        
+                // Numeric comparison
+                if (!isNaN(textA) && !isNaN(textB)) {
+                    return direction === 'asc' ? textA - textB : textB - textA;
+                }
+        
+                // String comparison
+                return direction === 'asc'
+                    ? textA.localeCompare(textB)
+                    : textB.localeCompare(textA);
+            });
+        
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    }
 
     
 });

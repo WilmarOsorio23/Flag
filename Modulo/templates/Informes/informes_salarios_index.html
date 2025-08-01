@@ -139,10 +139,38 @@
                                 <i class="fas fa-sort-down sort-icon-desc"></i>
                             </span>
                         </th>
-                        <th>Módulo</th>
-                        <th>Certificado</th>
-                        <th>Fecha Ingreso</th>
-                        <th>Años en Flag</th>
+                        <th data-sort="Modulo" class="sortable" data-direction="default">
+                            Módulo
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="certificado" class="sortable" data-direction="default">
+                            Certificado
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="fecha_ingreso" class="sortable" data-direction="default">
+                            Fecha Ingreso
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="anios" class="sortable" data-direction="default">
+                            Años en Flag
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
                         <th data-sort="año" class="sortable" data-direction="default">
                             Año 
                             <span class="sort-icon">
@@ -152,8 +180,22 @@
                             </span>
                         </th>
                         {% for mes in meses %}
-                            <th>Salario {{ mes }}</th>
-                            <th>Cliente {{ mes }}</th>
+                            <th data-sort="salario" class="sortable" data-direction="default">
+                                Salario {{ mes }}
+                                <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                            </th>
+                            <th data-sort="cliente" class="sortable" data-direction="default">
+                                Cliente {{ mes }}
+                                <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                            </th>
                         {% endfor %}
                     </tr>
                 </thead>
@@ -166,8 +208,8 @@
                             <td class="text-start">{{ empleado.cargo }}</td>
                             <td class="text-start">{{ empleado.perfil }}</td>
                             <td class="text-start">{{ empleado.modulo }}</td>
-                            <td>{{ empleado.certificado }}</td>
-                            <td>{{ empleado.fecha_ingreso|date:'d/m/Y' }}</td>
+                            <td class="text-start">{{ empleado.certificado }}</td>
+                            <td class="text-end">{{ empleado.fecha_ingreso|date:'d/m/Y' }}</td>
                             <td class="text-end">{{ empleado.años_en_flag }}</td>
                             <td class="text-end">{{ empleado.año }}</td>
                             {% for mes_data in empleado.meses %}

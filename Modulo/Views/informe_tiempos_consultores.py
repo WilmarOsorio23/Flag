@@ -82,6 +82,7 @@ def tiempos_clientes_filtrado(request):
                 {
                     'Documento': t.Documento,
                     'Nombre': consultores[t.Documento].Nombre if t.Documento in consultores else '',
+                    'Empresa': consultores[t.Documento].Empresa if t.Documento in consultores else '',
                     'Anio': t.Anio,
                     'Mes': t.Mes,
                     'Linea': t.LineaId.Linea if t.LineaId else '',
@@ -120,7 +121,7 @@ def exportar_tiempos_clientes_excel(request):
     ws.title = "Tiempos Consultores"
 
     # Definir encabezados y su orden
-    encabezados = ["Documento", "Nombre", "Linea", "Cliente", "Modulo", "Anio", "Mes", "Horas"]
+    encabezados = ["Documento", "Nombre", "Empresa", "Linea", "Cliente", "Modulo", "Anio", "Mes", "Horas"]
 
     # Estilo para bordes
     thin_border = Border(

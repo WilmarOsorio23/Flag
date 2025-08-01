@@ -57,23 +57,75 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Año</th>
-                            <th scope="col">Mes</th>
-                            <th scope="col">Nombre Empleado</th>
-                            <th scope="col">Salario</th>
-                            <th scope="col">Cliente</th>
+                            <th data-sort="anio" class="sortable" data-direction="default">
+                                Año
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="mes" class="sortable" data-direction="default">
+                                Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="documento" class="sortable" data-direction="default">
+                                Nombre Empleado
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="salario" class="sortable" data-direction="default">
+                                Salario
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Cliente" class="sortable" data-direction="default">
+                                Cliente
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                         </tr>
                     </thead>
                     
                     <tbody>
                         {% for nomina in nomina_data %}
                          <tr id="row-{{nomina.NominaId}}">
-                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{nomina.NominaId}}"></td>
-                            <td><input type="text" name="anio" class="form-control-plaintext" value="{{ nomina.Anio }}" readonly></td>
-                            <td><input type="text" name="mes" class="form-control-plaintext" value="{{ nomina.Mes }}" readonly></td>
-                            <td><input type="text" name="documento" class="form-control-plaintext" value="{{nomina.Documento.Nombre}}" readonly></td>
-                            <td><input type="text" name="salario" class="form-control-plaintext" value="{{nomina.Salario}}" readonly></td>
                             <td>
+                                <input type="checkbox" class="row-select" name="items_to_delete" value="{{nomina.NominaId}}">
+                            </td>
+                            <td data-field="anio" class="text-start">
+                                <span class="form-control-plaintext">{{ nomina.Anio }}</span>
+                                <input type="text" name="anio" class="form-control d-none" value="{{ nomina.Anio }}" readonly>
+                            </td>
+                            <td data-field="mes" class="text-start">
+                                <span class="form-control-plaintext">{{ nomina.Mes }}</span>
+                                <input type="text" name="mes" class="form-control d-none" value="{{ nomina.Mes }}" readonly>
+                            </td>
+                            <td data-field="documento" class="text-start">
+                                <span class="form-control-plaintext">{{ nomina.Documento.Nombre }}</span>
+                                <input type="text" name="documento" class="form-control d-none" value="{{nomina.Documento.Nombre}}" readonly>
+                            </td>
+                            <td data-field="salario" class="text-end">
+                                <span class="form-control-plaintext">{{ nomina.Salario }}</span>
+                                <input type="text" name="salario" class="form-control d-none" value="{{nomina.Salario}}" readonly>
+                            </td>
+                            <td data-field="Cliente">
+                                <span class="form-control d-none" data-field="Cliente">
+                                    {{ nomina.Cliente.Nombre_Cliente }}
+                                </span>
                                 <select name="Cliente" class="form-control-plaintext" disabled>
                                     {% for cliente in form.fields.Cliente.queryset %}
                                         <option value="{{cliente.ClienteId}}"{% if nomina.Cliente.ClienteId == cliente.ClienteId %}selected{% endif %}>{{cliente.Nombre_Cliente}}</option>

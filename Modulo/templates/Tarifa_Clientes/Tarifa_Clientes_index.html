@@ -56,55 +56,219 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Cliente </th>
-                            <th scope="col">Linea</th>
-                            <th scope="col">Modulo</th>
-                            <th scope="col">Referencia</th>
-                            <th scope="col">Centro de costos</th>
-                            <th scope="col">Año</th>
-                            <th scope="col">Mes</th>
-                            <th scope="col">Sitio de trabajo</th>
-                            <th scope="col">Valor Hora</th>
-                            <th scope="col">Valor Día</th>
-                            <th scope="col">Valor Mes</th>
-                            <th scope="col">Cantidad Bolsa</th>
-                            <th scope="col">Valor bolsa</th>
-                            <th scope="col">IVA</th>
-                            <th scope="col">Moneda</th>
+                            <th data-sort="Cliente" class="sortable" data-direction="default">
+                                Cliente
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span> 
+                            </th>
+                            <th data-sort="Linea" class="sortable" data-direction="default">
+                                Linea
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Modulo" class="sortable" data-direction="default">
+                                Modulo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="referencia" class="sortable" data-direction="default">
+                                Referencia
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="centroCostos" class="sortable" data-direction="default">
+                                Centro de costos
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Anio" class="sortable" data-direction="default">
+                                Año
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Mes" class="sortable" data-direction="default">
+                                Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="sitioTrabajo" class="sortable" data-direction="default">
+                                Sitio de trabajo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="valorHora" class="sortable" data-direction="default">
+                                Valor Hora
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="valorDia" class="sortable" data-direction="default">
+                                Valor Día
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="valorMes" class="sortable" data-direction="default">
+                                Valor Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="bolsaMes" class="sortable" data-direction="default">
+                                Cantidad Bolsa
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="valorBolsa" class="sortable" data-direction="default">
+                                Valor bolsa
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="iva" class="sortable" data-direction="default">
+                                IVA
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="moneda" class="sortable" data-direction="default">
+                                Moneda
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                             
                         </tr>
                     </thead>
                     <tbody>
                         {% for tarifa in  tarifa_clientes_data %}
                          <tr id="row-{{tarifa.id}}">
-                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{tarifa.id}}"></td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 180px;"><input type="text" name="clienteId" class="form-control-plaintext" value="{{ tarifa.clienteId.Nombre_Cliente}}" readonly></td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 120px;"><input type="text" name="lineaId" class="form-control-plaintext" value="{{ tarifa.lineaId.Linea}}" readonly></td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;"><input type="text" name="moduloId" class="form-control-plaintext" value="{{ tarifa.moduloId.Modulo}}" readonly></td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
-                                <select name="referencia" class="form-control-plaintext">
+                            <td>
+                                <input type="checkbox" class="row-select" name="items_to_delete" value="{{tarifa.id}}">
+                            </td>
+                            <td data-field="Cliente" class="text-start" style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
+                                <span class="form-control-plaintext">{{ tarifa.clienteId.Nombre_Cliente }}</span>
+                                <input type="text" name="clienteId" class="form-control d-none" value="{{ tarifa.clienteId.Nombre_Cliente}}" readonly>
+                            </td>
+                            <td data-field="Linea" class="text-start" style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
+                                <span class="form-control-plaintext">{{ tarifa.lineaId.Linea }}</span>
+                                <input type="text" name="lineaId" class="form-control d-none" value="{{ tarifa.lineaId.Linea}}" readonly>
+                            </td>
+                            <td data-field="Modulo" class="text-start" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                <span class="form-control-plaintext">{{ tarifa.moduloId.Modulo }}</span>
+                                <input type="text" name="moduloId" class="form-control d-none" value="{{ tarifa.moduloId.Modulo}}" readonly>
+                            </td>
+                            <td data-field="referencia" class="text-left" style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
+                                <span class="form-control d-none" data-field="referencia">
+                                    {% for ref in form.fields.referenciaId.queryset %}
+                                        {% if tarifa.referenciaId.id == ref.id %}
+                                            {{ ref.descripcionReferencia }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                                <select name="referencia" class="form-control-plaintext" disabled>
                                     {% for ref in form.fields.referenciaId.queryset %}
                                         <option value="{{ref.id}}"{% if tarifa.referenciaId.id == ref.id %}selected{% endif %}>{{ref.descripcionReferencia}}</option>
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
-                                <select name="centroCostos" class="form-control-plaintext">
+                            <td data-field="centroCostos" class="text-left" style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
+                                <span class="form-control d-none" data-field="centroCostos">
+                                    {% for CeCo in form.fields.centrocostosId.queryset %}
+                                        {% if tarifa.centrocostosId.id == CeCo.id %}
+                                            {{ CeCo.descripcionCeCo }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                                <select name="centroCostos" class="form-control-plaintext" disabled>
                                     {% for CeCo in form.fields.centrocostosId.queryset %}
                                         <option value="{{CeCo.id}}"{% if tarifa.centrocostosId.id == CeCo.id %}selected{% endif %}>{{CeCo.descripcionCeCo}}</option>
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 80px;"><input type="text" name="anio" class="form-control-plaintext" value="{{ tarifa.anio }}" readonly></td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 50px;"><input type="text" name="mes" class="form-control-plaintext" value="{{ tarifa.mes }}" readonly></td>
-                            <td><input type="text" name="sitioTrabajo" class="form-control-plaintext" value="{{ tarifa.sitioTrabajo }}" readonly></td>
-                            <td><input type="text" name="valorHora" class="form-control-plaintext" value="{{ tarifa.valorHora }}" readonly></td>
-                            <td><input type="text" name="valorDia" class="form-control-plaintext" value="{{ tarifa.valorDia }}" readonly></td>
-                            <td><input type="text" name="valorMes" class="form-control-plaintext" value="{{ tarifa.valorMes }}" readonly></td>
-                            <td><input type="text" name="bolsaMes" class="form-control-plaintext" value="{{ tarifa.bolsaMes }}" readonly></td>
-                            <td><input type="text" name="valorBolsa" class="form-control-plaintext" value="{{ tarifa.valorBolsa }}" readonly></td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 80px;"><input type="text" name="iva" class="form-control-plaintext" value="{{ tarifa.iva }}" readonly></td>
-                            <td>
+                            <td data-field="Anio" class="text-start" style="overflow: visible; text-overflow: ellipsis; min-width: 80px;">
+                                <span class="form-control-plaintext">{{ tarifa.anio }}</span>
+                                <input type="text" name="anio" class="form-control d-none" value="{{ tarifa.anio }}" readonly>
+                            </td>
+                            <td data-field="Mes" class="text-start" style="overflow: visible; text-overflow: ellipsis; min-width: 50px;">
+                                <span class="form-control-plaintext">{{ tarifa.mes }}</span>
+                                <input type="text" name="mes" class="form-control d-none" value="{{ tarifa.mes }}" readonly>
+                            </td>
+                            <td data-field="sitioTrabajo" class="text-start">
+                                <span class="form-control-plaintext">{{ tarifa.sitioTrabajo }}</span>
+                                <input type="text" name="sitioTrabajo" class="form-control d-none" value="{{ tarifa.sitioTrabajo }}" readonly>
+                            </td>
+                            <td data-field="valorHora" class="text-end">
+                                <span class="form-control-plaintext">{{ tarifa.valorHora }}</span>
+                                <input type="text" name="valorHora" class="form-control d-none" value="{{ tarifa.valorHora }}" readonly>
+                            </td>
+                            <td data-field="valorDia" class="text-end">
+                                <span class="form-control-plaintext">{{ tarifa.valorDia }}</span>
+                                <input type="text" name="valorDia" class="form-control d-none" value="{{ tarifa.valorDia }}" readonly>
+                            </td>
+                            <td data-field="valorMes" class="text-end">
+                                <span class="form-control-plaintext">{{ tarifa.valorMes }}</span>
+                                <input type="text" name="valorMes" class="form-control d-none" value="{{ tarifa.valorMes }}" readonly>
+                            </td>
+                            <td data-field="bolsaMes" class="text-end">
+                                <span class="form-control-plaintext">{{ tarifa.bolsaMes }}</span>
+                                <input type="text" name="bolsaMes" class="form-control d-none" value="{{ tarifa.bolsaMes }}" readonly>
+                            </td>
+                            <td data-field="valorBolsa" class="text-end">
+                                <span class="form-control-plaintext">{{ tarifa.valorBolsa }}</span>
+                                <input type="text" name="valorBolsa" class="form-control d-none" value="{{ tarifa.valorBolsa }}" readonly>
+                            </td>
+                            <td data-field="iva" class="text-end" style="overflow: visible; text-overflow: ellipsis; min-width: 80px;">
+                                <span class="form-control-plaintext">{{ tarifa.iva }}</span>
+                                <input type="text" name="iva" class="form-control d-none" value="{{ tarifa.iva }}" readonly>
+                            </td>
+                            <td data-field="moneda" class="text-right">
+                                <span class="form-control d-none" data-field="moneda">
+                                    {% for moneda in form.fields.monedaId.queryset %}
+                                        {% if tarifa.monedaId.id == moneda.id %}
+                                            {{ moneda.Nombre }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
                                 <select name="moneda" class="form-control-plaintext" disabled>
                                     {% for moneda in form.fields.monedaId.queryset %}
                                         <option value="{{moneda.id}}"{% if tarifa.monedaId.id == moneda.id %}selected{% endif %}>{{moneda.Nombre}}</option>

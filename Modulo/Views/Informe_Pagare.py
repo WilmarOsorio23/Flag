@@ -33,6 +33,7 @@ def filtrar_pagares(form, pagarés):
     anio = form.cleaned_data.get('Anio')
     lineas = form.cleaned_data.get('LineaId')
     tipos = form.cleaned_data.get('tipo_pagare')
+    estado = form.cleaned_data.get('estado_pagare')  # Nuevo filtro
 
     if empleados:
         pagarés = pagarés.filter(Documento__in=empleados.values_list('Documento', flat=True))
@@ -42,7 +43,9 @@ def filtrar_pagares(form, pagarés):
         pagarés = pagarés.filter(Documento__in=Empleado.objects.filter(LineaId__in=lineas).values_list('Documento', flat=True))
     if tipos:
         pagarés = pagarés.filter(Tipo_Pagare__in=tipos)
-
+    if estado:  # Aplicar el filtro de estado CORREGIDO
+        pagarés = pagarés.filter(estado=estado)
+        
     return pagarés
 
 def informe_pagares(request):
@@ -99,6 +102,7 @@ def informe_pagares(request):
                     'Nombre': empleado.Nombre,
                     'TipoPagare': pagare.Tipo_Pagare.Desc_Tipo_Pagare if pagare.Tipo_Pagare else 'N/A',
                     'Descripcion':pagare.descripcion,
+                    'Estado': pagare.estado,
                     'Linea': empleado.LineaId.Linea if empleado.LineaId else 'N/A',
                     'Cargo': empleado.CargoId.Cargo if empleado.CargoId else 'N/A',
                     'FechaIngreso': empleado.FechaIngreso.strftime("%Y-%m-%d") if empleado.FechaIngreso else "",

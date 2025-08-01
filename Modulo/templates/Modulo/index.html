@@ -54,12 +54,19 @@
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'eliminar' %}">
                 {% csrf_token %}
-                <table class="table table-primary">
+                <table class="table table-primary" id="moduloTable">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
                             <th scope="col">ID</th>
-                            <th scope="col">Nombre Módulo</th>
+                            <th data-sort="nombre_modulo" class="sortable" data-direction="default">
+                                Nombre Módulo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -67,7 +74,7 @@
                         <tr id="row-{{ modulo.ModuloId }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ modulo.ModuloId }}"></td>
                             <td>{{ modulo.ModuloId }}</td>
-                            <td>
+                            <td data-field="nombre_modulo">
                                 <input type="text" name="nombre" class="form-control-plaintext" value="{{ modulo.Modulo }}" readonly>
                             </td>
                         </tr>
