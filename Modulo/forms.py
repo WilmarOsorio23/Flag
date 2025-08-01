@@ -2461,22 +2461,22 @@ class FacturacionConsultoresFilterForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
-    Mes_Cobro = forms.ChoiceField(
+    Mes_Cobro = forms.MultipleChoiceField(
         choices=[],
         required=True,
         label="Mes a Cobrar *Obligatorio*",
-        widget=forms.Select(attrs={'class': 'form-control'})
-        )
+        widget=forms.CheckboxSelectMultiple()
+    )
 
-    LineaId = forms.ModelChoiceField(
-        queryset=Linea.objects.all(),
+    LineaId = forms.ChoiceField(
+        choices=[],
         required=False,
         label="Línea",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
-    Consultor = forms.ModelChoiceField(
-        queryset=Consultores.objects.all(),
+    Consultor = forms.ChoiceField(
+        choices=[],
         required=False, 
         label='Consultor',
         widget=forms.Select(attrs={'class': 'form-control'})
@@ -2507,15 +2507,15 @@ class FacturacionConsultoresFilterForm(forms.Form):
             ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
             ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
         ]
-        self.fields['Mes_Cobro'].choices = [('', 'Seleccione el mes')] + meses2
+        self.fields['Mes_Cobro'].choices = meses2
 
     def populate_consultor(self):
         consultores = Consultores.objects.values_list('Documento', 'Nombre').distinct()
-        self.fields['Consultor'].choices = [('', 'Seleccione el Consultor')] + list(consultores)
+        self.fields['Consultor'].choices = [('', 'Seleccione el Consultor')] + [(doc, f"{doc} - {nombre}") for doc, nombre in consultores]
 
     def populate_linea(self):
-        linea = Linea.objects.values_list('LineaId', 'Linea').distinct()
-        self.fields['LineaId'].choices = [('', 'Seleccione la linea')] + list(linea)
+        lineas = Linea.objects.values_list('LineaId', 'Linea').distinct()
+        self.fields['LineaId'].choices = [('', 'Seleccione la línea')] + [(lid, nombre) for lid, nombre in lineas]
 
 class FacturacionClientesFilterForm(forms.Form):
     Anio = forms.ChoiceField(

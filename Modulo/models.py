@@ -563,7 +563,7 @@ class Tarifa_Consultores(models.Model):
         db_table = 'Tarifa_Consultores'
         constraints = [
             models.UniqueConstraint( 
-                fields=['documentoId', 'anio', 'mes', 'clienteID', 'moduloId'], 
+                fields=['id','documentoId', 'anio', 'mes', 'clienteID', 'moduloId'], 
                 name='unique_tarifa_consultores'
             )
         ]

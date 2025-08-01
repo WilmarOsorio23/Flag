@@ -3,6 +3,32 @@ document.querySelectorAll('input.form-control:not([readonly])').forEach(input =>
     input.addEventListener('input', () => {
         document.getElementById('save-button').disabled = false;
     });
+
+     // Actualiza el texto del dropdown al seleccionar/desmarcar opciones
+     function updateDropdownLabel(dropdownId, checkboxes) {
+        const button = document.getElementById(dropdownId);
+        const selectedText = button.getAttribute('data-selected-text');
+        const selectedOptions = Array.from(checkboxes)
+            .filter((checkbox) => checkbox.checked)
+            .map((checkbox) => checkbox.nextSibling.textContent.trim());
+
+        if (selectedOptions.length === 0) {
+            button.textContent = selectedText;
+        } else if (selectedOptions.length === 1) {
+        button.textContent = selectedOptions[0];
+        } else {
+            button.textContent = `${selectedOptions.length} seleccionados`;
+        }
+    }
+
+
+    // Meses
+    const clienteCheckboxes = document.querySelectorAll('#dropdownMes ~ .dropdown-menu input[type="checkbox"]');
+    clienteCheckboxes.forEach((checkbox) =>
+        checkbox.addEventListener('change', () =>
+            updateDropdownLabel('dropdownMesCobro', clienteCheckboxes)
+        )
+    );
 });
 
 // Función para guardar todos los registros editados

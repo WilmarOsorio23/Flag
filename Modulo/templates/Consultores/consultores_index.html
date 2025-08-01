@@ -202,7 +202,7 @@
         <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ consultor.Documento }}"></td>
         
         <td data-field="TipoDocumentoID">
-            <span class="d-block text-end">{{ consultor.TipoDocumentoID.Nombre }}</span>
+            <span class="d-block text-start">{{ consultor.TipoDocumentoID.Nombre }}</span>
             <select name="TipoDocumentoID" class="form-select d-none">
                 {% for tipo_doc in form.fields.TipoDocumentoID.queryset %}
                     <option value="{{ tipo_doc.TipoDocumentoID }}" {% if consultor.TipoDocumentoID.Nombre == tipo_doc.Nombre %}selected{% endif %}>
@@ -213,24 +213,24 @@
         </td>
         
         <td data-field="documento">
-            <span class="d-block text-start">{{ consultor.Documento }}</span>
-            <input type="text" name="Documento" class="form-control-plaintext d-none text-start" value="{{ consultor.Documento }}" readonly>
+            <span class="d-block text-end">{{ consultor.Documento }}</span>
+            <input type="text" name="Documento" class="form-control-plaintext d-none text-end" value="{{ consultor.Documento }}" readonly>
         </td>
         
         <td data-field="nombre">
-            <input type="text" name="Nombre" class="form-control-plaintext text-end" value="{{ consultor.Nombre }}" readonly style="width: 200px; white-space: normal; overflow: visible;">
+            <input type="text" name="Nombre" class="form-control-plaintext text-start" value="{{ consultor.Nombre }}" readonly style="width: 200px; white-space: normal; overflow: visible;">
         </td>
         
         <td data-field="empresa">
-            <input type="text" name="Empresa" class="form-control-plaintext text-end" value="{{ consultor.Empresa }}" readonly style="width: 150px; white-space: normal; overflow: visible;">
+            <input type="text" name="Empresa" class="form-control-plaintext text-start" value="{{ consultor.Empresa }}" readonly style="width: 150px; white-space: normal; overflow: visible;">
         </td>
         
         <td data-field="profesion">
-            <input type="text" name="Profesion" class="form-control-plaintext text-end" value="{{ consultor.Profesion }}" readonly style="width: 200px; white-space: normal; overflow: visible;">
+            <input type="text" name="Profesion" class="form-control-plaintext text-start" value="{{ consultor.Profesion }}" readonly style="width: 200px; white-space: normal; overflow: visible;">
         </td>
         
         <td data-field="linea">
-            <select name="LineaId" class="form-control-plaintext text-end" disabled style="width: 150px; text-align-last: right;">
+            <select name="LineaId" class="form-control-plaintext text-start" disabled style="width: 200px; white-space: normal; overflow: visible;">
                 {% for linea in form.fields.LineaId.queryset %}
                     <option value="{{ linea.LineaId }}" {% if consultor.LineaId.Linea == linea.Linea %}selected{% endif %}>
                         {{ linea.Linea }}
@@ -240,7 +240,7 @@
         </td>
         
         <td data-field="modulo">
-            <select name="ModuloId" class="form-control-plaintext text-end" disabled style="width: 150px; text-align-last: right;">
+            <select name="ModuloId" class="form-control-plaintext text-start" disabled style="width: 200px; white-space: normal; overflow: visible;">
                 {% for modulo in form.fields.ModuloId.queryset %}
                     <option value="{{ modulo.ModuloId }}" {% if consultor.ModuloId.Modulo == modulo.Modulo %}selected{% endif %}>
                         {{ modulo.Modulo }}
@@ -250,7 +250,7 @@
         </td>
         
         <td data-field="perfil">
-            <select name="PerfilId" class="form-control-plaintext text-end" disabled style="width: 150px; text-align-last: right;">
+            <select name="PerfilId" class="form-control-plaintext text-start" disabled style="width: 200px; white-space: normal; overflow: visible;">
                 {% for perfil in form.fields.PerfilId.queryset %}
                     <option value="{{ perfil.PerfilId }}" {% if consultor.PerfilId.Perfil == perfil.Perfil %}selected{% endif %}>
                         {{ perfil.Perfil }}
@@ -260,53 +260,53 @@
         </td>
         
         <td data-field="estado">
-            <select name="Estado" class="form-control-plaintext text-end" disabled style="width: 150px; text-align-last: right;">
+            <select name="Estado" class="form-control-plaintext text-start" disabled style="width: 200px; white-space: normal; overflow: visible;">
                 <option value="True" {% if consultor.Estado %}selected{% endif %}>Activo</option>
                 <option value="False" {% if not consultor.Estado %}selected{% endif %}>Inactivo</option>
             </select>
         </td>
         
         <td data-field="fecha_ingreso">
-            <input type="date" name="Fecha_Ingreso" class="form-control-plaintext text-start" value="{{ consultor.Fecha_Ingreso|date:'Y-m-d' }}" readonly style="width: 150px;">
+            <input type="date" name="Fecha_Ingreso" class="form-control-plaintext text-end" value="{{ consultor.Fecha_Ingreso|date:'Y-m-d' }}" readonly>
         </td>
         
         <td data-field="fecha_retiro">
-            <input type="date" name="Fecha_Retiro" class="form-control-plaintext text-start" value="{{ consultor.Fecha_Retiro|date:'Y-m-d' }}" readonly style="width: 150px;">
+            <input type="date" name="Fecha_Retiro" class="form-control-plaintext text-end" value="{{ consultor.Fecha_Retiro|date:'Y-m-d' }}" readonly>
         </td>
         
         <td data-field="fecha_operacion">
-            <input type="date" name="Fecha_Operacion" class="form-control-plaintext text-start" value="{{ consultor.Fecha_Operacion|date:'Y-m-d' }}" readonly style="width: 150px;">
+            <input type="date" name="Fecha_Operacion" class="form-control-plaintext text-end" value="{{ consultor.Fecha_Operacion|date:'Y-m-d' }}" readonly>
         </td>
         
         <td data-field="certificado">
-            <select name="Certificado" class="form-control-plaintext text-end" disabled style="width: 150px; text-align-last: right;">
+            <select name="Certificado" class="form-control-plaintext text-start" disabled style="width: 200px; white-space: normal; overflow: visible;">
                 <option value="True" {% if consultor.Certificado %}selected{% endif %}>SI</option>
                 <option value="False" {% if not consultor.Certificado %}selected{% endif %}>NO</option>
             </select>
         </td>
         
         <td data-field="certificaciones">
-            <input type="text" name="Certificaciones" class="form-control-plaintext text-end" value="{{ consultor.Certificaciones|default_if_none:'' }}" readonly style="width: 150px; white-space: normal; overflow: visible;">
+            <input type="text" name="Certificaciones" class="form-control-plaintext text-start" value="{{ consultor.Certificaciones|default_if_none:'' }}" readonly>
         </td>
         
         <td data-field="fecha_nacimiento">
-            <input type="date" name="Fecha_Nacimiento" class="form-control-plaintext text-start" value="{{ consultor.Fecha_Nacimiento|date:'Y-m-d' }}" readonly style="width: 150px;">
+            <input type="date" name="Fecha_Nacimiento" class="form-control-plaintext text-end" value="{{ consultor.Fecha_Nacimiento|date:'Y-m-d' }}" readonly >
         </td>
         
         <td data-field="año_evaluacion">
-            <input type="number" name="Anio_Evaluacion" class="form-control-plaintext text-start" value="{{ consultor.Anio_Evaluacion|default_if_none:'' }}" readonly style="width: 150px;">
+            <input type="number" name="Anio_Evaluacion" class="form-control-plaintext text-end" value="{{ consultor.Anio_Evaluacion|default_if_none:'' }}" readonly >
         </td>
         
         <td data-field="nota_evaluacion">
-            <input type="text" name="NotaEvaluacion" class="form-control-plaintext text-start" value="{{ consultor.NotaEvaluacion|default_if_none:'' }}" readonly style="width: 150px;">
+            <input type="text" name="NotaEvaluacion" class="form-control-plaintext text-start" value="{{ consultor.NotaEvaluacion|default_if_none:'' }}" readonly >
         </td>
         
         <td data-field="telefono">
-            <input type="number" name="Telefono" class="form-control-plaintext text-start" value="{{ consultor.Telefono|default_if_none:'' }}" readonly style="width: 150px;">
+            <input type="number" name="Telefono" class="form-control-plaintext text-end" value="{{ consultor.Telefono|default_if_none:'' }}" readonly style="width: 200px; white-space: normal; overflow: visible;">
         </td>
         
         <td data-field="direccion">
-            <input type="text" name="Direccion" class="form-control-plaintext text-end" value="{{ consultor.Direccion|default_if_none:'' }}" readonly style="width: 150px; white-space: normal; overflow: visible;" maxlength="255">
+            <input type="text" name="Direccion" class="form-control-plaintext text-start" value="{{ consultor.Direccion|default_if_none:'' }}" readonly style="width: 150px; white-space: normal; overflow: visible;" maxlength="255">
         </td>
     </tr>
     {% empty %}

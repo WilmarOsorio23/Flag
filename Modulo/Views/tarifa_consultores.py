@@ -13,9 +13,23 @@ import json
 
 
 def tarifa_consultores_index(request):
-    tarifa_consultores = Tarifa_Consultores.objects.all()
-    form=Tarifa_ConsultoresForm()
-    return render(request, 'Tarifa_Consultores/tarifa_consultores_index.html', {'tarifa_consultores': tarifa_consultores, 'form': form})  
+    page_size = 100
+    page = int(request.GET.get('page', 1))
+    # Usar select_related para evitar N+1
+    tarifa_consultores_qs = Tarifa_Consultores.objects.select_related(
+        'documentoId', 'moduloId', 'clienteID', 'monedaId'
+    ).all()
+    total_registros = tarifa_consultores_qs.count()
+    total_paginas = (total_registros + page_size - 1) // page_size
+    tarifa_consultores = tarifa_consultores_qs[(page-1)*page_size:page*page_size]
+    form = Tarifa_ConsultoresForm()
+    return render(request, 'Tarifa_Consultores/tarifa_consultores_index.html', {
+        'tarifa_consultores': tarifa_consultores,
+        'form': form,
+        'total_paginas': total_paginas,
+        'pagina_actual': page,
+        'total_registros': total_registros,
+    })
 
 def tarifa_consultores_crear(request):
     if request.method == 'POST':
