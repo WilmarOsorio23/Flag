@@ -131,7 +131,35 @@
           </div>
         </div>
 
+        <div class="col-md-3">
+          <label for="estado_pagare" class="form-label">{{ form.estado_pagare.label }}</label>
+          <div class="dropdown">
+              <button 
+                  class="btn btn-outline-primary dropdown-toggle w-100" 
+                  type="button" 
+                  id="dropdownEstadoPagare" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false"
+                  data-selected-text="Seleccione Estado">
+                  Seleccione Estado
+              </button>
+              <ul class="dropdown-menu w-100" aria-labelledby="dropdownEstadoPagare">
+                  {% for value, label in form.estado_pagare.field.choices %}
+                      <li class="dropdown-item">
+                          <label class="form-check-label w-100">
+                              <input type="radio" name="estado_pagare" value="{{ value }}" {% if form.estado_pagare.value == value %}checked{% endif %}>{{ label }}
+                          </label>
+                      </li>
+                  {% endfor %}
+              </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-4"></div>
+
         <div class="row">
+
           <div class="col-md-6 text-start">
             <button type="submit" name="buscar" class="btn btn-primary">
               <i class="fas fa-search"></i> Buscar
@@ -158,6 +186,7 @@
                 <th>Nombre</th>
                 <th>Tipo Pagaré</th>
                 <th>Descripción</th>
+                <th>Estado</th>
                 <th>Línea</th>
                 <th>Cargo</th>
                 <th>F. Ingreso</th>
@@ -190,6 +219,7 @@
                   <td>{{ registro.Nombre }}</td>
                   <td>{{ registro.TipoPagare }}</td>
                   <td>{{ registro.Descripcion}}</td>
+                  <td>{{ registro.Estado }}</td>
                   <td>{{ registro.Linea }}</td>
                   <td>{{ registro.Cargo }}</td>
                   <td>{% if registro.FechaIngreso %}{{ registro.FechaIngreso }}{% else %}-{% endif %}</td>
@@ -222,7 +252,7 @@
                 Detalle
             </button>
           </div>
-          <div class="card-body" id="detalleCuotasCard" style="display=block">
+          <div class="card-body" id="detalleCuotasCard" style="display: block;">
             <div class="table-responsive">
               <table class="table table-bordered table-sm">
                 <thead class="table-info">
@@ -297,6 +327,7 @@ document.addEventListener('DOMContentLoaded', function () {
     attachDropdownListeners('dropdownAnio');
     attachDropdownListeners('dropdownLinea');
     attachDropdownListeners('dropdownTipoPagare');
+    attachDropdownListeners('dropdownEstadoPagare');
 
     // Eliminar persistencia de selección al filtrar
     const filterForm = document.getElementById('filterForm');
@@ -306,15 +337,18 @@ document.addEventListener('DOMContentLoaded', function () {
         const tipoPagareDropdown = document.getElementById('dropdownTipoPagare');
 
         // Guardar las selecciones actuales en el almacenamiento local (excepto empleados)
+        const estadoPagareDropdown = document.getElementById('dropdownEstadoPagare');
         localStorage.setItem('anioSeleccionado', anioDropdown.textContent);
         localStorage.setItem('lineaSeleccionada', lineaDropdown.textContent);
         localStorage.setItem('tipoPagareSeleccionado', tipoPagareDropdown.textContent);
+        localStorage.setItem('estadoPagareSeleccionado', estadoPagareDropdown.textContent);
     });
 
     // Restaurar las selecciones al cargar la página (excepto empleados)
     const anioSeleccionado = localStorage.getItem('anioSeleccionado');
     const lineaSeleccionada = localStorage.getItem('lineaSeleccionada');
     const tipoPagareSeleccionado = localStorage.getItem('tipoPagareSeleccionado');
+    const estadoPagareSeleccionado = localStorage.getItem('estadoPagareSeleccionado');
 
     if (anioSeleccionado) {
         document.getElementById('dropdownAnio').textContent = anioSeleccionado;
@@ -324,6 +358,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (tipoPagareSeleccionado) {
         document.getElementById('dropdownTipoPagare').textContent = tipoPagareSeleccionado;
+    }
+    if (estadoPagareSeleccionado) {
+        document.getElementById('dropdownEstadoPagare').textContent = estadoPagareSeleccionado;
     }
 
 
@@ -354,21 +391,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Verificar si los checkboxes existen antes de agregar eventos
-    const pagarCheckboxes = document.querySelectorAll('input[name="selected_pagares"]');
-    if (pagarCheckboxes.length > 0) {
-        pagarCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function () {
-                const checkboxes = document.querySelectorAll('input[name="selected_pagares"]');
-                checkboxes.forEach(cb => {
-                    if (cb !== this) cb.checked = false;
-                });
 
-                // Generar cuotas para el checkbox seleccionado
-                generarCuotas(this);
-            });
-        });
-    }
 
     // Seleccionar todos los pagarés
     
@@ -476,19 +499,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
 
-    // Mostrar detalle de cuotas al seleccionar un pagaré
-    document.querySelectorAll('input[name="selected_pagares"]').forEach(checkbox => {
-      checkbox.addEventListener('change', function() {
-          // Desmarcar otros checkboxes
-          const checkboxes = document.querySelectorAll('input[name="selected_pagares"]');
-          checkboxes.forEach(cb => {
-              if (cb !== this) cb.checked = false;
-          });
-  
-          // Generar cuotas para el checkbox seleccionado
-          generarCuotas(this);
-      });
-  });
+
     
     // Generar cuotas para el primer pagaré si existe
     setTimeout(() => {

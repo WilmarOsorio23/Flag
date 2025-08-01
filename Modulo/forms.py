@@ -2382,6 +2382,18 @@ class EmpleadoConPagareFilterForm(forms.Form):
         to_field_name='Tipo_PagareId',
     )
 
+    estado_pagare = forms.ChoiceField(
+        choices=[
+            ('', 'Seleccione el estado'),
+            ('Proceso', 'Proceso'),
+            ('Terminado', 'Terminado'),
+            ('Cancelado', 'Cancelado')
+        ],
+        required=False,
+        label='Estado del pagaré',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
