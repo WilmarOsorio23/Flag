@@ -170,22 +170,64 @@
                             </th>
 
                             <!-- Módulo -->
-                            <th>Módulo</th>
+                            <th data-sort="modulo" class="sortable" data-direction="default">
+                                Módulo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
 
                             <!-- Titulo -->
-                            <th>Título</th>
+                            <th data-sort="titulo" class="sortable" data-direction="default">
+                                Título
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
 
                             <!-- Institución -->
-                            <th>Institución</th>
+                            <th data-sort="institucion" class="sortable" data-direction="default">
+                                Institución
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
 
                             <!-- Fecha Grado -->
-                            <th>Fecha Grado</th>
+                            <th data-sort="fecha_grado" class="sortable" data-direction="default">
+                                Fecha Grado
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
 
                             <!-- Fecha Inicio -->
-                            <th>Fecha inicio</th>
+                            <th data-sort="fecha_inicio" class="sortable" data-direction="default">
+                                Fecha inicio
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
 
                             <!-- Fecha Fin -->
-                            <th>Fecha Fin</th>
+                            <th data-sort="fecha_fin" class="sortable" data-direction="default">
+                                Fecha Fin
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                         </tr>
                     </thead>
                     
@@ -202,9 +244,9 @@
                                     <td class="text-start">{{ empleado.modulo }}</td>
                                     <td class="text-start">{{ estudio.titulo }}</td>
                                     <td class="text-start">{{ estudio.institucion }}</td>
-                                    <td>{{ estudio.fecha_grado|date:'d/m/Y' }}</td>
-                                    <td>{{ estudio.fecha_inicio|date:'d/m/Y' }}</td>
-                                    <td>{{ estudio.fecha_fin|date:'d/m/Y' }}</td>
+                                    <td class="text-end">{{ estudio.fecha_grado|date:'d/m/Y' }}</td>
+                                    <td class="text-end">{{ estudio.fecha_inicio|date:'d/m/Y' }}</td>
+                                    <td class="text-end">{{ estudio.fecha_fin|date:'d/m/Y' }}</td>
                                 </tr>
                             {% endfor %}
                         {% empty %}

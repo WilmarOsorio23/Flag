@@ -54,20 +54,34 @@
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'referencia_eliminar' %}">
                 {% csrf_token %}
-                <table class="table table-primary">
+                <table class="table table-primary" id="referenciaTable">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">codigo</th>
-                            <th scope="col">Descripcion</th>
+                            <th data-sort="codigo" class="sortable" data-direction="default">
+                                codigo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="descripcion" class="sortable" data-direction="default">
+                                Descripcion
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for Referencia in Referencias %}
                         <tr id="row-{{Referencia.id}}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{Referencia.id}}"></td>
-                            <td><input type="text" name="Codigo" class="form-control-plaintext" value="{{Referencia.codigoReferencia}}" readonly></td>
-                            <td><input type="text" name="Descripcion" class="form-control-plaintext" value="{{Referencia.descripcionReferencia}}" readonly></td>
+                            <td data-field="codigo"><input type="text" name="Codigo" class="form-control-plaintext" value="{{Referencia.codigoReferencia}}" readonly></td>
+                            <td data-field="descripcion"><input type="text" name="Descripcion" class="form-control-plaintext" value="{{Referencia.descripcionReferencia}}" readonly></td>
                         </tr>
                         {% empty %}
                         <tr>

@@ -1600,8 +1600,10 @@ class ConsultorFilterForm(forms.Form):
         self.populate_perfil()
 
     def populate_nombre(self):
-        consultores = Consultores.objects.values_list('Documento', 'Nombre').distinct()
-        self.fields['Nombre'].choices = [('', 'Seleccione el Consultor')] + list(consultores)
+        consultores = Consultores.objects.values_list('Documento', 'Nombre', 'Empresa').distinct()
+        self.fields['Nombre'].choices = [('', 'Seleccione el Consultor')] + [
+        (doc, f"{nombre} - {empresa}") for doc, nombre, empresa in consultores
+    ]
         
     def populate_modulo(self):
         modulos = Modulo.objects.values_list('ModuloId', 'Modulo').distinct()
@@ -1793,8 +1795,10 @@ class TarifaConsultorFilterForm(forms.Form):
         self.populate_anio()
 
     def populate_nombre(self):
-        consultores = Consultores.objects.values_list('Documento', 'Nombre').distinct()
-        self.fields['Nombre'].choices = [('', 'Seleccione el Consultor')] + list(consultores)
+        consultores = Consultores.objects.values_list('Documento', 'Nombre', 'Empresa').distinct()
+        self.fields['Nombre'].choices = [('', 'Seleccione el Consultor')] + [
+        (doc, f"{nombre} - {empresa}") for doc, nombre, empresa in consultores
+    ]
         
     def populate_linea(self):
         # Si ModuloId necesita opciones dinámicas, añade lógica aquí.
@@ -2050,8 +2054,8 @@ class TotalesPorMesFilterForm(forms.Form):
         years = Facturacion_Consultores.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
         self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in years]
 
-        consultores = Consultores.objects.values_list('Documento', 'Nombre')
-        self.fields['Consultor'].choices = [(c[0], c[1]) for c in consultores]
+        consultores = Consultores.objects.values_list('Documento', 'Nombre', 'Empresa')
+        self.fields['Consultor'].choices = [(c[0], f"{c[1]} - {c[2]}") for c in consultores]
         
     def populate_mes(self):
         meses = [
@@ -2280,7 +2284,7 @@ class inforTiempoEmpleadosFilterForm(forms.Form):
         self.populate_mes()
 
         # Personalizar cómo se muestra cada consultor
-        self.fields['documento'].label_from_instance = lambda obj: f'{obj.Nombre} - {obj.Documento}'
+        self.fields['documento'].label_from_instance = lambda obj: f'{obj.Nombre} -{obj.Empresa}'
 
         # Llenar dinámicamente el campo de años
         years = Tiempos_Cliente.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
@@ -2510,8 +2514,8 @@ class FacturacionConsultoresFilterForm(forms.Form):
         self.fields['Mes_Cobro'].choices = meses2
 
     def populate_consultor(self):
-        consultores = Consultores.objects.values_list('Documento', 'Nombre').distinct()
-        self.fields['Consultor'].choices = [('', 'Seleccione el Consultor')] + [(doc, f"{doc} - {nombre}") for doc, nombre in consultores]
+        consultores = Consultores.objects.values_list('Documento', 'Nombre', 'Empresa').distinct()
+        self.fields['Consultor'].choices = [('', 'Seleccione el Consultor')] + [(doc, f"{nombre} - {empresa}") for doc, nombre, empresa  in consultores]
 
     def populate_linea(self):
         lineas = Linea.objects.values_list('LineaId', 'Linea').distinct()

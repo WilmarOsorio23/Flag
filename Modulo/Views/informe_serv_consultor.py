@@ -33,7 +33,8 @@ def filtrar_datos(form=None):
     facturas_agrupadas = facturas.values(
         'Mes', 
         'LineaId__Linea',
-        'Documento__Nombre',  # Nombre del consultor
+        'Documento__Nombre',      # Nombre del consultor
+        'Documento__Empresa',     # Empresa del consultor
         'ClienteId__Nombre_Cliente'  # Nombre del cliente
     ).annotate(
         total_factura=Sum('Valor_Fcta_Cliente'),
@@ -77,6 +78,7 @@ def informe_totales(request):
     for item in facturas:
         linea = item.get('LineaId__Linea', 'Sin línea')
         consultor = item.get('Documento__Nombre', 'Sin consultor')
+        empresa = item.get('Documento__Empresa', 'Sin empresa')
         cliente = item.get('ClienteId__Nombre_Cliente', 'Sin cliente')
         mes = int(item['Mes']) if item['Mes'] else 0
         
@@ -92,12 +94,12 @@ def informe_totales(request):
         # Estructura principal de datos
         if linea not in datos:
             datos[linea] = {}
-        if consultor not in datos[linea]:
-            datos[linea][consultor] = {}
-        if cliente not in datos[linea][consultor]:
-            datos[linea][consultor][cliente] = {}
+        if (consultor, empresa) not in datos[linea]:
+            datos[linea][(consultor, empresa)] = {}
+        if cliente not in datos[linea][(consultor, empresa)]:
+            datos[linea][(consultor, empresa)][cliente] = {}
         
-        datos[linea][consultor][cliente][mes] = {
+        datos[linea][(consultor, empresa)][cliente][mes] = {
             'total_factura': factura,
             'total_cobro': cobro,
             'total_diferencia': diferencia,
@@ -138,8 +140,8 @@ def informe_totales(request):
             totales_dict[key]['total_diferencia'] += diferencia
 
         # Actualizar todos los totales
-        update_totales(totales_por_linea_consultor, factura, cobro, diferencia, linea, consultor)
-        update_totales(totales_por_linea_consultor_mes, factura, cobro, diferencia, linea, consultor, mes)
+        update_totales(totales_por_linea_consultor, factura, cobro, diferencia, linea, (consultor, empresa))
+        update_totales(totales_por_linea_consultor_mes, factura, cobro, diferencia, linea, (consultor, empresa), mes)
         update_totales(totales_por_linea, factura, cobro, diferencia, linea)
         update_totales(totales_por_cliente, factura, cobro, diferencia, cliente)
         update_totales(totales_por_mes, factura, cobro, diferencia, mes)
@@ -176,7 +178,7 @@ def informe_totales(request):
     lineas_con_totales = {}
     for linea, consultores in datos.items():
         total_filas = 0
-        for consultor, clientes in consultores.items():
+        for consultores_clave, clientes in consultores.items():
             total_filas += len(clientes)
         lineas_con_totales[linea] = total_filas
 
@@ -238,6 +240,7 @@ def descargar_reporte_excel_totales_por_mes(request):
     for item in facturas:
         linea = item['LineaId__Linea']
         consultor = item['Documento__Nombre'] or ''
+        empresa = item['Documento__Empresa'] or ''
         cliente = item['ClienteId__Nombre_Cliente']
         mes = int(item['Mes'])
         
@@ -246,7 +249,7 @@ def descargar_reporte_excel_totales_por_mes(request):
         diferencia = Decimal(str(item['total_diferencia'] or '0'))
         porcentaje = (diferencia / factura * 100) if factura != 0 else Decimal('0')
         
-        datos[linea][consultor][cliente][mes] = {
+        datos[linea][(consultor, empresa)][cliente][mes] = {
             'Factura': factura,
             'Cobro': cobro,
             'Diferencia': diferencia,
@@ -452,7 +455,9 @@ def descargar_reporte_excel_totales_por_mes(request):
             'Porcentaje': Decimal('0')
         })
         
-        for consultor, clientes in consultores.items():
+        for consultores_clave, clientes in consultores.items():
+            consultor = consultores_clave[0]
+            empresa = consultores_clave[1]
             consultor_start_row = row_num
             total_consultor = defaultdict(lambda: {
                 'Factura': Decimal('0'),
@@ -464,7 +469,7 @@ def descargar_reporte_excel_totales_por_mes(request):
             for cliente, meses_data in clientes.items():
                 # Escribir línea, consultor y cliente (solo en primera fila)
                 ws.cell(row=row_num, column=1, value=linea if row_num == linea_start_row else '')
-                ws.cell(row=row_num, column=2, value=consultor if row_num == consultor_start_row else '')
+                ws.cell(row=row_num, column=2, value=f"{consultor} ({empresa})" if row_num == consultor_start_row else '')
                 ws.cell(row=row_num, column=3, value=cliente)
                 
                 col_num = 4
@@ -530,7 +535,7 @@ def descargar_reporte_excel_totales_por_mes(request):
             # Total por consultor (si hay más de un cliente)
             if len(clientes) >= 1:
                 ws.cell(row=row_num, column=1, value=linea)
-                ws.cell(row=row_num, column=2, value=f"Total {consultor}")
+                ws.cell(row=row_num, column=2, value=f"Total {consultor} ({empresa})")
                 ws.cell(row=row_num, column=3, value="")
                 
                 col_num = 4
