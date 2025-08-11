@@ -39,4 +39,75 @@ let mainF = (e) => {
         switchBtn[i].addEventListener("click", changeForm)
 }
 
+// Función para validar el formulario de inicio de sesión
+function validarFormulario(e) {
+    const email = document.querySelector('#email').value;
+    const password = document.querySelector('#password').value;
+    const mensajesError = [];
+
+    // Validar email
+    if (!email) {
+        mensajesError.push('El email es requerido');
+    } else if (!validarEmail(email)) {
+        mensajesError.push('Por favor ingrese un email válido');
+    }
+
+    // Validar contraseña
+    if (!password) {
+        mensajesError.push('La contraseña es requerida');
+    } else if (password.length < 8) {
+        mensajesError.push('La contraseña debe tener al menos 8 caracteres');
+    }
+
+    // Si hay errores, mostrarlos y prevenir el envío del formulario
+    if (mensajesError.length > 0) {
+        e.preventDefault();
+        mostrarErrores(mensajesError);
+    }
+}
+
+// Función para validar formato de email
+function validarEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+// Función para mostrar mensajes de error
+function mostrarErrores(mensajes) {
+    const contenedorMensajes = document.querySelector('.messages');
+    contenedorMensajes.innerHTML = '';
+
+    mensajes.forEach(mensaje => {
+        const alertaError = document.createElement('div');
+        alertaError.className = 'alert alert-danger';
+        alertaError.textContent = mensaje;
+        contenedorMensajes.appendChild(alertaError);
+    });
+}
+
+// Función para limpiar mensajes de error cuando el usuario empiece a escribir
+function limpiarErrores() {
+    const contenedorMensajes = document.querySelector('.messages');
+    if (contenedorMensajes) {
+        contenedorMensajes.innerHTML = '';
+    }
+}
+
+// Agregar eventos de validación al formulario
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.querySelector('form');
+    const inputs = document.querySelectorAll('input');
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', validarFormulario);
+    }
+
+    inputs.forEach(input => {
+        input.addEventListener('input', limpiarErrores);
+    });
+
+    // Mantener la funcionalidad existente
+    mainF();
+});
+
 window.addEventListener("load", mainF);

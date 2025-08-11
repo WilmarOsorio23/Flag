@@ -194,7 +194,7 @@ html, body {
     overflow-x: hidden;
     padding: 0.5em;
     box-sizing: border-box;
-    background: linear-gradient(to bottom, #ffffff, #ffffff, #007bff8c, #007bff, #007bffc7, #007bffe1);
+    background: linear-gradient(to bottom, #ffffff, #ffffff, #007bff8c, #007bff, #007bffc7, #007bffc7);
     margin-bottom: 1em;
     transition: all 0.3s ease;
     display: flex;      
@@ -408,6 +408,14 @@ a[aria-expanded="true"] {
 
 .dropdown-toggle {
     cursor: pointer;
+}
+
+.dropdown-toggle::after {
+    display: none !important;
+}
+
+.dropdown-toggle:focus {
+    box-shadow: none !important;
 }
 
 /* ========================== */
@@ -955,4 +963,161 @@ a.fas, .fa {
 canvas#graficoFacturacion {
     min-height: 300px;
     margin: 20px 0;
+}
+
+/* Estilos para el menú de usuario en el sidebar */
+/* Sidebar footer solo en la barra lateral */
+#sidebar {
+    position: relative;
+}
+
+.sidebar-footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 15px 0 10px 0;
+    z-index: 10;
+    text-align: center;
+}
+
+/* Eliminar separación visual extra entre secciones del menú */
+#sidebar .components {
+    margin-bottom: 0;
+}
+
+.sidebar-footer .dropup {
+    position: relative;
+}
+
+.sidebar-footer .dropdown-menu {
+    bottom: 100% !important;
+    top: auto !important;
+    margin-bottom: 5px;
+}
+
+/* El resto de los estilos del menú de usuario se mantienen igual */
+.user-menu-btn {
+    width: 90%;
+    margin: 0 auto;
+    text-align: left;
+    padding: 10px;
+    border: none;
+    background: #ffffff !important;
+    color: #333;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.user-menu-btn:hover {
+    background: rgb(203, 210, 220) !important;
+    color: #a2bde5 !important;
+    transform: translateY(-1px);
+}
+
+.user-avatar {
+    margin-right: 12px;
+    font-size: 2.5rem;
+    color: #0d6efd;
+    flex-shrink: 0;
+}
+
+.user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.user-name {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-role {
+    display: block;
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 2px;
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 8px 0;
+    min-width: 200px;
+    background: #fff;
+    overflow: hidden;
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+}
+
+.dropdown-item {
+    padding: 10px 16px;
+    color: #333;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-item:hover {
+    background: rgba(13, 110, 253, 0.08);
+    color: #0d6efd;
+    transform: translateX(2px);
+}
+
+.dropdown-item i {
+    margin-right: 10px;
+    width: 16px;
+    text-align: center;
+}
+
+.dropdown-divider {
+    margin: 8px 0;
+    border-color: #e5e5e5;
+}
+
+@media (max-width: 768px) {
+    .sidebar-footer {
+        position: relative;
+        margin-top: 20px;
+    }
+    .user-menu-btn {
+        padding: 8px;
+    }
+    .user-avatar {
+        font-size: 2rem;
+        margin-right: 10px;
+    }
+    .user-name {
+        font-size: 0.85rem;
+    }
+    .user-role {
+        font-size: 0.7rem;
+    }
+}
+
+/* Animación del dropdown */
+.dropdown-menu.show {
+    animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

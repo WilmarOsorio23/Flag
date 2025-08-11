@@ -55,27 +55,12 @@ from Modulo.Views import indicadores_margen_cliente
 from Modulo.Views import facturacion_consultores
 from Modulo.Views import informe_facturacion_consultores
 from Modulo.Views import informe_serv_consultor
-
+from Modulo.Views import auth_views
 
 
 urlpatterns = [
-    # Auth URLs
-    path('login/', auth_views.login_view, name='login'),
-    path('logout/', auth_views.logout_view, name='logout'),
-    
-    # Role management
-    path('roles/', auth_views.role_list, name='role_list'),
-    path('roles/create/', auth_views.role_create, name='role_create'),
-    path('roles/<int:role_id>/edit/', auth_views.role_edit, name='role_edit'),
-    
-    # User management
-    path('users/', auth_views.user_list, name='user_list'),
-    path('users/create/', auth_views.user_create, name='user_create'),
-    path('users/<int:user_id>/edit/', auth_views.user_edit, name='user_edit'),
-    
-    # Permission check endpoint
-    path('check-permission/', auth_views.check_permission, name='check_permission'),
-
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     path('', views.inicio, name='inicio'),
     path('nosotros', views.nosotros, name='nosotros'),
 
@@ -450,5 +435,17 @@ urlpatterns = [
     path('TipoPagare/eliminar/', tipo_pagare_eliminar, name='tipo_pagare_eliminar'),
     path('TipoPagare/confirmar_delete/<int:id>/', tipo_pagare_confirmar_delete, name='tipo_pagare_confirmar_delete'),
     path('TipoPagare/descargar_excel/', tipo_pagare_descargar_excel, name='tipo_pagare_descargar_excel'),
+
+    # URLs para gestión de roles y usuarios
+    path('roles/', auth_views.role_list, name='role_list'),
+    path('roles/crear/', auth_views.role_create, name='role_create'),
+    path('roles/editar/<int:role_id>/', auth_views.role_edit, name='role_edit'),
+    
+    path('usuarios/', auth_views.user_list, name='user_list'),
+    path('usuarios/crear/', auth_views.user_create, name='user_create'),
+    path('usuarios/editar/<int:user_id>/', auth_views.user_edit, name='user_edit'),
+    path('usuarios/cambiar-password/', auth_views.cambiar_password, name='cambiar_password'),
+    
+    path('check-permission/', auth_views.check_permission, name='check_permission'),
     ]
 

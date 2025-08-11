@@ -34,19 +34,9 @@ from django.contrib.auth.decorators import login_required
 
 
 def inicio(request):
-    """
-    Vista de la página principal. Requiere autenticación.
-    """
-    if not request.user.is_authenticated:
-        return redirect('login')
-    return render(request, 'paginas/inicio.html')
+    return render(request, 'paginas/Inicio.html')
 
 def nosotros(request):
-    """
-    Vista de la página Nosotros. Requiere autenticación.
-    """
-    if not request.user.is_authenticated:
-        return redirect('login')
     return render(request, 'paginas/nosotros.html')
 
 def login_view(request):

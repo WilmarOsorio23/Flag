@@ -75,7 +75,7 @@ class UserRole(models.Model):
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
-            raise ValueError('Users must have an email address')
+            raise ValueError('El email es obligatorio')
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -89,7 +89,7 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
-    role = models.ForeignKey(UserRole, on_delete=models.SET_NULL, null=True)
+    role = models.ForeignKey(UserRole, on_delete=models.SET_NULL, null=True, blank=True)
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -1016,3 +1016,19 @@ class Facturacion_Consultores(models.Model):
 
     def __str__(self):
         return f"Facturación {self.id} - Año {self.Anio} - Mes {self.Mes} - Consultor {self.Documento} - Línea {self.Linea}"
+
+class LoginAttempt(models.Model):
+    """
+    Modelo para registrar intentos de inicio de sesión fallidos
+    """
+    email = models.EmailField()
+    ip_address = models.GenericIPAddressField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    successful = models.BooleanField(default=False)
+    
+    class Meta:
+        db_table = 'login_attempts'
+        ordering = ['-timestamp']
+    
+    def __str__(self):
+        return f"{self.email} - {self.timestamp} - {'Exitoso' if self.successful else 'Fallido'}"
