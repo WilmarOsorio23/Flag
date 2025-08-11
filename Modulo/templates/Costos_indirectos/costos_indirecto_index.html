@@ -47,8 +47,15 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Id</th>
-                            <th scope="col">Costo</th>
+                            <th scope="col" style="width: 6%;">Id</th>
+                            <th data-sort="Costo" class="sortable" data-direction="default">
+                                Costo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span> 
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -56,7 +63,9 @@
                         <tr id="row-{{ costo.CostoId }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ costo.CostoId }}"></td>
                             <td><input type="text" name="CostoId" class="form-control-plaintext" value="{{ costo.CostoId }}" disabled></td>
-                            <td><input type="text" name="Costo" class="form-control-plaintext" value="{{ costo.Costo }}" readonly></td> 
+                            <td data-field="Costo">
+                                <input type="text" name="Costo" class="form-control-plaintext" value="{{ costo.Costo }}" readonly>
+                            </td> 
                         </tr>
                         {% empty %}
                         <tr>
