@@ -58,16 +58,30 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">codigo</th>
-                            <th scope="col">Descripcion</th>
+                            <th data-sort="Codigo" class="sortable" data-direction="default" style="width: 6%;">
+                                codigo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span> 
+                            </th>
+                            <th data-sort="Descripcion" class="sortable" data-direction="default">
+                                Descripción
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span> 
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for centro in centros_costos_data %}
                         <tr id="row-{{Referencia.id}}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{centro.id}}"></td>
-                            <td><input type="text" name="Codigo" class="form-control-plaintext" value="{{centro.codigoCeCo}}" readonly></td>
-                            <td><input type="text" name="Descripcion" class="form-control-plaintext" value="{{centro.descripcionCeCo}}" readonly></td>
+                            <td data-field="Codigo"><input type="text" name="Codigo" class="form-control-plaintext" value="{{centro.codigoCeCo}}" readonly></td>
+                            <td data-field="Descripcion"><input type="text" name="Descripcion" class="form-control-plaintext" value="{{centro.descripcionCeCo}}" readonly></td>
                         </tr>
                         {% empty %}
                         <tr>
