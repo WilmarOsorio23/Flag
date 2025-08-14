@@ -84,9 +84,11 @@ if (table) {
             const textA = getCellText(cellA);
             const textB = getCellText(cellB);
 
-            // Numeric comparison
-            if (!isNaN(textA) && !isNaN(textB)) {
-                return direction === 'asc' ? textA - textB : textB - textA;
+            // Numeric comparison for specific columns
+            if (columnName === 'horas' || columnName === 'horas_facturacion' || columnName === 'anio' || columnName === 'mes') {
+                const numA = parseFloat(textA) || 0;
+                const numB = parseFloat(textB) || 0;
+                return direction === 'asc' ? numA - numB : numB - numA;
             }
 
             // Date comparison

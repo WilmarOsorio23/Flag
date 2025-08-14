@@ -60,14 +60,20 @@ def get_item3(dictionary, key):
     return dictionary.get(key, {})
 
 @register.filter
-def get_item2(value, key):
-    """Filtro seguro para obtener valores de diccionarios"""
-    try:
-        if isinstance(value, (dict, defaultdict)):
-            return value.get(key, 0)
-        return 0
-    except (AttributeError, TypeError):
-        return 0
+def get_dynamic_key(dictionary, base_key):
+    """Obtiene valores de claves dinámicas como Cta_Cobro_1, Cta_Cobro_2, etc."""
+    if not isinstance(dictionary, dict):
+        return None
+    
+    # Busca todas las claves que coincidan con el patrón
+    matching_keys = [k for k in dictionary.keys() if str(k).startswith(base_key)]
+    
+    # Ordena las claves numéricamente (Cta_Cobro_1, Cta_Cobro_2, etc.)
+    matching_keys.sort(key=lambda x: int(x.split('_')[-1]))
+    
+    # Devuelve lista de valores ordenados
+    return [dictionary[key] for key in matching_keys]
+    
 @register.filter
 def mul(value, arg):
     try:
@@ -92,3 +98,13 @@ def divide(value, arg):
 @register.filter(name='multiply')
 def multiply(value, arg):
     return float(value) * float(arg)
+@register.filter
+def get_range(value):
+    return range(1, value + 1)
+
+@register.filter
+def index(list, i):
+    try:
+        return list[i-1]  # Restamos 1 para que i=1 acceda al índice 0
+    except (IndexError, TypeError):
+        return None
