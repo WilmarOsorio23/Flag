@@ -139,10 +139,20 @@ def user_edit(request, user_id):
     return render(request, 'users/user_form.html', {'form': form})
 
 @login_required
+@user_passes_test(is_admin)
+def user_delete(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    if request.method == 'POST':
+        user.delete()
+        messages.success(request, 'Usuario eliminado exitosamente.')
+        return redirect('user_list')
+    return redirect('user_list')  # Redirige si no es POST
+
+@login_required
 def check_permission(request):
     feature = request.GET.get('feature')
     if not feature:
-        return JsonResponse({'error': 'Feature parameter is required'}, status=400)
+        return JsonResponse({'error': 'Este campo es requerido'}, status=400)
         
     has_permission = False
     if hasattr(request.user.role, feature):

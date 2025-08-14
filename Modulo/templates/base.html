@@ -50,7 +50,7 @@
                             <ul class="collapse list-unstyled" id="homeSubmenuDatosMaestros">
                                 <li>
                                     <a class="nav-item nav-link" href="{% url 'actividad_pagare_index' %}">
-                                        <i class="fas fa-table"></i> Actividades Pagarés
+                                        <i class="fas fa-table"></i> Actividades Maestros
                                     </a>
                                 </li>
                                 <li>
@@ -402,8 +402,10 @@
                             </div>
                             <div class="user-info">
                                 <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
-                                {% if user.role %}
+                                {% if user.role and user.role.name %}
                                     <small class="user-role">{{ user.role.name }}</small>
+                                {% else %}
+                                    <small class="user-role text-warning">Sin rol asignado</small>
                                 {% endif %}
                             </div>
                         </button>

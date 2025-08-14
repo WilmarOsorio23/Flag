@@ -15,6 +15,11 @@ from Modulo.models import Empleado, Empleados_Estudios
 # Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_informe_estudios')
 
 # Función para filtrar Empleado y Empleados_Estudios
 def filtrar_empleados_y_estudios(form, empleados, empleados_estudios):

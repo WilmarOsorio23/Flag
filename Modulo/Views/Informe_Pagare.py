@@ -8,8 +8,13 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Side, Border
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
+
+@login_required
+@verificar_permiso('can_manage_informe_pagare')
 
 def calcular_meses_condonados(fecha_inicio):
     if not fecha_inicio or not isinstance(fecha_inicio, date):

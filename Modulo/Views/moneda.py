@@ -9,6 +9,11 @@ from Modulo.models import Moneda, Tarifa_Clientes
 from Modulo.models import Tarifa_Consultores
 from django.contrib import messages
 from django.db import models
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_moneda')
 
 def moneda_index(request):
     monedas = Moneda.objects.all()

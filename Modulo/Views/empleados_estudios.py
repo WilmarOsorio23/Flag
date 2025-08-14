@@ -7,6 +7,11 @@ from Modulo.models import Empleados_Estudios
 from django.db import models
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_empleados_estudios')
 
 def empleados_estudios_index(request):
     empleados_estudios = Empleados_Estudios.objects.all()

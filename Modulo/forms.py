@@ -2670,6 +2670,7 @@ class UserRoleForm(forms.ModelForm):
             'can_view_indicadores_facturacion': 'Ver Indicadores Facturación',
             'can_view_indicadores_margen_linea': 'Ver Indicadores Margen Línea',
             'can_view_indicadores_margen_cliente': 'Ver Indicadores Margen Cliente',
+            
         }
         return labels.get(field_name, field_name.replace('_', ' ').title())
 
@@ -2693,3 +2694,24 @@ class CustomUserForm(UserCreationForm):
         self.fields['password2'].widget.attrs.update({'class': 'form-control'})
         self.fields['password1'].label = 'Contraseña'
         self.fields['password2'].label = 'Confirmar Contraseña'
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        # Si estamos editando, excluimos al usuario actual
+        if self.instance.pk:
+            if CustomUser.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError("Ya existe un usuario con ese nombre de usuario.")
+        # Para creación nueva
+        elif CustomUser.objects.filter(username=username).exists():
+            raise forms.ValidationError("Ya existe un usuario con ese nombre de usuario.")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        # Misma lógica para email
+        if self.instance.pk:
+            if CustomUser.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError("Ya existe un usuario con ese email.")
+        elif CustomUser.objects.filter(email=email).exists():
+            raise forms.ValidationError("Ya existe un usuario con ese email.")
+        return email

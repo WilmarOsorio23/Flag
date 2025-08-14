@@ -18,6 +18,11 @@ from Modulo.models import Certificacion, Detalle_Certificacion, Empleado
 
 # Utilidad para conteo de elementos
 from collections import Counter
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_Informe_certificaciones')
 
 def filtrar_empleado(form, empleados, certificaciones, detalles):
     """

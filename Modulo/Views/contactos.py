@@ -7,6 +7,11 @@ from Modulo.forms import ContactosForm
 from Modulo.models import Contactos, Detalle_Gastos
 from django.db import models
 from django.contrib import messages
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_contactos')
 
 def contactos_index(request):
     contactos = Contactos.objects.all()

@@ -66,6 +66,9 @@ class UserRole(models.Model):
     can_view_indicadores_margen_linea = models.BooleanField(default=False)
     can_view_indicadores_margen_cliente = models.BooleanField(default=False)
 
+    can_manage_users = models.BooleanField(default=False, verbose_name='Gestionar Usuarios')
+    can_manage_roles = models.BooleanField(default=False, verbose_name='Gestionar Roles')
+
     def __str__(self):
         return self.name
 

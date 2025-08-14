@@ -15,6 +15,11 @@ from Modulo.models import Clientes
 # Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_informe_clientes')
 
 # Función para filtrar clientes
 def filtrar_clientes(form, clientes):

@@ -17,6 +17,11 @@ from Modulo.models import ContratosOtrosSi
 # Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_informe_clientes_contratos')
 
 #Función para filtrar Contratos de clientes
 def filtrar_clientes_contratos(form, clientes, clientes_contratos):

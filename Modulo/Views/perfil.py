@@ -11,6 +11,11 @@ from django.db import models
 import pandas as pd
 from django.contrib import messages
 from django.core.cache import cache
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_perfil')
 
 def perfil_index(request):
     perfil_data = Perfil.objects.all()

@@ -7,6 +7,11 @@ import pandas as pd
 from django.http import HttpResponseBadRequest
 from Modulo.models import TipoPagare
 from Modulo.forms import TipoPagareForm
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_tipo_pagare')
 
 def tipo_pagare_index(request):
     tipos_pagare = TipoPagare.objects.all()

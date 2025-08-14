@@ -9,6 +9,11 @@ from Modulo.forms import LineaForm
 from Modulo.models import Consultores, Empleado, Linea
 from django.db import models
 from django.contrib import messages
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_linea')
 
 def linea_index(request):
     linea_data = Linea.objects.all()

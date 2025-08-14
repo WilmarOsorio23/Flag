@@ -17,6 +17,12 @@ MESES = {
     '9': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dic'
 }
 
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_clientes')
+
 def indicadores_operatividad_index(request):
     form = Ind_Operatividad_FilterForm(request.GET or None)
     conceptos = Concepto.objects.all()  # Obtener todos los conceptos

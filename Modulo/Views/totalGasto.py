@@ -10,6 +10,11 @@ from Modulo.models import Total_Gastos, Detalle_Gastos, Gastos
 from django.db import models
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_total_gasto')
 
 def total_gastos_index(request):
     try:

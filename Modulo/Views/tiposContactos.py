@@ -7,6 +7,11 @@ from Modulo.forms import TiposContactosForm
 from Modulo.models import Contactos, TiposContactos
 from django.db import models
 from django.contrib import messages
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_tipos_contactos')
 
 def Tipos_contactos_index(request):
     tipos_contactos_data = TiposContactos.objects.all()

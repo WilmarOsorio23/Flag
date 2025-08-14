@@ -60,6 +60,15 @@ class RoleMiddleware:
             'indicadores_facturacion': 'can_view_indicadores_facturacion',
             'indicadores_margen_linea': 'can_view_indicadores_margen_linea',
             'indicadores_margen_cliente': 'can_view_indicadores_margen_cliente',
+            
+            # URLs de administración
+            'user_list': 'can_manage_users',
+            'user_create': 'can_manage_users',
+            'user_edit': 'can_manage_users',
+            'user_delete': 'can_manage_users',
+            'role_list': 'can_manage_roles',
+            'role_create': 'can_manage_roles',
+            'role_edit': 'can_manage_roles',
         }
 
     def __call__(self, request):
@@ -75,21 +84,25 @@ class RoleMiddleware:
         if not request.user.is_authenticated:
             return redirect(settings.LOGIN_URL)
 
-        # Super users and staff bypass permission checks
+        # Super users y staff bypass permission checks
         if request.user.is_superuser or request.user.is_staff:
             return self.get_response(request)
 
-        # Get the required permission for this URL
-        required_permission = None
-        for url_pattern, permission in self.permission_mappings.items():
-            if url_pattern in request.path:
-                required_permission = permission
-                break
+        # Si el usuario no tiene rol, denegar acceso
+        if not hasattr(request.user, 'role') or not request.user.role:
+            messages.error(request, 'No tiene un rol asignado.')
+            return redirect('inicio')
 
-        if required_permission:
-            # Check if user has the required permission through their role
-            if not request.user.role or not getattr(request.user.role, required_permission, False):
-                messages.error(request, 'No tiene permiso para acceder a esta sección.')
-                return redirect('inicio')
+        # Obtener el permiso requerido para esta URL
+        required_permission = self.permission_mappings.get(url_name)
+        
+        # Si no hay permiso mapeado, permitir acceso (o denegar según tu política)
+        if not required_permission:
+            return self.get_response(request)
+
+        # Verificar si el rol tiene el permiso requerido
+        if not getattr(request.user.role, required_permission, False):
+            messages.error(request, 'No tiene permiso para acceder a esta sección.')
+            return redirect('inicio')
 
         return self.get_response(request)

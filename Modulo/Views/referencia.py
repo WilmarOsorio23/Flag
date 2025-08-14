@@ -8,6 +8,11 @@ from Modulo.forms import ReferenciaForm
 from Modulo.models import Referencia, Tarifa_Clientes
 from django.contrib import messages
 from django.db import models
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_referencia')
 
 def referencia_index(request):
     Referencias = Referencia.objects.all()

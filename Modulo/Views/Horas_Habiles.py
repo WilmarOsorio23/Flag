@@ -8,6 +8,11 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from Modulo.forms import HorasHabilesForm
 from Modulo.models import Horas_Habiles, Tiempos_Cliente, TiemposConcepto
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_horas_habiles')
 
 def horas_habiles_index(request):
     horas_habiles = Horas_Habiles.objects.all()

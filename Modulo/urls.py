@@ -444,6 +444,7 @@ urlpatterns = [
     path('usuarios/', auth_views.user_list, name='user_list'),
     path('usuarios/crear/', auth_views.user_create, name='user_create'),
     path('usuarios/editar/<int:user_id>/', auth_views.user_edit, name='user_edit'),
+    path('users/delete/<int:user_id>/', auth_views.user_delete, name='user_delete'),
     path('usuarios/cambiar-password/', auth_views.cambiar_password, name='cambiar_password'),
     
     path('check-permission/', auth_views.check_permission, name='check_permission'),

@@ -9,6 +9,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 from Modulo.forms import ModuloForm
 from Modulo.models import Consultores, Empleado, Modulo
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_modulo')
 
 def modulo(request):
     # Ordenar los módulos por el campo 'id' en orden ascendente

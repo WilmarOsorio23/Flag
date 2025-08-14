@@ -9,7 +9,11 @@ from django.db import models
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 import json
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
 
+@login_required
+@verificar_permiso('can_manage_tarifa_consultores')
 
 
 def tarifa_consultores_index(request):

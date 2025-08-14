@@ -410,14 +410,6 @@ a[aria-expanded="true"] {
     cursor: pointer;
 }
 
-.dropdown-toggle::after {
-    display: none !important;
-}
-
-.dropdown-toggle:focus {
-    box-shadow: none !important;
-}
-
 /* ========================== */
 /*     COMPONENT STYLING      */
 /* ========================== */
@@ -1014,8 +1006,8 @@ canvas#graficoFacturacion {
 }
 
 .user-menu-btn:hover {
-    background: rgb(203, 210, 220) !important;
-    color: #a2bde5 !important;
+    background: rgb(203, 210, 220);
+    color: #a2bde5;
     transform: translateY(-1px);
 }
 

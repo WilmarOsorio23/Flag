@@ -10,6 +10,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
 from django.shortcuts import redirect
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_facturacion_consultores')
 
 def filtrar_tiempos_clientes(form):
     anio = form.cleaned_data.get('Anio')
