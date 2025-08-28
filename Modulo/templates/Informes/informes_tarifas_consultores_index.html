@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% load custom_filters %}
 <!-- Titulo de la pestaña en navegador -->
 {% block titulo %} Informe de Tarifas consultores {% endblock %}
 
@@ -239,9 +239,9 @@
                                         <td class="text-end">{{ anio }}</td> <!-- Mostrar el año en cada fila -->
                                         <td class="text-end">{{ tarifa.mes }}</td>
                                         <td class="text-start">{{ tarifa.clienteID }}</td>
-                                        <td class="text-end">{{ tarifa.tarifa_hora }}</td>
-                                        <td class="text-end">{{ tarifa.tarifa_dia }}</td>
-                                        <td class="text-end">{{ tarifa.tarifa_mes }}</td>
+                                        <td class="text-end">{{ tarifa.tarifa_hora|currency_format }}</td>
+                                        <td class="text-end">{{ tarifa.tarifa_dia|currency_format }}</td>
+                                        <td class="text-end">{{ tarifa.tarifa_mes|currency_format }}</td>
                                         <td>{{ tarifa.moneda }}</td>
                                         <td class="text-end">{{ tarifa.iva|default_if_none:'' }}</td>
                                         <td class="text-end">{{ tarifa.rteFte|default_if_none:'' }}</td>

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 {% block titulo %} Lista de Detalle de Costos Indirectos {% endblock %}
 
 {% block contenido %}
@@ -109,8 +110,8 @@
                                 <input type="text" name="costosid" class="form-control d-none" value="{{ detalle.CostosId }}" readonly>
                             </td>
                             <td data-field="valor" class="text-end">
-                                <span class="form-control-plaintext">{{ detalle.Valor}}</span>
-                                <input type="text" name="valor" class="form-control d-none" value="{{ detalle.Valor }}" readonly>
+                                <span class="form-control-plaintext">{{ detalle.Valor|currency_format }}</span>
+                                <input type="text" name="valor" class="form-control d-none" value="{{ detalle.Valor|currency_format }}" readonly>
                             </td>
                         </tr>
                         {% endfor %}

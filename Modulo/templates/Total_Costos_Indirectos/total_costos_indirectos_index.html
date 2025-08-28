@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 {% block titulo %} Lista de Total Costos Indirectos {% endblock %}
 
 {% block contenido %}
@@ -65,7 +66,7 @@
 
     <div class="card-footer text-muted">
         <div class="table-responsive">
-            <form id="delete-form" action="{% url 'total_costos_indirectos_eliminar' %}">
+            <form id="delete-form" method="POST" action="{% url 'total_costos_indirectos_eliminar' %}">
                 {% csrf_token %}
                 <table class="table table-primary" id="tabla_detalles">
                     <thead>
@@ -77,7 +78,8 @@
                                     <i class="fas fa-sort sort-icon-default"></i>
                                     <i class="fas fa-sort-up sort-icon-asc"></i>
                                     <i class="fas fa-sort-down sort-icon-desc"></i>
-                                </span></th>
+                                </span>
+                            </th>
                             <th data-sort="Mes" class="sortable" data-direction="default">
                                 Mes
                                 <span class="sort-icon">
@@ -94,62 +96,18 @@
                                     <i class="fas fa-sort-down sort-icon-desc"></i>
                                 </span>
                             </th>
-                            <th data-sort="anio" class="sortable" data-direction="default">
-                                Año
-                                <span class="sort-icon">
-                                    <i class="fas fa-sort sort-icon-default"></i>
-                                    <i class="fas fa-sort-up sort-icon-asc"></i>
-                                    <i class="fas fa-sort-down sort-icon-desc"></i>
-                                </span>
-                            </th>
-                            <th data-sort="mes" class="sortable" data-direction="default">
-                                Mes
-                                <span class="sort-icon">
-                                    <i class="fas fa-sort sort-icon-default"></i>
-                                    <i class="fas fa-sort-up sort-icon-asc"></i>
-                                    <i class="fas fa-sort-down sort-icon-desc"></i>
-                                </span>
-                            </th>
-                            <th data-sort="total" class="sortable" data-direction="default">
-                                Total
-                                <span class="sort-icon">
-                                    <i class="fas fa-sort sort-icon-default"></i>
-                                    <i class="fas fa-sort-up sort-icon-asc"></i>
-                                    <i class="fas fa-sort-down sort-icon-desc"></i>
-                                </span>
-                            </th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="tabla-detalles-tbody">
-                        {% for detalle in total_costos_indirectos_data %}
-                        <tr id="row-{{ detalle.id }}" data-id="{{ detalle.id }}">
-                            <td style="display: none;">
-                                <input type="hidden" name="id" value="{{ detalle.id }}">
-                            </td>
-                            <td>
-                                <input type="checkbox" class="detail-select" name="items_to_delete" value="{{ detalle.id }}">
-                            </td>
-                            <td data-field="Anio" class="text-start">
-                                <span class="form-control-plaintext">{{ detalle.Anio }}</span>
-                                <input type="text" name="Anio" value="{{ detalle.Anio }}" class="form-control d-none" readonly>
-                            </td>
-                            <td data-field="Mes" class="text-start">
-                                <span class="form-control-plaintext">{{ detalle.Mes }}</span>
-                                <input type="text" name="Mes" value="{{ detalle.Mes }}" class="form-control d-none" readonly>
-                            </td>
-                            <td data-field="Valor" id="total-{{ detalle.Anio }}-{{ detalle.Mes }}" class="text-end">
-                                <span class="form-control-plaintext">{{ detalle.Total }}</span>
-                                <input type="text" name="Valor" value="{{ detalle.Total }}" class="form-control d-none" readonly>
-                            </td>
                     <tbody>
                         {% for item in total_costos_indirectos_data %}
                         <tr id="row-{{ item.id }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ item.id }}"></td>
-                            <td data-field="anio" class="text-end">{{ item.Anio }}</td>
-                            <td data-field="mes" class="text-end">{{ item.Mes }}</td>
-                            <td data-field="total" class="text-end" id="total-{{ item.Anio }}-{{ item.Mes }}">{{ item.Total }} </td>
+                            <td data-field="Anio" class="text-end"><span>{{ item.Anio }}</span></td>
+                            <td data-field="Mes" class="text-end"><span>{{ item.Mes }}</span></td>
+                            <td data-field="Total" class="text-end" id="total-{{ item.Anio }}-{{ item.Mes }}"><span>{{ item.Total|currency_format }} </span></td>
                             <td>
-                                <a href="{% url 'total_costos_crear_detalle' detalle.id %}" class="btn btn-success btn-sm" title="Agregar Detalle">
+                                <a href="{% url 'total_costos_crear_detalle' item.id %}" class="btn btn-success btn-sm" title="Agregar Detalle">
                                     <i class="fas fa-plus"></i>
                                 </a>
                             </td>
@@ -160,7 +118,9 @@
             </form>
         </div>
     </div>
-    <!-- Tabla de Detalles de Costos Indirectos (editable) -->
+</div>
+
+<!-- Tabla de Detalles de Costos Indirectos (editable) -->
 <div class="card mt-4 d-none" id="tabla-detalles-container">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5>Detalles de Costos Indirectos</h5>
@@ -192,7 +152,6 @@
             </table>
         </div>
     </div>
-</div>
 </div>
 
 <script src="{% static 'JS/totalCostos.js' %}"></script>

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% load custom_filters %}
 {% block titulo %} Informe Otros Sí {% endblock %}
 
 {% block contenido %}
@@ -338,7 +338,7 @@
                                 </td>
                                 <td data-field="numero_otro" class="text-end">{{ otro.NumeroOtroSi }}</td>
                                 <td data-field="contrato" class="text-end">{{ otro.Contrato }}</td>
-                                <td data-field="valor" class="text-end">{{ otro.ValorOtroSi|default_if_none:"" }}</td>
+                                <td data-field="valor" class="text-end">{{ otro.ValorOtroSi|currency_format }}</td>
                                 <td data-field="iva" class="text-end">{{ otro.ValorIncluyeIva|yesno:"SI,NO" }}</td>
                                 <td data-field="polizas" class="text-end">{{ otro.Polizas|yesno:"SI,NO" }}</td>
                                 <td data-field="descripcion" class="text-start">{{ otro.PolizasDesc|default_if_none:"" }}</td>

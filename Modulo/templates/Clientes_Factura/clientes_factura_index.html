@@ -162,28 +162,28 @@
                                             <input type="text" name="Horas" class="form-control" value="{{ factura.Horas}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas}}">
+                                            <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas|currency_format }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Dias" class="form-control" value="{{ factura.Dias}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Dias" class="form-control" value="{{ factura.Valor_Dias}}">
+                                            <input type="text" name="Valor_Dias" class="form-control" value="{{ factura.Valor_Dias|currency_format }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Meses" class="form-control" value="{{ factura.Mes}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Meses" class="form-control" value="{{ factura.Valor_Meses}}">
+                                            <input type="text" name="Valor_Meses" class="form-control" value="{{ factura.Valor_Meses|currency_format }}">
                                         </td>
                                         <td style="overflow: visible; text-overflow: ellipsis; min-width: 100px;" >
                                             <input type="text" name="Bolsa" class="form-control" value="{{ factura.Bolsa }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Bolsa" class="form-control" value="{{ factura.Valor_Bolsa}}">
+                                            <input type="text" name="Valor_Bolsa" class="form-control" value="{{ factura.Valor_Bolsa|currency_format }}">
                                         </td>
                                         <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                            <input type="text" name="Valor" class="form-control" value="{{ factura.Valor }}" disabled>
+                                            <input type="text" name="Valor" class="form-control" value="{{ factura.Valor|currency_format }}" disabled>
                                         </td>
                                         <td>
                                             <input type="text" name="Descripcion" class="form-control" value="{{ factura.Descripcion }}">
@@ -225,28 +225,28 @@
                                             <input type="text" name="Horas" class="form-control" value="{{ factura.Horas}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas}}">
+                                            <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas|currency_format }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Dias" class="form-control" value="{{ factura.Dias}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Dias" class="form-control" value="{{ factura.Valor_Dias}}">
+                                            <input type="text" name="Valor_Dias" class="form-control" value="{{ factura.Valor_Dias|currency_format }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Meses" class="form-control" value="{{ factura.Mes}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Meses" class="form-control" value="{{ factura.Valor_Meses}}">
+                                            <input type="text" name="Valor_Meses" class="form-control" value="{{ factura.Valor_Meses|currency_format }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Bolsa" class="form-control" value="{{ factura.Bolsa}}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Bolsa" class="form-control" value="{{ factura.Valor_Bolsa}}">
+                                            <input type="text" name="Valor_Bolsa" class="form-control" value="{{ factura.Valor_Bolsa|currency_format }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor" class="form-control" value="{{ factura.Valor}}" disabled>
+                                            <input type="text" name="Valor" class="form-control" value="{{ factura.Valor|currency_format }}" disabled>
                                         </td>
                                         <td>
                                             <input type="text" name="Descripcion" class="form-control" value="{{ factura.Descripcion }}">

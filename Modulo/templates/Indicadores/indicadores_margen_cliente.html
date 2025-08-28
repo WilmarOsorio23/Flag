@@ -84,11 +84,11 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>Cliente</th>
-                                <th>$ Costo</th>
-                                <th>$ Facturado</th>
-                                <th>$ Pend.Fact</th>
-                                <th>$ Tot.Fact</th>
-                                <th>$ Utilidad Bruta</th>
+                                <th> Costo</th>
+                                <th> Facturado</th>
+                                <th> Pend.Fact</th>
+                                <th> Tot.Fact</th>
+                                <th> Utilidad Bruta</th>
                                 <th>% Margen Bruto</th>
                                 <th>Meta</th>
                             </tr>
@@ -98,11 +98,11 @@
                             {% for cliente, datos in resultados.totales.items %}
                             <tr>
                                 <td>{{ cliente }}</td>
-                                <td>${{ datos.Costo|floatformat:2 }}</td>
-                                <td>${{ datos.Facturado_valor|floatformat:2 }}</td>
-                                <td>${{ datos.Pendiente_valor|floatformat:2 }}</td>
-                                <td>${{ datos.total_facturado|floatformat:2 }}</td>
-                                <td>${{ datos.utilidad_bruta|floatformat:2 }}</td>
+                                <td>{{ datos.Costo|currency_format }}</td>
+                                <td>{{ datos.Facturado_valor|currency_format }}</td>
+                                <td>{{ datos.Pendiente_valor|currency_format }}</td>
+                                <td>{{ datos.total_facturado|currency_format }}</td>
+                                <td>{{ datos.utilidad_bruta|currency_format }}</td>
                                 <td>{% if datos.total_facturado > 0 %}{{ datos.margen_bruto|floatformat:2 }}%{% else %}-{% endif %}</td>
                                 <td>25%</td>
                             </tr>
@@ -110,14 +110,14 @@
                             <!-- Fila de totales -->
                             <tr>
                                 <th><strong>TOTALES</strong></th>
-                                <th>${{ resultados.totales_agregados.costo_total|floatformat:2 }}</th>
-                                <th>${{ resultados.totales_agregados.facturado_valor_total|floatformat:2 }}</th>
-                                <th>${{ resultados.totales_agregados.pendiente_valor_total|floatformat:2 }}</th>
-                                <th>${{ resultados.totales_agregados.total_facturado_total|floatformat:2 }}</th>
-                                <th>${{ resultados.totales_agregados.utilidad_bruta_total|floatformat:2 }}</th>
+                                <th>{{ resultados.totales_agregados.costo_total|currency_format }}</th>
+                                <th>{{ resultados.totales_agregados.facturado_valor_total|currency_format }}</th>
+                                <th>{{ resultados.totales_agregados.pendiente_valor_total|currency_format }}</th>
+                                <th>{{ resultados.totales_agregados.total_facturado_total|currency_format }}</th>
+                                <th>{{ resultados.totales_agregados.utilidad_bruta_total|currency_format }}</th>
                                 <th>
                                     {% if resultados.totales_agregados.total_facturado_total > 0 %}
-                                        {{ resultados.totales_agregados.margen_bruto_total|floatformat:2 }}%
+                                        {{ resultados.totales_agregados.margen_bruto_total|currency_format }}%
                                     {% else %}
                                         -
                                     {% endif %}

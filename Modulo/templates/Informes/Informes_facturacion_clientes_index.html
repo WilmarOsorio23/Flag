@@ -201,16 +201,16 @@
                                                 <!-- Datos por mes -->
                                                 {% for mes_num, mes_nombre in meses %}
                                                     <td class="text-center text-nowrap">
-                                                        {{ meses_data|get_item:mes_num|get_item:'total_valor'|default:0|floatformat:2 }}
+                                                        {{ meses_data|get_item:mes_num|get_item:'total_valor'|default:0|floatformat:2|currency_format }}
                                                     </td>
                                                 {% endfor %}
                                                 
                                                 <!-- Total por módulo -->
                                                 <td class="text-center text-nowrap fw-bold">
                                                     {% if "Total" in modulo %}
-                                                        {{ totales_por_ceco_linea|get_item:ceco|get_item:linea|default:0|floatformat:2 }}
+                                                        {{ totales_por_ceco_linea|get_item:ceco|get_item:linea|default:0|floatformat:2|currency_format }}
                                                     {% else %}
-                                                        {{ totales_por_ceco_linea_modulo|get_item:ceco|get_item:linea|get_item:modulo|default:0|floatformat:2 }}
+                                                        {{ totales_por_ceco_linea_modulo|get_item:ceco|get_item:linea|get_item:modulo|default:0|floatformat:2|currency_format }}
                                                     {% endif %}
                                                 </td>
                                             </tr>
@@ -221,11 +221,11 @@
                                             <td colspan="4" class="text-center fw-bold">Total {{ linea }}</td>
                                             {% for mes_num, mes_nombre in meses %}
                                                 <td class="text-center text-nowrap fw-bold">
-                                                    {{ totales_por_ceco_linea_mes|get_item:ceco|get_item:linea|get_item:mes_num|default:0|floatformat:2 }}
+                                                    {{ totales_por_ceco_linea_mes|get_item:ceco|get_item:linea|get_item:mes_num|default:0|floatformat:2|currency_format }}
                                                 </td>
                                             {% endfor %}
                                             <td class="text-center text-nowrap fw-bold">
-                                                {{ totales_por_ceco_linea|get_item:ceco|get_item:linea|default:0|floatformat:2 }}
+                                                {{ totales_por_ceco_linea|get_item:ceco|get_item:linea|default:0|floatformat:2|currency_format }}
                                             </td>
                                         </tr>
                                         {% endwith %}
@@ -238,11 +238,11 @@
                                 <td colspan="4" class="text-center fw-bold">TOTAL GENERAL</td>
                                 {% for mes_num, mes_nombre in meses %}
                                     <td class="text-center text-nowrap fw-bold">
-                                        {{ totales_por_mes|get_item:mes_num|default:0|floatformat:2 }}
+                                        {{ totales_por_mes|get_item:mes_num|default:0|floatformat:2|currency_format }}
                                     </td>
                                 {% endfor %}
                                 <td class="text-center text-nowrap fw-bold">
-                                    {{ total_global|default:0|floatformat:2 }}
+                                    {{ total_global|default:0|floatformat:2|currency_format }}
                                 </td>
                             </tr>
                         </tbody>

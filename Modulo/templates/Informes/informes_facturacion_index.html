@@ -145,12 +145,12 @@
                                 <td>{{ row.mes }}</td>
                                 <!-- Líneas activas -->
                                 {% for linea in lineas_activas %}
-                                    <td>{{ row.totales_linea|get_item:linea.LineaId|floatformat:2 }}</td>
+                                    <td>{{ row.totales_linea|get_item:linea.LineaId|currency_format }}</td>
                                 {% endfor %}
-                                <td>{{ row.total_general|floatformat:2 }}</td>
+                                <td>{{ row.total_general|currency_format }}</td>
                                 <!-- Clientes activos -->
                                 {% for cliente, linea in clientes_activos %}
-                                    <td>{{ row.clientes|get_item:cliente.ClienteId|get_item:'totales'|get_item:linea.LineaId|floatformat:2 }}</td>
+                                    <td>{{ row.clientes|get_item:cliente.ClienteId|get_item:'totales'|get_item:linea.LineaId|currency_format }}</td>
                                 {% endfor %}
                             </tr>
                             {% endfor %}
@@ -160,9 +160,9 @@
                             <tr>
                                 <th>Total</th>
                                 {% for linea in lineas_activas %}
-                                    <th>{{ footer.totales_linea|get_item:linea.LineaId|floatformat:2 }}</th>
+                                    <th>{{ footer.totales_linea|get_item:linea.LineaId|currency_format }}</th>
                                 {% endfor %}
-                                <th>{{ footer.total_general|floatformat:2 }}</th>
+                                <th>{{ footer.total_general|currency_format }}</th>
                                 {% for cliente, linea in clientes_activos %}
                                     <th>{{ footer.clientes|get_item:cliente.ClienteId|get_item:'totales'|get_item:linea.LineaId|floatformat:2 }}</th>
                                 {% endfor %}

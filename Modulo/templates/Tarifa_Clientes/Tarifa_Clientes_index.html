@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-
+{% load custom_filters %}
 {% block titulo %} Lista de Tarifas de Clientes {% endblock %}
 
 {% block contenido %}
@@ -238,24 +238,24 @@
                                 <input type="text" name="sitioTrabajo" class="form-control d-none" value="{{ tarifa.sitioTrabajo }}" readonly>
                             </td>
                             <td data-field="valorHora" class="text-end">
-                                <span class="form-control-plaintext">{{ tarifa.valorHora }}</span>
-                                <input type="text" name="valorHora" class="form-control d-none" value="{{ tarifa.valorHora }}" readonly>
+                                <span class="form-control-plaintext">{{ tarifa.valorHora|currency_format }}</span>
+                                <input type="text" name="valorHora" class="form-control d-none" value="{{ tarifa.valorHora|currency_format }}" readonly>
                             </td>
                             <td data-field="valorDia" class="text-end">
-                                <span class="form-control-plaintext">{{ tarifa.valorDia }}</span>
-                                <input type="text" name="valorDia" class="form-control d-none" value="{{ tarifa.valorDia }}" readonly>
+                                <span class="form-control-plaintext">{{ tarifa.valorDia|currency_format }}</span>
+                                <input type="text" name="valorDia" class="form-control d-none" value="{{ tarifa.valorDia|currency_format }}" readonly>
                             </td>
                             <td data-field="valorMes" class="text-end">
-                                <span class="form-control-plaintext">{{ tarifa.valorMes }}</span>
-                                <input type="text" name="valorMes" class="form-control d-none" value="{{ tarifa.valorMes }}" readonly>
+                                <span class="form-control-plaintext">{{ tarifa.valorMes|currency_format }}</span>
+                                <input type="text" name="valorMes" class="form-control d-none" value="{{ tarifa.valorMes|currency_format }}" readonly>
                             </td>
                             <td data-field="bolsaMes" class="text-end">
-                                <span class="form-control-plaintext">{{ tarifa.bolsaMes }}</span>
-                                <input type="text" name="bolsaMes" class="form-control d-none" value="{{ tarifa.bolsaMes }}" readonly>
+                                <span class="form-control-plaintext">{{ tarifa.bolsaMes|currency_format }}</span>
+                                <input type="text" name="bolsaMes" class="form-control d-none" value="{{ tarifa.bolsaMes|currency_format }}" readonly>
                             </td>
                             <td data-field="valorBolsa" class="text-end">
-                                <span class="form-control-plaintext">{{ tarifa.valorBolsa }}</span>
-                                <input type="text" name="valorBolsa" class="form-control d-none" value="{{ tarifa.valorBolsa }}" readonly>
+                                <span class="form-control-plaintext">{{ tarifa.valorBolsa|currency_format }}</span>
+                                <input type="text" name="valorBolsa" class="form-control d-none" value="{{ tarifa.valorBolsa|currency_format }}" readonly>
                             </td>
                             <td data-field="iva" class="text-end" style="overflow: visible; text-overflow: ellipsis; min-width: 80px;">
                                 <span class="form-control-plaintext">{{ tarifa.iva }}</span>

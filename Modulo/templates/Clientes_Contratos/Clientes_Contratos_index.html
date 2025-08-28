@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 {% block titulo %} Clientes Contratos {% endblock %}
 
 {% block contenido %}
@@ -271,8 +272,8 @@
                                 <input type="text" class="form-control d-none" name="PolizasDesc" value="{{ contrato.PolizasDesc|default_if_none:'' }}">
                             </td>
                             <td data-field="ContratoValor" class="text-end">
-                                <span class="form-control-plaintext">{{ contrato.ContratoValor|default_if_none:'' }}</span>
-                                <input type="text" class="form-control d-none" name="ContratoValor" value="{{ contrato.ContratoValor|default_if_none:'' }}">
+                                <span class="form-control-plaintext">{{ contrato.ContratoValor|default_if_none:''|currency_format }}</span>
+                                <input type="text" class="form-control d-none" name="ContratoValor" value="{{ contrato.ContratoValor|default_if_none:''|currency_format }}">
                             </td>
                             <td data-field="IncluyeIvaValor">
                                 <span class="form-control-plaintext boolean-display" data-field="IncluyeIvaValor">

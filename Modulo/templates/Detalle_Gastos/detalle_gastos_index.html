@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 {% block titulo %} Lista de Detalle_Gastos {% endblock %}
 
 {% block contenido %}
@@ -110,8 +111,8 @@
                                 <input type="text" name="GastosId" class="form-control d-none" value="{{ detalle.GastosId }}" readonly>
                             </td>
                             <td data-field="Valor" class="text-end">
-                                <span class="form-control-plaintext">{{ detalle.Valor }}</span>
-                                <input type="text" name="Valor" class="form-control d-none" value="{{ detalle.Valor }}" readonly>
+                                <span class="form-control-plaintext">{{ detalle.Valor|currency_format }}</span>
+                                <input type="text" name="Valor" class="form-control d-none" value="{{ detalle.Valor|currency_format }}" readonly>
                             </td>
                         </tr>
                         {% endfor %}

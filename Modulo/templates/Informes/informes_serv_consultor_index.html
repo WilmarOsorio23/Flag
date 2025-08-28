@@ -195,16 +195,16 @@
 
                                     {% for mes_num, mes_nombre in meses %}
                                         {% with valores=meses_data|get_item_safe:mes_num %}
-                                            <td>{{ valores.total_factura|floatformat:2|default:"0.00" }}</td>
-                                            <td>{{ valores.total_cobro|floatformat:2|default:"0.00" }}</td>
+                                            <td>{{ valores.total_factura|floatformat:2|default:"0.00"|currency_format }}</td>
+                                            <td>{{ valores.total_cobro|floatformat:2|default:"0.00"|currency_format  }}</td>
                                             <td>{{ valores.total_diferencia|floatformat:2|default:"0.00" }}</td>
                                             <td>{{ valores.porcentaje_diferencia|floatformat:2|default:"0.00" }}%</td>
                                         {% endwith %}
                                     {% endfor %}
 
                                     {% with total=totales_por_cliente|get_item_safe:cliente %}
-                                        <td>{{ total.total_factura|floatformat:2|default:"0.00" }}</td>
-                                        <td>{{ total.total_cobro|floatformat:2|default:"0.00" }}</td>
+                                        <td>{{ total.total_factura|floatformat:2|default:"0.00"|currency_format }}</td>
+                                        <td>{{ total.total_cobro|floatformat:2|default:"0.00"|currency_format }}</td>
                                         <td>{{ total.total_diferencia|floatformat:2|default:"0.00" }}</td>
                                         <td>{{ total.porcentaje_diferencia|floatformat:2|default:"0.00" }}%</td>
                                     {% endwith %}
@@ -218,15 +218,15 @@
                             <td></td>
                             {% for mes_num, mes_nombre in meses %}
                                 {% with total_mes=totales_por_linea_consultor_mes|get_item_safe:linea|get_item_safe:consultor_tuple|get_item_safe:mes_num %}
-                                    <td>{{ total_mes.total_factura|floatformat:2|default:"0.00" }}</td>
-                                    <td>{{ total_mes.total_cobro|floatformat:2|default:"0.00" }}</td>
+                                    <td>{{ total_mes.total_factura|floatformat:2|default:"0.00"|currency_format }}</td>
+                                    <td>{{ total_mes.total_cobro|floatformat:2|default:"0.00"|currency_format }}</td>
                                     <td>{{ total_mes.total_diferencia|floatformat:2|default:"0.00" }}</td>
                                     <td>{{ total_mes.porcentaje_diferencia|floatformat:2|default:"0.00" }}%</td>
                                 {% endwith %}
                             {% endfor %}
                             {% with total=totales_por_linea_consultor|get_item_safe:linea|get_item_safe:consultor_tuple %}
-                                <td>{{ total.total_factura|floatformat:2|default:"0.00" }}</td>
-                                <td>{{ total.total_cobro|floatformat:2|default:"0.00" }}</td>
+                                <td>{{ total.total_factura|floatformat:2|default:"0.00"|currency_format }}</td>
+                                <td>{{ total.total_cobro|floatformat:2|default:"0.00"|currency_format }}</td>
                                 <td>{{ total.total_diferencia|floatformat:2|default:"0.00" }}</td>
                                 <td>{{ total.porcentaje_diferencia|floatformat:2|default:"0.00" }}%</td>
                             {% endwith %}
@@ -240,15 +240,15 @@
                     <td></td>
                     {% for mes_num, mes_nombre in meses %}
                         {% with total_mes=totales_por_linea_mes|get_item_safe:linea|get_item_safe:mes_num %}
-                            <td>{{ total_mes.total_factura|floatformat:2|default:"0.00" }}</td>
-                            <td>{{ total_mes.total_cobro|floatformat:2|default:"0.00" }}</td>
+                            <td>{{ total_mes.total_factura|floatformat:2|default:"0.00"|currency_format }}</td>
+                            <td>{{ total_mes.total_cobro|floatformat:2|default:"0.00"|currency_format }}</td>
                             <td>{{ total_mes.total_diferencia|floatformat:2|default:"0.00" }}</td>
                             <td>{{ total_mes.porcentaje_diferencia|floatformat:2|default:"0.00" }}%</td>
                         {% endwith %}
                     {% endfor %}
                     {% with total=totales_por_linea|get_item_safe:linea %}
-                        <td>{{ total.total_factura|floatformat:2|default:"0.00" }}</td>
-                        <td>{{ total.total_cobro|floatformat:2|default:"0.00" }}</td>
+                        <td>{{ total.total_factura|floatformat:2|default:"0.00"|currency_format }}</td>
+                        <td>{{ total.total_cobro|floatformat:2|default:"0.00"|currency_format }}</td>
                         <td>{{ total.total_diferencia|floatformat:2|default:"0.00" }}</td>
                         <td>{{ total.porcentaje_diferencia|floatformat:2|default:"0.00" }}%</td>
                     {% endwith %}
@@ -260,14 +260,14 @@
                 <td colspan="4">Total General</td> <!-- Línea, Consultor, Empresa, Cliente -->
                 {% for mes_num, mes_nombre in meses %}
                     {% with total_mes=totales_por_mes|get_item_safe:mes_num %}
-                        <td>{{ total_mes.total_factura|floatformat:2|default:"0.00" }}</td>
-                        <td>{{ total_mes.total_cobro|floatformat:2|default:"0.00" }}</td>
+                        <td>{{ total_mes.total_factura|floatformat:2|default:"0.00"|currency_format }}</td>
+                        <td>{{ total_mes.total_cobro|floatformat:2|default:"0.00"|currency_format }}</td>
                         <td>{{ total_mes.total_diferencia|floatformat:2|default:"0.00" }}</td>
                         <td>{{ total_mes.porcentaje_diferencia|floatformat:2|default:"0.00" }}%</td>
                     {% endwith %}
                 {% endfor %}
-                <td>{{ total_global.total_factura|floatformat:2|default:"0.00" }}</td>
-                <td>{{ total_global.total_cobro|floatformat:2|default:"0.00" }}</td>
+                <td>{{ total_global.total_factura|floatformat:2|default:"0.00"|currency_format }}</td>
+                <td>{{ total_global.total_cobro|floatformat:2|default:"0.00"|currency_format }}</td>
                 <td>{{ total_global.total_diferencia|floatformat:2|default:"0.00" }}</td>
                 <td>{{ total_global.porcentaje_diferencia|floatformat:2|default:"0.00" }}%</td>
             </tr>
