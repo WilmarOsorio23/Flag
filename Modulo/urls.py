@@ -55,6 +55,7 @@ from Modulo.Views import indicadores_margen_cliente
 from Modulo.Views import facturacion_consultores
 from Modulo.Views import informe_facturacion_consultores
 from Modulo.Views import informe_serv_consultor
+from Modulo.Views import informe_detalle_facturacion_consultores
 
 
 
@@ -387,6 +388,10 @@ urlpatterns = [
     #Ruta para informe de Facturacion Consultores
     path('informes/informes_facturacion_consultores/', informe_facturacion_consultores.informe_totales_por_mes, name='informes_facturacion_consultores_index'),
     path('informes/informes_facturacion_consultores/reporte_excel_totales_por_mes', informe_facturacion_consultores.reporte_excel_totales_por_mes , name='reporte_excel_totales_por_mes'),
+
+    # Ruta para informe detalle de Facturacion Consultores
+    path('informes/detalle_facturacion_consultores/', informe_detalle_facturacion_consultores.informe_detalle_facturacion_consultores, name='informe_detalle_facturacion_consultores_index'),
+    path('informes/detalle_facturacion_consultores/exportar_excel/', informe_detalle_facturacion_consultores.exportar_detalle_facturacion_consultores_excel, name='exportar_detalle_facturacion_consultores_excel'),
 
     #Ruta para informe de servicio Facturacion Consultores
     path('informes/informes_Serv_consultor/', informe_serv_consultor.informe_totales, name='informes_serv_consultor_index'),
