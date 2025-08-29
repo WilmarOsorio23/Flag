@@ -2521,6 +2521,55 @@ class FacturacionConsultoresFilterForm(forms.Form):
         lineas = Linea.objects.values_list('LineaId', 'Linea').distinct()
         self.fields['LineaId'].choices = [('', 'Seleccione la línea')] + [(lid, nombre) for lid, nombre in lineas]
 
+class FacturacionConsultoresDetalleFilterForm(forms.Form):
+    Anio = forms.ChoiceField(
+        choices=[],
+        required=False,
+        label='Año',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    Mes = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label='Mes',
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    Consultor = forms.ModelMultipleChoiceField(
+        queryset=Consultores.objects.all(),
+        required=False,
+        label='Consultor',
+        widget=forms.CheckboxSelectMultiple(),
+        to_field_name='Documento',
+    )
+
+    LineaId = forms.ModelMultipleChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label='Línea',
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.populate_anio()
+        self.populate_mes()
+        # Personalizar cómo se muestran los consultores
+        self.fields['Consultor'].label_from_instance = lambda obj: f"{obj.Nombre} - {obj.Empresa}"
+
+    def populate_anio(self):
+        years = Facturacion_Consultores.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
+        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(str(year), str(year)) for year in years]
+
+    def populate_mes(self):
+        meses = [
+            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
+            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
+            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+        ]
+        self.fields['Mes'].choices = meses
+
 class FacturacionClientesFilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
