@@ -370,29 +370,29 @@
                             </ul>
                         </li>
                     </ul>
+                    <!-- ADMINISTRACIÓN (solo para administradores) -->
+                    {% if user.is_superuser or user.is_staff %}
+                    <ul class="list-unstyled components">
+                        <li>
+                            <a href="#homeSubmenuAdmin" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                                <i class="fas fa-cogs"></i> <span>Administración</span>
+                            </a>
+                            <ul class="collapse list-unstyled" id="homeSubmenuAdmin">
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'role_list' %}">
+                                        <i class="fas fa-user-tag"></i> Gestión de Roles
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-item nav-link" href="{% url 'user_list' %}">
+                                        <i class="fas fa-users"></i> Gestión de Usuarios
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                    {% endif %}
                 </div>
-                <!-- ADMINISTRACIÓN (solo para administradores) -->
-                {% if user.is_superuser or user.is_staff %}
-                <ul class="list-unstyled components">
-                    <li>
-                        <a href="#homeSubmenuAdmin" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
-                            <i class="fas fa-cogs"></i> <span>Administración</span>
-                        </a>
-                        <ul class="collapse list-unstyled" id="homeSubmenuAdmin">
-                            <li>
-                                <a class="nav-item nav-link" href="{% url 'role_list' %}">
-                                    <i class="fas fa-user-tag"></i> Gestión de Roles
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-item nav-link" href="{% url 'user_list' %}">
-                                    <i class="fas fa-users"></i> Gestión de Usuarios
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-                {% endif %}
                 <!-- Menú de usuario en el footer de la sidebar -->
                 <div class="sidebar-footer">
                     <div class="dropdown">

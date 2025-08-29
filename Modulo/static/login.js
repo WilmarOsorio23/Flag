@@ -41,15 +41,13 @@ let mainF = (e) => {
 
 // Función para validar el formulario de inicio de sesión
 function validarFormulario(e) {
-    const email = document.querySelector('#email').value;
+    const username = document.querySelector('#username').value;
     const password = document.querySelector('#password').value;
     const mensajesError = [];
 
-    // Validar email
-    if (!email) {
-        mensajesError.push('El email es requerido');
-    } else if (!validarEmail(email)) {
-        mensajesError.push('Por favor ingrese un email válido');
+    // Validar usuario
+    if (!username) {
+        mensajesError.push('El usuario es requerido');
     }
 
     // Validar contraseña

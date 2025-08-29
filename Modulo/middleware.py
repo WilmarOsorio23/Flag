@@ -6,70 +6,99 @@ from django.conf import settings
 class RoleMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
+        self.permission_mappings = self._build_permission_mappings()
         
-        # URLs that don't require permission checks
-        self.public_urls = [
-            'login',
-            'logout',
-            'check-permission',
-        ]
+    def _build_permission_mappings(self):
+        # Construir mapeo dinámico de permisos basado en URLs y nombres de vistas
+        mappings = {}
         
-        # Permission mappings
-        self.permission_mappings = {
-            # Maestros
-            'modulo': 'can_manage_modulo',
-            'linea': 'can_manage_linea',
-            'perfil': 'can_manage_perfil',
-            'tipo_documento': 'can_manage_tipo_documento',
-            'cargos': 'can_manage_cargos',
-            'clientes': 'can_manage_clientes',
-            'consultores': 'can_manage_consultores',
-            'certificacion': 'can_manage_certificacion',
-            'costos_indirectos': 'can_manage_costos_indirectos',
-            'conceptos': 'can_manage_conceptos',
-            'gastos': 'can_manage_gastos',
-            
-            # Movimientos
-            'clientes_contratos': 'can_manage_clientes_contratos',
-            'detalle_certificacion': 'can_manage_detalle_certificacion',
-            'detalle_costos_indirectos': 'can_manage_detalle_costos_indirectos',
-            'detalle_gastos': 'can_manage_detalle_gastos',
-            'historial_cargos': 'can_manage_historial_cargos',
-            'nomina': 'can_manage_nomina',
-            'registro_tiempos': 'can_manage_registro_tiempos',
-            'tarifa_clientes': 'can_manage_tarifa_clientes',
-            'tarifa_consultores': 'can_manage_tarifa_consultores',
-            'facturacion_clientes': 'can_manage_facturacion_clientes',
-            'facturas_consultores': 'can_manage_facturas_consultores',
-            'pagares': 'can_manage_pagares',
-            
-            # Informes
-            'informes/certificaciones': 'can_view_informe_certificaciones',
-            'informes/empleados': 'can_view_informe_empleados',
-            'informes/salarios': 'can_view_informe_salarios',
-            'informes/estudios': 'can_view_informe_estudios',
-            'informes/consultores': 'can_view_informe_consultores',
-            'informes/tarifas_consultores': 'can_view_informe_tarifa_consultores',
-            'informes/tarifas_clientes': 'can_view_informe_tarifa_clientes',
-            'informes/facturacion': 'can_view_informe_facturacion',
-            'informes/clientes': 'can_view_informe_clientes',
-            
-            # Indicadores
-            'indicadores_operatividad': 'can_view_indicadores_operatividad',
-            'indicadores_rentabilidad': 'can_view_indicadores_rentabilidad',
-            'indicadores_facturacion': 'can_view_indicadores_facturacion',
-            'indicadores_margen_linea': 'can_view_indicadores_margen_linea',
-            'indicadores_margen_cliente': 'can_view_indicadores_margen_cliente',
-            
-            # URLs de administración
+        # Mapeo para vistas de Maestros
+        mappings.update({
+            'actividad_pagare_index': 'can_manage_actividades_pagares',
+            'cargos_index': 'can_manage_cargos',
+            'certificacion_index': 'can_manage_certificacion',
+            'clientes_index': 'can_manage_clientes',
+            'conceptos_index': 'can_manage_conceptos',
+            'consultores_index': 'can_manage_consultores',
+            'contactos_index': 'can_manage_contactos',
+            'costos_indirectos_index': 'can_manage_costos_indirectos',
+            'centros_costos_index': 'can_manage_centros_costos',
+            'empleado_index': 'can_manage_empleados',
+            'empleados_estudios_index': 'can_manage_empleados_estudios',
+            'gastos_index': 'can_manage_gastos',
+            'horas_habiles_index': 'can_manage_horas_habiles',
+            'ind_index': 'can_manage_ind',
+            'ipc_index': 'can_manage_ipc',
+            'linea_index': 'can_manage_linea',
+            'Modulo': 'can_manage_modulo',
+            'moneda_index': 'can_manage_moneda',
+            'perfil_index': 'can_manage_perfil',
+            'referencia_index': 'can_manage_referencias',
+            'tipo_documento_index': 'can_manage_tipo_documento',
+            'tipos_contactos_index': 'can_manage_tipos_contactos',
+            'tipo_pagare_index': 'can_manage_tipo_pagare',
+        })
+        
+        # Mapeo para vistas de Movimientos
+        mappings.update({
+            'clientes_contratos_index': 'can_manage_clientes_contratos',
+            'contratos_otros_si_index': 'can_manage_contratos_otros_si',
+            'pagare_index': 'can_manage_pagare',
+            'detalle_certificacion_index': 'can_manage_detalle_certificacion',
+            'detalle_costos_indirectos_index': 'can_manage_detalle_costos_indirectos',
+            'detalle_gastos_index': 'can_manage_detalle_gastos',
+            'historial_cargos_index': 'can_manage_historial_cargos',
+            'nomina_index': 'can_manage_nomina',
+            'registro_tiempos_index': 'can_manage_registro_tiempos',
+            'tarifa_clientes_index': 'can_manage_tarifa_clientes',
+            'tarifa_consultores_index': 'can_manage_tarifa_consultores',
+            'total_costos_indirectos_index': 'can_manage_total_costos_indirectos',
+            'total_gastos_index': 'can_manage_total_gastos',
+            'clientes_factura_index': 'can_manage_clientes_factura',
+            'facturacion_consultores_index': 'can_manage_facturacion_consultores',
+        })
+        
+        # Mapeo para vistas de Informes
+        mappings.update({
+            'informes_certificacion_index': 'can_view_informe_certificacion',
+            'informes_empleado_index': 'can_view_informe_empleado',
+            'informes_salarios_index': 'can_view_informe_salarios',
+            'informes_estudios_index': 'can_view_informe_estudios',
+            'informes_consultores_index': 'can_view_informe_consultores',
+            'informes_tarifas_consultores_index': 'can_view_informe_tarifas_consultores',
+            'informes_facturacion_index': 'can_view_informe_facturacion',
+            'informes_historial_cargos_index': 'can_view_informe_historial_cargos',
+            'informes_tarifas_clientes_index': 'can_view_informe_tarifas_clientes',
+            'informes_tiempos_consultores': 'can_view_informe_tiempos_consultores',
+            'informes_clientes_index': 'can_view_informe_clientes',
+            'informes_clientes_contratos_index': 'can_view_informe_clientes_contratos',
+            'informes_otros_si_index': 'can_view_informe_otros_si',
+            'informe_pagares': 'can_view_informe_pagares',
+            'informes_facturacion_consultores_index': 'can_view_informe_facturacion_consultores',
+            'informes_serv_consultor_index': 'can_view_informe_serv_consultor',
+            'informes_facturacion_clientes_index': 'can_view_informe_facturacion_clientes',
+        })
+        
+        # Mapeo para vistas de Indicadores
+        mappings.update({
+            'indicadores_operatividad_index': 'can_view_indicadores_operatividad',
+            'indicadores_totales_index': 'can_view_indicadores_totales',
+            'indicadores_facturacion_index': 'can_view_indicadores_facturacion',
+            'indicadores_margen_cliente_index': 'can_view_indicadores_margen_cliente',
+        })
+        
+        # Mapeo para vistas de Administración
+        mappings.update({
+            'role_list': 'can_manage_roles',
+            'role_create': 'can_manage_roles',
+            'role_edit': 'can_manage_roles',
             'user_list': 'can_manage_users',
             'user_create': 'can_manage_users',
             'user_edit': 'can_manage_users',
             'user_delete': 'can_manage_users',
-            'role_list': 'can_manage_roles',
-            'role_create': 'can_manage_roles',
-            'role_edit': 'can_manage_roles',
-        }
+        })
+        
+        return mappings
 
     def __call__(self, request):
         # Get the URL name

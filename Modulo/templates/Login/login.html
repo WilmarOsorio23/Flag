@@ -13,18 +13,33 @@
     <div class="container b-container" id="b-container">
       <form id="b-form" class="form" method="post" action="{% url 'login' %}">
         {% csrf_token %}
-        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-          <img src="{% static 'resource/logo.webp' %}" alt="Flag Soluciones Logo" style="width: 120px; margin-bottom: 10px;">
-          <h2 class="form_title title">Iniciar Sesión</h2>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <img src="{% static 'resource/logo.webp' %}" alt="Flag Soluciones Logo" style="width: 150px;">
+            <h2 class="form_title title">Iniciar Sesión</h2>
         </div>
-        <span class="form__span">Ingrese su correo y contraseña para acceder</span>
-        <input class="form__input" type="text" name="username" placeholder="Usuario o correo" required />
+        <span class="form__span">Ingrese su usuario, correo y contraseña para acceder</span>
+        <input class="form__input" type="text" name="username" placeholder="Usuario o correo electrónico" required />
         <input class="form__input" type="password" name="password" placeholder="Contraseña" required />
+        
         {% if form.errors %}
-          <div style="color: red; margin-top: 10px;">Usuario o contraseña incorrectos.</div>
+            <div class="alert alert-danger mt-3">
+                Usuario/Email o contraseña incorrectos.
+            </div>
         {% endif %}
+        
+        {% if messages %}
+            <div class="messages mt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <input type="hidden" name="next" value="{{ request.GET.next }}" />
         <button class="form__button button submit" type="submit">ENTRAR</button>
-      </form>
+    </form>
     </div>
     <div class="switch" id="switch-cnt">
       <div class="switch__circle"></div>

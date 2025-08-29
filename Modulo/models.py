@@ -11,7 +11,12 @@ class UserRole(models.Model):
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField(null=True, blank=True)
     
-    # Maestros permissions
+    # Permisos de Administración
+    can_manage_users = models.BooleanField(default=False)
+    can_manage_roles = models.BooleanField(default=False)
+    
+    # Maestros - Permisos específicos
+    can_manage_actividades_pagares = models.BooleanField(default=False)
     can_manage_cargos = models.BooleanField(default=False)
     can_manage_certificacion = models.BooleanField(default=False)
     can_manage_clientes = models.BooleanField(default=False)
@@ -32,10 +37,13 @@ class UserRole(models.Model):
     can_manage_perfil = models.BooleanField(default=False)
     can_manage_referencias = models.BooleanField(default=False)
     can_manage_tipo_documento = models.BooleanField(default=False)
-    can_manage_tipo_contactos = models.BooleanField(default=False)
+    can_manage_tipos_contactos = models.BooleanField(default=False)
+    can_manage_tipo_pagare = models.BooleanField(default=False)
     
-    # Movimientos permissions
+    # Movimientos - Permisos específicos
     can_manage_clientes_contratos = models.BooleanField(default=False)
+    can_manage_contratos_otros_si = models.BooleanField(default=False)
+    can_manage_pagare = models.BooleanField(default=False)
     can_manage_detalle_certificacion = models.BooleanField(default=False)
     can_manage_detalle_costos_indirectos = models.BooleanField(default=False)
     can_manage_detalle_gastos = models.BooleanField(default=False)
@@ -44,31 +52,36 @@ class UserRole(models.Model):
     can_manage_registro_tiempos = models.BooleanField(default=False)
     can_manage_tarifa_clientes = models.BooleanField(default=False)
     can_manage_tarifa_consultores = models.BooleanField(default=False)
-    can_manage_facturacion_clientes = models.BooleanField(default=False)
-    can_manage_facturas_consultores = models.BooleanField(default=False)
-    can_manage_pagares = models.BooleanField(default=False)
+    can_manage_total_costos_indirectos = models.BooleanField(default=False)
+    can_manage_total_gastos = models.BooleanField(default=False)
+    can_manage_clientes_factura = models.BooleanField(default=False)
+    can_manage_facturacion_consultores = models.BooleanField(default=False)
     
-    # Informes permissions
-    can_view_informe_certificaciones = models.BooleanField(default=False)
-    can_view_informe_empleados = models.BooleanField(default=False)
+    # Informes - Permisos específicos
+    can_view_informe_certificacion = models.BooleanField(default=False)
+    can_view_informe_empleado = models.BooleanField(default=False)
     can_view_informe_salarios = models.BooleanField(default=False)
     can_view_informe_estudios = models.BooleanField(default=False)
     can_view_informe_consultores = models.BooleanField(default=False)
-    can_view_informe_tarifa_consultores = models.BooleanField(default=False)
-    can_view_informe_tarifa_clientes = models.BooleanField(default=False)
+    can_view_informe_tarifas_consultores = models.BooleanField(default=False)
     can_view_informe_facturacion = models.BooleanField(default=False)
+    can_view_informe_historial_cargos = models.BooleanField(default=False)
+    can_view_informe_tarifas_clientes = models.BooleanField(default=False)
+    can_view_informe_tiempos_consultores = models.BooleanField(default=False)
     can_view_informe_clientes = models.BooleanField(default=False)
+    can_view_informe_clientes_contratos = models.BooleanField(default=False)
+    can_view_informe_otros_si = models.BooleanField(default=False)
+    can_view_informe_pagares = models.BooleanField(default=False)
+    can_view_informe_facturacion_consultores = models.BooleanField(default=False)
+    can_view_informe_serv_consultor = models.BooleanField(default=False)
+    can_view_informe_facturacion_clientes = models.BooleanField(default=False)
     
-    # Indicadores permissions
+    # Indicadores - Permisos específicos
     can_view_indicadores_operatividad = models.BooleanField(default=False)
-    can_view_indicadores_rentabilidad = models.BooleanField(default=False)
+    can_view_indicadores_totales = models.BooleanField(default=False)
     can_view_indicadores_facturacion = models.BooleanField(default=False)
-    can_view_indicadores_margen_linea = models.BooleanField(default=False)
     can_view_indicadores_margen_cliente = models.BooleanField(default=False)
-
-    can_manage_users = models.BooleanField(default=False, verbose_name='Gestionar Usuarios')
-    can_manage_roles = models.BooleanField(default=False, verbose_name='Gestionar Roles')
-
+    
     def __str__(self):
         return self.name
 

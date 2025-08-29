@@ -1,7 +1,5 @@
-# ...existing imports...
 from django.urls import reverse_lazy
 
-# ...existing settings...
 
 # Authentication settings
 AUTH_USER_MODEL = 'Modulo.CustomUser'
@@ -30,5 +28,3 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'Modulo.middleware.RoleMiddleware',  # Add our custom middleware
 ]
-
-# ...existing settings...

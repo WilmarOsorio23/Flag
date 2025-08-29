@@ -87,7 +87,7 @@ body::before {
 
 .logo-container {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 50px;
 }
 
 .logo {
@@ -98,7 +98,6 @@ body::before {
 h2 {
     text-align: center;
     color: #333;
-    margin-bottom: 30px;
 }
 
 .form-group {
@@ -254,10 +253,10 @@ h2 {
 }
 
 .form__span {
-	margin-top: 30px;
 	margin-bottom: 12px;
-	color: #0d6efd;
+	color: #0d6dfdd1;
 	font-weight: 500;
+	font-size: medium;
 }
 
 .form__link {
