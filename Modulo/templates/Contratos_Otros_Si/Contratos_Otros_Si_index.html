@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 {% block titulo %} Contratos Otros Si {% endblock %}
 
 {% block contenido %}
@@ -177,8 +178,8 @@
                                 <input type="text" class="form-control d-none" name="NumeroOtroSi" value="{{ contrato.NumeroOtroSi }}" readonly>
                             </td>
                             <td data-field="ValorOtroSi" class="text-end">
-                                <span class="form-control-plaintext">{{contrato.ValorOtroSi|default_if_none:'' }}</span>
-                                <input type="text" name="ValorOtroSi" class="form-control d-none" value="{{contrato.ValorOtroSi|default_if_none:'' }}" readonly>
+                                <span class="form-control-plaintext">{{contrato.ValorOtroSi|default_if_none:''|currency_format }}</span>
+                                <input type="text" name="ValorOtroSi" class="form-control d-none" value="{{contrato.ValorOtroSi|default_if_none:''|currency_format }}" readonly>
                             </td>
                             <td data-field="ValorIncluyeIva">
                                 <span class="form-control-plaintext boolean-display" data-field="ValorIncluyeIva">

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
-
-{% block titulo %} Lista de Tarifas de Consultores {% endblock %}
+{% load custom_filters %}
+{% block titulo %} Lista de Tarifa Consultores {% endblock %}
 
 {% block contenido %}
 <div class="card">
@@ -198,15 +198,15 @@
                                 </select>
                             </td>
                             <td data-field="valorHora" class="text-end">
-                                <span class="form-control-plaintext">{{ tarifa.valorHora }}</span>
+                                <span class="form-control-plaintext">{{ tarifa.valorHora|currency_format }}</span>
                                 <input type="text" name="valorHora" class="form-control d-none" value="{{ tarifa.valorHora }}" readonly>
                             </td>
                             <td data-field="valorDia" class="text-end">
-                                <span class="form-control-plaintext">{{ tarifa.valorDia }}</span>
+                                <span class="form-control-plaintext">{{ tarifa.valorDia|currency_format }}</span>
                                 <input type="text" name="valorDia" class="form-control d-none" value="{{ tarifa.valorDia }}" readonly>
                             </td>
                             <td data-field="valorMes" class="text-end">
-                                <span class="form-control-plaintext">{{ tarifa.valorMes }}</span>
+                                <span class="form-control-plaintext">{{ tarifa.valorMes|currency_format }}</span>
                                 <input type="text" name="valorMes" class="form-control d-none" value="{{ tarifa.valorMes }}" readonly>
                             </td>
                             <td data-field="moneda">
@@ -224,11 +224,11 @@
                                 </select>
                             </td>
                             <td data-field="iva" class="text-end" style="overflow: visible; text-overflow: ellipsis; min-width: 80px;"> 
-                                <span class="form-control-plaintext">{{ tarifa.iva }}</span>
+                                <span class="form-control-plaintext">{{ tarifa.iva|default_if_none:'0' }}</span>
                                 <input type="text" name="iva" class="form-control d-none" placeholder="IVA" value="{{ tarifa.iva|default_if_none:'' }}" readonly>
                             </td>
                             <td data-field="rteFte" class="text-end">
-                                <span class="form-control-plaintext">{{ tarifa.rteFte }}</span>
+                                <span class="form-control-plaintext">{{ tarifa.rteFte|default_if_none:'0' }}</span>
                                 <input type="text" name="rteFte" class="form-control d-none" value="{{ tarifa.rteFte|default_if_none:'' }}" readonly>
                             </td>
                          </tr>   

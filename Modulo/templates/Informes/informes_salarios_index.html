@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
-
-{% block titulo %} Informe Salarios {% endblock %}
+{% load custom_filters %}
+{% block titulo %} Informe de Salarios {% endblock %}
 
 {% block contenido %}
 <div class="card">
@@ -213,7 +213,7 @@
                             <td class="text-end">{{ empleado.años_en_flag }}</td>
                             <td class="text-end">{{ empleado.año }}</td>
                             {% for mes_data in empleado.meses %}
-                                <td class="text-end">{{ mes_data.salario }}</td>
+                                <td class="text-end">{{ mes_data.salario|currency_format }}</td>
                                 <td class="text-start">{{ mes_data.cliente }}</td>
                             {% endfor %}
                         </tr>

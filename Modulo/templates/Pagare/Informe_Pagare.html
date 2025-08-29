@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% load custom_filters %}
 {% block titulo %}
   Informe de Pagarés
 {% endblock %}
@@ -387,9 +387,9 @@
                   <td data-field="fecha_pagare" class="text-end">v{% if registro.FechaPagare %}{{ registro.FechaPagare }}{% else %}-{% endif %}</td>
                   <td data-field="fecha_inicio_cond" class="text-end">{% if registro.FechaInicioCondonacion %}{{ registro.FechaInicioCondonacion }}{% else %}-{% endif %}</td>
                   <td data-field="fecha_fin_cond" class="text-end">{% if registro.FechaFinCondonacion %}{{ registro.FechaFinCondonacion }}{% else %}-{% endif %}</td>
-                  <td data-field="valor" class="text-end">$ {{ registro.ValorPagare|floatformat:2 }}</td>
-                  <td data-field="valor_cond" class="text-end">$ {{ registro.ValorCondonado|floatformat:2 }}</td>
-                  <td data-field="deuda" class="text-end">$ {{ registro.DeudaPagare|floatformat:2 }}</td>
+                  <td data-field="valor" class="text-end">$ {{ registro.ValorPagare|currency_format }}</td>
+                  <td data-field="valor_cond" class="text-end">$ {{ registro.ValorCondonado|currency_format }}</td>
+                  <td data-field="deuda" class="text-end">$ {{ registro.DeudaPagare|currency_format }}</td>
                   <td data-field="meses_cond" class="text-end">{{ registro.MesesCondonacion }}</td>
                   <td data-field="cond_hechos" class="text-end">{{ registro.MesesCondonados }}</td>
                   <td data-field="por_cond" class="text-end">{{ registro.MesesPorCondonar }}</td>

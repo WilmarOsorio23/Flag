@@ -1,6 +1,7 @@
 from collections import defaultdict
 from django import template
 from decimal import Decimal, InvalidOperation
+import locale
 
 register = template.Library()
 
@@ -98,6 +99,43 @@ def divide(value, arg):
 @register.filter(name='multiply')
 def multiply(value, arg):
     return float(value) * float(arg)
+
+@register.filter
+def currency_format(value):
+    """Formatea un valor como moneda colombiana con el signo de peso"""
+    try:
+        if value is None or value == '':
+            return '$0'
+        
+        # Convertir a decimal para manejo seguro
+        decimal_value = Decimal(str(value))
+        
+        # Formatear con separadores de miles y decimales
+        formatted = "{:,.0f}".format(decimal_value)
+        
+        # Agregar el signo de peso
+        return f"${formatted}"
+    except (ValueError, TypeError, InvalidOperation):
+        return '$0'
+
+@register.filter
+def currency_format_decimal(value):
+    """Formatea un valor como moneda colombiana con decimales"""
+    try:
+        if value is None or value == '':
+            return '$0.00'
+        
+        # Convertir a decimal para manejo seguro
+        decimal_value = Decimal(str(value))
+        
+        # Formatear con separadores de miles y 2 decimales
+        formatted = "{:,.2f}".format(decimal_value)
+        
+        # Agregar el signo de peso
+        return f"${formatted}"
+    except (ValueError, TypeError, InvalidOperation):
+        return '$0.00'
+    
 @register.filter
 def get_range(value):
     return range(1, value + 1)

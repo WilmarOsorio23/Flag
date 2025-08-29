@@ -541,5 +541,5 @@ window.visualizarDetalles = function() {
             rows.forEach(row => tbody.appendChild(row));
         }
     }
-
+    }
 });
