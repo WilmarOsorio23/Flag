@@ -11,6 +11,11 @@ from Modulo.models import Total_Costos_Indirectos,Detalle_Costos_Indirectos,Cost
 from django.db import models
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_total_costos')
 
 def total_costos_indirectos_index(request):
     try:

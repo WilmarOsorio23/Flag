@@ -9,6 +9,11 @@ from Modulo.forms import NominaForm
 from Modulo.models import Clientes, Empleado, Nomina
 from django.db import models
 from django.views.decorators.csrf import csrf_exempt
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_nomina')
 
 def nomina_index(request):
     nomina_data = Nomina.objects.all().order_by('-Anio','Mes')

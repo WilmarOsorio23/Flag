@@ -10,7 +10,11 @@ from Modulo import models
 from django.db import models
 from Modulo.forms import ConceptoForm
 from Modulo.models import Concepto, TiemposConcepto
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
 
+@login_required
+@verificar_permiso('can_manage_conceptos')
 
 def conceptos_index(request):
     concepto = Concepto.objects.all()

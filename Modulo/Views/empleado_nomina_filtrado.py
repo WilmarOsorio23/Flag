@@ -17,6 +17,11 @@ from Modulo.models import Empleado, Nomina
 # Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_empleados')
 
 # Función para filtrar empleados y nóminas
 def filtrar_empleados_y_nominas(form, empleados, nominas):

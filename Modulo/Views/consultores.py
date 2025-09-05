@@ -9,7 +9,11 @@ from Modulo.models import Consultores, Empleado, Linea, Modulo, Perfil, Tarifa_C
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ValidationError
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
 
+@login_required
+@verificar_permiso('can_manage_consultores')
 
 def consultores_index(request):
     consultores = Consultores.objects.all()

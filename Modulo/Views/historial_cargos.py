@@ -8,6 +8,11 @@ from Modulo.forms import HistorialCargosForm
 from Modulo.models import Historial_Cargos
 from django.db import models
 from django.contrib import messages
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_historial_cargos')
 
 def historial_cargos_index(request):
     historial_cargos_data = Historial_Cargos.objects.all()

@@ -15,6 +15,11 @@ from openpyxl.styles import Font, Alignment, Border, Side
 # Librerías estándar y de terceros
 from datetime import datetime
 from collections import Counter
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_informe_consultores')
 
 def filtrar_consultores(form, consultores):
     """

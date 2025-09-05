@@ -15,6 +15,11 @@ from Modulo import models
 from Modulo.forms import FacturacionFilterForm
 from Modulo.models import Clientes, ClientesContratos, FacturacionClientes, Linea, Tarifa_Clientes
 from collections import defaultdict
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_facturacion_clientes')
 
 @transaction.atomic
 def clientes_factura_guardar(request):

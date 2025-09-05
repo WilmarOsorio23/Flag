@@ -15,6 +15,11 @@ from Modulo.models import Consultores, Tarifa_Consultores
 # Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_informe_tarifas_consultoras')
 
 def filtrar_tarifas_consultores(form, consultores, consultores_tarifas):
     """

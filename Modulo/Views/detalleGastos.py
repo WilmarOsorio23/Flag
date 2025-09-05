@@ -8,6 +8,11 @@ from Modulo.forms import DetalleGastosForm
 from Modulo.models import Detalle_Gastos
 from django.db import models
 from django.contrib import messages
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_detalle_gastos')
 
 def detalle_gastos_index(request):
     detalles = Detalle_Gastos.objects.all()

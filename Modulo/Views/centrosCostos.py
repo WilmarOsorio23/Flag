@@ -8,7 +8,11 @@ from Modulo.forms import CentrosCostosForm
 from Modulo.models import CentrosCostos, Tarifa_Clientes
 from django.contrib import messages
 from django.db import models
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
 
+@login_required
+@verificar_permiso('can_manage_centros_costos')
 
 def centros_costos_index(request):
     centros_costos_data = CentrosCostos.objects.all()

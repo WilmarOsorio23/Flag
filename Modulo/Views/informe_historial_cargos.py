@@ -9,7 +9,11 @@ from django.db.models import Q
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
 
+@login_required
+@verificar_permiso('can_manage_historial_cargos')
 
 def filtrar_historial_cargos(request):
     # Obtener los filtros de la URL (GET)

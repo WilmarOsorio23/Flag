@@ -8,6 +8,11 @@ from Modulo.forms import Detalle_CertificacionForm
 from Modulo.models import Detalle_Certificacion
 from django.db import models
 from django.contrib import messages
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_certificaciones')
 
 def detalle_certificacion_index(request):
     detalles_certificacion = Detalle_Certificacion.objects.all()

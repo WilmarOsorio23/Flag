@@ -9,7 +9,11 @@ from django.contrib import messages
 from Modulo.forms import ContratosOtrosSiForm, ClientesContratos
 from Modulo.models import ContratosOtrosSi
 from django.db import IntegrityError
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
 
+@login_required
+@verificar_permiso('can_manage_contratos_otros_si')
 
 def contratos_otros_si_index(request):
     contratos_otros_si_data = ContratosOtrosSi.objects.all()

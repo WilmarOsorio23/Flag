@@ -9,6 +9,11 @@ from Modulo.models import ClientesContratos, ContratosOtrosSi
 from django.db import models
 from django.contrib import messages
 from django.db import IntegrityError
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_clientes_contratos')
 
 def clientes_contratos_index(request):
     clientes_contratos_data = ClientesContratos.objects.all()

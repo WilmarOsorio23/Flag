@@ -55,11 +55,14 @@ from Modulo.Views import indicadores_margen_cliente
 from Modulo.Views import facturacion_consultores
 from Modulo.Views import informe_facturacion_consultores
 from Modulo.Views import informe_serv_consultor
+from Modulo.Views import auth_views
 from Modulo.Views import informe_detalle_facturacion_consultores
 
 
 
 urlpatterns = [
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     path('', views.inicio, name='inicio'),
     path('nosotros', views.nosotros, name='nosotros'),
 
@@ -438,5 +441,23 @@ urlpatterns = [
     path('TipoPagare/eliminar/', tipo_pagare_eliminar, name='tipo_pagare_eliminar'),
     path('TipoPagare/confirmar_delete/<int:id>/', tipo_pagare_confirmar_delete, name='tipo_pagare_confirmar_delete'),
     path('TipoPagare/descargar_excel/', tipo_pagare_descargar_excel, name='tipo_pagare_descargar_excel'),
+
+    # Autenticación
+    path('cambiar-password/', auth_views.cambiar_password, name='cambiar_password'),     
+
+    # Gestión de roles y usuarios
+    path('administracion/roles/', auth_views.role_list, name='role_list'),
+    path('administracion/roles/crear/', auth_views.role_create, name='role_create'),
+    path('administracion/roles/editar/<int:role_id>/', auth_views.role_edit, name='role_edit'),
+    path('administracion/roles/eliminar/<int:role_id>/', auth_views.role_delete, name='role_delete'),
+    
+    path('administracion/usuarios/', auth_views.user_list, name='user_list'),
+    path('administracion/usuarios/crear/', auth_views.user_create, name='user_create'),
+    path('administracion/usuarios/editar/<int:user_id>/', auth_views.user_edit, name='user_edit'),
+    path('administracion/usuarios/eliminar/<int:user_id>/', auth_views.user_delete, name='user_delete'),
+    
+    # Verificación de permisos
+    path('check-permission/', auth_views.check_permission, name='check_permission'),
+    path('test-permissions/', auth_views.test_permissions, name='test_permissions'),
     ]
 

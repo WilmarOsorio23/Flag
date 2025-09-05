@@ -10,7 +10,11 @@ from django.db import models
 from django.contrib import messages
 from Modulo.forms import GastoForm
 from Modulo.models import Detalle_Gastos, Gastos
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
 
+@login_required
+@verificar_permiso('can_manage_gastos')
 
 def gasto_index(request):
     # Ordenar los gastos por el campo 'id' en orden ascendente

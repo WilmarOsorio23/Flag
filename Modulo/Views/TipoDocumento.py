@@ -10,7 +10,11 @@ from Modulo import models
 from django.db import models
 from Modulo.forms import TipoDocumentoForm
 from Modulo.models import Clientes, Empleado, TipoDocumento
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
 
+@login_required
+@verificar_permiso('can_manage_tipo_documento')
 
 def tipo_documento_index(request):
     tipo_documentos = TipoDocumento.objects.all()

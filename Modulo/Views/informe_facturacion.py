@@ -11,6 +11,11 @@ from openpyxl.utils import get_column_letter
 from openpyxl.cell import MergedCell
 from datetime import datetime
 from decimal import Decimal
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_informe_facturacion')
 
 # Función para filtrar datos
 def filtrar_datos(form):

@@ -12,6 +12,11 @@ from Modulo import models
 from django.db import models
 from Modulo.forms import ClientesForm
 from Modulo.models import Clientes, Contactos, Tiempos_Cliente, TiemposFacturables, Tarifa_Clientes
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_clientes')
 
 
 # Vista para listar todos los clientes

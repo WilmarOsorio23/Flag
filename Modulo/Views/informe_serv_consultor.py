@@ -9,6 +9,12 @@ from datetime import datetime
 from Modulo.forms import TotalesPorMesFilterForm
 from django.db.models import Sum
 from collections import defaultdict
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_informe_serv_consultor')
+
 def filtrar_datos(form=None):
     facturas = Facturacion_Consultores.objects.all().select_related(
         'LineaId', 'Documento', 'ClienteId, Documento'

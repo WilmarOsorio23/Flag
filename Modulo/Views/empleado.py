@@ -8,6 +8,11 @@ from Modulo.forms import EmpleadoForm
 from Modulo.models import Empleado, Nomina
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import F, Func, Value
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_empleados')
 
 def empleado_index(request):
     empleados = Empleado.objects.all()

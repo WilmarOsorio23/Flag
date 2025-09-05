@@ -1,5 +1,5 @@
 from django import forms
-from .models import Facturacion_Consultores, FacturacionClientes, Horas_Habiles, Modulo, IPC, IND, Linea, Pagare, Perfil, TipoDocumento, Clientes, Consultores, Certificacion, Costos_Indirectos, TipoPagare
+from .models import CustomUser, Facturacion_Consultores, FacturacionClientes, Horas_Habiles, Modulo, IPC, IND, Linea, Pagare, Perfil, TipoDocumento, Clientes, Consultores, Certificacion, Costos_Indirectos, TipoPagare, UserRole
 from .models import Concepto, Gastos, Detalle_Gastos, Total_Gastos, Total_Costos_Indirectos
 from .models import Detalle_Costos_Indirectos, TiemposConcepto, Tiempos_Cliente, Nomina, Detalle_Certificacion, Empleado
 from .models import Cargos
@@ -21,6 +21,7 @@ from datetime import date, datetime
 from .models import ActividadPagare
 from datetime import date
 from django.utils import timezone
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 
 class ModuloForm(forms.ModelForm):
@@ -1543,7 +1544,7 @@ class FacturacionFilterForm(forms.Form):
             ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
         ]
         self.fields['Mes'].choices = [('', 'Seleccione el mes')] + meses
-
+    
     def populate_cliente(self):
         clientes = Clientes.objects.values_list('ClienteId', 'Nombre_Cliente').distinct()
         self.fields['ClienteId'].choices = [('', 'Seleccione el cliente')] + list(clientes)
@@ -2642,3 +2643,150 @@ class TipoPagareForm(forms.ModelForm):
         labels = {
             'Desc_Tipo_Pagare': 'Descripción del Tipo de Pagaré',
         }
+
+class UserRoleForm(forms.ModelForm):
+    class Meta:
+        model = UserRole
+        fields = '__all__'
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hacer que todos los campos de permisos sean checkboxes
+        for field_name, field in self.fields.items():
+            if field_name.startswith('can_'):
+                field.widget = forms.CheckboxInput(attrs={'class': 'form-check-input'})
+                # Mejorar las etiquetas
+                field.label = self.get_permission_label(field_name)
+    
+    def get_permission_label(self, field_name):
+        """Convierte nombres de campos en etiquetas legibles"""
+        labels = {
+            # Maestros
+            'can_manage_cargos': 'Gestionar Cargos',
+            'can_manage_certificacion': 'Gestionar Certificación',
+            'can_manage_clientes': 'Gestionar Clientes',
+            'can_manage_conceptos': 'Gestionar Conceptos',
+            'can_manage_consultores': 'Gestionar Consultores',
+            'can_manage_contactos': 'Gestionar Contactos',
+            'can_manage_costos_indirectos': 'Gestionar Costos Indirectos',
+            'can_manage_centros_costos': 'Gestionar Centros de Costos',
+            'can_manage_empleados': 'Gestionar Empleados',
+            'can_manage_empleados_estudios': 'Gestionar Estudios de Empleados',
+            'can_manage_gastos': 'Gestionar Gastos',
+            'can_manage_horas_habiles': 'Gestionar Horas Hábiles',
+            'can_manage_ind': 'Gestionar IND',
+            'can_manage_ipc': 'Gestionar IPC',
+            'can_manage_linea': 'Gestionar Línea',
+            'can_manage_modulo': 'Gestionar Módulo',
+            'can_manage_moneda': 'Gestionar Moneda',
+            'can_manage_perfil': 'Gestionar Perfil',
+            'can_manage_referencias': 'Gestionar Referencias',
+            'can_manage_tipo_documento': 'Gestionar Tipo Documento',
+            'can_manage_tipo_contactos': 'Gestionar Tipo Contactos',
+            
+            # Movimientos
+            'can_manage_clientes_contratos': 'Gestionar Contratos de Clientes',
+            'can_manage_detalle_certificacion': 'Gestionar Detalle Certificación',
+            'can_manage_detalle_costos_indirectos': 'Gestionar Detalle Costos Indirectos',
+            'can_manage_detalle_gastos': 'Gestionar Detalle Gastos',
+            'can_manage_historial_cargos': 'Gestionar Historial Cargos',
+            'can_manage_nomina': 'Gestionar Nómina',
+            'can_manage_registro_tiempos': 'Gestionar Registro Tiempos',
+            'can_manage_tarifa_clientes': 'Gestionar Tarifa Clientes',
+            'can_manage_tarifa_consultores': 'Gestionar Tarifa Consultores',
+            'can_manage_facturacion_clientes': 'Gestionar Facturación Clientes',
+            'can_manage_facturas_consultores': 'Gestionar Facturas Consultores',
+            'can_manage_pagares': 'Gestionar Pagarés',
+            
+            # Informes
+            'can_view_informe_certificaciones': 'Ver Informe Certificaciones',
+            'can_view_informe_empleados': 'Ver Informe Empleados',
+            'can_view_informe_salarios': 'Ver Informe Salarios',
+            'can_view_informe_estudios': 'Ver Informe Estudios',
+            'can_view_informe_consultores': 'Ver Informe Consultores',
+            'can_view_informe_tarifa_consultores': 'Ver Informe Tarifa Consultores',
+            'can_view_informe_tarifa_clientes': 'Ver Informe Tarifa Clientes',
+            'can_view_informe_facturacion': 'Ver Informe Facturación',
+            'can_view_informe_clientes': 'Ver Informe Clientes',
+            
+            # Indicadores
+            'can_view_indicadores_operatividad': 'Ver Indicadores Operatividad',
+            'can_view_indicadores_rentabilidad': 'Ver Indicadores Rentabilidad',
+            'can_view_indicadores_facturacion': 'Ver Indicadores Facturación',
+            'can_view_indicadores_margen_linea': 'Ver Indicadores Margen Línea',
+            'can_view_indicadores_margen_cliente': 'Ver Indicadores Margen Cliente',
+            
+        }
+        return labels.get(field_name, field_name.replace('_', ' ').title())
+
+class CustomUserForm(UserCreationForm):
+    class Meta:
+        model = CustomUser
+        fields = ('email', 'username', 'first_name', 'last_name', 'role', 'is_active', 'is_staff')
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'role': forms.Select(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_staff': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password1'].widget.attrs.update({'class': 'form-control'})
+        self.fields['password2'].widget.attrs.update({'class': 'form-control'})
+        self.fields['password1'].label = 'Contraseña'
+        self.fields['password2'].label = 'Confirmar Contraseña'
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        # Si estamos editando, excluimos al usuario actual
+        if self.instance.pk:
+            if CustomUser.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError("Ya existe un usuario con ese nombre de usuario.")
+        # Para creación nueva
+        elif CustomUser.objects.filter(username=username).exists():
+            raise forms.ValidationError("Ya existe un usuario con ese nombre de usuario.")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        # Misma lógica para email
+        if self.instance.pk:
+            if CustomUser.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError("Ya existe un usuario con ese email.")
+        elif CustomUser.objects.filter(email=email).exists():
+            raise forms.ValidationError("Ya existe un usuario con ese email.")
+        return email
+
+class CustomUserEditForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ('email', 'username', 'first_name', 'last_name', 'role', 'is_active', 'is_staff')
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'role': forms.Select(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_staff': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if CustomUser.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Ya existe un usuario con ese nombre de usuario.")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if CustomUser.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Ya existe un usuario con ese email.")
+        return email

@@ -10,6 +10,11 @@ from Modulo.models import IPC
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 from django.contrib import messages
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_ipc')
 
 def ipc_index(request):
     ipc_data = IPC.objects.all().order_by('-Anio','Mes')

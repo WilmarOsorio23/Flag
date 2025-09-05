@@ -9,7 +9,11 @@ from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 from openpyxl.cell import MergedCell
 from datetime import datetime
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
 
+@login_required
+@verificar_permiso('can_manage_informe_tiempos_consultores')
 
 def filtrar_datos(request):
     documento = request.GET.getlist('Documento')

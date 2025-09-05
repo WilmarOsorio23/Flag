@@ -6,6 +6,11 @@ from Modulo.models import Clientes, Tarifa_Clientes
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 from datetime import datetime
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_informe_tarifas_clientes')
 
 #Función para filtrar Tarifas de clientes
 def filtrar_tarifas_clientes(form, clientes, clientes_tarifas):

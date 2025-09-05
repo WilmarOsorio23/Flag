@@ -4,7 +4,123 @@ from django.utils import timezone
 from django.core.validators import EmailValidator
 from django.core.exceptions import ValidationError
 from dateutil.relativedelta import relativedelta
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 import re
+
+class UserRole(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    description = models.TextField(null=True, blank=True)
+    
+    # Permisos de Administración
+    can_manage_users = models.BooleanField(default=False)
+    can_manage_roles = models.BooleanField(default=False)
+    
+    # Maestros - Permisos específicos
+    can_manage_actividades_pagares = models.BooleanField(default=False)
+    can_manage_cargos = models.BooleanField(default=False)
+    can_manage_certificacion = models.BooleanField(default=False)
+    can_manage_clientes = models.BooleanField(default=False)
+    can_manage_conceptos = models.BooleanField(default=False)
+    can_manage_consultores = models.BooleanField(default=False)
+    can_manage_contactos = models.BooleanField(default=False)
+    can_manage_costos_indirectos = models.BooleanField(default=False)
+    can_manage_centros_costos = models.BooleanField(default=False)
+    can_manage_empleados = models.BooleanField(default=False)
+    can_manage_empleados_estudios = models.BooleanField(default=False)
+    can_manage_gastos = models.BooleanField(default=False)
+    can_manage_horas_habiles = models.BooleanField(default=False)
+    can_manage_ind = models.BooleanField(default=False)
+    can_manage_ipc = models.BooleanField(default=False)
+    can_manage_linea = models.BooleanField(default=False)
+    can_manage_modulo = models.BooleanField(default=False)
+    can_manage_moneda = models.BooleanField(default=False)
+    can_manage_perfil = models.BooleanField(default=False)
+    can_manage_referencias = models.BooleanField(default=False)
+    can_manage_tipo_documento = models.BooleanField(default=False)
+    can_manage_tipos_contactos = models.BooleanField(default=False)
+    can_manage_tipo_pagare = models.BooleanField(default=False)
+    
+    # Movimientos - Permisos específicos
+    can_manage_clientes_contratos = models.BooleanField(default=False)
+    can_manage_contratos_otros_si = models.BooleanField(default=False)
+    can_manage_pagare = models.BooleanField(default=False)
+    can_manage_detalle_certificacion = models.BooleanField(default=False)
+    can_manage_detalle_costos_indirectos = models.BooleanField(default=False)
+    can_manage_detalle_gastos = models.BooleanField(default=False)
+    can_manage_historial_cargos = models.BooleanField(default=False)
+    can_manage_nomina = models.BooleanField(default=False)
+    can_manage_registro_tiempos = models.BooleanField(default=False)
+    can_manage_tarifa_clientes = models.BooleanField(default=False)
+    can_manage_tarifa_consultores = models.BooleanField(default=False)
+    can_manage_total_costos_indirectos = models.BooleanField(default=False)
+    can_manage_total_gastos = models.BooleanField(default=False)
+    can_manage_clientes_factura = models.BooleanField(default=False)
+    can_manage_facturacion_consultores = models.BooleanField(default=False)
+    
+    # Informes - Permisos específicos
+    can_view_informe_certificacion = models.BooleanField(default=False)
+    can_view_informe_empleado = models.BooleanField(default=False)
+    can_view_informe_salarios = models.BooleanField(default=False)
+    can_view_informe_estudios = models.BooleanField(default=False)
+    can_view_informe_consultores = models.BooleanField(default=False)
+    can_view_informe_tarifas_consultores = models.BooleanField(default=False)
+    can_view_informe_facturacion = models.BooleanField(default=False)
+    can_view_informe_historial_cargos = models.BooleanField(default=False)
+    can_view_informe_tarifas_clientes = models.BooleanField(default=False)
+    can_view_informe_tiempos_consultores = models.BooleanField(default=False)
+    can_view_informe_clientes = models.BooleanField(default=False)
+    can_view_informe_clientes_contratos = models.BooleanField(default=False)
+    can_view_informe_otros_si = models.BooleanField(default=False)
+    can_view_informe_pagares = models.BooleanField(default=False)
+    can_view_informe_facturacion_consultores = models.BooleanField(default=False)
+    can_view_informe_serv_consultor = models.BooleanField(default=False)
+    can_view_informe_facturacion_clientes = models.BooleanField(default=False)
+    
+    # Indicadores - Permisos específicos
+    can_view_indicadores_operatividad = models.BooleanField(default=False)
+    can_view_indicadores_totales = models.BooleanField(default=False)
+    can_view_indicadores_facturacion = models.BooleanField(default=False)
+    can_view_indicadores_margen_cliente = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'user_roles'
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('El email es obligatorio')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
+
+class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True)
+    role = models.ForeignKey(UserRole, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    # Desactivar M2M con grupos y permisos para no requerir tablas intermedias
+    groups = None
+    user_permissions = None
+    
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+
+    objects = CustomUserManager()
+
+    def __str__(self):
+        return self.email
+
+    class Meta:
+        db_table = 'custom_users'
 
 # Modelos base
 class Modulo(models.Model):
@@ -920,3 +1036,19 @@ class Facturacion_Consultores(models.Model):
 
     def __str__(self):
         return f"Facturación {self.id} - Año {self.Anio} - Mes {self.Mes} - Consultor {self.Documento} - Línea {self.Linea}"
+
+class LoginAttempt(models.Model):
+    """
+    Modelo para registrar intentos de inicio de sesión fallidos
+    """
+    email = models.EmailField()
+    ip_address = models.GenericIPAddressField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    successful = models.BooleanField(default=False)
+    
+    class Meta:
+        db_table = 'login_attempts'
+        ordering = ['-timestamp']
+    
+    def __str__(self):
+        return f"{self.email} - {self.timestamp} - {'Exitoso' if self.successful else 'Fallido'}"

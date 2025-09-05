@@ -77,4 +77,12 @@ STATICFILES_DIRS = [
 # Media files
 MEDIA_URL = '/media/'
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField' 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuración del modelo de usuario personalizado
+AUTH_USER_MODEL = 'Modulo.CustomUser'
+
+# Configuración de autenticación
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/' 

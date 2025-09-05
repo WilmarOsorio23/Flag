@@ -7,6 +7,11 @@ import pandas as pd
 from django.http import HttpResponseBadRequest
 from Modulo.models import ActividadPagare
 from Modulo.forms import ActividadPagareForm
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_pagares')
 
 def actividad_pagare_index(request):
     actividades = ActividadPagare.objects.all()

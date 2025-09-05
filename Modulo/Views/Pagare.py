@@ -17,6 +17,11 @@ from openpyxl.styles import Border, Side, Font, PatternFill, Alignment
 from dateutil.parser import parse as parse_date
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction  # Ensure this import is present for transaction.atomic
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_pagare')
 
 
 def pagare_index(request):

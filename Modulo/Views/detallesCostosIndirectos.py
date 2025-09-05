@@ -9,6 +9,11 @@ from Modulo.forms import DetalleCostosIndirectosForm
 from Modulo.models import Detalle_Costos_Indirectos
 from django.db import models
 from django.contrib import messages
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_costos_indirectos')
 
 def detalle_costos_indirectos_index(request):
     detalle_data = Detalle_Costos_Indirectos.objects.all()

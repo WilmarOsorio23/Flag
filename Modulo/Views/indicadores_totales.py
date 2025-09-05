@@ -15,6 +15,12 @@ MESES = {
     '9': 'Septiembre', '10': 'Octubre', '11': 'Noviembre', '12': 'Diciembre'
 }
 
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_clientes')
+
 # Funciones auxiliares
 
 # 1. Función para obtener días y horas hábiles

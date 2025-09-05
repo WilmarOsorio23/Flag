@@ -5,6 +5,11 @@ from Modulo.forms import Ind_Totales_FilterForm
 from Modulo.models import Clientes, Linea, FacturacionClientes, Tiempos_Cliente, Horas_Habiles, Nomina, Tarifa_Consultores, Tarifa_Clientes, IPC
 from django.db.models import Sum
 import json
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@verificar_permiso('can_manage_indicadores_margen_cliente')
 
 def obtener_horas_habiles(anio: str) -> dict:
     """Obtiene días y horas hábiles por mes para un año específico"""
