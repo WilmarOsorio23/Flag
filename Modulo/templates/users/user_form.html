@@ -1,12 +1,95 @@
 {% extends 'base.html' %}
 
 {% block contenido %}
+<style>
+/* Estilos para mensajes flotantes */
+.message-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+}
+
+.floating-alert {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    animation: slideIn 0.3s ease-out forwards;
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+.floating-alert.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Ajustes responsivos para mensajes */
+@media (max-width: 768px) {
+    .message-container {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .floating-alert {
+        width: 100%;
+    }
+}
+</style>
+
+<!-- Contenedor para mensajes flotantes -->
+<div id="message-container" class="message-container">
+    {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert">
+                {{ error }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    {% for field in form %}
+        {% if field.errors %}
+            {% for error in field.errors %}
+                <div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert">
+                    {{ error }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show floating-alert" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h3>{{ form.instance.id|yesno:"Editar,Crear" }} Usuario</h3>
+                    <h3>{{ title|default:form.instance.id|yesno:"Editar,Crear" }} Usuario</h3>
                 </div>
                 <div class="card-body">
                     <form method="post">
@@ -15,43 +98,28 @@
                         <div class="mb-3">
                             <label for="{{ form.email.id_for_label }}">Email:</label>
                             {{ form.email }}
-                            {% if form.email.errors %}
-                                <div class="alert alert-danger">{{ form.email.errors }}</div>
-                            {% endif %}
                         </div>
 
                         <div class="mb-3">
                             <label for="{{ form.username.id_for_label }}">Nombre de Usuario:</label>
                             {{ form.username }}
-                            {% if form.username.errors %}
-                                <div class="alert alert-danger">{{ form.username.errors }}</div>
-                            {% endif %}
                         </div>
 
                         {% if not form.instance.pk %}
                         <div class="mb-3">
                             <label for="{{ form.password1.id_for_label }}">Contraseña:</label>
                             {{ form.password1 }}
-                            {% if form.password1.errors %}
-                                <div class="alert alert-danger">{{ form.password1.errors }}</div>
-                            {% endif %}
                         </div>
 
                         <div class="mb-3">
                             <label for="{{ form.password2.id_for_label }}">Confirmar Contraseña:</label>
                             {{ form.password2 }}
-                            {% if form.password2.errors %}
-                                <div class="alert alert-danger">{{ form.password2.errors }}</div>
-                            {% endif %}
                         </div>
                         {% endif %}
 
                         <div class="mb-3">
                             <label for="{{ form.role.id_for_label }}">Rol:</label>
                             {{ form.role }}
-                            {% if form.role.errors %}
-                                <div class="alert alert-danger">{{ form.role.errors }}</div>
-                            {% endif %}
                         </div>
 
                         <div class="mb-3">
@@ -61,9 +129,6 @@
                                     Usuario Activo
                                 </label>
                             </div>
-                            {% if form.is_active.errors %}
-                                <div class="alert alert-danger">{{ form.is_active.errors }}</div>
-                            {% endif %}
                         </div>
 
                         <div class="mb-3">
@@ -73,9 +138,6 @@
                                     Staff (puede acceder al admin)
                                 </label>
                             </div>
-                            {% if form.is_staff.errors %}
-                                <div class="alert alert-danger">{{ form.is_staff.errors }}</div>
-                            {% endif %}
                         </div>
 
                         <div class="mt-4">
@@ -88,4 +150,52 @@
         </div>
     </div>
 </div>
+
+<script>
+// Función para mostrar mensajes flotantes
+function showFloatingMessages() {
+    const messages = document.querySelectorAll('.floating-alert');
+    
+    messages.forEach((message, index) => {
+        // Aplicar retraso para animación escalonada
+        setTimeout(() => {
+            message.classList.add('show');
+            
+            // Configurar cierre automático después de 5 segundos
+            setTimeout(() => {
+                if (message.parentNode) {
+                    message.style.opacity = '0';
+                    message.style.transition = 'opacity 0.5s';
+                    
+                    setTimeout(() => {
+                        if (message.parentNode) {
+                            message.parentNode.removeChild(message);
+                        }
+                    }, 500);
+                }
+            }, 5000);
+        }, index * 200); // Retraso entre mensajes
+    });
+}
+
+// Ejecutar cuando el DOM esté cargado
+document.addEventListener('DOMContentLoaded', function() {
+    showFloatingMessages();
+    
+    // Cerrar mensajes al hacer clic en el botón de cerrar
+    document.querySelectorAll('.btn-close').forEach(button => {
+        button.addEventListener('click', function() {
+            const alert = this.closest('.floating-alert');
+            if (alert) {
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.parentNode.removeChild(alert);
+                    }
+                }, 500);
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

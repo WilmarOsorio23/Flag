@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header {% if can_delete %}bg-danger{% else %}bg-warning{% endif %} text-white">
+                    <h4 class="mb-0">Confirmar Eliminación</h4>
+                </div>
+                <div class="card-body">
+                    {% if not can_delete %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>¡No se puede eliminar!</strong> Este rol tiene usuarios asignados.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong>Usuarios asignados a este rol:</strong>
+                            <ul class="list-group mt-2">
+                                {% for user in users_with_role %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ user.get_full_name|default:user.username }}
+                                    <span class="badge bg-primary rounded-pill">{{ user.email }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        
+                        <p class="text-muted">Para eliminar este rol, primero debe reasignar o eliminar los usuarios que lo tienen asignado.</p>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+                        </div>
+                        
+                        <p>¿Está seguro de que desea eliminar el rol <strong>"{{ role.name }}"</strong>?</p>
+                    {% endif %}
+                    
+                    {% if role.description %}
+                    <div class="mb-3">
+                        <strong>Descripción:</strong>
+                        <p class="text-muted">{{ role.description }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'role_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                        {% if can_delete %}
+                        <form method="post" class="d-inline" id="deleteForm">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" onclick="confirmDelete(event)">
+                                <i class="fas fa-trash"></i> Eliminar Rol
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(event) {
+    event.preventDefault();
+    
+    if (confirm('¿Está seguro de que desea eliminar este rol? Esta acción no se puede deshacer.')) {
+        // Mostrar mensaje de procesamiento
+        if (window.showMessage) {
+            window.showMessage('Eliminando rol...', 'info');
+        }
+        
+        // Enviar formulario
+        document.getElementById('deleteForm').submit();
+    }
+}
+</script>
+{% endblock %}

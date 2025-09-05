@@ -9,6 +9,25 @@
   <title>Flag Soluciones | Iniciar Sesión</title>
 </head>
 <body>
+  <!-- Contenedor para mensajes flotantes -->
+  <div id="message-container" class="message-container">
+    {% if form.errors %}
+      <div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert">
+        Usuario/Email o contraseña incorrectos.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endif %}
+    
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show floating-alert" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
   <div class="main">
     <div class="container b-container" id="b-container">
       <form id="b-form" class="form" method="post" action="{% url 'login' %}">
@@ -21,25 +40,9 @@
         <input class="form__input" type="text" name="username" placeholder="Usuario o correo electrónico" required />
         <input class="form__input" type="password" name="password" placeholder="Contraseña" required />
         
-        {% if form.errors %}
-            <div class="alert alert-danger mt-3">
-                Usuario/Email o contraseña incorrectos.
-            </div>
-        {% endif %}
-        
-        {% if messages %}
-            <div class="messages mt-3">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-        
         <input type="hidden" name="next" value="{{ request.GET.next }}" />
         <button class="form__button button submit" type="submit">ENTRAR</button>
-    </form>
+      </form>
     </div>
     <div class="switch" id="switch-cnt">
       <div class="switch__circle"></div>
@@ -50,6 +53,8 @@
       </div>
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'messages.js' %}"></script>
   <script src="login.js"></script>
 </body>
 </html>

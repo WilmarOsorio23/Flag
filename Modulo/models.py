@@ -107,6 +107,10 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     role = models.ForeignKey(UserRole, on_delete=models.SET_NULL, null=True, blank=True)
     
+    # Desactivar M2M con grupos y permisos para no requerir tablas intermedias
+    groups = None
+    user_permissions = None
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 

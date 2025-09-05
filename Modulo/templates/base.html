@@ -42,124 +42,124 @@
                         </li>
                     </ul>
                     <!-- DATOS MAESTROS -->
-                    <ul class="list-unstyled components">
+                    <ul class="list-unstyled components" data-categoria="maestros">
                         <li>
-                            <a href="#homeSubmenuDatosMaestros" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                            <a href="#homeSubmenuDatosMaestros" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal" data-requires="can_manage_maestros">
                                 <i class="fas fa-home"></i> <span>Datos Maestros</span>
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuDatosMaestros">
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'actividad_pagare_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'actividad_pagare_index' %}" data-requires="can_manage_actividades_pagares">
                                         <i class="fas fa-table"></i> Actividades Maestros
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'cargos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'cargos_index' %}" data-requires="can_manage_cargos">
                                         <i class="fas fa-table"></i> Cargos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'certificacion_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'certificacion_index' %}" data-requires="can_manage_certificacion">
                                         <i class="fas fa-table"></i> Certificacion
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'clientes_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'clientes_index' %}" data-requires="can_manage_clientes">
                                         <i class="fas fa-user"></i> Clientes
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'conceptos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'conceptos_index' %}" data-requires="can_manage_conceptos">
                                         <i class="fas fa-table"></i> Conceptos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'consultores_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'consultores_index' %}" data-requires="can_manage_consultores">
                                         <i class="fas fa-table"></i> Consultores
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'contactos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'contactos_index' %}" data-requires="can_manage_contactos">
                                         <i class="fas fa-table"></i> Contactos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'costos_indirectos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'costos_indirectos_index' %}" data-requires="can_manage_costos_indirectos">
                                         <i class="fas fa-table"></i> Costos Indirectos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'centros_costos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'centros_costos_index' %}" data-requires="can_manage_centros_costos">
                                         <i class="fas fa-table"></i> Centro Costos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'empleado_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'empleado_index' %}" data-requires="can_manage_empleados">
                                         <i class="fas fa-table"></i> Empleados
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'empleados_estudios_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'empleados_estudios_index' %}" data-requires="can_manage_empleados_estudios">
                                         <i class="fas fa-table"></i> Empleados Estudios
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'gastos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'gastos_index' %}" data-requires="can_manage_gastos">
                                         <i class="fas fa-table"></i> Gastos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'horas_habiles_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'horas_habiles_index' %}" data-requires="can_manage_horas_habiles">
                                         <i class="fas fa-table"></i> Horas Hábiles
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'ind_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'ind_index' %}" data-requires="can_manage_ind">
                                         <i class="fas fa-table"></i> IND
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'ipc_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'ipc_index' %}" data-requires="can_manage_ipc">
                                         <i class="fas fa-table"></i> IPC
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'linea_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'linea_index' %}" data-requires="can_manage_linea">
                                         <i class="fas fa-table"></i> Línea
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'Modulo' %}">
+                                    <a class="nav-item nav-link" href="{% url 'Modulo' %}" data-requires="can_manage_modulo">
                                         <i class="fas fa-table"></i> Modulo
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'moneda_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'moneda_index' %}" data-requires="can_manage_moneda">
                                         <i class="fas fa-table"></i> Moneda
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'perfil_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'perfil_index' %}" data-requires="can_manage_perfil">
                                         <i class="fas fa-table"></i> Perfil
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'referencia_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'referencia_index' %}" data-requires="can_manage_referencias">
                                         <i class="fas fa-table"></i> Referencias
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'tipo_documento_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'tipo_documento_index' %}" data-requires="can_manage_tipo_documento">
                                         <i class="fas fa-table"></i> Tipo Documento
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'tipos_contactos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'tipos_contactos_index' %}" data-requires="can_manage_tipos_contactos">
                                         <i class="fas fa-table"></i> Tipos Contactos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'tipo_pagare_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'tipo_pagare_index' %}" data-requires="can_manage_tipo_pagare">
                                         <i class="fas fa-table"></i> Tipo Pagare Maestros
                                     </a>
                                 </li>
@@ -167,94 +167,94 @@
                         </li>                   
                     </ul> 
                     <!-- INFORMES -->
-                    <ul class="list-unstyled components">
+                    <ul class="list-unstyled components" data-categoria="informes">
                         <li>
-                            <a href="#homeSubmenuInformes" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                            <a href="#homeSubmenuInformes" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal" data-requires="can_view_informes">
                                 <i class="fas fa-file-alt"></i> <span>Informes</span>
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuInformes">
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_certificacion_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_certificacion_index' %}" data-requires="can_view_informe_certificacion">
                                         <i class="fas fa-certificate"></i> Informe Certificación
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_empleado_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_empleado_index' %}" data-requires="can_view_informe_empleado">
                                         <i class="fas fa-user"></i> Informe Empleados
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_salarios_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_salarios_index' %}" data-requires="can_view_informe_salarios">
                                         <i class="fas fa-money-bill"></i> Informe Salarios
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_estudios_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_estudios_index' %}" data-requires="can_view_informe_estudios">
                                         <i class="fas fa-graduation-cap"></i> Informe Estudios
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_consultores_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_consultores_index' %}" data-requires="can_view_informe_consultores">
                                         <i class="fas fa-info"></i> Informe Consultores
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_tarifas_consultores_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_tarifas_consultores_index' %}" data-requires="can_view_informe_tarifas_consultores">
                                         <i class="fas fa-comments-dollar"></i> Informe Tarifas Consultores
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_facturacion_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_facturacion_index' %}" data-requires="can_view_informe_facturacion">
                                         <i class="fas fa-comments-dollar"></i> Informe Facturacion Clientes
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_historial_cargos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_historial_cargos_index' %}" data-requires="can_view_informe_historial_cargos">
                                         <i class="fas fa-comments-dollar"></i> Informe Historial Cargos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_tarifas_clientes_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_tarifas_clientes_index' %}" data-requires="can_view_informe_tarifas_clientes">
                                         <i class="fas fa-comments-dollar"></i> Informe Tarifas Clientes
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_tiempos_consultores' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_tiempos_consultores' %}" data-requires="can_view_informe_tiempos_consultores">
                                         <i class="fas fa-file-contract"></i> Informe Tiempos Consultores
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_clientes_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_clientes_index' %}" data-requires="can_view_informe_clientes">
                                         <i class="fas fa-user"></i> Informe Clientes
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_clientes_contratos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_clientes_contratos_index' %}" data-requires="can_view_informe_clientes_contratos">
                                         <i class="fas fa-file-contract"></i> Informe Clientes Contratos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_otros_si_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_otros_si_index' %}" data-requires="can_view_informe_otros_si">
                                         <i class="fas fa-file-contract"></i> Informe Contratos Otros Si
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informe_pagares' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informe_pagares' %}" data-requires="can_view_informe_pagares">
                                         <i class="fas fa-file-contract"></i> Informe Pagarés
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_facturacion_consultores_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_facturacion_consultores_index' %}" data-requires="can_view_informe_facturacion_consultores">
                                         <i class="fas fa-file-contract"></i> Informe Fact Consultores Línea
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_serv_consultor_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_serv_consultor_index' %}" data-requires="can_view_informe_serv_consultor">
                                         <i class="fas fa-file-contract"></i> Informe Fact Consultores Detalle
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'informes_facturacion_clientes_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'informes_facturacion_clientes_index' %}" data-requires="can_view_informe_facturacion_clientes">
                                         <i class="fas fa-file-contract"></i> Informe Fact CeCo
                                     </a>
                                 </li>                                
@@ -262,84 +262,84 @@
                         </li>
                     </ul> 
                     <!-- MOVIMIENTOS -->
-                    <ul class="list-unstyled components">
+                    <ul class="list-unstyled components" data-categoria="movimientos">
                         <li>
-                            <a href="#homeSubmenuMovimientos" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                            <a href="#homeSubmenuMovimientos" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal" data-requires="can_manage_movimientos">
                                 <i class="fa fa-exchange-alt"></i> <span>Movimientos</span>
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuMovimientos">
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'clientes_contratos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'clientes_contratos_index' %}" data-requires="can_manage_clientes_contratos">
                                         <i class="fas fa-table"></i> Clientes Contratos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'contratos_otros_si_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'contratos_otros_si_index' %}" data-requires="can_manage_contratos_otros_si">
                                         <i class="fas fa-table"></i> Contrato Otro Si
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'pagare_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'pagare_index' %}" data-requires="can_manage_pagare">
                                         <i class="fas fa-table"></i> Creación Pagare
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'detalle_certificacion_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'detalle_certificacion_index' %}" data-requires="can_manage_detalle_certificacion">
                                         <i class="fas fa-table"></i> Detalle Certificacion
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'detalle_costos_indirectos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'detalle_costos_indirectos_index' %}" data-requires="can_manage_detalle_costos_indirectos">
                                         <i class="fas fa-table"></i> Detalle Costos Indirectos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'detalle_gastos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'detalle_gastos_index' %}" data-requires="can_manage_detalle_gastos">
                                         <i class="fas fa-table"></i> Detalle Gastos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'historial_cargos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'historial_cargos_index' %}" data-requires="can_manage_historial_cargos">
                                         <i class="fas fa-table"></i> Historial Cargos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'nomina_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'nomina_index' %}" data-requires="can_manage_nomina">
                                         <i class="fas fa-table"></i> Nomina
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'registro_tiempos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'registro_tiempos_index' %}" data-requires="can_manage_registro_tiempos">
                                         <i class="fas fa-table"></i> Registro Tiempos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'tarifa_clientes_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'tarifa_clientes_index' %}" data-requires="can_manage_tarifa_clientes">
                                         <i class="fas fa-table"></i> Tarifa Clientes
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'tarifa_consultores_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'tarifa_consultores_index' %}" data-requires="can_manage_tarifa_consultores">
                                         <i class="fas fa-table"></i> Tarifa Consultores
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'total_costos_indirectos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'total_costos_indirectos_index' %}" data-requires="can_manage_total_costos_indirectos">
                                         <i class="fas fa-table"></i> Total Costos Indirectos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'total_gastos_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'total_gastos_index' %}" data-requires="can_manage_total_gastos">
                                         <i class="fas fa-table"></i> Total Gastos
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'clientes_factura_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'clientes_factura_index' %}" data-requires="can_manage_clientes_factura">
                                         <i class="fas fa-table"></i> Facturación Clientes
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'facturacion_consultores_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'facturacion_consultores_index' %}" data-requires="can_manage_facturacion_consultores">
                                         <i class="fas fa-table"></i> Facturación Consultores
                                     </a>
                                 </li>
@@ -347,23 +347,23 @@
                         </li>
                     </ul>
                     <!-- INDICADORES -->
-                    <ul class="list-unstyled components">
+                    <ul class="list-unstyled components" data-categoria="indicadores">
                         <li>
-                            <a href="#homeSubmenuIndicadores" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                            <a href="#homeSubmenuIndicadores" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal" data-requires="can_view_indicadores">
                                 <i class="fa fa-chart-line"></i> <span>Indicadores</span>
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuIndicadores">
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'indicadores_operatividad_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'indicadores_operatividad_index' %}" data-requires="can_view_indicadores_operatividad">
                                         <i class="fas fa-table"></i> Indicador Operatividad
                                     </a>
-                                    <a class="nav-item nav-link" href="{% url 'indicadores_totales_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'indicadores_totales_index' %}" data-requires="can_view_indicadores_totales">
                                         <i class="fas fa-chart-line"></i> Indicadores Totales
                                     </a>
-                                    <a class="nav-item nav-link" href="{% url 'indicadores_facturacion_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'indicadores_facturacion_index' %}" data-requires="can_view_indicadores_facturacion">
                                         <i class="fas fa-file-invoice-dollar"></i> Indicadores Facturación
                                     </a>
-                                    <a class="nav-item nav-link" href="{% url 'indicadores_margen_cliente_index' %}">
+                                    <a class="nav-item nav-link" href="{% url 'indicadores_margen_cliente_index' %}" data-requires="can_view_indicadores_margen_cliente">
                                         <i class="fas fa-percentage"></i> Indicadores Margen Cliente
                                     </a>
                                 </li>
@@ -371,27 +371,25 @@
                         </li>
                     </ul>
                     <!-- ADMINISTRACIÓN (solo para administradores) -->
-                    {% if user.is_superuser or user.is_staff %}
-                    <ul class="list-unstyled components">
+                    <ul class="list-unstyled components" data-categoria="administracion">
                         <li>
-                            <a href="#homeSubmenuAdmin" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
+                            <a href="#homeSubmenuAdmin" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal" data-requires="can_manage_administracion">
                                 <i class="fas fa-cogs"></i> <span>Administración</span>
                             </a>
                             <ul class="collapse list-unstyled" id="homeSubmenuAdmin">
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'role_list' %}">
+                                    <a class="nav-item nav-link" href="{% url 'role_list' %}" data-requires="can_manage_roles">
                                         <i class="fas fa-user-tag"></i> Gestión de Roles
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="nav-item nav-link" href="{% url 'user_list' %}">
+                                    <a class="nav-item nav-link" href="{% url 'user_list' %}" data-requires="can_manage_users">
                                         <i class="fas fa-users"></i> Gestión de Usuarios
                                     </a>
                                 </li>
                             </ul>
                         </li>
                     </ul>
-                    {% endif %}
                 </div>
                 <!-- Menú de usuario en el footer de la sidebar -->
                 <div class="sidebar-footer">
@@ -452,6 +450,8 @@
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
         <script src="{% static 'script.js' %}"></script>
         <script src="{% static 'JS/sidebar.js' %}"></script> <!-- Enlace al archivo sidebar.js -->
+        <script src="{% static 'JS/auth.js' %}"></script> <!-- Enlace al archivo auth.js para control de permisos -->
+        <script src="{% static 'messages.js' %}"></script> <!-- Sistema de mensajes flotantes -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
     {% block scripts %}{% endblock %}
     </body>

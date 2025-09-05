@@ -108,4 +108,52 @@ document.addEventListener('DOMContentLoaded', function() {
     mainF();
 });
 
+// Función para mostrar mensajes flotantes
+function showFloatingMessages() {
+    const messages = document.querySelectorAll('.floating-alert');
+
+    messages.forEach((message, index) => {
+        // Aplicar retraso para animación escalonada
+        setTimeout(() => {
+        message.classList.add('show');
+        
+        // Configurar cierre automático después de 5 segundos
+        setTimeout(() => {
+            if (message.parentNode) {
+            message.style.opacity = '0';
+            message.style.transition = 'opacity 0.5s';
+            
+            setTimeout(() => {
+                if (message.parentNode) {
+                message.parentNode.removeChild(message);
+                }
+            }, 500);
+            }
+        }, 5000);
+        }, index * 200); // Retraso entre mensajes
+    });
+    }
+
+    // Ejecutar cuando el DOM esté cargado
+    document.addEventListener('DOMContentLoaded', function() {
+    // Solo mostrar mensajes si el sistema mejorado no está disponible
+    if (!window.showMessage) {
+        showFloatingMessages();
+    }
+
+    // Mantener la funcionalidad existente
+    const loginForm = document.querySelector('form');
+    const inputs = document.querySelectorAll('input');
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', validarFormulario);
+    }
+
+    inputs.forEach(input => {
+        input.addEventListener('input', limpiarErrores);
+    });
+
+    mainF();
+});
+
 window.addEventListener("load", mainF);
