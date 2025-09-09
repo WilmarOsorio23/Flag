@@ -1,6 +1,7 @@
+from collections import defaultdict
 from decimal import Decimal
 from django.shortcuts import render
-from Modulo.models import FacturacionClientes, Linea, CentrosCostos
+from Modulo.models import FacturacionClientes, Linea, CentrosCostos, Clientes, Modulo
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 from openpyxl.utils import get_column_letter
@@ -8,19 +9,211 @@ from django.http import HttpResponse
 from datetime import datetime
 from Modulo.forms import FacturacionClientesFilterForm
 from django.db.models import Sum
-from collections import defaultdict
-
-def filtrar_datos(form=None):
-    facturas = FacturacionClientes.objects.all().select_related(
-        'LineaId', 'ModuloId', 
+from django.db.models import Q
+import json
+# Importar funciones y modelos necesarios para el cálculo de costos
+from Modulo.models import Tiempos_Cliente, Nomina, Tarifa_Consultores, Tarifa_Clientes, IPC, Horas_Habiles
+from decimal import Decimal, InvalidOperation
+def obtener_horas_habiles(anio: str) -> dict:
+    """Obtiene días y horas hábiles por mes para un año específico"""
+    registros = Horas_Habiles.objects.filter(Anio=anio)
+    return {
+        str(r.Mes): {
+            'dias': r.Dias_Habiles,
+            'horas_mes': r.Dias_Habiles * r.Horas_Laborales,
+            'horas_diarias': r.Horas_Laborales
+        } for r in registros
+    }
+def obtener_ipc_anio(anio):
+    """Obtiene el IPC de un año (retorna 1 si no existe)"""
+    try:
+        ipc = IPC.objects.filter(Anio=str(anio)).order_by('-Mes').first()
+        return ipc.Indice if ipc else 1
+    except Exception:
+        return 1
+def precargar_datos(anio: str, meses: list, clientes: list, lineas: list):
+    """Precarga todos los datos necesarios para optimizar consultas"""
+    print(f"PRECARGANDO DATOS - Año: {anio}, Meses: {meses}")
+    
+    clientes_ids = [c.ClienteId for c in clientes]
+    lineas_ids = [l.LineaId for l in lineas]
+    
+    # Precargar tiempos INCLUYENDO centro de costos
+    tiempos = Tiempos_Cliente.objects.filter(
+        Anio=anio,
+        Mes__in=meses,
+        ClienteId__in=clientes_ids,
+        LineaId__in=lineas_ids
+    ).values('Anio', 'Mes', 'Documento', 'ClienteId', 'LineaId', 'Horas', 'ModuloId', 'centrocostosId')
+    
+    print(f"TIEMPOS ENCONTRADOS: {len(tiempos)} registros")
+    if tiempos:
+        print("Ejemplo de tiempo:", tiempos[0])
+    
+    # Precargar facturación
+    facturacion = FacturacionClientes.objects.filter(
+        Anio=anio,
+        Mes__in=meses
+    ).values('ClienteId', 'LineaId', 'Mes', 'HorasFactura', 'DiasFactura', 'MesFactura', 'Valor')
+    
+    # Precargar nóminas
+    nominas = Nomina.objects.all().values('Documento', 'Anio', 'Mes', 'Salario')
+    nominas_dict = defaultdict(list)
+    for n in nominas:
+        nominas_dict[n['Documento']].append((int(n['Anio']), int(n['Mes']), Decimal(str(n['Salario'] or '0'))))
+    
+    print(f"NÓMINAS ENCONTRADAS: {len(nominas_dict)} documentos")
+    
+    # Ordenar nominas
+    for doc in nominas_dict:
+        nominas_dict[doc].sort(key=lambda x: (-x[0], -x[1]))
+    
+    # Precargar tarifas consultores
+    tarifas_consultores = Tarifa_Consultores.objects.all().values(
+        'documentoId', 'anio', 'mes', 'valorHora', 'valorDia', 'valorMes', 'moduloId'
     )
-
+    tarifas_consultores_dict = defaultdict(lambda: defaultdict(list))
+    for t in tarifas_consultores:
+        tarifas_consultores_dict[t['documentoId']][t['moduloId']].append((
+            int(t['anio']), 
+            int(t['mes']),
+            Decimal(str(t['valorHora'] or '0')),
+            Decimal(str(t['valorDia'] or '0')),
+            Decimal(str(t['valorMes'] or '0'))
+        ))
+    
+    print(f"TARIFAS CONSULTORES: {len(tarifas_consultores_dict)} documentos")
+    
+    # Ordenar tarifas consultores
+    for doc in tarifas_consultores_dict:
+        for modulo in tarifas_consultores_dict[doc]:
+            tarifas_consultores_dict[doc][modulo].sort(key=lambda x: (-x[0], -x[1]))
+    
+    # Precargar tarifas clientes
+    tarifas_clientes = Tarifa_Clientes.objects.filter(clienteId__in=clientes_ids)
+    tarifas_por_cliente = defaultdict(list)
+    for tarifa in tarifas_clientes:
+        tarifas_por_cliente[tarifa.clienteId_id].append(tarifa)
+    
+    print(f"TARIFAS CLIENTES: {len(tarifas_por_cliente)} clientes")
+    
+    return {
+        'tiempos_data': list(tiempos),
+        'facturacion_data': facturacion,
+        'nominas_dict': nominas_dict,
+        'tarifas_consultores_dict': tarifas_consultores_dict,
+        'tarifas_por_cliente': tarifas_por_cliente
+    }
+def calcular_costos_por_ceco_modulo_mes(anio: str, meses: list, lineas_ids: list, datos_precargados: dict, horas_habiles: dict):
+    """
+    Calcula costos agrupados por centro de costos, módulo y mes
+    """
+    print(f"CALCULANDO COSTOS - Año: {anio}, Meses: {meses}, Líneas: {lineas_ids}")
+    print(f"Total tiempos a procesar: {len(datos_precargados['tiempos_data'])}")
+    
+    # Estructura para incluir mes: {ceco: {modulo: {mes: costo}}}
+    costos_por_ceco_modulo_mes = defaultdict(lambda: defaultdict(lambda: defaultdict(Decimal)))
+    total_costos_calculados = 0
+    tiempos_procesados = 0
+    
+    for mes in meses:
+        if mes not in horas_habiles:
+            print(f"Mes {mes} no encontrado en horas hábiles")
+            continue
+            
+        hh_mes = horas_habiles[mes]
+        mes_int = int(mes)
+        print(f"Procesando mes {mes} - horas hábiles: {hh_mes}")
+        
+        for tiempo in datos_precargados['tiempos_data']:
+            if (str(tiempo['Anio']) != anio or 
+                str(tiempo['Mes']) != mes or 
+                tiempo['LineaId'] not in lineas_ids):
+                continue
+            tiempos_procesados += 1
+            documento = tiempo['Documento']
+            anio_int = int(tiempo['Anio'])
+            modulo_id = tiempo['ModuloId']
+            ceco_id = tiempo['centrocostosId']
+            horas_trabajadas = Decimal(tiempo['Horas'])
+            costo_hora = Decimal('0.00')
+            
+            print(f"Procesando tiempo: doc={documento}, mes={mes}, modulo={modulo_id}, ceco={ceco_id}, horas={horas_trabajadas}")
+            
+            # Lógica para empleados
+            if documento in datos_precargados['nominas_dict']:
+                print(f"  Empleado encontrado en nóminas")
+                entradas_nomina = datos_precargados['nominas_dict'][documento]
+                entrada = next((e for e in entradas_nomina if e[0] <= anio_int and e[1] <= mes_int), None)
+                if entrada:
+                    salario = entrada[2]
+                    ipc = obtener_ipc_anio(anio_int)
+                    salario_ajustado = salario * Decimal(str(ipc))
+                    horas_mes_total = hh_mes.get('horas_mes', Decimal('1'))
+                    costo_hora = salario_ajustado / horas_mes_total if horas_mes_total else Decimal('0')
+                    print(f"  Salario: {salario}, IPC: {ipc}, Salario ajustado: {salario_ajustado}, Costo/hora: {costo_hora}")
+            
+            # Lógica para consultores
+            else:
+                print(f"  Consultor - buscando tarifas")
+                entradas_tarifa = datos_precargados['tarifas_consultores_dict'][documento].get(modulo_id, [])
+                entrada = next((e for e in entradas_tarifa if e[0] <= anio_int and e[1] <= mes_int), None)
+                if entrada:
+                    valorHora, valorDia, valorMes = entrada[2], entrada[3], entrada[4]
+                    horas_diarias = hh_mes.get('horas_diarias', Decimal('1'))
+                    horas_mes_total = hh_mes.get('horas_mes', Decimal('1'))
+                    
+                    if valorHora > 0:
+                        costo_hora = valorHora
+                    elif valorDia > 0:
+                        costo_hora = valorDia / horas_diarias
+                    elif valorMes > 0:
+                        costo_hora = valorMes / horas_mes_total
+                    
+                    print(f"  Tarifa encontrada: Hora={valorHora}, Dia={valorDia}, Mes={valorMes}, Costo/hora: {costo_hora}")
+                else:
+                    print(f"  No se encontró tarifa para documento {documento}, módulo {modulo_id}")
+            # Acumular costo por centro de costos, módulo y mes
+            costo_total = horas_trabajadas * costo_hora
+            total_costos_calculados += float(costo_total)
+            
+            print(f"  Costo calculado: {horas_trabajadas} * {costo_hora} = {costo_total}")
+            
+            # Obtener código de centro de costos
+            try:
+                centro_costo = CentrosCostos.objects.get(id=ceco_id)
+                codigo_ceco = centro_costo.codigoCeCo
+                print(f"  CeCo encontrado: {codigo_ceco}")
+            except CentrosCostos.DoesNotExist:
+                codigo_ceco = 'SIN_CECO'
+                print(f"  CeCo NO encontrado para id {ceco_id}")
+            
+            # Obtener nombre del módulo
+            try:
+                modulo_obj = Modulo.objects.get(ModuloId=modulo_id)
+                nombre_modulo = modulo_obj.Modulo
+                print(f"  Módulo encontrado: {nombre_modulo}")
+            except Modulo.DoesNotExist:
+                nombre_modulo = 'SIN_MODULO'
+                print(f"  Módulo NO encontrado para id {modulo_id}")
+            
+            # Acumular por mes
+            costos_por_ceco_modulo_mes[codigo_ceco][nombre_modulo][mes] += costo_total
+            print(f"  Costo acumulado para {codigo_ceco}/{nombre_modulo}/{mes}: {costos_por_ceco_modulo_mes[codigo_ceco][nombre_modulo][mes]}")
+    
+    print(f"TOTAL TIEMPOS PROCESADOS: {tiempos_procesados}")
+    print(f"TOTAL COSTOS CALCULADOS: {total_costos_calculados}")
+    print(f"COSTOS POR CECO-MODULO-MES: {dict(costos_por_ceco_modulo_mes)}")
+    
+    return costos_por_ceco_modulo_mes
+def filtrar_datos(form=None):
+    facturas = FacturacionClientes.objects.all().select_related('LineaId', 'ModuloId')
     if form and form.is_valid():
         anio = form.cleaned_data.get('Anio')
         lineas = form.cleaned_data.get('LineaId')
         meses = form.cleaned_data.get('Mes')
         ceco = form.cleaned_data.get('Ceco')
-
+        print(f"FILTRO FORM - Año: {anio}, Líneas: {lineas}, Meses: {meses}, CeCo: {ceco}")
         if anio:
             facturas = facturas.filter(Anio=anio)
         if lineas:
@@ -29,22 +222,41 @@ def filtrar_datos(form=None):
             facturas = facturas.filter(Mes__in=[int(m) for m in meses])
         if ceco:
             cecos_filtro = list(ceco) if isinstance(ceco, (list, tuple)) else [ceco]
-            # Limpiar los valores
             cecos_filtro = [str(c).strip() for c in cecos_filtro]
             facturas = facturas.filter(Ceco__in=cecos_filtro)
             if facturas.count() == 0:
-                # Intentar con búsqueda case-insensitive si no hay resultados
                 facturas = FacturacionClientes.objects.all()
                 facturas = facturas.filter(Ceco__iregex=r'^(%s)$' % '|'.join(cecos_filtro))
-
+    # CALCULAR COSTOS (NUEVO)
+    costos_por_ceco_modulo_mes = {}
+    if form and form.is_valid() and anio:
+        lineas_ids = [l.LineaId for l in (lineas or Linea.objects.all())]
+        meses_list = [str(m) for m in (meses or range(1, 13))]
+        
+        print(f"CALCULANDO COSTOS CON: anio={anio}, lineas_ids={lineas_ids}, meses_list={meses_list}")
+        
+        # Precargar datos y calcular costos
+        horas_habiles = obtener_horas_habiles(anio)
+        print(f"HORAS HABILES: {horas_habiles}")
+        
+        datos_precargados = precargar_datos(
+            anio, 
+            meses_list, 
+            Clientes.objects.all(), 
+            lineas or Linea.objects.all()
+        )
+        
+        costos_por_ceco_modulo_mes = calcular_costos_por_ceco_modulo_mes(
+            anio, meses_list, lineas_ids, datos_precargados, horas_habiles
+        )
     # Obtener todos los códigos de CeCo únicos para buscar sus descripciones
     cecos_codigos = facturas.values_list('Ceco', flat=True).distinct()
+    print(f"CECOS ENCONTRADOS EN FACTURAS: {list(cecos_codigos)}")
     
     # Crear un diccionario de {codigoCeCo: descripcionCeCo}
     descripciones_cecos = dict(CentrosCostos.objects.filter(
         codigoCeCo__in=cecos_codigos
     ).values_list('codigoCeCo', 'descripcionCeCo'))
-
     facturas_agrupadas = facturas.values(
         'ConsecutivoId',
         'Mes', 
@@ -54,19 +266,26 @@ def filtrar_datos(form=None):
     ).annotate(
         total_valor=Sum('Valor')
     ).order_by('Ceco', 'LineaId__Linea', 'ModuloId__Modulo', 'Mes')
-
+    print(f"FACTURAS AGRUPADAS: {len(facturas_agrupadas)} registros")
+    if facturas_agrupadas:
+        print("Ejemplo de factura:", facturas_agrupadas[0])
     # Agregar las descripciones a los resultados
     for item in facturas_agrupadas:
         item['descripcion_ceco'] = descripciones_cecos.get(item['Ceco'], '')
-
     # Obtener las líneas usadas en la consulta
     lineas_obj = Linea.objects.filter(
         Linea__in=facturas.values_list('LineaId', flat=True).distinct()
     ).distinct()
     
-    return facturas_agrupadas, lineas_obj, form.cleaned_data.get('Mes') if form and form.is_valid() else None
-
-
+    return facturas_agrupadas, lineas_obj, form.cleaned_data.get('Mes') if form and form.is_valid() else None, costos_por_ceco_modulo_mes
+def generar_graficos_facturacion(datos):
+    """Genera datos para gráficos de facturación"""
+    return {}
+def convert_to_regular_dict(d):
+    """Convierte defaultdict a dict regular para el template"""
+    if isinstance(d, defaultdict):
+        d = {k: convert_to_regular_dict(v) for k, v in d.items()}
+    return d
 def informe_facturacion_clientes(request):
     form = FacturacionClientesFilterForm(request.GET or None)
     
@@ -76,11 +295,17 @@ def informe_facturacion_clientes(request):
         (9, 'Septiembre'), (10, 'Octubre'), (11, 'Noviembre'), (12, 'Diciembre')
     ]
     
-    facturas, lineas_filtradas, meses_filtrados = filtrar_datos(form)
+    print("=" * 50)
+    print("INICIANDO INFORME FACTURACIÓN CLIENTES")
+    print("=" * 50)
+    
+    # Ahora recibimos costos_por_ceco_modulo_mes
+    facturas, lineas_filtradas, meses_filtrados, costos_por_ceco_modulo_mes = filtrar_datos(form)
+    
+    print(f"COSTOS POR CECO MODULO MES RECIBIDOS: {dict(costos_por_ceco_modulo_mes)}")
     
     # Filtrar meses si es necesario
     meses = [par for par in meses_completos if not meses_filtrados or str(par[0]) in meses_filtrados]
-
     # Estructuras de datos
     datos = {}
     totales_por_linea = defaultdict(float)
@@ -88,27 +313,54 @@ def informe_facturacion_clientes(request):
     totales_por_modulo = defaultdict(float)
     totales_por_mes = defaultdict(float)
     totales_por_linea_mes = defaultdict(lambda: defaultdict(float))
-    totales_por_ceco_linea = defaultdict(lambda: defaultdict(float))  # Nuevo: Total por Ceco y Línea
-    totales_por_ceco_linea_mes = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))  # Nuevo: Total por Ceco, Línea y Mes
-
+    totales_por_ceco_linea = defaultdict(lambda: defaultdict(float))
+    totales_por_ceco_linea_mes = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
     totales_por_ceco_linea_modulo = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
-    totales_por_ceco_modulo = defaultdict(lambda: defaultdict(float))  # Nuevo: Total específico por Ceco y Módulo
+    totales_por_ceco_modulo = defaultdict(lambda: defaultdict(float))
+    
+    # NUEVAS ESTRUCTURAS PARA COSTOS
+    costos_por_ceco = defaultdict(float)
+    costos_por_modulo = defaultdict(float)
+    costos_por_ceco_modulo = defaultdict(lambda: defaultdict(float))
+    costos_por_mes = defaultdict(float)
+    costo_global = 0.0
+    # NUEVAS ESTRUCTURAS PARA COSTOS POR LÍNEA
+    costos_por_ceco_linea_mes = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+    costos_por_ceco_linea = defaultdict(lambda: defaultdict(float))
     
     total_global = 0.0
-
+    # PRIMERO: Agrupar facturas por ceco + modulo + mes para evitar duplicados
+    facturas_agrupadas_por_ceco_modulo_mes = defaultdict(float)
+    
     for item in facturas:
         ceco = item.get('Ceco', 'Sin Ceco')
-        descripcion = item.get('descripcion_ceco', '')
-        linea = item.get('LineaId__Linea', 'Sin línea')
         modulo = item.get('ModuloId__Modulo', 'Sin módulo')
         mes = int(item['Mes']) if item['Mes'] else 0
+        mes_str = str(mes)
         
         valor = float(item['total_valor'] or 0)
-
         # Solo procesar si el mes está en los meses filtrados
         if meses_filtrados and str(mes) not in meses_filtrados:
             continue
-
+        # Agrupar facturas por ceco + modulo + mes
+        key = f"{ceco}_{modulo}_{mes_str}"
+        facturas_agrupadas_por_ceco_modulo_mes[key] += valor
+    # SEGUNDO: Procesar las facturas agrupadas
+    for key, valor in facturas_agrupadas_por_ceco_modulo_mes.items():
+        ceco, modulo, mes_str = key.split('_')
+        mes = int(mes_str)
+        
+        # Obtener descripción y línea de la primera factura que coincida
+        primera_factura = next((item for item in facturas 
+                               if item.get('Ceco') == ceco 
+                               and item.get('ModuloId__Modulo') == modulo 
+                               and int(item.get('Mes', 0)) == mes), None)
+        
+        if not primera_factura:
+            continue
+            
+        descripcion = primera_factura.get('descripcion_ceco', '')
+        linea = primera_factura.get('LineaId__Linea', 'Sin línea')
         # Estructura principal de datos
         if ceco not in datos:
             datos[ceco] = {}
@@ -121,11 +373,17 @@ def informe_facturacion_clientes(request):
         
         # Inicializar si no existe
         if mes not in datos[ceco][descripcion][linea][modulo]:
-            datos[ceco][descripcion][linea][modulo][mes] = {'total_valor': 0.0}
+            datos[ceco][descripcion][linea][modulo][mes] = {'total_valor': 0.0, 'costo': 0.0}
         
-        # Sumar el valor
+        # Sumar el valor (ya está agrupado)
         datos[ceco][descripcion][linea][modulo][mes]['total_valor'] += valor
-
+        # AGREGAR COSTOS - Solo una vez por ceco + modulo + mes
+        costo_mes = float(costos_por_ceco_modulo_mes.get(ceco, {}).get(modulo, {}).get(mes_str, Decimal('0.00')))
+        datos[ceco][descripcion][linea][modulo][mes]['costo'] = costo_mes  # = en lugar de +=
+        # ACUMULAR COSTOS POR LÍNEA Y MES (NUEVO)
+        costos_por_ceco_linea_mes[ceco][linea][mes] += costo_mes
+        costos_por_ceco_linea[ceco][linea] += costo_mes
+        print(f"PROCESANDO: ceco={ceco}, modulo={modulo}, mes={mes}, facturado={valor}, costo={costo_mes}")
         # Actualizar totales
         totales_por_linea[linea] += valor
         totales_por_ceco[ceco] += valor
@@ -133,18 +391,20 @@ def informe_facturacion_clientes(request):
         totales_por_mes[mes] += valor
         totales_por_linea_mes[linea][mes] += valor
         totales_por_ceco_linea_modulo[ceco][linea][modulo] += valor
-        totales_por_ceco_modulo[ceco][modulo] += valor  # Nuevo: Total específico por Ceco y Módulo
+        totales_por_ceco_modulo[ceco][modulo] += valor
         totales_por_ceco_linea[ceco][linea] += valor
         totales_por_ceco_linea_mes[ceco][linea][mes] += valor
         
         total_global += valor
-
-    # Convertir defaultdict a dict para el template
-    def convert_to_regular_dict(d):
-        if isinstance(d, defaultdict):
-            d = {k: convert_to_regular_dict(v) for k, v in d.items()}
-        return d
-
+        # Actualizar totales de costos
+        costos_por_ceco[ceco] += costo_mes
+        costos_por_modulo[modulo] += costo_mes
+        costos_por_ceco_modulo[ceco][modulo] += costo_mes
+        costos_por_mes[mes] += costo_mes
+        costo_global += costo_mes
+    print(f"TOTAL GLOBAL FACTURADO: {total_global}")
+    print(f"TOTAL GLOBAL COSTO: {costo_global}")
+    print(f"MARGEN GLOBAL: {total_global - costo_global}")
     # Calcular totales de filas por ceco
     cecos_con_totales = {}
     for ceco, descripciones in datos.items():
@@ -153,7 +413,6 @@ def informe_facturacion_clientes(request):
             for linea, modulos in lineas.items():
                 total_filas += len(modulos)
         cecos_con_totales[ceco] = total_filas
-
     graficos = generar_graficos_facturacion(datos)
     context = {
         'form': form,
@@ -167,17 +426,29 @@ def informe_facturacion_clientes(request):
         'totales_por_mes': convert_to_regular_dict(totales_por_mes),
         'totales_por_linea_mes': convert_to_regular_dict(totales_por_linea_mes),
         'graficos': graficos,
-
         'totales_por_ceco_linea': convert_to_regular_dict(totales_por_ceco_linea),
         'totales_por_ceco_linea_mes': convert_to_regular_dict(totales_por_ceco_linea_mes),
-
-
         'totales_por_ceco_linea_modulo': convert_to_regular_dict(totales_por_ceco_linea_modulo),
-        'totales_por_ceco_modulo': convert_to_regular_dict(totales_por_ceco_modulo),  # Nuevo
-        'total_global': total_global
+        'totales_por_ceco_modulo': convert_to_regular_dict(totales_por_ceco_modulo),
+        'total_global': total_global,
+        
+        # NUEVOS DATOS DE COSTOS
+        'costos_por_ceco': convert_to_regular_dict(costos_por_ceco),
+        'costos_por_modulo': convert_to_regular_dict(costos_por_modulo),
+        'costos_por_ceco_modulo': convert_to_regular_dict(costos_por_ceco_modulo),
+        'costos_por_mes': convert_to_regular_dict(costos_por_mes),
+        'costo_global': costo_global,
+        'margen_global': total_global - costo_global,
+        # NUEVOS: Costos por línea
+        'costos_por_ceco_linea': convert_to_regular_dict(costos_por_ceco_linea),
+        'costos_por_ceco_linea_mes': convert_to_regular_dict(costos_por_ceco_linea_mes),
     }
-
+    print("=" * 50)
+    print("FINALIZANDO INFORME FACTURACIÓN CLIENTES")
+    print("=" * 50)
+    
     return render(request, 'Informes/informes_facturacion_clientes_index.html', context)
+
 
 def descargar_reporte_excel_facturacion_clientes(request):
     # 1. Limpieza de parámetros GET
@@ -367,27 +638,26 @@ def descargar_reporte_excel_facturacion_clientes(request):
                     
                     row_num += 1
                 
-                # Total por línea si hay más de un módulo
-                if len(modulos) > 1:
-                    ws.cell(row=row_num, column=3, value=f"Total {linea}")
-                    
-                    col_num = 5
-                    total_linea = 0.0
-                    
-                    for mes_num, mes_nombre in meses:
-                        total_mes = sum(modulo_data.get(mes_num, 0.0) for modulo_data in modulos.values())
-                        cell = ws.cell(row=row_num, column=col_num, value=total_mes)
-                        for attr, value in total_style.items():
-                            setattr(cell, attr, value)
-                        
-                        total_linea += total_mes
-                        col_num += 1
-                    
-                    cell = ws.cell(row=row_num, column=col_num, value=total_linea)
+                # Total por grupo (mostrar siempre, incluso si hay un solo módulo)
+                ws.cell(row=row_num, column=3, value=f"Total {descripcion}")
+                
+                col_num = 5
+                total_linea = 0.0
+                
+                for mes_num, mes_nombre in meses:
+                    total_mes = sum(modulo_data.get(mes_num, 0.0) for modulo_data in modulos.values())
+                    cell = ws.cell(row=row_num, column=col_num, value=total_mes)
                     for attr, value in total_style.items():
                         setattr(cell, attr, value)
                     
-                    row_num += 1
+                    total_linea += total_mes
+                    col_num += 1
+                
+                cell = ws.cell(row=row_num, column=col_num, value=total_linea)
+                for attr, value in total_style.items():
+                    setattr(cell, attr, value)
+                
+                row_num += 1
             
             # Total por descripción si hay más de una línea
             if len(lineas) > 1:
@@ -467,6 +737,7 @@ def descargar_reporte_excel_facturacion_clientes(request):
     
     wb.save(response)
     return response
+
 def generar_graficos_facturacion(datos):
     """Genera SOLO 2 gráficos de barras: totales por CeCo y totales por módulo"""
     graficos = []
