@@ -149,6 +149,10 @@ def currency_format_decimal(value):
         return f"${formatted}"
     except (ValueError, TypeError, InvalidOperation):
         return '$0.00'
+
+@register.filter
+def sub(value, arg):
+    return value - arg
     
 @register.filter
 def get_range(value):

@@ -1,9 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load custom_filters %}
-
 {% block titulo %} Inf Fact CeCo {% endblock %}
-
 {% block contenido %}
 <div class="card">
     <div class="card-header">
@@ -30,7 +28,6 @@
                                 </div>
                                 <input type="hidden" name="{{ form.Anio.html_name }}" id="selectedAnio">
                             </div>
-
                             <!-- Filtro Línea -->
                             <div class="col-md-3">
                                 <label for="linea" class="form-label">{{ form.LineaId.label }}</label>
@@ -56,7 +53,6 @@
                                     </ul>
                                 </div>
                             </div>
-
                             <!-- Filtro Mes -->
                             <div class="col-md-3">
                                 <label for="mes" class="form-label">{{ form.Mes.label }}</label>
@@ -82,7 +78,6 @@
                                     </ul>
                                 </div>
                             </div>
-
                             <!-- Filtro ceco -->
                             <div class="col-md-3">
                                 <label for="Ceco" class="form-label">{{ form.Ceco.label }}</label>
@@ -108,7 +103,6 @@
                                     </ul>
                                 </div>
                             </div>
-
                             <!-- Botón Buscar -->
                             <div class="col-md-3 text-start">
                                 <button type="submit" name="buscar" class="btn btn-primary mt-3">
@@ -125,15 +119,12 @@
                     <div class="col-md-12">
                         <form method="GET" action="{% url 'descargar_reporte_excel_facturacion_clientes' %}">
                             <input type="hidden" name="Anio" value="{{ form.Anio.value }}">
-
                             {% for linea in form.LineaId.value %}
                                 <input type="hidden" name="LineaId" value="{{ linea }}">
                             {% endfor %}
-
                             {% for mes in form.Mes.value %}
                                 <input type="hidden" name="Mes" value="{{ mes }}">
                             {% endfor %}
-
                             <button type="submit" class="btn btn-success mt-3">
                                 <i class="fas fa-file-excel"></i> Descargar Excel
                             </button>
@@ -167,8 +158,11 @@
                                 <th class="text-center">Módulo</th>
                                 {% for mes_num, mes_nombre in meses %}
                                     <th class="text-center">{{ mes_nombre }}</th>
+                                    <th class="text-center">Costo {{ mes_nombre }}</th>
                                 {% endfor %}
-                                <th class="text-center">Total</th>
+                                <th class="text-center">Total Facturado</th>
+                                <th class="text-center">Total Costo</th>
+                                <th class="text-center">Margen</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -198,21 +192,34 @@
                                                 <!-- Módulo -->
                                                 <td class="text-center">{{ modulo }}</td>
                                                 
-                                                <!-- Datos por mes -->
+                                                <!-- Datos por mes - Facturación y Costo -->
                                                 {% for mes_num, mes_nombre in meses %}
                                                     <td class="text-center text-nowrap">
-                                                        {{ meses_data|get_item:mes_num|get_item:'total_valor'|default:0|floatformat:2|currency_format }}
+                                                        {{ meses_data|get_item:mes_num|get_item:'total_valor'|default:0|floatformat:2 }}
+                                                    </td>
+                                                    <td class="text-center text-nowrap">
+                                                        {{ meses_data|get_item:mes_num|get_item:'costo'|default:0|floatformat:2 }}
                                                     </td>
                                                 {% endfor %}
                                                 
-                                                <!-- Total por módulo -->
+                                                <!-- Totales por módulo -->
+                                                {% with total_facturado_modulo=totales_por_ceco_linea_modulo|get_item:ceco|get_item:linea|get_item:modulo|default:0 %}
+                                                {% with total_costo_modulo=costos_por_ceco_modulo|get_item:ceco|get_item:modulo|default:0 %}
+                                                {% with margen_modulo=total_facturado_modulo|sub:total_costo_modulo %}
+                                                
                                                 <td class="text-center text-nowrap fw-bold">
-                                                    {% if "Total" in modulo %}
-                                                        {{ totales_por_ceco_linea|get_item:ceco|get_item:linea|default:0|floatformat:2|currency_format }}
-                                                    {% else %}
-                                                        {{ totales_por_ceco_linea_modulo|get_item:ceco|get_item:linea|get_item:modulo|default:0|floatformat:2|currency_format }}
-                                                    {% endif %}
+                                                    {{ total_facturado_modulo|floatformat:2 }}
                                                 </td>
+                                                <td class="text-center text-nowrap fw-bold">
+                                                    {{ total_costo_modulo|floatformat:2 }}
+                                                </td>
+                                                <td class="text-center text-nowrap fw-bold {% if margen_modulo < 0 %}text-danger{% else %}text-success{% endif %}">
+                                                    {{ margen_modulo|floatformat:2 }}
+                                                </td>
+                                                
+                                                {% endwith %}
+                                                {% endwith %}
+                                                {% endwith %}
                                             </tr>
                                         {% endfor %}
                                         
@@ -221,12 +228,31 @@
                                             <td colspan="4" class="text-center fw-bold">Total {{ linea }}</td>
                                             {% for mes_num, mes_nombre in meses %}
                                                 <td class="text-center text-nowrap fw-bold">
-                                                    {{ totales_por_ceco_linea_mes|get_item:ceco|get_item:linea|get_item:mes_num|default:0|floatformat:2|currency_format }}
+                                                    {{ totales_por_ceco_linea_mes|get_item:ceco|get_item:linea|get_item:mes_num|default:0|floatformat:2 }}
+                                                </td>
+                                                <td class="text-center text-nowrap fw-bold">
+                                                    <!-- NUEVO: Mostrar costo total por línea y mes -->
+                                                    {{ costos_por_ceco_linea_mes|get_item:ceco|get_item:linea|get_item:mes_num|default:0|floatformat:2 }}
                                                 </td>
                                             {% endfor %}
+                                            
+                                            {% with total_facturado_linea=totales_por_ceco_linea|get_item:ceco|get_item:linea|default:0 %}
+                                            {% with total_costo_linea=costos_por_ceco_linea|get_item:ceco|get_item:linea|default:0 %}
+                                            {% with margen_linea=total_facturado_linea|sub:total_costo_linea %}
+                                            
                                             <td class="text-center text-nowrap fw-bold">
-                                                {{ totales_por_ceco_linea|get_item:ceco|get_item:linea|default:0|floatformat:2|currency_format }}
+                                                {{ total_facturado_linea|floatformat:2 }}
                                             </td>
+                                            <td class="text-center text-nowrap fw-bold">
+                                                {{ total_costo_linea|floatformat:2 }}
+                                            </td>
+                                            <td class="text-center text-nowrap fw-bold {% if margen_linea < 0 %}text-danger{% else %}text-success{% endif %}">
+                                                {{ margen_linea|floatformat:2 }}
+                                            </td>
+                                            
+                                            {% endwith %}
+                                            {% endwith %}
+                                            {% endwith %}
                                         </tr>
                                         {% endwith %}
                                     {% endfor %}
@@ -238,11 +264,21 @@
                                 <td colspan="4" class="text-center fw-bold">TOTAL GENERAL</td>
                                 {% for mes_num, mes_nombre in meses %}
                                     <td class="text-center text-nowrap fw-bold">
-                                        {{ totales_por_mes|get_item:mes_num|default:0|floatformat:2|currency_format }}
+                                        {{ totales_por_mes|get_item:mes_num|default:0|floatformat:2 }}
+                                    </td>
+                                    <td class="text-center text-nowrap fw-bold">
+                                        {{ costos_por_mes|get_item:mes_num|default:0|floatformat:2 }}
                                     </td>
                                 {% endfor %}
+                                
                                 <td class="text-center text-nowrap fw-bold">
-                                    {{ total_global|default:0|floatformat:2|currency_format }}
+                                    {{ total_global|default:0|floatformat:2 }}
+                                </td>
+                                <td class="text-center text-nowrap fw-bold">
+                                    {{ costo_global|default:0|floatformat:2 }}
+                                </td>
+                                <td class="text-center text-nowrap fw-bold {% if margen_global < 0 %}text-danger{% else %}text-success{% endif %}">
+                                    {{ margen_global|default:0|floatformat:2 }}
                                 </td>
                             </tr>
                         </tbody>
