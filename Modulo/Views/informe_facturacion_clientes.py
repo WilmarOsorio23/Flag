@@ -17,9 +17,6 @@ from collections import defaultdict
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_informe_facturacion_clientes')
-
 def obtener_horas_habiles(anio: str) -> dict:
     """Obtiene días y horas hábiles por mes para un año específico"""
     registros = Horas_Habiles.objects.filter(Anio=anio)
@@ -293,6 +290,9 @@ def convert_to_regular_dict(d):
     if isinstance(d, defaultdict):
         d = {k: convert_to_regular_dict(v) for k, v in d.items()}
     return d
+
+@login_required
+@verificar_permiso('can_manage_informe_facturacion_clientes')
 def informe_facturacion_clientes(request):
     form = FacturacionClientesFilterForm(request.GET or None)
     
@@ -456,7 +456,8 @@ def informe_facturacion_clientes(request):
     
     return render(request, 'Informes/informes_facturacion_clientes_index.html', context)
 
-
+@login_required
+@verificar_permiso('can_manage_informe_facturacion_clientes')
 def descargar_reporte_excel_facturacion_clientes(request):
     # 1. Limpieza de parámetros GET
     get_params = request.GET.copy()
