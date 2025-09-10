@@ -18,7 +18,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_informe_facturacion')
 
 # Función para filtrar datos
-def filtrar_datos(form):
+def filtrar_datos(request, form):
     anio = form.cleaned_data.get('Anio')
     lineas_seleccionadas = form.cleaned_data.get('LineaId')
     clientes_seleccionados = form.cleaned_data.get('ClienteId')
@@ -154,7 +154,7 @@ def informes_facturacion_index(request):
     # Verificar si el formulario se ha enviado
     if 'buscar' in request.GET:
         if form.is_valid():
-            facturas, lineas, clientes = filtrar_datos(form)
+            facturas, lineas, clientes = filtrar_datos(request,form)
             if facturas.exists():
                 rows, footer, lineas, clientes, meses, lineas_activas, clientes_activos = organizar_datos(facturas, lineas, clientes)
             else:
@@ -300,7 +300,7 @@ def informes_facturacion_index(request):
 
     if 'buscar' in request.GET:
         if form.is_valid():
-            facturas, lineas, clientes = filtrar_datos(form)
+            facturas, lineas, clientes = filtrar_datos(request,form)
             if facturas.exists():
                 rows, footer, lineas, clientes, meses, lineas_activas, clientes_activos = organizar_datos(facturas, lineas, clientes)
                 # Pasar footer como nuevo parámetro

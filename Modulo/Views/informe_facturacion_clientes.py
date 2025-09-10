@@ -213,7 +213,7 @@ def calcular_costos_por_ceco_modulo_mes(anio: str, meses: list, lineas_ids: list
     
     return costos_por_ceco_modulo_mes
 
-def filtrar_datos(form=None):
+def filtrar_datos(request, form=None):
     facturas = FacturacionClientes.objects.all().select_related('LineaId', 'ModuloId')
     if form and form.is_valid():
         anio = form.cleaned_data.get('Anio')
@@ -307,7 +307,7 @@ def informe_facturacion_clientes(request):
     print("=" * 50)
     
     # Ahora recibimos costos_por_ceco_modulo_mes
-    facturas, lineas_filtradas, meses_filtrados, costos_por_ceco_modulo_mes = filtrar_datos(form)
+    facturas, lineas_filtradas, meses_filtrados, costos_por_ceco_modulo_mes = filtrar_datos(request, form)
     
     print(f"COSTOS POR CECO MODULO MES RECIBIDOS: {dict(costos_por_ceco_modulo_mes)}")
     
@@ -485,7 +485,7 @@ def descargar_reporte_excel_facturacion_clientes(request):
     
     # 4. Obtención de datos
     try:
-        facturas, lineas_filtradas, meses_filtrados = filtrar_datos(form)
+        facturas, lineas_filtradas, meses_filtrados = filtrar_datos(request, form)
     except Exception as e:
         return HttpResponse(f"Error al obtener datos: {str(e)}")
 
