@@ -36,7 +36,6 @@ def obtener_ipc_anio(anio):
         return 1
 def precargar_datos(anio: str, meses: list, clientes: list, lineas: list):
     """Precarga todos los datos necesarios para optimizar consultas"""
-    print(f"PRECARGANDO DATOS - Año: {anio}, Meses: {meses}")
     
     clientes_ids = [c.ClienteId for c in clientes]
     lineas_ids = [l.LineaId for l in lineas]
@@ -49,10 +48,6 @@ def precargar_datos(anio: str, meses: list, clientes: list, lineas: list):
         LineaId__in=lineas_ids
     ).values('Anio', 'Mes', 'Documento', 'ClienteId', 'LineaId', 'Horas', 'ModuloId', 'centrocostosId')
     
-    print(f"TIEMPOS ENCONTRADOS: {len(tiempos)} registros")
-    if tiempos:
-        print("Ejemplo de tiempo:", tiempos[0])
-    
     # Precargar facturación
     facturacion = FacturacionClientes.objects.filter(
         Anio=anio,
@@ -64,8 +59,6 @@ def precargar_datos(anio: str, meses: list, clientes: list, lineas: list):
     nominas_dict = defaultdict(list)
     for n in nominas:
         nominas_dict[n['Documento']].append((int(n['Anio']), int(n['Mes']), Decimal(str(n['Salario'] or '0'))))
-    
-    print(f"NÓMINAS ENCONTRADAS: {len(nominas_dict)} documentos")
     
     # Ordenar nominas
     for doc in nominas_dict:
@@ -85,8 +78,6 @@ def precargar_datos(anio: str, meses: list, clientes: list, lineas: list):
             Decimal(str(t['valorMes'] or '0'))
         ))
     
-    print(f"TARIFAS CONSULTORES: {len(tarifas_consultores_dict)} documentos")
-    
     # Ordenar tarifas consultores
     for doc in tarifas_consultores_dict:
         for modulo in tarifas_consultores_dict[doc]:
@@ -97,8 +88,6 @@ def precargar_datos(anio: str, meses: list, clientes: list, lineas: list):
     tarifas_por_cliente = defaultdict(list)
     for tarifa in tarifas_clientes:
         tarifas_por_cliente[tarifa.clienteId_id].append(tarifa)
-    
-    print(f"TARIFAS CLIENTES: {len(tarifas_por_cliente)} clientes")
     
     return {
         'tiempos_data': list(tiempos),
@@ -111,29 +100,23 @@ def calcular_costos_por_ceco_modulo_mes(anio: str, meses: list, lineas_ids: list
     """
     Calcula costos agrupados por centro de costos, módulo y mes
     """
-    print(f"CALCULANDO COSTOS - Año: {anio}, Meses: {meses}, Líneas: {lineas_ids}")
-    print(f"Total tiempos a procesar: {len(datos_precargados['tiempos_data'])}")
     
     # Estructura para incluir mes: {ceco: {modulo: {mes: costo}}}
     costos_por_ceco_modulo_mes = defaultdict(lambda: defaultdict(lambda: defaultdict(Decimal)))
-    total_costos_calculados = 0
-    tiempos_procesados = 0
     
     for mes in meses:
         if mes not in horas_habiles:
-            print(f"Mes {mes} no encontrado en horas hábiles")
             continue
             
         hh_mes = horas_habiles[mes]
         mes_int = int(mes)
-        print(f"Procesando mes {mes} - horas hábiles: {hh_mes}")
         
         for tiempo in datos_precargados['tiempos_data']:
             if (str(tiempo['Anio']) != anio or 
                 str(tiempo['Mes']) != mes or 
                 tiempo['LineaId'] not in lineas_ids):
                 continue
-            tiempos_procesados += 1
+                
             documento = tiempo['Documento']
             anio_int = int(tiempo['Anio'])
             modulo_id = tiempo['ModuloId']
@@ -141,11 +124,8 @@ def calcular_costos_por_ceco_modulo_mes(anio: str, meses: list, lineas_ids: list
             horas_trabajadas = Decimal(tiempo['Horas'])
             costo_hora = Decimal('0.00')
             
-            print(f"Procesando tiempo: doc={documento}, mes={mes}, modulo={modulo_id}, ceco={ceco_id}, horas={horas_trabajadas}")
-            
             # Lógica para empleados
             if documento in datos_precargados['nominas_dict']:
-                print(f"  Empleado encontrado en nóminas")
                 entradas_nomina = datos_precargados['nominas_dict'][documento]
                 entrada = next((e for e in entradas_nomina if e[0] <= anio_int and e[1] <= mes_int), None)
                 if entrada:
@@ -154,11 +134,9 @@ def calcular_costos_por_ceco_modulo_mes(anio: str, meses: list, lineas_ids: list
                     salario_ajustado = salario * Decimal(str(ipc))
                     horas_mes_total = hh_mes.get('horas_mes', Decimal('1'))
                     costo_hora = salario_ajustado / horas_mes_total if horas_mes_total else Decimal('0')
-                    print(f"  Salario: {salario}, IPC: {ipc}, Salario ajustado: {salario_ajustado}, Costo/hora: {costo_hora}")
             
             # Lógica para consultores
             else:
-                print(f"  Consultor - buscando tarifas")
                 entradas_tarifa = datos_precargados['tarifas_consultores_dict'][documento].get(modulo_id, [])
                 entrada = next((e for e in entradas_tarifa if e[0] <= anio_int and e[1] <= mes_int), None)
                 if entrada:
@@ -172,41 +150,26 @@ def calcular_costos_por_ceco_modulo_mes(anio: str, meses: list, lineas_ids: list
                         costo_hora = valorDia / horas_diarias
                     elif valorMes > 0:
                         costo_hora = valorMes / horas_mes_total
-                    
-                    print(f"  Tarifa encontrada: Hora={valorHora}, Dia={valorDia}, Mes={valorMes}, Costo/hora: {costo_hora}")
-                else:
-                    print(f"  No se encontró tarifa para documento {documento}, módulo {modulo_id}")
+            
             # Acumular costo por centro de costos, módulo y mes
             costo_total = horas_trabajadas * costo_hora
-            total_costos_calculados += float(costo_total)
-            
-            print(f"  Costo calculado: {horas_trabajadas} * {costo_hora} = {costo_total}")
             
             # Obtener código de centro de costos
             try:
                 centro_costo = CentrosCostos.objects.get(id=ceco_id)
                 codigo_ceco = centro_costo.codigoCeCo
-                print(f"  CeCo encontrado: {codigo_ceco}")
             except CentrosCostos.DoesNotExist:
                 codigo_ceco = 'SIN_CECO'
-                print(f"  CeCo NO encontrado para id {ceco_id}")
             
             # Obtener nombre del módulo
             try:
                 modulo_obj = Modulo.objects.get(ModuloId=modulo_id)
                 nombre_modulo = modulo_obj.Modulo
-                print(f"  Módulo encontrado: {nombre_modulo}")
             except Modulo.DoesNotExist:
                 nombre_modulo = 'SIN_MODULO'
-                print(f"  Módulo NO encontrado para id {modulo_id}")
             
             # Acumular por mes
             costos_por_ceco_modulo_mes[codigo_ceco][nombre_modulo][mes] += costo_total
-            print(f"  Costo acumulado para {codigo_ceco}/{nombre_modulo}/{mes}: {costos_por_ceco_modulo_mes[codigo_ceco][nombre_modulo][mes]}")
-    
-    print(f"TOTAL TIEMPOS PROCESADOS: {tiempos_procesados}")
-    print(f"TOTAL COSTOS CALCULADOS: {total_costos_calculados}")
-    print(f"COSTOS POR CECO-MODULO-MES: {dict(costos_por_ceco_modulo_mes)}")
     
     return costos_por_ceco_modulo_mes
 
@@ -217,7 +180,6 @@ def filtrar_datos(request, form=None):
         lineas = form.cleaned_data.get('LineaId')
         meses = form.cleaned_data.get('Mes')
         ceco = form.cleaned_data.get('Ceco')
-        print(f"FILTRO FORM - Año: {anio}, Líneas: {lineas}, Meses: {meses}, CeCo: {ceco}")
         if anio:
             facturas = facturas.filter(Anio=anio)
         if lineas:
@@ -237,11 +199,8 @@ def filtrar_datos(request, form=None):
         lineas_ids = [l.LineaId for l in (lineas or Linea.objects.all())]
         meses_list = [str(m) for m in (meses or range(1, 13))]
         
-        print(f"CALCULANDO COSTOS CON: anio={anio}, lineas_ids={lineas_ids}, meses_list={meses_list}")
-        
         # Precargar datos y calcular costos
         horas_habiles = obtener_horas_habiles(anio)
-        print(f"HORAS HABILES: {horas_habiles}")
         
         datos_precargados = precargar_datos(
             anio, 
@@ -255,7 +214,6 @@ def filtrar_datos(request, form=None):
         )
     # Obtener todos los códigos de CeCo únicos para buscar sus descripciones
     cecos_codigos = facturas.values_list('Ceco', flat=True).distinct()
-    print(f"CECOS ENCONTRADOS EN FACTURAS: {list(cecos_codigos)}")
     
     # Crear un diccionario de {codigoCeCo: descripcionCeCo}
     descripciones_cecos = dict(CentrosCostos.objects.filter(
@@ -270,9 +228,7 @@ def filtrar_datos(request, form=None):
     ).annotate(
         total_valor=Sum('Valor')
     ).order_by('Ceco', 'LineaId__Linea', 'ModuloId__Modulo', 'Mes')
-    print(f"FACTURAS AGRUPADAS: {len(facturas_agrupadas)} registros")
-    if facturas_agrupadas:
-        print("Ejemplo de factura:", facturas_agrupadas[0])
+
     # Agregar las descripciones a los resultados
     for item in facturas_agrupadas:
         item['descripcion_ceco'] = descripciones_cecos.get(item['Ceco'], '')
@@ -293,7 +249,7 @@ def convert_to_regular_dict(d):
 
 @login_required
 @verificar_permiso('can_manage_informe_facturacion_clientes')
-def informe_facturacion_clientes(request):
+def informe_facturacion_CentroCostos(request):
     form = FacturacionClientesFilterForm(request.GET or None)
     
     meses_completos = [
@@ -302,14 +258,8 @@ def informe_facturacion_clientes(request):
         (9, 'Septiembre'), (10, 'Octubre'), (11, 'Noviembre'), (12, 'Diciembre')
     ]
     
-    print("=" * 50)
-    print("INICIANDO INFORME FACTURACIÓN CLIENTES")
-    print("=" * 50)
-    
     # Ahora recibimos costos_por_ceco_modulo_mes
     facturas, lineas_filtradas, meses_filtrados, costos_por_ceco_modulo_mes = filtrar_datos(request, form)
-    
-    print(f"COSTOS POR CECO MODULO MES RECIBIDOS: {dict(costos_por_ceco_modulo_mes)}")
     
     # Filtrar meses si es necesario
     meses = [par for par in meses_completos if not meses_filtrados or str(par[0]) in meses_filtrados]
@@ -390,7 +340,7 @@ def informe_facturacion_clientes(request):
         # ACUMULAR COSTOS POR LÍNEA Y MES (NUEVO)
         costos_por_ceco_linea_mes[ceco][linea][mes] += costo_mes
         costos_por_ceco_linea[ceco][linea] += costo_mes
-        print(f"PROCESANDO: ceco={ceco}, modulo={modulo}, mes={mes}, facturado={valor}, costo={costo_mes}")
+        
         # Actualizar totales
         totales_por_linea[linea] += valor
         totales_por_ceco[ceco] += valor
@@ -409,9 +359,7 @@ def informe_facturacion_clientes(request):
         costos_por_ceco_modulo[ceco][modulo] += costo_mes
         costos_por_mes[mes] += costo_mes
         costo_global += costo_mes
-    print(f"TOTAL GLOBAL FACTURADO: {total_global}")
-    print(f"TOTAL GLOBAL COSTO: {costo_global}")
-    print(f"MARGEN GLOBAL: {total_global - costo_global}")
+
     # Calcular totales de filas por ceco
     cecos_con_totales = {}
     for ceco, descripciones in datos.items():
@@ -450,16 +398,13 @@ def informe_facturacion_clientes(request):
         'costos_por_ceco_linea': convert_to_regular_dict(costos_por_ceco_linea),
         'costos_por_ceco_linea_mes': convert_to_regular_dict(costos_por_ceco_linea_mes),
     }
-    print("=" * 50)
-    print("FINALIZANDO INFORME FACTURACIÓN CLIENTES")
-    print("=" * 50)
     
-    return render(request, 'Informes/informes_facturacion_clientes_index.html', context)
+    return render(request, 'Informes/informe_facturacion_CentroCostos_index.html', context)
 
 @login_required
 @verificar_permiso('can_manage_informe_facturacion_clientes')
 def descargar_reporte_excel_facturacion_clientes(request):
-    # 1. Limpieza de parámetros GET
+    # Limpieza de parámetros GET
     get_params = request.GET.copy()
     
     # Eliminar parámetros vacíos o None
@@ -467,70 +412,109 @@ def descargar_reporte_excel_facturacion_clientes(request):
         if get_params[key] in ['None', '', None, 'Todos']:
             del get_params[key]
     
-    # 2. Manejo del formulario
+    # Manejo del formulario
     if not get_params:
-        # Caso sin filtros - formulario sin validar
         form = FacturacionClientesFilterForm()
     else:
-        # Caso con filtros - validar formulario
         form = FacturacionClientesFilterForm(get_params)
         if not form.is_valid():
             return HttpResponse("Parámetros inválidos para generar el reporte.")
 
-    # 3. Definición de meses
+    # Definición de meses
     meses_completos = [
         (1, 'Enero'), (2, 'Febrero'), (3, 'Marzo'), (4, 'Abril'),
         (5, 'Mayo'), (6, 'Junio'), (7, 'Julio'), (8, 'Agosto'),
         (9, 'Septiembre'), (10, 'Octubre'), (11, 'Noviembre'), (12, 'Diciembre')
     ]
     
-    # 4. Obtención de datos
+    # Obtención de datos
     try:
-        facturas, lineas_filtradas, meses_filtrados = filtrar_datos(request, form)
+        facturas, lineas_filtradas, meses_filtrados, costos_por_ceco_modulo_mes = filtrar_datos(request, form)
     except Exception as e:
         return HttpResponse(f"Error al obtener datos: {str(e)}")
 
     if not facturas:
         return HttpResponse("No hay datos disponibles para los filtros seleccionados.")
 
-    # 5. Determinar meses a mostrar
+    # Determinar meses a mostrar
     meses = meses_completos
-    if meses_filtrados:  # Solo si hay meses filtrados específicamente
+    if meses_filtrados:
         meses = [par for par in meses_completos if str(par[0]) in meses_filtrados]
 
-    # 6. Procesamiento de datos
-    datos = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict))))
-    totales_por_mes = defaultdict(float)
-    total_global = 0.0
-
+    # PRIMERO: Agrupar facturas por ceco + modulo + mes para evitar duplicados (IGUAL QUE EN LA VISTA PRINCIPAL)
+    facturas_agrupadas_por_ceco_modulo_mes = defaultdict(float)
+    
     for item in facturas:
         ceco = item.get('Ceco', 'Sin Ceco')
-        descripcion = item.get('descripcion_ceco', '')
-        linea = item.get('LineaId__Linea', 'Sin línea')
         modulo = item.get('ModuloId__Modulo', 'Sin módulo')
+        mes = int(item['Mes']) if item['Mes'] else 0
+        mes_str = str(mes)
         
-        try:
-            mes = int(item['Mes']) if item['Mes'] else 0
-        except (ValueError, TypeError):
-            mes = 0
-            
         valor = float(item['total_valor'] or 0)
-
-        # Solo filtrar por mes si hay meses_filtrados definidos
+        # Solo procesar si el mes está en los meses filtrados
         if meses_filtrados and str(mes) not in meses_filtrados:
             continue
-
-        if mes not in datos[ceco][descripcion][linea][modulo]:
-            datos[ceco][descripcion][linea][modulo][mes] = 0.0
         
-        datos[ceco][descripcion][linea][modulo][mes] += valor
-        totales_por_mes[mes] += valor
-        total_global += valor
+        # Agrupar facturas por ceco + modulo + mes (EXACTAMENTE IGUAL QUE EN LA VISTA)
+        key = f"{ceco}_{modulo}_{mes_str}"
+        facturas_agrupadas_por_ceco_modulo_mes[key] += valor
 
-    # 7. Creación del libro Excel
+    # SEGUNDO: Procesar las facturas agrupadas (IGUAL QUE EN LA VISTA PRINCIPAL)
+    datos = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict))))
+    totales_por_mes = defaultdict(float)
+    costos_por_mes = defaultdict(float)
+    total_global = 0.0
+    costo_global = 0.0
+
+    for key, valor in facturas_agrupadas_por_ceco_modulo_mes.items():
+        ceco, modulo, mes_str = key.split('_')
+        mes = int(mes_str)
+        
+        # Obtener descripción y línea de la primera factura que coincida (IGUAL QUE EN LA VISTA)
+        primera_factura = next((item for item in facturas 
+                               if item.get('Ceco') == ceco 
+                               and item.get('ModuloId__Modulo') == modulo 
+                               and int(item.get('Mes', 0)) == mes), None)
+        
+        if not primera_factura:
+            continue
+            
+        descripcion = primera_factura.get('descripcion_ceco', '')
+        linea = primera_factura.get('LineaId__Linea', 'Sin línea')
+        
+        # Obtener costo para este ceco + modulo + mes (USANDO LA MISMA LÓGICA)
+        costo = float(costos_por_ceco_modulo_mes.get(ceco, {}).get(modulo, {}).get(mes_str, Decimal('0.00')))
+        
+        # Estructura principal de datos (IGUAL QUE EN LA VISTA)
+        if ceco not in datos:
+            datos[ceco] = {}
+        if descripcion not in datos[ceco]:
+            datos[ceco][descripcion] = {}
+        if linea not in datos[ceco][descripcion]:
+            datos[ceco][descripcion][linea] = {}
+        if modulo not in datos[ceco][descripcion][linea]:
+            datos[ceco][descripcion][linea][modulo] = {}
+        
+        # Inicializar si no existe (IGUAL QUE EN LA VISTA)
+        if mes not in datos[ceco][descripcion][linea][modulo]:
+            datos[ceco][descripcion][linea][modulo][mes] = {'facturacion': 0.0, 'costo': 0.0, 'margen': 0.0}
+        
+        # Sumar el valor (ya está agrupado) - IGUAL QUE EN LA VISTA
+        datos[ceco][descripcion][linea][modulo][mes]['facturacion'] += valor
+        # AGREGAR COSTOS - Solo una vez por ceco + modulo + mes (IGUAL QUE EN LA VISTA)
+        datos[ceco][descripcion][linea][modulo][mes]['costo'] = costo
+        datos[ceco][descripcion][linea][modulo][mes]['margen'] = valor - costo
+        
+        # Actualizar totales
+        totales_por_mes[mes] += valor
+        costos_por_mes[mes] += costo
+        total_global += valor
+        costo_global += costo
+
+    # Creación del libro Excel
     wb = Workbook()
     ws = wb.active
-    ws.title = "Facturación Clientes"
+    ws.title = "Facturación Centro Costos"
 
     # ========== ESTILOS ==========
     header_style = {
@@ -566,17 +550,26 @@ def descargar_reporte_excel_facturacion_clientes(request):
         'number_format': '#,##0.00'
     }
 
+    margen_style = {
+        'font': Font(bold=True, color="000000"),
+        'border': Border(left=Side(style='thin'), right=Side(style='thin'),
+                        top=Side(style='thin'), bottom=Side(style='thin')),
+        'alignment': Alignment(horizontal="right", vertical="center"),
+        'number_format': '#,##0.00'
+    }
+
     # ========== ESTRUCTURA DEL REPORTE ==========
     # Columnas fijas
-    columns_fijas = [
-        ('Ceco', 15),
-        ('Descripción', 30),
-        ('Línea', 20),
-        ('Módulo', 20)
-    ]
-
-    # Columnas de meses
-    columnas_meses = [(mes_nombre, 15) for mes_num, mes_nombre in meses]
+    columns_fijas = [('Ceco', 15), ('Descripción', 30), ('Línea', 20), ('Módulo', 20)]
+    
+    # Columnas de meses - Ahora 3 columnas por mes (Facturación, Costo, Margen)
+    columnas_por_mes = []
+    for mes_num, mes_nombre in meses:
+        columnas_por_mes.extend([
+            (f'{mes_nombre} Facturación', 15),
+            (f'{mes_nombre} Costo', 15),
+            (f'{mes_nombre} Margen', 15)
+        ])
 
     # Escribir encabezados
     col_num = 1
@@ -587,20 +580,23 @@ def descargar_reporte_excel_facturacion_clientes(request):
         ws.column_dimensions[get_column_letter(col_num)].width = width
         col_num += 1
 
-    for mes_nombre, width in columnas_meses:
-        cell = ws.cell(row=1, column=col_num, value=mes_nombre)
+    for mes_col_title, width in columnas_por_mes:
+        cell = ws.cell(row=1, column=col_num, value=mes_col_title)
         for attr, value in header_style.items():
             setattr(cell, attr, value)
         ws.column_dimensions[get_column_letter(col_num)].width = width
         col_num += 1
 
-    # Columna de total
-    cell = ws.cell(row=1, column=col_num, value="Total")
-    for attr, value in header_style.items():
-        setattr(cell, attr, value)
-    ws.column_dimensions[get_column_letter(col_num)].width = 15
+    # Columnas de total
+    total_columns = [('Total Facturación', 15), ('Total Costo', 15), ('Total Margen', 15)]
+    for col_title, width in total_columns:
+        cell = ws.cell(row=1, column=col_num, value=col_title)
+        for attr, value in header_style.items():
+            setattr(cell, attr, value)
+        ws.column_dimensions[get_column_letter(col_num)].width = width
+        col_num += 1
 
-    # ------ Escribir datos ------
+    # Escribir datos
     row_num = 2
     
     for ceco, descripciones in datos.items():
@@ -627,41 +623,111 @@ def descargar_reporte_excel_facturacion_clientes(request):
                                 setattr(cell, attr, value)
                     
                     # Escribir valores por mes
-                    col_num = 5
-                    total_fila = 0.0
+                    col_num_data = 5
+                    total_facturacion_fila = 0.0
+                    total_costo_fila = 0.0
+                    total_margen_fila = 0.0
                     
                     for mes_num, mes_nombre in meses:
-                        valor = meses_data.get(mes_num, 0.0)
-                        cell = ws.cell(row=row_num, column=col_num, value=valor)
+                        # Obtener datos para este mes
+                        mes_data = meses_data.get(mes_num, {'facturacion': 0.0, 'costo': 0.0, 'margen': 0.0})
+                        facturacion = mes_data['facturacion']
+                        costo = mes_data['costo']
+                        margen = mes_data['margen']
+                        
+                        # Facturación
+                        cell = ws.cell(row=row_num, column=col_num_data, value=facturacion)
                         for attr, value in data_style.items():
                             setattr(cell, attr, value)
+                        col_num_data += 1
                         
-                        total_fila += valor
-                        col_num += 1
+                        # Costo
+                        cell = ws.cell(row=row_num, column=col_num_data, value=costo)
+                        for attr, value in data_style.items():
+                            setattr(cell, attr, value)
+                        col_num_data += 1
+                        
+                        # Margen
+                        cell = ws.cell(row=row_num, column=col_num_data, value=margen)
+                        for attr, value in margen_style.items():
+                            setattr(cell, attr, value)
+                        col_num_data += 1
+                        
+                        total_facturacion_fila += facturacion
+                        total_costo_fila += costo
+                        total_margen_fila += margen
                     
-                    # Escribir total de la fila
-                    cell = ws.cell(row=row_num, column=col_num, value=total_fila)
+                    # Escribir totales de la fila
+                    cell = ws.cell(row=row_num, column=col_num_data, value=total_facturacion_fila)
                     for attr, value in data_style.items():
+                        setattr(cell, attr, value)
+                    col_num_data += 1
+                    
+                    cell = ws.cell(row=row_num, column=col_num_data, value=total_costo_fila)
+                    for attr, value in data_style.items():
+                        setattr(cell, attr, value)
+                    col_num_data += 1
+                    
+                    cell = ws.cell(row=row_num, column=col_num_data, value=total_margen_fila)
+                    for attr, value in margen_style.items():
                         setattr(cell, attr, value)
                     
                     row_num += 1
                 
-                # Total por grupo (mostrar siempre, incluso si hay un solo módulo)
-                ws.cell(row=row_num, column=3, value=f"Total {descripcion}")
+                # Total por línea
+                ws.cell(row=row_num, column=3, value=f"Total {linea}")
                 
-                col_num = 5
-                total_linea = 0.0
+                col_num_data = 5
+                total_facturacion_linea = 0.0
+                total_costo_linea = 0.0
+                total_margen_linea = 0.0
                 
                 for mes_num, mes_nombre in meses:
-                    total_mes = sum(modulo_data.get(mes_num, 0.0) for modulo_data in modulos.values())
-                    cell = ws.cell(row=row_num, column=col_num, value=total_mes)
+                    # Calcular totales por mes para esta línea
+                    facturacion_mes = 0.0
+                    costo_mes = 0.0
+                    margen_mes = 0.0
+                    
+                    for modulo_data in modulos.values():
+                        mes_data = modulo_data.get(mes_num, {'facturacion': 0.0, 'costo': 0.0, 'margen': 0.0})
+                        facturacion_mes += mes_data['facturacion']
+                        costo_mes += mes_data['costo']
+                        margen_mes += mes_data['margen']
+                    
+                    # Facturación
+                    cell = ws.cell(row=row_num, column=col_num_data, value=facturacion_mes)
                     for attr, value in total_style.items():
                         setattr(cell, attr, value)
+                    col_num_data += 1
                     
-                    total_linea += total_mes
-                    col_num += 1
+                    # Costo
+                    cell = ws.cell(row=row_num, column=col_num_data, value=costo_mes)
+                    for attr, value in total_style.items():
+                        setattr(cell, attr, value)
+                    col_num_data += 1
+                    
+                    # Margen
+                    cell = ws.cell(row=row_num, column=col_num_data, value=margen_mes)
+                    for attr, value in total_style.items():
+                        setattr(cell, attr, value)
+                    col_num_data += 1
+                    
+                    total_facturacion_linea += facturacion_mes
+                    total_costo_linea += costo_mes
+                    total_margen_linea += margen_mes
                 
-                cell = ws.cell(row=row_num, column=col_num, value=total_linea)
+                # Totales de la línea
+                cell = ws.cell(row=row_num, column=col_num_data, value=total_facturacion_linea)
+                for attr, value in total_style.items():
+                    setattr(cell, attr, value)
+                col_num_data += 1
+                
+                cell = ws.cell(row=row_num, column=col_num_data, value=total_costo_linea)
+                for attr, value in total_style.items():
+                    setattr(cell, attr, value)
+                col_num_data += 1
+                
+                cell = ws.cell(row=row_num, column=col_num_data, value=total_margen_linea)
                 for attr, value in total_style.items():
                     setattr(cell, attr, value)
                 
@@ -671,22 +737,58 @@ def descargar_reporte_excel_facturacion_clientes(request):
             if len(lineas) > 1:
                 ws.cell(row=row_num, column=2, value=f"Total {descripcion}")
                 
-                col_num = 5
-                total_desc = 0.0
+                col_num_data = 5
+                total_facturacion_desc = 0.0
+                total_costo_desc = 0.0
+                total_margen_desc = 0.0
                 
                 for mes_num, mes_nombre in meses:
-                    total_mes = sum(
-                        sum(modulo_data.get(mes_num, 0.0) for modulo_data in lineas[linea].values())
-                        for linea in lineas
-                    )
-                    cell = ws.cell(row=row_num, column=col_num, value=total_mes)
+                    # Calcular totales por mes para esta descripción
+                    facturacion_mes = 0.0
+                    costo_mes = 0.0
+                    margen_mes = 0.0
+                    
+                    for linea_data in lineas.values():
+                        for modulo_data in linea_data.values():
+                            mes_data = modulo_data.get(mes_num, {'facturacion': 0.0, 'costo': 0.0, 'margen': 0.0})
+                            facturacion_mes += mes_data['facturacion']
+                            costo_mes += mes_data['costo']
+                            margen_mes += mes_data['margen']
+                    
+                    # Facturación
+                    cell = ws.cell(row=row_num, column=col_num_data, value=facturacion_mes)
                     for attr, value in total_style.items():
                         setattr(cell, attr, value)
+                    col_num_data += 1
                     
-                    total_desc += total_mes
-                    col_num += 1
+                    # Costo
+                    cell = ws.cell(row=row_num, column=col_num_data, value=costo_mes)
+                    for attr, value in total_style.items():
+                        setattr(cell, attr, value)
+                    col_num_data += 1
+                    
+                    # Margen
+                    cell = ws.cell(row=row_num, column=col_num_data, value=margen_mes)
+                    for attr, value in total_style.items():
+                        setattr(cell, attr, value)
+                    col_num_data += 1
+                    
+                    total_facturacion_desc += facturacion_mes
+                    total_costo_desc += costo_mes
+                    total_margen_desc += margen_mes
                 
-                cell = ws.cell(row=row_num, column=col_num, value=total_desc)
+                # Totales de la descripción
+                cell = ws.cell(row=row_num, column=col_num_data, value=total_facturacion_desc)
+                for attr, value in total_style.items():
+                    setattr(cell, attr, value)
+                col_num_data += 1
+                
+                cell = ws.cell(row=row_num, column=col_num_data, value=total_costo_desc)
+                for attr, value in total_style.items():
+                    setattr(cell, attr, value)
+                col_num_data += 1
+                
+                cell = ws.cell(row=row_num, column=col_num_data, value=total_margen_desc)
                 for attr, value in total_style.items():
                     setattr(cell, attr, value)
                 
@@ -696,25 +798,59 @@ def descargar_reporte_excel_facturacion_clientes(request):
         if len(descripciones) > 1:
             ws.cell(row=row_num, column=1, value=f"Total {ceco}")
             
-            col_num = 5
-            total_ceco = 0.0
+            col_num_data = 5
+            total_facturacion_ceco = 0.0
+            total_costo_ceco = 0.0
+            total_margen_ceco = 0.0
             
             for mes_num, mes_nombre in meses:
-                total_mes = sum(
-                    sum(
-                        sum(modulo_data.get(mes_num, 0.0) for modulo_data in lineas[linea].values())
-                        for linea in lineas
-                    )
-                    for lineas in descripciones.values()
-                )
-                cell = ws.cell(row=row_num, column=col_num, value=total_mes)
+                # Calcular totales por mes para este ceco
+                facturacion_mes = 0.0
+                costo_mes = 0.0
+                margen_mes = 0.0
+                
+                for descripcion_data in descripciones.values():
+                    for linea_data in descripcion_data.values():
+                        for modulo_data in linea_data.values():
+                            mes_data = modulo_data.get(mes_num, {'facturacion': 0.0, 'costo': 0.0, 'margen': 0.0})
+                            facturacion_mes += mes_data['facturacion']
+                            costo_mes += mes_data['costo']
+                            margen_mes += mes_data['margen']
+                
+                # Facturación
+                cell = ws.cell(row=row_num, column=col_num_data, value=facturacion_mes)
                 for attr, value in total_style.items():
                     setattr(cell, attr, value)
+                col_num_data += 1
                 
-                total_ceco += total_mes
-                col_num += 1
+                # Costo
+                cell = ws.cell(row=row_num, column=col_num_data, value=costo_mes)
+                for attr, value in total_style.items():
+                    setattr(cell, attr, value)
+                col_num_data += 1
+                
+                # Margen
+                cell = ws.cell(row=row_num, column=col_num_data, value=margen_mes)
+                for attr, value in total_style.items():
+                    setattr(cell, attr, value)
+                col_num_data += 1
+                
+                total_facturacion_ceco += facturacion_mes
+                total_costo_ceco += costo_mes
+                total_margen_ceco += margen_mes
             
-            cell = ws.cell(row=row_num, column=col_num, value=total_ceco)
+            # Totales del ceco
+            cell = ws.cell(row=row_num, column=col_num_data, value=total_facturacion_ceco)
+            for attr, value in total_style.items():
+                setattr(cell, attr, value)
+            col_num_data += 1
+            
+            cell = ws.cell(row=row_num, column=col_num_data, value=total_costo_ceco)
+            for attr, value in total_style.items():
+                setattr(cell, attr, value)
+            col_num_data += 1
+            
+            cell = ws.cell(row=row_num, column=col_num_data, value=total_margen_ceco)
             for attr, value in total_style.items():
                 setattr(cell, attr, value)
             
@@ -724,14 +860,39 @@ def descargar_reporte_excel_facturacion_clientes(request):
     if datos:
         ws.cell(row=row_num, column=1, value="TOTAL GLOBAL")
         
-        col_num = 5
+        col_num_data = 5
         for mes_num, mes_nombre in meses:
-            cell = ws.cell(row=row_num, column=col_num, value=totales_por_mes.get(mes_num, 0.0))
+            # Facturación
+            cell = ws.cell(row=row_num, column=col_num_data, value=totales_por_mes.get(mes_num, 0.0))
             for attr, value in global_total_style.items():
                 setattr(cell, attr, value)
-            col_num += 1
+            col_num_data += 1
+            
+            # Costo
+            cell = ws.cell(row=row_num, column=col_num_data, value=costos_por_mes.get(mes_num, 0.0))
+            for attr, value in global_total_style.items():
+                setattr(cell, attr, value)
+            col_num_data += 1
+            
+            # Margen
+            margen_mes = totales_por_mes.get(mes_num, 0.0) - costos_por_mes.get(mes_num, 0.0)
+            cell = ws.cell(row=row_num, column=col_num_data, value=margen_mes)
+            for attr, value in global_total_style.items():
+                setattr(cell, attr, value)
+            col_num_data += 1
         
-        cell = ws.cell(row=row_num, column=col_num, value=total_global)
+        # Totales globales
+        cell = ws.cell(row=row_num, column=col_num_data, value=total_global)
+        for attr, value in global_total_style.items():
+            setattr(cell, attr, value)
+        col_num_data += 1
+        
+        cell = ws.cell(row=row_num, column=col_num_data, value=costo_global)
+        for attr, value in global_total_style.items():
+            setattr(cell, attr, value)
+        col_num_data += 1
+        
+        cell = ws.cell(row=row_num, column=col_num_data, value=total_global - costo_global)
         for attr, value in global_total_style.items():
             setattr(cell, attr, value)
 

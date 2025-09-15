@@ -1,5 +1,5 @@
 from django.urls import path
-from Modulo.Views import Act_Maestro, Informe_clientes, clientes_factura, indicadores_operatividad, indicadores_totales, informe_facturacion_clientes, informe_tiempos_consultores, modulo
+from Modulo.Views import Act_Maestro, Informe_clientes, clientes_factura, indicadores_operatividad, indicadores_totales, informe_facturacion_CentroCostos, informe_tiempos_consultores, modulo
 from Modulo.Views import ipc
 from Modulo.Views import ind
 from Modulo.Views import TipoDocumento
@@ -430,9 +430,9 @@ urlpatterns = [
     path('informes/pagares/', informe_pagares, name='informe_pagares'),
     path('informes/pagares/exportar_pagares_excel/', exportar_pagares_excel, name='exportar_pagares_excel'),
 
-    #Ruta para informe de Facturacion Clientes
-    path('informes/informes_facturacion_clientes/', informe_facturacion_clientes.informe_facturacion_clientes, name='informes_facturacion_clientes_index'),
-    path('informes/informes_facturacion_clientes/descargar_informe_facturacion_clientes_excel/', informe_facturacion_clientes.descargar_reporte_excel_facturacion_clientes, name='descargar_reporte_excel_facturacion_clientes'),
+    #Ruta para informe de Facturacion Centro Costos
+    path('informes/informe_facturacion_CentroCostos/', informe_facturacion_CentroCostos.informe_facturacion_CentroCostos, name='informe_facturacion_CentroCostos_index'),
+    path('informes/informe_facturacion_CentroCostos/descargar_informe_facturacion_clientes_excel/', informe_facturacion_CentroCostos.descargar_reporte_excel_facturacion_clientes, name='descargar_reporte_excel_facturacion_clientes'),
 
     # URLs para TipoPagare
     path('TipoPagare/', tipo_pagare_index, name='tipo_pagare_index'),
