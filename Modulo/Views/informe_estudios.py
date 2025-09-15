@@ -18,9 +18,6 @@ from openpyxl.styles import Font, Alignment, Border, Side
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_informe_estudios')
-
 # Función para filtrar Empleado y Empleados_Estudios
 def filtrar_empleados_y_estudios(form, empleados, empleados_estudios):
     """
@@ -80,6 +77,9 @@ def obtener_empleado_estudio(empleados, estudios):
 
     return empleado_estudio_info
 
+
+@login_required
+@verificar_permiso('can_manage_informe_estudios')
 def empleado_estudio_filtrado(request):
     """
     Vista principal del informe de estudios.
@@ -141,6 +141,9 @@ def empleado_estudio_filtrado(request):
 
     return render(request, 'informes/informes_estudios_index.html', context)
 
+
+@login_required
+@verificar_permiso('can_manage_informe_estudios')
 def exportar_estudio_excel(request):
     """
     Exporta los datos filtrados de estudios de empleados a un archivo Excel.

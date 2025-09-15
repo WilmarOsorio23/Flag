@@ -13,8 +13,6 @@ from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
 
-@login_required
-@verificar_permiso('can_manage_informe_pagare')
 
 def calcular_meses_condonados(fecha_inicio):
     if not fecha_inicio or not isinstance(fecha_inicio, date):
@@ -53,6 +51,8 @@ def filtrar_pagares(form, pagarés):
         
     return pagarés
 
+@login_required
+@verificar_permiso('can_manage_informe_pagare')
 def informe_pagares(request):
     pagarés_info = []
     show_data = False
@@ -145,6 +145,8 @@ def informe_pagares(request):
 
     return render(request, 'Pagare/Informe_Pagare.html', context)
 
+@login_required
+@verificar_permiso('can_manage_informe_pagare')
 def exportar_pagares_excel(request):
     # Obtener datos de la sesión
     pagarés_info = request.session.get('pagares_info', [])

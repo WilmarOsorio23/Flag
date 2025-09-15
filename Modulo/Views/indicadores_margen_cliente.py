@@ -8,9 +8,6 @@ import json
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_indicadores_margen_cliente')
-
 def obtener_horas_habiles(anio: str) -> dict:
     """Obtiene días y horas hábiles por mes para un año específico"""
     registros = Horas_Habiles.objects.filter(Anio=anio)
@@ -168,6 +165,8 @@ def obtener_ipc_anio(anio):
     except Exception:
         return 1
 
+@login_required
+@verificar_permiso('can_manage_indicadores_margen_cliente')
 def indicadores_margen_cliente(request):
     form = Ind_Totales_FilterForm(request.GET or None)
     resultados = None

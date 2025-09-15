@@ -19,8 +19,6 @@ from openpyxl.styles import Font, Alignment, Border, Side
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_informe_empleados')
 
 def filtrar_empleados(form, empleados):
     """
@@ -92,6 +90,8 @@ def obtener_informe_empleados(empleados):
         empleado_info.append(datos_empleado)
     return empleado_info
 
+@login_required
+@verificar_permiso('can_manage_informe_empleados')
 # Vista del informe de empleados
 def informe_empleados(request):
     """
@@ -198,6 +198,8 @@ def informe_empleados(request):
 
     return render(request, 'informes/informes_empleado_index.html', context)
 
+@login_required
+@verificar_permiso('can_manage_informe_empleados')
 # Funcionalidad para descargar el informe de empleados en Excel
 def exportar_empleados_excel(request):
     """

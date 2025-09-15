@@ -18,9 +18,6 @@ MESES = {
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_clientes')
-
 # Funciones auxiliares
 
 # 1. Función para obtener días y horas hábiles
@@ -484,6 +481,9 @@ def calcular_pendiente_por_linea(anio: str, mes: str, linea: Linea, horas_habile
         total_valor += pendiente_cliente['valor']
     return {'horas': total_horas, 'valor': total_valor}
 
+
+@login_required
+@verificar_permiso('can_manage_clientes')
 def indicadores_totales(request):
     form = Ind_Totales_FilterForm(request.GET or None)
     resultados = {

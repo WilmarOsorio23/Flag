@@ -20,8 +20,6 @@ from openpyxl.styles import Font, Alignment, Border, Side
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_informe_clientes_contratos')
 
 #Función para filtrar Contratos de clientes
 def filtrar_clientes_contratos(form, clientes, clientes_contratos):
@@ -106,6 +104,8 @@ def obtener_clientes_contratos(clientes, contratos):
 
     return cliente_contratos_info
 
+@login_required
+@verificar_permiso('can_manage_informe_clientes_contratos')
 # Función para generar el informe de contratos de clientes
 def clientes_contratos_filtrado(request):
     """
@@ -171,6 +171,8 @@ def clientes_contratos_filtrado(request):
 
     return render(request, 'informes/informes_clientes_contratos_index.html', context)
 
+@login_required
+@verificar_permiso('can_manage_informe_clientes_contratos')
 # Función para exportar el informe de contratos de clientes a Excel
 def exportar_clientes_contratos_excel(request):
     """

@@ -18,9 +18,6 @@ from openpyxl.styles import Font, Alignment, Border, Side
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_informe_tarifas_consultoras')
-
 def filtrar_tarifas_consultores(form, consultores, consultores_tarifas):
     """
     Aplica filtros del formulario sobre consultores y tarifas.
@@ -104,7 +101,8 @@ def obtener_tarifas_consultores(consultores, tarifas, anios):
 
     return consultor_tarifas_info
         
-
+@login_required
+@verificar_permiso('can_manage_informe_tarifas_consultoras')
 def tarifas_consultores_filtrado(request):
     """
     Vista que presenta el informe de tarifas de consultores.
@@ -150,6 +148,8 @@ def tarifas_consultores_filtrado(request):
 
     return render(request, 'informes/informes_tarifas_consultores_index.html', context)
 
+@login_required
+@verificar_permiso('can_manage_informe_tarifas_consultoras')
 def exportar_tarifas_consultores_excel(request):
     """
     Exporta a Excel la información filtrada de tarifas de consultores.

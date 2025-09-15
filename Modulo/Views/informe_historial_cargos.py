@@ -12,9 +12,6 @@ from openpyxl.styles import Font, Alignment, Border, Side
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_historial_cargos')
-
 def filtrar_historial_cargos(request):
     # Obtener los filtros de la URL (GET)
     empleados = request.GET.getlist('Empleado')
@@ -54,6 +51,8 @@ def filtrar_historial_cargos(form, historial):
 
     return historial
 
+@login_required
+@verificar_permiso('can_manage_historial_cargos')
 # Vista para mostrar el informe historial de cargos
 def historial_cargos_filtrado(request):
     historial_info = []
@@ -96,6 +95,8 @@ def historial_cargos_filtrado(request):
 
     return render(request, 'informes/informes_historial_cargos_index.html', context)
 
+@login_required
+@verificar_permiso('can_manage_historial_cargos')
 def exportar_historial_cargos_excel(request):
     historial_info = []
 
