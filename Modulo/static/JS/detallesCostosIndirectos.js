@@ -1,23 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    window.cancelEdit = function() {
-        console.log("esta en cancel")
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length == 1) {
-            let row = selected[0].closest('tr');
-            // Restaurar los valores originales desde el atributo personalizado
-            row.querySelectorAll('input.form-control').forEach(input => {
-                if (input.hasAttribute('data-original-value')) {
-                    input.value = input.getAttribute('data-original-value');
-                }
-            });
-            selected.disabled = false;
-            selected.checked = false;
-            window.location.reload();
-            disableEditMode(selected,row);
-            showMessage('Cambios cancelados.', 'danger');
-        }
-    };
-
+    
     // Clonar checkboxes seleccionados en el formulario de descarga
     document.getElementById('download-form').addEventListener('submit', function(event) {
     let selectedCheckboxes = document.querySelectorAll('.row-select:checked');
@@ -94,49 +76,95 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    window.enableEdit = function() {
-       
-        let selected = document.querySelectorAll('.row-select:checked');
+    window.enableEdit = function () {
+        const selected = document.querySelectorAll('.row-select:checked');
         if (selected.length === 0) {
-            alert('No has seleccionado ningúna Nomina para editar.');
+            alert('No has seleccionado ningún registro para editar.');
             return false;
         }
         if (selected.length > 1) {
-            alert('Solo puedes editar una Nomina a la vez.');
+            alert('Solo puedes editar un registro a la vez.');
             return false;
         }
 
-        let row = selected[0].closest('tr');
-        let inputs = row.querySelectorAll('input.form-control-plaintext');
+        const row = selected[0].closest('tr');
 
-        // Guardar valores originales en un atributo personalizado 
-        inputs.forEach(input => { 
-        input.setAttribute('data-original-value', input.value);
+        // Lista de campos específicos que son editables (solo "valor")
+        const editableFields = [
+            { name: "valor", type: "text" }
+        ];
+
+        // Guardar valores originales en un atributo personalizado
+        editableFields.forEach(field => {
+            const element = row.querySelector(`[name="${field.name}"]`);
+            const span = row.querySelector(`[data-field="${field.name}"] span.form-control-plaintext`);
+            if (element) {
+                element.setAttribute('data-original-value', element.value);
+            }
+            if (span) {
+                span.setAttribute('data-original-value', span.innerText.trim());
+            }
         });
 
-        // Desactivar todos los checkboxes, incluyendo el de seleccionar todos, boton de editar  
+        // Habilitar el campo editable y ocultar el span correspondiente
+        editableFields.forEach(field => {
+            const element = row.querySelector(`[name="${field.name}"]`);
+            const span = row.querySelector(`[data-field="${field.name}"] span.form-control-plaintext`);
+            if (element) {
+                element.classList.remove('form-control-plaintext');
+                element.classList.add('form-control');
+                element.readOnly = false;
+                element.classList.remove('d-none'); // Mostrar el input
+            }
+            if (span) {
+                span.classList.add('d-none'); // Ocultar el span en modo edición
+            }
+        });
+
+        // Desactivar todos los checkboxes y botones de edición
         document.getElementById('select-all').disabled = true;
         document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
         document.getElementById('edit-button').disabled = true;
 
-        // Convertir inputs en editables
-        let input = row.querySelector(`[name="valor"]`);
-        input.classList.remove('form-control-plaintext');
-        input.classList.add('form-control');
-        input.readOnly = false;
-      
-        // Mostrar botones de "Guardar" y "Cancelar" en la parte superior
+        // Mostrar botones de "Guardar" y "Cancelar"
         document.getElementById('save-button').classList.remove('d-none');
         document.getElementById('cancel-button').classList.remove('d-none');
-
     };
 
-    document.getElementById('select-all').addEventListener('click', function(event) {
-        let checkboxes = document.querySelectorAll('.row-select');
-        for (let checkbox of checkboxes) {
-            checkbox.checked = event.target.checked;
+    window.cancelEdit = function () {
+        const selected = document.querySelectorAll('.row-select:checked');
+        if (selected.length === 1) {
+            const row = selected[0].closest('tr');
+
+            // Restaurar valores originales (solo "valor")
+            const editableFields = ["valor"];
+
+            editableFields.forEach(name => {
+                const element = row.querySelector(`[name="${name}"]`);
+                const span = row.querySelector(`[data-field="${name}"] span.form-control-plaintext`);
+                if (element) {
+                    element.value = element.getAttribute('data-original-value');
+                    element.classList.add('form-control-plaintext');
+                    element.classList.remove('form-control');
+                    element.readOnly = true;
+                    element.classList.add('d-none'); // Ocultar el input
+                }
+                if (span) {
+                    span.innerText = span.getAttribute('data-original-value');
+                    span.classList.remove('d-none'); // Mostrar el span en modo solo lectura
+                }
+            });
+
+            // Restaurar botones y checkboxes
+            document.getElementById('select-all').disabled = false;
+            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
+            document.getElementById('edit-button').disabled = false;
+
+            // Ocultar botones de "Guardar" y "Cancelar"
+            document.getElementById('save-button').classList.add('d-none');
+            document.getElementById('cancel-button').classList.add('d-none');
         }
-    });
+    };
 
     // Obtener el valor del token CSRF para ser utilizado en las solicitudes POST
    
@@ -303,7 +331,65 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
    
-    
+    const table = document.querySelector('.table-primary');
+    if (table) {
+        const headers = table.querySelectorAll('th.sortable');
+
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-sort');
+                const direction = header.getAttribute('data-direction') || 'asc';
+                const newDirection = direction === 'asc' ? 'desc' : 'asc';
+
+                sortTableByColumn(table, column, newDirection);
+
+                // Reset all headers to default
+                headers.forEach(h => {
+                    h.setAttribute('data-direction', 'default');
+                    h.querySelector('.sort-icon-default').style.display = 'inline';
+                    h.querySelector('.sort-icon-asc').style.display = 'none';
+                    h.querySelector('.sort-icon-desc').style.display = 'none';
+                });
+
+                // Set current header direction
+                header.setAttribute('data-direction', newDirection);
+                header.querySelector('.sort-icon-default').style.display = 'none';
+                header.querySelector(`.sort-icon-${newDirection}`).style.display = 'inline';
+            });
+        });
+        
+
+        function sortTableByColumn(table, columnName, direction) {
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+            rows.sort((a, b) => {
+                const cellA = a.querySelector(`[data-field="${columnName}"]`);
+                const cellB = b.querySelector(`[data-field="${columnName}"]`);
+        
+                if (!cellA || !cellB) return 0;
+        
+                // Obtener el texto del <span> para el ordenamiento
+                const getCellValue = (cell) => {
+                    const span = cell.querySelector('span');
+                    if (span) {
+                        return span.innerText.trim();
+                    }
+                    return '';
+                };
+        
+                const textA = getCellValue(cellA);
+                const textB = getCellValue(cellB);
+        
+                // String comparison
+                return direction === 'asc'
+                    ? textA.localeCompare(textB)
+                    : textB.localeCompare(textA);
+            });
+        
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    }
     
 
     

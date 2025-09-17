@@ -28,7 +28,12 @@
         <!-- CRUD Icons -->
         <div class="button-group">
             <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'total_costos_indirectos_crear' %}" role="button"></a>
-            <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button" onclick="enableEditDetails();"></a>
+            <button id="edit-button" 
+                class="btn btn-outline-primary fas fa-edit" 
+                title="Editar" 
+                type="button"
+                onclick="enableEditDetails();">
+            </button>
             <button type="button" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" onclick="eliminarSeleccionados(event);"></button>
             <form id="download-form" method="POST" action="{% url 'total_costos_indirectos_descargar_excel' %}" style="display:inline;">
                 {% csrf_token %}
@@ -47,13 +52,13 @@
                 class="btn btn-outline-success fas fa-save d-none" 
                 title="Guardar" 
                 type="button" 
-                onclick="saveRow();">
+                onclick="saveDetails();">
             </button>
             <button id="cancel-button" 
                 class="btn btn-outline-danger fas fa-times d-none" 
                 title="Cancelar" 
                 type="button"
-                onclick="cancelEdit();">
+                onclick="cancelEditDetails();">
             </button>
         </div>
     </div>
@@ -62,32 +67,92 @@
         <div class="table-responsive">
             <form id="delete-form" action="{% url 'total_costos_indirectos_eliminar' %}">
                 {% csrf_token %}
-                <table class="table table-primary">
+                <table class="table table-primary" id="tabla_detalles">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Año</th>
-                            <th scope="col">Mes</th>
-                            <th scope="col">Total</th>
+                            <th data-sort="Anio" class="sortable" data-direction="default">
+                                Año
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span></th>
+                            <th data-sort="Mes" class="sortable" data-direction="default">
+                                Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Total" class="sortable" data-direction="default">
+                                Total
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="anio" class="sortable" data-direction="default">
+                                Año
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="mes" class="sortable" data-direction="default">
+                                Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="total" class="sortable" data-direction="default">
+                                Total
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                         </tr>
                     </thead>
+                    <tbody id="tabla-detalles-tbody">
+                        {% for detalle in total_costos_indirectos_data %}
+                        <tr id="row-{{ detalle.id }}" data-id="{{ detalle.id }}">
+                            <td style="display: none;">
+                                <input type="hidden" name="id" value="{{ detalle.id }}">
+                            </td>
+                            <td>
+                                <input type="checkbox" class="detail-select" name="items_to_delete" value="{{ detalle.id }}">
+                            </td>
+                            <td data-field="Anio" class="text-start">
+                                <span class="form-control-plaintext">{{ detalle.Anio }}</span>
+                                <input type="text" name="Anio" value="{{ detalle.Anio }}" class="form-control d-none" readonly>
+                            </td>
+                            <td data-field="Mes" class="text-start">
+                                <span class="form-control-plaintext">{{ detalle.Mes }}</span>
+                                <input type="text" name="Mes" value="{{ detalle.Mes }}" class="form-control d-none" readonly>
+                            </td>
+                            <td data-field="Valor" id="total-{{ detalle.Anio }}-{{ detalle.Mes }}" class="text-end">
+                                <span class="form-control-plaintext">{{ detalle.Total }}</span>
+                                <input type="text" name="Valor" value="{{ detalle.Total }}" class="form-control d-none" readonly>
+                            </td>
                     <tbody>
                         {% for item in total_costos_indirectos_data %}
                         <tr id="row-{{ item.id }}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ item.id }}"></td>
-                            <td>{{ item.Anio }}</td>
-                            <td>{{ item.Mes }}</td>
-                            <td id="total-{{ item.Anio }}-{{ item.Mes }}">{{ item.Total }} </td>
+                            <td data-field="anio" class="text-end">{{ item.Anio }}</td>
+                            <td data-field="mes" class="text-end">{{ item.Mes }}</td>
+                            <td data-field="total" class="text-end" id="total-{{ item.Anio }}-{{ item.Mes }}">{{ item.Total }} </td>
                             <td>
-                                <a href="{% url 'total_costos_crear_detalle' item.id %}" class="btn btn-success btn-sm" title="Agregar Detalle">
-                                    <i class="fas fa-plus"></i> <!-- Icono de agregar -->
+                                <a href="{% url 'total_costos_crear_detalle' detalle.id %}" class="btn btn-success btn-sm" title="Agregar Detalle">
+                                    <i class="fas fa-plus"></i>
                                 </a>
                             </td>
-                    
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4">No hay datos disponibles.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -113,7 +178,7 @@
                         <th>Valor</th>
                     </tr>
                 </thead>
-                <tbody id="tabla-detalles-tbody">
+                <tbody id="tabla-detalles-secundaria-tbody">
                     {% for detalle in detalles_costos_indirectos %}
                     <tr data-id="{{ detalle.Id }}">
                         <td><input type="checkbox" class="detail-select" value="{{ detalle.Id }}"></td>

@@ -49,7 +49,7 @@
                   id="dropdownDocumento" 
                   data-bs-toggle="dropdown" 
                   aria-expanded="false"
-                  data-selected-text="Seleccione Documento">
+                  data-selected-text="Seleccione Consultor">
                 </button>
                 <ul class="dropdown-menu w-100" aria-labelledby="dropdownDocumento">
                   {% for checkbox in form.documento %}
@@ -162,6 +162,14 @@
                       <i class="fas fa-sort-down sort-icon-desc"></i>
                   </span>
                 </th>
+                <th data-sort="empresa" class="sortable" data-direction="default">
+                Empresa
+                  <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+              </th>
                 <th data-sort="anio" class="sortable" data-direction="default">
                   Año
                   <span class="sort-icon">
@@ -218,6 +226,7 @@
                 <tr>
                   <td data-field="documento" class="text-end">{{ registro.Documento }}</td>
                   <td data-field="nombre" class="text-start">{{ registro.Nombre }}</td>
+                  <td data-field="nombre" class="text-end">{{ registro.Empresa }}</td>
                   <td data-field="anio" class="text-end">{{ registro.Anio }}</td>
                   <td data-field="mes" class="text-end">{{ registro.Mes }}</td>
                   <td data-field="linea" class="text-start">{{ registro.Linea }}</td>

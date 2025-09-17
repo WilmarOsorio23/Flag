@@ -56,40 +56,131 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Cliente</th>
-                            <th scope="col">Fecha Inicio</th>
-                            <th scope="col">Fecha Fin</th>
-                            <th scope="col">Número Otro Si</th>
-                            <th scope="col">Valor Otro Si</th>
-                            <th scope="col">Valor Incluye Iva</th>
-                            <th scope="col">Polizas</th>
-                            <th scope="col">Descripción Polizas</th>
-                            <th scope="col">Firmado Flag</th>
-                            <th scope="col">Firmado Cliente</th>
-                            <th scope="col">Moneda</th>
-                            <th scope="col">Contrato</th>
+                            <th data-sort="Cliente" class="sortable" data-direction="default">
+                                Cliente
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="FechaInicio" class="sortable" data-direction="default">
+                                Fecha Inicio
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="FechaFin" class="sortable" data-direction="default">
+                                Fecha Fin
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="NumeroOtroSi" class="sortable" data-direction="default">
+                                Número Otro Si
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="ValorOtroSi" class="sortable" data-direction="default">
+                                Valor Otro Si
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="ValorIncluyeIva" class="sortable" data-direction="default">
+                                Valor Incluye Iva
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Polizas" class="sortable" data-direction="default">
+                                Polizas
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="PolizasDesc" class="sortable" data-direction="default">
+                                Descripción Polizas
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="FirmadoFlag" class="sortable" data-direction="default">
+                                Firmado Flag
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="FirmadoCliente" class="sortable" data-direction="default">
+                                Firmado Cliente
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Moneda" class="sortable" data-direction="default">
+                                Moneda
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Contrato" class="sortable" data-direction="default">
+                                Contrato
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for contrato in contratos_otros_si_data %}
                         <tr>
-                            <td>
+                            <td >
                                 <input type="checkbox" class="row-select" name="items_to_delete" value="{{ contrato.ContratosOtrosSiId }}">
                             </td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
-                                <input type="text" class="form-control-plaintext" name="Nombre_Cliente" value="{{ contrato.ClienteId.Nombre_Cliente }}" readonly>
+                            <td data-field="Cliente" class="text-start" style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
+                                <span class="form-control-plaintext">{{ contrato.ClienteId.Nombre_Cliente }}</span>
+                                <input type="text" class="form-control d-none" name="Nombre_Cliente" value="{{ contrato.ClienteId.Nombre_Cliente }}" readonly>
                             </td>
-                            <td>
-                                <input type="date" class="form-control-plaintext" name="FechaInicio" value="{{ contrato.FechaInicio|date:'Y-m-d' }}" readonly>
+                            <td data-field="FechaInicio" class="text-start">
+                                <span class="form-control-plaintext">{{ contrato.FechaInicio|date:'Y-m-d' }}</span>
+                                <input type="date" class="form-control d-none" name="FechaInicio" value="{{ contrato.FechaInicio|date:'Y-m-d' }}" readonly>
                             </td>
-                            <td>
-                                <input type="date" class="form-control-plaintext" name="FechaFin" value="{{ contrato.FechaFin|date:'Y-m-d' }}" readonly>
+                            <td data-field="FechaFin" class="text-start">
+                                <span class="form-control-plaintext">{{ contrato.FechaFin|date:'Y-m-d' }}</span>
+                                <input type="date" class="form-control d-none" name="FechaFin" value="{{ contrato.FechaFin|date:'Y-m-d' }}" readonly>
                             </td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
-                                <input type="text" class="form-control-plaintext" name="NumeroOtroSi" value="{{ contrato.NumeroOtroSi }}" readonly>
+                            <td data-field="NumeroOtroSi" class="text-end" style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
+                                <span class="form-control-plaintext">{{ contrato.NumeroOtroSi }}</span>
+                                <input type="text" class="form-control d-none" name="NumeroOtroSi" value="{{ contrato.NumeroOtroSi }}" readonly>
                             </td>
-                            <td><input type="text" name="ValorOtroSi" class="form-control-plaintext" value="{{contrato.ValorOtroSi|default_if_none:'' }}" readonly></td>
-                            <td>
+                            <td data-field="ValorOtroSi" class="text-end">
+                                <span class="form-control-plaintext">{{contrato.ValorOtroSi|default_if_none:'' }}</span>
+                                <input type="text" name="ValorOtroSi" class="form-control d-none" value="{{contrato.ValorOtroSi|default_if_none:'' }}" readonly>
+                            </td>
+                            <td data-field="ValorIncluyeIva">
                                 <span class="form-control-plaintext boolean-display" data-field="ValorIncluyeIva">
                                     {% if contrato.ValorIncluyeIva %}Sí{% else %}No{% endif %}
                                 </span>
@@ -97,31 +188,33 @@
                                        name="ValorIncluyeIva" {% if contrato.ValorIncluyeIva %}checked{% endif %}>
                             </td>
                             
-                            <td>
+                            <td data-field="Polizas">
                                 <span class="form-control-plaintext boolean-display" data-field="Polizas">
                                     {% if contrato.Polizas %}Sí{% else %}No{% endif %}
                                 </span>
                                 <input type="checkbox" class="form-check-input boolean-edit d-none" 
                                        name="Polizas" {% if contrato.Polizas %}checked{% endif %}>
                             </td>
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
-                                <input type="text" class="form-control-plaintext" name="PolizasDesc" value="{{ contrato.PolizasDesc|default_if_none:'' }}" readonly>
+                            <td data-field="PolizasDesc" class="text-start" style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
+                                <span class="form-control-plaintext">{{ contrato.PolizasDesc|default_if_none:'' }}</span>
+                                <input type="text" class="form-control d-none" name="PolizasDesc" value="{{ contrato.PolizasDesc|default_if_none:'' }}" readonly>
                             </td>
-                            <td>
+                            <td data-field="FirmadoFlag">
                                 <span class="form-control-plaintext boolean-display" data-field="FirmadoFlag">
                                     {% if contrato.FirmadoFlag %}Sí{% else %}No{% endif %}
                                 </span>
                                 <input type="checkbox" class="form-check-input boolean-edit d-none" 
                                        name="FirmadoFlag" {% if contrato.FirmadoFlag %}checked{% endif %}>
                             </td>
-                            <td>
+                            <td data-field="FirmadoCliente" >
                                 <span class="form-control-plaintext boolean-display" data-field="FirmadoCliente">
                                     {% if contrato.FirmadoCliente %}Sí{% else %}No{% endif %}
                                 </span>
                                 <input type="checkbox" class="form-check-input boolean-edit d-none" 
                                        name="FirmadoCliente" {% if contrato.FirmadoCliente %}checked{% endif %}>
                             </td>
-                            <td>
+                            <td data-field="Moneda">
+                                <span class="form-control d-none">{{ contrato.monedaId.Nombre }}</span>
                                 <select name="moneda" class="form-control-plaintext" disabled>
                                     {% for moneda in form.fields.monedaId.queryset %}
                                         <option value="{{ moneda.id }}"{% if contrato.monedaId.id == moneda.id %} selected{% endif %}>
@@ -130,7 +223,14 @@
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td>
+                            <td data-field="Contrato" class="text-end">
+                                <span class="form-control d-none">
+                                    {% for contrato_cliente in contrato.ClienteId.clientescontratos_set.all %}
+                                        {% if contrato_cliente.Contrato == contrato.Contrato %}
+                                            {{ contrato_cliente.Contrato }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
                                 <select name="Contrato" class="form-control-plaintext" disabled>
                                     
                                     {% for contrato_cliente in contrato.ClienteId.clientescontratos_set.all %}

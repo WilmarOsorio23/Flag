@@ -57,20 +57,62 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
-                            <th scope="col">Año</th>
-                            <th scope="col">Mes</th>
-                            <th scope="col">Gasto ID</th>
-                            <th scope="col">Valor</th>
+                            <th data-sort="Anio" class="sortable" data-direction="default">
+                                Año
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Mes" class="sortable" data-direction="default">
+                                Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="GastosId" class="sortable" data-direction="default">
+                                Gasto ID
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Valor" class="sortable" data-direction="default">
+                                Valor
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for detalle in detalles %}
                         <tr id="row-{{ detalle.id }}">
-                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ detalle.id }}"></td>
-                            <td><input type="text" name="Anio" class="form-control-plaintext" value="{{ detalle.Anio }}" readonly></td>
-                            <td><input type="text" name="Mes" class="form-control-plaintext" value="{{ detalle.Mes }}" readonly></td>
-                            <td><input type="text" name="GastosId" class="form-control-plaintext" value="{{ detalle.GastosId }}" readonly></td>
-                            <td><input type="text" name="Valor" class="form-control-plaintext" value="{{ detalle.Valor }}" readonly></td>
+                            <td>
+                                <input type="checkbox" class="row-select" name="items_to_delete" value="{{ detalle.id }}">
+                            </td>
+                            <td data-field="Anio" class="text-start">
+                                <span class="form-control-plaintext">{{ detalle.Anio }}</span>
+                                <input type="text" name="Anio" class="form-control d-none" value="{{ detalle.Anio }}" readonly>
+                            </td>
+                            <td data-field="Mes" class="text-start">
+                                <span class="form-control-plaintext">{{ detalle.Mes }}</span>
+                                <input type="text" name="Mes" class="form-control d-none" value="{{ detalle.Mes }}" readonly>
+                            </td>
+                            <td data-field="GastosId" class="text-start">
+                                <span class="form-control-plaintext">{{ detalle.GastosId }}</span>
+                                <input type="text" name="GastosId" class="form-control d-none" value="{{ detalle.GastosId }}" readonly>
+                            </td>
+                            <td data-field="Valor" class="text-end">
+                                <span class="form-control-plaintext">{{ detalle.Valor }}</span>
+                                <input type="text" name="Valor" class="form-control d-none" value="{{ detalle.Valor }}" readonly>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

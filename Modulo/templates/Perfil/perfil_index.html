@@ -54,12 +54,19 @@
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'perfil_eliminar' %}">
                 {% csrf_token %}
-                <table class="table table-primary">
+                <table class="table table-primary" id="perfilTable">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
                             <th scope="col">Id</th>
-                            <th scope="col">Nombre perfil</th>
+                            <th data-sort="nombre_perfil" class="sortable" data-direction="default">
+                                Nombre perfil
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -67,7 +74,7 @@
                         <tr id="row-{{perfil.PerfilId}}">
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{perfil.PerfilId}}"></td>
                             <td>{{ perfil.PerfilId }}</td>
-                            <td><input type="text" name="Nombre" class="form-control-plaintext" value="{{ perfil.Perfil }}" readonly></td>
+                            <td data-field="nombre_perfil"><input type="text" name="Nombre" class="form-control-plaintext" value="{{ perfil.Perfil }}" readonly></td>
                         </tr>
                         {% empty %}
                         <tr>

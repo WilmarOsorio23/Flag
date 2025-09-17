@@ -219,7 +219,7 @@ urlpatterns = [
     # Rutas para tabla Total de Gastos
     path('total_gastos/', totalGasto.total_gastos_index, name='total_gastos_index'),
     path('total_gastos/crear', totalGasto.total_gastos_crear, name='total_gastos_crear'),
-    path('total_gastos/detalles/editar/', totalGasto.editar_detalles_gastos, name='editar_detalles_gastos'),
+    path('total_gastos_editar/', totalGasto.total_gastos_editar, name='total_gastos_editar'),
     path('total_gastos/eliminar/', totalGasto.total_gastos_eliminar, name='total_gastos_eliminar'),
     path('total_gastos/visualizar/<int:id>/', totalGasto.visualizar_detalle_gastos, name='visualizar_detalle_gastos'),  # Nueva ruta para visualizar detalles
     path('total_gastos/descargar_excel', totalGasto.total_gastos_descargar_excel, name='total_gastos_descargar_excel'),
@@ -236,6 +236,7 @@ urlpatterns = [
     # Rutas para tabla Total Costos Indirectos
     path('total_costos_indirectos/', totalCostos.total_costos_indirectos_index, name='total_costos_indirectos_index'),
     path('total_costos_indirectos/crear/', totalCostos.total_costos_indirectos_crear, name='total_costos_indirectos_crear'),
+    path('total_costos_indirectos/editar/', totalCostos.total_costos_indirectos_editar, name='total_costos_indirectos_editar'),
     path('total_costos_indirectos/eliminar/', totalCostos.total_costos_indirectos_eliminar, name='total_costos_indirectos_eliminar'),
     path('total_costos_indirectos/descargar_excel/', totalCostos.total_costos_indirectos_descargar_excel, name='total_costos_indirectos_descargar_excel'),
     path('total_costos_indirectos/visualizar/<int:id>/', totalCostos.visualizar_detalle_costos, name='visualizar_detalle_costos'),  # Nueva ruta para visualizar detalles

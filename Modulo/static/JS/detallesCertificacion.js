@@ -303,7 +303,65 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
    
-    
+    const table = document.querySelector('.table-primary');
+    if (table) {
+        const headers = table.querySelectorAll('th.sortable');
+
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-sort');
+                const direction = header.getAttribute('data-direction') || 'asc';
+                const newDirection = direction === 'asc' ? 'desc' : 'asc';
+
+                sortTableByColumn(table, column, newDirection);
+
+                // Reset all headers to default
+                headers.forEach(h => {
+                    h.setAttribute('data-direction', 'default');
+                    h.querySelector('.sort-icon-default').style.display = 'inline';
+                    h.querySelector('.sort-icon-asc').style.display = 'none';
+                    h.querySelector('.sort-icon-desc').style.display = 'none';
+                });
+
+                // Set current header direction
+                header.setAttribute('data-direction', newDirection);
+                header.querySelector('.sort-icon-default').style.display = 'none';
+                header.querySelector(`.sort-icon-${newDirection}`).style.display = 'inline';
+            });
+        });
+        
+
+        function sortTableByColumn(table, columnName, direction) {
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+            rows.sort((a, b) => {
+                const cellA = a.querySelector(`[data-field="${columnName}"]`);
+                const cellB = b.querySelector(`[data-field="${columnName}"]`);
+        
+                if (!cellA || !cellB) return 0;
+        
+                // Obtener el texto del <span> para el ordenamiento
+                const getCellValue = (cell) => {
+                    const span = cell.querySelector('span');
+                    if (span) {
+                        return span.innerText.trim();
+                    }
+                    return '';
+                };
+        
+                const textA = getCellValue(cellA);
+                const textB = getCellValue(cellB);
+        
+                // String comparison
+                return direction === 'asc'
+                    ? textA.localeCompare(textB)
+                    : textB.localeCompare(textA);
+            });
+        
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    }
     
 
     

@@ -59,9 +59,29 @@
                             <th><input type="checkbox" id="select-all"></th>
                             <!--Columna muestra documento de empleado-->
                             <!--<th scope="col">Documento</th>-->
-                            <th scope="col">Nombre Empleado</th>
-                            <th scope="col">Certificación</th>
-                            <th scope="col">Fecha de Certificación</th>
+                            <th data-sort="NombreEmpleado" class="sortable" data-direction="default">
+                                Nombre Empleado
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Certificacion" class="sortable" data-direction="default">
+                                Certificación
+                                <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span></th>
+                            <th data-sort="FechaCertificacion" class="sortable" data-direction="default">
+                                Fecha de Certificación
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -70,9 +90,18 @@
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ detalle.Id}}"></td>
                             <!--Columna muestra documento de empleado-->
                             <!--<td><input type="text" name="DocumentoId_{{ forloop.counter }}" class="form-control-plaintext" value="{{ detalle.Documento.Documento}}" readonly></td>-->
-                            <td><input type="text" name="EmpleadoNombre" class="form-control-plaintext" value="{{detalle.Documento.Nombre}}" readonly></td>
-                            <td><input type="text" name="CertificacionId" class="form-control-plaintext" value="{{detalle.CertificacionId}}" readonly></td>
-                            <td><input type="date" name="Fecha_Certificacion" class="form-control-plaintext" value="{{ detalle.Fecha_Certificacion|date:'Y-m-d' }}" readonly></td>
+                            <td data-field="NombreEmpleado" class="text-start">
+                                <span class="form-control d-none">{{ detalle.Documento.Nombre }}</span>
+                                <input type="text" name="EmpleadoNombre" class="form-control-plaintext" value="{{detalle.Documento.Nombre}}" readonly>
+                            </td>
+                            <td data-field="Certificacion" class="text-start">
+                                <span class="form-control d-none">{{ detalle.CertificacionId }}</span>
+                                <input type="text" name="CertificacionId" class="form-control-plaintext" value="{{detalle.CertificacionId}}" readonly>
+                            </td>
+                            <td data-field="FechaCertificacion" class="text-start">
+                                <span class="form-control d-none">{{ detalle.Fecha_Certificacion|date:'Y-m-d' }}</span>
+                                <input type="date" name="Fecha_Certificacion" class="form-control-plaintext" value="{{ detalle.Fecha_Certificacion|date:'Y-m-d' }}" readonly>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

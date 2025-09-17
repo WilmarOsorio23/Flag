@@ -12,20 +12,17 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 
 def total_gastos_index(request):
-    total_gastos_data = Total_Gastos.objects.all()
-    detalles = None
-    seleccionado = request.GET.get('seleccionado')
+    try:
+        # Obtener los datos de la base de datos
+        total_gastos_data = Total_Gastos.objects.all()
 
-    if seleccionado:
-        total_seleccionado =get_object_or_404(Total_Gastos, id=seleccionado)
-        detalles= Detalle_Gastos.objects.filter(
-            Anio=total_seleccionado.Anio,
-            Mes=total_seleccionado.Mes
-        )
-    return render(request, 'Total_gastos/total_gastos_index.html', {
-        'total_gastos_data': total_gastos_data,
-        'detalles': detalles,
-        'seleccionado': seleccionado,
+        # Pasar los datos al contexto
+        return render(request, 'Total_Gastos/total_gastos_index.html', {
+            'total_gastos_data': total_gastos_data
+        })
+    except Exception as e:
+        return render(request, 'Total_Gastos/total_gastos_index.html', {
+            'error_message': f'Error al cargar los datos: {str(e)}'
         })
 def crear_detalle_gastos(request, total_gastos_id):
     total_gastos = get_object_or_404(Total_Gastos, id=total_gastos_id)
@@ -169,23 +166,51 @@ def actualizar_total(request, anio, mes):
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)})
             
-def total_gastos_editar(request,id):
-    print("llego hasta editar")
+@csrf_exempt
+def total_gastos_editar(request):
     if request.method == 'POST':
         try:
+            # Parsear los datos enviados desde el cliente
             data = json.loads(request.body)
-            detalle = get_object_or_404( Total_Gastos, pk=id)
-            detalle.Total = data.get('total', detalle.Total)
-            detalle.save()
+            print(f"Datos recibidos: {data}")
 
-            print(JsonResponse({'status': 'success'}))
-            return JsonResponse({'status': 'success'})
+            # Obtener los valores enviados
+            detalle_id = data.get('id')
+            anio = data.get('Anio')
+            mes = data.get('Mes')
+            valor = data.get('Valor')
+
+            # Validar que los datos sean correctos
+            if not detalle_id or not anio or not mes or valor is None:
+                print("❌ Error: Datos incompletos.")
+                return JsonResponse({'status': 'error', 'message': 'Datos incompletos.'}, status=400)
+
+            # Buscar el registro correspondiente en la base de datos
+            print(f"Buscando Total_Gastos con ID={detalle_id}")
+            total_gasto = get_object_or_404(Total_Gastos, id=detalle_id)
+
+            # Actualizar los valores
+            print(f"Actualizando Total_Gastos con Total={valor}")
+            total_gasto.Anio = anio
+            total_gasto.Mes = mes
+            total_gasto.Total = valor
+            total_gasto.save()
+
+            print("✅ Total de gastos actualizado correctamente.")
+            return JsonResponse({'status': 'success', 'message': 'Total de gastos actualizado correctamente.'})
         except Total_Gastos.DoesNotExist:
-            return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
+            print("❌ Error: Registro no encontrado.")
+            return JsonResponse({'status': 'error', 'message': 'Registro no encontrado.'}, status=404)
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+            print("❌ Error: Error al decodificar JSON.")
+            return JsonResponse({'status': 'error', 'message': 'Error al decodificar JSON.'}, status=400)
+        except Exception as e:
+            # Registrar el error en los logs del servidor
+            print(f"❌ Error interno: {str(e)}")
+            return JsonResponse({'status': 'error', 'message': f'Error interno: {str(e)}'}, status=500)
     else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
+        print("❌ Error: Método no permitido.")
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)
     
 def total_gastos_descargar_excel(request):
     if request.method == 'POST':
