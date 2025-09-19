@@ -15,11 +15,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_tipo_documento')
-
 def tipo_documento_index(request):
     tipo_documentos = TipoDocumento.objects.all()
     return render(request, 'Tipo_Documento/tipo_documento_index.html', {'tipo_documentos': tipo_documentos})
 
+@login_required
+@verificar_permiso('can_manage_tipo_documento')
 def tipo_documento_crear(request):
     if request.method == 'POST':
         form = TipoDocumentoForm(request.POST)
@@ -35,6 +36,8 @@ def tipo_documento_crear(request):
         form = TipoDocumentoForm()
     return render(request, 'Tipo_Documento/tipo_documento_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_tipo_documento')
 @csrf_exempt
 def tipo_documento_editar(request, id):
     print("llego hasta editar")
@@ -55,6 +58,8 @@ def tipo_documento_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_tipo_documento')
 def tipo_documento_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -63,6 +68,8 @@ def tipo_documento_eliminar(request):
         return redirect('tipo_documento_index')
     return redirect('tipo_documento_index')
 
+@login_required
+@verificar_permiso('can_manage_tipo_documento')
 def verificar_relaciones(request):
     print("llego hasta verificar relaciones de tipo documento")
     if request.method == 'POST':
@@ -88,6 +95,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_tipo_documento')
 def tipo_documento_descargar_excel(request):
     if request.method == 'POST':
         # Obtiene los IDs de los documentos seleccionados

@@ -13,11 +13,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_centros_costos')
-
 def centros_costos_index(request):
     centros_costos_data = CentrosCostos.objects.all()
     return render(request, 'CentrosCostos/centros_costos_index.html', {'centros_costos_data': centros_costos_data})
 
+@login_required
+@verificar_permiso('can_manage_centros_costos')
 def centros_costos_crear(request):
     if request.method == 'POST':
         form = CentrosCostosForm(request.POST)
@@ -32,6 +33,8 @@ def centros_costos_crear(request):
         form = CentrosCostosForm()
     return render(request,'CentrosCostos/centros_costos_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_centros_costos')
 def centros_costos_editar(request, id):
    if request.method == 'POST':
         try:
@@ -52,6 +55,8 @@ def centros_costos_editar(request, id):
    else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
    
+@login_required
+@verificar_permiso('can_manage_centros_costos')
 def centros_costos_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -59,6 +64,8 @@ def centros_costos_eliminar(request):
         messages.success(request, 'La referencia seleccionada se han eliminado correctamente.')
         return redirect('centros_costos_index')
 
+@login_required
+@verificar_permiso('can_manage_centros_costos')
 def verificar_relaciones(request):
     print("llego a verificar relaciones de centros de costos")
     if request.method == 'POST':
@@ -84,7 +91,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
+@login_required
+@verificar_permiso('can_manage_centros_costos')
 def centros_costos_descargar_excel(request):
     if request.method == 'POST':
         centrocostos_ids = request.POST.get('items_to_download')

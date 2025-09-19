@@ -15,8 +15,7 @@ from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required
-@verificar_permiso('can_manage_total_costos')
-
+@verificar_permiso('can_manage_total_costos_indirectos')
 def total_costos_indirectos_index(request):
     try:
         # Obtener los datos de la base de datos
@@ -31,6 +30,8 @@ def total_costos_indirectos_index(request):
             'error_message': f'Error al cargar los datos: {str(e)}'
         })
 
+@login_required
+@verificar_permiso('can_manage_total_costos_indirectos')
 def crear_detalle_costos(request, total_costos_id):
     total_costos = get_object_or_404(Total_Costos_Indirectos, id=total_costos_id)
 
@@ -48,7 +49,8 @@ def crear_detalle_costos(request, total_costos_id):
 
     return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_crear_detalle.html', {'form': form, 'total_costos': total_costos})
 
-
+@login_required
+@verificar_permiso('can_manage_total_costos_indirectos')
 def total_costos_indirectos_crear(request):
     if request.method == 'POST':
         form = Total_Costos_IndirectosForm(request.POST)
@@ -64,6 +66,8 @@ def total_costos_indirectos_crear(request):
         form = Total_Costos_IndirectosForm()
     return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_total_costos_indirectos')
 @csrf_exempt
 def total_costos_indirectos_eliminar(request):
     if request.method == "POST":
@@ -99,6 +103,8 @@ def total_costos_indirectos_eliminar(request):
 
     return JsonResponse({"success": False, "error": "Método no permitido."})
 
+@login_required
+@verificar_permiso('can_manage_total_costos_indirectos')
 def total_costos_indirectos_descargar_excel(request):
     if request.method == 'POST':
         items_selected = request.POST.get('items_to_download')
@@ -121,6 +127,7 @@ def total_costos_indirectos_descargar_excel(request):
         df.to_excel(response, index=False)
         return response
     return redirect('total_costos_indirectos_index')
+
 
 def visualizar_detalle_costos(request, id):
     total_seleccionado = get_object_or_404(Total_Costos_Indirectos, id=id)
@@ -158,6 +165,8 @@ def visualizar_detalle_costos(request, id):
 
     return JsonResponse(response_data)
 
+@login_required
+@verificar_permiso('can_manage_total_costos_indirectos')
 @csrf_exempt
 def editar_detalles_costos(request):
     if request.method == 'POST':
@@ -198,6 +207,8 @@ def actualizar_total(request, anio, mes):
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)})
 
+@login_required
+@verificar_permiso('can_manage_total_costos_indirectos')
 @csrf_exempt
 def total_costos_indirectos_editar(request):
     if request.method == 'POST':

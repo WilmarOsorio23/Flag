@@ -22,8 +22,6 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_pagare')
-
-
 def pagare_index(request):
     form = PagareFilterForm(request.GET or None)
     empleados = []
@@ -56,7 +54,8 @@ def pagare_index(request):
     })
 
 
-
+@login_required
+@verificar_permiso('can_manage_pagare')
 @csrf_exempt
 def eliminar_pagares(request):
     if request.method == 'POST':
@@ -75,7 +74,9 @@ def eliminar_pagares(request):
             return JsonResponse({'success': False, 'message': str(e)})
     else:
         return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
-    
+
+@login_required
+@verificar_permiso('can_manage_pagare')
 @csrf_exempt
 def actualizar_pagare(request):
     if request.method == 'POST':
@@ -165,6 +166,8 @@ def limpiar_float(valor_str):
                     .replace(',', '.')
         )
 
+@login_required
+@verificar_permiso('can_manage_pagare')
 @csrf_exempt
 def obtener_datos_pagares(request):
     print("Solicitud recibida")
@@ -240,7 +243,8 @@ def obtener_datos_pagares(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-    
+@login_required
+@verificar_permiso('can_manage_pagare')
 def pagares_exitoso(request):
     return render(request, 'pagares_exitoso.html')
 
@@ -253,7 +257,8 @@ def get_item(dictionary, key):
     return dictionary.get(key, "")
 
     
-
+@login_required
+@verificar_permiso('can_manage_pagare')
 def obtener_pagares_empleado(request):
     documentos = request.GET.getlist('documentos[]')
     pagares = Pagare.objects.filter(Documento__in=documentos).select_related('Tipo_Pagare').values(
@@ -264,7 +269,8 @@ def obtener_pagares_empleado(request):
     )
     return JsonResponse(list(pagares), safe=False)
 
-
+@login_required
+@verificar_permiso('can_manage_pagare')
 def pag_planeado(request, pagare_id):
     pagare = get_object_or_404(Pagare, pk=pagare_id)
     todas_actividades = ActividadPagare.objects.all()
@@ -288,6 +294,8 @@ def pag_planeado(request, pagare_id):
         'todas_actividades': todas_actividades,
     })
 
+@login_required
+@verificar_permiso('can_manage_pagare')
 def agregar_actividad_planeada(request, pagare_id):
     if request.method == 'POST':
         actividad_id = request.POST.get('actividad_id')
@@ -305,6 +313,8 @@ def agregar_actividad_planeada(request, pagare_id):
 
     return redirect('pag_planeado', pagare_id=pagare_id)
 
+@login_required
+@verificar_permiso('can_manage_pagare')
 def pag_ejecutado(request, pagare_id):
     pagare = get_object_or_404(Pagare, pk=pagare_id)
     todas_actividades = ActividadPagare.objects.all()
@@ -336,7 +346,8 @@ def pag_ejecutado(request, pagare_id):
         'ejecutados': ejecutados,
     })
 
-
+@login_required
+@verificar_permiso('can_manage_pagare')
 def agregar_actividad_ejecutada(request, pagare_id):
     if request.method == 'POST':
         actividad_id = request.POST.get('actividad_id')
@@ -355,7 +366,8 @@ def agregar_actividad_ejecutada(request, pagare_id):
     return redirect('pag_ejecutado', pagare_id=pagare_id)
 
 
-
+@login_required
+@verificar_permiso('can_manage_pagare')
 @csrf_exempt
 def guardar_pagare(request):
     if request.method == 'POST':

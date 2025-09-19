@@ -17,8 +17,6 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_clientes')
-
-
 # Vista para listar todos los clientes
 def clientes_index(request):
     clientes = Clientes.objects.all()
@@ -36,6 +34,8 @@ def clientes_index(request):
         'contactos_por_cliente': contactos_por_cliente_json
     })
 
+@login_required
+@verificar_permiso('can_manage_clientes')
 # Vista para crear un nuevo cliente
 def clientes_crear(request):
     if request.method == 'POST':
@@ -52,6 +52,8 @@ def clientes_crear(request):
     
     return render(request, 'clientes/clientes_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_clientes')
 # Vista para editar un cliente existente
 @csrf_exempt
 def clientes_editar(request, id):
@@ -108,6 +110,8 @@ def clientes_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_clientes')
 # Vista para eliminar clientes seleccionados
 def clientes_eliminar(request):
     """
@@ -145,6 +149,8 @@ def clientes_eliminar(request):
 
     return redirect('clientes_index')  # Redirigir si el método no es POST
 
+@login_required
+@verificar_permiso('can_manage_clientes')
 # Vista para verificar relaciones de clientes con otros registros
 def verificar_relaciones(request):
     if request.method == 'POST':
@@ -192,6 +198,8 @@ def verificar_relaciones(request):
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_clientes')
 def clientes_descargar_excel(request):
     """
     Descarga los clientes seleccionados en un archivo Excel.
@@ -255,7 +263,8 @@ def clientes_descargar_excel(request):
         return response
     return redirect('clientes_index')
 
-
+@login_required
+@verificar_permiso('can_manage_clientes')
 # Nueva vista para obtener los contactos de un cliente
 def obtener_contactos(request):
     """

@@ -139,7 +139,7 @@ def organizar_datos(facturas, lineas, clientes):
     return rows, footer, lineas, clientes, meses, lineas_activas, clientes_activos
 
 @login_required
-@verificar_permiso('can_manage_informe_facturacion')
+@verificar_permiso('can_view_informe_facturacion')
 # Función para generar el reporte en el frontend
 def informes_facturacion_index(request):
     form = InformeFacturacionForm(request.GET or None)
@@ -288,7 +288,7 @@ def generar_graficos_por_linea(rows, lineas_activas, clientes_activos, footer):
     return graficos
 
 @login_required
-@verificar_permiso('can_manage_informe_facturacion')
+@verificar_permiso('can_view_informe_facturacion')
 def informes_facturacion_index(request):
     form = InformeFacturacionForm(request.GET or None)
     mensaje = None
@@ -337,7 +337,7 @@ def informes_facturacion_index(request):
     return render(request, 'Informes/informes_facturacion_index.html', context)
 
 @login_required
-@verificar_permiso('can_manage_informe_facturacion')
+@verificar_permiso('can_view_informe_facturacion')
 # Función para descargar el reporte en Excel
 def descargar_reporte_excel(request):
     # Obtener parámetros y convertir a enteros

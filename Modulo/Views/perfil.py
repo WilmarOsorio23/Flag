@@ -16,12 +16,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_perfil')
-
 def perfil_index(request):
     perfil_data = Perfil.objects.all()
     return render(request, 'perfil/perfil_index.html', {'perfil_data': perfil_data})
 
-
+@login_required
+@verificar_permiso('can_manage_perfil')
 def perfil_crear(request):
      if request.method == 'POST':
         form = PerfilForm(request.POST)
@@ -33,6 +33,8 @@ def perfil_crear(request):
         form = PerfilForm()
      return render(request, 'Perfil/perfil_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_perfil')
 def perfil_editar(request,id):
      if request.method == 'POST':
         try:
@@ -52,7 +54,8 @@ def perfil_editar(request,id):
      else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
      
-     
+@login_required
+@verificar_permiso('can_manage_perfil')    
 def verificar_relaciones(request):
     if request.method == 'POST':
         import json
@@ -77,7 +80,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
+@login_required
+@verificar_permiso('can_manage_perfil')
 def perfil_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_download')
@@ -86,7 +90,8 @@ def perfil_eliminar(request):
         return redirect('perfil_index')
     return redirect('perfil_index')
 
-
+@login_required
+@verificar_permiso('can_manage_perfil')
 def perfil_descargar_excel(request):
     if request.method == 'POST':
         perfil_ids = request.POST.get('items_to_download')

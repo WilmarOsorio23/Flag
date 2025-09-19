@@ -173,7 +173,7 @@ def calcular_costos_por_ceco_modulo_mes(anio: str, meses: list, lineas_ids: list
     
     return costos_por_ceco_modulo_mes
 
-def filtrar_datos(request, form=None):
+def filtrar_datos(form=None):
     facturas = FacturacionClientes.objects.all().select_related('LineaId', 'ModuloId')
     if form and form.is_valid():
         anio = form.cleaned_data.get('Anio')
@@ -248,7 +248,7 @@ def convert_to_regular_dict(d):
     return d
 
 @login_required
-@verificar_permiso('can_manage_informe_facturacion_clientes')
+@verificar_permiso('can_view_informe_facturacion_centrocostos')
 def informe_facturacion_CentroCostos(request):
     form = FacturacionClientesFilterForm(request.GET or None)
     
@@ -259,7 +259,7 @@ def informe_facturacion_CentroCostos(request):
     ]
     
     # Ahora recibimos costos_por_ceco_modulo_mes
-    facturas, lineas_filtradas, meses_filtrados, costos_por_ceco_modulo_mes = filtrar_datos(request, form)
+    facturas, lineas_filtradas, meses_filtrados, costos_por_ceco_modulo_mes = filtrar_datos(form)
     
     # Filtrar meses si es necesario
     meses = [par for par in meses_completos if not meses_filtrados or str(par[0]) in meses_filtrados]
@@ -402,7 +402,7 @@ def informe_facturacion_CentroCostos(request):
     return render(request, 'Informes/informe_facturacion_CentroCostos_index.html', context)
 
 @login_required
-@verificar_permiso('can_manage_informe_facturacion_clientes')
+@verificar_permiso('can_view_informe_facturacion_centrocostos')
 def descargar_reporte_excel_facturacion_clientes(request):
     # Limpieza de parámetros GET
     get_params = request.GET.copy()
@@ -429,7 +429,7 @@ def descargar_reporte_excel_facturacion_clientes(request):
     
     # Obtención de datos
     try:
-        facturas, lineas_filtradas, meses_filtrados, costos_por_ceco_modulo_mes = filtrar_datos(request, form)
+        facturas, lineas_filtradas, meses_filtrados, costos_por_ceco_modulo_mes = filtrar_datos(form)
     except Exception as e:
         return HttpResponse(f"Error al obtener datos: {str(e)}")
 

@@ -19,6 +19,8 @@ def linea_index(request):
     linea_data = Linea.objects.all()
     return render(request, 'Linea/linea_index.html', {'lineas': linea_data})
 
+@login_required
+@verificar_permiso('can_manage_linea')
 def linea_crear(request):
     if request.method == 'POST':
         form = LineaForm(request.POST)
@@ -33,6 +35,8 @@ def linea_crear(request):
         form = LineaForm()
     return render(request, 'linea/linea_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_linea')
 def linea_editar(request, id):
     print("llego hasta views")
     if request.method == 'POST':
@@ -52,7 +56,9 @@ def linea_editar(request, id):
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
-     
+    
+@login_required
+@verificar_permiso('can_manage_linea')
 def verificar_relaciones(request):
     print('entro a verificar relaciones')
     if request.method == 'POST':
@@ -77,6 +83,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})  
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_linea')
 def linea_eliminar(request):
      if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -85,6 +93,8 @@ def linea_eliminar(request):
         return redirect('linea_index')
      return redirect('linea_index')
 
+@login_required
+@verificar_permiso('can_manage_linea')
 def linea_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')  

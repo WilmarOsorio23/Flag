@@ -14,12 +14,13 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_nomina')
-
 def nomina_index(request):
     nomina_data = Nomina.objects.all().order_by('-Anio','Mes')
     form=NominaForm()
     return render(request, 'nomina/nomina_index.html', {'nomina_data': nomina_data, 'form': form})
 
+@login_required
+@verificar_permiso('can_manage_nomina')
 def nomina_crear(request):
     if request.method == 'POST':
         form = NominaForm(request.POST)
@@ -30,7 +31,9 @@ def nomina_crear(request):
     else:
         form = NominaForm()
     return render(request, 'Nomina/nomina_form.html', {'form': form})
-    
+
+@login_required
+@verificar_permiso('can_manage_nomina')
 @csrf_exempt 
 def nomina_editar(request, id):
     print("llego hasta editar")
@@ -50,7 +53,9 @@ def nomina_editar(request, id):
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405) 
-    
+
+@login_required
+@verificar_permiso('can_manage_nomina')
 def nomina_eliminar(request):
     print("llego hasta nomina eliminar")
     if request.method == 'POST':
@@ -59,7 +64,9 @@ def nomina_eliminar(request):
     for item_id in item_ids:
             Nomina.objects.filter(pk=item_id).delete()
     return redirect('nomina_index')
-  
+
+@login_required
+@verificar_permiso('can_manage_nomina')
 def verificar_relaciones(request):
     if request.method == 'POST':
         import json
@@ -83,7 +90,9 @@ def verificar_relaciones(request):
         else:
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
-    
+
+@login_required
+@verificar_permiso('can_manage_nomina')
 def nomina_descargar_excel(request):
     if request.method == 'POST':
         items_selected = request.POST.get('items_to_download')

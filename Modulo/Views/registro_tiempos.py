@@ -14,7 +14,6 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_registro_tiempos')
-
 def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, modulo_id, horas):
     try:
         # Validar que modulo_id esté presente y sea válido
@@ -47,6 +46,7 @@ def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, modulo_i
         return tiempo_cliente
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos del cliente: {str(e)}")
+
 
 def guardar_tiempos_concepto(anio, mes, documento, concepto_id, linea_id, horas):
     try:
@@ -165,6 +165,8 @@ def guardar_totales_concepto(anio, mes, linea_id, concepto_id, horas_concepto):
     except Exception as e:
         raise ValidationError(f"Error al guardar los totales por concepto: {str(e)}")
 
+@login_required
+@verificar_permiso('can_manage_registro_tiempos')
 @transaction.atomic
 def registro_tiempos_guardar(request):
     if request.method == 'POST':
@@ -398,7 +400,8 @@ def obtener_info_linea(linea, clientes, tiempo_facturables):
 
     return linea_info
 
-
+@login_required
+@verificar_permiso('can_manage_registro_tiempos')
 # Vista para mostrar la información filtrada de los colaboradores
 def registro_tiempos_index(request):
     empleados = Empleado.objects.select_related('LineaId', 'PerfilId', 'ModuloId').all().order_by('Nombre')
@@ -549,7 +552,8 @@ def obtener_horas_habiles(anio, mes):
     except Horas_Habiles.DoesNotExist:
         return None, None
     
-
+@login_required
+@verificar_permiso('can_manage_registro_tiempos')
 def obtener_horas_habiles_view(request):
     anio = request.GET.get('anio')
     mes = request.GET.get('mes')

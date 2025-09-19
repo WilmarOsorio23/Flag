@@ -55,7 +55,7 @@ def filtrar_datos(form=None):
 
 
 @login_required
-@verificar_permiso('can_manage_informe_serv_consultor')
+@verificar_permiso('can_view_informe_serv_consultor')
 def informe_totales(request):
     form = TotalesPorMesFilterForm(request.GET or None)
     
@@ -207,7 +207,7 @@ def informe_totales(request):
 
 
 @login_required
-@verificar_permiso('can_manage_informe_serv_consultor')
+@verificar_permiso('can_view_informe_serv_consultor')
 def descargar_reporte_excel_totales_por_mes(request):
     form = TotalesPorMesFilterForm(request.GET or None)
     if not form.is_valid():

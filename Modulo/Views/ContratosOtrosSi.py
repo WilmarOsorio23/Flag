@@ -14,12 +14,13 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_contratos_otros_si')
-
 def contratos_otros_si_index(request):
     contratos_otros_si_data = ContratosOtrosSi.objects.all()
     form=ContratosOtrosSiForm()
     return render(request, 'contratos_otros_si/contratos_otros_si_index.html', {'contratos_otros_si_data': contratos_otros_si_data, 'form': form})
 
+@login_required
+@verificar_permiso('can_manage_contratos_otros_si')
 def contratos_otros_si_crear(request):
     if request.method == 'POST':
         cliente_id = request.POST.get('ClienteId')
@@ -37,6 +38,8 @@ def contratos_otros_si_crear(request):
         form = ContratosOtrosSiForm()
     return render(request, 'contratos_otros_si/Contratos_Otros_Si_crear.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_contratos_otros_si')
 def contratos_otros_si_editar(request, id):
     logger = logging.getLogger(__name__)
     logger.info("llego hasta editar")
@@ -100,6 +103,8 @@ def contratos_otros_si_editar(request, id):
     })
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 '''
+@login_required
+@verificar_permiso('can_manage_contratos_otros_si')
 def contratos_otros_si_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -107,6 +112,8 @@ def contratos_otros_si_eliminar(request):
         messages.success(request, 'Los contratos seleccionados se han eliminado correctamente.')
     return redirect('contratos_otros_si_index')
 
+@login_required
+@verificar_permiso('can_manage_contratos_otros_si')
 def contratos_otros_si_descargar_excel(request):
     if request.method == 'POST':
         contratosotrossi_ids = request.POST.get('items_to_download')
@@ -136,7 +143,9 @@ def contratos_otros_si_descargar_excel(request):
         df.to_excel(response, index=False)
         return response
     return redirect('contratos_otros_si_index')
-  
+
+@login_required
+@verificar_permiso('can_manage_contratos_otros_si')
 def obtener_contratos_por_cliente(request, cliente_id):
     #contratos = ClientesContratos.objects.filter(ClienteId=cliente_id, ContratoVigente=True)
     contratos = ClientesContratos.objects.filter(ClienteId=cliente_id)

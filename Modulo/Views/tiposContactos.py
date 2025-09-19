@@ -12,11 +12,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_tipos_contactos')
-
 def Tipos_contactos_index(request):
     tipos_contactos_data = TiposContactos.objects.all()
     return render(request, 'Tipos_Contactos/Tipos_Contactos_index.html', {'tipos_contactos_data': tipos_contactos_data})  
 
+@login_required
+@verificar_permiso('can_manage_tipos_contactos')
 def Tipos_contactos_crear(request):
     if request.method == 'POST':
         form = TiposContactosForm(request.POST)
@@ -31,6 +32,8 @@ def Tipos_contactos_crear(request):
         form = TiposContactosForm()
     return render(request, 'Tipos_Contactos/Tipos_Contactos_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_tipos_contactos')
 def Tipos_contactos_editar(request, id):    
    print("llego hasta editar")
    if request.method == 'POST':
@@ -49,7 +52,8 @@ def Tipos_contactos_editar(request, id):
    else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
+@login_required
+@verificar_permiso('can_manage_tipos_contactos')
 def Tipos_contactos_eliminar(request):
   if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -57,7 +61,8 @@ def Tipos_contactos_eliminar(request):
         messages.success(request, 'Los detalles seleccionados se han eliminado correctamente.')
   return redirect('tipos_contactos_index')
 
-
+@login_required
+@verificar_permiso('can_manage_tipos_contactos')
 def verificar_relaciones(request):
     if request.method == 'POST':
         import json
@@ -82,6 +87,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_tipos_contactos')
 def Tipos_contactos_descargar_excel(request):
     if request.method == 'POST':
         tipoContactos_ids = request.POST.get('items_to_download')

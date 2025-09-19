@@ -13,12 +13,13 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_empleados')
-
 def empleado_index(request):
     empleados = Empleado.objects.all()
     form = EmpleadoForm()
     return render(request, 'empleado/empleado_index.html', {'empleados': empleados, 'form': form})
 
+@login_required
+@verificar_permiso('can_manage_empleados')
 # Vista para crear un nuevo empleado
 def empleado_crear(request):
     if request.method == 'POST':
@@ -33,6 +34,8 @@ def empleado_crear(request):
     
     return render(request, 'empleado/empleado_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_empleados')
 # Vista para editar un empleado
 @csrf_exempt
 def empleado_editar(request, id):
@@ -54,6 +57,8 @@ def empleado_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_empleados')
 # Vista para eliminar empleados
 def empleado_eliminar(request):
     if request.method == 'POST':
@@ -63,6 +68,8 @@ def empleado_eliminar(request):
         return redirect('empleado_index')
     return redirect('empleado_index')
 
+@login_required
+@verificar_permiso('can_manage_empleados')
 def verificar_relaciones(request):
     if request.method == 'POST':
         try:
@@ -89,6 +96,8 @@ def verificar_relaciones(request):
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_empleados')
 # Vista para descargar datos de empleados en Excel
 def empleado_descargar_excel(request):
     if request.method == 'POST':

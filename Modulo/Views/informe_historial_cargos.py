@@ -52,7 +52,7 @@ def filtrar_historial_cargos(form, historial):
     return historial
 
 @login_required
-@verificar_permiso('can_manage_historial_cargos')
+@verificar_permiso('can_view_informe_historial_cargos')
 # Vista para mostrar el informe historial de cargos
 def historial_cargos_filtrado(request):
     historial_info = []
@@ -96,7 +96,7 @@ def historial_cargos_filtrado(request):
     return render(request, 'informes/informes_historial_cargos_index.html', context)
 
 @login_required
-@verificar_permiso('can_manage_historial_cargos')
+@verificar_permiso('can_view_informe_historial_cargos')
 def exportar_historial_cargos_excel(request):
     historial_info = []
 

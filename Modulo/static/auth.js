@@ -64,7 +64,8 @@ const PERMISSION_CATEGORIES = {
         'can_view_informe_pagares',
         'can_view_informe_facturacion_consultores',
         'can_view_informe_serv_consultor',
-        'can_view_informe_facturacion_clientes'
+        'can_view_informe_facturacion_centrocostos',
+        'can_view_informe_detalle_facturacion_consultores'
     ],
     'indicadores': [
         'can_view_indicadores_operatividad',

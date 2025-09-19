@@ -14,11 +14,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_moneda')
-
 def moneda_index(request):
     monedas = Moneda.objects.all()
     return render(request, 'Moneda/Moneda_index.html', {'monedas': monedas})  
 
+@login_required
+@verificar_permiso('can_manage_moneda')
 def moneda_crear(request):
   if request.method == 'POST':
         form = MonedaForm(request.POST)
@@ -33,6 +34,8 @@ def moneda_crear(request):
      form = MonedaForm()
      return render(request, 'Moneda/Moneda_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_moneda')
 def moneda_editar(request, id):
      if request.method == 'POST':
         try:
@@ -50,7 +53,9 @@ def moneda_editar(request, id):
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
      else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
-        
+
+@login_required
+@verificar_permiso('can_manage_moneda')   
 def moneda_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -59,6 +64,8 @@ def moneda_eliminar(request):
         return redirect('moneda_index')
     return redirect('moneda_index')
 
+@login_required
+@verificar_permiso('can_manage_moneda')
 def verificar_relaciones(request):
     if request.method == 'POST':
         import json
@@ -83,6 +90,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_moneda')
 def moneda_descargar_excel(request):
     if request.method == 'POST':
         moneda_ids = request.POST.get('items_to_download')

@@ -14,12 +14,13 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_clientes_contratos')
-
 def clientes_contratos_index(request):
     clientes_contratos_data = ClientesContratos.objects.all()
     form = ClientesContratosForm()
     return render(request, 'clientes_contratos/clientes_contratos_index.html', {'clientes_contratos_data': clientes_contratos_data, 'form': form})
 
+@login_required
+@verificar_permiso('can_manage_clientes_contratos')
 def clientes_contratos_crear(request):
     if request.method == 'POST':
         form = ClientesContratosForm(request.POST)
@@ -30,7 +31,8 @@ def clientes_contratos_crear(request):
         form = ClientesContratosForm()
     return render(request, 'clientes_contratos/clientes_contratos_form.html', {'form': form})
 
-
+@login_required
+@verificar_permiso('can_manage_clientes_contratos')
 def clientes_contratos_editar(request, id):
     logger = logging.getLogger(__name__)
     logger.info("llego hasta editar")
@@ -94,6 +96,8 @@ def clientes_contratos_editar(request, id):
     
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_clientes_contratos')
 def clientes_contratos_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')  # Obtener los IDs seleccionados desde el formulario
@@ -139,6 +143,8 @@ def clientes_contratos_eliminar(request):
         return redirect('clientes_contratos_index')
     return redirect('clientes_contratos_index')
 
+@login_required
+@verificar_permiso('can_manage_clientes_contratos')
 def clientes_contratos_descargar_excel(request):
     if request.method == 'POST':
         clientescontratos_ids = request.POST.get('items_to_download')
@@ -177,6 +183,8 @@ def clientes_contratos_descargar_excel(request):
         return response
     return redirect('clientes_contratos_index')
 
+@login_required
+@verificar_permiso('can_manage_clientes_contratos')
 def verificar_relaciones_contratos(request):
     """
     Verifica si los contratos de clientes están relacionados con otros registros.

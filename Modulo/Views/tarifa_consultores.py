@@ -14,8 +14,6 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_tarifa_consultores')
-
-
 def tarifa_consultores_index(request):
     page_size = 100
     page = int(request.GET.get('page', 1))
@@ -35,6 +33,8 @@ def tarifa_consultores_index(request):
         'total_registros': total_registros,
     })
 
+@login_required
+@verificar_permiso('can_manage_tarifa_consultores')
 def tarifa_consultores_crear(request):
     if request.method == 'POST':
         form = Tarifa_ConsultoresForm(request.POST)
@@ -54,6 +54,8 @@ def tarifa_consultores_crear(request):
         form = Tarifa_ConsultoresForm()
     return render(request, 'Tarifa_Consultores/tarifa_consultores_form.html', {'form': form})   
 
+@login_required
+@verificar_permiso('can_manage_tarifa_consultores')
 @csrf_exempt
 def tarifa_consultores_editar(request, idd):
     print("llego hasta editar")
@@ -78,7 +80,9 @@ def tarifa_consultores_editar(request, idd):
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405) 
-    
+
+@login_required
+@verificar_permiso('can_manage_tarifa_consultores')  
 def tarifa_consultores_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -86,6 +90,8 @@ def tarifa_consultores_eliminar(request):
         messages.success(request, 'Los detalles seleccionados se han eliminado correctamente.')
     return redirect('tarifa_consultores_index')
 
+@login_required
+@verificar_permiso('can_manage_tarifa_consultores')
 def tarifa_consultores_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
