@@ -224,7 +224,7 @@ class RoleMiddleware:
             'informes_estudios_index': 'can_view_informe_estudios',
             'informes_consultores_index': 'can_view_informe_consultores',
             'informes_tarifas_consultores_index': 'can_view_informe_tarifas_consultores',
-            'informes_facturacion_index': 'can_view_informe_facturacion',
+            'informes_facturacion_clientes_index': 'can_view_informe_facturacion',
             'informes_historial_cargos_index': 'can_view_informe_historial_cargos',
             'informes_tarifas_clientes_index': 'can_view_informe_tarifas_clientes',
             'informes_tiempos_consultores': 'can_view_informe_tiempos_consultores',
@@ -234,7 +234,8 @@ class RoleMiddleware:
             'informe_pagares': 'can_view_informe_pagares',
             'informes_facturacion_consultores_index': 'can_view_informe_facturacion_consultores',
             'informes_serv_consultor_index': 'can_view_informe_serv_consultor',
-            'informes_facturacion_clientes_index': 'can_view_informe_facturacion_clientes',
+            'informes_facturacion_centrocostos': 'can_view_informe_facturacion_centrocostos',
+            'informe_detalle_facturacion_consultores_index': 'can_view_informe_detalle_facturacion_consultores',
         })
         
         # Mapeo para vistas de Indicadores

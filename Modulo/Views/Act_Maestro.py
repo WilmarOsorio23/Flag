@@ -11,7 +11,7 @@ from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required
-@verificar_permiso('can_manage_pagares')
+@verificar_permiso('can_manage_actividades_pagares')
 
 def actividad_pagare_index(request):
     actividades = ActividadPagare.objects.all()
@@ -19,6 +19,8 @@ def actividad_pagare_index(request):
         'actividades': actividades
     })
 
+@login_required
+@verificar_permiso('can_manage_actividades_pagares')
 def actividad_pagare_crear(request):
     if request.method == 'POST':
         form = ActividadPagareForm(request.POST)
@@ -35,6 +37,9 @@ def actividad_pagare_crear(request):
         form = ActividadPagareForm()
     
     return render(request, 'Act_Maestro/Act_Maestro_crear.html', {'form': form})
+
+@login_required
+@verificar_permiso('can_manage_actividades_pagares')
 def actividad_pagare_editar(request, id):
     try:
         actividad = get_object_or_404(ActividadPagare, Act_PagareId=id)
@@ -67,6 +72,8 @@ def actividad_pagare_editar(request, id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@login_required
+@verificar_permiso('can_manage_actividades_pagares')
 def actividad_pagare_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.get('items_to_delete', '').split(',')
@@ -91,12 +98,16 @@ def actividad_pagare_eliminar(request):
 
     return HttpResponseBadRequest("Método no permitido")
 
+@login_required
+@verificar_permiso('can_manage_actividades_pagares')
 def actividad_pagare_confirmar_delete(request, id):
     actividad = get_object_or_404(ActividadPagare, Act_PagareId=id)
     return render(request, 'Act_Maestro/Act_Maestro_confirmar_delete.html', {
         'actividad': actividad
     })
 
+@login_required
+@verificar_permiso('can_manage_actividades_pagares')
 def actividad_pagare_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.get('items_to_delete', '').split(',')

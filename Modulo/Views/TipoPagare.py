@@ -12,13 +12,14 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_tipo_pagare')
-
 def tipo_pagare_index(request):
     tipos_pagare = TipoPagare.objects.all()
     return render(request, 'Tipo_Maestro/TipoPagare_index.html', {
         'tipos_pagare': tipos_pagare
     })
 
+@login_required
+@verificar_permiso('can_manage_tipo_pagare')
 def tipo_pagare_crear(request):
     if request.method == 'POST':
         form = TipoPagareForm(request.POST)
@@ -36,6 +37,8 @@ def tipo_pagare_crear(request):
     
     return render(request, 'Tipo_Maestro/TipoPagare_crear.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_tipo_pagare')
 def tipo_pagare_editar(request, id):
     try:
         tipo_pagare = get_object_or_404(TipoPagare, Tipo_PagareId=id)
@@ -68,6 +71,8 @@ def tipo_pagare_editar(request, id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@login_required
+@verificar_permiso('can_manage_tipo_pagare')
 def tipo_pagare_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.get('items_to_delete', '').split(',')
@@ -90,12 +95,16 @@ def tipo_pagare_eliminar(request):
 
     return HttpResponseBadRequest("Método no permitido")
 
+@login_required
+@verificar_permiso('can_manage_tipo_pagare')
 def tipo_pagare_confirmar_delete(request, id):
     tipo_pagare = get_object_or_404(TipoPagare, Tipo_PagareId=id)
     return render(request, 'Tipo_Maestro/TipoPagare_confirmar_delete.html', {
         'tipo_pagare': tipo_pagare
     })
 
+@login_required
+@verificar_permiso('can_manage_tipo_pagare')
 def tipo_pagare_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.get('items_to_delete', '').split(',')

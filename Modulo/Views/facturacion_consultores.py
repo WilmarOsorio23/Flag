@@ -15,7 +15,6 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_facturacion_consultores')
-
 def filtrar_tiempos_clientes(form):
     anio = form.cleaned_data.get('Anio')
     mes_cobro = form.cleaned_data.get('Mes_Cobro')
@@ -40,6 +39,8 @@ def obtener_tarifa(anio, mes_cobro, documento, cliente_id):
         tarifa = tarifa_anteriores.first()
     return tarifa
 
+@login_required
+@verificar_permiso('can_manage_facturacion_consultores')
 def facturacion_consultores(request):
     facturacion_info = []
     totales_facturacion = {}
@@ -268,6 +269,8 @@ def safe_decimal(value):
     except (InvalidOperation, ValueError, TypeError):
         return Decimal('0')
 
+@login_required
+@verificar_permiso('can_manage_facturacion_consultores')
 @csrf_exempt
 def guardar_facturacion_consultores(request):
     if request.method == 'POST':
@@ -385,7 +388,8 @@ def guardar_facturacion_consultores(request):
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
 
-
+@login_required
+@verificar_permiso('can_manage_facturacion_consultores')
 @csrf_exempt
 def eliminar_facturacion_consultores(request):
     if request.method == 'POST':

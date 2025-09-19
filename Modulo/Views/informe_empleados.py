@@ -91,7 +91,7 @@ def obtener_informe_empleados(empleados):
     return empleado_info
 
 @login_required
-@verificar_permiso('can_manage_informe_empleados')
+@verificar_permiso('can_view_informe_empleado')
 # Vista del informe de empleados
 def informe_empleados(request):
     """
@@ -199,7 +199,7 @@ def informe_empleados(request):
     return render(request, 'informes/informes_empleado_index.html', context)
 
 @login_required
-@verificar_permiso('can_manage_informe_empleados')
+@verificar_permiso('can_view_informe_empleado')
 # Funcionalidad para descargar el informe de empleados en Excel
 def exportar_empleados_excel(request):
     """

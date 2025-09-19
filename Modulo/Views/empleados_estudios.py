@@ -12,11 +12,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_empleados_estudios')
-
 def empleados_estudios_index(request):
     empleados_estudios = Empleados_Estudios.objects.all()
     return render(request, 'Empleados_Estudios/Empleados_Estudios_index.html', {'empleados_estudios': empleados_estudios})
 
+@login_required
+@verificar_permiso('can_manage_empleados_estudios')
 def empleados_estudios_crear(request):
     if request.method == 'POST':
         form = EmpleadosEstudiosForm(request.POST)
@@ -27,6 +28,8 @@ def empleados_estudios_crear(request):
         form = EmpleadosEstudiosForm()
     return render(request, 'Empleados_Estudios/Empleados_Estudios_form.html', {'form': form})  
 
+@login_required
+@verificar_permiso('can_manage_empleados_estudios')
 def empleados_estudios_editar(request, id):
    print("llego hasta editar")
    if request.method == 'POST':
@@ -49,6 +52,8 @@ def empleados_estudios_editar(request, id):
    else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_empleados_estudios')
 def empleados_estudios_eliminar(request):
      if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -56,6 +61,8 @@ def empleados_estudios_eliminar(request):
         messages.success(request, 'Los detalles seleccionados se han eliminado correctamente.')
      return redirect('empleados_estudios_index') 
 
+@login_required
+@verificar_permiso('can_manage_empleados_estudios')
 def empleados_estudios_descargarExcel(request):
     if request.method == 'POST':
         empleadoestudio_ids = request.POST.get('items_to_download')

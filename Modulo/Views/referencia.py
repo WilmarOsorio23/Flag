@@ -12,12 +12,13 @@ from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required
-@verificar_permiso('can_manage_referencia')
-
+@verificar_permiso('can_manage_referencias')
 def referencia_index(request):
     Referencias = Referencia.objects.all()
     return render(request, 'referencia/referencia_index.html', {'Referencias': Referencias})
 
+@login_required
+@verificar_permiso('can_manage_referencias')
 def referencia_crear(request):
     if request.method == 'POST':
         form = ReferenciaForm(request.POST)
@@ -32,6 +33,8 @@ def referencia_crear(request):
      form = ReferenciaForm()
      return render(request, 'referencia/referencia_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_referencias')
 def referencia_editar(request, id):
     print("llego a editar d e referencia")
     if request.method == 'POST':
@@ -52,7 +55,9 @@ def referencia_editar(request, id):
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
-    
+
+@login_required
+@verificar_permiso('can_manage_referencias')
 def referencia_eliminar(request):
    if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -60,6 +65,8 @@ def referencia_eliminar(request):
         messages.success(request, 'La referencia seleccionada se han eliminado correctamente.')
         return redirect('referencia_index')
 
+@login_required
+@verificar_permiso('can_manage_referencias')
 def verificar_relaciones(request):
     print("llego a verificar relaciones de referencia")
     if request.method == 'POST':
@@ -84,7 +91,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
+@login_required
+@verificar_permiso('can_manage_referencias')
 def referencia_descargar_excel(request):
         # Verifica si la solicitud es POST
         if request.method == 'POST':

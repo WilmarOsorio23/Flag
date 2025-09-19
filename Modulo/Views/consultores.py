@@ -14,12 +14,13 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_consultores')
-
 def consultores_index(request):
     consultores = Consultores.objects.all()
     form = ConsultoresForm()
     return render(request, 'consultores/consultores_index.html', {'consultores': consultores, 'form': form})
 
+@login_required
+@verificar_permiso('can_manage_consultores')
 def consultores_crear(request):
     if request.method == 'POST':
         form = ConsultoresForm(request.POST)
@@ -32,6 +33,8 @@ def consultores_crear(request):
     
     return render(request, 'consultores/consultores_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_consultores')
 @csrf_exempt
 def consultores_editar(request, id):
     if request.method == 'POST':
@@ -84,7 +87,8 @@ def consultores_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
     
-
+@login_required
+@verificar_permiso('can_manage_consultores')
 def consultores_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -93,6 +97,8 @@ def consultores_eliminar(request):
         return redirect('consultores_index')    
     return redirect('consultores_index')
 
+@login_required
+@verificar_permiso('can_manage_consultores')
 def verificar_relaciones(request):
     if request.method == 'POST':
         import json
@@ -135,7 +141,8 @@ def make_timezone_unaware(fecha):
         return fecha.replace(tzinfo=None)  # Eliminar zona horaria
     return fecha  # No hacer nada si es un objeto date o ya no tiene zona horaria
 
-
+@login_required
+@verificar_permiso('can_manage_consultores')
 def consultores_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.get('items_to_delete', '').split(',')

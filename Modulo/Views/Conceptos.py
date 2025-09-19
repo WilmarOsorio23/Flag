@@ -15,11 +15,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_conceptos')
-
 def conceptos_index(request):
     concepto = Concepto.objects.all()
     return render(request, 'Conceptos/conceptos_index.html', {'conceptos': concepto})
 
+@login_required
+@verificar_permiso('can_manage_conceptos')
 def conceptos_crear(request):
     if request.method == 'POST':
         form = ConceptoForm(request.POST)
@@ -35,6 +36,8 @@ def conceptos_crear(request):
         form = ConceptoForm()
     return render(request, 'conceptos/conceptos_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_conceptos')
 @csrf_exempt
 def conceptos_editar(request, id):
     if request.method == 'POST':
@@ -59,6 +62,8 @@ def conceptos_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_conceptos')
 def verificar_relaciones(request):
     if request.method == 'POST':
         import json
@@ -82,7 +87,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
+@login_required
+@verificar_permiso('can_manage_conceptos')
 def conceptos_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')  # Obtener los IDs seleccionados
@@ -91,6 +97,8 @@ def conceptos_eliminar(request):
         return redirect('conceptos_index')  # Cambia 'conceptos_index' al nombre de tu vista de listado si es diferente
     return redirect('conceptos_index')
 
+@login_required
+@verificar_permiso('can_manage_conceptos')
 def conceptos_descargar_excel(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':

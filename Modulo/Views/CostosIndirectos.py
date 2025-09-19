@@ -15,11 +15,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_costos_indirectos')
-
 def costos_indirectos_index(request):
     costos_indirectos = Costos_Indirectos.objects.all()
     return render(request, 'Costos_Indirectos/costos_indirecto_index.html', {'costos_indirectos': costos_indirectos})
 
+@login_required
+@verificar_permiso('can_manage_costos_indirectos')
 def costos_indirectos_crear(request):
     if request.method == 'POST':
         form = CostosIndirectosForm(request.POST)
@@ -34,6 +35,8 @@ def costos_indirectos_crear(request):
         form = CostosIndirectosForm()
     return render(request, 'Costos_Indirectos/costos_indirecto_forms.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_costos_indirectos')
 @csrf_exempt
 def costos_indirectos_editar(request, id):
     if request.method == 'POST':
@@ -58,6 +61,8 @@ def costos_indirectos_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_costos_indirectos')
 def costos_indirectos_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -66,6 +71,8 @@ def costos_indirectos_eliminar(request):
         return redirect('costos_indirectos_index')
     return redirect('costos_indirectos_index')
 
+@login_required
+@verificar_permiso('can_manage_costos_indirectos')
 def verificar_relaciones(request):
     print("entro a Verificando relaciones de costos indirectos")
     if request.method == 'POST':
@@ -90,6 +97,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_costos_indirectos')
 def costos_indirectos_descargar_excel(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':

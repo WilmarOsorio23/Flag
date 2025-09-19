@@ -91,7 +91,7 @@ def obtener_consultores(consultores):
     return consultor_info
 
 @login_required
-@verificar_permiso('can_manage_informe_consultores')
+@verificar_permiso('can_view_informe_consultores')
 def consultores_filtrado(request):
     """
     Vista para renderizar el informe de consultores.
@@ -168,7 +168,7 @@ def consultores_filtrado(request):
     return render(request, 'informes/informes_consultores_index.html', context)
 
 @login_required
-@verificar_permiso('can_manage_informe_consultores')
+@verificar_permiso('can_view_informe_consultores')
 def exportar_consultores_excel(request):
     """
     Exporta los datos filtrados de consultores a un archivo Excel.

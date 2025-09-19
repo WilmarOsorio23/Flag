@@ -79,7 +79,7 @@ def obtener_empleado_estudio(empleados, estudios):
 
 
 @login_required
-@verificar_permiso('can_manage_informe_estudios')
+@verificar_permiso('can_view_informe_estudios')
 def empleado_estudio_filtrado(request):
     """
     Vista principal del informe de estudios.
@@ -143,7 +143,7 @@ def empleado_estudio_filtrado(request):
 
 
 @login_required
-@verificar_permiso('can_manage_informe_estudios')
+@verificar_permiso('can_view_informe_estudios')
 def exportar_estudio_excel(request):
     """
     Exporta los datos filtrados de estudios de empleados a un archivo Excel.

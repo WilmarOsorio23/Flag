@@ -12,11 +12,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_contactos')
-
 def contactos_index(request):
     contactos = Contactos.objects.all()
     return render(request, 'Contactos/contactos_index.html', {'contactos': contactos})  
 
+@login_required
+@verificar_permiso('can_manage_contactos')
 def contactos_crear(request):
     if request.method == 'POST':
         form = ContactosForm(request.POST)
@@ -31,6 +32,8 @@ def contactos_crear(request):
         form = ContactosForm()
     return render(request, 'Contactos/contactos_form.html', {'form': form}) 
 
+@login_required
+@verificar_permiso('can_manage_contactos')
 def contactos_editar(request, id):
     print("Llego a editar")  # Confirmar que la función se está ejecutando
     if request.method == 'POST':
@@ -60,6 +63,8 @@ def contactos_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_contactos')
 def contactos_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -67,6 +72,8 @@ def contactos_eliminar(request):
         messages.success(request, 'Los detalles seleccionados se han eliminado correctamente.')
     return redirect('contactos_index')  
 
+@login_required
+@verificar_permiso('can_manage_contactos')
 def contactos_descargar_excel(request):
      
      # Verifica si la solicitud es POST

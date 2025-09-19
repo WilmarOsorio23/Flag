@@ -483,7 +483,7 @@ def calcular_pendiente_por_linea(anio: str, mes: str, linea: Linea, horas_habile
 
 
 @login_required
-@verificar_permiso('can_manage_clientes')
+@verificar_permiso('can_view_indicadores_totales')
 def indicadores_totales(request):
     form = Ind_Totales_FilterForm(request.GET or None)
     resultados = {

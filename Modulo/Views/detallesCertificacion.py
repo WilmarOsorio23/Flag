@@ -12,14 +12,14 @@ from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required
-@verificar_permiso('can_manage_certificaciones')
-
+@verificar_permiso('can_manage_detalle_certificacion')
 def detalle_certificacion_index(request):
     detalles_certificacion = Detalle_Certificacion.objects.all()
     #print(detalles_certificacion) 
     return render(request, 'Detalle_Certificacion/detalle_certificacion_index.html', {'detalles_certificacion': detalles_certificacion})
 
-
+@login_required
+@verificar_permiso('can_manage_detalle_certificacion')
 def detalle_certificacion_crear(request):
  print("entro a la funcion")
  if request.method == 'POST':
@@ -38,6 +38,8 @@ def detalle_certificacion_crear(request):
     form = Detalle_CertificacionForm()
     return render(request, 'Detalle_Certificacion/detalle_certificacion_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_detalle_certificacion')
 def detalle_certificacion_editar(request,Id):
     print("llego hasta editar")
     if request.method == 'POST':
@@ -56,6 +58,8 @@ def detalle_certificacion_editar(request,Id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_detalle_certificacion')
 def detalle_certificacion_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -64,6 +68,8 @@ def detalle_certificacion_eliminar(request):
         return redirect('detalle_certificacion_index')
     return redirect('detalle_certificacion_index')
 
+@login_required
+@verificar_permiso('can_manage_detalle_certificacion')
 def detalle_certificacion_descargar_excel(request):
     if request.method == 'POST':
         items_selected = request.POST.get('items_to_download')

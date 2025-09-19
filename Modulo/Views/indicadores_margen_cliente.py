@@ -166,7 +166,7 @@ def obtener_ipc_anio(anio):
         return 1
 
 @login_required
-@verificar_permiso('can_manage_indicadores_margen_cliente')
+@verificar_permiso('can_view_indicadores_margen_cliente')
 def indicadores_margen_cliente(request):
     form = Ind_Totales_FilterForm(request.GET or None)
     resultados = None

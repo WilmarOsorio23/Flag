@@ -14,8 +14,7 @@ from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required
-@verificar_permiso('can_manage_total_gasto')
-
+@verificar_permiso('can_manage_total_gastos')
 def total_gastos_index(request):
     try:
         # Obtener los datos de la base de datos
@@ -29,6 +28,9 @@ def total_gastos_index(request):
         return render(request, 'Total_Gastos/total_gastos_index.html', {
             'error_message': f'Error al cargar los datos: {str(e)}'
         })
+    
+@login_required
+@verificar_permiso('can_manage_total_gastos')
 def crear_detalle_gastos(request, total_gastos_id):
     total_gastos = get_object_or_404(Total_Gastos, id=total_gastos_id)
 
@@ -45,6 +47,8 @@ def crear_detalle_gastos(request, total_gastos_id):
         form = DetalleGastosFormOpcion2()
     return render(request, 'Total_gastos/total_gastos_crear_detalle.html', {'form': form, 'total_gastos': total_gastos})
 
+@login_required
+@verificar_permiso('can_manage_total_gastos')
 def total_gastos_crear(request):
     if request.method == 'POST':
         form = TotalGastosForm(request.POST)
@@ -60,6 +64,8 @@ def total_gastos_crear(request):
         form = TotalGastosForm()
     return render(request, 'total_gastos/total_gastos_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_total_gastos')
 @csrf_exempt
 def total_gastos_eliminar(request):
     if request.method == "POST":
@@ -130,7 +136,9 @@ def visualizar_detalle_gastos(request, id):
     print(response_data)
 
     return JsonResponse(response_data)
-    
+
+@login_required
+@verificar_permiso('can_manage_total_gastos')   
 @csrf_exempt
 def editar_detalles_gastos(request):
     if request.method == 'POST':
@@ -170,7 +178,9 @@ def actualizar_total(request, anio, mes):
         return JsonResponse({"success": True, "total": total})
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)})
-            
+
+@login_required
+@verificar_permiso('can_manage_total_gastos')      
 @csrf_exempt
 def total_gastos_editar(request):
     if request.method == 'POST':
@@ -216,7 +226,9 @@ def total_gastos_editar(request):
     else:
         print("❌ Error: Método no permitido.")
         return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)
-    
+
+@login_required
+@verificar_permiso('can_manage_total_gastos')  
 def total_gastos_descargar_excel(request):
     if request.method == 'POST':
         items_selected = request.POST.get('items_to_download')

@@ -51,7 +51,7 @@ def filtrar_datos(form=None):
     return facturas_agrupadas, lineas_obj, meses_filtrados
 
 @login_required
-@verificar_permiso('can_manage_informe_facturacion_consultores')
+@verificar_permiso('can_view_informe_facturacion_consultores')
 def informe_totales_por_mes(request):
     form = TotalesPorMesFilterForm(request.GET or None)
 
@@ -163,7 +163,7 @@ def informe_totales_por_mes(request):
     return render(request, 'Informes/informes_facturacion_consultores_index.html', context)
 
 @login_required
-@verificar_permiso('can_manage_informe_facturacion_consultores')
+@verificar_permiso('can_view_informe_facturacion_consultores')
 def reporte_excel_totales_por_mes(request):
     form = TotalesPorMesFilterForm(request.GET or None)
 

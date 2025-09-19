@@ -13,11 +13,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_historial_cargos')
-
 def historial_cargos_index(request):
     historial_cargos_data = Historial_Cargos.objects.all()
     return render(request, 'Historial_Cargos/Historial_Cargos_index.html', {'historial_cargos_data': historial_cargos_data})
 
+@login_required
+@verificar_permiso('can_manage_historial_cargos')
 def historial_cargos_crear(request):
     if request.method == 'POST':
         form = HistorialCargosForm(request.POST)
@@ -32,6 +33,8 @@ def historial_cargos_crear(request):
         form = HistorialCargosForm()
     return render(request, 'Historial_Cargos/Historial_Cargos_form.html', {'form': form})   
 
+@login_required
+@verificar_permiso('can_manage_historial_cargos')
 def historial_cargos_editar(request, id):
      print("llego hasta editar")
      if request.method == 'POST':
@@ -49,6 +52,8 @@ def historial_cargos_editar(request, id):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
 
+@login_required
+@verificar_permiso('can_manage_historial_cargos')
 def historial_cargos_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -56,6 +61,8 @@ def historial_cargos_eliminar(request):
         messages.success(request, 'Los detalles seleccionados se han eliminado correctamente.')
     return redirect('historial_cargos_index')
 
+@login_required
+@verificar_permiso('can_manage_historial_cargos')
 def historial_cargos_descargar_excel(request):
     if request.method == 'POST':
         items_selected = request.POST.get('items_to_download')

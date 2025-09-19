@@ -13,11 +13,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_horas_habiles')
-
 def horas_habiles_index(request):
     horas_habiles = Horas_Habiles.objects.all()
     return render(request, 'Horas_Habiles/horas_habiles_index.html', {'horas_habiles': horas_habiles})
 
+@login_required
+@verificar_permiso('can_manage_horas_habiles')
 def horas_habiles_crear(request):
     if request.method == 'POST':
         form = HorasHabilesForm(request.POST)
@@ -32,6 +33,8 @@ def horas_habiles_crear(request):
         form = HorasHabilesForm()
     return render(request, 'Horas_Habiles/horas_habiles_crear.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_horas_habiles')
 @csrf_exempt
 def horas_habiles_editar(request, id):
     if request.method == 'POST':
@@ -51,6 +54,8 @@ def horas_habiles_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_horas_habiles')
 @csrf_exempt
 def horas_habiles_eliminar(request):
     if request.method == 'POST':
@@ -63,6 +68,8 @@ def horas_habiles_eliminar(request):
         return redirect('horas_habiles_index')
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_horas_habiles')
 @csrf_exempt
 def verificar_relaciones(request):
     if request.method == 'POST':
@@ -90,6 +97,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Datos no permitidos'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_horas_habiles')
 def horas_habiles_descargar_excel(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':
