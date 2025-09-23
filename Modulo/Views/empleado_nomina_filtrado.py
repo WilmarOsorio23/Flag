@@ -21,8 +21,7 @@ from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required
-@verificar_permiso('can_manage_empleados')
-
+@verificar_permiso('can_view_informe_salarios')
 # Función para filtrar empleados y nóminas
 def filtrar_empleados_y_nominas(form, empleados, nominas):
     """
@@ -53,6 +52,8 @@ def filtrar_empleados_y_nominas(form, empleados, nominas):
 
     return empleados, nominas
 
+@login_required
+@verificar_permiso('can_view_informe_salarios')
 # Función para calcular la información del empleado
 def obtener_empleado_info(empleados, nominas, meses):
     """
@@ -111,6 +112,8 @@ def obtener_empleado_info(empleados, nominas, meses):
             })
     return empleado_info
 
+@login_required
+@verificar_permiso('can_view_informe_salarios')
 # Informe de Nómina de Empleados
 def empleado_nomina_filtrado(request):
     """
@@ -167,6 +170,8 @@ def empleado_nomina_filtrado(request):
 
     return render(request, 'informes/informes_salarios_index.html', context)
 
+@login_required
+@verificar_permiso('can_view_informe_salarios')
 # Funcionalidad para descargar los resultados en Excel
 def exportar_nomina_excel(request):
     """

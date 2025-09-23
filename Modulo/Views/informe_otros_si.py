@@ -122,7 +122,7 @@ def obtener_otros_si(clientes, otros_si):
     return cliente_otros_si_info
 
 @login_required
-@verificar_permiso('can_manage_informe_otros_si')
+@verificar_permiso('can_view_informe_otros_si')
 def informe_otros_si(request):
     """
     Vista principal que renderiza el informe HTML de contratos Otros Sí.
@@ -255,7 +255,7 @@ def informe_otros_si(request):
 
 
 @login_required
-@verificar_permiso('can_manage_informe_otros_si')
+@verificar_permiso('can_view_informe_otros_si')
 # Exportar a Excel
 def exportar_otros_si_excel(request):
     """

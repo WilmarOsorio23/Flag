@@ -13,12 +13,13 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_detalle_gastos')
-
 def detalle_gastos_index(request):
     detalles = Detalle_Gastos.objects.all()
     print("Buscando plantilla en: Detalle_Gastos/detalle_gastos_index.html")
     return render(request, 'Detalle_Gastos/detalle_gastos_index.html', {'detalles': detalles})
 
+@login_required
+@verificar_permiso('can_manage_detalle_gastos')
 def detalle_gastos_crear(request):
     if request.method == 'POST':
         form = DetalleGastosForm(request.POST)
@@ -33,7 +34,8 @@ def detalle_gastos_crear(request):
         form = DetalleGastosForm()
     return render(request, 'Detalle_Gastos/detalle_gastos_form.html', {'form': form})
 
-
+@login_required
+@verificar_permiso('can_manage_detalle_gastos')
 def detalle_gastos_editar(request,id):
     print("llego hasta editar")
     if request.method == 'POST':
@@ -52,6 +54,8 @@ def detalle_gastos_editar(request,id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_detalle_gastos')
 def detalle_gastos_eliminar(request):
      if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -59,6 +63,8 @@ def detalle_gastos_eliminar(request):
         messages.success(request, 'Los detalles seleccionados se han eliminado correctamente.')
      return redirect('detalle_gastos_index')
 
+@login_required
+@verificar_permiso('can_manage_detalle_gastos')
 def detalle_gastos_descargar_excel(request):
     if request.method == 'POST':
         items_selected = request.POST.get('items_to_download')

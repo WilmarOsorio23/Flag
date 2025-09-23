@@ -15,11 +15,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_ipc')
-
 def ipc_index(request):
     ipc_data = IPC.objects.all().order_by('-Anio','Mes')
     return render(request, 'ipc/ipc_index.html', {'ipc_data': ipc_data})
 
+@login_required
+@verificar_permiso('can_manage_ipc')
 def ipc_crear(request):
     if request.method == 'POST':
         form = IPCForm(request.POST)
@@ -34,6 +35,8 @@ def ipc_crear(request):
         form = IPCForm()
     return render(request, 'ipc/ipc_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_ipc')
 @csrf_exempt 
 def ipc_editar(request, id):
     if request.method == 'POST':
@@ -54,7 +57,8 @@ def ipc_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
+@login_required
+@verificar_permiso('can_manage_ipc')
 def ipc_eliminar(request):
    if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -62,6 +66,8 @@ def ipc_eliminar(request):
         messages.success(request, 'El registro se han eliminado correctamente.')
         return redirect('ipc_index')
 
+@login_required
+@verificar_permiso('can_manage_ipc')
 def ipc_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')

@@ -13,12 +13,13 @@ from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required
-@verificar_permiso('can_manage_costos_indirectos')
-
+@verificar_permiso('can_manage_detalle_costos_indirectos')
 def detalle_costos_indirectos_index(request):
     detalle_data = Detalle_Costos_Indirectos.objects.all()
     return render(request, 'detalle_costos_indirectos/detalle_costos_indirectos_index.html', {'detalle_data': detalle_data})
 
+@login_required
+@verificar_permiso('can_manage_detalle_costos_indirectos')
 def detalle_costos_indirectos_crear(request):
      if request.method == 'POST':
         form = DetalleCostosIndirectosForm(request.POST)
@@ -34,6 +35,8 @@ def detalle_costos_indirectos_crear(request):
         form = DetalleCostosIndirectosForm()
      return render(request, 'Detalle_Costos_Indirectos/detalle_costos_indirectos_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_detalle_costos_indirectos')
 def detalle_costos_indirectos_editar(request, id):
     print("llego hasta editar")
     if request.method == 'POST':
@@ -52,6 +55,8 @@ def detalle_costos_indirectos_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_detalle_costos_indirectos')
 def detalle_costos_indirectos_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -60,6 +65,8 @@ def detalle_costos_indirectos_eliminar(request):
         return redirect('detalle_costos_indirectos_index')
     return redirect('detalle_costos_indirectos_index')
 
+@login_required
+@verificar_permiso('can_manage_detalle_costos_indirectos')
 def detalle_costos_indirectos_descargar_excel(request):
     if request.method == 'POST':
         items_selected = request.POST.get('items_to_download')
@@ -85,7 +92,10 @@ def detalle_costos_indirectos_descargar_excel(request):
     return redirect('detalle_costos_indirectos_index')
 
 
-'''def detalle_costos_indirectos_descargar_excel(request):
+'''
+@login_required
+@verificar_permiso('can_manage_detalle_costos_indirectos')
+def detalle_costos_indirectos_descargar_excel(request):
      if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
         

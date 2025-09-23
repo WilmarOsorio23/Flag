@@ -14,12 +14,13 @@ from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required
-@verificar_permiso('can_manage_certificaciones')
-
+@verificar_permiso('can_manage_certificacion')
 def certificacion_index(request):
     certificaciones = Certificacion.objects.all()
     return render(request, 'Certificacion/certificacion_index.html', {'certificaciones': certificaciones})
 
+@login_required
+@verificar_permiso('can_manage_certificacion')
 def certificacion_crear(request):
     if request.method == 'POST':
         form = CertificacionForm(request.POST)
@@ -34,6 +35,8 @@ def certificacion_crear(request):
         form = CertificacionForm()
     return render(request, 'Certificacion/certificacion_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_certificacion')
 @csrf_exempt
 def certificacion_editar(request, id):
     if request.method == 'POST':
@@ -54,7 +57,8 @@ def certificacion_editar(request, id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
+@login_required
+@verificar_permiso('can_manage_certificacion')
 def certificacion_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -63,6 +67,8 @@ def certificacion_eliminar(request):
         return redirect('certificacion_index')
     return redirect('certificacion_index')
 
+@login_required
+@verificar_permiso('can_manage_certificacion')
 def verificar_relaciones(request):
     if request.method == 'POST':
         import json
@@ -86,6 +92,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_certificacion')
 def certificacion_descargar_excel(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':

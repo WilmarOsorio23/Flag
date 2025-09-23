@@ -203,7 +203,7 @@ def generar_graficos_por_linea(resultados, meses_seleccionados, meses_nombres):
     return graficos
 
 @login_required
-@verificar_permiso('can_manage_indicadores_facturacion')
+@verificar_permiso('can_view_indicadores_facturacion')
 def indicadores_facturacion(request):
     """Vista principal para el indicador de facturación"""
     try:

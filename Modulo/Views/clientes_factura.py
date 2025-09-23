@@ -8,7 +8,7 @@ from io import BytesIO
 from decimal import Decimal, InvalidOperation
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.db import transaction
+from django.db import transaction   
 from django.forms import ValidationError
 from django.shortcuts import render
 from Modulo import models
@@ -190,6 +190,8 @@ def clientes_factura_guardar(request):
             return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
     return JsonResponse({'status': 'error', 'error': 'Método no permitido.'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_clientes_factura')
 @csrf_exempt
 def eliminar_facturas(request):
     if request.method == 'POST':
@@ -341,6 +343,8 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
 
     return facturacion_info
 
+@login_required
+@verificar_permiso('can_manage_clientes_factura')
 def clientes_factura_index(request):
     clientes = models.Clientes.objects.all()
     lineas = models.Linea.objects.all()
@@ -417,8 +421,9 @@ def calcular_totales_facturacion(facturacion_info):
 
     
     return totales
-    
-    
+
+@login_required
+@verificar_permiso('can_manage_clientes_factura')
 @csrf_exempt
 def generar_plantilla(request):
     if request.method == 'POST':
@@ -570,6 +575,8 @@ def generar_plantilla(request):
             return HttpResponse(f'Error: {str(e)}', status=500)
     return HttpResponse('Método no permitido', status=405)
 
+@login_required
+@verificar_permiso('can_manage_clientes_factura')
 def obtener_tarifa(request): 
     try:
         # Obtener los parámetros de la solicitud
@@ -643,6 +650,8 @@ def obtener_tarifa(request):
     except Exception as e:
         return JsonResponse({'error': f'Error interno del servidor: {str(e)}'}, status=500)
 
+@login_required
+@verificar_permiso('can_manage_clientes_factura')
 def get_lineas_modulos(request):
     cliente_id = request.GET.get('clienteId')
     anio = request.GET.get('anio')

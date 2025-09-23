@@ -59,7 +59,7 @@ def Filtrar_datos(forms,tiempos):
     return tiempos
 
 @login_required
-@verificar_permiso('can_manage_informe_tiempos_consultores')
+@verificar_permiso('can_view_informe_tiempos_consultores')
 def tiempos_clientes_filtrado(request):
     tiempos_info = []
     show_data = False
@@ -142,7 +142,7 @@ def tiempos_clientes_filtrado(request):
     return render(request, 'informes/informes_tiempos_consultores_index.html', context)
 
 @login_required
-@verificar_permiso('can_manage_informe_tiempos_consultores')            
+@verificar_permiso('can_view_informe_tiempos_consultores')            
 def exportar_tiempos_clientes_excel(request):
     # Obtener datos de la sesión
     tiempos_info = request.session.get('tiempos_info', [])

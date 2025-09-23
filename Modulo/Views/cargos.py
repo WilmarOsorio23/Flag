@@ -13,13 +13,14 @@ from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required
-@verificar_permiso('can_manage_clientes')
+@verificar_permiso('can_manage_cargos')
 def cargos_index(request):
     # Ordenar los módulos por el campo 'id' en orden ascendente
     lista  = Cargos.objects.all().order_by('CargoId')
     return render(request, 'Cargos/cargos_index.html', {'Cargos': lista})
 
-    
+@login_required
+@verificar_permiso('can_manage_cargos')
 def crear(request):
     if request.method == 'POST':
         form = CargosForm(request.POST)
@@ -35,6 +36,8 @@ def crear(request):
         form = CargosForm()
     return render(request, 'Cargos/cargos_crear.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_cargos')
 @csrf_exempt
 def editar(request, id):
     if request.method == 'POST':
@@ -52,6 +55,8 @@ def editar(request, id):
             return JsonResponse({'status': 'error', 'errors': ['Error desconocido: ' + str(e)]})
     return JsonResponse({'status': 'error', 'error': 'Cargo no permitido'})
     
+@login_required
+@verificar_permiso('can_manage_cargos')
 def eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -60,6 +65,8 @@ def eliminar(request):
         return redirect('cargos_index')
     return redirect('cargos_index')
 
+@login_required
+@verificar_permiso('can_manage_cargos')
 def verificar_relaciones(request):
     if request.method == 'POST':
         import json
@@ -83,6 +90,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Cargo no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_cargos')
 def descargar_excel(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':

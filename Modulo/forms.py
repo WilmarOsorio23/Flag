@@ -2652,7 +2652,7 @@ class UserRoleForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Hacer que todos los campos de permisos sean checkboxes
@@ -2665,7 +2665,12 @@ class UserRoleForm(forms.ModelForm):
     def get_permission_label(self, field_name):
         """Convierte nombres de campos en etiquetas legibles"""
         labels = {
+            # Permisos de Administración
+            'can_manage_users': 'Gestionar Usuarios',
+            'can_manage_roles': 'Gestionar Roles',
+            
             # Maestros
+            'can_manage_actividades_pagares': 'Gestionar Actividades Pagarés',
             'can_manage_cargos': 'Gestionar Cargos',
             'can_manage_certificacion': 'Gestionar Certificación',
             'can_manage_clientes': 'Gestionar Clientes',
@@ -2686,40 +2691,51 @@ class UserRoleForm(forms.ModelForm):
             'can_manage_perfil': 'Gestionar Perfil',
             'can_manage_referencias': 'Gestionar Referencias',
             'can_manage_tipo_documento': 'Gestionar Tipo Documento',
-            'can_manage_tipo_contactos': 'Gestionar Tipo Contactos',
+            'can_manage_tipos_contactos': 'Gestionar Tipos de Contactos',
+            'can_manage_tipo_pagare': 'Gestionar Tipo Pagaré',
             
             # Movimientos
             'can_manage_clientes_contratos': 'Gestionar Contratos de Clientes',
+            'can_manage_contratos_otros_si': 'Gestionar Contratos Otros Sí',
+            'can_manage_pagare': 'Gestionar Pagarés',
             'can_manage_detalle_certificacion': 'Gestionar Detalle Certificación',
             'can_manage_detalle_costos_indirectos': 'Gestionar Detalle Costos Indirectos',
             'can_manage_detalle_gastos': 'Gestionar Detalle Gastos',
-            'can_manage_historial_cargos': 'Gestionar Historial Cargos',
+            'can_manage_historial_cargos': 'Gestionar Historial de Cargos',
             'can_manage_nomina': 'Gestionar Nómina',
-            'can_manage_registro_tiempos': 'Gestionar Registro Tiempos',
+            'can_manage_registro_tiempos': 'Gestionar Registro de Tiempos',
             'can_manage_tarifa_clientes': 'Gestionar Tarifa Clientes',
             'can_manage_tarifa_consultores': 'Gestionar Tarifa Consultores',
-            'can_manage_facturacion_clientes': 'Gestionar Facturación Clientes',
-            'can_manage_facturas_consultores': 'Gestionar Facturas Consultores',
-            'can_manage_pagares': 'Gestionar Pagarés',
+            'can_manage_total_costos_indirectos': 'Gestionar Total Costos Indirectos',
+            'can_manage_total_gastos': 'Gestionar Total Gastos',
+            'can_manage_clientes_factura': 'Gestionar Facturación Clientes',
+            'can_manage_facturacion_consultores': 'Gestionar Facturación Consultores',
             
             # Informes
-            'can_view_informe_certificaciones': 'Ver Informe Certificaciones',
-            'can_view_informe_empleados': 'Ver Informe Empleados',
+            'can_view_informe_certificacion': 'Ver Informe Certificación',
+            'can_view_informe_empleado': 'Ver Informe Empleado',
             'can_view_informe_salarios': 'Ver Informe Salarios',
             'can_view_informe_estudios': 'Ver Informe Estudios',
             'can_view_informe_consultores': 'Ver Informe Consultores',
-            'can_view_informe_tarifa_consultores': 'Ver Informe Tarifa Consultores',
-            'can_view_informe_tarifa_clientes': 'Ver Informe Tarifa Clientes',
+            'can_view_informe_tarifas_consultores': 'Ver Informe Tarifas Consultores',
             'can_view_informe_facturacion': 'Ver Informe Facturación',
+            'can_view_informe_historial_cargos': 'Ver Informe Historial Cargos',
+            'can_view_informe_tarifas_clientes': 'Ver Informe Tarifas Clientes',
+            'can_view_informe_tiempos_consultores': 'Ver Informe Tiempos Consultores',
             'can_view_informe_clientes': 'Ver Informe Clientes',
+            'can_view_informe_clientes_contratos': 'Ver Informe Contratos Clientes',
+            'can_view_informe_otros_si': 'Ver Informe Otros Sí',
+            'can_view_informe_pagares': 'Ver Informe Pagarés',
+            'can_view_informe_facturacion_consultores': 'Ver Informe Facturación Consultores',
+            'can_view_informe_serv_consultor': 'Ver Informe Servicios Consultor',
+            'can_view_informe_facturacion_centrocostos': 'Ver Informe Facturación Centros Costos',
+            'can_view_informe_detalle_facturacion_consultores': 'Ver Informe Detalle Facturación Consultores',
             
             # Indicadores
             'can_view_indicadores_operatividad': 'Ver Indicadores Operatividad',
-            'can_view_indicadores_rentabilidad': 'Ver Indicadores Rentabilidad',
+            'can_view_indicadores_totales': 'Ver Indicadores Totales',
             'can_view_indicadores_facturacion': 'Ver Indicadores Facturación',
-            'can_view_indicadores_margen_linea': 'Ver Indicadores Margen Línea',
             'can_view_indicadores_margen_cliente': 'Ver Indicadores Margen Cliente',
-            
         }
         return labels.get(field_name, field_name.replace('_', ' ').title())
 

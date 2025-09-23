@@ -14,13 +14,13 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_modulo')
-
 def modulo(request):
     # Ordenar los módulos por el campo 'id' en orden ascendente
     lista_modulos  = Modulo.objects.all().order_by('ModuloId')
     return render(request, 'Modulo/index.html', {'Modulo': lista_modulos})
 
-    
+@login_required
+@verificar_permiso('can_manage_modulo')
 def crear(request):
     if request.method == 'POST':
         form = ModuloForm(request.POST)
@@ -36,6 +36,8 @@ def crear(request):
         form = ModuloForm()
     return render(request, 'Modulo/crear.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_modulo')
 @csrf_exempt
 def editar(request, id):
     if request.method == 'POST':
@@ -52,7 +54,9 @@ def editar(request, id):
         except Exception as e:
             return JsonResponse({'status': 'error', 'errors': ['Error desconocido: ' + str(e)]})
     return JsonResponse({'status': 'error', 'error': 'Método no permitido'})
-    
+
+@login_required
+@verificar_permiso('can_manage_modulo')   
 def eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -61,6 +65,8 @@ def eliminar(request):
         return redirect('Modulo')
     return redirect('Modulo')
 
+@login_required
+@verificar_permiso('can_manage_modulo')
 def verificar_relaciones(request):
     if request.method == 'POST':
         import json
@@ -85,6 +91,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_modulo')
 def descargar_excel(request):
     # Verifica si la solicitud es POST
     if request.method == 'POST':

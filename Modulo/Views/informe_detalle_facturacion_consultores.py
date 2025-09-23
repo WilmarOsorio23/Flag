@@ -6,8 +6,11 @@ from Modulo.models import Facturacion_Consultores, Empleado, Linea
 from Modulo.forms import FacturacionConsultoresDetalleFilterForm
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side, numbers
+from Modulo.decorators import verificar_permiso
+from django.contrib.auth.decorators import login_required
 
-
+@login_required
+@verificar_permiso('can_view_informe_detalle_facturacion_consultores')
 def filtrar_facturacion_consultores(request):
     # Obtener los filtros de la URL (GET)
     anio = request.GET.get('Anio')
@@ -49,7 +52,8 @@ def filtrar_facturacion_consultores_form(form, facturacion):
 
     return facturacion
 
-
+@login_required
+@verificar_permiso('can_view_informe_detalle_facturacion_consultores')
 # Vista para mostrar el informe de facturación de consultores
 def informe_detalle_facturacion_consultores(request):
     resultados = []
@@ -98,7 +102,8 @@ def informe_detalle_facturacion_consultores(request):
 
     return render(request, 'Informes/informe_detalle_facturacion_consultores.html', context)
 
-
+@login_required
+@verificar_permiso('can_view_informe_detalle_facturacion_consultores')
 def exportar_detalle_facturacion_consultores_excel(request):
     form = FacturacionConsultoresDetalleFilterForm(request.GET or None)
     if not form.is_valid():

@@ -14,8 +14,6 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_ind')
-
-
 def ind_index(request):
     ind_data = IND.objects.all().order_by('-Anio','Mes')
     return render(request, 'ind/ind_index.html', {'ind_data': ind_data})
@@ -34,6 +32,8 @@ def ind_crear(request):
         form = INDForm()
     return render(request, 'ind/ind_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_ind')
 @csrf_exempt
 def ind_editar(request, id):
     if request.method == 'POST':
@@ -54,6 +54,8 @@ def ind_editar(request, id):
             return JsonResponse({'status': 'error', 'errors': ['Error desconocido: ' + str(e)]})
     return JsonResponse({'status': 'error', 'error': 'Método no permitido'})
     
+@login_required
+@verificar_permiso('can_manage_ind')
 def ind_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -61,6 +63,8 @@ def ind_eliminar(request):
         return redirect('ind_index')
     return redirect('ind_index')
 
+@login_required
+@verificar_permiso('can_manage_ind')
 def ind_descargar_excel(request):
     print("inicio descarga")
     if request.method == 'POST':

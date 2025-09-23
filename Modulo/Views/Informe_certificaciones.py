@@ -73,7 +73,7 @@ def obtener_informe_certificacion(certificaciones, empleados, detalles):
     return certificaciones_info
 
 @login_required
-@verificar_permiso('can_manage_Informe_certificaciones')
+@verificar_permiso('can_view_informe_certificacion')
 def empleado_filtrado(request):
     """
     Vista que construye el informe HTML con filtros, tabla de datos y resumenes (cards).
@@ -124,7 +124,7 @@ def empleado_filtrado(request):
     return render(request, 'informes/informes_certificacion_index.html', context)
 
 @login_required
-@verificar_permiso('can_manage_Informe_certificaciones')
+@verificar_permiso('can_view_informe_certificacion')
 @csrf_exempt
 def exportar_certificaciones_excel(request):
     """

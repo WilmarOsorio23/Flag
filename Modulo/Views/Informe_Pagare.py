@@ -52,7 +52,7 @@ def filtrar_pagares(form, pagarés):
     return pagarés
 
 @login_required
-@verificar_permiso('can_manage_informe_pagare')
+@verificar_permiso('can_view_informe_pagares')
 def informe_pagares(request):
     pagarés_info = []
     show_data = False
@@ -146,7 +146,7 @@ def informe_pagares(request):
     return render(request, 'Pagare/Informe_Pagare.html', context)
 
 @login_required
-@verificar_permiso('can_manage_informe_pagare')
+@verificar_permiso('can_view_informe_pagares')
 def exportar_pagares_excel(request):
     # Obtener datos de la sesión
     pagarés_info = request.session.get('pagares_info', [])

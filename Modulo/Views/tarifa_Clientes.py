@@ -12,13 +12,13 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_tarifa_clientes')
-
-
 def tarifa_clientes_index(request):
     tarifa_clientes_data = Tarifa_Clientes.objects.all()
     form=Tarifa_ClientesForm()
     return render(request, 'tarifa_clientes/tarifa_clientes_index.html', {'tarifa_clientes_data': tarifa_clientes_data,'form': form}, )    
 
+@login_required
+@verificar_permiso('can_manage_tarifa_clientes')
 def tarifa_clientes_crear(request):
    if request.method == 'POST':
         form = Tarifa_ClientesForm(request.POST)
@@ -33,7 +33,8 @@ def tarifa_clientes_crear(request):
         form = Tarifa_ClientesForm()
    return render(request, 'Tarifa_Clientes/Tarifa_Clientes_form.html', {'form': form})   
 
-
+@login_required
+@verificar_permiso('can_manage_tarifa_clientes')
 def tarifa_clientes_editar(request, id):
      print("llego hasta editar")
      if request.method == 'POST':
@@ -61,6 +62,8 @@ def tarifa_clientes_editar(request, id):
      else:
         return JsonResponse({'error': 'Método no permitido'}, status=405) 
 
+@login_required
+@verificar_permiso('can_manage_tarifa_clientes')
 def tarifa_clientes_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -68,7 +71,8 @@ def tarifa_clientes_eliminar(request):
         messages.success(request, 'Los elementos seleccionados se han eliminado correctamente.')
     return redirect('tarifa_clientes_index')
 
-
+@login_required
+@verificar_permiso('can_manage_tarifa_clientes')
 def tarifa_clientes_descargar_excel(request):   
      if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')

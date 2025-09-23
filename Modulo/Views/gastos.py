@@ -15,12 +15,13 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_gastos')
-
 def gasto_index(request):
     # Ordenar los gastos por el campo 'id' en orden ascendente
     gastos = Gastos.objects.all().order_by('GastoId')
     return render(request, 'Gastos/gasto_index.html', {'gastos': gastos})   
 
+@login_required
+@verificar_permiso('can_manage_gastos')
 def gasto_crear(request):
     if request.method == 'POST':
         form = GastoForm(request.POST)
@@ -35,6 +36,8 @@ def gasto_crear(request):
         form = GastoForm()
     return render(request, 'Gastos/gasto_form.html', {'form': form})
 
+@login_required
+@verificar_permiso('can_manage_gastos')
 @csrf_exempt
 def gasto_editar(request, id):
     if request.method == 'POST':
@@ -52,6 +55,8 @@ def gasto_editar(request, id):
             return JsonResponse({'status': 'error', 'errors': ['Error desconocido: ' + str(e)]})
     return JsonResponse({'status': 'error', 'error': 'Método no permitido'})
 
+@login_required
+@verificar_permiso('can_manage_gastos')
 def gasto_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -60,6 +65,8 @@ def gasto_eliminar(request):
         return redirect('gastos_index')
     return redirect('gastos_index')
 
+@login_required
+@verificar_permiso('can_manage_gastos')
 def verificar_relaciones(request):
     if request.method == 'POST':
         import json
@@ -83,6 +90,8 @@ def verificar_relaciones(request):
             return JsonResponse({'isRelated': False})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@login_required
+@verificar_permiso('can_manage_gastos')
 def gasto_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.get('items_to_delete') 

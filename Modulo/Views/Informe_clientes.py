@@ -89,7 +89,7 @@ def obtener_info_clientes(clientes):
     return clientes_info
 
 @login_required
-@verificar_permiso('can_manage_informe_clientes')
+@verificar_permiso('can_view_informe_clientes')
 # Vista para mostrar el informe de clientes
 def clientes_filtrado(request):
     """
@@ -164,7 +164,7 @@ def clientes_filtrado(request):
     return render(request, 'informes/informes_clientes_index.html', context)
 
 @login_required
-@verificar_permiso('can_manage_informe_clientes')
+@verificar_permiso('can_view_informe_clientes')
 # Vista para exportar el informe a Excel
 def exportar_clientes_excel(request):
     """

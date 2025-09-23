@@ -74,7 +74,8 @@ class UserRole(models.Model):
     can_view_informe_pagares = models.BooleanField(default=False)
     can_view_informe_facturacion_consultores = models.BooleanField(default=False)
     can_view_informe_serv_consultor = models.BooleanField(default=False)
-    can_view_informe_facturacion_clientes = models.BooleanField(default=False)
+    can_view_informe_facturacion_centrocostos = models.BooleanField(default=False)
+    can_view_informe_detalle_facturacion_consultores = models.BooleanField(default=False)
     
     # Indicadores - Permisos específicos
     can_view_indicadores_operatividad = models.BooleanField(default=False)
