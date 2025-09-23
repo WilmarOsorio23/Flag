@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 from io import BytesIO
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
@@ -19,43 +19,67 @@ from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required
-@verificar_permiso('can_manage_facturacion_clientes')
-
+@verificar_permiso('can_manage_clientes_factura')
 @transaction.atomic
 def clientes_factura_guardar(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body) 
             rows = data.get('data', [])
+            
+            # Debug: imprimir datos recibidos
+            print("Datos recibidos:", json.dumps(rows, indent=2))
                 
-            # Aquí puedes procesar cada fila
             for row in rows:
                 # Validar campos obligatorios
-                if not all(key in row for key in ['ClienteId', 'LineaId', 'Anio', 'Mes','ModuloId']):
+                required_fields = ['ClienteId', 'LineaId', 'Anio', 'Mes', 'ModuloId']
+                if not all(key in row for key in required_fields):
+                    print(f"Faltan campos obligatorios en: {row}")
                     continue  # Saltar filas que no tienen los campos obligatorios
 
-                # Obtener el flag is_new_line
-                is_new_line = row.get('is_new_line', 'false').lower() == 'true'
+                # Obtener el flag is_new_line (manejar tanto string como boolean)
+                is_new_line = row.get('is_new_line', 'false')
+                if isinstance(is_new_line, bool):
+                    is_new_line = 'true' if is_new_line else 'false'
+                is_new_line = is_new_line.lower() == 'true'
+
+                # Función auxiliar mejorada para conversión de valores decimales
+                def safe_decimal_convert(value):
+                    try:
+                        if value is None or str(value).lower() in ['', 'none', 'null', 'undefined', 'nan']:
+                            return Decimal('0.0')
+                        # Si ya es decimal, retornar directamente
+                        if isinstance(value, Decimal):
+                            return value
+                        # Remover caracteres no numéricos excepto punto decimal y signo negativo
+                        clean_value = ''.join(c for c in str(value) if c.isdigit() or c in ['.', '-'])
+                        return Decimal(clean_value) if clean_value else Decimal('0.0')
+                    except (ValueError, TypeError, InvalidOperation):
+                        return Decimal('0.0')
 
                 # Convertir valores de manera segura
-                consecutivo_id = row.get('ConsecutivoId') or None
-                anio = int(row.get('Anio', 0)) if row.get('Anio') else 0
-                mes = int(row.get('Mes', 0)) if row.get('Mes') else 0
-                cliente_id = int(row.get('ClienteId', 0)) if row.get('ClienteId') else 0
-                linea_id = int(row.get('LineaId', 0)) if row.get('LineaId') else 0
-                modulo_id = int(row.get('ModuloId', 0)) if row.get('ModuloId') else 0
+                consecutivo_id = row.get('ConsecutivoId')
+                if consecutivo_id is not None:
+                    try:
+                        consecutivo_id = int(consecutivo_id)
+                    except (ValueError, TypeError):
+                        consecutivo_id = None
                 
-                horas_factura = float(row.get('Horas', 0)) if row.get('Horas') and row.get('Horas').lower() != 'none' else 0.0
-                valor_horas = Decimal(row.get('Valor_Horas', '0')) if row.get('Valor_Horas') and row.get('Valor_Horas').lower() != 'none' else Decimal('0.0')
-                dias_factura = float(row.get('Dias', 0)) if row.get('Dias') and row.get('Dias').lower() != 'none' else 0.0
-                valor_dias = Decimal(row.get('Valor_Dias', '0')) if row.get('Valor_Dias') and row.get('Valor_Dias').lower() != 'none' else Decimal('0.0')
-                mes_factura = int(row.get('Meses', 0)) if row.get('Meses') and row.get('Meses').lower() != 'none' else 0   
-                valor_meses = Decimal(row.get('Valor_Meses', '0')) if row.get('Valor_Meses') and row.get('Valor_Meses').lower() != 'none' else Decimal('0.0')
-
-                bolsa = Decimal(row.get('Bolsa', '0')) if row.get('Bolsa') and row.get('Bolsa').lower() != 'none' else Decimal('0.0')
-                valor_bolsa = Decimal(row.get('Valor_Bolsa', '0')) if row.get('Valor_Bolsa') and row.get('Valor_Bolsa').lower() != 'none' else Decimal('0.0')
-
-                iva = float(row.get('IVA', 0)) if row.get('IVA') and row.get('IVA').lower() != 'none' else 0.0
+                anio = int(safe_decimal_convert(row.get('Anio')))
+                mes = int(safe_decimal_convert(row.get('Mes')))
+                cliente_id = int(safe_decimal_convert(row.get('ClienteId')))
+                linea_id = int(safe_decimal_convert(row.get('LineaId')))
+                modulo_id = int(safe_decimal_convert(row.get('ModuloId')))
+                
+                horas_factura = safe_decimal_convert(row.get('Horas'))
+                valor_horas = safe_decimal_convert(row.get('Valor_Horas'))
+                dias_factura = safe_decimal_convert(row.get('Dias'))
+                valor_dias = safe_decimal_convert(row.get('Valor_Dias'))
+                mes_factura = safe_decimal_convert(row.get('Meses'))
+                valor_meses = safe_decimal_convert(row.get('Valor_Meses'))
+                bolsa = safe_decimal_convert(row.get('Bolsa'))
+                valor_bolsa = safe_decimal_convert(row.get('Valor_Bolsa'))
+                iva = safe_decimal_convert(row.get('IVA'))
 
                 descripcion = row.get('Descripcion', "") or ""
                 numero_factura = row.get('Numero_Factura', "") or ""
@@ -64,132 +88,105 @@ def clientes_factura_guardar(request):
                 sitio_serv = row.get('Sitio_Serv', "") or ""
 
                 # Calcular el valor
-                valor = (Decimal(horas_factura) * valor_horas if horas_factura else Decimal('0.0')) + (Decimal(dias_factura) * valor_dias if dias_factura else Decimal('0.0')) + (Decimal(mes_factura) * valor_meses if valor_meses else Decimal('0.0')) + (bolsa * valor_bolsa if bolsa else Decimal('0.0'))
+                valor = Decimal('0.0')
+                if horas_factura:
+                    valor += horas_factura * valor_horas
+                if dias_factura:
+                    valor += dias_factura * valor_dias
+                if mes_factura:
+                    valor += mes_factura * valor_meses
+                if bolsa:
+                    valor += bolsa * valor_bolsa
 
-                if (horas_factura > 0 or dias_factura > 0 or mes_factura > 0 or bolsa > 0):
-
-                    # Verificar si el registro ya existe
-                    if consecutivo_id:
-                        try:
-                            facturacion_cliente = FacturacionClientes.objects.get(ConsecutivoId=consecutivo_id)
-                            
-                            # Verificar si los datos han cambiado   
-                            if (facturacion_cliente.HorasFactura == horas_factura and
-                                facturacion_cliente.Valor_Horas == valor_horas and
-                                facturacion_cliente.DiasFactura == dias_factura and
-                                facturacion_cliente.Valor_Dias == valor_dias and
-                                facturacion_cliente.MesFactura == mes_factura and
-                                facturacion_cliente.Valor_Meses == valor_meses and
-                                facturacion_cliente.Valor == valor and
-                                facturacion_cliente.Descripcion == descripcion and
-                                facturacion_cliente.Factura == numero_factura and
-                                facturacion_cliente.Bolsa == bolsa and
-                                facturacion_cliente.Valor_Bolsa == valor_bolsa and
-                                facturacion_cliente.IVA == iva and
-                                facturacion_cliente.Referencia == referencia and
-                                facturacion_cliente.Ceco == ceco and
-                                facturacion_cliente.Sitio_Serv == sitio_serv):
-                                continue
-
-                            # Actualizar solo si hay cambios
-                            facturacion_cliente.HorasFactura = horas_factura
-                            facturacion_cliente.Valor_Horas = valor_horas
-                            facturacion_cliente.DiasFactura = dias_factura
-                            facturacion_cliente.Valor_Dias = valor_dias
-                            facturacion_cliente.MesFactura = mes_factura
-                            facturacion_cliente.Valor_Meses = valor_meses
-                            facturacion_cliente.Valor = valor
-                            facturacion_cliente.Descripcion = descripcion
-                            facturacion_cliente.Factura = numero_factura
-                            facturacion_cliente.Bolsa = bolsa
-                            facturacion_cliente.Valor_Bolsa = valor_bolsa
-                            facturacion_cliente.IVA = iva
-                            facturacion_cliente.Referencia = referencia
-                            facturacion_cliente.Ceco = ceco
-                            facturacion_cliente.Sitio_Serv = sitio_serv
-                            facturacion_cliente.save()
-
-                        except FacturacionClientes.DoesNotExist:
-                            # Crear un nuevo registro
-                            FacturacionClientes.objects.create(
-                                Anio=anio,
-                                Mes=mes,
-                                ClienteId_id=cliente_id,
-                                LineaId_id=linea_id,
-                                ModuloId_id=modulo_id,
-                                HorasFactura=horas_factura,
-                                Valor_Horas=valor_horas,
-                                DiasFactura=dias_factura,
-                                Valor_Dias=valor_dias,
-                                MesFactura=mes_factura,
-                                Valor_Meses=valor_meses,
-                                Valor=valor,
-                                Descripcion=descripcion,
-                                Factura=numero_factura,
-                                Bolsa=bolsa,
-                                Valor_Bolsa=valor_bolsa,
-                                IVA=iva,
-                                Referencia=referencia,
-                                Ceco=ceco,
-                                Sitio_Serv=sitio_serv
-                            )
-
-                    else:
-                        if is_new_line:
-                            # Si es una nueva línea, crear un registro sin verificar duplicados
-                            FacturacionClientes.objects.create(
-                                Anio=anio,
-                                Mes=mes,
-                                ClienteId_id=cliente_id,
-                                LineaId_id=linea_id,
-                                ModuloId_id=modulo_id,
-                                HorasFactura=horas_factura,
-                                Valor_Horas=valor_horas,
-                                DiasFactura=dias_factura,
-                                Valor_Dias=valor_dias,
-                                MesFactura=mes_factura,
-                                Valor_Meses=valor_meses,
-                                Valor=valor,
-                                Descripcion=descripcion,
-                                Factura=numero_factura,
-                                Bolsa=bolsa,
-                                Valor_Bolsa=valor_bolsa,
-                                IVA=iva,
-                                Referencia=referencia,
-                                Ceco=ceco,
-                                Sitio_Serv=sitio_serv
-                            )
-                        else:
-                            # Usar update_or_create para evitar duplicados
-                            FacturacionClientes.objects.update_or_create(
-                                Anio=anio,
-                                Mes=mes,
-                                ClienteId_id=cliente_id,
-                                LineaId_id=linea_id,
-                                ModuloId_id=modulo_id,
-                                defaults={
-                                    'HorasFactura': horas_factura,
-                                    'Valor_Horas': valor_horas,
-                                    'DiasFactura': dias_factura,
-                                    'Valor_Dias': valor_dias,
-                                    'MesFactura': mes_factura,
-                                    'Valor_Meses': valor_meses,
-                                    'Valor': valor,
-                                    'Descripcion': descripcion,
-                                    'Factura': numero_factura,
-                                    'Bolsa': bolsa,
-                                    'Valor_Bolsa': valor_bolsa,
-                                    'IVA': iva,
-                                    'Referencia': referencia,
-                                    'Ceco': ceco,
-                                    'Sitio_Serv': sitio_serv
-                                }
-                            )
-                else:
+                # Verificar si los IDs existen en la base de datos
+                try:
+                    cliente = Clientes.objects.get(ClienteId=cliente_id)
+                    linea = Linea.objects.get(LineaId=linea_id)
+                    modulo = models.Modulo.objects.get(ModuloId=modulo_id)
+                except (Clientes.DoesNotExist, Linea.DoesNotExist, models.Modulo.DoesNotExist) as e:
+                    print(f"Error: {e}")
                     continue
+
+                # Siempre guardar el registro, incluso si todos los valores son 0
+                if consecutivo_id and not is_new_line:
+                    try:
+                        facturacion_cliente = FacturacionClientes.objects.get(ConsecutivoId=consecutivo_id)
+                        
+                        # Actualizar todos los campos
+                        facturacion_cliente.HorasFactura = float(horas_factura)
+                        facturacion_cliente.Valor_Horas = valor_horas
+                        facturacion_cliente.DiasFactura = float(dias_factura)
+                        facturacion_cliente.Valor_Dias = valor_dias
+                        facturacion_cliente.MesFactura = float(mes_factura)
+                        facturacion_cliente.Valor_Meses = valor_meses
+                        facturacion_cliente.Valor = valor
+                        facturacion_cliente.Descripcion = descripcion
+                        facturacion_cliente.Factura = numero_factura
+                        facturacion_cliente.Bolsa = bolsa
+                        facturacion_cliente.Valor_Bolsa = valor_bolsa
+                        facturacion_cliente.IVA = float(iva)
+                        facturacion_cliente.Referencia = referencia
+                        facturacion_cliente.Ceco = ceco
+                        facturacion_cliente.Sitio_Serv = sitio_serv
+                        facturacion_cliente.save()
+                        print(f"Registro actualizado: {consecutivo_id}")
+
+                    except FacturacionClientes.DoesNotExist:
+                        # Crear un nuevo registro si no existe
+                        FacturacionClientes.objects.create(
+                            Anio=anio,
+                            Mes=mes,
+                            ClienteId=cliente,
+                            LineaId=linea,
+                            ModuloId=modulo,
+                            HorasFactura=float(horas_factura),
+                            Valor_Horas=valor_horas,
+                            DiasFactura=float(dias_factura),
+                            Valor_Dias=valor_dias,
+                            MesFactura=float(mes_factura),
+                            Valor_Meses=valor_meses,
+                            Valor=valor,
+                            Descripcion=descripcion,
+                            Factura=numero_factura,
+                            Bolsa=bolsa,
+                            Valor_Bolsa=valor_bolsa,
+                            IVA=float(iva),
+                            Referencia=referencia,
+                            Ceco=ceco,
+                            Sitio_Serv=sitio_serv
+                        )
+                        print(f"Nuevo registro creado con ID existente: {consecutivo_id}")
+                else:
+                    # Para nuevas filas, usar create en lugar de update_or_create
+                    FacturacionClientes.objects.create(
+                        Anio=anio,
+                        Mes=mes,
+                        ClienteId=cliente,
+                        LineaId=linea,
+                        ModuloId=modulo,
+                        HorasFactura=float(horas_factura),
+                        Valor_Horas=valor_horas,
+                        DiasFactura=float(dias_factura),
+                        Valor_Dias=valor_dias,
+                        MesFactura=float(mes_factura),
+                        Valor_Meses=valor_meses,
+                        Valor=valor,
+                        Descripcion=descripcion,
+                        Factura=numero_factura,
+                        Bolsa=bolsa,
+                        Valor_Bolsa=valor_bolsa,
+                        IVA=float(iva),
+                        Referencia=referencia,
+                        Ceco=ceco,
+                        Sitio_Serv=sitio_serv
+                    )
+                    print("Nuevo registro creado")
 
             return JsonResponse({'status': 'success'})
         except Exception as e:
+            import traceback
+            error_traceback = traceback.format_exc()
+            print(f"Error completo: {error_traceback}")
             return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
     return JsonResponse({'status': 'error', 'error': 'Método no permitido.'}, status=405)
 
@@ -247,7 +244,7 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
                 }
                 facturacion_info.append(cliente_info)
 
-            # Obtener todas las tarifas para este cliente, año y mes
+            # Obtener todas las tarifas para este cliente, año and mes
             tarifas = Tarifa_Clientes.objects.filter(
                 clienteId=contrato.ClienteId,
                 anio__lte=anio,  # Tarifas con año menor o igual al solicitado
@@ -368,8 +365,14 @@ def clientes_factura_index(request):
             # Obtener la información de facturación
             facturacion_info = obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes)
 
+            # Debug: imprimir facturacion_info para verificar los datos
+            print(f"DEBUG - facturacion_info: {facturacion_info}")
+
             # Calcular totales
-            totales_facturacion = calcular_totales_facturacion(facturacion_clientes)
+            totales_facturacion = calcular_totales_facturacion(facturacion_info)
+            
+            # Debug: imprimir totales
+            print(f"DEBUG - totales_facturacion: {totales_facturacion}")
 
     else:
         form = FacturacionFilterForm()
@@ -386,7 +389,7 @@ def clientes_factura_index(request):
 
     return render(request, 'Clientes_Factura/clientes_factura_index.html', context)
 
-def calcular_totales_facturacion(facturacion_clientes):
+def calcular_totales_facturacion(facturacion_info):
     totales = {
         'Total_Horas': 0.0,
         'Total_Dias': 0.0,
@@ -395,15 +398,27 @@ def calcular_totales_facturacion(facturacion_clientes):
         'Total_Valor': Decimal('0.0'),
     }
     
-    for factura in facturacion_clientes:
-        totales['Total_Horas'] += factura.HorasFactura or 0.0
-        totales['Total_Dias'] += factura.DiasFactura or 0.0
-        totales['Total_Meses'] += factura.MesFactura or 0
-        totales['Total_Bolsa'] += factura.Bolsa or Decimal('0.0')
-        totales['Total_Valor'] += factura.Valor or Decimal('0.0')
+    for cliente in facturacion_info:
+        for factura in cliente['Facturas']:
+            # Sumar valores de cada factura
+            print(f"DEBUG - Factura: {factura}")
 
+            totales['Total_Horas'] += factura.get('Horas', 0) or 0.0
+            totales['Total_Dias'] += factura.get('Dias', 0) or 0.0
+            totales['Total_Meses'] += factura.get('Mes', 0) or 0
+            
+            # Convertir y sumar valores Decimal
+            bolsa = Decimal(str(factura.get('Bolsa', 0))) if factura.get('Bolsa') not in [None, ''] else Decimal('0.0')
+            valor = Decimal(str(factura.get('Valor', 0))) if factura.get('Valor') not in [None, ''] else Decimal('0.0')
+            
+            totales['Total_Bolsa'] += bolsa
+            totales['Total_Valor'] += valor
+            print(f"DEBUG - Totales calculados: {totales}")
+
+    
     return totales
-
+    
+    
 @csrf_exempt
 def generar_plantilla(request):
     if request.method == 'POST':
