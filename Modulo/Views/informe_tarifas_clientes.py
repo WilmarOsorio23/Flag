@@ -9,9 +9,6 @@ from datetime import datetime
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_informe_tarifas_clientes')
-
 #Función para filtrar Tarifas de clientes
 def filtrar_tarifas_clientes(form, clientes, clientes_tarifas):
     clientes = clientes.order_by('Nombre_Cliente')
@@ -81,6 +78,8 @@ def obtener_tarifas_clientes(clientes, tarifas, anios):
 
     return cliente_tarifas_info
 
+@login_required
+@verificar_permiso('can_manage_informe_tarifas_clientes')
 # Función para generar el informe de tarifas de clientes
 def tarifas_clientes_filtrado(request):
     cliente_tarifas_info = []
@@ -116,6 +115,8 @@ def tarifas_clientes_filtrado(request):
 
     return render(request, 'informes/informes_tarifas_clientes_index.html', context)
 
+@login_required
+@verificar_permiso('can_manage_informe_tarifas_clientes')
 #Función para exportar el informe de tarifas de clientes a Excel
 def exportar_tarifas_clientes_excel(request):
     cliente_tarifas_info = []

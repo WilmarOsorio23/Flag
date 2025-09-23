@@ -18,9 +18,6 @@ from openpyxl.styles import Font, Alignment, Border, Side
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_informe_clientes')
-
 # Función para filtrar clientes
 def filtrar_clientes(form, clientes):
     """
@@ -91,6 +88,8 @@ def obtener_info_clientes(clientes):
         clientes_info.append(datos_cliente)
     return clientes_info
 
+@login_required
+@verificar_permiso('can_manage_informe_clientes')
 # Vista para mostrar el informe de clientes
 def clientes_filtrado(request):
     """
@@ -164,6 +163,8 @@ def clientes_filtrado(request):
 
     return render(request, 'informes/informes_clientes_index.html', context)
 
+@login_required
+@verificar_permiso('can_manage_informe_clientes')
 # Vista para exportar el informe a Excel
 def exportar_clientes_excel(request):
     """

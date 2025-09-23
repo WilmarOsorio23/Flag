@@ -21,9 +21,6 @@ MESES = {
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_indicadores_facturacion')
-
 def obtener_horas_habiles(anio: str) -> dict:
     """Obtiene las horas hábiles por mes para un año específico"""
     horas_habiles = {}
@@ -205,6 +202,8 @@ def generar_graficos_por_linea(resultados, meses_seleccionados, meses_nombres):
     
     return graficos
 
+@login_required
+@verificar_permiso('can_manage_indicadores_facturacion')
 def indicadores_facturacion(request):
     """Vista principal para el indicador de facturación"""
     try:

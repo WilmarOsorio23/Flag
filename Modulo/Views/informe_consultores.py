@@ -18,8 +18,6 @@ from collections import Counter
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_informe_consultores')
 
 def filtrar_consultores(form, consultores):
     """
@@ -92,6 +90,8 @@ def obtener_consultores(consultores):
         consultor_info.append(datos_consultor)
     return consultor_info
 
+@login_required
+@verificar_permiso('can_manage_informe_consultores')
 def consultores_filtrado(request):
     """
     Vista para renderizar el informe de consultores.
@@ -167,7 +167,8 @@ def consultores_filtrado(request):
 
     return render(request, 'informes/informes_consultores_index.html', context)
 
-
+@login_required
+@verificar_permiso('can_manage_informe_consultores')
 def exportar_consultores_excel(request):
     """
     Exporta los datos filtrados de consultores a un archivo Excel.

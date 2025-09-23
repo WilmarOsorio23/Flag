@@ -21,9 +21,6 @@ from collections import Counter
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_Informe_certificaciones')
-
 def filtrar_empleado(form, empleados, certificaciones, detalles):
     """
     Aplica los filtros del formulario a los conjuntos de empleados y certificaciones.
@@ -75,6 +72,8 @@ def obtener_informe_certificacion(certificaciones, empleados, detalles):
             })
     return certificaciones_info
 
+@login_required
+@verificar_permiso('can_manage_Informe_certificaciones')
 def empleado_filtrado(request):
     """
     Vista que construye el informe HTML con filtros, tabla de datos y resumenes (cards).
@@ -124,6 +123,8 @@ def empleado_filtrado(request):
 
     return render(request, 'informes/informes_certificacion_index.html', context)
 
+@login_required
+@verificar_permiso('can_manage_Informe_certificaciones')
 @csrf_exempt
 def exportar_certificaciones_excel(request):
     """

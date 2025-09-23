@@ -12,9 +12,6 @@ from datetime import datetime
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_informe_tiempos_consultores')
-
 def filtrar_datos(request):
     documento = request.GET.getlist('Documento')
     anio = request.GET.getlist('Anio')
@@ -60,6 +57,9 @@ def Filtrar_datos(forms,tiempos):
         tiempos= tiempos.filter(LineaId__in=linea)
 
     return tiempos
+
+@login_required
+@verificar_permiso('can_manage_informe_tiempos_consultores')
 def tiempos_clientes_filtrado(request):
     tiempos_info = []
     show_data = False
@@ -140,7 +140,9 @@ def tiempos_clientes_filtrado(request):
     }
 
     return render(request, 'informes/informes_tiempos_consultores_index.html', context)
-            
+
+@login_required
+@verificar_permiso('can_manage_informe_tiempos_consultores')            
 def exportar_tiempos_clientes_excel(request):
     # Obtener datos de la sesión
     tiempos_info = request.session.get('tiempos_info', [])

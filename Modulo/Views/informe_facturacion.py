@@ -14,11 +14,9 @@ from decimal import Decimal
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_informe_facturacion')
 
 # Función para filtrar datos
-def filtrar_datos(request, form):
+def filtrar_datos(form):
     anio = form.cleaned_data.get('Anio')
     lineas_seleccionadas = form.cleaned_data.get('LineaId')
     clientes_seleccionados = form.cleaned_data.get('ClienteId')
@@ -140,7 +138,8 @@ def organizar_datos(facturas, lineas, clientes):
 
     return rows, footer, lineas, clientes, meses, lineas_activas, clientes_activos
 
-
+@login_required
+@verificar_permiso('can_manage_informe_facturacion')
 # Función para generar el reporte en el frontend
 def informes_facturacion_index(request):
     form = InformeFacturacionForm(request.GET or None)
@@ -154,7 +153,7 @@ def informes_facturacion_index(request):
     # Verificar si el formulario se ha enviado
     if 'buscar' in request.GET:
         if form.is_valid():
-            facturas, lineas, clientes = filtrar_datos(request,form)
+            facturas, lineas, clientes = filtrar_datos(form)
             if facturas.exists():
                 rows, footer, lineas, clientes, meses, lineas_activas, clientes_activos = organizar_datos(facturas, lineas, clientes)
             else:
@@ -288,6 +287,8 @@ def generar_graficos_por_linea(rows, lineas_activas, clientes_activos, footer):
 
     return graficos
 
+@login_required
+@verificar_permiso('can_manage_informe_facturacion')
 def informes_facturacion_index(request):
     form = InformeFacturacionForm(request.GET or None)
     mensaje = None
@@ -300,7 +301,7 @@ def informes_facturacion_index(request):
 
     if 'buscar' in request.GET:
         if form.is_valid():
-            facturas, lineas, clientes = filtrar_datos(request,form)
+            facturas, lineas, clientes = filtrar_datos(form)
             if facturas.exists():
                 rows, footer, lineas, clientes, meses, lineas_activas, clientes_activos = organizar_datos(facturas, lineas, clientes)
                 # Pasar footer como nuevo parámetro
@@ -335,7 +336,8 @@ def informes_facturacion_index(request):
 
     return render(request, 'Informes/informes_facturacion_index.html', context)
 
-
+@login_required
+@verificar_permiso('can_manage_informe_facturacion')
 # Función para descargar el reporte en Excel
 def descargar_reporte_excel(request):
     # Obtener parámetros y convertir a enteros

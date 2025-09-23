@@ -12,8 +12,6 @@ from collections import defaultdict
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_informe_serv_consultor')
 
 def filtrar_datos(form=None):
     facturas = Facturacion_Consultores.objects.all().select_related(
@@ -56,6 +54,8 @@ def filtrar_datos(form=None):
     return facturas_agrupadas, lineas_obj, form.cleaned_data.get('Mes') if form and form.is_valid() else None
 
 
+@login_required
+@verificar_permiso('can_manage_informe_serv_consultor')
 def informe_totales(request):
     form = TotalesPorMesFilterForm(request.GET or None)
     
@@ -204,6 +204,10 @@ def informe_totales(request):
     }
 
     return render(request, 'Informes/informes_serv_consultor_index.html', context) 
+
+
+@login_required
+@verificar_permiso('can_manage_informe_serv_consultor')
 def descargar_reporte_excel_totales_por_mes(request):
     form = TotalesPorMesFilterForm(request.GET or None)
     if not form.is_valid():
