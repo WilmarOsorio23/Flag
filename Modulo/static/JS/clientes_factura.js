@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Obtener el valor del token CSRF para ser utilizado en las solicitudes POST
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+    // Variable para controlar el estado de inicialización
+    window.isInitializing = true;
+
     // Recuperar los valores de año y mes originales desde la URL y almacenarlos en localStorage
     updateAnioMesFromURL();
 
@@ -59,11 +62,9 @@ document.addEventListener('DOMContentLoaded', function () {
         let alertIcon = document.getElementById('alert-icon');
         let alertMessage = document.getElementById('alert-message');
 
-        // Si no existen, los creamos como fallback y los añadimos al body
         if (!alertBox || !alertIcon || !alertMessage) {
             alertBox = document.createElement('div');
             alertBox.id = 'message-box';
-            // estilos mínimos para que se muestre sin depender del layout
             alertBox.className = `alert alert-${type} alert-dismissible fade show`;
             alertBox.style.position = 'fixed';
             alertBox.style.top = '20px';
@@ -83,14 +84,12 @@ document.addEventListener('DOMContentLoaded', function () {
             document.body.appendChild(alertBox);
         }
 
-        // Rellenar y mostrar
         alertMessage.textContent = message;
         alertBox.className = `alert alert-${type} alert-dismissible fade show`;
         const icons = { success: '✔️', danger: '❌', warning: '⚠️', info: 'ℹ️' };
         alertIcon.textContent = icons[type] || '';
         alertBox.style.display = 'block';
 
-        // Ocultar automáticamente después de 3s (seguro: comprueba existencia)
         setTimeout(() => {
             if (alertBox && alertBox.classList) alertBox.classList.remove('show');
             setTimeout(() => {
@@ -99,18 +98,34 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 3000);
     }
 
-
     // Funciones para manejar selecciones
     function toggleButtons() {
         const selectedIds = getSelectedRows();
-        sessionStorage.setItem('selectedRows', JSON.stringify(selectedIds)); // Guardar en sessionStorage
+        sessionStorage.setItem('selectedRows', JSON.stringify(selectedIds));
         document.getElementById('delete-button').disabled = selectedIds.length === 0;
         document.getElementById('generate-template').disabled = selectedIds.length === 0;
         
-        // Activar el botón de guardar si hay selección
         const anio = document.querySelector('select[name="Anio"]').value;
         const mes = document.querySelector('select[name="Mes"]').value;
         document.getElementById('save-button').disabled = !(anio && mes && selectedIds.length > 0);
+    }
+
+    function setupCheckboxListeners() {
+        document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const allChecked = document.querySelectorAll('.row-checkbox:checked').length === 
+                                 document.querySelectorAll('.row-checkbox').length;
+                document.getElementById('select-all').checked = allChecked;
+                toggleButtons();
+            });
+        });
+
+        document.getElementById('select-all').addEventListener('change', function() {
+            document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            toggleButtons();
+        });
     }
 
     document.querySelectorAll('.row-checkbox').forEach(checkbox => {
@@ -135,18 +150,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const selectedIds = getSelectedRows();
         if (selectedIds.length === 0) return;
 
-        // Guardar el elemento con foco actual
         window.preDeleteFocusElement = document.activeElement;
 
-        // Mostrar el modal de confirmación
         const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
         const confirmDeleteButton = document.getElementById('confirmDelete');
 
-        // Limpiar event listeners previos
         confirmDeleteButton.replaceWith(confirmDeleteButton.cloneNode(true));
         const newConfirmDeleteButton = document.getElementById('confirmDelete');
 
-        // Manejar la confirmación de eliminación
         const handleDelete = () => {
             deleteModal.hide();
             showSavingOverlay(true);
@@ -165,36 +176,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             })
             .finally(() => showSavingOverlay(false));
+            showMessage('Eliminado Exitosamente.','success')
         };
 
-        // Asignar el evento de confirmación
         newConfirmDeleteButton.addEventListener('click', handleDelete, { once: true });
-
-        // Mostrar el modal
         deleteModal.show();
-        
     };
 
     // Función para mostrar modal de confirmación de plantilla POST-GUARDADO
     window.showPostSaveTemplateModal = function() {
-        // Cerrar completamente cualquier modal abierto previamente
         const openModals = document.querySelectorAll('.modal.show');
         openModals.forEach(modal => {
             const bsModal = bootstrap.Modal.getInstance(modal);
             if (bsModal) {
                 bsModal.hide();
-                // Limpiar completamente el modal
                 modal.style.display = 'none';
                 modal.setAttribute('aria-hidden', 'true');
             }
         });
         
-        // Limpiar backdrops
         const backdrops = document.querySelectorAll('.modal-backdrop');
         backdrops.forEach(backdrop => backdrop.remove());
         document.body.classList.remove('modal-open');
         
-        // Pequeña pausa para asegurar que los modales anteriores estén cerrados
         setTimeout(() => {
             const modal = new bootstrap.Modal(document.getElementById('generateTemplateModal'));
             
@@ -202,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 modal._element.removeEventListener('hidden.bs.modal', handleClose);
                 if (sessionStorage.getItem('templateGenerated') === 'true') {
                     sessionStorage.removeItem('templateGenerated');
-                    window.location.reload(); // Forzar recarga solo si se generó plantilla
+                    window.location.reload();
                 }
             };
             
@@ -213,73 +217,72 @@ document.addEventListener('DOMContentLoaded', function () {
 
    // Guarda de saveAllRows
    function saveAllRows() {
-        const data = prepareSaveData();
-        console.log('Datos a enviar:', JSON.stringify(data, null, 2)); // Para depuración
-        const hasNewRows = data.some(row => !row.ConsecutivoId);
-        const selectedIds = getSelectedRows();
+    const data = prepareSaveData();
+    console.log('Datos a enviar:', JSON.stringify(data, null, 2));
+    const hasNewRows = data.some(row => !row.ConsecutivoId);
+    const selectedIds = getSelectedRows();
 
-        showSavingOverlay(true);
-        disableUI(true);
+    showSavingOverlay(true);
+    disableUI(true);
 
-        fetch('/clientes_factura/guardar/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({ data: data })
-        })
-        .then(response => {
-            if (!response.ok) {
-                // Si la respuesta no es exitosa, lanzar un error con el status
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(result => {
-            if (result.status === 'success') {
-                // Restablecer el estado de cambios
-                hasUnsavedChanges = false;
-                toggleButtons();
+    fetch('/clientes_factura/guardar/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ data: data })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(result => {
+        if (result.status === 'success') {
+            hasUnsavedChanges = false;
+            toggleButtons();
+            
+            if (hasNewRows && selectedIds.length > 0) {
+                const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+                const confirmButton = document.getElementById('confirmGenerate');
                 
-                if (hasNewRows && selectedIds.length > 0) {
-                    const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-                    const confirmButton = document.getElementById('confirmGenerate');
-                    
-                    confirmButton.replaceWith(confirmButton.cloneNode(true));
-                    const newConfirmButton = document.getElementById('confirmGenerate');
+                confirmButton.replaceWith(confirmButton.cloneNode(true));
+                const newConfirmButton = document.getElementById('confirmGenerate');
 
-                    const handleConfirmation = () => {
-                        confirmationModal.hide();
-                        sessionStorage.setItem('pendingTemplateGeneration', JSON.stringify(selectedIds));
-                        showPostSaveTemplateModal();
-                    };
+                const handleConfirmation = () => {
+                    confirmationModal.hide();
+                    sessionStorage.setItem('pendingTemplateGeneration', JSON.stringify(selectedIds));
+                    showPostSaveTemplateModal();
+                };
 
-                    const handleClose = () => {
-                        confirmationModal._element.removeEventListener('hidden.bs.modal', handleClose);
-                        if (!sessionStorage.getItem('pendingTemplateGeneration')) {
-                            window.location.reload();
-                        }
-                    };
+                const handleClose = () => {
+                    confirmationModal._element.removeEventListener('hidden.bs.modal', handleClose);
+                    if (!sessionStorage.getItem('pendingTemplateGeneration')) {
+                        window.location.reload();
+                    }
+                };
 
-                    confirmationModal._element.addEventListener('hidden.bs.modal', handleClose, {once: true});
-                    newConfirmButton.addEventListener('click', handleConfirmation, {once: true});
-                    
-                    confirmationModal.show();
-                } else {
-                    window.location.reload();
-                }
+                confirmationModal._element.addEventListener('hidden.bs.modal', handleClose, {once: true});
+                newConfirmButton.addEventListener('click', handleConfirmation, {once: true});
+                
+                confirmationModal.show();
+            } else {
+                window.location.reload();
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showMessage('Error al guardar los cambios.', 'danger');
-        })
-        .finally(() => {
-            showSavingOverlay(false);
-            disableUI(false);
-        });
-    }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessage('Error al guardar los cambios.', 'danger');
+    })
+    .finally(() => {
+        showSavingOverlay(false);
+        showMessage('Guardado Exitosamente.','success');
+        disableUI(false);
+    });
+}
 
     // Verificar modal al cargar
     
@@ -297,36 +300,28 @@ document.addEventListener('DOMContentLoaded', function () {
         rows.forEach((row) => {
             const rowId = row.id.replace('row-', '');
             
-            // Solo procesar filas seleccionadas
             if (selectedIds.includes(rowId)) {
                 const rowData = {};
                 const inputs = row.querySelectorAll('input');
                 
-                // Obtener todos los valores de los inputs
                 inputs.forEach(input => {
                     if (input.name && input.type !== 'checkbox') {
-                        // Campos que deben convertirse a número
                         const numericFields = ['Horas', 'Dias', 'Meses', 'Bolsa', 'Valor', 'IVA', 'LineaId', 'ModuloId'];
                         if (numericFields.includes(input.name)) {
-                            // Convertir vacíos a 0 y manejar valores no numéricos
                             const value = input.value.trim();
                             rowData[input.name] = value === '' ? 0 : parseFloat(value) || 0;
                         } else {
-                            // Para otros campos, mantener como string
                             rowData[input.name] = input.value;
                         }
                     }
                 });
                 
-                // Incluir el ID solo para filas existentes
                 if (rowId && !rowId.startsWith('new-')) {
                     rowData['ConsecutivoId'] = parseInt(rowId);
                 } else {
-                    // Para nuevas filas, incluir el flag como string
                     rowData['is_new_line'] = 'true';
                 }
                 
-                // Incluir año y mes originales como números
                 rowData['ClienteId'] = parseInt(window.originalCliente);
                 rowData['Anio'] = parseInt(window.originalAnio);
                 rowData['Mes'] = parseInt(window.originalMes);
@@ -364,7 +359,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function showSavingOverlay(show) {
         const overlay = document.getElementById('saving-overlay');
-        overlay.style.display = show ? 'flex' : 'none';
+        if (overlay) {
+            overlay.style.display = show ? 'flex' : 'none';
+        }
     }
 
     function getSelectedRows() {
@@ -377,6 +374,53 @@ document.addEventListener('DOMContentLoaded', function () {
         return selectedIds;
     }
 
+    // FUNCIÓN MEJORADA: Limpiar formato de moneda para convertir a número
+    function cleanCurrencyValue(value) {
+        if (value === null || value === undefined || value === '') {
+            return '0';
+        }
+        
+        const strValue = String(value).trim();
+        
+        // Si el valor ya es un número sin caracteres especiales, retornarlo tal cual
+        if (/^-?\d*\.?\d+$/.test(strValue)) {
+            return strValue;
+        }
+        
+        // Remover símbolos de moneda pero preservar puntos decimales
+        // Estrategia: preservar solo números, puntos decimales y signo negativo
+        let cleaned = strValue.replace(/[$,]/g, ''); // Eliminar $ y comas
+        
+        // Verificar si hay un punto decimal válido (solo uno y seguido de dígitos)
+        const decimalParts = cleaned.split('.');
+        
+        if (decimalParts.length > 2) {
+            // Si hay múltiples puntos, probablemente son separadores de miles
+            // Unir todas las partes excepto la última (que sería decimal)
+            cleaned = decimalParts.slice(0, -1).join('') + '.' + decimalParts[decimalParts.length - 1];
+        }
+        
+        // Asegurar que solo haya dígitos y un punto decimal opcional
+        cleaned = cleaned.replace(/[^\d.-]/g, '');
+        
+        // Si después de limpiar está vacío, retornar '0'
+        if (cleaned === '' || cleaned === '-') {
+            return '0';
+        }
+        
+        return cleaned;
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(value);
+    }
+    
+
     // Función para mostrar modal de plantilla - Global
     window.showTemplateConfirmationModal = function() {
         const modal = new bootstrap.Modal(document.getElementById('templateConfirmationModal'));
@@ -384,52 +428,156 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Función auxiliar para conversión segura de valores
+    // FUNCIÓN MEJORADA: Conversión segura de valores
     function safeParseFloat(value) {
-        if (value === null || value === undefined || value === '') {
-            return 0;
-        }
-        const parsed = parseFloat(value);
+        const cleanedValue = cleanCurrencyValue(value);
+        
+        // Casos especiales
+        if (cleanedValue === '') return 0;
+        if (cleanedValue === '.') return 0;
+        
+        // Para valores como "53.0", parseFloat los maneja correctamente como 53.0
+        const parsed = parseFloat(cleanedValue);
         return isNaN(parsed) ? 0 : parsed;
     }
 
-    // Modificar updateRowTotal para usar la función segura y verificar nulidad
-    function updateRowTotal(row) {
-        const horasInput = row.querySelector('input[name="Horas"]');
-        const valorHorasInput = row.querySelector('input[name="Valor_Horas"]');
-        const diasInput = row.querySelector('input[name="Dias"]');
-        const valorDiasInput = row.querySelector('input[name="Valor_Dias"]');
-        const mesesInput = row.querySelector('input[name="Meses"]');
-        const valorMesesInput = row.querySelector('input[name="Valor_Meses"]');
-        const bolsaInput = row.querySelector('input[name="Bolsa"]');
-        const valorBolsaInput = row.querySelector('input[name="Valor_Bolsa"]');
-        
-        // Verificar que todos los inputs existan antes de acceder a sus valores
-        if (!horasInput || !valorHorasInput || !diasInput || !valorDiasInput || 
-            !mesesInput || !valorMesesInput || !bolsaInput || !valorBolsaInput) {
-            return;
+    // NUEVA FUNCIÓN: Formatear valor preservando los decimales originales
+    function preserveOriginalFormat(value) {
+        if (value === null || value === undefined || value === '') {
+            return '';
         }
         
-        const horas = safeParseFloat(horasInput.value);
-        const valorHoras = safeParseFloat(valorHorasInput.value);
-        const dias = safeParseFloat(diasInput.value);
-        const valorDias = safeParseFloat(valorDiasInput.value);
-        const meses = safeParseFloat(mesesInput.value);
-        const valorMeses = safeParseFloat(valorMesesInput.value);
-        const bolsa = safeParseFloat(bolsaInput.value);
-        const valorBolsa = safeParseFloat(valorBolsaInput.value);
+        // Si ya es un número, convertirlo a string sin forzar decimales
+        if (typeof value === 'number') {
+            // Preservar los decimales originales
+            return value.toString();
+        }
+        
+        // Si es string, mantenerlo tal cual
+        return String(value);
+    }
+
+    // NUEVA FUNCIÓN: Aplicar formato suave que preserve los valores originales
+    function applySoftFormatting() {
+        console.log('💾 Preservando formatos originales...');
+        
+        document.querySelectorAll('input[name="Valor_Horas"], input[name="Valor_Dias"], input[name="Valor_Meses"], input[name="Valor_Bolsa"]').forEach(input => {
+            // Solo preservar el formato original, no forzar cambios
+            if (input.value && input !== document.activeElement) {
+                // Mantener el valor original sin modificaciones
+                const currentValue = input.value;
+                // Solo limpiar si tiene caracteres no numéricos problemáticos
+                if (/[^0-9.,]/.test(currentValue)) {
+                    input.value = currentValue.replace(/[^0-9.,]/g, '');
+                }
+            }
+        });
+    }
+
+    function getNumericValueFromCell(row, fieldName) {
+        // Primero intentar con input
+        let input = row.querySelector(`input[name="${fieldName}"]`);
+        if (input) {
+            console.log(`📥 Input ${fieldName}:`, input.value);
+            return safeParseFloat(input.value);
+        }
+        
+        // Si no hay input, buscar en el contenido de texto de la celda
+        const cells = row.querySelectorAll('td');
+        let headerIndex = -1;
+        
+        // Encontrar el índice de la columna basado en los headers
+        const headers = document.querySelectorAll('thead th');
+        headers.forEach((header, index) => {
+            if (header.textContent.trim().includes(fieldName.replace('_', ' '))) {
+                headerIndex = index;
+            }
+        });
+        
+        if (headerIndex !== -1 && cells[headerIndex]) {
+            const cellValue = cells[headerIndex].textContent || cells[headerIndex].innerText;
+            console.log(`📥 Celda ${fieldName} [${headerIndex}]:`, cellValue);
+            return safeParseFloat(cellValue);
+        }
+        
+        console.log(`❌ No se encontró valor para ${fieldName}`);
+        return 0;
+    }
+
+    // Modificar updateRowTotal para preservar formatos originales
+    function updateRowTotal(row) {
+        console.log('🔢 Actualizando total para fila:', row.id);
+        
+        // Obtener valores usando la función mejorada
+        const horas = getNumericValueFromCell(row, 'Horas');
+        const valorHoras = getNumericValueFromCell(row, 'Valor_Horas');
+        const dias = getNumericValueFromCell(row, 'Dias');
+        const valorDias = getNumericValueFromCell(row, 'Valor_Dias');
+        const meses = getNumericValueFromCell(row, 'Meses');
+        const valorMeses = getNumericValueFromCell(row, 'Valor_Meses');
+        const bolsa = getNumericValueFromCell(row, 'Bolsa');
+        const valorBolsa = getNumericValueFromCell(row, 'Valor_Bolsa');
+        
+        console.log(`📊 Valores obtenidos: H=${horas}, VH=${valorHoras}, D=${dias}, VD=${valorDias}, M=${meses}, VM=${valorMeses}, B=${bolsa}, VB=${valorBolsa}`);
         
         const total = (horas * valorHoras) + 
                     (dias * valorDias) + 
                     (meses * valorMeses) + 
                     (bolsa * valorBolsa);
         
+        console.log(`🧮 Cálculo: (${horas} * ${valorHoras}) + (${dias} * ${valorDias}) + (${meses} * ${valorMeses}) + (${bolsa} * ${valorBolsa}) = ${total}`);
+        
+        // Actualizar el input hidden de Valor
         const valorInput = row.querySelector('input[name="Valor"]');
         if (valorInput) {
-            valorInput.value = total.toFixed(2);
+            valorInput.value = total;
+            console.log('✅ Input Valor actualizado:', valorInput.value);
         }
+        
+        // Actualizar el span visible que muestra el valor
+        let valorSpan = row.querySelector('span.form-control-plaintext');
+        if (!valorSpan) {
+            // Buscar en la celda de Total
+            const cells = row.querySelectorAll('td');
+            const headers = document.querySelectorAll('thead th');
+            let totalIndex = -1;
+            
+            headers.forEach((header, index) => {
+                if (header.textContent.trim().includes('Total')) {
+                    totalIndex = index;
+                }
+            });
+            
+            if (totalIndex !== -1 && cells[totalIndex]) {
+                valorSpan = cells[totalIndex].querySelector('span');
+                if (!valorSpan) {
+                    // Si no hay span, crear uno
+                    valorSpan = document.createElement('span');
+                    valorSpan.className = 'form-control-plaintext';
+                    cells[totalIndex].innerHTML = '';
+                    cells[totalIndex].appendChild(valorSpan);
+                }
+            }
+        }
+        
+        if (valorSpan) {
+            // Aplicar formato de moneda al total de la fila individual
+            valorSpan.textContent = formatCurrency(total);
+            console.log('✅ Span Valor actualizado:', valorSpan.textContent);
+        }
+        
+        // También buscar por name="valorspan" por si acaso
+        const valorSpanByName = row.querySelector('span[name="valorspan"]');
+        if (valorSpanByName) {
+            valorSpanByName.textContent = formatCurrency(total);
+            console.log('✅ Span por name actualizado:', valorSpanByName.textContent);
+        }
+        
+        return total;
     } 
 
     function recalculateTotals() {
+        console.log('🔄 Recalculando totales generales...');
         const rows = document.querySelectorAll('tbody tr');
         const totals = {
             totalHoras: 0,
@@ -439,33 +587,50 @@ document.addEventListener('DOMContentLoaded', function () {
             totalValor: 0
         };
     
-        rows.forEach(row => {
-            // Verificar si la fila tiene los inputs necesarios
-            const horasInput = row.querySelector('input[name="Horas"]');
-            if (!horasInput) return; // Saltar filas que no son de datos
+        rows.forEach((row, index) => {
+            // Verificar si es una fila de datos (tiene inputs)
+            const hasInputs = row.querySelector('input[name="Horas"]') !== null;
+            if (!hasInputs) {
+                console.log(`⏭️ Saltando fila ${index} - no es fila de datos`);
+                return;
+            }
             
-            // Actualizar total de la fila primero
-            updateRowTotal(row);
+            console.log(`📝 Procesando fila ${index}:`, row.id);
             
-            // Sumar a los totales generales usando safeParseFloat
-            const horas = safeParseFloat(row.querySelector('input[name="Horas"]').value);
-            const dias = safeParseFloat(row.querySelector('input[name="Dias"]').value);
-            const meses = safeParseFloat(row.querySelector('input[name="Meses"]').value);
-            const bolsa = safeParseFloat(row.querySelector('input[name="Bolsa"]').value);
-            const valor = safeParseFloat(row.querySelector('input[name="Valor"]').value);
+            // Actualizar total de la fila
+            const rowTotal = updateRowTotal(row);
+            
+            // Sumar a los totales generales usando la función mejorada
+            const horas = getNumericValueFromCell(row, 'Horas');
+            const dias = getNumericValueFromCell(row, 'Dias');
+            const meses = getNumericValueFromCell(row, 'Meses');
+            const bolsa = getNumericValueFromCell(row, 'Bolsa');
+            const valor = rowTotal;
     
             totals.totalHoras += horas;
             totals.totalDias += dias;
             totals.totalMeses += meses;
             totals.totalBolsa += bolsa;
             totals.totalValor += valor;
+            
+            console.log(`➕ Sumando fila ${index}: Horas=${horas}, Dias=${dias}, Meses=${meses}, Bolsa=${bolsa}, Valor=${valor}`);
         });
     
-        // Función auxiliar para actualizar solo si el elemento existe
-        const updateIfExists = (selector, value) => {
+        console.log('🎯 Totales calculados:', totals);
+        
+        // Función auxiliar para actualizar elementos en el footer
+        const updateIfExists = (selector, value, isCurrency = false) => {
             const element = document.querySelector(selector);
             if (element) {
-                element.textContent = typeof value === 'number' ? value.toFixed(2) : value;
+                // Aplicar formato de moneda si corresponde
+                if (isCurrency) {
+                    element.textContent = formatCurrency(value);
+                } else {
+                    element.textContent = value;
+                }
+                console.log(`✅ Actualizado ${selector}: ${element.textContent}`);
+            } else {
+                console.log(`❌ Elemento no encontrado: ${selector}`);
             }
         };
     
@@ -474,7 +639,9 @@ document.addEventListener('DOMContentLoaded', function () {
         updateIfExists('tfoot th[data-total-dias]', totals.totalDias);
         updateIfExists('tfoot th[data-total-meses]', totals.totalMeses);
         updateIfExists('tfoot th[data-total-bolsa]', totals.totalBolsa);
-        updateIfExists('tfoot th[data-total-valor]', totals.totalValor);
+        updateIfExists('tfoot th[data-total-valor]', totals.totalValor, true); // Este es el único que lleva formato de moneda
+        
+        console.log('✅ Totales generales actualizados');
     }
 
     // Función para verificar cambios en los campos
@@ -485,7 +652,6 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         
-        // Verificar si hay cambios en las filas seleccionadas
         hasUnsavedChanges = false;
         
         selectedIds.forEach(id => {
@@ -501,8 +667,63 @@ document.addEventListener('DOMContentLoaded', function () {
         
         toggleButtons();
     }
+
+    function setupRealTimeCalculations() {
+        console.log('⚡ Configurando cálculos en tiempo real...');
+        
+        // Event listener general para todos los inputs relevantes
+        document.addEventListener('input', function(e) {
+            // No procesar eventos durante la inicialización
+            if (window.isInitializing) return;
+            
+            const target = e.target;
+            const relevantFields = ['Horas', 'Valor_Horas', 'Dias', 'Valor_Dias', 
+                                'Meses', 'Valor_Meses', 'Bolsa', 'Valor_Bolsa'];
+            
+            if (relevantFields.includes(target.name)) {
+                console.log(`🎯 Cambio detectado en campo: ${target.name} = ${target.value}`);
+                const row = target.closest('tr');
+                if (row) {
+                    updateRowTotal(row);
+                    recalculateTotals();
+                    checkForChanges();
+                }
+            }
+        });
+
+        // Event listeners específicos para cada campo
+        const relevantFields = ['Horas', 'Valor_Horas', 'Dias', 'Valor_Dias', 
+                              'Meses', 'Valor_Meses', 'Bolsa', 'Valor_Bolsa'];
+        
+        relevantFields.forEach(fieldName => {
+            document.querySelectorAll(`input[name="${fieldName}"]`).forEach(input => {
+                // Función separada para manejar cambios de input
+                const handleInputChange = function() {
+                    if (window.isInitializing) return;
+                    
+                    console.log(`📝 Campo ${fieldName} cambiado: ${this.value}`);
+                    const row = this.closest('tr');
+                    if (row) {
+                        updateRowTotal(row);
+                        recalculateTotals();
+                        checkForChanges();
+                    }
+                };
+                
+                // Remover event listeners existentes para evitar duplicados
+                input.removeEventListener('input', handleInputChange);
+                input.addEventListener('input', handleInputChange);
+            });
+        });
+        
+        console.log('✅ Cálculos en tiempo real configurados');
+    }
+
     // Modificar el evento de input para incluir todos los campos relevantes
     document.addEventListener('input', function(e) {
+        // No procesar eventos durante la inicialización
+        if (window.isInitializing) return;
+        
         const target = e.target;
         const relevantFields = ['Horas', 'Valor_Horas', 'Dias', 'Valor_Dias', 
                             'Meses', 'Valor_Meses', 'Bolsa', 'Valor_Bolsa', 
@@ -519,14 +740,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Modificar los event listeners para incluir todos los campos relevantes
+    // Modificar los event listeners para preservar formatos originales
     document.querySelectorAll('input[name="Horas"], input[name="Valor_Horas"], input[name="Dias"], input[name="Valor_Dias"], input[name="Meses"], input[name="Valor_Meses"], input[name="Bolsa"], input[name="Valor_Bolsa"], input[name="Descripcion"], input[name="Numero_Factura"], input[name="IVA"], input[name="Referencia"], input[name="Ceco"], input[name="Sitio_Serv"]').forEach(input => {
-        input.addEventListener('input', () => {
+        const handleInputChange = function() {
+            if (window.isInitializing) return;
+            
             // Actualizar la fila actual y luego los totales generales
             updateRowTotal(input.closest('tr'));
             recalculateTotals();
             checkForChanges();
-        });
+        };
+        
+        input.removeEventListener('input', handleInputChange);
+        input.addEventListener('input', handleInputChange);
     });
 
     function confirmAddLine() {
@@ -590,13 +816,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     <input type="text" name="ModuloId" class="form-control" value="${moduloId}" hidden>
                 </td>
                 <td><input type="number" name="Horas" class="form-control" value=""></td>
-                <td><input type="number" name="Valor_Horas" class="form-control" step="0.01" value="${tarifa.valorHora || 0}"></td>
+                <td><input type="text" name="Valor_Horas" class="form-control" value="${tarifa.valorHora || 0}"></td>
                 <td><input type="number" name="Dias" class="form-control" value=""></td>
-                <td><input type="number" name="Valor_Dias" class="form-control" step="0.01" value="${tarifa.valorDia || 0}"></td>
+                <td><input type="text" name="Valor_Dias" class="form-control" value="${tarifa.valorDia || 0}"></td>
                 <td><input type="number" name="Meses" class="form-control" value=""></td>
-                <td><input type="number" name="Valor_Meses" class="form-control" step="0.01" value="${tarifa.valorMes || 0}"></td>
+                <td><input type="text" name="Valor_Meses" class="form-control" value="${tarifa.valorMes || 0}"></td>
                 <td><input type="number" name="Bolsa" class="form-control" value=""></td>
-                <td><input type="number" name="Valor_Bolsa" class="form-control" step="0.01" value="${tarifa.valorBolsa || 0}"></td>
+                <td><input type="text" name="Valor_Bolsa" class="form-control" value="${tarifa.valorBolsa || 0}"></td>
                 <td><input type="number" name="Valor" class="form-control" value="" disabled></td>
                 <td><input type="text" name="Descripcion" class="form-control" value=""></td>
                 <td><input type="text" name="Numero_Factura" class="form-control" value=""></td>
@@ -646,19 +872,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Función para agregar event listeners a los campos de una fila
     function addEventListenersToRow(row) {
+        console.log('🎯 Agregando listeners a nueva fila:', row.id);
+        
         const relevantFields = ['Horas', 'Valor_Horas', 'Dias', 'Valor_Dias', 
-                              'Meses', 'Valor_Meses', 'Bolsa', 'Valor_Bolsa', 
-                              'Descripcion', 'Numero_Factura', 'IVA', 
-                              'Referencia', 'Ceco', 'Sitio_Serv'];
+                              'Meses', 'Valor_Meses', 'Bolsa', 'Valor_Bolsa'];
         
         relevantFields.forEach(fieldName => {
             const input = row.querySelector(`input[name="${fieldName}"]`);
             if (input) {
-                input.addEventListener('input', () => {
+                const handleInputChange = function() {
+                    if (window.isInitializing) return;
+                    
+                    console.log(`🔄 Cambio en nueva fila - ${fieldName}: ${this.value}`);
                     updateRowTotal(row);
                     recalculateTotals();
                     checkForChanges();
-                });
+                };
+                
+                input.addEventListener('input', handleInputChange);
             }
         });
     }
@@ -716,8 +947,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         Referencia: referencia,
                         Concepto: descripcion,
                         Cantidad: horas || dias || meses || bolsa,
-                        Valor_Unitario: Valor_Unitario.toFixed(2),
-                        Valor_Total: valor_total.toFixed(2),
+                        Valor_Unitario: Valor_Unitario,
+                        Valor_Total: valor_total,
                         Ceco: ceco,
                         Sitio_Serv: sitio_serv
                     });
@@ -733,7 +964,7 @@ document.addEventListener('DOMContentLoaded', function () {
             Concepto: 'Subtotal',
             Cantidad: '',
             Valor_Unitario: '',
-            Valor_Total: subtotal.toFixed(2),
+            Valor_Total: subtotal,
             Ceco: '',
             Sitio_Serv: ''
         });
@@ -742,8 +973,8 @@ document.addEventListener('DOMContentLoaded', function () {
             Referencia: '',
             Concepto: 'IVA',
             Cantidad: '',
-            Valor_Unitario: `${((ivaTotal / subtotal) * 100).toFixed(2)}%`,
-            Valor_Total: ivaTotal.toFixed(2),
+            Valor_Unitario: `${((ivaTotal / subtotal) * 100)}%`,
+            Valor_Total: ivaTotal,
             Ceco: '',
             Sitio_Serv: ''
         });
@@ -753,7 +984,7 @@ document.addEventListener('DOMContentLoaded', function () {
             Concepto: 'Total',
             Cantidad: '',
             Valor_Unitario: '',
-            Valor_Total: (subtotal + ivaTotal).toFixed(2),
+            Valor_Total: (subtotal + ivaTotal),
             Ceco: '',
             Sitio_Serv: ''
         });
@@ -1061,7 +1292,18 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
-    
+    // NUEVA FUNCIÓN: Preservar los valores originales sin formato adicional
+    function preserveOriginalValues() {
+        console.log('💾 Preservando valores originales...');
+        
+        // No aplicar ningún formato adicional, mantener los valores tal cual vienen de la base de datos
+        document.querySelectorAll('input[name="Valor_Horas"], input[name="Valor_Dias"], input[name="Valor_Meses"], input[name="Valor_Bolsa"]').forEach(input => {
+            // Mantener el valor exacto sin modificaciones
+            console.log(`📊 Valor original preservado: ${input.name} = ${input.value}`);
+        });
+        
+        console.log('✅ Valores originales preservados correctamente');
+    }
 
     // Añadir evento para habilitar o deshabilitar los botones
     document.querySelector('select[name="Anio"]').addEventListener('change', function () {
@@ -1084,6 +1326,56 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleButtons(); // Re-evaluar los botones después de la búsqueda
     });    
 
+    function initialize() {
+        console.log('🚀 Inicializando aplicación...');
+
+        // Asegurar que el overlay esté oculto al iniciar
+        showSavingOverlay(false);
+        
+        // Ocultar cualquier mensaje de alerta al iniciar
+        const messageBox = document.getElementById('message-box');
+        if (messageBox) {
+            messageBox.style.display = 'none';
+            messageBox.classList.remove('show');
+        }
+        
+        // Restaurar selección guardada
+        const savedSelection = JSON.parse(sessionStorage.getItem('selectedRows') || '[]');
+        savedSelection.forEach(id => {
+            const checkbox = document.querySelector(`.row-checkbox[data-id="${id}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+        sessionStorage.removeItem('selectedRows');
+        
+        // Guardar valores originales
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const rowId = row.id.replace('row-', '');
+            originalValues[rowId] = {};
+            row.querySelectorAll('input').forEach(input => {
+                if (input.name) {
+                    originalValues[rowId][input.name] = input.value;
+                }
+            });
+        });
+        
+        // Configurar event listeners
+        setupCheckboxListeners();
+        setupRealTimeCalculations();
+        
+        // Preservar valores originales sin formato adicional
+        preserveOriginalValues();
+        
+        // Calcular totales iniciales
+        recalculateTotals();
+        toggleButtons();
+        
+        // Marcar que la inicialización ha terminado
+        setTimeout(() => {
+            window.isInitializing = false;
+            console.log('✅ Aplicación inicializada correctamente');
+        }, 100);
+    }
+
     // Hacer las funciones accesibles globalmente
     window.generateTemplateExcel = generateTemplateExcel;
     window.generateTemplateJpg = generateTemplateJpg;
@@ -1092,7 +1384,15 @@ document.addEventListener('DOMContentLoaded', function () {
     window.confirmAddLine = confirmAddLine;
     window.removeLine = removeLine;
     
-    // Inicializar
-    recalculateTotals(); // Initial calculation
-    toggleButtons(); // Inicializar estado de botones
+    // Asegurar que el overlay esté oculto cuando se cierra la página
+    window.addEventListener('beforeunload', function() {
+        showSavingOverlay(false);
+    });
+
+    // También asegurar que esté oculto si hay un error de carga
+    window.addEventListener('error', function() {
+        showSavingOverlay(false);
+    });
+    
+    initialize();
 });

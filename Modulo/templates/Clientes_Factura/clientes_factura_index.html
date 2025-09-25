@@ -162,7 +162,7 @@
                                             <input type="text" name="Horas" class="form-control" value="{{ factura.Horas }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas|currency_format }}">
+                                            <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas|currency_format  }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Dias" class="form-control" value="{{ factura.Dias }}">
@@ -247,8 +247,8 @@
                                             <input type="text" name="Valor_Bolsa" class="form-control" value="{{ factura.Valor_Bolsa|currency_format }}">
                                         </td>
                                         <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                            <span class="form-control-plaintext">{{ factura.Valor|currency_format }}</span>
-                                            <input type="hidden" name="Valor" value="{{ factura.Valor }}">
+                                            <span class="form-control-plaintext" name="valorspan">{{ factura.Valor|currency_format }}</span>
+                                            <input type="hidden" class="form-control-plaintext d-none" name="Valor" value="{{ factura.Valor|currency_format }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Descripcion" class="form-control" value="{{ factura.Descripcion }}">
@@ -281,15 +281,15 @@
                     <tfoot>
                         <tr>
                             <th colspan="4" class="text-end">Totales:</th>
-                            <th class="text-end">{{ TotalesFacturacion.Total_Horas|floatformat:2 }}</th>
+                            <th data-total-horas class="text-end">{{ TotalesFacturacion.Total_Horas|floatformat:2 }}</th>
                             <th></th>
-                            <th class="text-end">{{ TotalesFacturacion.Total_Dias|floatformat:2 }}</th>
+                            <th data-total-dias class="text-end">{{ TotalesFacturacion.Total_Dias|floatformat:2 }}</th>
                             <th></th>
-                            <th class="text-end">{{ TotalesFacturacion.Total_Meses }}</th>
+                            <th data-total-meses class="text-end">{{ TotalesFacturacion.Total_Meses }}</th>
                             <th></th>
-                            <th class="text-end">{{ TotalesFacturacion.Total_Bolsa|floatformat:2 }}</th>
+                            <th data-total-bolsa class="text-end">{{ TotalesFacturacion.Total_Bolsa|floatformat:2 }}</th>
                             <th></th>
-                            <th class="text-end">{{ TotalesFacturacion.Total_Valor|currency_format }}</th>
+                            <th data-total-valor class="text-end">{{ TotalesFacturacion.Total_Valor|currency_format }}</th>
                             <th colspan="6"></th>
                         </tr>
                     </tfoot>
@@ -297,21 +297,9 @@
             </form>
         </div>
     </div>
-    <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
-        <span id="alert-icon" class="alert-heading"></span>
-        <span id="alert-message"></span>
-    </div>
+
     <!-- overlay de guardado -->
-    <div id="saving-overlay" class="saving-overlay" style="display: none;">
-        <div class="saving-content">
-            <div class="spinner-border text-primary" role="status"></div>
-            <span class="mt-2">Guardando cambios...</span>
-        </div>
-    </div>
-    <div id="saving-message" class="alert alert-info saving-alert" role="alert" style="display: none;">
-        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-        Guardando cambios...
-    </div>
+    
     {% if messages %}
     <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
         {% for message in messages %}
