@@ -101,7 +101,7 @@
             </div>
         </div>
         <div class="mt-2">
-            <small class="text-muted">* El botón "Guardar" se habilita al filtrar por año y mes.</small><br>
+            <small class="text-muted">* El botón "Guardar" se habilita al seleccionar un registro y haber modificado algun campo.</small><br>
             <small class="text-muted">* El botón "Agregar Línea" se habilita al filtrar por año, mes y cliente.</small>
         </div>
         
@@ -148,42 +148,43 @@
                                         </td>
                                         <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
                                             <strong>{{ cliente_info.Cliente }}</strong>
-                                            <input type="text" name="ClienteId" class="form-control" value="{{ cliente_info.ClienteId }}" hidden>
+                                            <input type="hidden" name="ClienteId" value="{{ cliente_info.ClienteId }}">
                                         </td>
                                         <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
                                             {{ factura.Linea }}
-                                            <input type="text" name="LineaId" class="form-control" value="{{ factura.LineaId }}" hidden>
+                                            <input type="hidden" name="LineaId" value="{{ factura.LineaId }}">
                                         </td>
                                         <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
                                             {{ factura.Modulo }}
-                                            <input type="text" name="ModuloId" class="form-control" value="{{ factura.ModuloId }}" hidden>
+                                            <input type="hidden" name="ModuloId" value="{{ factura.ModuloId }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Horas" class="form-control" value="{{ factura.Horas}}">
+                                            <input type="text" name="Horas" class="form-control" value="{{ factura.Horas }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas|currency_format }}">
+                                            <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas|currency_format  }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Dias" class="form-control" value="{{ factura.Dias}}">
+                                            <input type="text" name="Dias" class="form-control" value="{{ factura.Dias }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Valor_Dias" class="form-control" value="{{ factura.Valor_Dias|currency_format }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Meses" class="form-control" value="{{ factura.Mes}}">
+                                            <input type="text" name="Meses" class="form-control" value="{{ factura.Mes }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Valor_Meses" class="form-control" value="{{ factura.Valor_Meses|currency_format }}">
                                         </td>
-                                        <td style="overflow: visible; text-overflow: ellipsis; min-width: 100px;" >
+                                        <td>
                                             <input type="text" name="Bolsa" class="form-control" value="{{ factura.Bolsa }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Valor_Bolsa" class="form-control" value="{{ factura.Valor_Bolsa|currency_format }}">
                                         </td>
                                         <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                            <input type="text" name="Valor" class="form-control" value="{{ factura.Valor|currency_format }}" disabled>
+                                            <span class="form-control-plaintext">{{ factura.Valor|currency_format }}</span>
+                                            <input class="form-control- plaintext d-none" type="text" name="Valor" value="{{ factura.Valor }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Descripcion" class="form-control" value="{{ factura.Descripcion }}">
@@ -191,17 +192,17 @@
                                         <td>
                                             <input type="text" name="Numero_Factura" class="form-control" value="{{ factura.NumeroFactura }}">
                                         </td>
-                                        <td style="overflow: visible; text-overflow: ellipsis; min-width: 80px;">
-                                            <input type="text" name="IVA" class="form-control" value="{{ factura.IVA }}" >
-                                        </td>
-                                        <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                            <input type="text" name="Referencia" class="form-control" value="{{ factura.Referencia }}" >
-                                        </td>
-                                        <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                            <input type="text" name="Ceco" class="form-control" value="{{ factura.Ceco }}" >
+                                        <td style="min-width: 70px;">
+                                            <input type="text" name="IVA" class="form-control" value="{{ factura.IVA }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Sitio_Serv" class="form-control" value="{{ factura.Sitio_Serv }}" >
+                                            <input type="text" name="Referencia" class="form-control" value="{{ factura.Referencia }}">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="Ceco" class="form-control" value="{{ factura.Ceco }}">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="Sitio_Serv" class="form-control" value="{{ factura.Sitio_Serv }}">
                                         </td>
                                     </tr>
                                 {% else %}
@@ -211,42 +212,43 @@
                                                    data-id="{{ factura.ConsecutivoId }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="ClienteId" class="form-control" value="{{ cliente_info.ClienteId }}" hidden>
+                                            <input type="hidden" name="ClienteId" value="{{ cliente_info.ClienteId }}">
                                         </td>
                                         <td>
                                             {{ factura.Linea }}
-                                            <input type="text" name="LineaId" class="form-control" value="{{ factura.LineaId }}" hidden>
+                                            <input type="hidden" name="LineaId" value="{{ factura.LineaId }}">
                                         </td>
                                         <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
                                             {{ factura.Modulo }}
-                                            <input type="text" name="ModuloId" class="form-control" value="{{ factura.ModuloId }}" hidden>
+                                            <input type="hidden" name="ModuloId" value="{{ factura.ModuloId }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Horas" class="form-control" value="{{ factura.Horas}}">
+                                            <input type="text" name="Horas" class="form-control" value="{{ factura.Horas }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Valor_Horas" class="form-control" value="{{ factura.Valor_Horas|currency_format }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Dias" class="form-control" value="{{ factura.Dias}}">
+                                            <input type="text" name="Dias" class="form-control" value="{{ factura.Dias }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Valor_Dias" class="form-control" value="{{ factura.Valor_Dias|currency_format }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Meses" class="form-control" value="{{ factura.Mes}}">
+                                            <input type="text" name="Meses" class="form-control" value="{{ factura.Mes }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Valor_Meses" class="form-control" value="{{ factura.Valor_Meses|currency_format }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Bolsa" class="form-control" value="{{ factura.Bolsa}}">
+                                            <input type="text" name="Bolsa" class="form-control" value="{{ factura.Bolsa }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Valor_Bolsa" class="form-control" value="{{ factura.Valor_Bolsa|currency_format }}">
                                         </td>
-                                        <td>
-                                            <input type="text" name="Valor" class="form-control" value="{{ factura.Valor|currency_format }}" disabled>
+                                        <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                                            <span class="form-control-plaintext" name="valorspan">{{ factura.Valor|currency_format }}</span>
+                                            <input type="hidden" class="form-control-plaintext d-none" name="Valor" value="{{ factura.Valor|currency_format }}">
                                         </td>
                                         <td>
                                             <input type="text" name="Descripcion" class="form-control" value="{{ factura.Descripcion }}">
@@ -255,16 +257,16 @@
                                             <input type="text" name="Numero_Factura" class="form-control" value="{{ factura.NumeroFactura }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="IVA" class="form-control" value="{{ factura.IVA }}" >
+                                            <input type="text" name="IVA" class="form-control" value="{{ factura.IVA }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Referencia" class="form-control" value="{{ factura.Referencia }}" >
+                                            <input type="text" name="Referencia" class="form-control" value="{{ factura.Referencia }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Ceco" class="form-control" value="{{ factura.Ceco }}" >
+                                            <input type="text" name="Ceco" class="form-control" value="{{ factura.Ceco }}">
                                         </td>
                                         <td>
-                                            <input type="text" name="Sitio_Serv" class="form-control" value="{{ factura.Sitio_Serv }}" >
+                                            <input type="text" name="Sitio_Serv" class="form-control" value="{{ factura.Sitio_Serv }}">
                                         </td>
                                     </tr>
                                 {% endif %}
@@ -278,17 +280,17 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="4">Total</th>
-                            <th data-total-horas>{{ TotalesFacturacion.Total_Horas}}</th>
-                            <th colspan="1"></th>
-                            <th data-total-dias>{{ TotalesFacturacion.Total_Dias}}</th>
-                            <th colspan="1"></th>
-                            <th data-total-meses>{{ TotalesFacturacion.Total_Meses}}</th>
-                            <th colspan="1"></th>
-                            <th data-total-bolsa>{{ TotalesFacturacion.Total_Bolsa}}</th>
-                            <th colspan="1"></th>
-                            <th data-total-valor>{{ TotalesFacturacion.Total_Valor}}</th>
-                            <th colspan="11"></th>
+                            <th colspan="4" class="text-end">Totales:</th>
+                            <th data-total-horas class="text-end">{{ TotalesFacturacion.Total_Horas|floatformat:2 }}</th>
+                            <th></th>
+                            <th data-total-dias class="text-end">{{ TotalesFacturacion.Total_Dias|floatformat:2 }}</th>
+                            <th></th>
+                            <th data-total-meses class="text-end">{{ TotalesFacturacion.Total_Meses }}</th>
+                            <th></th>
+                            <th data-total-bolsa class="text-end">{{ TotalesFacturacion.Total_Bolsa|floatformat:2 }}</th>
+                            <th></th>
+                            <th data-total-valor class="text-end">{{ TotalesFacturacion.Total_Valor|currency_format }}</th>
+                            <th colspan="6"></th>
                         </tr>
                     </tfoot>
                 </table>
@@ -305,7 +307,7 @@
 </div>
 
 <!-- Modal para agregar línea -->
-<div class="modal fade" id="addLineModal" tabindex="-1" aria-labelledby="addLineModalLabel" aria-hidden="true">
+<div class="modal fade" id="addLineModal" tabindex="-1" aria-labelledby="addLineModalLabel">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -329,7 +331,7 @@
                 </form>
             </div>
             <div id="adding-message" class="alert alert-info" role="alert" style="display: none;">
-                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
                 Agregando...
             </div>
             <div class="modal-footer">
@@ -341,7 +343,7 @@
 </div>
 
 <!-- Modal para generar plantilla -->
-<div class="modal fade" id="generateTemplateModal" tabindex="-1" aria-labelledby="generateTemplateModalLabel" aria-hidden="true">
+<div class="modal fade" id="generateTemplateModal" tabindex="-1" aria-labelledby="generateTemplateModalLabel">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
@@ -377,7 +379,7 @@
 </div>
 
 <!-- Modal de Confirmación -->
-<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
@@ -389,7 +391,7 @@
             <div class="modal-body text-center">
                 <p class="lead">¿Desea generar la plantilla con las filas seleccionadas?</p>
                 <div class="d-flex justify-content-center gap-3 mt-4">
-                    <button type="button" class="btn btn-lg btn-danger" data-bs-dismiss="modal" onclick="window.location.reload()">
+                    <button type="button" class="btn btn-lg btn-danger" data-bs-dismiss="modal">
                         <i class="fas fa-times me-2"></i>No, Solo Guardar
                     </button>
                     <button type="button" class="btn btn-lg btn-success" id="confirmGenerate">
@@ -400,9 +402,9 @@
         </div>
     </div>
 </div>
-
+    
 <!-- Modal de Eliminación -->
-<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">

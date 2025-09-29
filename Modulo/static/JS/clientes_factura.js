@@ -2,11 +2,18 @@ document.addEventListener('DOMContentLoaded', function () {
     // Obtener el valor del token CSRF para ser utilizado en las solicitudes POST
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+    // Variable para controlar el estado de inicialización
+    window.isInitializing = true;
+
     // Recuperar los valores de año y mes originales desde la URL y almacenarlos en localStorage
     updateAnioMesFromURL();
 
     // Inhabilitar la tecla Enter para evitar que envíen formularios accidentalmente
     preventFormSubmissionOnEnter();
+
+    // Variables para rastrear cambios
+    let hasUnsavedChanges = false;
+    let originalValues = {};
 
     // Funciones reutilizables
 
@@ -49,11 +56,33 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Funciones para manejar selecciones
-    function toggleDeleteButton() {
+    function toggleButtons() {
         const selectedIds = getSelectedRows();
-        sessionStorage.setItem('selectedRows', JSON.stringify(selectedIds)); // Guardar en sessionStorage
+        sessionStorage.setItem('selectedRows', JSON.stringify(selectedIds));
         document.getElementById('delete-button').disabled = selectedIds.length === 0;
         document.getElementById('generate-template').disabled = selectedIds.length === 0;
+        
+        const anio = document.querySelector('select[name="Anio"]').value;
+        const mes = document.querySelector('select[name="Mes"]').value;
+        document.getElementById('save-button').disabled = !(anio && mes && selectedIds.length > 0);
+    }
+
+    function setupCheckboxListeners() {
+        document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const allChecked = document.querySelectorAll('.row-checkbox:checked').length === 
+                                 document.querySelectorAll('.row-checkbox').length;
+                document.getElementById('select-all').checked = allChecked;
+                toggleButtons();
+            });
+        });
+
+        document.getElementById('select-all').addEventListener('change', function() {
+            document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            toggleButtons();
+        });
     }
 
     document.querySelectorAll('.row-checkbox').forEach(checkbox => {
@@ -61,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const allChecked = document.querySelectorAll('.row-checkbox:checked').length === 
                              document.querySelectorAll('.row-checkbox').length;
             document.getElementById('select-all').checked = allChecked;
-            toggleDeleteButton();
+            toggleButtons();
         });
     });
 
@@ -70,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.row-checkbox').forEach(checkbox => {
             checkbox.checked = this.checked;
         });
-        toggleDeleteButton(); // Añadir esta línea para actualizar los botones
+        toggleButtons(); // Añadir esta línea para actualizar los botones
     });
 
     // Función de eliminación 
@@ -81,15 +110,14 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Mostrar el modal de confirmación
+        window.preDeleteFocusElement = document.activeElement;
+
         const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
         const confirmDeleteButton = document.getElementById('confirmDelete');
 
-        // Limpiar event listeners previos
         confirmDeleteButton.replaceWith(confirmDeleteButton.cloneNode(true));
         const newConfirmDeleteButton = document.getElementById('confirmDelete');
 
-        // Manejar la confirmación de eliminación
         const handleDelete = () => {
             deleteModal.hide();
             showSavingOverlay(true);
@@ -117,29 +145,43 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.showError('Error al eliminar las filas.');
             })
             .finally(() => showSavingOverlay(false));
+            showMessage('Eliminado Exitosamente.','success')
         };
 
-        // Asignar el evento de confirmación
         newConfirmDeleteButton.addEventListener('click', handleDelete, { once: true });
-
-        // Mostrar el modal
         deleteModal.show();
     };
 
     // Función para mostrar modal de confirmación de plantilla POST-GUARDADO
     window.showPostSaveTemplateModal = function() {
-        const modal = new bootstrap.Modal(document.getElementById('generateTemplateModal'));
-        
-        const handleClose = () => {
-            modal._element.removeEventListener('hidden.bs.modal', handleClose);
-            if (sessionStorage.getItem('templateGenerated') === 'true') {
-                sessionStorage.removeItem('templateGenerated');
-                window.location.reload(); // Forzar recarga solo si se generó plantilla
+        const openModals = document.querySelectorAll('.modal.show');
+        openModals.forEach(modal => {
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            if (bsModal) {
+                bsModal.hide();
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
             }
-        };
+        });
         
-        modal._element.addEventListener('hidden.bs.modal', handleClose);
-        modal.show();
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
+        document.body.classList.remove('modal-open');
+        
+        setTimeout(() => {
+            const modal = new bootstrap.Modal(document.getElementById('generateTemplateModal'));
+            
+            const handleClose = () => {
+                modal._element.removeEventListener('hidden.bs.modal', handleClose);
+                if (sessionStorage.getItem('templateGenerated') === 'true') {
+                    sessionStorage.removeItem('templateGenerated');
+                    window.location.reload();
+                }
+            };
+            
+            modal._element.addEventListener('hidden.bs.modal', handleClose);
+            modal.show();
+        }, 50);
     };
 
     // Guarda de saveAllRows
@@ -148,8 +190,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const hasNewRows = data.some(row => !row.ConsecutivoId);
         const selectedIds = getSelectedRows();
 
-        showSavingOverlay(true);
-        disableUI(true);
+    showSavingOverlay(true);
+    disableUI(true);
 
         fetch('/clientes_factura/guardar/', {
             method: 'POST',
@@ -171,20 +213,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     confirmButton.replaceWith(confirmButton.cloneNode(true));
                     const newConfirmButton = document.getElementById('confirmGenerate');
 
-                    const handleConfirmation = () => {
-                        confirmationModal.hide();
-                        sessionStorage.setItem('pendingTemplateGeneration', JSON.stringify(selectedIds));
-                        showPostSaveTemplateModal();
-                    };
+                const handleConfirmation = () => {
+                    confirmationModal.hide();
+                    sessionStorage.setItem('pendingTemplateGeneration', JSON.stringify(selectedIds));
+                    showPostSaveTemplateModal();
+                };
 
-                    const handleClose = () => {
-                        confirmationModal._element.removeEventListener('hidden.bs.modal', handleClose);
-                        if (!sessionStorage.getItem('pendingTemplateGeneration')) {
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1500);
-                        }
-                    };
+                const handleClose = () => {
+                    confirmationModal._element.removeEventListener('hidden.bs.modal', handleClose);
+                    if (!sessionStorage.getItem('pendingTemplateGeneration')) {
+                        window.location.reload();
+                    }
+                };
 
                     confirmationModal._element.addEventListener('hidden.bs.modal', handleClose, {once: true});
                     newConfirmButton.addEventListener('click', handleConfirmation, {once: true});
@@ -210,52 +250,83 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Verificar modal al cargar
-    document.addEventListener('DOMContentLoaded', function() {
-        if (sessionStorage.getItem('showTemplateModal') === 'true') {
-            sessionStorage.removeItem('showTemplateModal');
-            showTemplateConfirmationModal();
-        }
-    });
+    
+    if (sessionStorage.getItem('showTemplateModal') === 'true') {
+        sessionStorage.removeItem('showTemplateModal');
+        showTemplateConfirmationModal();
+    }
+    
 
     function prepareSaveData() {
+        const selectedIds = getSelectedRows();
         const rows = document.querySelectorAll('tbody tr');
         const data = [];
     
         rows.forEach((row) => {
-            const rowData = {};
-            const inputs = row.querySelectorAll('input');
-            
-            inputs.forEach(input => {
-                if (input.name) {
-                    rowData[input.name] = input.value;
-                }
-            });
-    
             const rowId = row.id.replace('row-', '');
-            if (rowId) rowData['ConsecutivoId'] = rowId;
             
-            rowData['Anio'] = window.originalAnio;
-            rowData['Mes'] = window.originalMes;
-    
-            data.push(rowData);
+            if (selectedIds.includes(rowId)) {
+                const rowData = {};
+                const inputs = row.querySelectorAll('input');
+                
+                inputs.forEach(input => {
+                    if (input.name && input.type !== 'checkbox') {
+                        const numericFields = ['Horas', 'Dias', 'Meses', 'Bolsa', 'Valor', 'IVA', 'LineaId', 'ModuloId'];
+                        if (numericFields.includes(input.name)) {
+                            const value = input.value.trim();
+                            rowData[input.name] = value === '' ? 0 : parseFloat(value) || 0;
+                        } else {
+                            rowData[input.name] = input.value;
+                        }
+                    }
+                });
+                
+                if (rowId && !rowId.startsWith('new-')) {
+                    rowData['ConsecutivoId'] = parseInt(rowId);
+                } else {
+                    rowData['is_new_line'] = 'true';
+                }
+                
+                rowData['ClienteId'] = parseInt(window.originalCliente);
+                rowData['Anio'] = parseInt(window.originalAnio);
+                rowData['Mes'] = parseInt(window.originalMes);
+        
+                data.push(rowData);
+            }
         });
     
         return data;
     }
 
     // Restaurar al cargar
-    document.addEventListener('DOMContentLoaded', function() {
-        const savedSelection = JSON.parse(sessionStorage.getItem('selectedRows') || '[]');
-        savedSelection.forEach(id => {
-            const checkbox = document.querySelector(`.row-checkbox[data-id="${id}"]`);
-            if (checkbox) checkbox.checked = true;
-        });
-        sessionStorage.removeItem('selectedRows');
+ 
+    const savedSelection = JSON.parse(sessionStorage.getItem('selectedRows') || '[]');
+    savedSelection.forEach(id => {
+        const checkbox = document.querySelector(`.row-checkbox[data-id="${id}"]`);
+        if (checkbox) checkbox.checked = true;
     });
+    sessionStorage.removeItem('selectedRows');
+    
+    // Guardar valores originales para detectar cambios
+    document.querySelectorAll('tbody tr').forEach(row => {
+        const rowId = row.id.replace('row-', '');
+        originalValues[rowId] = {};
+        row.querySelectorAll('input').forEach(input => {
+            if (input.name) {
+                originalValues[rowId][input.name] = input.value;
+            }
+        });
+    });
+        
+        // Actualizar botones al cargar
+        toggleButtons();
+    
 
     function showSavingOverlay(show) {
         const overlay = document.getElementById('saving-overlay');
-        overlay.style.display = show ? 'flex' : 'none';
+        if (overlay) {
+            overlay.style.display = show ? 'flex' : 'none';
+        }
     }
 
     function getSelectedRows() {
@@ -268,28 +339,210 @@ document.addEventListener('DOMContentLoaded', function () {
         return selectedIds;
     }
 
+    // FUNCIÓN MEJORADA: Limpiar formato de moneda para convertir a número
+    function cleanCurrencyValue(value) {
+        if (value === null || value === undefined || value === '') {
+            return '0';
+        }
+        
+        const strValue = String(value).trim();
+        
+        // Si el valor ya es un número sin caracteres especiales, retornarlo tal cual
+        if (/^-?\d*\.?\d+$/.test(strValue)) {
+            return strValue;
+        }
+        
+        // Remover símbolos de moneda pero preservar puntos decimales
+        // Estrategia: preservar solo números, puntos decimales y signo negativo
+        let cleaned = strValue.replace(/[$,]/g, ''); // Eliminar $ y comas
+        
+        // Verificar si hay un punto decimal válido (solo uno y seguido de dígitos)
+        const decimalParts = cleaned.split('.');
+        
+        if (decimalParts.length > 2) {
+            // Si hay múltiples puntos, probablemente son separadores de miles
+            // Unir todas las partes excepto la última (que sería decimal)
+            cleaned = decimalParts.slice(0, -1).join('') + '.' + decimalParts[decimalParts.length - 1];
+        }
+        
+        // Asegurar que solo haya dígitos y un punto decimal opcional
+        cleaned = cleaned.replace(/[^\d.-]/g, '');
+        
+        // Si después de limpiar está vacío, retornar '0'
+        if (cleaned === '' || cleaned === '-') {
+            return '0';
+        }
+        
+        return cleaned;
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(value);
+    }
+    
+
     // Función para mostrar modal de plantilla - Global
     window.showTemplateConfirmationModal = function() {
         const modal = new bootstrap.Modal(document.getElementById('templateConfirmationModal'));
         modal.show();
     };
 
+    // Función auxiliar para conversión segura de valores
+    // FUNCIÓN MEJORADA: Conversión segura de valores
+    function safeParseFloat(value) {
+        const cleanedValue = cleanCurrencyValue(value);
+        
+        // Casos especiales
+        if (cleanedValue === '') return 0;
+        if (cleanedValue === '.') return 0;
+        
+        // Para valores como "53.0", parseFloat los maneja correctamente como 53.0
+        const parsed = parseFloat(cleanedValue);
+        return isNaN(parsed) ? 0 : parsed;
+    }
+
+    // NUEVA FUNCIÓN: Formatear valor preservando los decimales originales
+    function preserveOriginalFormat(value) {
+        if (value === null || value === undefined || value === '') {
+            return '';
+        }
+        
+        // Si ya es un número, convertirlo a string sin forzar decimales
+        if (typeof value === 'number') {
+            // Preservar los decimales originales
+            return value.toString();
+        }
+        
+        // Si es string, mantenerlo tal cual
+        return String(value);
+    }
+
+    // NUEVA FUNCIÓN: Aplicar formato suave que preserve los valores originales
+    function applySoftFormatting() {
+        console.log('💾 Preservando formatos originales...');
+        
+        document.querySelectorAll('input[name="Valor_Horas"], input[name="Valor_Dias"], input[name="Valor_Meses"], input[name="Valor_Bolsa"]').forEach(input => {
+            // Solo preservar el formato original, no forzar cambios
+            if (input.value && input !== document.activeElement) {
+                // Mantener el valor original sin modificaciones
+                const currentValue = input.value;
+                // Solo limpiar si tiene caracteres no numéricos problemáticos
+                if (/[^0-9.,]/.test(currentValue)) {
+                    input.value = currentValue.replace(/[^0-9.,]/g, '');
+                }
+            }
+        });
+    }
+
+    function getNumericValueFromCell(row, fieldName) {
+        // Primero intentar con input
+        let input = row.querySelector(`input[name="${fieldName}"]`);
+        if (input) {
+            console.log(`📥 Input ${fieldName}:`, input.value);
+            return safeParseFloat(input.value);
+        }
+        
+        // Si no hay input, buscar en el contenido de texto de la celda
+        const cells = row.querySelectorAll('td');
+        let headerIndex = -1;
+        
+        // Encontrar el índice de la columna basado en los headers
+        const headers = document.querySelectorAll('thead th');
+        headers.forEach((header, index) => {
+            if (header.textContent.trim().includes(fieldName.replace('_', ' '))) {
+                headerIndex = index;
+            }
+        });
+        
+        if (headerIndex !== -1 && cells[headerIndex]) {
+            const cellValue = cells[headerIndex].textContent || cells[headerIndex].innerText;
+            console.log(`📥 Celda ${fieldName} [${headerIndex}]:`, cellValue);
+            return safeParseFloat(cellValue);
+        }
+        
+        console.log(`❌ No se encontró valor para ${fieldName}`);
+        return 0;
+    }
+
+    // Modificar updateRowTotal para preservar formatos originales
     function updateRowTotal(row) {
-        const horas = parseFloat(row.querySelector('input[name="Horas"]').value) || 0;
-        const valorHoras = parseFloat(row.querySelector('input[name="Valor_Horas"]').value) || 0;
-        const dias = parseFloat(row.querySelector('input[name="Dias"]').value) || 0;
-        const valorDias = parseFloat(row.querySelector('input[name="Valor_Dias"]').value) || 0;
-        const meses = parseFloat(row.querySelector('input[name="Meses"]').value) || 0;
-        const valorMeses = parseFloat(row.querySelector('input[name="Valor_Meses"]').value) || 0;
-        const bolsa = parseFloat(row.querySelector('input[name="Bolsa"]').value) || 0;
-        const valorBolsa = parseFloat(row.querySelector('input[name="Valor_Bolsa"]').value) || 0;
+        console.log('🔢 Actualizando total para fila:', row.id);
         
+        // Obtener valores usando la función mejorada
+        const horas = getNumericValueFromCell(row, 'Horas');
+        const valorHoras = getNumericValueFromCell(row, 'Valor_Horas');
+        const dias = getNumericValueFromCell(row, 'Dias');
+        const valorDias = getNumericValueFromCell(row, 'Valor_Dias');
+        const meses = getNumericValueFromCell(row, 'Meses');
+        const valorMeses = getNumericValueFromCell(row, 'Valor_Meses');
+        const bolsa = getNumericValueFromCell(row, 'Bolsa');
+        const valorBolsa = getNumericValueFromCell(row, 'Valor_Bolsa');
         
-        const total = (horas * valorHoras) + (dias * valorDias) + (meses * valorMeses) + (bolsa *  valorBolsa);
-        row.querySelector('input[name="Valor"]').value = total.toFixed(2);
-    }    
+        console.log(`📊 Valores obtenidos: H=${horas}, VH=${valorHoras}, D=${dias}, VD=${valorDias}, M=${meses}, VM=${valorMeses}, B=${bolsa}, VB=${valorBolsa}`);
+        
+        const total = (horas * valorHoras) + 
+                    (dias * valorDias) + 
+                    (meses * valorMeses) + 
+                    (bolsa * valorBolsa);
+        
+        console.log(`🧮 Cálculo: (${horas} * ${valorHoras}) + (${dias} * ${valorDias}) + (${meses} * ${valorMeses}) + (${bolsa} * ${valorBolsa}) = ${total}`);
+        
+        // Actualizar el input hidden de Valor
+        const valorInput = row.querySelector('input[name="Valor"]');
+        if (valorInput) {
+            valorInput.value = total;
+            console.log('✅ Input Valor actualizado:', valorInput.value);
+        }
+        
+        // Actualizar el span visible que muestra el valor
+        let valorSpan = row.querySelector('span.form-control-plaintext');
+        if (!valorSpan) {
+            // Buscar en la celda de Total
+            const cells = row.querySelectorAll('td');
+            const headers = document.querySelectorAll('thead th');
+            let totalIndex = -1;
+            
+            headers.forEach((header, index) => {
+                if (header.textContent.trim().includes('Total')) {
+                    totalIndex = index;
+                }
+            });
+            
+            if (totalIndex !== -1 && cells[totalIndex]) {
+                valorSpan = cells[totalIndex].querySelector('span');
+                if (!valorSpan) {
+                    // Si no hay span, crear uno
+                    valorSpan = document.createElement('span');
+                    valorSpan.className = 'form-control-plaintext';
+                    cells[totalIndex].innerHTML = '';
+                    cells[totalIndex].appendChild(valorSpan);
+                }
+            }
+        }
+        
+        if (valorSpan) {
+            // Aplicar formato de moneda al total de la fila individual
+            valorSpan.textContent = formatCurrency(total);
+            console.log('✅ Span Valor actualizado:', valorSpan.textContent);
+        }
+        
+        // También buscar por name="valorspan" por si acaso
+        const valorSpanByName = row.querySelector('span[name="valorspan"]');
+        if (valorSpanByName) {
+            valorSpanByName.textContent = formatCurrency(total);
+            console.log('✅ Span por name actualizado:', valorSpanByName.textContent);
+        }
+        
+        return total;
+    } 
 
     function recalculateTotals() {
+        console.log('🔄 Recalculando totales generales...');
         const rows = document.querySelectorAll('tbody tr');
         const totals = {
             totalHoras: 0,
@@ -299,58 +552,200 @@ document.addEventListener('DOMContentLoaded', function () {
             totalValor: 0
         };
     
-        rows.forEach(row => {
-            // Actualizar total de la fila primero
-            updateRowTotal(row);
+        rows.forEach((row, index) => {
+            // Verificar si es una fila de datos (tiene inputs)
+            const hasInputs = row.querySelector('input[name="Horas"]') !== null;
+            if (!hasInputs) {
+                console.log(`⏭️ Saltando fila ${index} - no es fila de datos`);
+                return;
+            }
             
-            // Sumar a los totales generales
-            const horas = parseFloat(row.querySelector('input[name="Horas"]').value) || 0;
-            const dias = parseFloat(row.querySelector('input[name="Dias"]').value) || 0;
-            const meses = parseFloat(row.querySelector('input[name="Meses"]').value) || 0;
-            const bolsa = parseFloat(row.querySelector('input[name="Bolsa"]').value) || 0;
-            const valor = parseFloat(row.querySelector('input[name="Valor"]').value) || 0;
+            console.log(`📝 Procesando fila ${index}:`, row.id);
+            
+            // Actualizar total de la fila
+            const rowTotal = updateRowTotal(row);
+            
+            // Sumar a los totales generales usando la función mejorada
+            const horas = getNumericValueFromCell(row, 'Horas');
+            const dias = getNumericValueFromCell(row, 'Dias');
+            const meses = getNumericValueFromCell(row, 'Meses');
+            const bolsa = getNumericValueFromCell(row, 'Bolsa');
+            const valor = rowTotal;
     
             totals.totalHoras += horas;
             totals.totalDias += dias;
             totals.totalMeses += meses;
             totals.totalBolsa += bolsa;
             totals.totalValor += valor;
+            
+            console.log(`➕ Sumando fila ${index}: Horas=${horas}, Dias=${dias}, Meses=${meses}, Bolsa=${bolsa}, Valor=${valor}`);
         });
     
+        console.log('🎯 Totales calculados:', totals);
+        
+        // Función auxiliar para actualizar elementos en el footer
+        const updateIfExists = (selector, value, isCurrency = false) => {
+            const element = document.querySelector(selector);
+            if (element) {
+                // Aplicar formato de moneda si corresponde
+                if (isCurrency) {
+                    element.textContent = formatCurrency(value);
+                } else {
+                    element.textContent = value;
+                }
+                console.log(`✅ Actualizado ${selector}: ${element.textContent}`);
+            } else {
+                console.log(`❌ Elemento no encontrado: ${selector}`);
+            }
+        };
+    
         // Actualizar los totales en el pie de página
-        document.querySelector('tfoot th[data-total-horas]').textContent = totals.totalHoras.toFixed(2);
-        document.querySelector('tfoot th[data-total-dias]').textContent = totals.totalDias.toFixed(2);
-        document.querySelector('tfoot th[data-total-meses]').textContent = totals.totalMeses.toFixed(2);
-        document.querySelector('tfoot th[data-total-bolsa]').textContent = totals.totalBolsa.toFixed(2);
-        document.querySelector('tfoot th[data-total-valor]').textContent = totals.totalValor.toFixed(2);
+        updateIfExists('tfoot th[data-total-horas]', totals.totalHoras);
+        updateIfExists('tfoot th[data-total-dias]', totals.totalDias);
+        updateIfExists('tfoot th[data-total-meses]', totals.totalMeses);
+        updateIfExists('tfoot th[data-total-bolsa]', totals.totalBolsa);
+        updateIfExists('tfoot th[data-total-valor]', totals.totalValor, true); // Este es el único que lleva formato de moneda
+        
+        console.log('✅ Totales generales actualizados');
     }
 
-    // Modificar los event listeners para incluir todos los campos relevantes
-    document.querySelectorAll('input[name="Horas"], input[name="Valor_Horas"], input[name="Dias"], input[name="Valor_Dias"], input[name="Meses"], input[name="Valor_Meses"], input[name="Bolsa"], input[name="Valor_Bolsa"]').forEach(input => {
-        input.addEventListener('input', () => {
+    // Función para verificar cambios en los campos
+    function checkForChanges() {
+        const selectedIds = getSelectedRows();
+        if (selectedIds.length === 0) {
+            hasUnsavedChanges = false;
+            return;
+        }
+        
+        hasUnsavedChanges = false;
+        
+        selectedIds.forEach(id => {
+            const row = document.getElementById(`row-${id}`);
+            if (row) {
+                row.querySelectorAll('input').forEach(input => {
+                    if (input.name && originalValues[id] && originalValues[id][input.name] !== input.value) {
+                        hasUnsavedChanges = true;
+                    }
+                });
+            }
+        });
+        
+        toggleButtons();
+    }
+
+    function setupRealTimeCalculations() {
+        console.log('⚡ Configurando cálculos en tiempo real...');
+        
+        // Event listener general para todos los inputs relevantes
+        document.addEventListener('input', function(e) {
+            // No procesar eventos durante la inicialización
+            if (window.isInitializing) return;
+            
+            const target = e.target;
+            const relevantFields = ['Horas', 'Valor_Horas', 'Dias', 'Valor_Dias', 
+                                'Meses', 'Valor_Meses', 'Bolsa', 'Valor_Bolsa'];
+            
+            if (relevantFields.includes(target.name)) {
+                console.log(`🎯 Cambio detectado en campo: ${target.name} = ${target.value}`);
+                const row = target.closest('tr');
+                if (row) {
+                    updateRowTotal(row);
+                    recalculateTotals();
+                    checkForChanges();
+                }
+            }
+        });
+
+        // Event listeners específicos para cada campo
+        const relevantFields = ['Horas', 'Valor_Horas', 'Dias', 'Valor_Dias', 
+                              'Meses', 'Valor_Meses', 'Bolsa', 'Valor_Bolsa'];
+        
+        relevantFields.forEach(fieldName => {
+            document.querySelectorAll(`input[name="${fieldName}"]`).forEach(input => {
+                // Función separada para manejar cambios de input
+                const handleInputChange = function() {
+                    if (window.isInitializing) return;
+                    
+                    console.log(`📝 Campo ${fieldName} cambiado: ${this.value}`);
+                    const row = this.closest('tr');
+                    if (row) {
+                        updateRowTotal(row);
+                        recalculateTotals();
+                        checkForChanges();
+                    }
+                };
+                
+                // Remover event listeners existentes para evitar duplicados
+                input.removeEventListener('input', handleInputChange);
+                input.addEventListener('input', handleInputChange);
+            });
+        });
+        
+        console.log('✅ Cálculos en tiempo real configurados');
+    }
+
+    // Modificar el evento de input para incluir todos los campos relevantes
+    document.addEventListener('input', function(e) {
+        // No procesar eventos durante la inicialización
+        if (window.isInitializing) return;
+        
+        const target = e.target;
+        const relevantFields = ['Horas', 'Valor_Horas', 'Dias', 'Valor_Dias', 
+                            'Meses', 'Valor_Meses', 'Bolsa', 'Valor_Bolsa', 
+                            'Descripcion', 'Numero_Factura', 'IVA', 
+                            'Referencia', 'Ceco', 'Sitio_Serv'];
+        
+        if (relevantFields.includes(target.name)) {
+            const row = target.closest('tr');
+            if (row) {
+                updateRowTotal(row);
+                recalculateTotals();
+                checkForChanges();
+            }
+        }
+    });
+
+    // Modificar los event listeners para preservar formatos originales
+    document.querySelectorAll('input[name="Horas"], input[name="Valor_Horas"], input[name="Dias"], input[name="Valor_Dias"], input[name="Meses"], input[name="Valor_Meses"], input[name="Bolsa"], input[name="Valor_Bolsa"], input[name="Descripcion"], input[name="Numero_Factura"], input[name="IVA"], input[name="Referencia"], input[name="Ceco"], input[name="Sitio_Serv"]').forEach(input => {
+        const handleInputChange = function() {
+            if (window.isInitializing) return;
+            
             // Actualizar la fila actual y luego los totales generales
             updateRowTotal(input.closest('tr'));
             recalculateTotals();
-        });
+            checkForChanges();
+        };
+        
+        input.removeEventListener('input', handleInputChange);
+        input.addEventListener('input', handleInputChange);
     });
 
     window.confirmAddLine = function() {
         const lineaId = document.getElementById('lineaSelect').value;
         const moduloId = document.getElementById('moduloSelect').value;
         const clienteId = window.originalCliente;
-        const anio = window.originalAnio; // Obtener el año del filtro
-        const mes = window.originalMes;   // Obtener el mes del filtro
+        const anio = window.originalAnio;
+        const mes = window.originalMes;
     
         if (!lineaId || !moduloId) {
             window.showWarning('Seleccione una línea y módulo.');
             return;
         }
-
-        // Mostrar el mensaje de "Agregando..."
-        const addingMessage = document.getElementById('adding-message');
-        addingMessage.style.display = 'block';
     
-        // Obtener la tarifa asociada al cliente y la línea
+        // Obtener el modal y el mensaje de forma segura
+        const modal = document.getElementById('addLineModal');
+        const addingMessage = modal ? modal.querySelector('#adding-message') : null;
+    
+        if (addingMessage) {
+            addingMessage.style.display = 'block';
+        }
+    
+        // Deshabilitar botones mientras se procesa
+        const buttons = modal.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.disabled = true;
+        });
+    
         fetch(`/clientes_factura/obtener_factura/?clienteId=${clienteId}&lineaId=${lineaId}&moduloId=${moduloId}&anio=${anio}&mes=${mes}`, {
             method: 'GET',
             headers: {
@@ -366,12 +761,13 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(tarifa => {
             const tbody = document.querySelector('tbody');
-    
             // Crear una nueva fila en la tabla con los valores predeterminados de la tarifa
             const newRow = document.createElement('tr');
-            newRow.setAttribute('id', `row-`);
+            const newRowId = 'new-' + Date.now(); // ID temporal para la nueva fila
+            newRow.setAttribute('id', `row-${newRowId}`);
             newRow.innerHTML = `
                 <td>
+                    <input type="checkbox" class="row-checkbox" data-id="${newRowId}" checked>
                     <button type="button" class="btn btn-danger fas fa-times" aria-label="Close" onclick="removeLine(this)"></button>
                 </td>
                 <td>
@@ -384,36 +780,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${document.querySelector('#moduloSelect option:checked').textContent}
                     <input type="text" name="ModuloId" class="form-control" value="${moduloId}" hidden>
                 </td>
-                <td><input type="text" name="Horas" class="form-control" value=""></td>
+                <td><input type="number" name="Horas" class="form-control" value=""></td>
                 <td><input type="text" name="Valor_Horas" class="form-control" value="${tarifa.valorHora || 0}"></td>
-                <td><input type="text" name="Dias" class="form-control" value=""></td>
+                <td><input type="number" name="Dias" class="form-control" value=""></td>
                 <td><input type="text" name="Valor_Dias" class="form-control" value="${tarifa.valorDia || 0}"></td>
-                <td><input type="text" name="Meses" class="form-control" value=""></td>
+                <td><input type="number" name="Meses" class="form-control" value=""></td>
                 <td><input type="text" name="Valor_Meses" class="form-control" value="${tarifa.valorMes || 0}"></td>
-                <td><input type="text" name="Bolsa" class="form-control" value=""></td>
+                <td><input type="number" name="Bolsa" class="form-control" value=""></td>
                 <td><input type="text" name="Valor_Bolsa" class="form-control" value="${tarifa.valorBolsa || 0}"></td>
-                <td><input type="text" name="Valor" class="form-control" value=""disabled></td>
+                <td><input type="number" name="Valor" class="form-control" value="" disabled></td>
                 <td><input type="text" name="Descripcion" class="form-control" value=""></td>
                 <td><input type="text" name="Numero_Factura" class="form-control" value=""></td>
-                <td><input type="text" name="IVA" class="form-control" value="${tarifa.iva || 0}"></td>
+                <td><input type="number" name="IVA" class="form-control" step="0.01" value="${tarifa.iva || 0}"></td>
                 <td><input type="text" name="Referencia" class="form-control" value="${tarifa.referenciaId?.codigoReferencia || ''}"></td>
                 <td><input type="text" name="Ceco" class="form-control" value="${tarifa.centrocostosId?.codigoCeCo || ''}"></td>
                 <td><input type="text" name="Sitio_Serv" class="form-control" value="${tarifa.sitioTrabajo || ''}"></td>
             `;
             tbody.appendChild(newRow);
     
-            // Ocultar el modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('addLineModal'));
-            modal.hide();
-
-            // Ocultar el mensaje de "Agregando..."
-            addingMessage.style.display = 'none';
-
-            // Agregar event listeners a los campos de la nueva fila para calcular el valor en tiempo real
+            // Guardar valores originales
+            originalValues[newRowId] = {};
+            newRow.querySelectorAll('input').forEach(input => {
+                if (input.name) {
+                    originalValues[newRowId][input.name] = input.value;
+                }
+            });
+            
+            // Agregar event listeners a la nueva fila
             addEventListenersToRow(newRow);
-
+    
+            // Ocultar el modal
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            modalInstance.hide();
+    
             // Recalcular totales
             recalculateTotals();
+            
+            // Marcar que hay cambios sin guardar
+            hasUnsavedChanges = true;
+            toggleButtons();
         })
         .catch(error => {
             console.error('Error al obtener la tarifa:', error);
@@ -425,15 +830,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Función para agregar event listeners a los campos de una fila
     function addEventListenersToRow(row) {
-        const inputs = row.querySelectorAll('input[name="Horas"], input[name="Valor_Horas"], input[name="Dias"], input[name="Valor_Dias"], input[name="Meses"], input[name="Valor_Meses"], input[name="Bolsa"], input[name="Valor_Bolsa"]');
-
-        inputs.forEach(input => {
-            input.addEventListener('input', () => {
-                // Actualizar el valor total de la fila
-                updateRowTotal(row);
-                // Recalcular los totales generales
-                recalculateTotals();
-            });
+        console.log('🎯 Agregando listeners a nueva fila:', row.id);
+        
+        const relevantFields = ['Horas', 'Valor_Horas', 'Dias', 'Valor_Dias', 
+                              'Meses', 'Valor_Meses', 'Bolsa', 'Valor_Bolsa'];
+        
+        relevantFields.forEach(fieldName => {
+            const input = row.querySelector(`input[name="${fieldName}"]`);
+            if (input) {
+                const handleInputChange = function() {
+                    if (window.isInitializing) return;
+                    
+                    console.log(`🔄 Cambio en nueva fila - ${fieldName}: ${this.value}`);
+                    updateRowTotal(row);
+                    recalculateTotals();
+                    checkForChanges();
+                };
+                
+                input.addEventListener('input', handleInputChange);
+            }
         });
     }
 
@@ -490,8 +905,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         Referencia: referencia,
                         Concepto: descripcion,
                         Cantidad: horas || dias || meses || bolsa,
-                        Valor_Unitario: Valor_Unitario.toFixed(2),
-                        Valor_Total: valor_total.toFixed(2),
+                        Valor_Unitario: Valor_Unitario,
+                        Valor_Total: valor_total,
                         Ceco: ceco,
                         Sitio_Serv: sitio_serv
                     });
@@ -507,7 +922,7 @@ document.addEventListener('DOMContentLoaded', function () {
             Concepto: 'Subtotal',
             Cantidad: '',
             Valor_Unitario: '',
-            Valor_Total: subtotal.toFixed(2),
+            Valor_Total: subtotal,
             Ceco: '',
             Sitio_Serv: ''
         });
@@ -516,8 +931,8 @@ document.addEventListener('DOMContentLoaded', function () {
             Referencia: '',
             Concepto: 'IVA',
             Cantidad: '',
-            Valor_Unitario: `${((ivaTotal / subtotal) * 100).toFixed(2)}%`,
-            Valor_Total: ivaTotal.toFixed(2),
+            Valor_Unitario: `${((ivaTotal / subtotal) * 100)}%`,
+            Valor_Total: ivaTotal,
             Ceco: '',
             Sitio_Serv: ''
         });
@@ -527,7 +942,7 @@ document.addEventListener('DOMContentLoaded', function () {
             Concepto: 'Total',
             Cantidad: '',
             Valor_Unitario: '',
-            Valor_Total: (subtotal + ivaTotal).toFixed(2),
+            Valor_Total: (subtotal + ivaTotal),
             Ceco: '',
             Sitio_Serv: ''
         });
@@ -611,8 +1026,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // Función para eliminar una línea
     window.removeLine = function(button) {
         const row = button.closest('tr');
+        const rowId = row.id.replace('row-', '');
+        
+        // Eliminar de los valores originales
+        if (originalValues[rowId]) {
+            delete originalValues[rowId];
+        }
+        
         row.remove();
         recalculateTotals();
+        checkForChanges();
     }
 
     // Habilitar o deshabilitar los botones según los filtros aplicados
@@ -620,15 +1043,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const anio = document.querySelector('select[name="Anio"]').value;
         const mes = document.querySelector('select[name="Mes"]').value;
         const cliente = document.querySelector('select[name="ClienteId"]').value;
+        const selectedIds = getSelectedRows();
         
-        // Habilitar guardar si hay año y mes
-        document.getElementById('save-button').disabled = !(anio && mes);
+        // Habilitar guardar si hay año, mes y selección
+        document.getElementById('save-button').disabled = !(anio && mes && selectedIds.length > 0);
         
         // Habilitar agregar línea si hay año, mes y cliente
         document.getElementById('add-line').disabled = !(anio && mes && cliente);
         
-        // Habilitar generar plantilla si hay selección
-        toggleDeleteButton();
+        // Habilitar eliminar y generar plantilla si hay selección
+        document.getElementById('delete-button').disabled = selectedIds.length === 0;
+        document.getElementById('generate-template').disabled = selectedIds.length === 0;
     }
 
     document.getElementById('addLineModal').addEventListener('show.bs.modal', function (event) {
@@ -669,6 +1094,176 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     });
 
+    // Función para manejar correctamente el cierre de modales
+    
+    // Manejo avanzado de accesibilidad para modales
+    function setupAdvancedModalAccessibility() {
+        let lastFocusedElement = null;
+        
+        // Guardar el elemento que tenía el foco antes de abrir cualquier modal
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('[data-bs-toggle="modal"], [data-bs-target]') || 
+                e.target.closest('[data-bs-toggle="modal"], [data-bs-target]')) {
+                lastFocusedElement = document.activeElement;
+            }
+        });
+
+        // Configurar eventos para todos los modales
+        document.querySelectorAll('.modal').forEach(modal => {
+            // Al mostrar un modal
+            modal.addEventListener('shown.bs.modal', function() {
+                // Enfocar el primer elemento interactivo del modal
+                const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                if (focusableElements.length > 0) {
+                    focusableElements[0].focus();
+                }
+            });
+
+            // Al ocultar un modal - manejo mejorado
+            modal.addEventListener('hidden.bs.modal', function() {
+                // Limpiar completamente el backdrop de Bootstrap
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+                document.body.classList.remove('modal-open');
+                
+                // Forzar el cierre completo del modal
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+                
+                // Restaurar el foco al elemento que abrió el modal o a un elemento seguro
+                setTimeout(() => {
+                    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+                        lastFocusedElement.focus();
+                    } else {
+                        // Fallback: enfocar un elemento seguro
+                        const safeElements = document.querySelectorAll('#save-button, #generate-template, #add-line, #delete-button');
+                        if (safeElements.length > 0) {
+                            safeElements[0].focus();
+                        }
+                    }
+                }, 100);
+            });
+        });
+
+        // Sobrescribir funciones de cierre de modales
+        const originalGenerateTemplateExcel = window.generateTemplateExcel;
+        window.generateTemplateExcel = function() {
+            if (originalGenerateTemplateExcel) {
+                originalGenerateTemplateExcel();
+            }
+            forceCloseModal('#generateTemplateModal');
+        };
+
+        const originalGenerateTemplateJpg = window.generateTemplateJpg;
+        window.generateTemplateJpg = function() {
+            if (originalGenerateTemplateJpg) {
+                originalGenerateTemplateJpg();
+            }
+            forceCloseModal('#generateTemplateModal');
+        };
+
+        // Mejorar la función de eliminación para manejar correctamente el cierre
+        const originalDeleteSelectedRows = window.deleteSelectedRows;
+        window.deleteSelectedRows = function() {
+            // Guardar el foco actual antes de abrir el modal de confirmación
+            window.preDeleteFocusElement = document.activeElement;
+            
+            if (originalDeleteSelectedRows) {
+                originalDeleteSelectedRows();
+            }
+        };
+
+        // Interceptar la confirmación de eliminación
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'confirmDelete' || e.target.closest('#confirmDelete')) {
+                // Cerrar el modal de confirmación de manera segura
+                setTimeout(() => {
+                    forceCloseModal('#deleteConfirmationModal');
+                    
+                    // Restaurar el foco al elemento que estaba antes de la eliminación
+                    if (window.preDeleteFocusElement) {
+                        window.preDeleteFocusElement.focus();
+                        delete window.preDeleteFocusElement;
+                    }
+                }, 100);
+            }
+        });
+    }
+
+    // Función para forzar el cierre completo de un modal
+    function forceCloseModal(modalSelector) {
+        const modal = document.querySelector(modalSelector);
+        if (!modal) return;
+        
+        // Obtener la instancia de Bootstrap del modal
+        const bsModal = bootstrap.Modal.getInstance(modal);
+        if (bsModal) {
+            bsModal.hide();
+        }
+        
+        // Limpieza adicional para asegurar el cierre completo
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        
+        // Remover backdrops
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
+        
+        // Remover clase modal-open del body
+        document.body.classList.remove('modal-open');
+        
+        // Mover el foco a un elemento seguro
+        setTimeout(() => {
+            const safeElements = document.querySelectorAll('#save-button, #generate-template, #add-line, #delete-button');
+            if (safeElements.length > 0) {
+                safeElements[0].focus();
+            }
+        }, 150);
+    }
+
+    // Inicializar cuando el documento esté listo
+    setupAdvancedModalAccessibility();
+    
+
+    // Sobrescribir la función showPostSaveTemplateModal para manejar mejor el foco
+    if (window.showPostSaveTemplateModal) {
+        const originalShowPostSaveTemplateModal = window.showPostSaveTemplateModal;
+        window.showPostSaveTemplateModal = function() {
+            // Guardar el elemento actual con foco
+            window.lastFocusedBeforeModal = document.activeElement;
+            
+            // Llamar a la función original
+            originalShowPostSaveTemplateModal();
+            
+            // Configurar el manejo del cierre para este modal específico
+            const modal = document.getElementById('generateTemplateModal');
+            if (modal) {
+                const handleHide = function() {
+                    // Restaurar el foco al elemento anterior
+                    if (window.lastFocusedBeforeModal) {
+                        window.lastFocusedBeforeModal.focus();
+                    }
+                    modal.removeEventListener('hidden.bs.modal', handleHide);
+                };
+                
+                modal.addEventListener('hidden.bs.modal', handleHide);
+            }
+        };
+    }
+
+    // NUEVA FUNCIÓN: Preservar los valores originales sin formato adicional
+    function preserveOriginalValues() {
+        console.log('💾 Preservando valores originales...');
+        
+        // No aplicar ningún formato adicional, mantener los valores tal cual vienen de la base de datos
+        document.querySelectorAll('input[name="Valor_Horas"], input[name="Valor_Dias"], input[name="Valor_Meses"], input[name="Valor_Bolsa"]').forEach(input => {
+            // Mantener el valor exacto sin modificaciones
+            console.log(`📊 Valor original preservado: ${input.name} = ${input.value}`);
+        });
+        
+        console.log('✅ Valores originales preservados correctamente');
+    }
+
     // Añadir evento para habilitar o deshabilitar los botones
     document.querySelector('select[name="Anio"]').addEventListener('change', function () {
         window.searchPerformed = false;
@@ -690,6 +1285,56 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleButtons(); // Re-evaluar los botones después de la búsqueda
     });    
 
+    function initialize() {
+        console.log('🚀 Inicializando aplicación...');
+
+        // Asegurar que el overlay esté oculto al iniciar
+        showSavingOverlay(false);
+        
+        // Ocultar cualquier mensaje de alerta al iniciar
+        const messageBox = document.getElementById('message-box');
+        if (messageBox) {
+            messageBox.style.display = 'none';
+            messageBox.classList.remove('show');
+        }
+        
+        // Restaurar selección guardada
+        const savedSelection = JSON.parse(sessionStorage.getItem('selectedRows') || '[]');
+        savedSelection.forEach(id => {
+            const checkbox = document.querySelector(`.row-checkbox[data-id="${id}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+        sessionStorage.removeItem('selectedRows');
+        
+        // Guardar valores originales
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const rowId = row.id.replace('row-', '');
+            originalValues[rowId] = {};
+            row.querySelectorAll('input').forEach(input => {
+                if (input.name) {
+                    originalValues[rowId][input.name] = input.value;
+                }
+            });
+        });
+        
+        // Configurar event listeners
+        setupCheckboxListeners();
+        setupRealTimeCalculations();
+        
+        // Preservar valores originales sin formato adicional
+        preserveOriginalValues();
+        
+        // Calcular totales iniciales
+        recalculateTotals();
+        toggleButtons();
+        
+        // Marcar que la inicialización ha terminado
+        setTimeout(() => {
+            window.isInitializing = false;
+            console.log('✅ Aplicación inicializada correctamente');
+        }, 100);
+    }
+
     // Hacer las funciones accesibles globalmente
     window.generateTemplateExcel = generateTemplateExcel;
     window.generateTemplateJpg = generateTemplateJpg;
@@ -697,6 +1342,16 @@ document.addEventListener('DOMContentLoaded', function () {
     window.saveAllRows = saveAllRows;
     window.confirmAddLine = confirmAddLine;
     window.removeLine = removeLine;
-    recalculateTotals(); // Initial calculation
-    toggleButtons();
+    
+    // Asegurar que el overlay esté oculto cuando se cierra la página
+    window.addEventListener('beforeunload', function() {
+        showSavingOverlay(false);
+    });
+
+    // También asegurar que esté oculto si hay un error de carga
+    window.addEventListener('error', function() {
+        showSavingOverlay(false);
+    });
+    
+    initialize();
 });
