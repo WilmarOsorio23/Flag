@@ -184,6 +184,93 @@ html, body {
 }
 
 /* ========================== */
+/*   SISTEMA UNIFICADO DE MENSAJES  */
+/* ========================== */
+
+/* Contenedor de mensajes flotantes - COMPLEMENTA lo existente */
+.message-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+}
+
+/* Mensajes flotantes - usa las clases .alert existentes pero con animaciones mejoradas */
+.floating-alert {
+    position: relative;
+    min-width: 300px;
+    max-width: 500px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    /* Hereda todos los estilos de .alert que ya tienes */
+}
+
+.floating-alert.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.floating-alert .btn-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+/* Responsive para mensajes flotantes */
+@media (max-width: 768px) {
+    .message-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .floating-alert {
+        min-width: auto;
+        max-width: none;
+    }
+    
+    /* Ajustar los mensajes existentes para mobile */
+    #message-box {
+        width: 90%;
+        margin-left: 5%;
+        margin-right: 5%;
+        max-width: none;
+        margin-top: 10em;
+    }
+    
+    #saving-message {
+        margin-left: 5%;
+        margin-right: 5%;
+        max-width: none;
+        margin-top: 10em;
+    }
+}
+
+/* Mejoras para las alertas existentes */
+#message-box,
+#saving-message {
+    /* Mantener tus estilos existentes pero agregar transiciones mejoradas */
+    transition: all 0.3s ease-in-out;
+}
+
+/* Para cuando se usen mensajes inline (como en tarifa_consultores) */
+.alert-highlight {
+    animation: highlight 2s ease-in-out;
+}
+
+@keyframes highlight {
+    0% { background-color: transparent; }
+    50% { background-color: #e3f2fd; }
+    100% { background-color: transparent; }
+}
+
+/* ========================== */
 /*         SIDEBAR            */
 /* ========================== */
 

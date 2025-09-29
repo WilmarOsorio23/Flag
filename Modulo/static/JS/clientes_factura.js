@@ -48,37 +48,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Mostrar mensajes de alerta
-    function showMessage(message, type) {
-        const alertBox = document.getElementById('message-box');
-        const alertIcon = document.getElementById('alert-icon');
-        const alertMessage = document.getElementById('alert-message');
-
-        // Asignar el mensaje y el tipo de alerta
-        alertMessage.textContent = message;
-        alertBox.className = `alert alert-${type} alert-dismissible fade show`;
-
-        // Asignar íconos según el tipo
-        const icons = {
-            success: '✔️', // Puedes usar clases de FontAwesome o Bootstrap Icons
-            danger: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
-        };
-        alertIcon.textContent = icons[type] || '';
-
-        // Mostrar la alerta
-        alertBox.style.display = 'block';
-
-        // Ocultar la alerta después de 3 segundos
-        setTimeout(() => {
-            alertBox.classList.remove('show');
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-            }, 300); // Tiempo para que la transición termine
-        }, 800);
-    }
-
     // Funciones para manejar selecciones
     function toggleDeleteButton() {
         const selectedIds = getSelectedRows();
@@ -107,7 +76,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Función de eliminación 
     window.deleteSelectedRows = function() {
         const selectedIds = getSelectedRows();
-        if (selectedIds.length === 0) return;
+        if (selectedIds.length === 0) {
+            window.showError('No hay filas seleccionadas para eliminar.');
+            return;
+        }
 
         // Mostrar el modal de confirmación
         const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
@@ -132,8 +104,17 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(response => {
                 if (response.ok) {
-                    window.location.reload();
+                    window.showSuccess('Filas eliminadas correctamente.');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    throw new Error('Error en la respuesta del servidor');
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                window.showError('Error al eliminar las filas.');
             })
             .finally(() => showSavingOverlay(false));
         };
@@ -161,8 +142,8 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.show();
     };
 
-   // Guarda de saveAllRows
-   function saveAllRows() {
+    // Guarda de saveAllRows
+    window.saveAllRows = function() {
         const data = prepareSaveData();
         const hasNewRows = data.some(row => !row.ConsecutivoId);
         const selectedIds = getSelectedRows();
@@ -181,6 +162,8 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(result => {
             if (result.status === 'success') {
+                window.showSuccess('Cambios guardados correctamente.');
+                
                 if (hasNewRows && selectedIds.length > 0) {
                     const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
                     const confirmButton = document.getElementById('confirmGenerate');
@@ -197,7 +180,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     const handleClose = () => {
                         confirmationModal._element.removeEventListener('hidden.bs.modal', handleClose);
                         if (!sessionStorage.getItem('pendingTemplateGeneration')) {
-                            window.location.reload();
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
                         }
                     };
 
@@ -206,13 +191,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     
                     confirmationModal.show();
                 } else {
-                    window.location.reload();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
                 }
+            } else {
+                throw new Error(result.error || 'Error desconocido');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showMessage('Error al guardar los cambios.', 'danger');
+            window.showError('Error al guardar los cambios: ' + error.message);
         })
         .finally(() => {
             showSavingOverlay(false);
@@ -345,7 +334,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    function confirmAddLine() {
+    window.confirmAddLine = function() {
         const lineaId = document.getElementById('lineaSelect').value;
         const moduloId = document.getElementById('moduloSelect').value;
         const clienteId = window.originalCliente;
@@ -353,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const mes = window.originalMes;   // Obtener el mes del filtro
     
         if (!lineaId || !moduloId) {
-            showMessage('Seleccione una línea y módulo.', 'warning');
+            window.showWarning('Seleccione una línea y módulo.');
             return;
         }
 
@@ -428,7 +417,7 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(error => {
             console.error('Error al obtener la tarifa:', error);
-            showMessage('Error al obtener la tarifa asociada.', 'danger');
+            window.showError('Error al obtener la tarifa asociada.');
             // Ocultar el mensaje de "Agregando..." en caso de error
             addingMessage.style.display = 'none';
         });
@@ -574,7 +563,7 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(error => {
             console.error('Error:', error);
-            showMessage(`Error al generar la plantilla en ${format.toUpperCase()}.`, 'danger');
+            window.showError(`Error al generar la plantilla en ${format.toUpperCase()}.`);
         });
     }
 
@@ -620,7 +609,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Función para eliminar una línea
-    function removeLine(button) {
+    window.removeLine = function(button) {
         const row = button.closest('tr');
         row.remove();
         recalculateTotals();
@@ -648,7 +637,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const mes = window.originalMes;
     
         if (!clienteId || !anio || !mes) {
-            showMessage('Primero seleccione un cliente, año y mes.', 'warning');
+            window.showWarning('Primero seleccione un cliente, año y mes.');
+            event.preventDefault(); // Importante agregar esto
             return;
         }
     
@@ -675,7 +665,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(error => {
                 console.error('Error al obtener las líneas y módulos:', error);
-                showMessage('Error al cargar las opciones.', 'danger');
+                window.showError('Error al cargar las opciones.');
             });
     });
 

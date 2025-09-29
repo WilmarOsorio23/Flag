@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length != 1) {
-            showMessage('Error al guardar: No hay un detalle seleccionado.', 'danger');
+            showError('Error al guardar: No hay un detalle seleccionado.');
             return;
         }
 
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => { 
             if (data.status == 'success') {
-                showMessage('Cambios guardados correctamente.', 'success');
+                showSuccess('Cambios guardados correctamente.');
                 window.location.reload()
 
                 row.querySelectorAll('input.form-control').forEach(input => {
@@ -73,16 +73,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 disableEditMode(selected,row);
 
             } else {
-                showMessage('Error al guardar los cambios: ' + (data.error || 'Error desconocido'), 'danger');
+                showError('Error al guardar los cambios: ' + (data.error || 'Error desconocido'));
                 restoreOriginalValues(row); // Restaurar valores originales en caso de error
             }
 
         })
         .catch(error => {
             console.error('Error al guardar los cambios:', error);
-            showMessage('Error al guardar los cambios: ' + error.message, 'danger');
+            showError('Error al guardar los cambios: ' + error.message);            
             restoreOriginalValues(row); // Restaurar valores originales en caso de error
-
             disableEditMode(selected,row);
         });
     };
@@ -90,11 +89,11 @@ document.addEventListener('DOMContentLoaded', function() {
     window.enableEdit = function () {
         const selected = document.querySelectorAll('.row-select:checked');
         if (selected.length === 0) {
-            alert('No has seleccionado ningún registro para editar.');
+            showError('No has seleccionado ningún registro para editar.');
             return false;
         }
         if (selected.length > 1) {
-            alert('Solo puedes editar un registro a la vez.');
+            showError('Solo puedes editar un registro a la vez.');
             return false;
         }
 
@@ -251,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("si esta entrando en handledelete")
         const selectedIds = getSelectedIds(); // Obtener los IDs de los elementos seleccionados
         if (selectedIds.length == 0) {
-            showMessage('No has seleccionado ningún elemento para eliminar.', 'danger'); // Mostrar mensaje si no hay elementos seleccionados
+            showError('No has seleccionado ningún elemento para eliminar.'); // Mostrar mensaje si no hay elementos seleccionados
             return;
         }
 
@@ -291,43 +290,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function showMessage(message, type) {
-        const alertBox = document.getElementById('message-box');
-        const alertIcon = document.getElementById('alert-icon');
-        const alertMessage = document.getElementById('alert-message');
-  
-
-        // Asignar el mensaje y el tipo de alerta
-        alertMessage.textContent = message;
-        alertBox.className = `alert alert-${type} alert-dismissible fade show`;
-
-        // Asignar íconos según el tipo
-        const icons = {
-            success: '✔️', // Puedes usar clases de FontAwesome o Bootstrap Icons
-            danger: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
-        };
-        alertIcon.textContent = icons[type] || '';
-
-        // Mostrar la alerta
-        alertBox.style.display = 'block';
-
-        // Ocultar la alerta después de 3 segundos
-        setTimeout(() => {
-            alertBox.classList.remove('show');
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-            }, 300); // Tiempo para que la transición termine
-        }, 800);
-    }
-
-
     // Confirmación antes de descargar
     window.confirmDownload = function() {
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length == 0) {
-            showMessage('No has seleccionado ningún elemento para descargar.', 'danger');
+            showError('No has seleccionado ningún elemento para descargar.');
             return false;
         }
 
