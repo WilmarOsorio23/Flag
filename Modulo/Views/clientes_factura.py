@@ -70,7 +70,7 @@ def clientes_factura_guardar(request):
                 cliente_id = int(safe_decimal_convert(row.get('ClienteId')))
                 linea_id = int(safe_decimal_convert(row.get('LineaId')))
                 modulo_id = int(safe_decimal_convert(row.get('ModuloId')))
-                
+        
                 horas_factura = safe_decimal_convert(row.get('Horas'))
                 valor_horas = safe_decimal_convert(row.get('Valor_Horas'))
                 dias_factura = safe_decimal_convert(row.get('Dias'))
@@ -89,6 +89,11 @@ def clientes_factura_guardar(request):
 
                 # Calcular el valor
                 valor = Decimal('0.0')
+
+                if not linea_id or not modulo_id:
+                    print(f"[SKIP] Fila sin LineaId/ModuloId válidos: {row}")
+                    continue
+
                 if horas_factura:
                     valor += horas_factura * valor_horas
                 if dias_factura:
@@ -227,7 +232,7 @@ def filtrar_facturacion(form, clientes_contratos, facturacion_clientes):
 
     return clientes_contratos, facturacion_clientes
 
-def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes):
+def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes, linea_id=None):
     facturacion_info = []
 
     # Diccionario para rastrear las combinaciones de cliente, línea y módulo ya procesadas
@@ -256,6 +261,9 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
             # Si no hay tarifas, continuar con el siguiente contrato
             if not tarifas.exists():
                 continue
+
+            if linea_id:  # <--- aplicar filtro de línea
+                tarifas = tarifas.filter(lineaId_id=linea_id)
 
             # Procesar cada tarifa
             for tarifa in tarifas:
@@ -341,6 +349,76 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
                             'Sitio_Serv': facturacion.Sitio_Serv or (tarifa.sitioTrabajo if tarifa else '')
                         })
 
+            combos_tarifa = set()
+            for t in tarifas:
+                combos_tarifa.add((
+                    t.clienteId.ClienteId,
+                    t.lineaId.LineaId if t.lineaId else None,
+                    t.moduloId.ModuloId if t.moduloId else None
+                ))
+
+            # Tomar todas las facturaciones del cliente (ya filtradas por año/mes en 'facturacion_clientes')
+            facturaciones_restantes = facturacion_clientes.filter(ClienteId=contrato.ClienteId)
+            if linea_id:
+                facturaciones_restantes = facturaciones_restantes.filter(LineaId_id=linea_id)
+
+            for f in facturaciones_restantes:
+                combo_f = (
+                    f.ClienteId.ClienteId if f.ClienteId else None,
+                    f.LineaId.LineaId if f.LineaId else None,
+                    f.ModuloId.ModuloId if f.ModuloId else None
+                )
+
+                # Si la combinación ya está cubierta por alguna tarifa, no la duplicamos
+                if combo_f in combos_tarifa:
+                    continue
+
+                # Asegurar el contenedor para este cliente
+                cliente_info = next((item for item in facturacion_info if item['ClienteId'] == contrato.ClienteId.ClienteId), None)
+                if not cliente_info:
+                    cliente_info = {
+                        'Cliente': contrato.ClienteId.Nombre_Cliente,
+                        'ClienteId': contrato.ClienteId.ClienteId,
+                        'Facturas': []
+                    }
+                    facturacion_info.append(cliente_info)
+
+                # Preparar valores desde la facturación
+                horas = f.HorasFactura or 0
+                dias = f.DiasFactura or 0
+                meses = f.MesFactura or 0
+                bolsa = f.Bolsa or 0
+
+                valor_horas = f.Valor_Horas or Decimal('0.0')
+                valor_dias = f.Valor_Dias or Decimal('0.0')
+                valor_meses = f.Valor_Meses or Decimal('0.0')
+                valor_bolsa = f.Valor_Bolsa or Decimal('0.0')
+
+                valor_total = (Decimal(horas) * valor_horas) + (Decimal(dias) * valor_dias) + (Decimal(meses) * valor_meses) + (Decimal(bolsa) * valor_bolsa)
+
+                cliente_info['Facturas'].append({
+                    'ConsecutivoId': f.ConsecutivoId,
+                    'LineaId': f.LineaId.LineaId if f.LineaId else None,
+                    'Linea': f.LineaId.Linea if f.LineaId else '',
+                    'ModuloId': f.ModuloId.ModuloId if f.ModuloId else None,
+                    'Modulo': f.ModuloId.Modulo if f.ModuloId else '',
+                    'Horas': horas,
+                    'Valor_Horas': valor_horas,
+                    'Dias': dias,
+                    'Valor_Dias': valor_dias,
+                    'Mes': meses,
+                    'Valor_Meses': valor_meses,
+                    'Bolsa': bolsa,
+                    'Valor_Bolsa': valor_bolsa,
+                    'Valor': valor_total,
+                    'Descripcion': f.Descripcion or '',
+                    'NumeroFactura': f.Factura or '',
+                    'IVA': f.IVA or 0,
+                    'Referencia': f.Referencia or '',
+                    'Ceco': f.Ceco or '',
+                    'Sitio_Serv': f.Sitio_Serv or ''
+                })
+
     return facturacion_info
 
 @login_required
@@ -362,21 +440,18 @@ def clientes_factura_index(request):
         if form.is_valid():
             anio = form.cleaned_data.get('Anio')
             mes = form.cleaned_data.get('Mes')
-            
+            linea_id = form.cleaned_data.get('LineaId')
             # Filtrar facturación según los datos del formulario
             clientes_contratos, facturacion_clientes = filtrar_facturacion(form, clientes_contratos, facturacion_clientes)
 
             # Obtener la información de facturación
-            facturacion_info = obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes)
+            facturacion_info = obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes, linea_id)
 
             # Debug: imprimir facturacion_info para verificar los datos
             print(f"DEBUG - facturacion_info: {facturacion_info}")
 
             # Calcular totales
             totales_facturacion = calcular_totales_facturacion(facturacion_info)
-            
-            # Debug: imprimir totales
-            print(f"DEBUG - totales_facturacion: {totales_facturacion}")
 
     else:
         form = FacturacionFilterForm()
