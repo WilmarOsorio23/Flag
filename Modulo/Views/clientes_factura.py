@@ -304,7 +304,7 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
                         'NumeroFactura': '',
                         'Bolsa': '',
                         'Valor_Bolsa': tarifa.valorBolsa if tarifa else 0,
-                        'IVA': tarifa.iva if tarifa else 0,
+                        'IVA': float(tarifa.iva) if (tarifa and tarifa.iva is not None) else 0,
                         'Referencia': tarifa.referenciaId.codigoReferencia if tarifa and tarifa.referenciaId else '',
                         'Ceco': tarifa.centrocostosId.codigoCeCo if tarifa and tarifa.centrocostosId else '',
                         'Sitio_Serv': tarifa.sitioTrabajo if tarifa else ''
@@ -344,7 +344,7 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
                             'NumeroFactura': facturacion.Factura,
                             'Bolsa': bolsa,
                             'Valor_Bolsa': valor_bolsa,
-                            'IVA': facturacion.IVA or (float(tarifa.iva) if tarifa else 0),
+                            'IVA': (facturacion.IVA if facturacion.IVA is not None else (float(tarifa.iva) if (tarifa and tarifa.iva is not None) else 0)),
                             'Referencia': facturacion.Referencia or (tarifa.referenciaId.codigoReferencia if tarifa and tarifa.referenciaId else ''),
                             'Ceco': facturacion.Ceco or (tarifa.centrocostosId.codigoCeCo if tarifa and tarifa.centrocostosId else ''),
                             'Sitio_Serv': facturacion.Sitio_Serv or (tarifa.sitioTrabajo if tarifa else '')
