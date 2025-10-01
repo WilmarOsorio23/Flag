@@ -17,6 +17,7 @@ from Modulo.models import Clientes, ClientesContratos, FacturacionClientes, Line
 from collections import defaultdict
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
+from django.db.models import OuterRef, Subquery, F, IntegerField, Value, Q
 
 @login_required
 @verificar_permiso('can_manage_clientes_factura')
@@ -550,7 +551,7 @@ def generar_plantilla(request):
                         worksheet.set_column(idx, idx, min(excel_width, 50))
                         
                         # Aplicar formato monetario
-                        if col in ['Valor Unitario', 'Valor Total']:
+                        if col in ['Valor Unitario', 'Valor Total', 'Valor_Unitario', 'Valor_Total']:
                             worksheet.set_column(idx, idx, 15, money_format)
                     
                     # Aplicar formato de cabecera
@@ -729,52 +730,57 @@ def obtener_tarifa(request):
 @verificar_permiso('can_manage_clientes_factura')
 def get_lineas_modulos(request):
     cliente_id = request.GET.get('clienteId')
-    anio = request.GET.get('anio')
-    mes = request.GET.get('mes')
+    anio = request.GET.get('anio')  # ya no se usa para filtrar, se mantiene por compatibilidad
+    mes = request.GET.get('mes')    # idem
+    linea_id = request.GET.get('lineaId')
 
-    if not cliente_id or not anio or not mes:
-        return JsonResponse({'error': 'ClienteId, anio y mes son requeridos.'}, status=400)
+    if not cliente_id:
+        return JsonResponse({'error': 'ClienteId es requerido.'}, status=400)
 
     try:
         cliente_id = int(cliente_id)
-        anio = int(anio)
-        mes = int(mes)
-        
-        # Primero buscar tarifas exactas para el año y mes
-        tarifas = Tarifa_Clientes.objects.filter(
-            clienteId=cliente_id,
-            anio=anio,
-            mes=mes
-        ).select_related('lineaId', 'moduloId').distinct()
+        linea_id_int = int(linea_id) if linea_id else None
 
-        # Si no hay tarifas exactas, buscar las más recientes
-        if not tarifas.exists():
-            tarifas = Tarifa_Clientes.objects.filter(
+        # Base: todas las tarifas del cliente (y opcionalmente de la línea)
+        base_qs = (Tarifa_Clientes.objects
+                   .filter(clienteId=cliente_id)
+                   .select_related('lineaId', 'moduloId'))
+
+        if linea_id_int:
+            base_qs = base_qs.filter(lineaId=linea_id_int)
+
+        # Subquery: para cada (linea, modulo) tomar el PK de la tarifa más reciente (anio, mes) 
+        latest_pk_sq = (Tarifa_Clientes.objects
+            .filter(
                 clienteId=cliente_id,
-                anio__lte=anio,
-                mes__lte=mes
-            ).order_by('-anio', '-mes').distinct()
+                lineaId=OuterRef('lineaId'),
+                moduloId=OuterRef('moduloId'),
+                # si quieres además respetar "no en el futuro" respecto al filtro Anio/Mes,
+                # descomenta estas dos líneas:
+                # anio__lte=int(anio) if anio else None,
+                # mes__lte=int(mes) if mes else None,
+            )
+            .order_by('-anio', '-mes')
+            .values('pk')[:1])
 
-        lineas = []
-        modulos = []
+        # Lista final: solo los registros cuyo pk = último de su par (linea, modulo)
+        latest_qs = base_qs.filter(pk__in=Subquery(
+            base_qs.values('lineaId', 'moduloId').annotate(
+                last_id=Subquery(latest_pk_sq)
+            ).values('last_id')
+        ))
 
-        seen_lineas = set()
-        seen_modulos = set()
+        # Construir listas únicas para el modal
+        lineas, modulos = [], []
+        seen_lineas, seen_modulos = set(), set()
 
-        for tarifa in tarifas:
-            if tarifa.lineaId and tarifa.lineaId.LineaId not in seen_lineas:
-                lineas.append({
-                    'LineaId': tarifa.lineaId.LineaId,
-                    'Linea': tarifa.lineaId.Linea
-                })
-                seen_lineas.add(tarifa.lineaId.LineaId)
-
-            if tarifa.moduloId and tarifa.moduloId.ModuloId not in seen_modulos:
-                modulos.append({
-                    'ModuloId': tarifa.moduloId.ModuloId,
-                    'Modulo': tarifa.moduloId.Modulo
-                })
-                seen_modulos.add(tarifa.moduloId.ModuloId)
+        for t in latest_qs:
+            if t.lineaId and t.lineaId.LineaId not in seen_lineas:
+                lineas.append({'LineaId': t.lineaId.LineaId, 'Linea': t.lineaId.Linea})
+                seen_lineas.add(t.lineaId.LineaId)
+            if t.moduloId and t.moduloId.ModuloId not in seen_modulos:
+                modulos.append({'ModuloId': t.moduloId.ModuloId, 'Modulo': t.moduloId.Modulo})
+                seen_modulos.add(t.moduloId.ModuloId)
 
         return JsonResponse({'lineas': lineas, 'modulos': modulos})
 

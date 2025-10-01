@@ -22,18 +22,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const anio = urlParams.get('Anio');
         const mes = urlParams.get('Mes');
         const cliente = urlParams.get('ClienteId');
+        const linea = urlParams.get('LineaId');         
         if (anio && mes) {
-            document.querySelector('#anio-original').textContent = anio;
-            document.querySelector('#mes-original').textContent = mes;
-            window.originalAnio = anio;
-            window.originalMes = mes;
-            window.originalCliente = cliente;
-            // Si en sessionStorage se marcó que ya se realizó la búsqueda, lo establecemos
-            if (sessionStorage.getItem('searchPerformed') === 'true') {
-                window.searchPerformed = true;
-            }
+          document.querySelector('#anio-original').textContent = anio;
+          document.querySelector('#mes-original').textContent = mes;
+          window.originalAnio = anio;
+          window.originalMes = mes;
+          window.originalCliente = cliente;
+          window.originalLinea = linea || '';              
+          if (sessionStorage.getItem('searchPerformed') === 'true') {
+            window.searchPerformed = true;
+          }
         }
-    }
+      }
      
     // Función para deshabilitar UI
     function disableUI(disable) {
@@ -245,65 +246,73 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
 
+    // 2) En prepareSaveData(): (arregla el ReferenceError y filtra por línea)
     function prepareSaveData() {
         const selectedIds = getSelectedRows();
         const rows = document.querySelectorAll('tbody tr');
         const data = [];
     
+        // línea seleccionada del filtro (si hay)
+        const selectedLinea =
+        window.originalLinea ||
+        document.querySelector('select[name="LineaId"]')?.value ||
+        '';
+    
         rows.forEach((row) => {
-            const rowId = row.id.replace('row-', '');
-            if (!rowId) return;
+        const rowId = row.id.replace('row-', '');
+        if (!rowId) return;
     
-            // Incluir si está seleccionada O si tiene cambios respecto a originalValues 
-            const lineaInput = row.querySelector('input[name="LineaId"]');
-            if (selectedLinea && lineaInput && parseInt(lineaInput.value, 10) !== parseInt(selectedLinea, 10)) {
-                return;
-            }
-            
-            const include = selectedIds.includes(rowId) || hasRowChanges(row, rowId);
-            if (!include) return;
+        // si hay filtro de línea, ignora filas de otra línea
+        const lineaInput = row.querySelector('input[name="LineaId"]');
+        if (selectedLinea && lineaInput &&
+            parseInt(lineaInput.value, 10) !== parseInt(selectedLinea, 10)) {
+            return;
+        }
     
-            const rowData = {};
-            const inputs = row.querySelectorAll('input');
+        const include = selectedIds.includes(rowId) || hasRowChanges(row, rowId);
+        if (!include) return;
     
-            inputs.forEach(input => {
-                if (input.name && input.type !== 'checkbox') {
-                    const numericFields = ['Horas', 'Dias', 'Meses', 'Bolsa', 'Valor', 'IVA'];
-                    if (numericFields.includes(input.name)) {
-                        const value = input.value.trim();
-                        rowData[input.name] = value === '' ? 0 : parseFloat(value) || 0;
-                    } else {
-                        rowData[input.name] = input.value;
-                    }
-                }
-            });
+        const rowData = {};
+        const inputs = row.querySelectorAll('input');
     
-            if (rowId && !rowId.startsWith('new-')) {
-                rowData['ConsecutivoId'] = parseInt(rowId, 10);
+        inputs.forEach(input => {
+            if (input.name && input.type !== 'checkbox') {
+            const numericFields = ['Horas', 'Dias', 'Meses', 'Bolsa', 'Valor', 'IVA'];
+            if (numericFields.includes(input.name)) {
+                const value = input.value.trim();
+                rowData[input.name] = value === '' ? 0 : parseFloat(value) || 0;
             } else {
-                rowData['is_new_line'] = 'true';
+                rowData[input.name] = input.value;
             }
-    
-            rowData['ClienteId'] = parseInt(window.originalCliente, 10);
-            rowData['Anio'] = parseInt(window.originalAnio, 10);
-            rowData['Mes'] = parseInt(window.originalMes, 10);
-    
-            const lineaRaw = row.querySelector('input[name="LineaId"]')?.value ?? '';
-            const moduloRaw = row.querySelector('input[name="ModuloId"]')?.value ?? '';
-            rowData['LineaId'] = parseInt(lineaRaw || '0', 10);
-            rowData['ModuloId'] = parseInt(moduloRaw || '0', 10);
-    
-            if (!rowData['LineaId'] || !rowData['ModuloId']) {
-                console.warn('Fila omitida por falta de LineaId/ModuloId', rowId, rowData);
-                return; // no la envíes si faltan IDs
             }
-    
-            data.push(rowData);
         });
     
-        console.log(data);
+        if (rowId && !rowId.startsWith('new-')) {
+            rowData['ConsecutivoId'] = parseInt(rowId, 10);
+        } else {
+            rowData['is_new_line'] = 'true';
+        }
+    
+        rowData['ClienteId'] = parseInt(window.originalCliente, 10);
+        rowData['Anio'] = parseInt(window.originalAnio, 10);
+        rowData['Mes'] = parseInt(window.originalMes, 10);
+    
+        const lineaRaw = row.querySelector('input[name="LineaId"]')?.value ?? '';
+        const moduloRaw = row.querySelector('input[name="ModuloId"]')?.value ?? '';
+        rowData['LineaId'] = parseInt(lineaRaw || '0', 10);
+        rowData['ModuloId'] = parseInt(moduloRaw || '0', 10);
+    
+        if (!rowData['LineaId'] || !rowData['ModuloId']) {
+            console.warn('Fila omitida por falta de LineaId/ModuloId', rowId, rowData);
+            return;
+        }
+    
+        data.push(rowData);
+        });
+    
         return data;
-    }    
+    }
+      
 
     // Restaurar al cargar
  
@@ -742,12 +751,10 @@ document.addEventListener('DOMContentLoaded', function () {
             newRow.setAttribute('id', `row-${newRowId}`);
             newRow.innerHTML = `
                 <td>
-                    <input type="checkbox" class="row-checkbox" data-id="${newRowId}" checked>
-                    <button type="button" class="btn btn-danger fas fa-times" aria-label="Close" onclick="removeLine(this)"></button>
+                    <input type="checkbox" class="row-checkbox" data-id="${newRowId}">
                 </td>
                 <td>
-                    <input type="text" name="ClienteId" class="form-control" value="${clienteId}" hidden>
-                    <input type="hidden" name="is_new_line" value="true">
+                    <button type="button" class="btn btn-danger fas fa-times" aria-label="Close" onclick="removeLine(this)"></button>
                 </td>
                 <td>${document.querySelector('#lineaSelect option:checked').textContent}
                     <input type="text" name="LineaId" class="form-control" value="${lineaId}" hidden>
@@ -772,6 +779,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td><input type="text" name="Sitio_Serv" class="form-control" value="${tarifa.sitioTrabajo || ''}"></td>
             `;
             tbody.appendChild(newRow);
+
+            const cb = newRow.querySelector('.row-checkbox');
+            if (cb) {
+            cb.addEventListener('change', function () {
+                const allChecked = document.querySelectorAll('.row-checkbox:checked').length === 
+                                document.querySelectorAll('.row-checkbox').length;
+                document.getElementById('select-all').checked = allChecked;
+                toggleButtons();
+            });
+            }
     
             // Guardar valores originales
             originalValues[newRowId] = {};
@@ -798,8 +815,10 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(error => {
             console.error('Error al obtener la tarifa:', error);
             window.showError('Error al obtener la tarifa asociada.');
-            // Ocultar el mensaje de "Agregando..." en caso de error
-            addingMessage.style.display = 'none';
+        })
+        .finally(() => {
+            if (addingMessage) addingMessage.style.display = 'none';
+            buttons.forEach(b => b.disabled = false);
         });
     }
 
@@ -826,134 +845,138 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Función para generar la plantilla en formato Excel o JPG
+    // --- reemplazar función generateTemplate completa ---
     function generateTemplate(format, selectedIds) {
         const validSelectedIds = selectedIds.filter(id => id && id !== "undefined");
-
+    
         let rowsToProcess = validSelectedIds.length > 0 
-            ? Array.from(document.querySelectorAll('tbody tr')).filter(row => {
-                const rowId = row.id.replace('row-', '');
-                return validSelectedIds.includes(rowId);
+        ? Array.from(document.querySelectorAll('tbody tr')).filter(row => {
+            const rowId = row.id.replace('row-', '');
+            return validSelectedIds.includes(rowId);
             })
-            : [];
-
+        : [];
+    
         if (rowsToProcess.length === 0) {
-            rowsToProcess = Array.from(document.querySelectorAll('tbody tr'));
+        rowsToProcess = Array.from(document.querySelectorAll('tbody tr'));
         }
-
+    
         const data = [];
         let subtotal = 0;
         let ivaTotal = 0;
-
-        // Recopilar datos solo de las filas seleccionadas
+    
         rowsToProcess.forEach(row => {
-            try {
-                const referencia = row.querySelector('input[name="Referencia"]')?.value || '';
-                const descripcion = row.querySelector('input[name="Descripcion"]')?.value || '';
-                const horas = parseFloat(row.querySelector('input[name="Horas"]')?.value) || 0;
-                const valor_horas = parseFloat(row.querySelector('input[name="Valor_Horas"]')?.value) || 0;
-                const dias = parseFloat(row.querySelector('input[name="Dias"]')?.value) || 0;
-                const valor_dias = parseFloat(row.querySelector('input[name="Valor_Dias"]')?.value) || 0;
-                const meses = parseFloat(row.querySelector('input[name="Meses"]')?.value) || 0;
-                const valor_meses = parseFloat(row.querySelector('input[name="Valor_Meses"]')?.value) || 0;
-                const bolsa = parseFloat(row.querySelector('input[name="Bolsa"]')?.value) || 0;
-                const valor_bolsa = parseFloat(row.querySelector('input[name="Valor_Bolsa"]')?.value) || 0;
-                const ceco = row.querySelector('input[name="Ceco"]')?.value || '';
-                const sitio_serv = row.querySelector('input[name="Sitio_Serv"]')?.value || '';
-                const iva = parseFloat(row.querySelector('input[name="IVA"]')?.value) || 0;
-
-                const valor_total = (horas * valor_horas) + (dias * valor_dias) + 
+        try {
+            const referencia   = row.querySelector('input[name="Referencia"]')?.value || '';
+            const descripcion  = row.querySelector('input[name="Descripcion"]')?.value || '';
+            const horas        = safeParseFloat(row.querySelector('input[name="Horas"]')?.value || 0);
+            const valor_horas  = safeParseFloat(row.querySelector('input[name="Valor_Horas"]')?.value || 0);
+            const dias         = safeParseFloat(row.querySelector('input[name="Dias"]')?.value || 0);
+            const valor_dias   = safeParseFloat(row.querySelector('input[name="Valor_Dias"]')?.value || 0);
+            const meses        = safeParseFloat(row.querySelector('input[name="Meses"]')?.value || 0);
+            const valor_meses  = safeParseFloat(row.querySelector('input[name="Valor_Meses"]')?.value || 0);
+            const bolsa        = safeParseFloat(row.querySelector('input[name="Bolsa"]')?.value || 0);
+            const valor_bolsa  = safeParseFloat(row.querySelector('input[name="Valor_Bolsa"]')?.value || 0);
+            const ceco         = row.querySelector('input[name="Ceco"]')?.value || '';
+            const sitio_serv   = row.querySelector('input[name="Sitio_Serv"]')?.value || '';
+            const ivaRow       = safeParseFloat(row.querySelector('input[name="IVA"]')?.value || 0);
+    
+            // Total de la fila (recomputado para asegurar consistencia)
+            const valor_total = (horas * valor_horas) + (dias * valor_dias) +
                                 (meses * valor_meses) + (bolsa * valor_bolsa);
-                
-                let Valor_Unitario = 0;
-                if (horas !== 0) Valor_Unitario = valor_horas;
-                else if (dias !== 0) Valor_Unitario = valor_dias;
-                else if (meses !== 0) Valor_Unitario = valor_meses;
-                else if (bolsa !== 0) Valor_Unitario = valor_bolsa;
-
-                subtotal += valor_total;
-                ivaTotal += valor_total * (iva / 100);
-
-                if (horas !== 0 || dias !== 0 || meses !== 0 || bolsa !== 0) {
-                    data.push({
-                        Referencia: referencia,
-                        Concepto: descripcion,
-                        Cantidad: horas || dias || meses || bolsa,
-                        Valor_Unitario: Valor_Unitario,
-                        Valor_Total: valor_total,
-                        Ceco: ceco,
-                        Sitio_Serv: sitio_serv
-                    });
-                }
-            } catch (error) {
-                console.error('Error procesando fila:', error);
+    
+            // Valor unitario segun la cantidad usada
+            let Valor_Unitario = 0;
+            let cantidad = 0;
+            if (horas) { Valor_Unitario = valor_horas; cantidad = horas; }
+            else if (dias) { Valor_Unitario = valor_dias; cantidad = dias; }
+            else if (meses) { Valor_Unitario = valor_meses; cantidad = meses; }
+            else if (bolsa) { Valor_Unitario = valor_bolsa; cantidad = bolsa; }
+    
+            subtotal += valor_total;
+            ivaTotal += valor_total * (ivaRow / 100);
+    
+            // Solo empujar filas con cantidad > 0
+            if (cantidad) {
+            data.push({
+                Referencia: referencia,
+                Concepto: descripcion,
+                Cantidad: cantidad,
+                Valor_Unitario: Valor_Unitario,
+                Valor_Total: valor_total,
+                Ceco: ceco,
+                Sitio_Serv: sitio_serv
+            });
             }
+        } catch (error) {
+            console.error('Error procesando fila:', error);
+        }
         });
-
-        // Agregar totales (igual que antes)
+    
+        // Totales
         data.push({
-            Referencia: '',
-            Concepto: 'Subtotal',
-            Cantidad: '',
-            Valor_Unitario: '',
-            Valor_Total: subtotal,
-            Ceco: '',
-            Sitio_Serv: ''
+        Referencia: '',
+        Concepto: 'Subtotal',
+        Cantidad: '',
+        Valor_Unitario: '',
+        Valor_Total: subtotal,
+        Ceco: '',
+        Sitio_Serv: ''
         });
-
+    
+        const ivaPct = subtotal > 0 ? (ivaTotal / subtotal * 100) : 0;
         data.push({
-            Referencia: '',
-            Concepto: 'IVA',
-            Cantidad: '',
-            Valor_Unitario: `${((ivaTotal / subtotal) * 100)}%`,
-            Valor_Total: ivaTotal,
-            Ceco: '',
-            Sitio_Serv: ''
+        Referencia: '',
+        Concepto: 'IVA',
+        Cantidad: '',
+        Valor_Unitario: `${ivaPct}%`,
+        Valor_Total: ivaTotal,
+        Ceco: '',
+        Sitio_Serv: ''
         });
-
+    
         data.push({
-            Referencia: '',
-            Concepto: 'Total',
-            Cantidad: '',
-            Valor_Unitario: '',
-            Valor_Total: (subtotal + ivaTotal),
-            Ceco: '',
-            Sitio_Serv: ''
+        Referencia: '',
+        Concepto: 'Total',
+        Cantidad: '',
+        Valor_Unitario: '',
+        Valor_Total: (subtotal + ivaTotal),
+        Ceco: '',
+        Sitio_Serv: ''
         });
-
+    
         return fetch('/clientes_factura/generar_plantilla/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache'
-            },
-            body: JSON.stringify({ 
-                data: data, 
-                format: format,
-                selectedIds: selectedIds,
-                timestamp: Date.now() // Parámetro único anti-cache
-            })
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+        },
+        body: JSON.stringify({ 
+            data: data, 
+            format: format,
+            selectedIds: selectedIds,
+            timestamp: Date.now()
+        })
         })
         .then(response => response.blob())
         .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            // Añadir timestamp al nombre del archivo
-            const timestamp = new Date().getTime();
-            a.download = `plantilla_${format}_${timestamp}.${format}`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-            return true; // Indicar éxito
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const timestamp = new Date().getTime();
+        a.download = `plantilla_${format}_${timestamp}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        return true;
         })
         .catch(error => {
-            console.error('Error:', error);
-            window.showError(`Error al generar la plantilla en ${format.toUpperCase()}.`);
+        console.error('Error:', error);
+        window.showError(`Error al generar la plantilla en ${format.toUpperCase()}.`);
         });
-    }
+    }  
 
    // Modificar funciones de generación para cerrar el modal
    window.generateTemplateExcel = function() {
@@ -1058,43 +1081,52 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('generate-template').disabled = selectedIds.length === 0;
     }
 
+    // 3) Al abrir el modal "Agregar Línea": pasar la línea filtrada
     document.getElementById('addLineModal').addEventListener('show.bs.modal', function (event) {
+        // reset del estado del modal por si quedó “pegado” de una apertura anterior
+        const addingMsg = this.querySelector('#adding-message');
+        if (addingMsg) addingMsg.style.display = 'none';
+        this.querySelectorAll('button').forEach(b => b.disabled = false);
+
         const clienteId = window.originalCliente;
         const anio = window.originalAnio;
         const mes = window.originalMes;
+        const linea = window.originalLinea || ''; // <---
     
         if (!clienteId || !anio || !mes) {
-            window.showWarning('Primero seleccione un cliente, año y mes.');
-            event.preventDefault(); // Importante agregar esto
-            return;
+        window.showWarning('Primero seleccione un cliente, año y mes.');
+        event.preventDefault();
+        return;
         }
     
-        fetch(`/clientes_factura/get_lineas_modulos/?clienteId=${clienteId}&anio=${anio}&mes=${mes}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error en la solicitud');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const lineaSelect = document.getElementById('lineaSelect');
-                const moduloSelect = document.getElementById('moduloSelect');
+        const url = `/clientes_factura/get_lineas_modulos/?clienteId=${clienteId}&anio=${anio}&mes=${mes}` +
+                    (linea ? `&lineaId=${linea}` : '');       // <---
     
-                // Limpiar y cargar líneas
-                lineaSelect.innerHTML = data.lineas.map(linea => 
-                    `<option value="${linea.LineaId}">${linea.Linea}</option>`
-                ).join('');
+        fetch(url)
+        .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+        .then(data => {
+            const lineaSelect = document.getElementById('lineaSelect');
+            const moduloSelect = document.getElementById('moduloSelect');
     
-                // Limpiar y cargar módulos
-                moduloSelect.innerHTML = data.modulos.map(modulo => 
-                    `<option value="${modulo.ModuloId}">${modulo.Modulo}</option>`
-                ).join('');
-            })
-            .catch(error => {
-                console.error('Error al obtener las líneas y módulos:', error);
-                window.showError('Error al cargar las opciones.');
-            });
+            // Si venimos filtrados por línea, limitar y bloquear el select de línea
+            if (linea && data.lineas?.length) {
+            const only = data.lineas.filter(l => String(l.LineaId) === String(linea));
+            lineaSelect.innerHTML = only.map(l => `<option value="${l.LineaId}">${l.Linea}</option>`).join('');
+            lineaSelect.value = linea;
+            lineaSelect.disabled = true;                  // <---
+            } else {
+            lineaSelect.innerHTML = data.lineas.map(l => `<option value="${l.LineaId}">${l.Linea}</option>`).join('');
+            lineaSelect.disabled = false;
+            }
+    
+            moduloSelect.innerHTML = data.modulos.map(m => `<option value="${m.ModuloId}">${m.Modulo}</option>`).join('');
+        })
+        .catch(e => {
+            console.error(e);
+            window.showError('Error al cargar las opciones.');
+        });
     });
+  
 
     // Función para manejar correctamente el cierre de modales
     
