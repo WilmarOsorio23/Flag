@@ -32,10 +32,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-
+@login_required
 def inicio(request):
     return render(request, 'paginas/Inicio.html')
 
+@login_required
 def nosotros(request):
     return render(request, 'paginas/nosotros.html')
 
