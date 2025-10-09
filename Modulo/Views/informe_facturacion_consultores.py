@@ -23,6 +23,7 @@ def filtrar_datos(form=None):
         if anio:
             facturas = facturas.filter(Anio=anio)
         if lineas:
+            # CORRECCIÓN: Usar LineaId directamente en lugar de LineaId__id
             facturas = facturas.filter(LineaId__in=lineas)
         if meses:
             facturas = facturas.filter(Mes__in=[int(m) for m in meses])
@@ -32,6 +33,8 @@ def filtrar_datos(form=None):
         lineas = None
         meses = None
 
+    # CORRECCIÓN: Cambiar 'LineaId__Linea' por 'LineaId__nombre_campo_linea'
+    # Reemplaza 'Linea' con el nombre real del campo en tu modelo Linea
     facturas_agrupadas = facturas.values('Mes', 'LineaId__Linea').annotate(
         total_factura=Sum('Valor_Fcta_Cliente'),
         total_cobro=Sum('Valor_Cobro'),
@@ -40,7 +43,7 @@ def filtrar_datos(form=None):
 
     # Para devolver líneas y meses usados en la consulta (si filtrados), si no, todos
     if lineas:
-        lineas_obj = Linea.objects.filter(id__in=[l.id if hasattr(l, 'id') else l for l in lineas])
+        lineas_obj = lineas  # Ya es un queryset de Linea
     else:
         lineas_obj = Linea.objects.all()
 
@@ -66,7 +69,7 @@ def informe_totales_por_mes(request):
         'total_factura': 0,
         'total_cobro': 0,
         'total_diferencia': 0,
-        'porcentaje_diferencia': 0  # Nuevo campo
+        'porcentaje_diferencia': 0
     }))
     totales_por_linea = {}
     totales_por_mes = {}
@@ -74,19 +77,16 @@ def informe_totales_por_mes(request):
         'total_factura': 0, 
         'total_cobro': 0, 
         'total_diferencia': 0,
-        'porcentaje_diferencia': 0  # Nuevo campo
+        'porcentaje_diferencia': 0
     }
-    lineas = Linea.objects.all()
 
     facturas, lineas_filtradas, meses_filtrados = filtrar_datos(form)
 
     if meses_filtrados:
         meses = [par for par in meses_completos if str(par[0]) in meses_filtrados]
 
-    if form.is_valid() and form.cleaned_data.get('LineaId'):
-        lineas = form.cleaned_data.get('LineaId')
-    else:
-        lineas = lineas_filtradas
+    # CORRECCIÓN: Usar lineas_filtradas directamente
+    lineas = lineas_filtradas
 
     for item in facturas:
         linea = item['LineaId__Linea']
@@ -102,7 +102,7 @@ def informe_totales_por_mes(request):
             'total_factura': factura,
             'total_cobro': cobro,
             'total_diferencia': diferencia,
-            'porcentaje_diferencia': porcentaje  # Nuevo campo
+            'porcentaje_diferencia': porcentaje
         }
 
         # Totales por línea
@@ -211,10 +211,8 @@ def reporte_excel_totales_por_mes(request):
         'porcentaje_diferencia': Decimal('0')
     }
 
-    if form.cleaned_data.get('LineaId'):
-        lineas = form.cleaned_data.get('LineaId')
-    else:
-        lineas = lineas_filtradas
+    # CORRECCIÓN: Usar lineas_filtradas directamente
+    lineas = lineas_filtradas
 
     for item in facturas:
         linea = item['LineaId__Linea']
@@ -330,7 +328,7 @@ def reporte_excel_totales_por_mes(request):
             ws.cell(row=fila, column=col+1, value=float(mes_data['total_cobro']))
             ws.cell(row=fila, column=col+2, value=float(mes_data['total_diferencia']))
             percent_cell = ws.cell(row=fila, column=col+3, value=float(mes_data['porcentaje_diferencia']/100))
-            percent_cell.number_format = numbers.FORMAT_PERCENTAGE_00  # Formato de porcentaje
+            percent_cell.number_format = numbers.FORMAT_PERCENTAGE_00
             col += 4
         
         total_linea = totales_por_linea.get(linea.Linea, {
@@ -344,7 +342,7 @@ def reporte_excel_totales_por_mes(request):
         ws.cell(row=fila, column=col+1, value=float(total_linea['total_cobro']))
         ws.cell(row=fila, column=col+2, value=float(total_linea['total_diferencia']))
         percent_cell = ws.cell(row=fila, column=col+3, value=float(total_linea['porcentaje_diferencia']/100))
-        percent_cell.number_format = numbers.FORMAT_PERCENTAGE_00  # Formato de porcentaje
+        percent_cell.number_format = numbers.FORMAT_PERCENTAGE_00
 
     # Fila totales generales
     fila_totales = fila_inicio + len(lineas)
@@ -363,14 +361,14 @@ def reporte_excel_totales_por_mes(request):
         ws.cell(row=fila_totales, column=col+1, value=float(tot_mes['total_cobro']))
         ws.cell(row=fila_totales, column=col+2, value=float(tot_mes['total_diferencia']))
         percent_cell = ws.cell(row=fila_totales, column=col+3, value=float(tot_mes['porcentaje_diferencia']/100))
-        percent_cell.number_format = numbers.FORMAT_PERCENTAGE_00  # Formato de porcentaje
+        percent_cell.number_format = numbers.FORMAT_PERCENTAGE_00
         col += 4
 
     ws.cell(row=fila_totales, column=col, value=float(total_global['total_factura']))
     ws.cell(row=fila_totales, column=col+1, value=float(total_global['total_cobro']))
     ws.cell(row=fila_totales, column=col+2, value=float(total_global['total_diferencia']))
     percent_cell = ws.cell(row=fila_totales, column=col+3, value=float(total_global['porcentaje_diferencia']/100))
-    percent_cell.number_format = numbers.FORMAT_PERCENTAGE_00  # Formato de porcentaje
+    percent_cell.number_format = numbers.FORMAT_PERCENTAGE_00
 
     # Estilo fila totales
     for col_idx in range(1, 2 + num_meses * 4 + 4):
@@ -384,7 +382,6 @@ def reporte_excel_totales_por_mes(request):
     for row in ws.iter_rows(min_row=3, max_row=ws.max_row, min_col=2):
         for cell in row:
             if isinstance(cell.value, (int, float)):
-                # Aplicar formato de número a las columnas de valores
                 if (cell.column - 2) % 4 != 3 and cell.column != (2 + num_meses * 4 + 3):
                     cell.number_format = numbers.FORMAT_NUMBER_COMMA_SEPARATED1
 

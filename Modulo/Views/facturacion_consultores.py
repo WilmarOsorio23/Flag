@@ -13,8 +13,7 @@ from django.shortcuts import redirect
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_facturacion_consultores')
+# QUITAR LOS DECORADORES DE ESTA FUNCIÓN - No es una vista
 def filtrar_tiempos_clientes(form):
     anio = form.cleaned_data.get('Anio')
     mes_cobro = form.cleaned_data.get('Mes_Cobro')
