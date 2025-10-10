@@ -17,6 +17,7 @@ from Modulo.models import Clientes, ClientesContratos, FacturacionClientes, Line
 from collections import defaultdict
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
+from django.db.models import OuterRef, Subquery, F, IntegerField, Value, Q
 
 @login_required
 @verificar_permiso('can_manage_clientes_factura')
@@ -70,7 +71,7 @@ def clientes_factura_guardar(request):
                 cliente_id = int(safe_decimal_convert(row.get('ClienteId')))
                 linea_id = int(safe_decimal_convert(row.get('LineaId')))
                 modulo_id = int(safe_decimal_convert(row.get('ModuloId')))
-                
+        
                 horas_factura = safe_decimal_convert(row.get('Horas'))
                 valor_horas = safe_decimal_convert(row.get('Valor_Horas'))
                 dias_factura = safe_decimal_convert(row.get('Dias'))
@@ -89,6 +90,11 @@ def clientes_factura_guardar(request):
 
                 # Calcular el valor
                 valor = Decimal('0.0')
+
+                if not linea_id or not modulo_id:
+                    print(f"[SKIP] Fila sin LineaId/ModuloId válidos: {row}")
+                    continue
+
                 if horas_factura:
                     valor += horas_factura * valor_horas
                 if dias_factura:
@@ -227,7 +233,7 @@ def filtrar_facturacion(form, clientes_contratos, facturacion_clientes):
 
     return clientes_contratos, facturacion_clientes
 
-def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes):
+def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes, linea_id=None):
     facturacion_info = []
 
     # Diccionario para rastrear las combinaciones de cliente, línea y módulo ya procesadas
@@ -256,6 +262,9 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
             # Si no hay tarifas, continuar con el siguiente contrato
             if not tarifas.exists():
                 continue
+
+            if linea_id:  # <--- aplicar filtro de línea
+                tarifas = tarifas.filter(lineaId_id=linea_id)
 
             # Procesar cada tarifa
             for tarifa in tarifas:
@@ -295,7 +304,7 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
                         'NumeroFactura': '',
                         'Bolsa': '',
                         'Valor_Bolsa': tarifa.valorBolsa if tarifa else 0,
-                        'IVA': tarifa.iva if tarifa else 0,
+                        'IVA': float(tarifa.iva) if (tarifa and tarifa.iva is not None) else 0,
                         'Referencia': tarifa.referenciaId.codigoReferencia if tarifa and tarifa.referenciaId else '',
                         'Ceco': tarifa.centrocostosId.codigoCeCo if tarifa and tarifa.centrocostosId else '',
                         'Sitio_Serv': tarifa.sitioTrabajo if tarifa else ''
@@ -341,6 +350,76 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
                             'Sitio_Serv': facturacion.Sitio_Serv or (tarifa.sitioTrabajo if tarifa else '')
                         })
 
+            combos_tarifa = set()
+            for t in tarifas:
+                combos_tarifa.add((
+                    t.clienteId.ClienteId,
+                    t.lineaId.LineaId if t.lineaId else None,
+                    t.moduloId.ModuloId if t.moduloId else None
+                ))
+
+            # Tomar todas las facturaciones del cliente (ya filtradas por año/mes en 'facturacion_clientes')
+            facturaciones_restantes = facturacion_clientes.filter(ClienteId=contrato.ClienteId)
+            if linea_id:
+                facturaciones_restantes = facturaciones_restantes.filter(LineaId_id=linea_id)
+
+            for f in facturaciones_restantes:
+                combo_f = (
+                    f.ClienteId.ClienteId if f.ClienteId else None,
+                    f.LineaId.LineaId if f.LineaId else None,
+                    f.ModuloId.ModuloId if f.ModuloId else None
+                )
+
+                # Si la combinación ya está cubierta por alguna tarifa, no la duplicamos
+                if combo_f in combos_tarifa:
+                    continue
+
+                # Asegurar el contenedor para este cliente
+                cliente_info = next((item for item in facturacion_info if item['ClienteId'] == contrato.ClienteId.ClienteId), None)
+                if not cliente_info:
+                    cliente_info = {
+                        'Cliente': contrato.ClienteId.Nombre_Cliente,
+                        'ClienteId': contrato.ClienteId.ClienteId,
+                        'Facturas': []
+                    }
+                    facturacion_info.append(cliente_info)
+
+                # Preparar valores desde la facturación
+                horas = f.HorasFactura or 0
+                dias = f.DiasFactura or 0
+                meses = f.MesFactura or 0
+                bolsa = f.Bolsa or 0
+
+                valor_horas = f.Valor_Horas or Decimal('0.0')
+                valor_dias = f.Valor_Dias or Decimal('0.0')
+                valor_meses = f.Valor_Meses or Decimal('0.0')
+                valor_bolsa = f.Valor_Bolsa or Decimal('0.0')
+
+                valor_total = (Decimal(horas) * valor_horas) + (Decimal(dias) * valor_dias) + (Decimal(meses) * valor_meses) + (Decimal(bolsa) * valor_bolsa)
+
+                cliente_info['Facturas'].append({
+                    'ConsecutivoId': f.ConsecutivoId,
+                    'LineaId': f.LineaId.LineaId if f.LineaId else None,
+                    'Linea': f.LineaId.Linea if f.LineaId else '',
+                    'ModuloId': f.ModuloId.ModuloId if f.ModuloId else None,
+                    'Modulo': f.ModuloId.Modulo if f.ModuloId else '',
+                    'Horas': horas,
+                    'Valor_Horas': valor_horas,
+                    'Dias': dias,
+                    'Valor_Dias': valor_dias,
+                    'Mes': meses,
+                    'Valor_Meses': valor_meses,
+                    'Bolsa': bolsa,
+                    'Valor_Bolsa': valor_bolsa,
+                    'Valor': valor_total,
+                    'Descripcion': f.Descripcion or '',
+                    'NumeroFactura': f.Factura or '',
+                    'IVA': f.IVA or 0,
+                    'Referencia': f.Referencia or '',
+                    'Ceco': f.Ceco or '',
+                    'Sitio_Serv': f.Sitio_Serv or ''
+                })
+
     return facturacion_info
 
 @login_required
@@ -362,21 +441,18 @@ def clientes_factura_index(request):
         if form.is_valid():
             anio = form.cleaned_data.get('Anio')
             mes = form.cleaned_data.get('Mes')
-            
+            linea_id = form.cleaned_data.get('LineaId')
             # Filtrar facturación según los datos del formulario
             clientes_contratos, facturacion_clientes = filtrar_facturacion(form, clientes_contratos, facturacion_clientes)
 
             # Obtener la información de facturación
-            facturacion_info = obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes)
+            facturacion_info = obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes, linea_id)
 
             # Debug: imprimir facturacion_info para verificar los datos
             print(f"DEBUG - facturacion_info: {facturacion_info}")
 
             # Calcular totales
             totales_facturacion = calcular_totales_facturacion(facturacion_info)
-            
-            # Debug: imprimir totales
-            print(f"DEBUG - totales_facturacion: {totales_facturacion}")
 
     else:
         form = FacturacionFilterForm()
@@ -475,7 +551,7 @@ def generar_plantilla(request):
                         worksheet.set_column(idx, idx, min(excel_width, 50))
                         
                         # Aplicar formato monetario
-                        if col in ['Valor Unitario', 'Valor Total']:
+                        if col in ['Valor Unitario', 'Valor Total', 'Valor_Unitario', 'Valor_Total']:
                             worksheet.set_column(idx, idx, 15, money_format)
                     
                     # Aplicar formato de cabecera
@@ -654,52 +730,57 @@ def obtener_tarifa(request):
 @verificar_permiso('can_manage_clientes_factura')
 def get_lineas_modulos(request):
     cliente_id = request.GET.get('clienteId')
-    anio = request.GET.get('anio')
-    mes = request.GET.get('mes')
+    anio = request.GET.get('anio')  # ya no se usa para filtrar, se mantiene por compatibilidad
+    mes = request.GET.get('mes')    # idem
+    linea_id = request.GET.get('lineaId')
 
-    if not cliente_id or not anio or not mes:
-        return JsonResponse({'error': 'ClienteId, anio y mes son requeridos.'}, status=400)
+    if not cliente_id:
+        return JsonResponse({'error': 'ClienteId es requerido.'}, status=400)
 
     try:
         cliente_id = int(cliente_id)
-        anio = int(anio)
-        mes = int(mes)
-        
-        # Primero buscar tarifas exactas para el año y mes
-        tarifas = Tarifa_Clientes.objects.filter(
-            clienteId=cliente_id,
-            anio=anio,
-            mes=mes
-        ).select_related('lineaId', 'moduloId').distinct()
+        linea_id_int = int(linea_id) if linea_id else None
 
-        # Si no hay tarifas exactas, buscar las más recientes
-        if not tarifas.exists():
-            tarifas = Tarifa_Clientes.objects.filter(
+        # Base: todas las tarifas del cliente (y opcionalmente de la línea)
+        base_qs = (Tarifa_Clientes.objects
+                   .filter(clienteId=cliente_id)
+                   .select_related('lineaId', 'moduloId'))
+
+        if linea_id_int:
+            base_qs = base_qs.filter(lineaId=linea_id_int)
+
+        # Subquery: para cada (linea, modulo) tomar el PK de la tarifa más reciente (anio, mes) 
+        latest_pk_sq = (Tarifa_Clientes.objects
+            .filter(
                 clienteId=cliente_id,
-                anio__lte=anio,
-                mes__lte=mes
-            ).order_by('-anio', '-mes').distinct()
+                lineaId=OuterRef('lineaId'),
+                moduloId=OuterRef('moduloId'),
+                # si quieres además respetar "no en el futuro" respecto al filtro Anio/Mes,
+                # descomenta estas dos líneas:
+                # anio__lte=int(anio) if anio else None,
+                # mes__lte=int(mes) if mes else None,
+            )
+            .order_by('-anio', '-mes')
+            .values('pk')[:1])
 
-        lineas = []
-        modulos = []
+        # Lista final: solo los registros cuyo pk = último de su par (linea, modulo)
+        latest_qs = base_qs.filter(pk__in=Subquery(
+            base_qs.values('lineaId', 'moduloId').annotate(
+                last_id=Subquery(latest_pk_sq)
+            ).values('last_id')
+        ))
 
-        seen_lineas = set()
-        seen_modulos = set()
+        # Construir listas únicas para el modal
+        lineas, modulos = [], []
+        seen_lineas, seen_modulos = set(), set()
 
-        for tarifa in tarifas:
-            if tarifa.lineaId and tarifa.lineaId.LineaId not in seen_lineas:
-                lineas.append({
-                    'LineaId': tarifa.lineaId.LineaId,
-                    'Linea': tarifa.lineaId.Linea
-                })
-                seen_lineas.add(tarifa.lineaId.LineaId)
-
-            if tarifa.moduloId and tarifa.moduloId.ModuloId not in seen_modulos:
-                modulos.append({
-                    'ModuloId': tarifa.moduloId.ModuloId,
-                    'Modulo': tarifa.moduloId.Modulo
-                })
-                seen_modulos.add(tarifa.moduloId.ModuloId)
+        for t in latest_qs:
+            if t.lineaId and t.lineaId.LineaId not in seen_lineas:
+                lineas.append({'LineaId': t.lineaId.LineaId, 'Linea': t.lineaId.Linea})
+                seen_lineas.add(t.lineaId.LineaId)
+            if t.moduloId and t.moduloId.ModuloId not in seen_modulos:
+                modulos.append({'ModuloId': t.moduloId.ModuloId, 'Modulo': t.moduloId.Modulo})
+                seen_modulos.add(t.moduloId.ModuloId)
 
         return JsonResponse({'lineas': lineas, 'modulos': modulos})
 

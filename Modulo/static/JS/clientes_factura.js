@@ -22,18 +22,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const anio = urlParams.get('Anio');
         const mes = urlParams.get('Mes');
         const cliente = urlParams.get('ClienteId');
+        const linea = urlParams.get('LineaId');         
         if (anio && mes) {
-            document.querySelector('#anio-original').textContent = anio;
-            document.querySelector('#mes-original').textContent = mes;
-            window.originalAnio = anio;
-            window.originalMes = mes;
-            window.originalCliente = cliente;
-            // Si en sessionStorage se marcó que ya se realizó la búsqueda, lo establecemos
-            if (sessionStorage.getItem('searchPerformed') === 'true') {
-                window.searchPerformed = true;
-            }
+          document.querySelector('#anio-original').textContent = anio;
+          document.querySelector('#mes-original').textContent = mes;
+          window.originalAnio = anio;
+          window.originalMes = mes;
+          window.originalCliente = cliente;
+          window.originalLinea = linea || '';              
+          if (sessionStorage.getItem('searchPerformed') === 'true') {
+            window.searchPerformed = true;
+          }
         }
-    }
+      }
      
     // Función para deshabilitar UI
     function disableUI(disable) {
@@ -55,61 +56,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Mostrar mensajes de alerta
-    // Mensajes de alerta seguros: crean el DOM si no existe
-    function showMessage(message, type = 'info') {
-        let alertBox = document.getElementById('message-box');
-        let alertIcon = document.getElementById('alert-icon');
-        let alertMessage = document.getElementById('alert-message');
-
-        if (!alertBox || !alertIcon || !alertMessage) {
-            alertBox = document.createElement('div');
-            alertBox.id = 'message-box';
-            alertBox.className = `alert alert-${type} alert-dismissible fade show`;
-            alertBox.style.position = 'fixed';
-            alertBox.style.top = '20px';
-            alertBox.style.right = '20px';
-            alertBox.style.zIndex = '2050';
-            alertBox.style.display = 'none';
-
-            alertIcon = document.createElement('span');
-            alertIcon.id = 'alert-icon';
-            alertIcon.className = 'alert-heading me-2';
-
-            alertMessage = document.createElement('span');
-            alertMessage.id = 'alert-message';
-
-            alertBox.appendChild(alertIcon);
-            alertBox.appendChild(alertMessage);
-            document.body.appendChild(alertBox);
-        }
-
-        alertMessage.textContent = message;
-        alertBox.className = `alert alert-${type} alert-dismissible fade show`;
-        const icons = { success: '✔️', danger: '❌', warning: '⚠️', info: 'ℹ️' };
-        alertIcon.textContent = icons[type] || '';
-        alertBox.style.display = 'block';
-
-        setTimeout(() => {
-            if (alertBox && alertBox.classList) alertBox.classList.remove('show');
-            setTimeout(() => {
-                if (alertBox && alertBox.style) alertBox.style.display = 'none';
-            }, 300);
-        }, 3000);
-    }
-
-    // Funciones para manejar selecciones
-    function toggleButtons() {
-        const selectedIds = getSelectedRows();
-        sessionStorage.setItem('selectedRows', JSON.stringify(selectedIds));
-        document.getElementById('delete-button').disabled = selectedIds.length === 0;
-        document.getElementById('generate-template').disabled = selectedIds.length === 0;
-        
-        const anio = document.querySelector('select[name="Anio"]').value;
-        const mes = document.querySelector('select[name="Mes"]').value;
-        document.getElementById('save-button').disabled = !(anio && mes && selectedIds.length > 0);
-    }
-
     function setupCheckboxListeners() {
         document.querySelectorAll('.row-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
@@ -119,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 toggleButtons();
             });
         });
-
+    
         document.getElementById('select-all').addEventListener('change', function() {
             document.querySelectorAll('.row-checkbox').forEach(checkbox => {
                 checkbox.checked = this.checked;
@@ -148,7 +94,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Función de eliminación 
     window.deleteSelectedRows = function() {
         const selectedIds = getSelectedRows();
-        if (selectedIds.length === 0) return;
+        if (selectedIds.length === 0) {
+            window.showError('No hay filas seleccionadas para eliminar.');
+            return;
+        }
 
         window.preDeleteFocusElement = document.activeElement;
 
@@ -172,8 +121,17 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(response => {
                 if (response.ok) {
-                    window.location.reload();
+                    window.showSuccess('Filas eliminadas correctamente.');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    throw new Error('Error en la respuesta del servidor');
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                window.showError('Error al eliminar las filas.');
             })
             .finally(() => showSavingOverlay(false));
             showMessage('Eliminado Exitosamente.','success')
@@ -215,41 +173,34 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 50);
     };
 
-   // Guarda de saveAllRows
-   function saveAllRows() {
-    const data = prepareSaveData();
-    console.log('Datos a enviar:', JSON.stringify(data, null, 2));
-    const hasNewRows = data.some(row => !row.ConsecutivoId);
-    const selectedIds = getSelectedRows();
+    // Guarda de saveAllRows
+    window.saveAllRows = function() {
+        const data = prepareSaveData();
+        const hasNewRows = data.some(row => !row.ConsecutivoId);
+        const selectedIds = getSelectedRows();
 
     showSavingOverlay(true);
     disableUI(true);
 
-    fetch('/clientes_factura/guardar/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        },
-        body: JSON.stringify({ data: data })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-        return response.json();
-    })
-    .then(result => {
-        if (result.status === 'success') {
-            hasUnsavedChanges = false;
-            toggleButtons();
-            
-            if (hasNewRows && selectedIds.length > 0) {
-                const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-                const confirmButton = document.getElementById('confirmGenerate');
+        fetch('/clientes_factura/guardar/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ data: data })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === 'success') {
+                window.showSuccess('Cambios guardados correctamente.');
                 
-                confirmButton.replaceWith(confirmButton.cloneNode(true));
-                const newConfirmButton = document.getElementById('confirmGenerate');
+                if (hasNewRows && selectedIds.length > 0) {
+                    const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+                    const confirmButton = document.getElementById('confirmGenerate');
+                    
+                    confirmButton.replaceWith(confirmButton.cloneNode(true));
+                    const newConfirmButton = document.getElementById('confirmGenerate');
 
                 const handleConfirmation = () => {
                     confirmationModal.hide();
@@ -264,25 +215,28 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 };
 
-                confirmationModal._element.addEventListener('hidden.bs.modal', handleClose, {once: true});
-                newConfirmButton.addEventListener('click', handleConfirmation, {once: true});
-                
-                confirmationModal.show();
+                    confirmationModal._element.addEventListener('hidden.bs.modal', handleClose, {once: true});
+                    newConfirmButton.addEventListener('click', handleConfirmation, {once: true});
+                    
+                    confirmationModal.show();
+                } else {
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                }
             } else {
-                window.location.reload();
+                throw new Error(result.error || 'Error desconocido');
             }
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showMessage('Error al guardar los cambios.', 'danger');
-    })
-    .finally(() => {
-        showSavingOverlay(false);
-        showMessage('Guardado Exitosamente.','success');
-        disableUI(false);
-    });
-}
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            window.showError('Error al guardar los cambios: ' + error.message);
+        })
+        .finally(() => {
+            showSavingOverlay(false);
+            disableUI(false);
+        });
+    }
 
     // Verificar modal al cargar
     
@@ -292,46 +246,73 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
 
+    // 2) En prepareSaveData(): (arregla el ReferenceError y filtra por línea)
     function prepareSaveData() {
         const selectedIds = getSelectedRows();
         const rows = document.querySelectorAll('tbody tr');
         const data = [];
     
+        // línea seleccionada del filtro (si hay)
+        const selectedLinea =
+        window.originalLinea ||
+        document.querySelector('select[name="LineaId"]')?.value ||
+        '';
+    
         rows.forEach((row) => {
-            const rowId = row.id.replace('row-', '');
-            
-            if (selectedIds.includes(rowId)) {
-                const rowData = {};
-                const inputs = row.querySelectorAll('input');
-                
-                inputs.forEach(input => {
-                    if (input.name && input.type !== 'checkbox') {
-                        const numericFields = ['Horas', 'Dias', 'Meses', 'Bolsa', 'Valor', 'IVA', 'LineaId', 'ModuloId'];
-                        if (numericFields.includes(input.name)) {
-                            const value = input.value.trim();
-                            rowData[input.name] = value === '' ? 0 : parseFloat(value) || 0;
-                        } else {
-                            rowData[input.name] = input.value;
-                        }
-                    }
-                });
-                
-                if (rowId && !rowId.startsWith('new-')) {
-                    rowData['ConsecutivoId'] = parseInt(rowId);
-                } else {
-                    rowData['is_new_line'] = 'true';
-                }
-                
-                rowData['ClienteId'] = parseInt(window.originalCliente);
-                rowData['Anio'] = parseInt(window.originalAnio);
-                rowData['Mes'] = parseInt(window.originalMes);
-        
-                data.push(rowData);
+        const rowId = row.id.replace('row-', '');
+        if (!rowId) return;
+    
+        // si hay filtro de línea, ignora filas de otra línea
+        const lineaInput = row.querySelector('input[name="LineaId"]');
+        if (selectedLinea && lineaInput &&
+            parseInt(lineaInput.value, 10) !== parseInt(selectedLinea, 10)) {
+            return;
+        }
+    
+        const include = selectedIds.includes(rowId) || hasRowChanges(row, rowId);
+        if (!include) return;
+    
+        const rowData = {};
+        const inputs = row.querySelectorAll('input');
+    
+        inputs.forEach(input => {
+            if (input.name && input.type !== 'checkbox') {
+            const numericFields = ['Horas', 'Dias', 'Meses', 'Bolsa', 'Valor', 'IVA'];
+            if (numericFields.includes(input.name)) {
+                const value = input.value.trim();
+                rowData[input.name] = value === '' ? 0 : parseFloat(value) || 0;
+            } else {
+                rowData[input.name] = input.value;
             }
+            }
+        });
+    
+        if (rowId && !rowId.startsWith('new-')) {
+            rowData['ConsecutivoId'] = parseInt(rowId, 10);
+        } else {
+            rowData['is_new_line'] = 'true';
+        }
+    
+        rowData['ClienteId'] = parseInt(window.originalCliente, 10);
+        rowData['Anio'] = parseInt(window.originalAnio, 10);
+        rowData['Mes'] = parseInt(window.originalMes, 10);
+    
+        const lineaRaw = row.querySelector('input[name="LineaId"]')?.value ?? '';
+        const moduloRaw = row.querySelector('input[name="ModuloId"]')?.value ?? '';
+        rowData['LineaId'] = parseInt(lineaRaw || '0', 10);
+        rowData['ModuloId'] = parseInt(moduloRaw || '0', 10);
+    
+        if (!rowData['LineaId'] || !rowData['ModuloId']) {
+            console.warn('Fila omitida por falta de LineaId/ModuloId', rowId, rowData);
+            return;
+        }
+    
+        data.push(rowData);
         });
     
         return data;
     }
+      
 
     // Restaurar al cargar
  
@@ -459,7 +440,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // NUEVA FUNCIÓN: Aplicar formato suave que preserve los valores originales
     function applySoftFormatting() {
-        console.log('💾 Preservando formatos originales...');
         
         document.querySelectorAll('input[name="Valor_Horas"], input[name="Valor_Dias"], input[name="Valor_Meses"], input[name="Valor_Bolsa"]').forEach(input => {
             // Solo preservar el formato original, no forzar cambios
@@ -478,7 +458,6 @@ document.addEventListener('DOMContentLoaded', function () {
         // Primero intentar con input
         let input = row.querySelector(`input[name="${fieldName}"]`);
         if (input) {
-            console.log(`📥 Input ${fieldName}:`, input.value);
             return safeParseFloat(input.value);
         }
         
@@ -496,17 +475,14 @@ document.addEventListener('DOMContentLoaded', function () {
         
         if (headerIndex !== -1 && cells[headerIndex]) {
             const cellValue = cells[headerIndex].textContent || cells[headerIndex].innerText;
-            console.log(`📥 Celda ${fieldName} [${headerIndex}]:`, cellValue);
             return safeParseFloat(cellValue);
         }
         
-        console.log(`❌ No se encontró valor para ${fieldName}`);
         return 0;
     }
 
     // Modificar updateRowTotal para preservar formatos originales
     function updateRowTotal(row) {
-        console.log('🔢 Actualizando total para fila:', row.id);
         
         // Obtener valores usando la función mejorada
         const horas = getNumericValueFromCell(row, 'Horas');
@@ -517,21 +493,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const valorMeses = getNumericValueFromCell(row, 'Valor_Meses');
         const bolsa = getNumericValueFromCell(row, 'Bolsa');
         const valorBolsa = getNumericValueFromCell(row, 'Valor_Bolsa');
-        
-        console.log(`📊 Valores obtenidos: H=${horas}, VH=${valorHoras}, D=${dias}, VD=${valorDias}, M=${meses}, VM=${valorMeses}, B=${bolsa}, VB=${valorBolsa}`);
-        
+                
         const total = (horas * valorHoras) + 
                     (dias * valorDias) + 
                     (meses * valorMeses) + 
                     (bolsa * valorBolsa);
-        
-        console.log(`🧮 Cálculo: (${horas} * ${valorHoras}) + (${dias} * ${valorDias}) + (${meses} * ${valorMeses}) + (${bolsa} * ${valorBolsa}) = ${total}`);
-        
+                
         // Actualizar el input hidden de Valor
         const valorInput = row.querySelector('input[name="Valor"]');
         if (valorInput) {
             valorInput.value = total;
-            console.log('✅ Input Valor actualizado:', valorInput.value);
         }
         
         // Actualizar el span visible que muestra el valor
@@ -563,21 +534,18 @@ document.addEventListener('DOMContentLoaded', function () {
         if (valorSpan) {
             // Aplicar formato de moneda al total de la fila individual
             valorSpan.textContent = formatCurrency(total);
-            console.log('✅ Span Valor actualizado:', valorSpan.textContent);
         }
         
         // También buscar por name="valorspan" por si acaso
         const valorSpanByName = row.querySelector('span[name="valorspan"]');
         if (valorSpanByName) {
             valorSpanByName.textContent = formatCurrency(total);
-            console.log('✅ Span por name actualizado:', valorSpanByName.textContent);
         }
         
         return total;
     } 
 
     function recalculateTotals() {
-        console.log('🔄 Recalculando totales generales...');
         const rows = document.querySelectorAll('tbody tr');
         const totals = {
             totalHoras: 0,
@@ -591,11 +559,9 @@ document.addEventListener('DOMContentLoaded', function () {
             // Verificar si es una fila de datos (tiene inputs)
             const hasInputs = row.querySelector('input[name="Horas"]') !== null;
             if (!hasInputs) {
-                console.log(`⏭️ Saltando fila ${index} - no es fila de datos`);
                 return;
             }
             
-            console.log(`📝 Procesando fila ${index}:`, row.id);
             
             // Actualizar total de la fila
             const rowTotal = updateRowTotal(row);
@@ -613,10 +579,8 @@ document.addEventListener('DOMContentLoaded', function () {
             totals.totalBolsa += bolsa;
             totals.totalValor += valor;
             
-            console.log(`➕ Sumando fila ${index}: Horas=${horas}, Dias=${dias}, Meses=${meses}, Bolsa=${bolsa}, Valor=${valor}`);
         });
     
-        console.log('🎯 Totales calculados:', totals);
         
         // Función auxiliar para actualizar elementos en el footer
         const updateIfExists = (selector, value, isCurrency = false) => {
@@ -628,7 +592,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     element.textContent = value;
                 }
-                console.log(`✅ Actualizado ${selector}: ${element.textContent}`);
             } else {
                 console.log(`❌ Elemento no encontrado: ${selector}`);
             }
@@ -641,35 +604,23 @@ document.addEventListener('DOMContentLoaded', function () {
         updateIfExists('tfoot th[data-total-bolsa]', totals.totalBolsa);
         updateIfExists('tfoot th[data-total-valor]', totals.totalValor, true); // Este es el único que lleva formato de moneda
         
-        console.log('✅ Totales generales actualizados');
     }
 
     // Función para verificar cambios en los campos
     function checkForChanges() {
-        const selectedIds = getSelectedRows();
-        if (selectedIds.length === 0) {
-            hasUnsavedChanges = false;
-            return;
-        }
-        
         hasUnsavedChanges = false;
-        
-        selectedIds.forEach(id => {
-            const row = document.getElementById(`row-${id}`);
-            if (row) {
-                row.querySelectorAll('input').forEach(input => {
-                    if (input.name && originalValues[id] && originalValues[id][input.name] !== input.value) {
-                        hasUnsavedChanges = true;
-                    }
-                });
+    
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const rowId = row.id.replace('row-', '');
+            if (rowId && hasRowChanges(row, rowId)) {
+                hasUnsavedChanges = true;
             }
         });
-        
+    
         toggleButtons();
-    }
+    }     
 
     function setupRealTimeCalculations() {
-        console.log('⚡ Configurando cálculos en tiempo real...');
         
         // Event listener general para todos los inputs relevantes
         document.addEventListener('input', function(e) {
@@ -681,12 +632,12 @@ document.addEventListener('DOMContentLoaded', function () {
                                 'Meses', 'Valor_Meses', 'Bolsa', 'Valor_Bolsa'];
             
             if (relevantFields.includes(target.name)) {
-                console.log(`🎯 Cambio detectado en campo: ${target.name} = ${target.value}`);
                 const row = target.closest('tr');
                 if (row) {
                     updateRowTotal(row);
                     recalculateTotals();
                     checkForChanges();
+                    toggleButtons();
                 }
             }
         });
@@ -701,7 +652,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 const handleInputChange = function() {
                     if (window.isInitializing) return;
                     
-                    console.log(`📝 Campo ${fieldName} cambiado: ${this.value}`);
                     const row = this.closest('tr');
                     if (row) {
                         updateRowTotal(row);
@@ -716,7 +666,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
         
-        console.log('✅ Cálculos en tiempo real configurados');
     }
 
     // Modificar el evento de input para incluir todos los campos relevantes
@@ -755,7 +704,7 @@ document.addEventListener('DOMContentLoaded', function () {
         input.addEventListener('input', handleInputChange);
     });
 
-    function confirmAddLine() {
+    window.confirmAddLine = function() {
         const lineaId = document.getElementById('lineaSelect').value;
         const moduloId = document.getElementById('moduloSelect').value;
         const clienteId = window.originalCliente;
@@ -763,7 +712,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const mes = window.originalMes;
     
         if (!lineaId || !moduloId) {
-            showMessage('Seleccione una línea y módulo.', 'warning');
+            window.showWarning('Seleccione una línea y módulo.');
             return;
         }
     
@@ -802,12 +751,10 @@ document.addEventListener('DOMContentLoaded', function () {
             newRow.setAttribute('id', `row-${newRowId}`);
             newRow.innerHTML = `
                 <td>
-                    <input type="checkbox" class="row-checkbox" data-id="${newRowId}" checked>
-                    <button type="button" class="btn btn-danger fas fa-times" aria-label="Close" onclick="removeLine(this)"></button>
+                    <input type="checkbox" class="row-checkbox" data-id="${newRowId}">
                 </td>
                 <td>
-                    <input type="text" name="ClienteId" class="form-control" value="${clienteId}" hidden>
-                    <input type="hidden" name="is_new_line" value="true">
+                    <button type="button" class="btn btn-danger fas fa-times" aria-label="Close" onclick="removeLine(this)"></button>
                 </td>
                 <td>${document.querySelector('#lineaSelect option:checked').textContent}
                     <input type="text" name="LineaId" class="form-control" value="${lineaId}" hidden>
@@ -832,6 +779,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td><input type="text" name="Sitio_Serv" class="form-control" value="${tarifa.sitioTrabajo || ''}"></td>
             `;
             tbody.appendChild(newRow);
+
+            const cb = newRow.querySelector('.row-checkbox');
+            if (cb) {
+            cb.addEventListener('change', function () {
+                const allChecked = document.querySelectorAll('.row-checkbox:checked').length === 
+                                document.querySelectorAll('.row-checkbox').length;
+                document.getElementById('select-all').checked = allChecked;
+                toggleButtons();
+            });
+            }
     
             // Guardar valores originales
             originalValues[newRowId] = {};
@@ -857,22 +814,16 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(error => {
             console.error('Error al obtener la tarifa:', error);
-            showMessage('Error al obtener la tarifa asociada.', 'danger');
+            window.showError('Error al obtener la tarifa asociada.');
         })
         .finally(() => {
-            // Ocultar el mensaje y habilitar botones
-            if (addingMessage) {
-                addingMessage.style.display = 'none';
-            }
-            buttons.forEach(button => {
-                button.disabled = false;
-            });
+            if (addingMessage) addingMessage.style.display = 'none';
+            buttons.forEach(b => b.disabled = false);
         });
     }
 
     // Función para agregar event listeners a los campos de una fila
     function addEventListenersToRow(row) {
-        console.log('🎯 Agregando listeners a nueva fila:', row.id);
         
         const relevantFields = ['Horas', 'Valor_Horas', 'Dias', 'Valor_Dias', 
                               'Meses', 'Valor_Meses', 'Bolsa', 'Valor_Bolsa'];
@@ -883,7 +834,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 const handleInputChange = function() {
                     if (window.isInitializing) return;
                     
-                    console.log(`🔄 Cambio en nueva fila - ${fieldName}: ${this.value}`);
                     updateRowTotal(row);
                     recalculateTotals();
                     checkForChanges();
@@ -895,134 +845,138 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Función para generar la plantilla en formato Excel o JPG
+    // --- reemplazar función generateTemplate completa ---
     function generateTemplate(format, selectedIds) {
         const validSelectedIds = selectedIds.filter(id => id && id !== "undefined");
-
+    
         let rowsToProcess = validSelectedIds.length > 0 
-            ? Array.from(document.querySelectorAll('tbody tr')).filter(row => {
-                const rowId = row.id.replace('row-', '');
-                return validSelectedIds.includes(rowId);
+        ? Array.from(document.querySelectorAll('tbody tr')).filter(row => {
+            const rowId = row.id.replace('row-', '');
+            return validSelectedIds.includes(rowId);
             })
-            : [];
-
+        : [];
+    
         if (rowsToProcess.length === 0) {
-            rowsToProcess = Array.from(document.querySelectorAll('tbody tr'));
+        rowsToProcess = Array.from(document.querySelectorAll('tbody tr'));
         }
-
+    
         const data = [];
         let subtotal = 0;
         let ivaTotal = 0;
-
-        // Recopilar datos solo de las filas seleccionadas
+    
         rowsToProcess.forEach(row => {
-            try {
-                const referencia = row.querySelector('input[name="Referencia"]')?.value || '';
-                const descripcion = row.querySelector('input[name="Descripcion"]')?.value || '';
-                const horas = parseFloat(row.querySelector('input[name="Horas"]')?.value) || 0;
-                const valor_horas = parseFloat(row.querySelector('input[name="Valor_Horas"]')?.value) || 0;
-                const dias = parseFloat(row.querySelector('input[name="Dias"]')?.value) || 0;
-                const valor_dias = parseFloat(row.querySelector('input[name="Valor_Dias"]')?.value) || 0;
-                const meses = parseFloat(row.querySelector('input[name="Meses"]')?.value) || 0;
-                const valor_meses = parseFloat(row.querySelector('input[name="Valor_Meses"]')?.value) || 0;
-                const bolsa = parseFloat(row.querySelector('input[name="Bolsa"]')?.value) || 0;
-                const valor_bolsa = parseFloat(row.querySelector('input[name="Valor_Bolsa"]')?.value) || 0;
-                const ceco = row.querySelector('input[name="Ceco"]')?.value || '';
-                const sitio_serv = row.querySelector('input[name="Sitio_Serv"]')?.value || '';
-                const iva = parseFloat(row.querySelector('input[name="IVA"]')?.value) || 0;
-
-                const valor_total = (horas * valor_horas) + (dias * valor_dias) + 
+        try {
+            const referencia   = row.querySelector('input[name="Referencia"]')?.value || '';
+            const descripcion  = row.querySelector('input[name="Descripcion"]')?.value || '';
+            const horas        = safeParseFloat(row.querySelector('input[name="Horas"]')?.value || 0);
+            const valor_horas  = safeParseFloat(row.querySelector('input[name="Valor_Horas"]')?.value || 0);
+            const dias         = safeParseFloat(row.querySelector('input[name="Dias"]')?.value || 0);
+            const valor_dias   = safeParseFloat(row.querySelector('input[name="Valor_Dias"]')?.value || 0);
+            const meses        = safeParseFloat(row.querySelector('input[name="Meses"]')?.value || 0);
+            const valor_meses  = safeParseFloat(row.querySelector('input[name="Valor_Meses"]')?.value || 0);
+            const bolsa        = safeParseFloat(row.querySelector('input[name="Bolsa"]')?.value || 0);
+            const valor_bolsa  = safeParseFloat(row.querySelector('input[name="Valor_Bolsa"]')?.value || 0);
+            const ceco         = row.querySelector('input[name="Ceco"]')?.value || '';
+            const sitio_serv   = row.querySelector('input[name="Sitio_Serv"]')?.value || '';
+            const ivaRow       = safeParseFloat(row.querySelector('input[name="IVA"]')?.value || 0);
+    
+            // Total de la fila (recomputado para asegurar consistencia)
+            const valor_total = (horas * valor_horas) + (dias * valor_dias) +
                                 (meses * valor_meses) + (bolsa * valor_bolsa);
-                
-                let Valor_Unitario = 0;
-                if (horas !== 0) Valor_Unitario = valor_horas;
-                else if (dias !== 0) Valor_Unitario = valor_dias;
-                else if (meses !== 0) Valor_Unitario = valor_meses;
-                else if (bolsa !== 0) Valor_Unitario = valor_bolsa;
-
-                subtotal += valor_total;
-                ivaTotal += valor_total * (iva / 100);
-
-                if (horas !== 0 || dias !== 0 || meses !== 0 || bolsa !== 0) {
-                    data.push({
-                        Referencia: referencia,
-                        Concepto: descripcion,
-                        Cantidad: horas || dias || meses || bolsa,
-                        Valor_Unitario: Valor_Unitario,
-                        Valor_Total: valor_total,
-                        Ceco: ceco,
-                        Sitio_Serv: sitio_serv
-                    });
-                }
-            } catch (error) {
-                console.error('Error procesando fila:', error);
+    
+            // Valor unitario segun la cantidad usada
+            let Valor_Unitario = 0;
+            let cantidad = 0;
+            if (horas) { Valor_Unitario = valor_horas; cantidad = horas; }
+            else if (dias) { Valor_Unitario = valor_dias; cantidad = dias; }
+            else if (meses) { Valor_Unitario = valor_meses; cantidad = meses; }
+            else if (bolsa) { Valor_Unitario = valor_bolsa; cantidad = bolsa; }
+    
+            subtotal += valor_total;
+            ivaTotal += valor_total * (ivaRow / 100);
+    
+            // Solo empujar filas con cantidad > 0
+            if (cantidad) {
+            data.push({
+                Referencia: referencia,
+                Concepto: descripcion,
+                Cantidad: cantidad,
+                Valor_Unitario: Valor_Unitario,
+                Valor_Total: valor_total,
+                Ceco: ceco,
+                Sitio_Serv: sitio_serv
+            });
             }
+        } catch (error) {
+            console.error('Error procesando fila:', error);
+        }
         });
-
-        // Agregar totales (igual que antes)
+    
+        // Totales
         data.push({
-            Referencia: '',
-            Concepto: 'Subtotal',
-            Cantidad: '',
-            Valor_Unitario: '',
-            Valor_Total: subtotal,
-            Ceco: '',
-            Sitio_Serv: ''
+        Referencia: '',
+        Concepto: 'Subtotal',
+        Cantidad: '',
+        Valor_Unitario: '',
+        Valor_Total: subtotal,
+        Ceco: '',
+        Sitio_Serv: ''
         });
-
+    
+        const ivaPct = subtotal > 0 ? (ivaTotal / subtotal * 100) : 0;
         data.push({
-            Referencia: '',
-            Concepto: 'IVA',
-            Cantidad: '',
-            Valor_Unitario: `${((ivaTotal / subtotal) * 100)}%`,
-            Valor_Total: ivaTotal,
-            Ceco: '',
-            Sitio_Serv: ''
+        Referencia: '',
+        Concepto: 'IVA',
+        Cantidad: '',
+        Valor_Unitario: `${ivaPct}%`,
+        Valor_Total: ivaTotal,
+        Ceco: '',
+        Sitio_Serv: ''
         });
-
+    
         data.push({
-            Referencia: '',
-            Concepto: 'Total',
-            Cantidad: '',
-            Valor_Unitario: '',
-            Valor_Total: (subtotal + ivaTotal),
-            Ceco: '',
-            Sitio_Serv: ''
+        Referencia: '',
+        Concepto: 'Total',
+        Cantidad: '',
+        Valor_Unitario: '',
+        Valor_Total: (subtotal + ivaTotal),
+        Ceco: '',
+        Sitio_Serv: ''
         });
-
+    
         return fetch('/clientes_factura/generar_plantilla/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache'
-            },
-            body: JSON.stringify({ 
-                data: data, 
-                format: format,
-                selectedIds: selectedIds,
-                timestamp: Date.now() // Parámetro único anti-cache
-            })
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+        },
+        body: JSON.stringify({ 
+            data: data, 
+            format: format,
+            selectedIds: selectedIds,
+            timestamp: Date.now()
+        })
         })
         .then(response => response.blob())
         .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            // Añadir timestamp al nombre del archivo
-            const timestamp = new Date().getTime();
-            a.download = `plantilla_${format}_${timestamp}.${format}`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-            return true; // Indicar éxito
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const timestamp = new Date().getTime();
+        a.download = `plantilla_${format}_${timestamp}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        return true;
         })
         .catch(error => {
-            console.error('Error:', error);
-            showMessage(`Error al generar la plantilla en ${format.toUpperCase()}.`, 'danger');
+        console.error('Error:', error);
+        window.showError(`Error al generar la plantilla en ${format.toUpperCase()}.`);
         });
-    }
+    }  
 
    // Modificar funciones de generación para cerrar el modal
    window.generateTemplateExcel = function() {
@@ -1066,7 +1020,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Función para eliminar una línea
-    function removeLine(button) {
+    window.removeLine = function(button) {
         const row = button.closest('tr');
         const rowId = row.id.replace('row-', '');
         
@@ -1078,62 +1032,101 @@ document.addEventListener('DOMContentLoaded', function () {
         row.remove();
         recalculateTotals();
         checkForChanges();
+        toggleButtons();
+    }
+
+    function checkChangesInSelectedRows(selectedIds) {
+        if (selectedIds.length === 0) return false;
+        
+        for (const id of selectedIds) {
+            const row = document.getElementById(`row-${id}`);
+            if (row && hasRowChanges(row, id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    function hasRowChanges(row, rowId) {
+        if (!originalValues[rowId]) {
+            return true;
+        }
+        
+        const inputs = row.querySelectorAll('input[name]:not([type="checkbox"]):not([type="hidden"])');
+        for (const input of inputs) {
+            const originalValue = originalValues[rowId][input.name];
+            const currentValue = input.value;
+            
+            if (originalValue !== currentValue) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Habilitar o deshabilitar los botones según los filtros aplicados
     function toggleButtons() {
-        const anio = document.querySelector('select[name="Anio"]').value;
-        const mes = document.querySelector('select[name="Mes"]').value;
-        const cliente = document.querySelector('select[name="ClienteId"]').value;
+        const anio = document.querySelector('select[name="Anio"]')?.value;
+        const mes = document.querySelector('select[name="Mes"]')?.value;
+        const cliente = document.querySelector('select[name="ClienteId"]')?.value;
         const selectedIds = getSelectedRows();
-        
-        // Habilitar guardar si hay año, mes y selección
-        document.getElementById('save-button').disabled = !(anio && mes && selectedIds.length > 0);
-        
-        // Habilitar agregar línea si hay año, mes y cliente
+      
+        // Regla solicitada: habilitar Guardar cuando hay Año y Mes
+        // ...y también cuando hay selección o cambios detectados
+        const canSave = !!(anio && mes && (window.searchPerformed || selectedIds.length > 0 || hasUnsavedChanges));
+      
+        document.getElementById('save-button').disabled = !canSave;
         document.getElementById('add-line').disabled = !(anio && mes && cliente);
-        
-        // Habilitar eliminar y generar plantilla si hay selección
         document.getElementById('delete-button').disabled = selectedIds.length === 0;
         document.getElementById('generate-template').disabled = selectedIds.length === 0;
     }
 
+    // 3) Al abrir el modal "Agregar Línea": pasar la línea filtrada
     document.getElementById('addLineModal').addEventListener('show.bs.modal', function (event) {
+        // reset del estado del modal por si quedó “pegado” de una apertura anterior
+        const addingMsg = this.querySelector('#adding-message');
+        if (addingMsg) addingMsg.style.display = 'none';
+        this.querySelectorAll('button').forEach(b => b.disabled = false);
+
         const clienteId = window.originalCliente;
         const anio = window.originalAnio;
         const mes = window.originalMes;
+        const linea = window.originalLinea || ''; // <---
     
         if (!clienteId || !anio || !mes) {
-            showMessage('Primero seleccione un cliente, año y mes.', 'warning');
-            return;
+        window.showWarning('Primero seleccione un cliente, año y mes.');
+        event.preventDefault();
+        return;
         }
     
-        fetch(`/clientes_factura/get_lineas_modulos/?clienteId=${clienteId}&anio=${anio}&mes=${mes}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error en la solicitud');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const lineaSelect = document.getElementById('lineaSelect');
-                const moduloSelect = document.getElementById('moduloSelect');
+        const url = `/clientes_factura/get_lineas_modulos/?clienteId=${clienteId}&anio=${anio}&mes=${mes}` +
+                    (linea ? `&lineaId=${linea}` : '');       // <---
     
-                // Limpiar y cargar líneas
-                lineaSelect.innerHTML = data.lineas.map(linea => 
-                    `<option value="${linea.LineaId}">${linea.Linea}</option>`
-                ).join('');
+        fetch(url)
+        .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+        .then(data => {
+            const lineaSelect = document.getElementById('lineaSelect');
+            const moduloSelect = document.getElementById('moduloSelect');
     
-                // Limpiar y cargar módulos
-                moduloSelect.innerHTML = data.modulos.map(modulo => 
-                    `<option value="${modulo.ModuloId}">${modulo.Modulo}</option>`
-                ).join('');
-            })
-            .catch(error => {
-                console.error('Error al obtener las líneas y módulos:', error);
-                showMessage('Error al cargar las opciones.', 'danger');
-            });
+            // Si venimos filtrados por línea, limitar y bloquear el select de línea
+            if (linea && data.lineas?.length) {
+            const only = data.lineas.filter(l => String(l.LineaId) === String(linea));
+            lineaSelect.innerHTML = only.map(l => `<option value="${l.LineaId}">${l.Linea}</option>`).join('');
+            lineaSelect.value = linea;
+            lineaSelect.disabled = true;                  // <---
+            } else {
+            lineaSelect.innerHTML = data.lineas.map(l => `<option value="${l.LineaId}">${l.Linea}</option>`).join('');
+            lineaSelect.disabled = false;
+            }
+    
+            moduloSelect.innerHTML = data.modulos.map(m => `<option value="${m.ModuloId}">${m.Modulo}</option>`).join('');
+        })
+        .catch(e => {
+            console.error(e);
+            window.showError('Error al cargar las opciones.');
+        });
     });
+  
 
     // Función para manejar correctamente el cierre de modales
     
@@ -1294,15 +1287,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // NUEVA FUNCIÓN: Preservar los valores originales sin formato adicional
     function preserveOriginalValues() {
-        console.log('💾 Preservando valores originales...');
         
         // No aplicar ningún formato adicional, mantener los valores tal cual vienen de la base de datos
         document.querySelectorAll('input[name="Valor_Horas"], input[name="Valor_Dias"], input[name="Valor_Meses"], input[name="Valor_Bolsa"]').forEach(input => {
             // Mantener el valor exacto sin modificaciones
-            console.log(`📊 Valor original preservado: ${input.name} = ${input.value}`);
         });
         
-        console.log('✅ Valores originales preservados correctamente');
     }
 
     // Añadir evento para habilitar o deshabilitar los botones
@@ -1327,8 +1317,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });    
 
     function initialize() {
-        console.log('🚀 Inicializando aplicación...');
-
         // Asegurar que el overlay esté oculto al iniciar
         showSavingOverlay(false);
         
@@ -1358,6 +1346,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
         
+        normalizeRowIds();
+
         // Configurar event listeners
         setupCheckboxListeners();
         setupRealTimeCalculations();
@@ -1372,7 +1362,6 @@ document.addEventListener('DOMContentLoaded', function () {
         // Marcar que la inicialización ha terminado
         setTimeout(() => {
             window.isInitializing = false;
-            console.log('✅ Aplicación inicializada correctamente');
         }, 100);
     }
 
@@ -1393,6 +1382,38 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('error', function() {
         showSavingOverlay(false);
     });
+
+    function normalizeRowIds() {
+        const rows = document.querySelectorAll('tbody tr');
+        let counter = 0;
+
+        rows.forEach((row) => {
+            const cb = row.querySelector('.row-checkbox');
+            if (!cb) return;
+        
+            const rawId = (cb.dataset.id || '').trim();
+            // si no tiene id, asígnale uno sintético estable
+            if (!rawId) {
+            const newId = `new-auto-${counter++}`;
+            cb.dataset.id = newId;
+            row.id = `row-${newId}`;
+        
+            // añade bandera para que prepareSaveData marque nueva línea
+            if (!row.querySelector('input[name="is_new_line"]')) {
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = 'is_new_line';
+                hidden.value = 'true';
+                row.appendChild(hidden);
+            }
+            } else {
+            // Asegura que el <tr> tenga id coherente
+            if (!row.id || row.id === 'row-') {
+                row.id = `row-${rawId}`;
+            }
+            }
+        });
+    }
     
     initialize();
 });

@@ -101,7 +101,7 @@
             </div>
         </div>
         <div class="mt-2">
-            <small class="text-muted">* El botón "Guardar" se habilita al seleccionar un registro y haber modificado algun campo.</small><br>
+            <small class="text-muted">* El botón "Guardar" se habilita al detectar cambios (no es necesario marcar).</small><br>
             <small class="text-muted">* El botón "Agregar Línea" se habilita al filtrar por año, mes y cliente.</small>
         </div>
         
@@ -297,19 +297,13 @@
             </form>
         </div>
     </div>
-
     <!-- overlay de guardado -->
-    
-    {% if messages %}
-    <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
+    <div id="saving-overlay" class="saving-overlay" style="display: none;">
+        <div class="saving-content">
+            <div class="spinner-border text-primary" role="status"></div>
+            <span class="mt-2">Guardando cambios...</span>
+        </div>
     </div>
-    {% endif %}
 </div>
 
 <!-- Modal para agregar línea -->

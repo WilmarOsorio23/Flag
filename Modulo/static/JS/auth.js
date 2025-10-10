@@ -102,18 +102,15 @@ async function verificarPermiso(permiso) {
 
 // Ocultar elementos del menú basado en permisos
 async function ocultarElementosNoPermitidos() {
-    console.log('Iniciando verificación de permisos...');
     
     // Verificar permisos para cada categoría
     for (const [categoria, permisos] of Object.entries(PERMISSION_CATEGORIES)) {
-        console.log(`Verificando categoría: ${categoria}`);
         
         // Verificar si el usuario tiene al menos un permiso en esta categoría
         let tieneAcceso = false;
         
         for (const permiso of permisos) {
             const tienePermiso = await verificarPermiso(permiso);
-            console.log(`Permiso ${permiso}: ${tienePermiso}`);
             if (tienePermiso) {
                 tieneAcceso = true;
                 break;
@@ -124,7 +121,6 @@ async function ocultarElementosNoPermitidos() {
             // Ocultar toda la sección del menú
             const seccion = document.querySelector(`[data-categoria="${categoria}"]`);
             if (seccion) {
-                console.log(`Ocultando sección: ${categoria}`);
                 seccion.style.display = 'none';
             }
         } else {
@@ -133,7 +129,6 @@ async function ocultarElementosNoPermitidos() {
                 const tienePermiso = await verificarPermiso(permiso);
                 if (!tienePermiso) {
                     document.querySelectorAll(`[data-requires="${permiso}"]`).forEach(elemento => {
-                        console.log(`Ocultando elemento con permiso: ${permiso}`);
                         elemento.style.display = 'none';
                         // También ocultar el li padre si existe
                         const liPadre = elemento.closest('li');
@@ -153,7 +148,6 @@ async function ocultarElementosNoPermitidos() {
         if (permiso) {
             const tienePermiso = await verificarPermiso(permiso);
             if (!tienePermiso) {
-                console.log(`Ocultando elemento individual con permiso: ${permiso}`);
                 elemento.style.display = 'none';
                 // También ocultar el li padre si existe
                 const liPadre = elemento.closest('li');
@@ -169,7 +163,6 @@ async function ocultarElementosNoPermitidos() {
     submenus.forEach(submenu => {
         const elementosVisibles = submenu.querySelectorAll('li:not([style*="display: none"])');
         if (elementosVisibles.length === 0) {
-            console.log('Ocultando submenú vacío');
             submenu.style.display = 'none';
             // También ocultar el elemento padre que abre el submenú
             const elementoPadre = submenu.previousElementSibling;
@@ -179,7 +172,6 @@ async function ocultarElementosNoPermitidos() {
         }
     });
     
-    console.log('Verificación de permisos completada');
 }
 
 // Iniciar la verificación de permisos

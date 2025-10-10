@@ -7,7 +7,7 @@ class RoleMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         self.permission_mappings = self._build_permission_mappings()
-        self.public_urls = ['login', 'logout', 'inicio', 'nosotros']
+        self.public_urls = ['login', 'logout']
         
     def _build_permission_mappings(self):
         # Construir mapeo dinámico de permisos basado en URLs y nombres de vistas
