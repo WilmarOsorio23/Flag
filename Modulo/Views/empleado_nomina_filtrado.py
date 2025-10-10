@@ -20,8 +20,7 @@ from openpyxl.styles import Font, Alignment, Border, Side
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_view_informe_salarios')
+
 # Función para filtrar empleados y nóminas
 def filtrar_empleados_y_nominas(form, empleados, nominas):
     """
@@ -52,8 +51,6 @@ def filtrar_empleados_y_nominas(form, empleados, nominas):
 
     return empleados, nominas
 
-@login_required
-@verificar_permiso('can_view_informe_salarios')
 # Función para calcular la información del empleado
 def obtener_empleado_info(empleados, nominas, meses):
     """

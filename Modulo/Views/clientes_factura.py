@@ -113,18 +113,18 @@ def clientes_factura_guardar(request):
                         facturacion_cliente = FacturacionClientes.objects.get(ConsecutivoId=consecutivo_id)
                         
                         # Actualizar todos los campos
-                        facturacion_cliente.HorasFactura = float(horas_factura)
+                        facturacion_cliente.HorasFactura = float(horas_factura) if horas_factura is not None else 0.0
                         facturacion_cliente.Valor_Horas = valor_horas
-                        facturacion_cliente.DiasFactura = float(dias_factura)
+                        facturacion_cliente.DiasFactura = float(dias_factura) if dias_factura is not None else 0.0
                         facturacion_cliente.Valor_Dias = valor_dias
-                        facturacion_cliente.MesFactura = float(mes_factura)
+                        facturacion_cliente.MesFactura = float(mes_factura) if mes_factura is not None else 0.0
                         facturacion_cliente.Valor_Meses = valor_meses
                         facturacion_cliente.Valor = valor
                         facturacion_cliente.Descripcion = descripcion
                         facturacion_cliente.Factura = numero_factura
                         facturacion_cliente.Bolsa = bolsa
                         facturacion_cliente.Valor_Bolsa = valor_bolsa
-                        facturacion_cliente.IVA = float(iva)
+                        facturacion_cliente.IVA = float(iva) if iva is not None else 0.0
                         facturacion_cliente.Referencia = referencia
                         facturacion_cliente.Ceco = ceco
                         facturacion_cliente.Sitio_Serv = sitio_serv
@@ -139,18 +139,18 @@ def clientes_factura_guardar(request):
                             ClienteId=cliente,
                             LineaId=linea,
                             ModuloId=modulo,
-                            HorasFactura=float(horas_factura),
+                            HorasFactura=float(horas_factura) if horas_factura is not None else 0.0,
                             Valor_Horas=valor_horas,
-                            DiasFactura=float(dias_factura),
+                            DiasFactura=float(dias_factura) if dias_factura is not None else 0.0,
                             Valor_Dias=valor_dias,
-                            MesFactura=float(mes_factura),
+                            MesFactura=float(mes_factura) if mes_factura is not None else 0.0,
                             Valor_Meses=valor_meses,
                             Valor=valor,
                             Descripcion=descripcion,
                             Factura=numero_factura,
                             Bolsa=bolsa,
                             Valor_Bolsa=valor_bolsa,
-                            IVA=float(iva),
+                            IVA=float(iva) if iva is not None else 0.0,
                             Referencia=referencia,
                             Ceco=ceco,
                             Sitio_Serv=sitio_serv
@@ -164,18 +164,18 @@ def clientes_factura_guardar(request):
                         ClienteId=cliente,
                         LineaId=linea,
                         ModuloId=modulo,
-                        HorasFactura=float(horas_factura),
+                        HorasFactura=float(horas_factura) if horas_factura is not None else 0.0,
                         Valor_Horas=valor_horas,
-                        DiasFactura=float(dias_factura),
+                        DiasFactura=float(dias_factura) if dias_factura is not None else 0.0,
                         Valor_Dias=valor_dias,
-                        MesFactura=float(mes_factura),
+                        MesFactura=float(mes_factura) if mes_factura is not None else 0.0,
                         Valor_Meses=valor_meses,
                         Valor=valor,
                         Descripcion=descripcion,
                         Factura=numero_factura,
                         Bolsa=bolsa,
                         Valor_Bolsa=valor_bolsa,
-                        IVA=float(iva),
+                        IVA=float(iva) if iva is not None else 0.0,
                         Referencia=referencia,
                         Ceco=ceco,
                         Sitio_Serv=sitio_serv
@@ -335,7 +335,7 @@ def obtener_info_facturacion(clientes_contratos, facturacion_clientes, anio, mes
                             'NumeroFactura': facturacion.Factura,
                             'Bolsa': bolsa,
                             'Valor_Bolsa': valor_bolsa,
-                            'IVA': facturacion.IVA or (float(tarifa.iva) if tarifa else 0),
+                            'IVA': facturacion.IVA or (float(tarifa.iva) if tarifa and tarifa.iva is not None else 0),
                             'Referencia': facturacion.Referencia or (tarifa.referenciaId.codigoReferencia if tarifa and tarifa.referenciaId else ''),
                             'Ceco': facturacion.Ceco or (tarifa.centrocostosId.codigoCeCo if tarifa and tarifa.centrocostosId else ''),
                             'Sitio_Serv': facturacion.Sitio_Serv or (tarifa.sitioTrabajo if tarifa else '')
@@ -623,7 +623,7 @@ def obtener_tarifa(request):
                 'valorDia': str(Decimal(tarifa.valorDia)) if tarifa.valorDia else '0.0',
                 'valorMes': str(Decimal(tarifa.valorMes)) if tarifa.valorMes else '0.0',
                 'valorBolsa': str(Decimal(tarifa.valorBolsa)) if tarifa.valorBolsa else '0.0',
-                'iva': float(tarifa.iva) if tarifa.iva else 0.0,
+                'iva': float(tarifa.iva) if tarifa.iva is not None else 0.0,
                 'referenciaId': {
                     'codigoReferencia': tarifa.referenciaId.codigoReferencia if tarifa.referenciaId else ''
                 },
