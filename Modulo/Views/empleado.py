@@ -20,14 +20,12 @@ def empleado_index(request):
 
 @login_required
 @verificar_permiso('can_manage_empleados')
-# Vista para crear un nuevo empleado
 def empleado_crear(request):
     if request.method == 'POST':
         form = EmpleadoForm(request.POST)
         if form.is_valid():
             nuevo_empleado = form.save(commit=False)
             nuevo_empleado.save()
-
             return redirect('empleado_index')
     else:
         form = EmpleadoForm()
@@ -36,7 +34,6 @@ def empleado_crear(request):
 
 @login_required
 @verificar_permiso('can_manage_empleados')
-# Vista para editar un empleado
 @csrf_exempt
 def empleado_editar(request, id):
     if request.method == 'POST':
@@ -59,7 +56,6 @@ def empleado_editar(request, id):
 
 @login_required
 @verificar_permiso('can_manage_empleados')
-# Vista para eliminar empleados
 def empleado_eliminar(request):
     if request.method == 'POST':
         item_ids = request.POST.getlist('items_to_delete')
@@ -79,9 +75,7 @@ def verificar_relaciones(request):
             # Verifica si los módulos están relacionados
             relacionados = []
             for id in ids:
-                # Verifica si el empleado está relacionado con la nómina
                 is_related = Nomina.objects.filter(Documento=id).exists()
-
                 if is_related:
                     relacionados.append(id)
 
@@ -98,7 +92,6 @@ def verificar_relaciones(request):
 
 @login_required
 @verificar_permiso('can_manage_empleados')
-# Vista para descargar datos de empleados en Excel
 def empleado_descargar_excel(request):
     if request.method == 'POST':
         item_ids = request.POST.get('items_to_delete')
@@ -106,14 +99,11 @@ def empleado_descargar_excel(request):
 
         # Eliminar puntos de los documentos recibidos
         documentos_limpios = [doc.replace('.', '') for doc in documentos]
-        print("Documentos sin puntos:", documentos_limpios)
 
         # Comparar documentos en la BD eliminando puntos antes de filtrar
         empleados_data = Empleado.objects.annotate(
             DocumentoSinPuntos=Func(F('Documento'), Value('.'), Value(''), function='REPLACE')
         ).filter(DocumentoSinPuntos__in=documentos_limpios)
-
-        print("Empleados encontrados:", empleados_data)
 
         # Preparar respuesta en formato Excel
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -186,4 +176,3 @@ def empleado_descargar_excel(request):
         return response
 
     return redirect('empleado_index')
-

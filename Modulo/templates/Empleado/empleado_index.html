@@ -258,8 +258,6 @@
                             <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ empleado.Documento }}"></td>
                             <td data-field="tipo_documento">
                                 <span class="d-block text-start">{{ empleado.TipoDocumento.Nombre }}</span>
-
-                                <!-- Modo edición: Select de TipoDocumento -->
                                 <select name="TipoDocumento" class="form-select d-none">
                                     {% for tipo_doc in form.fields.TipoDocumento.queryset %}
                                         <option value="{{ tipo_doc.TipoDocumentoID }}" {% if empleado.TipoDocumento.Nombre == tipo_doc.Nombre %}selected{% endif %}>
@@ -371,10 +369,8 @@
             </form>
         </div>
     </div>
-    <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
-        <span id="alert-icon" class="alert-heading"></span>
-        <span id="alert-message"></span>
-    </div>
+    
+    
     {% if messages %}
     <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
         {% for message in messages %}
@@ -385,6 +381,7 @@
         {% endfor %}
     </div>
     {% endif %}
+    
     <!-- Modal de confirmación -->
     <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
         <div class="modal-dialog">
