@@ -12,8 +12,6 @@ from django.db import transaction
 from Modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
-@login_required
-@verificar_permiso('can_manage_registro_tiempos')
 def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, modulo_id, horas):
     try:
         # Validar que modulo_id esté presente y sea válido
