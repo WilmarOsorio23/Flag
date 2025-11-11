@@ -107,125 +107,106 @@
                 <table class="table table-primary">
                     <thead>
                         <tr>
-                            <th class="sticky-column" scope="col">Colaborador</th>
-                            <th scope="col">Línea</th>
-                            <th scope="col">Perfil</th>
-                            <th scope="col">Módulo</th>
-                            <th scope="col">Empresa</th>
-                            {% for cliente in Clientes %}
-                            <th>{{ cliente }}</th>
-                            {% endfor %}
-                            <th scope="col">Total Operación</th>
-                            {% for concepto in Conceptos %}
-                            <th>{{ concepto }}</th>
-                            {% endfor %}
-                            <th scope="col">Total Conceptos</th>
-                            <th scope="col">Total</th>
-                            <th scope="col">Dif. Horas</th>
+                          <th class="sticky-column" scope="col">Colaborador</th>
+                          <th scope="col">Línea</th>
+                          <th scope="col">Perfil</th>
+                          <th scope="col">Módulo</th>
+                          <th scope="col">Empresa</th>
+                          {% for cliente in Clientes %}
+                            <th>{{ cliente.Nombre_Cliente }}</th>
+                          {% endfor %}
+                          <th scope="col">Total Operación</th>
+                          {% for concepto in Conceptos %}
+                            <th>{{ concepto.Descripcion }}</th>
+                          {% endfor %}
+                          <th scope="col">Total Conceptos</th>
+                          <th scope="col">Total</th>
+                          <th scope="col">Dif. Horas</th>
                         </tr>
-                    </thead>
+                    </thead>                      
                     <tbody>
                         {% for empleado in colaborador_info %}
-                        <tr id="row-{{ empleado.Documento }}">
-                            <td class="sticky-column" style="text-align: left;">
-                                {{ empleado.Nombre }}
-                                <input type="text" name="Documento" class="form-control-plaintext d-none" value="{{ empleado.Documento }}" readonly>
+                          <tr id="row-{{ empleado.Documento }}">
+                            <td class="sticky-column" style="text-align:left;">
+                              {{ empleado.Nombre }}
+                              <input type="text" name="Documento" class="form-control-plaintext d-none" value="{{ empleado.Documento }}" readonly>
                             </td>
-
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                {{ empleado.Linea }}
-                                <input type="text" name="LineaId" class="form-control d-none" value="{{ empleado.LineaId }}">
-                            </td>
-                            
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                {{ empleado.Perfil }}
-                            </td>
-
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                {{ empleado.Modulo }}
-                                <input type="hidden" name="ModuloId" value="{{ empleado.ModuloId }}">
-                            </td>
-
-                            <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                {{ empleado.Empresa}}
-                            </td>
-                            
-                            {% for cliente in empleado.Clientes.values %}
-                                <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <input type="text" name="ClienteId_{{ forloop.counter }}" class="form-control d-none" value="{{ cliente.ClienteId }}">
-                                    <input type="text" name="Tiempo_Clientes_{{ forloop.counter }}" class="form-control" value="{{ cliente.tiempo_clientes}}">
-                                </td>
+                        
+                            <td>{{ empleado.Linea }} <input type="text" name="LineaId" class="form-control d-none" value="{{ empleado.LineaId }}"></td>
+                            <td>{{ empleado.Perfil }}</td>
+                            <td>{{ empleado.Modulo }} <input type="hidden" name="ModuloId" value="{{ empleado.ModuloId }}"></td>
+                            <td>{{ empleado.Empresa }}</td>
+                        
+                            {# ⬇️ Render SOLO clientes filtrados, alineados con el header #}
+                            {% for cliente in Clientes %}
+                              {% with celda=empleado.Clientes|get_item:cliente.ClienteId %}
+                              <td style="min-width:150px;">
+                                <input type="text" name="ClienteId_{{ forloop.counter }}" class="form-control d-none" value="{{ cliente.ClienteId }}">
+                                <input type="text" name="Tiempo_Clientes_{{ forloop.counter }}" class="form-control" value="{{ celda.tiempo_clientes|default:0 }}">
+                              </td>
+                              {% endwith %}
                             {% endfor %}
-                            
+                        
                             <td data-total-clientes-row>
-                                {{ empleado.Total_Clientes }}
-                                <input type="text" name="Total_Clientes" class="form-control d-none" value="{{ empleado.Total_Clientes }}">
+                              {{ empleado.Total_Clientes }}
+                              <input type="text" name="Total_Clientes" class="form-control d-none" value="{{ empleado.Total_Clientes }}">
                             </td>
-
-                            {% for concepto in empleado.Conceptos.values %}
-                                <td style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
-                                    <input type="text" name="ConceptoId_{{ forloop.counter }}" class="form-control d-none" value="{{ concepto.ConceptoId }}">
-                                    <input type="text" name="Tiempo_Conceptos_{{ forloop.counter }}" class="form-control" value="{{ concepto.tiempo_conceptos }}">
-                                </td>
+                        
+                            {# Conceptos #}
+                            {% for concepto in Conceptos %}
+                              {% with celda=empleado.Conceptos|get_item:concepto.ConceptoId %}
+                              <td style="min-width:150px;">
+                                <input type="text" name="ConceptoId_{{ forloop.counter }}" class="form-control d-none" value="{{ concepto.ConceptoId }}">
+                                <input type="text" name="Tiempo_Conceptos_{{ forloop.counter }}" class="form-control" value="{{ celda.tiempo_conceptos|default:0 }}">
+                              </td>
+                              {% endwith %}
                             {% endfor %}
-
-                            <td data-total-conceptos-row>
-                                {{ empleado.Total_Conceptos}}
-                            </td>
-                            <td data-total-horas-row>
-                                {{ empleado.Total_Horas }}
-                            </td>
-                            <td data-dif-horas-row>
-                                {{ Dif_Horas }}
-                            </td>
-                        </tr>
+                        
+                            <td data-total-conceptos-row>{{ empleado.Total_Conceptos }}</td>
+                            <td data-total-horas-row>{{ empleado.Total_Horas }}</td>
+                            <td data-dif-horas-row>{{ Dif_Horas }}</td>
+                          </tr>
                         {% empty %}
-                        <tr>
-                            <td colspan="50">No hay datos disponibles.</td>
-                        </tr>
+                          <tr><td colspan="50">No hay datos disponibles.</td></tr>
                         {% endfor %}
-                    </tbody>
+                    </tbody>                        
                     <tfoot>
                         <tr>
-                            <th colspan="5">Total Horas</th>
-                                {% for cliente in Clientes.values %}
-                                    <th data-cliente-id="{{ cliente.ClienteId }}">{{ Totales|get_item:cliente.ClienteId }}</th>
-                                {% endfor %}
-                            <th data-total-clientes>{{ Totales.Total_Clientes }}</th>
-                            {% for concepto in Conceptos.values %}
-                                <th data-concepto-id="{{ concepto.ConceptoId }}">{{ Totales|get_item:concepto.ConceptoId }}</th>
-                            {% endfor %}
-                            <th data-total-conceptos>{{ Totales.Total_Conceptos }}</th>
-                            <th data-total-horas>{{ Totales.Total_Horas }}</th>
-                            <th data-dif-horas>{{ Totales.Dif_horas }}</th>
+                          <th colspan="5">Total Horas</th>
+                          {% for cliente in Clientes %}
+                            <th data-cliente-id="{{ cliente.ClienteId }}">{{ Totales|get_item:cliente.ClienteId }}</th>
+                          {% endfor %}
+                          <th data-total-clientes>{{ Totales.Total_Clientes }}</th>
+                      
+                          {% for concepto in Conceptos %}
+                            <th data-concepto-id="{{ concepto.ConceptoId }}">{{ Totales|get_item:concepto.ConceptoId }}</th>
+                          {% endfor %}
+                          <th data-total-conceptos>{{ Totales.Total_Conceptos }}</th>
+                          <th data-total-horas>{{ Totales.Total_Horas }}</th>
+                          <th data-dif-horas>{{ Totales.Dif_horas }}</th>
                         </tr>
+                      
                         {% for linea in Tiempo_Lineas %}
                         <tr>
-                            <th colspan="2">Horas Facturables</th>  
-                            <td colspan="3">{{ linea.Linea }}</td>
-                            {% for cliente in linea.Clientes.values %}
+                          <th colspan="2">Horas Facturables</th>
+                          <td colspan="3">{{ linea.Linea }}</td>
+                      
+                          {# Importante: alinear columnas contra `Clientes` visibles #}
+                          {% for cliente in Clientes %}
+                            {% with celda=linea.Clientes|get_item:cliente.ClienteId %}
                             <td>
-                                <input type="text" name="Hora_Facturable_{{ forloop.counter }}" class="form-control" value="{{ cliente.horas_facturables }}">
-                                <input type="hidden" name="LineaId_{{ forloop.counter }}" value="{{ linea.LineaId }}">
-                                <input type="hidden" name="ClienteId_{{ forloop.counter }}" value="{{ cliente.ClienteId }}">
+                              <input type="text" name="Hora_Facturable_{{ forloop.counter }}" class="form-control" value="{{ celda.horas_facturables|default:0 }}">
+                              <input type="hidden" name="LineaId_{{ forloop.counter }}" value="{{ linea.LineaId }}">
+                              <input type="hidden" name="ClienteId_{{ forloop.counter }}" value="{{ cliente.ClienteId }}">
                             </td>
-                            {% endfor %}
-                            <td data-total-facturable-linea-row>
-                                {{ linea.Total_Horas_Facturables }}
-                            </td>
+                            {% endwith %}
+                          {% endfor %}
+                      
+                          <td data-total-facturable-linea-row></td>
+                          <td colspan="{{ Conceptos|length|add:'3' }}"></td>
                         </tr>
                         {% endfor %}
-                        <tr>
-                            <th colspan="5">Total Horas Facturables</th>
-                            {% for cliente in Clientes.values %}
-                                <th data-cliente-facturables-id="{{ cliente.ClienteId }}">{{ TotalesFacturables|get_item:cliente.ClienteId }}</th>
-                            {% endfor %}
-                            <th data-total-clientes-facturables>{{ TotalesFacturables.Total_Clientes }}</th>
-                            <th colspan="{{ Conceptos.count }}"></th> <!-- Espacio para las columnas de conceptos -->
-                            <th data-total-horas-facturables>{{ TotalesFacturables.Total_Horas }}</th>
-                            <th colspan="5"></th>
-                        </tr>
-                    </tfoot>
+                    </tfoot>                      
                 </table>
             </form>
         </div>
