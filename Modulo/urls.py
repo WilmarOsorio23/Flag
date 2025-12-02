@@ -276,6 +276,8 @@ urlpatterns = [
     path('nomina/editar/<str:id>/', Nomina.nomina_editar, name='nomina_editar'),
     path('nomina/eliminar', Nomina.nomina_eliminar, name='nomina_eliminar'),
     path('nomina/descargar_excel', Nomina.nomina_descargar_excel, name='nomina_descargar_excel'),
+    path('nomina/verificar-relaciones/', Nomina.verificar_relaciones, name='nomina_verificar_relaciones'),
+
 
     # Rutas para tabla Detalle Certificación
     path('detalle_certificacion/', detallesCertificacion.detalle_certificacion_index, name='detalle_certificacion_index'),
@@ -460,4 +462,3 @@ urlpatterns = [
     path('check-permission/', auth_views.check_permission, name='check_permission'),
     path('test-permissions/', auth_views.test_permissions, name='test_permissions'),
     ]
-
