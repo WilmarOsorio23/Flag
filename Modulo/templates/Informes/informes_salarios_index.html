@@ -183,18 +183,18 @@
                             <th data-sort="salario" class="sortable" data-direction="default">
                                 Salario {{ mes }}
                                 <span class="sort-icon">
-                                <i class="fas fa-sort sort-icon-default"></i>
-                                <i class="fas fa-sort-up sort-icon-asc"></i>
-                                <i class="fas fa-sort-down sort-icon-desc"></i>
-                            </span>
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
                             </th>
                             <th data-sort="cliente" class="sortable" data-direction="default">
                                 Cliente {{ mes }}
                                 <span class="sort-icon">
-                                <i class="fas fa-sort sort-icon-default"></i>
-                                <i class="fas fa-sort-up sort-icon-asc"></i>
-                                <i class="fas fa-sort-down sort-icon-desc"></i>
-                            </span>
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
                             </th>
                         {% endfor %}
                     </tr>
@@ -226,13 +226,13 @@
             </table>
         </div>
         {% else %}
-                <div class="alert alert-warning" role="alert">
-                    {% if not busqueda_realizada %}
-                        No se ha realizado ninguna búsqueda aún.
-                    {% else %}
-                        No se encontraron resultados para los filtros aplicados.
-                    {% endif %}
-                </div>
+            <div class="alert alert-warning" role="alert">
+                {% if not busqueda_realizada %}
+                    No se ha realizado ninguna búsqueda aún.
+                {% else %}
+                    No se encontraron resultados para los filtros aplicados.
+                {% endif %}
+            </div>
         {% endif %}
     </div>
 </div>
@@ -250,14 +250,14 @@
         </div>
       </div>
     </div>
-  </div>
+</div>
 
-  <!-- Carga dinámica de datos para los gráficos en JS -->
-  {% block extra_js %}
-    {{ lineas_labels|json_script:"labels-linea" }}
-    {{ lineas_data|json_script:"values-linea" }}
+    <!-- Carga dinámica de datos para los gráficos en JS -->
+    {% block extra_js %}
+        {{ lineas_labels|json_script:"labels-linea" }}
+        {{ lineas_data|json_script:"values-linea" }}
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{% static 'JS/informes_salarios.js' %}"></script>
-  {% endblock %}
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="{% static 'JS/informes_salarios.js' %}"></script>
+    {% endblock %}
 {% endblock %}

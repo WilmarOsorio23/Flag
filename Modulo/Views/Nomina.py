@@ -1,164 +1,193 @@
-# Nomina
+# Modulo/Views/Nomina.py
 import json
-from pyexpat.errors import messages
+import pandas as pd
+
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-import pandas as pd
-from Modulo import models
+from django.views.decorators.csrf import csrf_exempt  # puedes quitarlo si quieres forzar CSRF
+from django.contrib.auth.decorators import login_required
+
 from Modulo.forms import NominaForm
 from Modulo.models import Clientes, Empleado, Nomina
-from django.db import models
-from django.views.decorators.csrf import csrf_exempt
 from Modulo.decorators import verificar_permiso
-from django.contrib.auth.decorators import login_required
+
 
 @login_required
 @verificar_permiso('can_manage_nomina')
 def nomina_index(request):
-    nomina_data = Nomina.objects.all().order_by('-Anio','Mes')
-    form=NominaForm()
-    return render(request, 'nomina/nomina_index.html', {'nomina_data': nomina_data, 'form': form})
+    """
+    Lista de registros de nómina ordenados por año/mes (descendente)
+    y formulario base para selects de cliente en la tabla.
+    """
+    nomina_data = (
+        Nomina.objects
+        .select_related('Documento', 'Cliente')
+        .all()
+        .order_by('-Anio', 'Mes')
+    )
+    form = NominaForm()
+    return render(
+        request,
+        'nomina/nomina_index.html',
+        {
+            'nomina_data': nomina_data,
+            'form': form,
+        },
+    )
+
 
 @login_required
 @verificar_permiso('can_manage_nomina')
 def nomina_crear(request):
+    """
+    Crear un nuevo registro de nómina mediante NominaForm.
+    """
     if request.method == 'POST':
         form = NominaForm(request.POST)
         if form.is_valid():
-            nueva_nomina = form.save(commit=False)
-            nueva_nomina.save()  # Guardar directamente el registro con el Documento proporcionado
+            form.save()
             return redirect('nomina_index')
     else:
         form = NominaForm()
+
     return render(request, 'Nomina/nomina_form.html', {'form': form})
+
 
 @login_required
 @verificar_permiso('can_manage_nomina')
-@csrf_exempt 
+@csrf_exempt  # si quieres forzar CSRF, quita esto (el JS ya manda X-CSRFToken)
 def nomina_editar(request, id):
-    print("llego hasta editar")
-    if request.method == 'POST':
+    """
+    Edita un registro puntual de nómina vía fetch (JSON).
+    Por ahora solo actualiza Salario y Cliente.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+
+    nomina = get_object_or_404(Nomina, pk=id)
+
+    # Salario (se espera un número en formato plano, sin currency_format)
+    salario = data.get('Salario')
+    if salario is not None:
         try:
-            data = json.loads(request.body)
-            nomina = get_object_or_404(Nomina, pk=id)
-            nomina.Salario = data.get('Salario', nomina.Salario)
-            cliente_id = data.get('Cliente')
-            if cliente_id:
-                nomina.Cliente = get_object_or_404(Clientes, pk=cliente_id)
-            nomina.save()
-            return JsonResponse({'status': 'success'})
-        except Nomina.DoesNotExist:
-            return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
-    else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405) 
+            # Limpieza básica por si vienen puntos de miles o comas decimales
+            salario_str = str(salario).replace('.', '').replace(',', '.')
+            nomina.Salario = salario_str
+        except Exception:
+            return JsonResponse({'error': 'Formato de salario no válido'}, status=400)
+
+    # Cliente (pk)
+    cliente_id = data.get('Cliente')
+    if cliente_id:
+        cliente = get_object_or_404(Clientes, pk=cliente_id)
+        nomina.Cliente = cliente
+
+    nomina.save()
+    return JsonResponse({'status': 'success'})
+
 
 @login_required
 @verificar_permiso('can_manage_nomina')
 def nomina_eliminar(request):
-    print("llego hasta nomina eliminar")
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        print(item_ids)
-    for item_id in item_ids:
-            Nomina.objects.filter(pk=item_id).delete()
+    """
+    Elimina uno o varios registros de nómina seleccionados en la tabla.
+    """
+    if request.method != 'POST':
+        return redirect('nomina_index')
+
+    item_ids = request.POST.getlist('items_to_delete')
+    if item_ids:
+        Nomina.objects.filter(pk__in=item_ids).delete()
+
     return redirect('nomina_index')
+
 
 @login_required
 @verificar_permiso('can_manage_nomina')
 def verificar_relaciones(request):
-    if request.method == 'POST':
-        import json
+    """
+    Verifica relaciones antes de eliminar.
+    Para Nómina, normalmente NO hay FK que apunten a Nomina,
+    así que por defecto permitimos eliminar.
+    Dejamos el endpoint implementado y listo para extender si se requieren
+    restricciones futuras.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    try:
         data = json.loads(request.body)
         ids = data.get('ids', [])
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
 
-        # Verifica si los módulos están relacionados
-        relacionados = []
-        for id in ids:
-            if (
-                Empleado.objects.filter(NominaId=id.Documento).exists() or
-                Clientes.objects.filter(NominaId=id.ClienteId).exists()
-            ): 
-                relacionados.append(id)
+    # Si llegáramos a tener relaciones fuertes desde otros modelos a Nomina,
+    # aquí sería el lugar para validar. Por ahora, devolvemos que NO hay relaciones.
+    relacionados = []
 
-        if relacionados:
-            return JsonResponse({
-                'isRelated': True,
-                'ids': relacionados
-            })
-        else:
-            return JsonResponse({'isRelated': False})
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
+    # Ejemplo futuro:
+    # for nomina_id in ids:
+    #     if SomeOtherModel.objects.filter(nomina_id=nomina_id).exists():
+    #         relacionados.append(nomina_id)
+
+    if relacionados:
+        return JsonResponse({'isRelated': True, 'ids': relacionados})
+    return JsonResponse({'isRelated': False})
+
 
 @login_required
 @verificar_permiso('can_manage_nomina')
 def nomina_descargar_excel(request):
-    if request.method == 'POST':
-        items_selected = request.POST.get('items_to_download')
-        items_selected = list(map(int, items_selected.split (','))) 
+    """
+    Descarga en Excel las filas seleccionadas en la tabla.
+    Usa pandas para armar el archivo.
+    """
+    if request.method != 'POST':
+        return redirect('nomina_index')
 
-        nominas = Nomina.objects.filter(NominaId__in=items_selected)
+    items_selected = request.POST.get('items_to_download', '')
+    if not items_selected:
+        return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
 
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="Nomina.xlsx"'
+    try:
+        ids = list(map(int, items_selected.split(',')))
+    except ValueError:
+        return HttpResponse("IDs de nómina inválidos.", status=400)
 
-        data = []
-        for nomina in nominas:
-            data.append([
-                nomina.Anio,
-                nomina.Mes,
-                nomina.Documento.Documento,
-                nomina.Documento.Nombre,
-                nomina.Salario,
-                nomina.Cliente.Nombre_Cliente,
-            ])
-        df = pd.DataFrame(data, columns=['Año','Mes','Documento','Nombre Empleado','Salario','Cliente'])
-        df.to_excel(response, index=False)
-        return response
-    return redirect('nomina_index')
+    nominas = (
+        Nomina.objects
+        .select_related('Documento', 'Cliente')
+        .filter(NominaId__in=ids)
+    )
 
+    if not nominas.exists():
+        return HttpResponse("No se encontraron registros de nómina.", status=404)
 
-'''def nomina_descargar_excel(request):
-    if request.method == 'POST':
-        item_ids = request.POST.getlist('items_to_delete')
-        
-        # Verificar si se recibieron IDs
-        if not item_ids:
-            return HttpResponse("No se seleccionaron elementos para descargar.", status=400)
-        
-        # Consultar las nóminas usando las IDs
-        nomina_data = []
-        for item_id in item_ids:
-            try:
-                nomina = Nomina.objects.get(pk=item_id)
-                nomina_data.append([
-                    nomina.Anio, 
-                    nomina.Mes, 
-                    nomina.Documento.Documento, 
-                    nomina.Documento.Nombre,
-                    nomina.Salario, 
-                    nomina.Cliente.Nombre_Cliente
-                ])
-            except Nomina.DoesNotExist:
-                print(f"Nómina con ID {item_id} no encontrada.")
-        
-        # Si no hay datos para exportar
-        if not nomina_data:
-            return HttpResponse("No se encontraron registros de nómina.", status=404)
+    data = []
+    for nomina in nominas:
+        data.append([
+            nomina.Anio,
+            nomina.Mes,
+            nomina.Documento.Documento if nomina.Documento else '',
+            nomina.Documento.Nombre if nomina.Documento else '',
+            nomina.Salario,
+            nomina.Cliente.Nombre_Cliente if nomina.Cliente else '',
+        ])
 
-        # Crear DataFrame de pandas
-        df = pd.DataFrame(nomina_data, columns=['Año', 'Mes', 'Documento','Nombre Empleado', 'Salario', 'Cliente'])
-        
-        # Configurar la respuesta HTTP con el archivo Excel
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        response['Content-Disposition'] = 'attachment; filename="nomina.xlsx"'
-        
-        # Escribir el DataFrame en el archivo Excel
-        df.to_excel(response, index=False)
-        return response
+    df = pd.DataFrame(
+        data,
+        columns=['Año', 'Mes', 'Documento', 'Nombre Empleado', 'Salario', 'Cliente'],
+    )
 
-    return redirect('nomina_index')'''
-    
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="Nomina.xlsx"'
+
+    df.to_excel(response, index=False)
+    return response

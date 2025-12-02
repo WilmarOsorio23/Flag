@@ -1,419 +1,373 @@
-document.addEventListener('DOMContentLoaded', function() {
-
-    // Clonar checkboxes seleccionados en el formulario de descarga
-    document.getElementById('download-form').addEventListener('submit', function(event) {
-    let selectedCheckboxes = document.querySelectorAll('.row-select:checked');
-    if (selectedCheckboxes.length === 0) {
-        alert('No has seleccionado ningún elemento para descargar.');
-        event.preventDefault(); // Evita el envío si no hay elementos seleccionados
-        return;
+// Modulo/static/JS/nomina.js
+document.addEventListener('DOMContentLoaded', function () {
+    // ============================
+    // HELPERS
+    // ============================
+    function getCsrfToken() {
+      return (
+        (document.querySelector('[name=csrfmiddlewaretoken]') || {}).value ||
+        (document.querySelector('meta[name="csrf-token"]') || {}).getAttribute('content') ||
+        ''
+      );
     }
-
-    // Captura los valores de los checkboxes seleccionados
-    let selectedValues = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
-     // Asigna los valores seleccionados al campo oculto
-     document.getElementById('items_to_download').value = selectedValues.join(',');
-});
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    window.saveRow = function () {
-        const selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length !== 1) {
-            showMessage('Error al guardar: No hay un registro seleccionado.', 'danger');
-            return;
-        }
-
-        const row = selected[0].closest('tr');
-
-        // Capturar los valores de los campos editables
-        const data = {
-            Anio: row.querySelector('input[name="anio"]').value.trim(),
-            Mes: row.querySelector('input[name="mes"]').value.trim(),
-            Documento: row.querySelector('input[name="documento"]').value.trim(),
-            Salario: row.querySelector('input[name="salario"]').value.trim(),
-            Cliente: row.querySelector('select[name="Cliente"]').value.trim()
-        };
-
-        const id = selected[0].value;
-
-        // Validar que los campos requeridos no estén vacíos
-        if (!data.Anio || !data.Mes || !data.Documento || !data.Salario || !data.Cliente) {
-            showMessage('Todos los campos son obligatorios.', 'danger');
-            return;
-        }
-
-        // Enviar los datos al servidor
-        fetch(`/nomina/editar/${id}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error al guardar los cambios.');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.status === 'success') {
-                showMessage('Cambios guardados correctamente.', 'success');
-                window.location.reload();
-            } else {
-                showMessage(`Error al guardar los cambios: ${data.error || 'Error desconocido'}`, 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Error al guardar los cambios:', error);
-            showMessage(`Error al guardar los cambios: ${error.message}`, 'danger');
-        });
-    };
-
-    window.enableEdit = function () {
+  
+    // Atajo para mostrar mensajes inline (si existe message-box) o flotantes
+    function inlineInfo(msg, type = 'info', elementId = 'message-box') {
+      if (window.showInlineMessage) return window.showInlineMessage(msg, type, elementId);
+      if (window.showMessage) return window.showMessage(msg, type);
+      alert(`${type.toUpperCase()}: ${msg}`);
+    }
+  
+    const csrfToken = getCsrfToken();
+  
+    // ============================
+    // DESCARGA EXCEL
+    // ============================
+    const downloadForm = document.getElementById('download-form');
+    if (downloadForm) {
+      downloadForm.addEventListener('submit', function (event) {
         const selected = document.querySelectorAll('.row-select:checked');
         if (selected.length === 0) {
-            alert('No has seleccionado ningún registro para editar.');
-            return false;
+          inlineInfo('No has seleccionado ningún elemento para descargar.', 'warning');
+          event.preventDefault();
+          return;
         }
-        if (selected.length > 1) {
-            alert('Solo puedes editar un registro a la vez.');
-            return false;
-        }
-
-        const row = selected[0].closest('tr');
-
-        // Lista de campos específicos que son editables
-        const editableFields = [
-            { name: "salario", type: "text" },
-            { name: "Cliente", type: "select" }
-        ];
-
-        // Guardar valores originales en un atributo personalizado
-        editableFields.forEach(field => {
-            const element = row.querySelector(`[name="${field.name}"]`);
-            const span = row.querySelector(`[data-field="${field.name}"] span.form-control-plaintext`);
-            if (element) {
-                element.setAttribute('data-original-value', element.value);
-            }
-            if (span) {
-                span.setAttribute('data-original-value', span.innerText.trim());
-            }
-        });
-
-        // Habilitar los campos editables y ocultar los spans correspondientes
-        editableFields.forEach(field => {
-            const element = row.querySelector(`[name="${field.name}"]`);
-            const span = row.querySelector(`[data-field="${field.name}"] span.form-control-plaintext`);
-            if (element) {
-                if (field.type === "select") {
-                    element.disabled = false; // Habilitar el select
-                    element.classList.remove('form-control-plaintext');
-                    element.classList.add('form-control');
-                } else {
-                    element.classList.remove('d-none'); // Mostrar el input
-                    element.classList.remove('form-control-plaintext');
-                    element.classList.add('form-control');
-                    element.readOnly = false; // Habilitar el input
-                }
-            }
-            if (span) {
-                span.classList.add('d-none'); // Ocultar el span en modo edición
-            }
-        });
-
-        // Desactivar todos los checkboxes y botones de edición
-        document.getElementById('select-all').disabled = true;
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = true);
-        document.getElementById('edit-button').disabled = true;
-
-        // Mostrar botones de "Guardar" y "Cancelar"
-        document.getElementById('save-button').classList.remove('d-none');
-        document.getElementById('cancel-button').classList.remove('d-none');
-    };
-
-    window.cancelEdit = function () {
-        const selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length === 1) {
-            const row = selected[0].closest('tr');
-
-            // Restaurar valores originales
-            const editableFields = ["anio", "mes", "documento", "salario", "Cliente"];
-
-            editableFields.forEach(name => {
-                const element = row.querySelector(`[name="${name}"]`);
-                const span = row.querySelector(`[data-field="${name}"] span.form-control-plaintext`);
-                if (element) {
-                    if (name === "Cliente") {
-                        element.disabled = true; // Deshabilitar el select
-                        element.classList.add('form-control-plaintext');
-                        element.classList.remove('form-control');
-                    } else {
-                        element.value = element.getAttribute('data-original-value');
-                        element.classList.add('form-control-plaintext');
-                        element.classList.remove('form-control');
-                        element.readOnly = true;
-                        element.classList.add('d-none'); // Ocultar el input
-                    }
-                }
-                if (span) {
-                    span.innerText = span.getAttribute('data-original-value');
-                    span.classList.remove('d-none'); // Mostrar el span en modo solo lectura
-                }
-            });
-
-            // Restaurar botones y checkboxes
-            document.getElementById('select-all').disabled = false;
-            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
-            document.getElementById('edit-button').disabled = false;
-
-            // Ocultar botones de "Guardar" y "Cancelar"
-            document.getElementById('save-button').classList.add('d-none');
-            document.getElementById('cancel-button').classList.add('d-none');
-        }
-    };
-
-
-    document.getElementById('select-all').addEventListener('click', function(event) {
-        let checkboxes = document.querySelectorAll('.row-select');
-        for (let checkbox of checkboxes) {
-            checkbox.checked = event.target.checked;
-        }
-    });
-
-    // Obtener el valor del token CSRF para ser utilizado en las solicitudes POST
-   
-
-    // Inhabilitar la tecla Enter para evitar que envíen formularios accidentalmente
-    preventFormSubmissionOnEnter();
-
-    // Inicialización del modal de confirmación y botón de confirmación de eliminación
-    const deleteForm = document.getElementById('delete-form');
-    const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-    const confirmDeleteButton = document.getElementById('confirm-delete-btn');
-
-    // Asociar el evento de clic al botón de seleccionar/deseleccionar todos los checkboxes
-    document.getElementById('select-all').addEventListener('click', toggleCheckboxSelection);
-
-    // Configurar el evento de clic para el botón de eliminación
-    document.querySelector('.btn-outline-danger.fas.fa-trash-alt').addEventListener('click', function (event) {
-        handleDeleteConfirmation(event, confirmDeleteModal, confirmDeleteButton, deleteForm, csrfToken);
-    });
-    
-    // Funciones reutilizables
-
-    // Prevenir el envío del formulario al presionar la tecla Enter
-    function preventFormSubmissionOnEnter() {
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('keydown', function (event) {
-                if (event.key == "Enter") {
-                    event.preventDefault(); // Prevenir la acción predeterminada de la tecla Enter
-                }
-            });
-        });
+        const ids = Array.from(selected).map(cb => cb.value);
+        document.getElementById('items_to_download').value = ids.join(',');
+      });
     }
-
-    // Alternar la selección de todos los checkboxes al hacer clic en el checkbox "Seleccionar todo"
-    function toggleCheckboxSelection(event) {
-        const checkboxes = document.querySelectorAll('.row-select');
-        checkboxes.forEach(checkbox => checkbox.checked = event.target.checked);
-    }
-
-    // Manejar la confirmación de eliminación
-    async function handleDeleteConfirmation(event, modal, confirmButton, form, csrfToken) {
-        event.preventDefault(); // Prevenir la acción predeterminada del evento
-
-        const selectedIds = getSelectedIds(); // Obtener los IDs de los elementos seleccionados
-        if (selectedIds.length == 0) {
-            showMessage('No has seleccionado ningún elemento para eliminar.', 'danger'); // Mostrar mensaje si no hay elementos seleccionados
+  
+    // ============================
+    // EDITAR / GUARDAR / CANCELAR
+    // ============================
+    window.saveRow = function () {
+      const selected = document.querySelectorAll('.row-select:checked');
+      if (selected.length !== 1) {
+        inlineInfo('Debes seleccionar exactamente un registro para guardar.', 'danger');
+        return;
+      }
+  
+      const row = selected[0].closest('tr');
+      const id = selected[0].value;
+  
+      const data = {
+        Anio: row.querySelector('input[name="anio"]').value.trim(),
+        Mes: row.querySelector('input[name="mes"]').value.trim(),
+        Documento: row.querySelector('input[name="documento"]').value.trim(),
+        Salario: row.querySelector('input[name="salario"]').value.trim(),
+        Cliente: row.querySelector('select[name="Cliente"]').value.trim(),
+      };
+  
+      if (!data.Anio || !data.Mes || !data.Documento || !data.Salario || !data.Cliente) {
+        inlineInfo('Todos los campos son obligatorios.', 'danger');
+        return;
+      }
+  
+      // Mostrar “Guardando…”
+      const savingToast = window.showFloatingMessage
+        ? window.showFloatingMessage('Guardando...', 'info')
+        : (window.showMessage && window.showMessage('Guardando...', 'info'));
+  
+      fetch(`/nomina/editar/${id}/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify(data),
+      })
+        .then(response =>
+          response
+            .json()
+            .catch(() => ({}))
+            .then(json => ({ ok: response.ok, json }))
+        )
+        .then(({ ok, json }) => {
+          if (savingToast && typeof hideMessage === 'function') hideMessage(savingToast);
+  
+          if (!ok) {
+            inlineInfo(`Error al guardar los cambios: ${json.error || 'Error desconocido'}`, 'danger');
             return;
-        }
-
-        modal.show(); // Mostrar el modal de confirmación de eliminación
-
-        confirmButton.onclick = async function () {
-            const isRelated = await verifyRelations(selectedIds, csrfToken); // Verificar si hay relaciones con otros elementos
-            if (isRelated) {
-                showMessage('Algunos elementos no pueden ser eliminados porque están relacionados con otras tablas.', 'danger'); // Mensaje de error si hay relaciones
-                modal.hide(); // Ocultar el modal
-                document.getElementById('select-all').checked = false;
-                document.querySelectorAll('.row-select').forEach(checkbox => checkbox.checked = false);
-                return;
+          }
+          if (json.status === 'success') {
+            if (window.showSuccess) {
+              window.showSuccess('Cambios guardados correctamente.');
+            } else {
+              inlineInfo('Cambios guardados correctamente.', 'success');
             }
-
-            document.getElementById('items_to_delete').value = selectedIds.join(','); // Asignar los IDs seleccionados al formulario
-            form.submit(); // Enviar el formulario para realizar la eliminación
-
-        };
-    }
-
-    // Obtener los IDs de los elementos seleccionados (checkboxes marcados)
-    function getSelectedIds() {
-        return Array.from(document.querySelectorAll('.row-select:checked')).map(el => el.value);
-    }
-
-    // Verificar si los elementos seleccionados están relacionados con otros elementos en el backend
-    async function verifyRelations(ids, csrfToken) {
-        try {
-            const response = await fetch('/verificar-relaciones/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken,
-                },
-                body: JSON.stringify({ ids }), // Enviar los IDs en el cuerpo de la solicitud
-            });
-            const data = await response.json(); // Obtener la respuesta como JSON
-            return data.isRelated || false; // Si la respuesta indica que están relacionados, retornar true
-        } catch (error) {
-            console.error('Error verificando relaciones:', error);
-            return true; // Asumir que están relacionados en caso de error
-        }
-    }
-
-    function showMessage(message, type) {
-        const alertBox = document.getElementById('message-box');
-        const alertIcon = document.getElementById('alert-icon');
-        const alertMessage = document.getElementById('alert-message');
-
-        // Asignar el mensaje y el tipo de alerta
-        alertMessage.textContent = message;
-        alertBox.className = `alert alert-${type} alert-dismissible fade show`;
-
-        // Asignar íconos según el tipo
-        const icons = {
-            success: '✔️', // Puedes usar clases de FontAwesome o Bootstrap Icons
-            danger: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
-        };
-        alertIcon.textContent = icons[type] || '';
-
-        // Mostrar la alerta
-        alertBox.style.display = 'block';
-
-        // Ocultar la alerta después de 3 segundos
-        setTimeout(() => {
-            alertBox.classList.remove('show');
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-            }, 300); // Tiempo para que la transición termine
-        }, 3000);
-    }
-
-    // Confirmación antes de descargar
-    window.confirmDownload = function() {
-        let selected = document.querySelectorAll('.row-select:checked');
-        if (selected.length == 0) {
-            showMessage('No has seleccionado ningún elemento para descargar.', 'danger');
-            return false;
-        }
-
-        let itemIds = [];
-        selected.forEach(function(checkbox) {
-            itemIds.push(checkbox.value);
+            window.location.reload();
+          } else {
+            inlineInfo(`Error al guardar los cambios: ${json.error || 'Error desconocido'}`, 'danger');
+          }
+        })
+        .catch(error => {
+          if (savingToast && typeof hideMessage === 'function') hideMessage(savingToast);
+          console.error('Error al guardar los cambios:', error);
+          inlineInfo(`Error al guardar los cambios: ${error.message}`, 'danger');
         });
-        document.getElementById('items_to_delete').value = itemIds.join(',');
-
-        return true;
     };
-
-
-    // Deshabilitar modo edición
-    function disableEditMode(selected,row) {
-        // Cambiar inputs a solo lectura
-        row.querySelectorAll('input.form-control').forEach(input => {
-            input.classList.add('form-control-plaintext');
-            input.classList.remove('form-control');
-            input.readOnly = true;
+  
+    window.enableEdit = function () {
+      const selected = document.querySelectorAll('.row-select:checked');
+      if (selected.length === 0) {
+        inlineInfo('No has seleccionado ningún registro para editar.', 'warning');
+        return false;
+      }
+      if (selected.length > 1) {
+        inlineInfo('Solo puedes editar un registro a la vez.', 'warning');
+        return false;
+      }
+  
+      const row = selected[0].closest('tr');
+  
+      const editableFields = [
+        { name: 'salario', type: 'text' },
+        { name: 'Cliente', type: 'select' },
+      ];
+  
+      // Guardar originales
+      editableFields.forEach(field => {
+        const el = row.querySelector(`[name="${field.name}"]`);
+        if (el && !el.hasAttribute('data-original-value')) {
+          el.setAttribute('data-original-value', el.value);
+        }
+        const cell = row.querySelector(`[data-field="${field.name.toLowerCase()}"]`);
+        const span = cell ? cell.querySelector('span.form-control-plaintext') : null;
+        if (span && !span.hasAttribute('data-original-value')) {
+          span.setAttribute('data-original-value', span.innerText.trim());
+        }
+      });
+  
+      // Activar edición
+      editableFields.forEach(field => {
+        const el = row.querySelector(`[name="${field.name}"]`);
+        const cell = row.querySelector(`[data-field="${field.name.toLowerCase()}"]`);
+        const span = cell ? cell.querySelector('span.form-control-plaintext') : null;
+  
+        if (el) {
+          if (field.type === 'select') {
+            el.disabled = false;
+            el.classList.remove('form-control-plaintext');
+            el.classList.add('form-control');
+          } else {
+            el.classList.remove('d-none', 'form-control-plaintext');
+            el.classList.add('form-control');
+            el.readOnly = false;
+          }
+        }
+        if (span) span.classList.add('d-none');
+      });
+  
+      // Deshabilitar selección global mientras se edita
+      const selectAll = document.getElementById('select-all');
+      if (selectAll) selectAll.disabled = true;
+      document.querySelectorAll('.row-select').forEach(cb => (cb.disabled = true));
+      selected[0].disabled = false;
+  
+      document.getElementById('edit-button').disabled = true;
+      document.getElementById('save-button').classList.remove('d-none');
+      document.getElementById('cancel-button').classList.remove('d-none');
+    };
+  
+    window.cancelEdit = function () {
+      const selected = document.querySelectorAll('.row-select:checked');
+      if (selected.length !== 1) return;
+  
+      const row = selected[0].closest('tr');
+      const editableFields = ['salario', 'Cliente'];
+  
+      editableFields.forEach(name => {
+        const el = row.querySelector(`[name="${name}"]`);
+        const cell = row.querySelector(`[data-field="${name.toLowerCase()}"]`);
+        const span = cell ? cell.querySelector('span.form-control-plaintext') : null;
+  
+        if (el && el.hasAttribute('data-original-value')) {
+          const original = el.getAttribute('data-original-value');
+          el.value = original;
+  
+          if (name === 'Cliente') {
+            el.disabled = true;
+            el.classList.add('form-control-plaintext');
+            el.classList.remove('form-control');
+          } else {
+            el.readOnly = true;
+            el.classList.add('form-control-plaintext', 'd-none');
+            el.classList.remove('form-control');
+          }
+        }
+  
+        if (span && span.hasAttribute('data-original-value')) {
+          span.innerText = span.getAttribute('data-original-value');
+          span.classList.remove('d-none');
+        }
+      });
+  
+      // Restaurar selección/botones
+      const selectAll = document.getElementById('select-all');
+      if (selectAll) selectAll.disabled = false;
+      document.querySelectorAll('.row-select').forEach(cb => (cb.disabled = false));
+      selected[0].checked = false;
+  
+      document.getElementById('edit-button').disabled = false;
+      document.getElementById('save-button').classList.add('d-none');
+      document.getElementById('cancel-button').classList.add('d-none');
+    };
+  
+    // ============================
+    // SELECT ALL
+    // ============================
+    const selectAll = document.getElementById('select-all');
+    if (selectAll) {
+      selectAll.addEventListener('click', function (event) {
+        const checked = event.target.checked;
+        document.querySelectorAll('.row-select').forEach(cb => {
+          cb.checked = checked;
         });
-
-        // Desmarcar y habilitar el checkbox de la fila
-        selected[0].checked = false;
-        selected[0].disabled = false;
-
-        // Habilitar todos los checkboxes y el botón de edición
-        document.getElementById('select-all').disabled = false;
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.disabled = false);
-        document.getElementById('edit-button').disabled = false;
-
-        // Ocultar los botones de guardar y cancelar
-        document.getElementById('save-button').classList.add('d-none');
-        document.getElementById('cancel-button').classList.add('d-none');
-        
+      });
     }
-
-   
+  
+    // ============================
+    // PREVENIR ENTER EN FORMULARIOS
+    // ============================
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') event.preventDefault();
+      });
+    });
+  
+    // ============================
+    // ELIMINACIÓN CON MODAL
+    // ============================
+    const deleteForm = document.getElementById('delete-form');
+    const confirmDeleteModalEl = document.getElementById('confirmDeleteModal');
+    const confirmDeleteButton = document.getElementById('confirm-delete-btn');
+    const deleteButton = document.querySelector('.btn-outline-danger.fas.fa-trash-alt');
+  
+    if (deleteForm && confirmDeleteModalEl && confirmDeleteButton && deleteButton) {
+      const confirmDeleteModal = new bootstrap.Modal(confirmDeleteModalEl);
+  
+      deleteButton.addEventListener('click', function (event) {
+        event.preventDefault();
+  
+        const selectedIds = Array.from(document.querySelectorAll('.row-select:checked')).map(el => el.value);
+        if (selectedIds.length === 0) {
+          inlineInfo('No has seleccionado ningún elemento para eliminar.', 'warning');
+          return;
+        }
+  
+        confirmDeleteModal.show();
+  
+        confirmDeleteButton.onclick = async function () {
+          const isRelated = await verifyRelations(selectedIds, csrfToken);
+          if (isRelated) {
+            inlineInfo(
+              'Algunos elementos no pueden ser eliminados porque están relacionados con otras tablas.',
+              'danger'
+            );
+            confirmDeleteModal.hide();
+            if (selectAll) selectAll.checked = false;
+            document.querySelectorAll('.row-select').forEach(cb => (cb.checked = false));
+            return;
+          }
+  
+          confirmDeleteModal.hide();
+          deleteForm.submit();
+        };
+      });
+    }
+  
+    // ============================
+    // VERIFICAR RELACIONES
+    // ============================
+    async function verifyRelations(ids, csrfToken) {
+      try {
+        const response = await fetch('/nomina/verificar-relaciones/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          },
+          body: JSON.stringify({ ids }),
+        });
+        const data = await response.json();
+        return data.isRelated || false;
+      } catch (error) {
+        console.error('Error verificando relaciones:', error);
+        // En caso de error, no bloqueamos la eliminación
+        return false;
+      }
+    }
+  
+    // ============================
+    // ORDENAMIENTO DE TABLA
+    // ============================
     const table = document.querySelector('.table-primary');
     if (table) {
-        const headers = table.querySelectorAll('th.sortable');
-
-        headers.forEach(header => {
-            header.addEventListener('click', () => {
-                const column = header.getAttribute('data-sort');
-                const direction = header.getAttribute('data-direction') || 'asc';
-                const newDirection = direction === 'asc' ? 'desc' : 'asc';
-
-                sortTableByColumn(table, column, newDirection);
-
-                // Reset all headers to default
-                headers.forEach(h => {
-                    h.setAttribute('data-direction', 'default');
-                    h.querySelector('.sort-icon-default').style.display = 'inline';
-                    h.querySelector('.sort-icon-asc').style.display = 'none';
-                    h.querySelector('.sort-icon-desc').style.display = 'none';
-                });
-
-                // Set current header direction
-                header.setAttribute('data-direction', newDirection);
-                header.querySelector('.sort-icon-default').style.display = 'none';
-                header.querySelector(`.sort-icon-${newDirection}`).style.display = 'inline';
-            });
+      const headers = table.querySelectorAll('th.sortable');
+  
+      headers.forEach(header => {
+        header.addEventListener('click', () => {
+          const column = header.getAttribute('data-sort');
+          const direction = header.getAttribute('data-direction') || 'asc';
+          const newDirection = direction === 'asc' ? 'desc' : 'asc';
+  
+          sortTableByColumn(table, column, newDirection);
+  
+          headers.forEach(h => {
+            h.setAttribute('data-direction', 'default');
+            const def = h.querySelector('.sort-icon-default');
+            const asc = h.querySelector('.sort-icon-asc');
+            const desc = h.querySelector('.sort-icon-desc');
+            if (def) def.style.display = 'inline';
+            if (asc) asc.style.display = 'none';
+            if (desc) desc.style.display = 'none';
+          });
+  
+          header.setAttribute('data-direction', newDirection);
+          const def = header.querySelector('.sort-icon-default');
+          const asc = header.querySelector('.sort-icon-asc');
+          const desc = header.querySelector('.sort-icon-desc');
+          if (def) def.style.display = 'none';
+          if (asc && newDirection === 'asc') asc.style.display = 'inline';
+          if (desc && newDirection === 'desc') desc.style.display = 'inline';
         });
-        
-
-        function sortTableByColumn(table, columnName, direction) {
-            const tbody = table.querySelector('tbody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-        
-            rows.sort((a, b) => {
-                const cellA = a.querySelector(`[data-field="${columnName}"]`);
-                const cellB = b.querySelector(`[data-field="${columnName}"]`);
-        
-                if (!cellA || !cellB) return 0;
-        
-                // Obtener el texto o valor del elemento dentro de la celda
-                const getCellValue = (cell) => {
-                    const input = cell.querySelector('input');
-                    const span = cell.querySelector('span');
-                    const select = cell.querySelector('select');
-                    if (input && !input.classList.contains('d-none')) {
-                        return input.value.trim();
-                    } else if (span) {
-                        return span.innerText.trim();
-                    } else if (select) {
-                        return select.options[select.selectedIndex].text.trim();
-                    }
-                    return '';
-                };
-        
-                const textA = getCellValue(cellA);
-                const textB = getCellValue(cellB);
-        
-                // Numeric comparison
-                if (!isNaN(textA) && !isNaN(textB)) {
-                    return direction === 'asc' ? textA - textB : textB - textA;
-                }
-        
-                // String comparison
-                return direction === 'asc'
-                    ? textA.localeCompare(textB)
-                    : textB.localeCompare(textA);
-            });
-        
-            rows.forEach(row => tbody.appendChild(row));
-        }
+      });
+  
+      function sortTableByColumn(table, columnName, direction) {
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+  
+        rows.sort((a, b) => {
+          const cellA = a.querySelector(`[data-field="${columnName}"]`);
+          const cellB = b.querySelector(`[data-field="${columnName}"]`);
+          if (!cellA || !cellB) return 0;
+  
+          const getCellValue = cell => {
+            const input = cell.querySelector('input');
+            const span = cell.querySelector('span');
+            const select = cell.querySelector('select');
+            if (input && !input.classList.contains('d-none')) return input.value.trim();
+            if (span && !span.classList.contains('d-none')) return span.innerText.trim();
+            if (select) return select.options[select.selectedIndex].text.trim();
+            return '';
+          };
+  
+          const textA = getCellValue(cellA);
+          const textB = getCellValue(cellB);
+  
+          if (['anio', 'mes', 'salario'].includes(columnName)) {
+            const numA = parseFloat(textA.toString().replace(/[^\d.-]/g, '')) || 0;
+            const numB = parseFloat(textB.toString().replace(/[^\d.-]/g, '')) || 0;
+            return direction === 'asc' ? numA - numB : numB - numA;
+          }
+  
+          return direction === 'asc'
+            ? textA.localeCompare(textB)
+            : textB.localeCompare(textA);
+        });
+  
+        rows.forEach(row => tbody.appendChild(row));
+      }
     }
-
-    
-});
+  });
+  
