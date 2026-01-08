@@ -1,18 +1,21 @@
 from decimal import Decimal
 import json
+from collections import defaultdict
+
 from django.forms import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.db import transaction
+from django.contrib.auth.decorators import login_required
+
 from Modulo.forms import ColaboradorFilterForm
 from Modulo.models import (
     Clientes, Concepto, Consultores, Empleado, Horas_Habiles,
     Ind_Operat_Clientes, Ind_Operat_Conceptos, Linea, Modulo,
     Tiempos_Cliente, TiemposConcepto, TiemposFacturables
 )
-from collections import defaultdict
-from django.db import transaction
 from Modulo.decorators import verificar_permiso
-from django.contrib.auth.decorators import login_required
+
 
 # -------------------------
 # Helpers (SIN decoradores)
@@ -47,6 +50,7 @@ def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, modulo_i
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos del cliente: {str(e)}")
 
+
 def guardar_tiempos_concepto(anio, mes, documento, concepto_id, linea_id, horas):
     try:
         tiempo_concepto, creado = TiemposConcepto.objects.get_or_create(
@@ -70,6 +74,7 @@ def guardar_tiempos_concepto(anio, mes, documento, concepto_id, linea_id, horas)
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos del concepto: {str(e)}")
 
+
 def guardar_tiempos_facturables(anio, mes, linea_id, cliente_id, horas):
     try:
         tiempo_facturable, creado = TiemposFacturables.objects.get_or_create(
@@ -92,14 +97,19 @@ def guardar_tiempos_facturables(anio, mes, linea_id, cliente_id, horas):
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos facturables: {str(e)}")
 
+
 def guardar_totales_operacion(anio, mes, linea_id, horas_trabajadas, horas_facturables):
     try:
-        anio = int(anio); mes = int(mes); linea_id = int(linea_id)
+        anio = int(anio)
+        mes = int(mes)
+        linea_id = int(linea_id)
         horas_trabajadas = float(horas_trabajadas)
         horas_facturables = float(horas_facturables)
         linea = Linea.objects.get(LineaId=linea_id)
         total_operacion, creado = Ind_Operat_Clientes.objects.get_or_create(
-            Anio=anio, Mes=mes, LineaId=linea,
+            Anio=anio,
+            Mes=mes,
+            LineaId=linea,
             defaults={'HorasTrabajadas': horas_trabajadas, 'HorasFacturables': horas_facturables}
         )
         if not creado:
@@ -110,15 +120,21 @@ def guardar_totales_operacion(anio, mes, linea_id, horas_trabajadas, horas_factu
     except Exception as e:
         raise ValidationError(f"Error al guardar los totales de operación: {str(e)}")
 
+
 def guardar_totales_concepto(anio, mes, linea_id, concepto_id, horas_concepto):
     try:
-        anio = int(anio); mes = int(mes)
-        linea_id = int(linea_id); concepto_id = int(concepto_id)
+        anio = int(anio)
+        mes = int(mes)
+        linea_id = int(linea_id)
+        concepto_id = int(concepto_id)
         horas_concepto = float(horas_concepto)
         linea = Linea.objects.get(LineaId=linea_id)
         concepto = Concepto.objects.get(ConceptoId=concepto_id)
         total_concepto, creado = Ind_Operat_Conceptos.objects.get_or_create(
-            Anio=anio, Mes=mes, LineaId=linea, ConceptoId=concepto,
+            Anio=anio,
+            Mes=mes,
+            LineaId=linea,
+            ConceptoId=concepto,
             defaults={'HorasConcepto': horas_concepto}
         )
         if not creado:
@@ -127,6 +143,53 @@ def guardar_totales_concepto(anio, mes, linea_id, concepto_id, horas_concepto):
         return total_concepto
     except Exception as e:
         raise ValidationError(f"Error al guardar los totales por concepto: {str(e)}")
+
+
+# Índices en memoria para evitar N+1 queries en la tabla grande
+def build_tiempo_clientes_index(qs):
+    """
+    index[Documento][ModuloId][LineaId][ClienteId] = horas
+    """
+    index = defaultdict(
+        lambda: defaultdict(
+            lambda: defaultdict(
+                lambda: defaultdict(float)
+            )
+        )
+    )
+    for t in qs:
+        doc = t.Documento
+        mod = int(t.ModuloId_id)
+        linea = int(t.LineaId_id)
+        cliente = int(t.ClienteId_id)
+        index[doc][mod][linea][cliente] += float(t.Horas)
+    return index
+
+
+def build_tiempo_conceptos_index(qs):
+    """
+    index[Documento][LineaId][ConceptoId] = horas
+    """
+    index = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+    for t in qs:
+        doc = t.Documento
+        linea = int(t.LineaId_id)
+        concepto = int(t.ConceptoId_id)
+        index[doc][linea][concepto] += float(t.Horas)
+    return index
+
+
+def build_tiempos_facturables_index(qs):
+    """
+    index[LineaId][ClienteId] = horas
+    """
+    index = defaultdict(lambda: defaultdict(float))
+    for t in qs:
+        linea = int(t.LineaId_id)
+        cliente = int(t.ClienteId_id)
+        index[linea][cliente] += float(t.Horas)
+    return index
+
 
 # -------------------------
 # Views (CON decoradores)
@@ -149,14 +212,19 @@ def registro_tiempos_guardar(request):
 
                     if 'ClienteId' in row and 'Tiempo_Clientes' in row:
                         guardar_tiempos_cliente(
-                            anio, mes, documento,
+                            anio,
+                            mes,
+                            documento,
                             row.get('ClienteId'),
-                            linea_id, modulo_id,
+                            linea_id,
+                            modulo_id,
                             row.get('Tiempo_Clientes')
                         )
                     elif 'ConceptoId' in row and 'Tiempo_Conceptos' in row:
                         guardar_tiempos_concepto(
-                            anio, mes, documento,
+                            anio,
+                            mes,
+                            documento,
                             row.get('ConceptoId'),
                             linea_id,
                             row.get('Tiempo_Conceptos')
@@ -193,93 +261,144 @@ def registro_tiempos_guardar(request):
             return JsonResponse({'status': 'error', 'error': str(e)})
     return JsonResponse({'status': 'error', 'error': 'Método no permitido.'})
 
+
 @login_required
 @verificar_permiso('can_manage_registro_tiempos')
 def registro_tiempos_index(request):
-    empleados = Empleado.objects.select_related('LineaId', 'PerfilId', 'ModuloId').all().order_by('Nombre')
-    consultores = Consultores.objects.select_related('LineaId', 'PerfilId', 'ModuloId').all().order_by('Nombre')
-    clientes = Clientes.objects.all().order_by('Nombre_Cliente')  # ⬅ queryset de objetos
-    conceptos = Concepto.objects.all()
-    tiempo_clientes = Tiempos_Cliente.objects.select_related('ClienteId').all()
-    tiempo_conceptos = TiemposConcepto.objects.select_related('ConceptoId').all()
-    horas_facturables = TiemposFacturables.objects.select_related('LineaId', 'ClienteId').all()
-    lineas = Linea.objects.all()
-
     colaborador_info = []
     lineas_info = []
     show_data = False
 
-    if request.method == 'GET':
-        form = ColaboradorFilterForm(request.GET)
-        if form.is_valid():
-            empleados, consultores, tiempo_clientes, tiempo_conceptos = filtrar_colaboradores(
-                form, empleados, consultores, clientes, tiempo_clientes, tiempo_conceptos
+    # Formularios de filtro
+    form = ColaboradorFilterForm(request.GET or None)
+
+    # Base de catálogos (ligeros)
+    clientes_qs = Clientes.objects.all().order_by('Nombre_Cliente').only('ClienteId', 'Nombre_Cliente')
+    conceptos_qs = Concepto.objects.all()
+
+    # Estos se sobreescribirán si hay datos
+    clientes_visibles = clientes_qs.none()
+    conceptos_visibles = conceptos_qs
+
+    if request.method == 'GET' and 'buscar' in request.GET and form.is_valid():
+        # Querysets base para el período / filtros
+        empleados = Empleado.objects.select_related('LineaId', 'PerfilId', 'ModuloId').all().order_by('Documento')
+        consultores = Consultores.objects.select_related('LineaId', 'PerfilId', 'ModuloId').all().order_by('Documento')
+        tiempo_clientes = Tiempos_Cliente.objects.select_related('ClienteId', 'LineaId', 'ModuloId').all()
+        tiempo_conceptos = TiemposConcepto.objects.select_related('ConceptoId', 'LineaId').all()
+        horas_facturables = TiemposFacturables.objects.select_related('LineaId', 'ClienteId').all()
+        lineas = Linea.objects.all()
+
+        # Filtrar por año/mes/línea/empleado/consultor/cliente
+        empleados, consultores, tiempo_clientes, tiempo_conceptos = filtrar_colaboradores(
+            form, empleados, consultores, clientes_qs, tiempo_clientes, tiempo_conceptos
+        )
+
+        # Filtrar clientes visibles según el filtro de cliente
+        clientes_visibles = clientes_qs
+        cliente_obj = form.cleaned_data.get('ClienteId')
+        if cliente_obj:
+            cliente_pk = getattr(cliente_obj, "pk", cliente_obj)
+            clientes_visibles = clientes_visibles.filter(ClienteId=cliente_pk)
+
+        # Reducir tiempos únicamente a los documentos filtrados (empleados + consultores)
+        documentos_empleados = list(empleados.values_list('Documento', flat=True))
+        documentos_consultores = list(consultores.values_list('Documento', flat=True))
+        documentos = documentos_empleados + documentos_consultores
+
+        if documentos:
+            tiempo_clientes = tiempo_clientes.filter(Documento__in=documentos)
+            tiempo_conceptos = tiempo_conceptos.filter(Documento__in=documentos)
+
+        # Construir índices en memoria para evitar N+1 queries
+        tiempos_clientes_idx = build_tiempo_clientes_index(tiempo_clientes)
+        tiempos_conceptos_idx = build_tiempo_conceptos_index(tiempo_conceptos)
+
+        # Empleados
+        for empleado in empleados:
+            info = obtener_info_colaborador(
+                empleado,
+                clientes_visibles,
+                conceptos_qs,
+                tiempos_clientes_idx,
+                tiempos_conceptos_idx
             )
+            if info:
+                colaborador_info.append(info)
 
-            # ⬇️ NUEVO: limitar también el queryset de clientes visibles
-            cliente_obj = form.cleaned_data.get('ClienteId')
-            if cliente_obj:
-                cliente_pk = getattr(cliente_obj, "pk", cliente_obj)  # soporta objeto o id
-                clientes = clientes.filter(ClienteId=cliente_pk)
-            # (opcional) si quieres mostrar solo clientes con horas en el período cuando NO hay filtro:
-            # else:
-            #     ids_tc = tiempo_clientes.values_list('ClienteId_id', flat=True).distinct()
-            #     ids_tf = horas_facturables.values_list('ClienteId_id', flat=True).distinct()
-            #     clientes = clientes.filter(ClienteId__in=set(ids_tc) | set(ids_tf))
+        # Consultores (pueden tener varios módulos)
+        for consultor in consultores:
+            modulos_tarifa = Modulo.objects.filter(
+                tarifa_consultores__documentoId=consultor.Documento
+            ).distinct()
+            modulos_tiempos = Modulo.objects.filter(
+                tiempos_cliente__Documento=consultor.Documento
+            ).distinct()
+            modulos = (modulos_tarifa | modulos_tiempos).distinct()
 
-            for empleado in empleados:
-                info = obtener_info_colaborador(empleado, clientes, conceptos, tiempo_clientes, tiempo_conceptos)
+            if modulos.exists():
+                for modulo in modulos:
+                    info = obtener_info_colaborador(
+                        consultor,
+                        clientes_visibles,
+                        conceptos_qs,
+                        tiempos_clientes_idx,
+                        tiempos_conceptos_idx,
+                        modulo
+                    )
+                    if info:
+                        colaborador_info.append(info)
+            else:
+                info = obtener_info_colaborador(
+                    consultor,
+                    clientes_visibles,
+                    conceptos_qs,
+                    tiempos_clientes_idx,
+                    tiempos_conceptos_idx
+                )
                 if info:
                     colaborador_info.append(info)
 
-            for consultor in consultores:
-                modulos_tarifa = Modulo.objects.filter(
-                    tarifa_consultores__documentoId=consultor.Documento
-                ).distinct()
-                modulos_tiempos = Modulo.objects.filter(
-                    tiempos_cliente__Documento=consultor.Documento
-                ).distinct()
-                modulos = (modulos_tarifa | modulos_tiempos).distinct()
+        # Ordenar por Nombre y Empresa
+        colaborador_info = sorted(
+            colaborador_info,
+            key=lambda x: (x.get('Nombre', ''), x.get('Empresa', ''))
+        )
+        show_data = bool(colaborador_info)
 
-                if modulos.exists():
-                    for modulo in modulos:
-                        info = obtener_info_colaborador(consultor, clientes, conceptos, tiempo_clientes, tiempo_conceptos, modulo)
-                        if info:
-                            colaborador_info.append(info)
-                else:
-                    info = obtener_info_colaborador(consultor, clientes, conceptos, tiempo_clientes, tiempo_conceptos)
-                    if info:
-                        colaborador_info.append(info)
+        # Tiempo facturable por línea
+        lineas_unicas = list({c['Linea'] for c in colaborador_info})
+        tiempos_facturables, lineas, clientes_visibles = filtrar_linea(
+            form, horas_facturables, lineas, clientes_visibles
+        )
 
-            colaborador_info = sorted(colaborador_info, key=lambda x: (x.get('Nombre', ''), x.get('Empresa', '')))
-            show_data = bool(colaborador_info)
-
-            lineas_unicas = list({c['Linea'] for c in colaborador_info})
-            tiempos_facturables, lineas, clientes = filtrar_linea(form, horas_facturables, lineas, clientes)
-
+        if lineas_unicas:
+            tiempos_facturables_idx = build_tiempos_facturables_index(tiempos_facturables)
             for linea in lineas:
                 if linea.Linea in lineas_unicas:
-                    lineas_info.append(obtener_info_linea(linea, clientes, tiempos_facturables))
+                    lineas_info.append(
+                        obtener_info_linea(linea, clientes_visibles, tiempos_facturables_idx)
+                    )
     else:
-        form = ColaboradorFilterForm()
+        # No se ha hecho búsqueda aún o el formulario no es válido
+        horas_facturables = TiemposFacturables.objects.none()
 
     totales, totales_facturables = calcular_totales(colaborador_info, lineas_info)
 
     context = {
         'form': form,
         'colaborador_info': colaborador_info,
-        # ⬇️ AHORA pasamos objetos, no values_list:
-        'Clientes': clientes.only('ClienteId', 'Nombre_Cliente'),
-        'Conceptos': conceptos,  # igual: los usaremos como objetos
+        'Clientes': clientes_visibles.only('ClienteId', 'Nombre_Cliente') if show_data else clientes_qs.none(),
+        'Conceptos': conceptos_qs,
         'Totales': totales,
         'TotalesFacturables': totales_facturables,
         'Horas_Facturables': horas_facturables,
         'Tiempo_Lineas': lineas_info,
         'show_data': show_data,
-        'mensaje': "No se encontraron resultados para los filtros aplicados." if not colaborador_info else ""
+        'mensaje': "No se encontraron resultados para los filtros aplicados." if (not colaborador_info and 'buscar' in request.GET) else ""
     }
-    print(context)
     return render(request, 'Registro_Tiempos/registro_tiempos_index.html', context)
+
 
 def filtrar_colaboradores(form, empleados, consultores, clientes, tiempo_clientes, tiempo_conceptos):
     empleados = empleados.order_by('Documento')
@@ -310,6 +429,7 @@ def filtrar_colaboradores(form, empleados, consultores, clientes, tiempo_cliente
 
     return empleados, consultores, tiempo_clientes, tiempo_conceptos
 
+
 def filtrar_linea(form, tiempos_facturables, lineas, clientes):
     tiempos_facturables = tiempos_facturables.order_by('LineaId')
     anio = form.cleaned_data.get('Anio')
@@ -326,12 +446,13 @@ def filtrar_linea(form, tiempos_facturables, lineas, clientes):
 
     if cliente_sel:
         cliente_pk = getattr(cliente_sel, "pk", cliente_sel)
-        tiempos_facturables = tiempos_facturables.filter(ClienteId_id=cliente_pk)  # FK -> usa _id
-        clientes = clientes.filter(ClienteId=cliente_pk)  # acá sí es IntegerField en la tabla Clientes
+        tiempos_facturables = tiempos_facturables.filter(ClienteId_id=cliente_pk)
+        clientes = clientes.filter(ClienteId=cliente_pk)
 
     return tiempos_facturables, lineas, clientes
 
-def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes, tiempo_conceptos, modulo=None):
+
+def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes_idx, tiempo_conceptos_idx, modulo=None):
     cliente_info = {c.ClienteId: c for c in clientes}
     concepto_info = {c.ConceptoId: c for c in conceptos}
 
@@ -344,36 +465,38 @@ def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes, 
 
     linea_id = int(colaborador.LineaId_id)
 
-    # ⬇️  CLAVE: usar *_id y agregar LineaId_id para asegurar coincidencia
-    horas_trabajadas_cliente = tiempo_clientes.filter(
-        Documento=colaborador.Documento,
-        ModuloId_id=modulo_id,
-        LineaId_id=linea_id
-    )
+    # Horas por cliente desde índice en memoria
     clientes_colaborador = {c.ClienteId: 0 for c in clientes}
-    for t in horas_trabajadas_cliente:
-        cid = int(t.ClienteId_id)
-        if cid in clientes_colaborador:
-            # Asegurar tipo numérico
-            clientes_colaborador[cid] += float(t.Horas)
+    horas_cliente_map = (
+        tiempo_clientes_idx
+            .get(colaborador.Documento, {})
+            .get(modulo_id, {})
+            .get(linea_id, {})
+    )
+    for cid in clientes_colaborador:
+        if cid in horas_cliente_map:
+            clientes_colaborador[cid] = float(horas_cliente_map[cid])
 
     total_horas_clientes = sum(clientes_colaborador.values())
 
-    horas_trabajadas_concepto = tiempo_conceptos.filter(
-        Documento=colaborador.Documento,
-        LineaId_id=linea_id
-    )
+    # Horas por concepto desde índice en memoria
     conceptos_colaborador = {c.ConceptoId: 0 for c in conceptos}
-    for t in horas_trabajadas_concepto:
-        ccid = int(t.ConceptoId_id)
-        if ccid in conceptos_colaborador:
-            conceptos_colaborador[ccid] += float(t.Horas)
+    horas_conceptos_map = (
+        tiempo_conceptos_idx
+            .get(colaborador.Documento, {})
+            .get(linea_id, {})
+    )
+    for ccid in conceptos_colaborador:
+        if ccid in horas_conceptos_map:
+            conceptos_colaborador[ccid] = float(horas_conceptos_map[ccid])
 
     total_horas_conceptos = sum(conceptos_colaborador.values())
     total_horas_trabajadas = total_horas_clientes + total_horas_conceptos
     tiene_horas = total_horas_trabajadas > 0
 
-    if (colaborador.Activo if isinstance(colaborador, Empleado) else colaborador.Estado) or tiene_horas:
+    activo_flag = (colaborador.Activo if isinstance(colaborador, Empleado) else colaborador.Estado)
+
+    if activo_flag or tiene_horas:
         return {
             'Nombre': colaborador.Nombre,
             'Documento': colaborador.Documento,
@@ -383,31 +506,56 @@ def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes, 
             'ModuloId': modulo_id,
             'Modulo': modulo_nombre,
             'Empresa': "Flag Soluciones" if isinstance(colaborador, Empleado) else colaborador.Empresa,
-            'Clientes': {cid: {'Cliente': cliente_info[cid].Nombre_Cliente, 'ClienteId': cid, 'tiempo_clientes': horas}
-                         for cid, horas in clientes_colaborador.items()},
+            'Clientes': {
+                cid: {
+                    'Cliente': cliente_info[cid].Nombre_Cliente,
+                    'ClienteId': cid,
+                    'tiempo_clientes': horas
+                }
+                for cid, horas in clientes_colaborador.items()
+            },
             'Total_Clientes': total_horas_clientes,
-            'Conceptos': {ccid: {'Concepto': concepto_info[ccid].Descripcion, 'ConceptoId': ccid, 'tiempo_conceptos': horas}
-                          for ccid, horas in conceptos_colaborador.items()},
+            'Conceptos': {
+                ccid: {
+                    'Concepto': concepto_info[ccid].Descripcion,
+                    'ConceptoId': ccid,
+                    'tiempo_conceptos': horas
+                }
+                for ccid, horas in conceptos_colaborador.items()
+            },
             'Total_Conceptos': total_horas_conceptos,
             'Total_Horas': total_horas_trabajadas,
-            'Activo': (colaborador.Activo if isinstance(colaborador, Empleado) else colaborador.Estado)
+            'Activo': activo_flag,
         }
     return None
 
-def obtener_info_linea(linea, clientes, tiempo_facturables):
+
+def obtener_info_linea(linea, clientes, tiempo_facturables_idx):
     cliente_info = {c.ClienteId: c for c in clientes}
-    horas_facturables_cliente = tiempo_facturables.filter(LineaId=linea)
     clientes_linea = {c.ClienteId: 0 for c in clientes}
-    for t in horas_facturables_cliente:
-        if t.ClienteId_id in clientes_linea:
-            clientes_linea[t.ClienteId_id] += t.Horas
+
+    horas_linea_map = tiempo_facturables_idx.get(linea.LineaId, {})
+
+    for cid in clientes_linea:
+        if cid in horas_linea_map:
+            clientes_linea[cid] = float(horas_linea_map[cid])
+
     total_horas_facturables = sum(clientes_linea.values())
+
     return {
         'Linea': linea.Linea,
         'LineaId': linea.LineaId,
-        'Clientes': {cid: {'Cliente': cliente_info[cid].Nombre_Cliente, 'ClienteId': cid, 'horas_facturables': horas} for cid, horas in clientes_linea.items()},
+        'Clientes': {
+            cid: {
+                'Cliente': cliente_info[cid].Nombre_Cliente,
+                'ClienteId': cid,
+                'horas_facturables': horas
+            }
+            for cid, horas in clientes_linea.items()
+        },
         'Total_Horas_Facturables': total_horas_facturables
     }
+
 
 def calcular_totales(colaborador_info, lineas_info):
     totales = defaultdict(Decimal)
@@ -419,18 +567,22 @@ def calcular_totales(colaborador_info, lineas_info):
         for concepto in empleado['Conceptos'].values():
             totales[concepto['ConceptoId']] += Decimal(str(concepto['tiempo_conceptos']))
 
-    totales['Total_Clientes'] = sum(Decimal(str(e['Total_Clientes'])) for e in colaborador_info)
-    totales['Total_Conceptos'] = sum(Decimal(str(e['Total_Conceptos'])) for e in colaborador_info)
-    totales['Total_Horas'] = sum(Decimal(str(e['Total_Horas'])) for e in colaborador_info)
+    totales['Total_Clientes'] = sum(Decimal(str(e['Total_Clientes'])) for e in colaborador_info) if colaborador_info else Decimal('0')
+    totales['Total_Conceptos'] = sum(Decimal(str(e['Total_Conceptos'])) for e in colaborador_info) if colaborador_info else Decimal('0')
+    totales['Total_Horas'] = sum(Decimal(str(e['Total_Horas'])) for e in colaborador_info) if colaborador_info else Decimal('0')
 
     for linea in lineas_info:
         for cliente in linea['Clientes'].values():
             totales_facturables[cliente['ClienteId']] += Decimal(str(cliente['horas_facturables']))
 
-    totales_facturables['Total_Clientes'] = sum(Decimal(str(l['Total_Horas_Facturables'])) for l in lineas_info)
-    totales_facturables['Total_Horas'] = sum(Decimal(str(l['Total_Horas_Facturables'])) for l in lineas_info)
+    totales_facturables['Total_Clientes'] = sum(
+        Decimal(str(l['Total_Horas_Facturables']))
+        for l in lineas_info
+    ) if lineas_info else Decimal('0')
+    totales_facturables['Total_Horas'] = totales_facturables['Total_Clientes']
 
     return totales, totales_facturables
+
 
 def obtener_horas_habiles(anio, mes):
     try:
@@ -439,6 +591,7 @@ def obtener_horas_habiles(anio, mes):
     except Horas_Habiles.DoesNotExist:
         return None, None
 
+
 @login_required
 @verificar_permiso('can_manage_registro_tiempos')
 def obtener_horas_habiles_view(request):
@@ -446,6 +599,7 @@ def obtener_horas_habiles_view(request):
     mes = request.GET.get('mes')
     dias_habiles, horas_laborales = obtener_horas_habiles(anio, mes)
     return JsonResponse({'Dias_Habiles': dias_habiles, 'Horas_Laborales': horas_laborales})
+
 
 def calcular_totales_por_linea(datos):
     totales_operacion = defaultdict(float)
