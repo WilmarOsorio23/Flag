@@ -3,6 +3,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
     const csrfToken = csrfInput ? csrfInput.value : '';
 
+    // Cache de horas hábiles para no hacer fetch en cada keypress
+    let horasHabilesCache = {
+        anio: null,
+        mes: null,
+        diasHabiles: null,
+        horasLaborales: null,
+        horasLaboralesTotales: null,
+    };
+
+    // Timer para hacer debounce de recálculo de totales
+    let recalcTimeout = null;
+
     // Recuperar año/mes desde la URL y exponer globalmente
     updateAnioMesFromURL();
 
@@ -35,6 +47,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Helpers de mensajes (unificados)
+    function showInfo(msg) { return window.showMessage ? window.showMessage(msg, 'info') : alert(msg); }
+    function showOk(msg) { return window.showSuccess ? window.showSuccess(msg) : (window.showMessage ? window.showMessage(msg, 'success') : alert(msg)); }
+    function showWarn(msg) { return window.showWarning ? window.showWarning(msg) : (window.showMessage ? window.showMessage(msg, 'warning') : alert(msg)); }
+    function showErr(msg) { return window.showError ? window.showError(msg) : (window.showMessage ? window.showMessage(msg, 'danger') : alert(msg)); }
+
     // UI de guardado: spinner en el botón + mensaje flotante
     function startSavingUI() {
         const btn = document.getElementById('save-button');
@@ -49,18 +67,37 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
         }
 
+        // Mostrar mensaje flotante (sistema unificado)
         if (window.showFloatingMessage) {
             toast = window.showFloatingMessage('Guardando...', 'info');
+        } else if (window.showMessage) {
+            toast = window.showMessage('Guardando...', 'info');
         }
 
         function stop(resultType = null, resultMessage = null) {
-            if (toast && toast.remove) toast.remove();
+            // Ocultar toast si existe
+            try {
+                if (toast && typeof window.hideMessage === 'function') {
+                    window.hideMessage(toast);
+                } else if (toast && toast.remove) {
+                    toast.remove();
+                }
+            } catch (e) {
+                console.error('Error ocultando mensaje:', e);
+            }
+
+            // Restaurar botón
             if (btn) {
                 btn.disabled = false;
                 if (btn.dataset.originalHtml) btn.innerHTML = btn.dataset.originalHtml;
             }
-            if (resultMessage && window.showMessage) {
-                window.showMessage(resultMessage, resultType || 'info');
+
+            // Mostrar resultado final
+            if (resultMessage) {
+                if (resultType === 'success') showOk(resultMessage);
+                else if (resultType === 'warning') showWarn(resultMessage);
+                else if (resultType === 'danger' || resultType === 'error') showErr(resultMessage);
+                else showInfo(resultMessage);
             }
         }
 
@@ -72,8 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function saveAllRows() {
         // Validación de contexto (Anio/Mes)
         if (!window.originalAnio || !window.originalMes) {
-            if (window.showWarning) window.showWarning('Falta Año/Mes en los filtros. Usa "Buscar" antes de guardar.');
-            else if (window.showMessage) window.showMessage('Falta Año/Mes en los filtros. Usa "Buscar" antes de guardar.', 'warning');
+            showWarn('Falta Año/Mes en los filtros. Usa "Buscar" antes de guardar.');
             return;
         }
 
@@ -81,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const data = [];
         const lineasData = {}; // totales por línea
 
-        // 1) Recopilar datos por fila (empleados/consultores) + acumular por línea
+        // 1) Recopilar datos por fila + acumular por línea
         rows.forEach((row) => {
             const rowData = {};
             const inputs = row.querySelectorAll('input');
@@ -127,10 +163,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 };
             }
 
-            // Sumar operación
             lineasData[lineaId].horasTrabajadas += clientes.reduce((acc, c) => acc + (c.tiempo || 0), 0);
 
-            // Sumar conceptos
             conceptos.forEach(({ concepto, tiempo }) => {
                 if (!lineasData[lineaId].conceptos[concepto]) {
                     lineasData[lineaId].conceptos[concepto] = 0;
@@ -192,7 +226,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 const lineaIdEl = row.querySelector('input[name="LineaId"]');
                 const lineaId = lineaIdEl ? lineaIdEl.value : null;
 
-                // Clientes
                 row.querySelectorAll('input[name^="ClienteId_"]').forEach((input, i) => {
                     const cliente = (input.value || '').trim();
                     const tiempoClienteInput = row.querySelector(`input[name="Tiempo_Clientes_${i + 1}"]`);
@@ -205,7 +238,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
 
-                // Conceptos
                 row.querySelectorAll('input[name^="ConceptoId_"]').forEach((input, i) => {
                     const concepto = (input.value || '').trim();
                     const tiempoConceptoInput = row.querySelector(`input[name="Tiempo_Conceptos_${i + 1}"]`);
@@ -218,7 +250,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
 
-                // Empaquetar
                 clientes.forEach(({ cliente, tiempoCliente }) => {
                     data.push({
                         Documento: rowData.Documento,
@@ -288,22 +319,23 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             body: JSON.stringify({ data })
         })
-        .then(r => r.json())
-        .then(result => {
-            if (result.status === 'success') {
-                saving.stop('success', 'Datos guardados correctamente.');
-                // Actualizar data-original con los nuevos valores para evitar reenvíos innecesarios
-                document.querySelectorAll('input[name^="Tiempo_Clientes_"], input[name^="Tiempo_Conceptos_"], input[name^="Hora_Facturable_"]').forEach(input => {
-                    input.setAttribute('data-original', input.value);
-                });
-            } else {
-                saving.stop('danger', result.error ? `Error: ${result.error}` : 'Error al guardar los datos.');
-            }
-        })
-        .catch(err => {
-            console.error('Error:', err);
-            saving.stop('danger', 'Error de conexión al guardar los datos.');
-        });
+            .then(r => r.json())
+            .then(result => {
+                if (result.status === 'success') {
+                    saving.stop('success', 'Datos guardados correctamente.');
+
+                    // Actualizar data-original con los nuevos valores
+                    document.querySelectorAll('input[name^="Tiempo_Clientes_"], input[name^="Tiempo_Conceptos_"], input[name^="Hora_Facturable_"]').forEach(input => {
+                        input.setAttribute('data-original', input.value);
+                    });
+                } else {
+                    saving.stop('danger', result.error ? `Error: ${result.error}` : 'Error al guardar los datos.');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                saving.stop('danger', 'Error de conexión al guardar los datos.');
+            });
     }
 
     // --------------------- Recalcular totales ---------------------
@@ -347,18 +379,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 totalConceptosRow += horas;
             });
 
-            // Totales por fila
             const tc = row.querySelector('td[data-total-clientes-row]');
             const tco = row.querySelector('td[data-total-conceptos-row]');
             const th = row.querySelector('td[data-total-horas-row]');
             const dif = row.querySelector('td[data-dif-horas-row]');
+            const totalHorasRow = totalClientesRow + totalConceptosRow;
+
             if (tc) tc.textContent = totalClientesRow.toFixed(2);
             if (tco) tco.textContent = totalConceptosRow.toFixed(2);
-            if (th) th.textContent = (totalClientesRow + totalConceptosRow).toFixed(2);
+            if (th) th.textContent = totalHorasRow.toFixed(2);
             if (dif) dif.textContent = (0).toFixed(2);
         });
 
-        // tfoot: por línea
         const tfootRows = document.querySelectorAll('tfoot tr');
         tfootRows.forEach(row => {
             let totalFacturablesRow = 0;
@@ -377,44 +409,66 @@ document.addEventListener('DOMContentLoaded', function () {
             if (totalFacturableCell) totalFacturableCell.textContent = totalFacturablesRow.toFixed(2);
         });
 
-        // Año/Mes (usar selects si existen, si no usar global)
         const anioSel = document.querySelector('select[name="Anio"]');
         const mesSel = document.querySelector('select[name="Mes"]');
         const anio = anioSel ? anioSel.value : (window.originalAnio || '');
         const mes = mesSel ? mesSel.value : (window.originalMes || '');
 
+        const applyHorasHabiles = (diasHabiles, horasLaborales) => {
+            const dias = diasHabiles || 0;
+            const horas = horasLaborales || 0;
+            const horasLaboralesTotales = dias * horas;
+
+            const diasEl = document.querySelector('#dias-habiles');
+            const hlEl = document.querySelector('#horas-habiles');
+            if (diasEl) diasEl.textContent = dias;
+            if (hlEl) hlEl.textContent = horasLaboralesTotales;
+
+            let totalDifHoras = 0;
+            rows.forEach(row => {
+                const th = row.querySelector('td[data-total-horas-row]');
+                const dif = row.querySelector('td[data-dif-horas-row]');
+                const totalHorasRow = th ? parseFloat(th.textContent) || 0 : 0;
+                const difHorasRow = horasLaboralesTotales - totalHorasRow;
+                if (dif) dif.textContent = difHorasRow.toFixed(2);
+                totalDifHoras += difHorasRow;
+            });
+
+            const difFooter = document.querySelector('tfoot th[data-dif-horas]');
+            if (difFooter) difFooter.textContent = totalDifHoras.toFixed(2);
+        };
+
         if (!anio || !mes) {
-            // No hacemos fetch si faltan filtros
             updateFooterTotals(totals);
             return;
         }
 
-        // Horas hábiles y dif. horas
+        if (
+            horasHabilesCache.anio === anio &&
+            horasHabilesCache.mes === mes &&
+            horasHabilesCache.diasHabiles !== null &&
+            horasHabilesCache.horasLaborales !== null
+        ) {
+            applyHorasHabiles(horasHabilesCache.diasHabiles, horasHabilesCache.horasLaborales);
+            updateFooterTotals(totals);
+            return;
+        }
+
         fetch(`/registro_tiempos/horas_habiles/?anio=${anio}&mes=${mes}`)
             .then(response => response.json())
             .then(data => {
                 const diasHabiles = data.Dias_Habiles || 0;
                 const horasLaborales = data.Horas_Laborales || 0;
-                const horasLaboralesTotales = (diasHabiles || 0) * (horasLaborales || 0);
 
-                const diasEl = document.querySelector('#dias-habiles');
-                const hlEl = document.querySelector('#horas-habiles');
-                if (diasEl) diasEl.textContent = diasHabiles;
-                if (hlEl) hlEl.textContent = horasLaboralesTotales;
+                horasHabilesCache = {
+                    anio,
+                    mes,
+                    diasHabiles,
+                    horasLaborales,
+                    horasLaboralesTotales: diasHabiles * horasLaborales
+                };
 
-                let totalDifHoras = 0;
-                rows.forEach(row => {
-                    const th = row.querySelector('td[data-total-horas-row]');
-                    const dif = row.querySelector('td[data-dif-horas-row]');
-                    const totalHorasRow = th ? parseFloat(th.textContent) || 0 : 0;
-                    const difHorasRow = horasLaboralesTotales - totalHorasRow;
-                    if (dif) dif.textContent = difHorasRow.toFixed(2);
-                    totalDifHoras += difHorasRow;
-                });
-
-                const difFooter = document.querySelector('tfoot th[data-dif-horas]');
-                if (difFooter) difFooter.textContent = totalDifHoras.toFixed(2);
-
+                applyHorasHabiles(diasHabiles, horasLaborales);
                 updateFooterTotals(totals);
             })
             .catch(error => {
@@ -440,25 +494,38 @@ document.addEventListener('DOMContentLoaded', function () {
         if (tc) tc.textContent = totals.totalClientes.toFixed(2);
         if (tco) tco.textContent = totals.totalConceptos.toFixed(2);
         if (th) th.textContent = totals.totalHoras.toFixed(2);
-
-        document.querySelectorAll('tfoot th[data-cliente-facturables-id]').forEach(thf => {
-            const clienteId = thf.getAttribute('data-cliente-facturables-id');
-            thf.textContent = (totals.facturables[clienteId] || 0).toFixed(2);
-        });
-
-        const tcf = document.querySelector('tfoot th[data-total-clientes-facturables]');
-        const thf = document.querySelector('tfoot th[data-total-horas-facturables]');
-        if (tcf) tcf.textContent = totals.totalFacturables.toFixed(2);
-        if (thf) thf.textContent = totals.totalFacturables.toFixed(2);
     }
 
     // --------------------- Listeners ---------------------
 
-    document.querySelectorAll('input[name^="Tiempo_Clientes_"], input[name^="Tiempo_Conceptos_"], input[name^="Hora_Facturable_"]').forEach(input => {
+    function onTotalsInputChange() {
+        if (recalcTimeout) clearTimeout(recalcTimeout);
+        recalcTimeout = setTimeout(recalculateTotals, 200);
+    }
+
+    document.querySelectorAll(
+        'input[name^="Tiempo_Clientes_"], input[name^="Tiempo_Conceptos_"], input[name^="Hora_Facturable_"]'
+    ).forEach(input => {
         input.setAttribute('data-original', input.value);
-        input.addEventListener('input', recalculateTotals);
+        input.addEventListener('input', onTotalsInputChange);
     });
 
+    const anioSel = document.querySelector('select[name="Anio"]');
+    const mesSel = document.querySelector('select[name="Mes"]');
+    [anioSel, mesSel].forEach(sel => {
+        if (!sel) return;
+        sel.addEventListener('change', () => {
+            horasHabilesCache = {
+                anio: null,
+                mes: null,
+                diasHabiles: null,
+                horasLaborales: null,
+                horasLaboralesTotales: null,
+            };
+        });
+    });
+
+    // Exponer función global para usarla en el botón "Guardar"
     window.saveAllRows = saveAllRows;
 
     // Cálculo inicial
