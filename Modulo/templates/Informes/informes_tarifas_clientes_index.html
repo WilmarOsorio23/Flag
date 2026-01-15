@@ -108,6 +108,9 @@
                             <button type="submit" name="buscar" class="btn btn-primary mt-3">
                                 <i class="fas fa-glasses"></i>Buscar <!-- Texto e icono de botón -->
                             </button>
+                            <button type="button" id="btn-reset-filtros" class="btn btn-secondary mt-3 ms-2">
+                                <i class="fas fa-redo"></i> Reiniciar
+                            </button>
                         </div>
                     </div>
                 </div>   
@@ -141,57 +144,136 @@
 
                     <!-- Encabezado de la tabla -->
                     <thead>
-                        <!-- Filas dentro del encabezado -->
                         <tr>
-
-                            <!-- Documento Cliente CLIENTES-->
-                            <th>Documento Cliente</th>
-
-                            <!-- Nombre Cliente CLIENTES-->
-                            <th>Nombre Cliente</th>
-
-                            <!-- Estado CLIENTES -->
-                            <th>Estado</th>
-
-                            <!-- Nombre línea TARIFA_CLIENTES-->
-                            <th>Nombre Línea</th>
-
-                            <!-- Módulo TARIFA_CLIENTES-->
-                            <th>Módulo</th>
-
-                            <!-- Año TARIFA_CLIENTES-->   
-                            <th>Año</th>
-
-                            <!-- Mes TARIFA_CLIENTES-->
-                            <th>Mes</th>
-
-                            <!-- Tarifa Hora TARIFA_CLIENTES-->
-                            <th>Tarifa Hora</th>
-
-                            <!-- Tarifa Día TARIFA_CLIENTES-->
-                            <th>Tarifa Día</th>
-
-                            <!-- Tarifa Mes TARIFA_CLIENTES-->
-                            <th>Tarifa Mes</th>
-
-                            <!-- Tarifa bolsa TARIFA_CLIENTES-->
-                            <th>Tarifa Bolsa</th>
-
-                            <!-- Referencia  TARIFA_CLIENTES-->
-                            <th>Referencia</th>
-
-                            <!-- Centro de costos TARIFA_CLIENTES -->
-                            <th>Centro de costos</th>
-                            
-                            <!-- IVA TARIFA_CLIENTES-->
-                            <th>IVA</th>
-
-                            <!-- Sitio trabajo TARIFA_CLIENTES-->
-                            <th>Sitio trabajo</th>   
-
-                            <!-- Moneda TARIFA_CLIENTES-->
-                            <th>Moneda</th>
-                            
+                            <th data-sort="documento" class="sortable" data-direction="default">
+                                Documento Cliente
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="nombre" class="sortable" data-direction="default">
+                                Nombre Cliente
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="estado" class="sortable" data-direction="default">
+                                Estado
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="linea" class="sortable" data-direction="default">
+                                Nombre Línea
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="modulo" class="sortable" data-direction="default">
+                                Módulo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="anio" class="sortable" data-direction="default">
+                                Año
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="mes" class="sortable" data-direction="default">
+                                Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="tarifa_hora" class="sortable" data-direction="default">
+                                Tarifa Hora
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="tarifa_dia" class="sortable" data-direction="default">
+                                Tarifa Día
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="tarifa_mes" class="sortable" data-direction="default">
+                                Tarifa Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="tarifa_bolsa" class="sortable" data-direction="default">
+                                Tarifa Bolsa
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="referencia" class="sortable" data-direction="default">
+                                Referencia
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="centro_costos" class="sortable" data-direction="default">
+                                Centro de costos
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="iva" class="sortable" data-direction="default">
+                                IVA
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="sitio_trabajo" class="sortable" data-direction="default">
+                                Sitio trabajo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="moneda" class="sortable" data-direction="default">
+                                Moneda
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                        </tr>
                     </thead>
 
                     <!-- Lectura de campos para mostrar -->
