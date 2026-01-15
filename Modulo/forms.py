@@ -17,6 +17,7 @@ from .models import ContratosOtrosSi
 from .models import Tarifa_Clientes
 from .models import Referencia
 from .models import CentrosCostos
+from .models import LineaClienteCentroCostos
 from datetime import date, datetime
 from .models import ActividadPagare
 from datetime import date
@@ -2686,6 +2687,7 @@ class UserRoleForm(forms.ModelForm):
             'can_manage_ind': 'Gestionar IND',
             'can_manage_ipc': 'Gestionar IPC',
             'can_manage_linea': 'Gestionar Línea',
+            'can_manage_linea_cliente_centrocostos': 'Gestionar Relación Línea - Cliente - CeCo',
             'can_manage_modulo': 'Gestionar Módulo',
             'can_manage_moneda': 'Gestionar Moneda',
             'can_manage_perfil': 'Gestionar Perfil',
@@ -2806,3 +2808,25 @@ class CustomUserEditForm(forms.ModelForm):
         if CustomUser.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError("Ya existe un usuario con ese email.")
         return email
+
+class LineaClienteCentroCostosForm(forms.ModelForm):
+    class Meta:
+        model = LineaClienteCentroCostos
+        fields = ['linea', 'cliente', 'centro_costo']
+        widgets = {
+            'linea': forms.Select(attrs={'class': 'form-select'}),
+            'cliente': forms.Select(attrs={'class': 'form-select'}),
+            'centro_costo': forms.Select(attrs={'class': 'form-select'}),
+        }
+        labels = {
+            'linea': 'Línea',
+            'cliente': 'Cliente',
+            'centro_costo': 'Centro de Costos',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['linea'].queryset = Linea.objects.all().order_by('Linea')
+        self.fields['cliente'].queryset = Clientes.objects.all().order_by('Nombre_Cliente')
+        self.fields['centro_costo'].queryset = CentrosCostos.objects.all().order_by('codigoCeCo')

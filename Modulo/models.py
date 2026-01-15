@@ -32,6 +32,7 @@ class UserRole(models.Model):
     can_manage_ind = models.BooleanField(default=False)
     can_manage_ipc = models.BooleanField(default=False)
     can_manage_linea = models.BooleanField(default=False)
+    can_manage_linea_cliente_centrocostos = models.BooleanField(default=False)
     can_manage_modulo = models.BooleanField(default=False)
     can_manage_moneda = models.BooleanField(default=False)
     can_manage_perfil = models.BooleanField(default=False)
@@ -308,17 +309,28 @@ class Tiempos_Cliente(models.Model):
     Anio = models.CharField(max_length=4)
     Mes = models.CharField(max_length=2)
     Documento = models.CharField(max_length=20)
+
     ClienteId = models.ForeignKey('Clientes', on_delete=models.CASCADE, db_column='ClienteId')
     LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
     ModuloId = models.ForeignKey('Modulo', on_delete=models.CASCADE, db_column='ModuloId')
+
     Horas = models.DecimalField(max_digits=10, decimal_places=2)
+
+    # ✅ En DB es NULLABLE, así debe ser en Django
     centrocostosId = models.ForeignKey(
-        'CentrosCostos', 
-        on_delete=models.CASCADE, 
-        db_column='centrocostosId')
+        'CentrosCostos',
+        on_delete=models.SET_NULL,         # ✅ evita borrar tiempos si borran un CECO
+        db_column='centrocostosId',
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
-        return f"Año: {self.Anio}, Mes: {self.Mes}, Documento: {self.Documento}, Cliente: {self.ClienteId}, Horas: {self.Horas}"
+        return (
+            f"Año: {self.Anio}, Mes: {self.Mes}, Documento: {self.Documento}, "
+            f"Cliente: {self.ClienteId}, Linea: {self.LineaId}, Modulo: {self.ModuloId}, "
+            f"Horas: {self.Horas}, CECO: {self.centrocostosId_id}"
+        )
 
     class Meta:
         db_table = 'Tiempos_Cliente'
@@ -326,7 +338,10 @@ class Tiempos_Cliente(models.Model):
             models.Index(fields=['ClienteId', 'Anio', 'Mes', 'LineaId']),
         ]
         constraints = [
-            models.UniqueConstraint(fields=['Anio', 'Mes', 'Documento', 'ClienteId', 'LineaId', 'ModuloId'], name='unique_tiempos_cliente')
+            models.UniqueConstraint(
+                fields=['Anio', 'Mes', 'Documento', 'ClienteId', 'LineaId', 'ModuloId'],
+                name='unique_tiempos_cliente'
+            )
         ]
 
 class Consultores(models.Model):
@@ -1057,3 +1072,57 @@ class LoginAttempt(models.Model):
     
     def __str__(self):
         return f"{self.email} - {self.timestamp} - {'Exitoso' if self.successful else 'Fallido'}"
+
+class LineaClienteCentroCostos(models.Model):
+    id = models.AutoField(primary_key=True)
+
+    linea = models.ForeignKey(
+        'Linea',
+        on_delete=models.CASCADE,
+        db_column='LineaId',
+        related_name='clientes_centros',
+    )
+
+    cliente = models.ForeignKey(
+        'Clientes',
+        on_delete=models.CASCADE,
+        db_column='ClienteId',
+        related_name='lineas_centros',
+    )
+
+    centro_costo = models.ForeignKey(
+        'CentrosCostos',
+        on_delete=models.CASCADE,
+        db_column='CentroCostoId',
+        related_name='lineas_clientes',
+    )
+
+    # ✅ “Nombres reconocibles” listos para retorno (sin reemplazar IDs)
+    @property
+    def linea_nombre(self):
+        return self.linea.Linea
+
+    @property
+    def cliente_nombre(self):
+        return self.cliente.Nombre_Cliente
+
+    @property
+    def codigo_ceco(self):
+        return self.centro_costo.codigoCeCo
+
+    def __str__(self):
+        return f"{self.linea.Linea} | {self.cliente.Nombre_Cliente} | {self.centro_costo.codigoCeCo}"
+
+    class Meta:
+        db_table = 'Linea_Cliente_CentroCostos'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['linea', 'cliente', 'centro_costo'],
+                name='uniq_linea_cliente_centrocosto'
+            )
+        ]
+        indexes = [
+            models.Index(fields=['linea'], name='idx_lccc_linea'),
+            models.Index(fields=['cliente'], name='idx_lccc_cliente'),
+            models.Index(fields=['centro_costo'], name='idx_lccc_centrocosto'),
+        ]

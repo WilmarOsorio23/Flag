@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %} Crear Relación Línea - Cliente - Centro de Costos {% endblock %}
+
+{% block contenido %}
+<div class="card">
+  <div class="card-header">
+    <h4 class="card-title">Crear relación</h4>
+  </div>
+
+  <div class="card-body">
+    <form method="POST">
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <button type="submit" class="btn btn-primary">Guardar</button>
+      <a href="{% url 'linea_cliente_centrocostos_index' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+
+<script src="{% static 'messages.js' %}"></script>
+{% endblock %}

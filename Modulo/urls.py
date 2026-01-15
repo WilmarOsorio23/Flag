@@ -51,7 +51,7 @@ from Modulo.Views import informe_facturacion
 from Modulo.Views import informe_historial_cargos
 from Modulo.Views import indicadores_facturacion
 from Modulo.Views import indicadores_margen_cliente
-
+from Modulo.Views import lineaClienteCentroCostos
 from Modulo.Views import facturacion_consultores
 from Modulo.Views import informe_facturacion_consultores
 from Modulo.Views import informe_serv_consultor
@@ -443,6 +443,14 @@ urlpatterns = [
     path('TipoPagare/eliminar/', tipo_pagare_eliminar, name='tipo_pagare_eliminar'),
     path('TipoPagare/confirmar_delete/<int:id>/', tipo_pagare_confirmar_delete, name='tipo_pagare_confirmar_delete'),
     path('TipoPagare/descargar_excel/', tipo_pagare_descargar_excel, name='tipo_pagare_descargar_excel'),
+
+    #Ruta para maestro de linea Cliente CentroCostos
+    path('linea_cliente_centrocostos/', lineaClienteCentroCostos.linea_cliente_centrocostos_index, name='linea_cliente_centrocostos_index'),
+    path('linea_cliente_centrocostos/crear', lineaClienteCentroCostos.linea_cliente_centrocostos_crear, name='linea_cliente_centrocostos_crear'),
+    path('linea_cliente_centrocostos/editar/<int:id>/', lineaClienteCentroCostos.linea_cliente_centrocostos_editar, name='linea_cliente_centrocostos_editar'),
+    path('linea_cliente_centrocostos/eliminar', lineaClienteCentroCostos.linea_cliente_centrocostos_eliminar, name='linea_cliente_centrocostos_eliminar'),
+    path('linea_cliente_centrocostos/verificar-relaciones/', lineaClienteCentroCostos.linea_cliente_centrocostos_verificar_relaciones, name='linea_cliente_centrocostos_verificar_relaciones'),
+    path('linea_cliente_centrocostos/descargar_excel', lineaClienteCentroCostos.linea_cliente_centrocostos_descargar_excel, name='linea_cliente_centrocostos_descargar_excel'),
 
     # Autenticación
     path('cambiar-password/', auth_views.cambiar_password, name='cambiar_password'),     
