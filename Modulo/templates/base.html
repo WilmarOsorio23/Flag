@@ -1,3 +1,4 @@
+{# Modulo/templates/base.html #}
 {% load static %}
 {% load custom_filters %}
 <!doctype html>
@@ -46,7 +47,7 @@
           </ul>
 
           {# ===================== DATOS MAESTROS ===================== #}
-          {% if user|has_permission:'can_manage_actividades_pagares' or user|has_permission:'can_manage_cargos' or user|has_permission:'can_manage_certificacion' or user|has_permission:'can_manage_clientes' or user|has_permission:'can_manage_conceptos' or user|has_permission:'can_manage_consultores' or user|has_permission:'can_manage_contactos' or user|has_permission:'can_manage_costos_indirectos' or user|has_permission:'can_manage_centros_costos' or user|has_permission:'can_manage_empleados' or user|has_permission:'can_manage_empleados_estudios' or user|has_permission:'can_manage_gastos' or user|has_permission:'can_manage_horas_habiles' or user|has_permission:'can_manage_ind' or user|has_permission:'can_manage_ipc' or user|has_permission:'can_manage_linea' or user|has_permission:'can_manage_modulo' or user|has_permission:'can_manage_moneda' or user|has_permission:'can_manage_perfil' or user|has_permission:'can_manage_referencias' or user|has_permission:'can_manage_tipo_documento' or user|has_permission:'can_manage_tipos_contactos' or user|has_permission:'can_manage_tipo_pagare' %}
+          {% if user|has_permission:'can_manage_actividades_pagares' or user|has_permission:'can_manage_cargos' or user|has_permission:'can_manage_certificacion' or user|has_permission:'can_manage_clientes' or user|has_permission:'can_manage_conceptos' or user|has_permission:'can_manage_consultores' or user|has_permission:'can_manage_contactos' or user|has_permission:'can_manage_costos_indirectos' or user|has_permission:'can_manage_centros_costos' or user|has_permission:'can_manage_empleados' or user|has_permission:'can_manage_empleados_estudios' or user|has_permission:'can_manage_gastos' or user|has_permission:'can_manage_horas_habiles' or user|has_permission:'can_manage_ind' or user|has_permission:'can_manage_ipc' or user|has_permission:'can_manage_linea' or user|has_permission:'can_manage_linea_cliente_centrocostos' or user|has_permission:'can_manage_modulo' or user|has_permission:'can_manage_moneda' or user|has_permission:'can_manage_perfil' or user|has_permission:'can_manage_referencias' or user|has_permission:'can_manage_tipo_documento' or user|has_permission:'can_manage_tipos_contactos' or user|has_permission:'can_manage_tipo_pagare' %}
           <ul class="list-unstyled components" data-categoria="maestros">
             <li>
               <a href="#homeSubmenuDatosMaestros" data-bs-toggle="collapse" onclick="removeCollapsive()" aria-expanded="false" class="dropdown-toggle sidebar-item-principal">
@@ -79,6 +80,9 @@
                 {% endif %}
                 {% if user|has_permission:'can_manage_centros_costos' %}
                 <li><a class="nav-item nav-link" href="{% url 'centros_costos_index' %}"><i class="fas fa-table"></i> Centro Costos</a></li>
+                {% endif %}
+                {% if user|has_permission:'can_manage_linea_cliente_centrocostos' %}
+                <li><a class="nav-item nav-link" href="{% url 'linea_cliente_centrocostos_index' %}" data-requires="can_manage_linea_cliente_centrocostos"><i class="fas fa-project-diagram"></i> Relación Línea - Cliente - CeCo</a></li>
                 {% endif %}
                 {% if user|has_permission:'can_manage_empleados' %}
                 <li><a class="nav-item nav-link" href="{% url 'empleado_index' %}"><i class="fas fa-table"></i> Empleados</a></li>

@@ -97,6 +97,13 @@ class RoleMiddleware:
             'linea_crear': 'can_manage_linea',
             'linea_editar': 'can_manage_linea',
             'linea_eliminar': 'can_manage_linea',
+
+            'linea_cliente_centrocostos_index': 'can_manage_linea_cliente_centrocostos',
+            'linea_cliente_centrocostos_crear': 'can_manage_linea_cliente_centrocostos',
+            'linea_cliente_centrocostos_editar': 'can_manage_linea_cliente_centrocostos',
+            'linea_cliente_centrocostos_eliminar': 'can_manage_linea_cliente_centrocostos',
+            'linea_cliente_centrocostos_verificar_relaciones': 'can_manage_linea_cliente_centrocostos',
+            'linea_cliente_centrocostos_descargar_excel': 'can_manage_linea_cliente_centrocostos',
             
             'modulo_index': 'can_manage_modulo',
             'modulo_crear': 'can_manage_modulo',

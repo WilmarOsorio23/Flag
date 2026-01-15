@@ -1,3 +1,4 @@
+# Modulo/templatetags/custom_filters.py
 from collections import defaultdict
 from django import template
 from decimal import Decimal, InvalidOperation
@@ -48,7 +49,7 @@ def get_item(dictionary, key):
 
 @register.filter
 def items(dictionary):
-    return dictionary.items()  # Devuelve los items del diccionario
+    return dictionary.items()
 
 @register.filter
 def get_item_safe(dictionary, key):
@@ -65,40 +66,38 @@ def get_dynamic_key(dictionary, base_key):
     """Obtiene valores de claves dinámicas como Cta_Cobro_1, Cta_Cobro_2, etc."""
     if not isinstance(dictionary, dict):
         return None
-    
-    # Busca todas las claves que coincidan con el patrón
+
     matching_keys = [k for k in dictionary.keys() if str(k).startswith(base_key)]
-    
-    # Ordena las claves numéricamente (Cta_Cobro_1, Cta_Cobro_2, etc.)
     matching_keys.sort(key=lambda x: int(x.split('_')[-1]))
-    
-    # Devuelve lista de valores ordenados
     return [dictionary[key] for key in matching_keys]
-    
+
 @register.filter
 def mul(value, arg):
     try:
         return int(value) * int(arg)
     except (ValueError, TypeError):
         return ''
+
 @register.filter
 def enumerate_items(iterable):
     return enumerate(iterable)
-@register.filter
-def multiply(value, arg):
-    """Multiplica el valor por el argumento"""
-    return float(value) * float(arg)       
+
+# ====== IMPORTANTE: tenías estos filtros duplicados en tu archivo original ======
+# Los dejo UNA sola vez para evitar comportamientos raros en templates.
 
 @register.filter(name='divide')
-def divide(value, arg):
+def divide_float(value, arg):
     try:
         return float(value) / float(arg)
-    except (ValueError, ZeroDivisionError):
+    except (ValueError, ZeroDivisionError, TypeError):
         return 0
 
 @register.filter(name='multiply')
-def multiply(value, arg):
-    return float(value) * float(arg)
+def multiply_float(value, arg):
+    try:
+        return float(value) * float(arg)
+    except (ValueError, TypeError):
+        return 0
 
 @register.filter(name='has_permission')
 def has_permission(user, permission):
@@ -106,13 +105,24 @@ def has_permission(user, permission):
     Template filter to check if a user has a specific permission through their role.
     Usage: {% if user|has_permission:'can_manage_modulo' %}
     """
-    if user.is_superuser or user.is_staff:
+    if getattr(user, "is_superuser", False) or getattr(user, "is_staff", False):
         return True
-        
-    if not user.role:
+
+    role = getattr(user, "role", None)
+    if not role:
         return False
-        
-    return getattr(user.role, permission, False)
+
+    return bool(getattr(role, permission, False))
+
+# ====== OPCIONAL: para simplificar ifs gigantes en templates ======
+@register.filter(name='has_any_permission')
+def has_any_permission(user, perms_csv: str):
+    """
+    Usage:
+      {% if user|has_any_permission:"perm1,perm2,perm3" %} ... {% endif %}
+    """
+    perms = [p.strip() for p in (perms_csv or "").split(",") if p.strip()]
+    return any(has_permission(user, p) for p in perms)
 
 @register.filter
 def currency_format(value):
@@ -120,14 +130,8 @@ def currency_format(value):
     try:
         if value is None or value == '':
             return '$0'
-        
-        # Convertir a decimal para manejo seguro
         decimal_value = Decimal(str(value))
-        
-        # Formatear con separadores de miles y decimales
         formatted = "{:,.0f}".format(decimal_value)
-        
-        # Agregar el signo de peso
         return f"${formatted}"
     except (ValueError, TypeError, InvalidOperation):
         return '$0'
@@ -138,14 +142,8 @@ def currency_format_decimal(value):
     try:
         if value is None or value == '':
             return '$0.00'
-        
-        # Convertir a decimal para manejo seguro
         decimal_value = Decimal(str(value))
-        
-        # Formatear con separadores de miles y 2 decimales
         formatted = "{:,.2f}".format(decimal_value)
-        
-        # Agregar el signo de peso
         return f"${formatted}"
     except (ValueError, TypeError, InvalidOperation):
         return '$0.00'
@@ -153,14 +151,14 @@ def currency_format_decimal(value):
 @register.filter
 def sub(value, arg):
     return value - arg
-    
+
 @register.filter
 def get_range(value):
     return range(1, value + 1)
 
 @register.filter
-def index(list, i):
+def index(lst, i):
     try:
-        return list[i-1]  # Restamos 1 para que i=1 acceda al índice 0
+        return lst[i-1]
     except (IndexError, TypeError):
         return None

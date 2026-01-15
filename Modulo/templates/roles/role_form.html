@@ -1,3 +1,4 @@
+{# Modulo/templates/roles/role_form.html #}
 {% extends 'base.html' %}
 
 {% block contenido %}
@@ -73,7 +74,7 @@
                                     <div class="accordion-body">
                                         <div class="row">
                                             {% for field in form %}
-                                                {% if field.name in "can_manage_actividades_pagares,can_manage_cargos,can_manage_certificacion,can_manage_clientes,can_manage_conceptos,can_manage_consultores,can_manage_contactos,can_manage_costos_indirectos,can_manage_centros_costos,can_manage_empleados,can_manage_empleados_estudios,can_manage_gastos,can_manage_horas_habiles,can_manage_ind,can_manage_ipc,can_manage_linea,can_manage_modulo,can_manage_moneda,can_manage_perfil,can_manage_referencias,can_manage_tipo_documento,can_manage_tipos_contactos,can_manage_tipo_pagare" %}
+                                                {% if field.name in "can_manage_actividades_pagares,can_manage_cargos,can_manage_certificacion,can_manage_clientes,can_manage_conceptos,can_manage_consultores,can_manage_contactos,can_manage_costos_indirectos,can_manage_centros_costos,can_manage_empleados,can_manage_empleados_estudios,can_manage_gastos,can_manage_horas_habiles,can_manage_ind,can_manage_ipc,can_manage_linea,can_manage_linea_cliente_centrocostos,can_manage_modulo,can_manage_moneda,can_manage_perfil,can_manage_referencias,can_manage_tipo_documento,can_manage_tipos_contactos,can_manage_tipo_pagare" %}
                                                     <div class="col-md-6 mb-2">
                                                         <div class="form-check form-switch">
                                                             {{ field }}

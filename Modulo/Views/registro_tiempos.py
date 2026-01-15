@@ -1,4 +1,6 @@
-from decimal import Decimal
+# Modulo/Views/registro_tiempos.py
+
+from decimal import Decimal, InvalidOperation
 import json
 from collections import defaultdict
 
@@ -12,7 +14,8 @@ from Modulo.forms import ColaboradorFilterForm
 from Modulo.models import (
     Clientes, Concepto, Consultores, Empleado, Horas_Habiles,
     Ind_Operat_Clientes, Ind_Operat_Conceptos, Linea, Modulo,
-    Tiempos_Cliente, TiemposConcepto, TiemposFacturables
+    Tiempos_Cliente, TiemposConcepto, TiemposFacturables,
+    LineaClienteCentroCostos,  # ✅ NUEVO
 )
 from Modulo.decorators import verificar_permiso
 
@@ -20,13 +23,105 @@ from Modulo.decorators import verificar_permiso
 # -------------------------
 # Helpers (SIN decoradores)
 # -------------------------
-def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, modulo_id, horas):
+
+def _to_decimal(v) -> Decimal:
+    """
+    Convierte string/num a Decimal seguro.
+    Soporta '' / None / coma decimal.
+    """
+    if v is None:
+        return Decimal("0")
+    s = str(v).strip()
+    if s == "":
+        return Decimal("0")
+    s = s.replace(",", ".")
+    try:
+        return Decimal(s)
+    except (InvalidOperation, ValueError):
+        return Decimal("0")
+
+
+def build_lccc_index():
+    """
+    Construye un índice en memoria para resolver CentroCostoId por (LineaId, ClienteId).
+
+    Retorna:
+      - idx[(linea_id, cliente_id)] = centro_costo_id  (elige determinístico si hay múltiples)
+      - multi_keys = set(keys) donde hay más de 1 CECO para el mismo (linea, cliente)
+
+    Regla cuando hay múltiples:
+      - se elige el primero por codigoCeCo ASC, luego por id ASC
+    """
+    qs = (
+        LineaClienteCentroCostos.objects
+        .select_related("centro_costo")
+        .only("linea_id", "cliente_id", "centro_costo_id", "centro_costo__codigoCeCo")
+        .order_by("linea_id", "cliente_id", "centro_costo__codigoCeCo", "centro_costo_id")
+    )
+
+    idx = {}
+    multi_keys = set()
+
+    for r in qs:
+        key = (int(r.linea_id), int(r.cliente_id))
+        if key in idx:
+            multi_keys.add(key)
+            continue
+        idx[key] = int(r.centro_costo_id)
+
+    return idx, multi_keys
+
+
+def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, modulo_id, horas, lccc_idx=None, lccc_multi=None, warnings=None):
+    """
+    Guarda Tiempos_Cliente y asigna automaticamente centrocostosId según:
+      Linea_Cliente_CentroCostos (LineaId + ClienteId) -> CentroCostoId
+    """
     try:
         if not modulo_id:
             raise ValidationError("El campo ModuloId es requerido.")
         if not str(modulo_id).isdigit():
             raise ValidationError("ModuloId debe ser un número entero válido.")
         modulo_id = int(modulo_id)
+
+        if not str(cliente_id).isdigit():
+            raise ValidationError("ClienteId debe ser un entero válido.")
+        if not str(linea_id).isdigit():
+            raise ValidationError("LineaId debe ser un entero válido.")
+
+        cliente_id = int(cliente_id)
+        linea_id = int(linea_id)
+
+        horas_dec = _to_decimal(horas)
+
+        # ✅ Resolver CECO por índice en memoria (1 query total en el request)
+        ceco_id = None
+        key = (linea_id, cliente_id)
+
+        if lccc_idx is not None:
+            ceco_id = lccc_idx.get(key)
+
+            # warnings opcionales (no rompen el flujo)
+            if warnings is not None:
+                if ceco_id is None:
+                    warnings.append(f"Sin CECO para LineaId={linea_id}, ClienteId={cliente_id}")
+                elif lccc_multi and key in lccc_multi:
+                    warnings.append(
+                        f"Múltiples CECO para LineaId={linea_id}, ClienteId={cliente_id}. "
+                        f"Se usó CentroCostoId={ceco_id} (por orden codigoCeCo)."
+                    )
+
+        # Si no hay horas -> elimina el registro (mismo comportamiento que ya tenías)
+        if horas_dec <= 0:
+            Tiempos_Cliente.objects.filter(
+                Anio=anio,
+                Mes=mes,
+                Documento=documento,
+                ClienteId_id=cliente_id,
+                LineaId_id=linea_id,
+                ModuloId_id=modulo_id,
+            ).delete()
+            return None
 
         tiempo_cliente, creado = Tiempos_Cliente.objects.get_or_create(
             Anio=anio,
@@ -35,18 +130,31 @@ def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, modulo_i
             ClienteId_id=cliente_id,
             LineaId_id=linea_id,
             ModuloId_id=modulo_id,
-            defaults={'Horas': horas}
+            defaults={
+                'Horas': horas_dec,
+                'centrocostosId_id': ceco_id,  # ✅ auto-CECO
+            }
         )
-        if creado:
-            if horas == '0':
-                tiempo_cliente.delete()
-        else:
-            if horas == '0':
-                tiempo_cliente.delete()
-            elif tiempo_cliente.Horas != horas:
-                tiempo_cliente.Horas = horas
-                tiempo_cliente.save()
+
+        if not creado:
+            changed = False
+
+            # actualizar horas si cambia
+            if tiempo_cliente.Horas != horas_dec:
+                tiempo_cliente.Horas = horas_dec
+                changed = True
+
+            # ✅ siempre sincronizar CECO con la relación (si existe índice)
+            # si no hay relación -> queda NULL
+            if lccc_idx is not None and tiempo_cliente.centrocostosId_id != ceco_id:
+                tiempo_cliente.centrocostosId_id = ceco_id
+                changed = True
+
+            if changed:
+                tiempo_cliente.save(update_fields=["Horas", "centrocostosId"])
+
         return tiempo_cliente
+
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos del cliente: {str(e)}")
 
@@ -194,6 +302,7 @@ def build_tiempos_facturables_index(qs):
 # -------------------------
 # Views (CON decoradores)
 # -------------------------
+
 @login_required
 @verificar_permiso('can_manage_registro_tiempos')
 @transaction.atomic
@@ -202,6 +311,11 @@ def registro_tiempos_guardar(request):
         try:
             data = json.loads(request.body)
             rows = data.get('data', [])
+
+            # ✅ construir índice CECO una sola vez (evita N queries por celda)
+            lccc_idx, lccc_multi = build_lccc_index()
+            warnings = []
+
             for row in rows:
                 if 'Documento' in row:
                     documento = row.get('Documento')
@@ -212,14 +326,18 @@ def registro_tiempos_guardar(request):
 
                     if 'ClienteId' in row and 'Tiempo_Clientes' in row:
                         guardar_tiempos_cliente(
-                            anio,
-                            mes,
-                            documento,
-                            row.get('ClienteId'),
-                            linea_id,
-                            modulo_id,
-                            row.get('Tiempo_Clientes')
+                            anio=anio,
+                            mes=mes,
+                            documento=documento,
+                            cliente_id=row.get('ClienteId'),
+                            linea_id=linea_id,
+                            modulo_id=modulo_id,
+                            horas=row.get('Tiempo_Clientes'),
+                            lccc_idx=lccc_idx,
+                            lccc_multi=lccc_multi,
+                            warnings=warnings
                         )
+
                     elif 'ConceptoId' in row and 'Tiempo_Conceptos' in row:
                         guardar_tiempos_concepto(
                             anio,
@@ -256,9 +374,13 @@ def registro_tiempos_guardar(request):
                             concepto_id=row.get('ConceptoId'),
                             horas_concepto=row.get('horas')
                         )
-            return JsonResponse({'status': 'success'})
+
+            # ✅ No rompe tu JS: sigue siendo status=success
+            return JsonResponse({'status': 'success', 'warnings': warnings[:50]})
+
         except Exception as e:
             return JsonResponse({'status': 'error', 'error': str(e)})
+
     return JsonResponse({'status': 'error', 'error': 'Método no permitido.'})
 
 
