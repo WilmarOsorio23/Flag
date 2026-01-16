@@ -20,6 +20,11 @@ from Modulo.Views import informe_otros_si
 from Modulo.Views import empleado
 from Modulo.Views import consultores
 from Modulo.Views import Nomina
+from Modulo.Views.Nomina import (
+    nomina_index, nomina_crear, nomina_editar, nomina_eliminar,
+    nomina_descargar_excel, verificar_relaciones,
+    nomina_bulk_preview, nomina_bulk_create,   # <-- NUEVO
+)
 from Modulo.Views import Informe_certificaciones
 from Modulo.Views.Informe_Pagare import exportar_pagares_excel, informe_pagares
 from Modulo.Views.Pagare import actualizar_pagare, eliminar_pagares, guardar_pagare, obtener_datos_pagares, obtener_pagares_empleado, pag_ejecutado, pag_planeado, pagare_index
@@ -277,6 +282,10 @@ urlpatterns = [
     path('nomina/eliminar', Nomina.nomina_eliminar, name='nomina_eliminar'),
     path('nomina/descargar_excel', Nomina.nomina_descargar_excel, name='nomina_descargar_excel'),
     path('nomina/verificar-relaciones/', Nomina.verificar_relaciones, name='nomina_verificar_relaciones'),
+
+    # Guardado masivo  
+    path('nomina/bulk/preview/', nomina_bulk_preview, name='nomina_bulk_preview'),
+    path('nomina/bulk/create/', nomina_bulk_create, name='nomina_bulk_create'),
 
 
     # Rutas para tabla Detalle Certificación
