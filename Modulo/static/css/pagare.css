@@ -1,0 +1,223 @@
+/* Modulo/static/css/pagare.css */
+:root{
+  --flag-blue:#0d6efd;
+  --flag-blue-weak: rgba(13,110,253,.14);
+  --flag-blue-soft: rgba(13,110,253,.08);
+  --border-soft:#e5e7eb;
+  --shadow-soft:0 8px 22px rgba(0,0,0,.08);
+}
+
+.pagare-index .pagare-page > .card-header{
+  background: linear-gradient(90deg, var(--flag-blue-soft), #fff);
+  border-bottom: 1px solid rgba(13,110,253,.18);
+}
+.pagare-index .pagare-page .card-title{ color:#0b4fb8; }
+
+.pagare-index .pagare-pill{
+  border-radius:999px;
+  padding:.35rem .6rem;
+}
+
+.pagare-index .pagare-filters{
+  padding: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+  margin-bottom: 14px;
+}
+
+.pagare-index .form-control:focus,
+.pagare-index .form-select:focus{
+  border-color: var(--flag-blue);
+  box-shadow: 0 0 0 .2rem var(--flag-blue-weak);
+}
+
+.pagare-index .table-dark{
+  --bs-table-bg: var(--flag-blue);
+  --bs-table-color: #fff;
+}
+.pagare-index .table-dark th{
+  background-color: var(--flag-blue) !important;
+  color:#fff !important;
+  border-color: rgba(255,255,255,.18) !important;
+}
+.pagare-index .table-bordered{ border-color: rgba(13,110,253,.20); }
+.pagare-index .table-bordered > :not(caption) > *{ border-color: rgba(13,110,253,.18); }
+
+.pagare-index .pagare-employee-card{
+  border: 2px solid #dee2e6;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.pagare-index .pagare-employee-card.is-active{
+  outline: 3px solid rgba(13,110,253,.20);
+  border-color: rgba(13,110,253,.35);
+}
+.pagare-index .pagare-employee-card > .card-header{
+  background: linear-gradient(90deg, rgba(13,110,253,.16), rgba(13,110,253,.06), #fff);
+  border-bottom: 1px solid rgba(13,110,253,.18);
+}
+.pagare-index .pagare-employee-card > .card-header .fw-bold{ color:#0b4fb8; }
+
+.pagare-index .pagare-section{
+  border: 1px solid var(--border-soft);
+  border-left: 5px solid var(--flag-blue);
+  border-radius: 12px;
+  padding: 12px;
+  background: linear-gradient(180deg, #fff, #f8fbff);
+}
+.pagare-index .pagare-section h6{ color:#0b4fb8; }
+
+.pagare-index .pagare-subcard{
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+}
+
+.pagare-index .pagare-table-mini.table-responsive{ max-height: 320px; }
+
+.pagare-index .ej-diff{
+  font-size:12px;
+  color:#6c757d;
+  margin-top:6px;
+}
+.pagare-index .ej-diff b{ color:#2b5ea6; }
+
+.pagare-index .offcanvas .pagare-global{
+  border:1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 14px;
+  background: #fff;
+  box-shadow: var(--shadow-soft);
+}
+.pagare-index .pagare-global-box{
+  border: 1px dashed #d3d9e2;
+  border-radius: 12px;
+  padding: 12px;
+  background:#fbfcff;
+}
+.pagare-index .pagare-global-help{
+  border-top: 1px solid #eef0f3;
+  padding-top: 10px;
+}
+
+.pagare-index .pagare-loading-dot{
+  display:inline-block;
+  width:10px;height:10px;border-radius:999px;
+  background: var(--flag-blue);
+  animation: pgPulse 1s infinite ease-in-out;
+  margin-right:6px;
+}
+@keyframes pgPulse{ 0%{opacity:.2} 50%{opacity:1} 100%{opacity:.2} }
+
+/* ✅ Selector pagaré activo */
+.pagare-index .pg-active-select{
+  min-width: 260px;
+}
+.pagare-index .pg-active-select label{
+  display:block;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+/* ✅ Modal (sin inline styles) */
+.pg-modal-backdrop{
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,.40);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 8vh 16px 16px;
+}
+
+.pg-modal{
+  width: min(560px, 96vw);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 20px 45px rgba(0,0,0,.25);
+  border: 1px solid rgba(13,110,253,.18);
+  overflow: hidden;
+}
+
+.pg-modal--lg{
+  width: min(860px, 96vw);
+}
+
+.pg-modal__header{
+  padding: 14px 16px;
+  background: linear-gradient(90deg, rgba(13,110,253,.12), #fff);
+  border-bottom: 1px solid rgba(13,110,253,.18);
+}
+
+.pg-modal__title{
+  font-weight: 800;
+  color: #0b4fb8;
+}
+
+.pg-modal__subtitle{
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 4px;
+}
+
+.pg-modal__content{
+  padding: 14px 16px;
+  max-height: 55vh;
+  overflow: auto;
+}
+
+.pg-modal__body{
+  padding: 16px;
+}
+
+.pg-modal__actions{
+  padding: 12px 16px;
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  border-top: 1px solid #eef0f3;
+  background: #fff;
+}
+
+.pg-modal__section{
+  border: 1px solid #eef0f3;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #fbfcff;
+}
+
+.pg-modal__section-title{
+  font-weight: 800;
+  color: #0b4fb8;
+  margin-bottom: 2px;
+}
+
+.pg-modal__section-sub{
+  font-size: 12px;
+  color: #6c757d;
+  margin-bottom: 10px;
+}
+
+.pg-modal__radios{
+  display: grid;
+  gap: 8px;
+}
+
+.pg-radio{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(13,110,253,.12);
+  background: #fff;
+  cursor: pointer;
+}
+.pg-radio input{ margin-top: 3px; }
+.pg-radio:hover{ border-color: rgba(13,110,253,.25); background: rgba(13,110,253,.04); }

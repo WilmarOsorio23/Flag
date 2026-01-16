@@ -1164,7 +1164,8 @@ canvas#graficoFacturacion {
     padding: 8px 0;
     min-width: 200px;
     background: #fff;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     margin-left: 10px !important;
     margin-right: 10px !important;
 }
@@ -1244,3 +1245,4 @@ canvas#graficoFacturacion {
     min-height: 300px;
     margin: 20px 0;
 }
+
