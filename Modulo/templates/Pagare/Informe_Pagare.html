@@ -1,776 +1,340 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load custom_filters %}
-{% block titulo %}
-  Informe de Pagarés
-{% endblock %}
+{% block titulo %}Informe de Pagarés{% endblock %}
 
 {% block estilos %}
 <style>
-  .fila-cumplida {
-    background-color: rgb(138, 255, 148) !important;
+  .report-wrap { background: #f6f8fb; padding: 14px; border-radius: 14px; }
+  .report-card { border: 0; border-radius: 16px; box-shadow: 0 10px 30px rgba(16,24,40,.06); overflow: hidden; }
+  .report-header { background: linear-gradient(180deg, #0d6efd 0%, #0b5ed7 100%); color: #fff; }
+  .report-header .sub { opacity: .85; }
+  .chip { display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .6rem; border-radius: 999px; background: rgba(255,255,255,.16); color:#fff; font-size:.85rem; }
+  .filters-card { border: 1px solid rgba(16,24,40,.08); border-radius: 14px; background:#fff; }
+  .filters-grid .dropdown-menu { max-height: 320px; overflow:auto; }
+  .dropdown-item label { white-space: normal; cursor:pointer; }
+  .table thead th { position: sticky; top: 0; z-index: 2; }
+  .table thead th { background: #0d6efd !important; color: #fff; }
+  .sortable { cursor: pointer; user-select:none; }
+  .sort-icon i { display:none; }
+  .sort-icon .sort-icon-default { display:inline; opacity:.9; }
+  .fila-cumplida { background: #d9fbe1 !important; }
+  .badge-soft { background:#eef2ff; color:#3730a3; border:1px solid rgba(55,48,163,.15); }
+  .btn-round { border-radius: 12px; }
+</style>
+<style>
+  /* 1) No recortar dropdowns por la tarjeta */
+  .report-card { overflow: visible !important; }
+
+  /* 2) Asegurar que los dropdowns de filtros tengan scroll y no recorten contenido */
+  #informe-pagares-app .filters-card .dropdown-menu{
+    max-height: 360px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    white-space: normal !important;
+    z-index: 2000 !important;
   }
-  .dropdown-item label {
-    white-space: normal; /* Permitir saltos de línea */
+
+  /* 3) Permitir que el texto haga wrap y no se salga */
+  #informe-pagares-app .filters-card .dropdown-item,
+  #informe-pagares-app .filters-card .dropdown-item label{
+    white-space: normal !important;
+  }
+
+  #informe-pagares-app .filters-card .dropdown-item label{
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+  }
+
+  #informe-pagares-app .filters-card .dropdown-item label span{
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
   }
 </style>
 {% endblock %}
 
 {% block contenido %}
-  <div class="card">
-    <div class="card-header">
-      <h4 class="card-title">Informe de Pagarés</h4>
+<div class="report-wrap" id="informe-pagares-app" data-fecha-actual="{{ fecha_actual }}">
+  <div class="card report-card">
+    <div class="card-header report-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h4 class="mb-0">Informe de Pagarés</h4>
+        <div class="sub small">Filtra, revisa y exporta pagarés con detalle de cuotas.</div>
+      </div>
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="chip"><i class="fas fa-calendar-alt"></i> {{ fecha_actual }}</span>
+        {% if show_data %}
+          <span class="chip"><i class="fas fa-list"></i> {{ pagares_info|length }} registros</span>
+        {% endif %}
+      </div>
     </div>
+
     <div class="card-body">
-      <!-- Fecha del sistema -->
-      <div class="row mb-3">
-        <div class="col-md-3">
-          <div class="form-group">
-            <label class="form-label">Fecha del sistema:</label>
-            <input type="text" class="form-control" value="{{ fecha_actual }}" readonly>
-          </div>
-        </div>
-      </div>
-      
-      <form method="GET" id="filterForm">
-        <div class="row mb-3">
-          <div class="col-md-3">
-            <label for="empleados_con_pagare" class="form-label">{{ form.empleados_con_pagare.label }}</label>
-            <div class="dropdown">
-              <button 
-                class="btn btn-outline-primary dropdown-toggle w-100" 
-                type="button" 
-                id="dropdownEmpleados" 
-                data-bs-toggle="dropdown" 
-                aria-expanded="false"
-                data-selected-text="Seleccione Empleados">
-                Seleccione Empleados
-              </button>
-              <ul class="dropdown-menu w-100" aria-labelledby="dropdownEmpleados">
-                {% for checkbox in form.empleados_con_pagare %}
-                  <li class="dropdown-item">
-                    <label class="form-check-label w-100">
-                      {{ checkbox.tag }} {{ checkbox.choice_label|safe }}
-                    </label>
-                  </li>
-                {% endfor %}
-              </ul>
-            </div>
-          </div>
 
-          <div class="col-md-3">
-            <label for="Anio" class="form-label">{{ form.Anio.label }}</label>
-            <div class="dropdown">
-              <button 
-                class="btn btn-outline-primary dropdown-toggle w-100" 
-                type="button" 
-                id="dropdownAnio" 
-                data-bs-toggle="dropdown" 
-                aria-expanded="false"
-                data-selected-text="Seleccione Año">
-                Seleccione Año
-              </button>
-              <ul class="dropdown-menu w-100" aria-labelledby="dropdownAnio">
-                {% for value, label in form.Anio.field.choices %}
-                  <li class="dropdown-item">
-                    <label class="form-check-label w-100">
-                      <input type="radio" name="Anio" value="{{ value }}" {% if form.Anio.value == value %}checked{% endif %}>{{ label }}
-                    </label>
-                  </li>
-                {% endfor %}
-              </ul>
-            </div>
-          </div>
-
-          <div class="col-md-3">
-            <label for="LineaId" class="form-label">{{ form.LineaId.label }}</label>
-            <div class="dropdown">
-              <button 
-                class="btn btn-outline-primary dropdown-toggle w-100" 
-                type="button" 
-                id="dropdownLinea" 
-                data-bs-toggle="dropdown" 
-                aria-expanded="false"
-                data-selected-text="Seleccione Línea">
-                Seleccione Línea
-              </button>
-              <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
-                {% for checkbox in form.LineaId %}
-                  <li class="dropdown-item">
-                    <label class="form-check-label w-100">
-                      {{ checkbox.tag }} {{ checkbox.choice_label }}
-                    </label>
-                  </li>
-                {% endfor %}
-              </ul>
-            </div>
-          </div>
-
-          <div class="col-md-3">
-            <label for="tipo_pagare" class="form-label">{{ form.tipo_pagare.label }}</label>
-            <div class="dropdown">
-              <button 
-                class="btn btn-outline-primary dropdown-toggle w-100" 
-                type="button" 
-                id="dropdownTipoPagare" 
-                data-bs-toggle="dropdown" 
-                aria-expanded="false"
-                data-selected-text="Seleccione Tipo de Pagaré">
-                Seleccione Tipo de Pagaré
-              </button>
-              <ul class="dropdown-menu w-100" aria-labelledby="dropdownTipoPagare">
-                {% for checkbox in form.tipo_pagare %}
-                  <li class="dropdown-item">
-                    <label class="form-check-label w-100">
-                      {{ checkbox.tag }} {{ checkbox.choice_label }}
-                    </label>
-                  </li>
-                {% endfor %}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <label for="estado_pagare" class="form-label">{{ form.estado_pagare.label }}</label>
-          <div class="dropdown">
-              <button 
-                  class="btn btn-outline-primary dropdown-toggle w-100" 
-                  type="button" 
-                  id="dropdownEstadoPagare" 
-                  data-bs-toggle="dropdown" 
+      <div class="filters-card p-3 mb-3">
+        <form method="GET" id="filterForm">
+          <div class="row g-2 filters-grid align-items-end">
+            <div class="col-12 col-lg-3">
+              <label class="form-label fw-semibold">{{ form.empleados_con_pagare.label }}</label>
+              <div class="dropdown">
+                <button
+                  class="btn btn-outline-primary dropdown-toggle w-100 btn-round"
+                  type="button"
+                  id="dropdownEmpleados"
+                  data-bs-toggle="dropdown"
                   aria-expanded="false"
-                  data-selected-text="Seleccione Estado">
-                  Seleccione Estado
-              </button>
-              <ul class="dropdown-menu w-100" aria-labelledby="dropdownEstadoPagare">
-                  {% for value, label in form.estado_pagare.field.choices %}
-                      <li class="dropdown-item">
-                          <label class="form-check-label w-100">
-                              <input type="radio" name="estado_pagare" value="{{ value }}" {% if form.estado_pagare.value == value %}checked{% endif %}>{{ label }}
-                          </label>
-                      </li>
+                  data-selected-text="Seleccione Empleados">
+                  Seleccione Empleados
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownEmpleados">
+                  {% for checkbox in form.empleados_con_pagare %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label">
+                        {{ checkbox.tag }} <span class="ms-2">{{ checkbox.choice_label|safe }}</span>
+                      </label>
+                    </li>
                   {% endfor %}
-              </ul>
+                </ul>
+              </div>
+              <div class="form-text">Tip: selecciona uno o varios.</div>
+            </div>
+
+            <div class="col-12 col-lg-2">
+              <label class="form-label fw-semibold">{{ form.Anio.label }}</label>
+              <div class="dropdown">
+                <button class="btn btn-outline-primary dropdown-toggle w-100 btn-round"
+                        type="button" id="dropdownAnio" data-bs-toggle="dropdown"
+                        aria-expanded="false" data-selected-text="Todos">
+                  Todos
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownAnio">
+                  {% for value, label in form.Anio.field.choices %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                        <input type="radio" name="Anio" value="{{ value }}" {% if form.Anio.value == value %}checked{% endif %}>
+                        <span class="ms-2">{{ label }}</span>
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-2">
+              <label class="form-label fw-semibold">{{ form.LineaId.label }}</label>
+              <div class="dropdown">
+                <button class="btn btn-outline-primary dropdown-toggle w-100 btn-round"
+                        type="button" id="dropdownLinea" data-bs-toggle="dropdown"
+                        aria-expanded="false" data-selected-text="Todas">
+                  Todas
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
+                  {% for checkbox in form.LineaId %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                        {{ checkbox.tag }} <span class="ms-2">{{ checkbox.choice_label }}</span>
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-3">
+              <label class="form-label fw-semibold">{{ form.tipo_pagare.label }}</label>
+              <div class="dropdown">
+                <button class="btn btn-outline-primary dropdown-toggle w-100 btn-round"
+                        type="button" id="dropdownTipoPagare" data-bs-toggle="dropdown"
+                        aria-expanded="false" data-selected-text="Todos">
+                  Todos
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownTipoPagare">
+                  {% for checkbox in form.tipo_pagare %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                        {{ checkbox.tag }} <span class="ms-2">{{ checkbox.choice_label }}</span>
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-2">
+              <label class="form-label fw-semibold">{{ form.estado_pagare.label }}</label>
+              <select class="form-select btn-round" name="estado_pagare" id="estado_pagare">
+                {% for value, label in form.estado_pagare.field.choices %}
+                  <option value="{{ value }}" {% if form.estado_pagare.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
           </div>
-        </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+            <div class="d-flex gap-2">
+              <button type="submit" name="buscar" class="btn btn-primary btn-round">
+                <i class="fas fa-search me-1"></i> Buscar
+              </button>
+
+              <a href="{% url 'informe_pagares' %}" class="btn btn-outline-secondary btn-round" id="btnLimpiar">
+                <i class="fas fa-broom me-1"></i> Limpiar
+              </a>
+            </div>
+
+            <button type="button" id="btnExportar" class="btn btn-success btn-round">
+              <i class="fas fa-file-excel me-1"></i> Exportar
+            </button>
+          </div>
+        </form>
       </div>
-
-      <div class="mb-4"></div>
-
-        <div class="row">
-
-          <div class="col-md-6 text-start">
-            <button type="submit" name="buscar" class="btn btn-primary">
-              <i class="fas fa-search"></i> Buscar
-            </button>
-          </div>
-          
-          <div class="col-md-6 text-end">
-            <button type="button" id="btnExportar" class="btn btn-success">
-              <i class="fas fa-file-excel"></i> Exportar
-            </button>
-          </div>
-          
-        </div>
-      </form>
 
       {% if show_data %}
-        <!-- Tabla de resultados principal -->
-        <div class="table-responsive mt-4">
-          <table class="table table-bordered table-hover table-sm" id="tablaPagares">
-            <thead class="table-primary">
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover table-sm align-middle" id="tablaPagares">
+            <thead>
               <tr>
-                <th><input type="checkbox" id="selectAll"></th>
+                <th style="width:42px;"><input type="checkbox" id="selectAll"></th>
+
                 <th data-sort="documento" class="sortable" data-direction="default">
                   Documento
                   <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                    <i class="fas fa-sort sort-icon-default"></i>
+                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                    <i class="fas fa-sort-down sort-icon-desc"></i>
                   </span>
                 </th>
+
                 <th data-sort="nombre" class="sortable" data-direction="default">
                   Nombre
                   <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
+                    <i class="fas fa-sort sort-icon-default"></i>
+                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
                 </th>
-                <th data-sort="tipo_pagare" class="sortable" data-direction="default">
-                  Tipo Pagaré
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="descripcion" class="sortable" data-direction="default">
-                  Descripción
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th th data-sort="linea" class="sortable" data-direction="default">
-                  Línea
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="cargo" class="sortable" data-direction="default">
-                  Cargo
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="fecha_ingreso" class="sortable" data-direction="default">
-                  F. Ingreso
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="fecha_inicio" class="sortable" data-direction="default">
-                  F. Inicio Op.
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="consecutivo" class="sortable" data-direction="default">
-                  Consecutivo
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="fecha_pagare" class="sortable" data-direction="default">
-                  F. Pagaré
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="fecha_inicio_cond" class="sortable" data-direction="default">
-                  F. Inicio Cond.
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="fecha_fin_cond" class="sortable" data-direction="default">
-                  F. Fin Cond.
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th  data-sort="valor" class="sortable" data-direction="default">
-                  Valor
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="valor_cond" class="sortable" data-direction="default">
-                  Valor Cond.
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="deuda" class="sortable" data-direction="default">
-                  Deuda
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="meses_cond" class="sortable" data-direction="default">
-                  Meses Cond.
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="cond_hechos" class="sortable" data-direction="default">
-                  Cond. Hechos
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="por_cond" class="sortable" data-direction="default">
-                  Por Cond.
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="ejecucion" class="sortable" data-direction="default">
-                  % Ejec.
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th data-sort="fecha_retiro" class="sortable" data-direction="default">
-                  F. Retiro
-                  <span class="sort-icon">
-                      <i class="fas fa-sort sort-icon-default"></i>
-                      <i class="fas fa-sort-up sort-icon-asc"></i>
-                      <i class="fas fa-sort-down sort-icon-desc"></i>
-                  </span>                
-                </th>
-                <th>Documento</th>
-                <th>Nombre</th>
-                <th>Tipo Pagaré</th>
-                <th>Descripción</th>
-                <th>Estado</th>
-                <th>Línea</th>
-                <th>Cargo</th>
-                <th>F. Ingreso</th>
-                <th>F. Inicio Op.</th>
-                <th>Consecutivo</th>
-                <th>F. Pagaré</th>
-                <th>F. Inicio Cond.</th>
-                <th>F. Fin Cond.</th>
-                <th>Valor</th>
-                <th>Valor Cond.</th>
-                <th>Deuda</th>
-                <th>Meses Cond.</th>
-                <th>Cond. Hechos</th>
-                <th>Por Cond.</th>
-                <th>% Ejec.</th>
-                <th>F. Retiro</th>
+
+                <th data-sort="tipo_pagare" class="sortable" data-direction="default">Tipo</th>
+                <th data-sort="descripcion" class="sortable" data-direction="default">Descripción</th>
+                <th data-sort="estado" class="sortable" data-direction="default">Estado</th>
+                <th data-sort="linea" class="sortable" data-direction="default">Línea</th>
+                <th data-sort="cargo" class="sortable" data-direction="default">Cargo</th>
+                <th data-sort="fecha_ingreso" class="sortable" data-direction="default">F. Ingreso</th>
+                <th data-sort="fecha_inicio" class="sortable" data-direction="default">F. Inicio Op.</th>
+                <th data-sort="consecutivo" class="sortable" data-direction="default">Consecutivo</th>
+                <th data-sort="fecha_pagare" class="sortable" data-direction="default">F. Pagaré</th>
+                <th data-sort="fecha_inicio_cond" class="sortable" data-direction="default">Inicio Cond.</th>
+                <th data-sort="fecha_fin_cond" class="sortable" data-direction="default">Fin Cond.</th>
+                <th data-sort="valor" class="sortable" data-direction="default">Valor</th>
+                <th data-sort="valor_cond" class="sortable" data-direction="default">Valor Cond.</th>
+                <th data-sort="deuda" class="sortable" data-direction="default">Deuda</th>
+                <th data-sort="meses_cond" class="sortable" data-direction="default">Meses</th>
+                <th data-sort="cond_hechos" class="sortable" data-direction="default">Cond. Hechos</th>
+                <th data-sort="por_cond" class="sortable" data-direction="default">Por Cond.</th>
+                <th data-sort="ejecucion" class="sortable" data-direction="default">% Ejec.</th>
+                <th data-sort="fecha_retiro" class="sortable" data-direction="default">F. Retiro</th>
               </tr>
             </thead>
+
             <tbody>
               {% for registro in pagares_info %}
-              <tr>
-                  <td><input type="checkbox" name="selected_pagares" value="{{ registro.ConsecutivoPagare }}" 
-                      data-valor="{{ registro.ValorPagare }}"
-                      data-meses="{{ registro.MesesCondonacion }}"
-                      data-fecha="{{ registro.FechaInicioCondonacion|default:'' }}"
-                      data-documento="{{ registro.Documento }}"
-                      data-nombre="{{ registro.Nombre }}">
+                <tr class="{% if registro.MesesCondonacion and registro.MesesPorCondonar == 0 %}fila-cumplida{% endif %}">
+                  <td>
+                    <input type="checkbox"
+                           name="selected_pagares"
+                           value="{{ registro.ConsecutivoPagare }}"
+                           data-valor="{{ registro.ValorPagare }}"
+                           data-meses="{{ registro.MesesCondonacion }}"
+                           data-fecha="{{ registro.FechaInicioCondonacion|default:'' }}"
+                           data-documento="{{ registro.Documento }}"
+                           data-nombre="{{ registro.Nombre }}">
                   </td>
+
                   <td data-field="documento" class="text-end">{{ registro.Documento }}</td>
                   <td data-field="nombre" class="text-start">{{ registro.Nombre }}</td>
                   <td data-field="tipo_pagare" class="text-start">{{ registro.TipoPagare }}</td>
-                  <td data-field="descripcion" class="text-start">{{ registro.Descripcion}}</td>
+                  <td data-field="descripcion" class="text-start">{{ registro.Descripcion }}</td>
+
+                  <td data-field="estado" class="text-start">
+                    <span class="badge badge-soft">{{ registro.Estado }}</span>
+                  </td>
+
                   <td data-field="linea" class="text-start">{{ registro.Linea }}</td>
                   <td data-field="cargo" class="text-start">{{ registro.Cargo }}</td>
-                  <td data-field="fecha_ingreso" class="text-end">{% if registro.FechaIngreso %}{{ registro.FechaIngreso }}{% else %}-{% endif %}</td>
-                  <td data-field="fecha_inicio" class="text-end">{% if registro.FechaOperacion %}{{ registro.FechaOperacion }}{% else %}-{% endif %}</td>
+
+                  <td data-field="fecha_ingreso" class="text-end">{{ registro.FechaIngreso|default:"-" }}</td>
+                  <td data-field="fecha_inicio" class="text-end">{{ registro.FechaOperacion|default:"-" }}</td>
+
                   <td data-field="consecutivo" class="text-end">{{ registro.ConsecutivoPagare }}</td>
-                  <td data-field="fecha_pagare" class="text-end">v{% if registro.FechaPagare %}{{ registro.FechaPagare }}{% else %}-{% endif %}</td>
-                  <td data-field="fecha_inicio_cond" class="text-end">{% if registro.FechaInicioCondonacion %}{{ registro.FechaInicioCondonacion }}{% else %}-{% endif %}</td>
-                  <td data-field="fecha_fin_cond" class="text-end">{% if registro.FechaFinCondonacion %}{{ registro.FechaFinCondonacion }}{% else %}-{% endif %}</td>
+                  <td data-field="fecha_pagare" class="text-end">{{ registro.FechaPagare|default:"-" }}</td>
+
+                  <td data-field="fecha_inicio_cond" class="text-end">{{ registro.FechaInicioCondonacion|default:"-" }}</td>
+                  <td data-field="fecha_fin_cond" class="text-end">{{ registro.FechaFinCondonacion|default:"-" }}</td>
+
                   <td data-field="valor" class="text-end">$ {{ registro.ValorPagare|currency_format }}</td>
                   <td data-field="valor_cond" class="text-end">$ {{ registro.ValorCondonado|currency_format }}</td>
                   <td data-field="deuda" class="text-end">$ {{ registro.DeudaPagare|currency_format }}</td>
+
                   <td data-field="meses_cond" class="text-end">{{ registro.MesesCondonacion }}</td>
                   <td data-field="cond_hechos" class="text-end">{{ registro.MesesCondonados }}</td>
                   <td data-field="por_cond" class="text-end">{{ registro.MesesPorCondonar }}</td>
+
                   <td data-field="ejecucion" class="text-end">{{ registro.PorcentajeEjecucion|floatformat:2 }}%</td>
-                  <td data-field="fecha_retiro" class="text-end">{% if registro.FechaRetiro %}{{ registro.FechaRetiro|date:"d/m/Y" }}{% else %}-{% endif %}</td>
-                  <td>{{ registro.Documento }}</td>
-                  <td>{{ registro.Nombre }}</td>
-                  <td>{{ registro.TipoPagare }}</td>
-                  <td>{{ registro.Descripcion}}</td>
-                  <td>{{ registro.Estado }}</td>
-                  <td>{{ registro.Linea }}</td>
-                  <td>{{ registro.Cargo }}</td>
-                  <td>{% if registro.FechaIngreso %}{{ registro.FechaIngreso }}{% else %}-{% endif %}</td>
-                  <td>{% if registro.FechaOperacion %}{{ registro.FechaOperacion }}{% else %}-{% endif %}</td>
-                  <td>{{ registro.ConsecutivoPagare }}</td>
-                  <td>{% if registro.FechaPagare %}{{ registro.FechaPagare }}{% else %}-{% endif %}</td>
-                  <td>{% if registro.FechaInicioCondonacion %}{{ registro.FechaInicioCondonacion }}{% else %}-{% endif %}</td>
-                  <td>{% if registro.FechaFinCondonacion %}{{ registro.FechaFinCondonacion }}{% else %}-{% endif %}</td>
-                  <td>$ {{ registro.ValorPagare|floatformat:2 }}</td>
-                  <td>$ {{ registro.ValorCondonado|floatformat:2 }}</td>
-                  <td>$ {{ registro.DeudaPagare|floatformat:2 }}</td>
-                  <td>{{ registro.MesesCondonacion }}</td>
-                  <td>{{ registro.MesesCondonados }}</td>
-                  <td>{{ registro.MesesPorCondonar }}</td>
-                  <td>{{ registro.PorcentajeEjecucion|floatformat:2 }}%</td>
-                  <td>{% if registro.FechaRetiro %}{{ registro.FechaRetiro|date:"d/m/Y" }}{% else %}-{% endif %}</td>
-              </tr>
+                  <td data-field="fecha_retiro" class="text-end">{{ registro.FechaRetiro|default:"-" }}</td>
+                </tr>
               {% endfor %}
-          </tbody>
+            </tbody>
           </table>
         </div>
 
-
-        
-        <!-- Tabla de detalle de cuotas - Siempre visible -->
-        <div class="card mt-4" >
-          <div class="card-header">
-            <h5 class="card-title">Detalle de Cuotas</h5>
-            <button id="toggleDetalleCuotas" class="btn btn-secondary">
-                Detalle
+        <div class="card mt-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Detalle de Cuotas</h5>
+            <button id="toggleDetalleCuotas" class="btn btn-outline-secondary btn-round btn-sm">
+              Ocultar detalle
             </button>
           </div>
-          <div class="card-body" id="detalleCuotasCard" style="display: block;">
+          <div class="card-body" id="detalleCuotasCard" style="display:block;">
             <div class="table-responsive">
-              <table class="table table-bordered table-sm">
-                <thead class="table-info">
+              <table class="table table-bordered table-sm align-middle">
+                <thead class="table-light">
                   <tr>
                     <th>Documento</th>
                     <th>Nombre</th>
-                    <th>No. Cuota</th>
+                    <th class="text-center">No. Cuota</th>
                     <th>Fecha Cuota</th>
-                    <th>Valor cuota</th>
-                    <th>Estado</th> <!-- Nueva columna para estado -->
+                    <th class="text-end">Valor cuota</th>
+                    <th class="text-center">Estado</th>
                   </tr>
                 </thead>
                 <tbody id="detalleCuotasBody">
                   <tr>
-                    <td colspan="6" class="text-center">Seleccione un pagaré para ver el detalle de cuotas</td>
+                    <td colspan="6" class="text-center text-muted">Seleccione un pagaré para ver el detalle de cuotas</td>
                   </tr>
                 </tbody>
               </table>
             </div>
+            <div class="small text-muted mt-2">
+              Nota: las cuotas se calculan desde “Inicio Condonación”. Si está vacío, no se puede proyectar.
+            </div>
           </div>
         </div>
-        
-        <!-- Área de depuración para ver los datos -->
-        
+
       {% else %}
         <div class="alert alert-warning mt-4">{{ mensaje }}</div>
       {% endif %}
     </div>
   </div>
-  
+
   <form id="exportForm" method="GET" action="{% url 'exportar_pagares_excel' %}" style="display:none;">
     <input type="hidden" name="selected_ids" id="selectedIdsInput">
     <input type="hidden" name="export_all" id="exportAllInput" value="0">
     <input type="hidden" name="fecha_informe" id="fechaInformeInput" value="{{ fecha_actual }}">
   </form>
+</div>
 {% endblock %}
 
 {% block scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    
-    // Función para convertir fecha a formato YYYYMMDD (numérico)
-    function fechaANumero(fecha) {
-        const año = fecha.getFullYear();
-        const mes = fecha.getMonth() + 1; // Los meses van de 0 a 11
-        const dia = fecha.getDate();
-        return año * 10000 + mes * 100 + dia;
-    }
-
-    // Actualizar etiquetas de dropdown
-    function updateDropdownLabel(dropdownId, inputs) {
-        const button = document.getElementById(dropdownId);
-        const selectedOptions = Array.from(inputs).filter(input => input.checked || input.selected);
-        if (selectedOptions.length === 0) {
-            button.textContent = button.getAttribute('data-selected-text') || "Seleccione";
-        } else if (selectedOptions.length === 1) {
-            button.textContent = selectedOptions[0].nextSibling.textContent.trim();
-        } else {
-            button.textContent = `${selectedOptions.length} seleccionados`;
-        }
-    }
-
-    // Adjuntar listeners a los dropdowns
-    function attachDropdownListeners(dropdownId) {
-        const inputs = document.querySelectorAll(`#${dropdownId} ~ .dropdown-menu input, #${dropdownId} ~ .dropdown-menu select`);
-        inputs.forEach(input => input.addEventListener('change', () => updateDropdownLabel(dropdownId, inputs)));
-        updateDropdownLabel(dropdownId, inputs);
-    }
-
-    // Inicializar dropdowns
-    attachDropdownListeners('dropdownEmpleados');
-    attachDropdownListeners('dropdownAnio');
-    attachDropdownListeners('dropdownLinea');
-    attachDropdownListeners('dropdownTipoPagare');
-    attachDropdownListeners('dropdownEstadoPagare');
-
-    // Eliminar persistencia de selección al filtrar
-    const filterForm = document.getElementById('filterForm');
-    filterForm.addEventListener('submit', function () {
-        const anioDropdown = document.getElementById('dropdownAnio');
-        const lineaDropdown = document.getElementById('dropdownLinea');
-        const tipoPagareDropdown = document.getElementById('dropdownTipoPagare');
-
-        // Guardar las selecciones actuales en el almacenamiento local (excepto empleados)
-        const estadoPagareDropdown = document.getElementById('dropdownEstadoPagare');
-        localStorage.setItem('anioSeleccionado', anioDropdown.textContent);
-        localStorage.setItem('lineaSeleccionada', lineaDropdown.textContent);
-        localStorage.setItem('tipoPagareSeleccionado', tipoPagareDropdown.textContent);
-        localStorage.setItem('estadoPagareSeleccionado', estadoPagareDropdown.textContent);
-    });
-
-    // Restaurar las selecciones al cargar la página (excepto empleados)
-    const anioSeleccionado = localStorage.getItem('anioSeleccionado');
-    const lineaSeleccionada = localStorage.getItem('lineaSeleccionada');
-    const tipoPagareSeleccionado = localStorage.getItem('tipoPagareSeleccionado');
-    const estadoPagareSeleccionado = localStorage.getItem('estadoPagareSeleccionado');
-
-    if (anioSeleccionado) {
-        document.getElementById('dropdownAnio').textContent = anioSeleccionado;
-    }
-    if (lineaSeleccionada) {
-        document.getElementById('dropdownLinea').textContent = lineaSeleccionada;
-    }
-    if (tipoPagareSeleccionado) {
-        document.getElementById('dropdownTipoPagare').textContent = tipoPagareSeleccionado;
-    }
-    if (estadoPagareSeleccionado) {
-        document.getElementById('dropdownEstadoPagare').textContent = estadoPagareSeleccionado;
-    }
-
-
-    const toggleButton = document.getElementById('toggleDetalleCuotas');
-    const detalleCuotasCard = document.getElementById('detalleCuotasCard');
-
-    if (toggleButton && detalleCuotasCard) {
-        // Manejar el clic en el botón para mostrar/ocultar
-        toggleButton.addEventListener('click', function () {
-            if (detalleCuotasCard.style.display === 'none') {
-                detalleCuotasCard.style.display = 'block';
-                toggleButton.textContent = 'Ocultar Detalle';
-            } else {
-                detalleCuotasCard.style.display = 'none';
-                toggleButton.textContent = 'Mostrar Detalle';
-            }
-        });
-    }
-
-    // Verificar si el elemento existe antes de agregar el evento
-    const selectAllCheckbox = document.getElementById('selectAll');
-    if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', function () {
-            const checkboxes = document.querySelectorAll('input[name="selected_pagares"]');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-        });
-    }
-
-
-
-    // Seleccionar todos los pagarés
-    
-    
-    // Exportar a Excel
-    document.getElementById('btnExportar').addEventListener('click', function() {
-      const selectedCheckboxes = document.querySelectorAll('input[name="selected_pagares"]:checked');
-      const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
-      
-      const fechaInput = document.getElementById('fechaInformeInput');
-      fechaInput.value = "{{ fecha_actual }}";
-      
-      if (selectedIds.length > 0) {
-          document.getElementById('selectedIdsInput').value = selectedIds.join(',');
-          document.getElementById('exportAllInput').value = "0";
-      } else {
-          document.getElementById('selectedIdsInput').value = '';
-          document.getElementById('exportAllInput').value = "1";
-      }
-      
-      document.getElementById('exportForm').submit();
-  });
-
-    // Función para generar las cuotas y mostrar datos de depuración
-    function generarCuotas(checkbox) {
-      const cuerpoTabla = document.getElementById('detalleCuotasBody');
-      cuerpoTabla.innerHTML = '';
-  
-      if (checkbox.checked) {
-          // Obtener datos del pagaré seleccionado
-          const valorPagare = parseFloat(checkbox.dataset.valor) || 0;
-          const mesesCondonacion = parseInt(checkbox.dataset.meses) || 0;
-          const fechaInicioCondonacionStr = checkbox.dataset.fecha || '';
-          const documento = checkbox.dataset.documento || 'N/A';
-          const nombre = checkbox.dataset.nombre || 'N/A';
-  
-          let fechaInicio = null;
-  
-          // Intentar parsear la fecha de inicio de condonación
-          if (fechaInicioCondonacionStr) {
-              try {
-                  const [year, month, day] = fechaInicioCondonacionStr.split('-').map(Number);
-                  fechaInicio = new Date(year, month - 1, day);
-              } catch (error) {
-                  console.error("Error al parsear la fecha de inicio condonación:", error);
-                  fechaInicio = null;
-              }
-          }
-  
-          const isFechaValida = fechaInicio && !isNaN(fechaInicio.getTime());
-  
-          console.log('Datos del pagaré seleccionado:', {
-              valorPagare,
-              mesesCondonacion,
-              fechaInicioCondonacionStr,
-              documento,
-              nombre,
-              fechaInicio,
-              isFechaValida
-          });
-  
-          if (valorPagare > 0 && mesesCondonacion > 0) {
-              const valorCuota = valorPagare / mesesCondonacion;
-  
-              // Obtener fecha actual
-              const fechaActual = new Date();
-              fechaActual.setHours(0, 0, 0, 0);
-  
-              for (let i = 1; i <= mesesCondonacion; i++) {
-                  // Crear fila
-                  const rowCuota = document.createElement('tr');
-  
-                  let fechaCuota = null;
-                  let fechaFormateada = '-';
-                  let estado = '-';
-  
-                  // Calcular fecha de cuota si la fecha de inicio es válida
-                  if (isFechaValida) {
-                      fechaCuota = new Date(fechaInicio);
-                      fechaCuota.setMonth(fechaInicio.getMonth() + i - 1);
-  
-                      // Formatear fecha para mostrar
-                      fechaFormateada = `${fechaCuota.getDate().toString().padStart(2, '0')}/${(fechaCuota.getMonth() + 1).toString().padStart(2, '0')}/${fechaCuota.getFullYear()}`;
-  
-                      // Determinar estado de la cuota
-                      estado = fechaCuota <= fechaActual ? 'Pago' : 'Pendiente';
-                  }
-  
-                  // Generar contenido de la fila
-                  rowCuota.innerHTML = `
-                      <td>${documento}</td>
-                      <td>${nombre}</td>
-                      <td class="text-center">${i}</td>
-                      <td>${fechaFormateada}</td>
-                      <td class="text-right">$ ${valorCuota.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                      <td class="text-center">${estado}</td>
-                  `;
-                  cuerpoTabla.appendChild(rowCuota);
-              }
-          } else {
-              cuerpoTabla.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Datos inválidos para mostrar cuotas</td></tr>';
-          }
-      } else {
-          cuerpoTabla.innerHTML = '<tr><td colspan="6" class="text-center">Seleccione un pagaré para ver el detalle de cuotas</td></tr>';
-      }
-    }
-
-
-    
-    // Generar cuotas para el primer pagaré si existe
-    setTimeout(() => {
-        const firstCheckbox = document.querySelector('input[name="selected_pagares"]');
-        if (firstCheckbox) {
-            firstCheckbox.checked = true;
-            generarCuotas(firstCheckbox);
-        }
-    }, 500);
-    const table = document.getElementById('tablaPagares');
-if (table) {
-    const headers = table.querySelectorAll('th.sortable');
-
-    headers.forEach(header => {
-        header.addEventListener('click', () => {
-            const column = header.getAttribute('data-sort');
-            const direction = header.getAttribute('data-direction') || 'asc';
-            const newDirection = direction === 'asc' ? 'desc' : 'asc';
-
-            sortTableByColumn(table, column, newDirection);
-
-            // Reset all headers to default
-            headers.forEach(h => {
-                h.setAttribute('data-direction', 'default');
-                h.querySelector('.sort-icon-default').style.display = 'inline';
-                h.querySelector('.sort-icon-asc').style.display = 'none';
-                h.querySelector('.sort-icon-desc').style.display = 'none';
-            });
-            
-            // Set current header direction
-            header.setAttribute('data-direction', newDirection);
-            header.querySelector('.sort-icon-default').style.display = 'none';
-            header.querySelector(`.sort-icon-${newDirection}`).style.display = 'inline';
-        });
-    });
-
-    function sortTableByColumn(table, columnName, direction) {
-        const tbody = table.querySelector('tbody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        
-        // Find column index by data-field attribute to be more precise
-        const headerCells = Array.from(table.querySelectorAll('thead th'));
-        const columnIndex = headerCells.findIndex(th => {
-            return th.getAttribute('data-sort') === columnName;
-        });
-        
-        if (columnIndex === -1) return; // Column not found
-
-        rows.sort((a, b) => {
-            // Find cells by data-field attribute for more reliable matching
-            const cellA = a.querySelector(`td[data-field="${columnName}"]`);
-            const cellB = b.querySelector(`td[data-field="${columnName}"]`);
-            
-            if (!cellA || !cellB) return 0;
-            
-            // Get the text content, handling different element types
-            const getCellText = (cell) => {
-                if (cell.querySelector('input, select')) {
-                    return cell.querySelector('input, select').value.trim();
-                }
-                return cell.innerText.trim();
-            };
-            
-            const textA = getCellText(cellA);
-            const textB = getCellText(cellB);
-
-            // Numeric comparison
-            if (!isNaN(textA) && !isNaN(textB)) {
-                return direction === 'asc' ? textA - textB : textB - textA;
-            }
-
-            // Date comparison
-            if (columnName.includes('fecha') || columnName.includes('fecha')) {
-                const dateA = new Date(textA);
-                const dateB = new Date(textB);
-                if (!isNaN(dateA) && !isNaN(dateB)) {
-                    return direction === 'asc' ? dateA - dateB : dateB - dateA;
-                }
-            }
-
-            // String comparison
-            return direction === 'asc' 
-                ? textA.localeCompare(textB) 
-                : textB.localeCompare(textA);
-        });
-
-        // Reattach sorted rows
-        rows.forEach(row => tbody.appendChild(row));
-    }
-}
-
-});
-</script>
+  <script src="{% static 'JS/Informe_Pagare.js' %}"></script>
 {% endblock %}

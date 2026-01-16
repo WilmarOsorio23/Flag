@@ -2361,7 +2361,7 @@ class EmpleadoConPagareFilterForm(forms.Form):
         ).distinct().order_by('Nombre'),
         required=False,
         label='Empleados con pagaré',
-        widget=forms.CheckboxSelectMultiple(),  # Cambiado a CheckboxSelectMultiple
+        widget=forms.CheckboxSelectMultiple(),
         to_field_name='Documento',
     )
 
@@ -2370,30 +2370,29 @@ class EmpleadoConPagareFilterForm(forms.Form):
         required=False,
         label='Año',
         widget=forms.Select(attrs={'class': 'form-control'})
-
     )
 
     LineaId = forms.ModelMultipleChoiceField(
         queryset=Linea.objects.all(),
         required=False,
         label="Línea",
-        widget=forms.CheckboxSelectMultiple()  # Cambiado a CheckboxSelectMultiple
+        widget=forms.CheckboxSelectMultiple()
     )
 
     tipo_pagare = forms.ModelMultipleChoiceField(
         queryset=TipoPagare.objects.all(),
         required=False,
         label='Tipo de pagaré',
-        widget=forms.CheckboxSelectMultiple(),  # Cambiado a CheckboxSelectMultiple
+        widget=forms.CheckboxSelectMultiple(),
         to_field_name='Tipo_PagareId',
     )
 
     estado_pagare = forms.ChoiceField(
         choices=[
-            ('', 'Seleccione el estado'),
-            ('Proceso', 'Proceso'),
-            ('Terminado', 'Terminado'),
-            ('Cancelado', 'Cancelado')
+            ('', 'Todos'),
+            ('proceso', 'Proceso'),
+            ('terminado', 'Terminado'),
+            ('cancelado', 'Cancelado'),
         ],
         required=False,
         label='Estado del pagaré',
@@ -2403,14 +2402,13 @@ class EmpleadoConPagareFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Personalizar cómo se muestra cada empleado (nombre y documento en dos líneas)
-        self.fields['empleados_con_pagare'].label_from_instance = lambda obj: f'{obj.Nombre}<br>{obj.Documento}'
-        
-        # Llenar dinámicamente el campo de años
+        self.fields['empleados_con_pagare'].label_from_instance = (
+            lambda obj: f'{obj.Nombre}<br><span class="text-muted small">{obj.Documento}</span>'
+        )
+
         current_year = datetime.now().year
         available_years = range(2023, current_year + 1)
-
-        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in available_years]
+        self.fields['Anio'].choices = [('', 'Todos')] + [(year, year) for year in available_years]
 
 class Ind_Facturacion_FilterForm(forms.Form):
     Anio = forms.ChoiceField(
