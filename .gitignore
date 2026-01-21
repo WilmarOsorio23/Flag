@@ -1,6 +1,26 @@
-
+# Python
 *.pyc
-/Modulo/__pycache__
-/Modulo/migrations
+__pycache__/
 *.log
-*.pyc
+
+# Virtualenv
+venv/
+.venv/
+
+# Env files (NUNCA al repo)
+.env
+.env.*
+*.env
+
+# Django collected static / media local
+staticfiles/
+media/
+
+# OS / IDE
+.DS_Store
+desktop.ini
+.vscode/
+.idea/
+
+# Installers / binaries
+*.exe
