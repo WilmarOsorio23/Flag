@@ -2810,15 +2810,17 @@ class CustomUserEditForm(forms.ModelForm):
 class LineaClienteCentroCostosForm(forms.ModelForm):
     class Meta:
         model = LineaClienteCentroCostos
-        fields = ['linea', 'cliente', 'centro_costo']
+        fields = ['linea', 'cliente', 'modulo', 'centro_costo']
         widgets = {
             'linea': forms.Select(attrs={'class': 'form-select'}),
             'cliente': forms.Select(attrs={'class': 'form-select'}),
+            'modulo': forms.Select(attrs={'class': 'form-select'}),
             'centro_costo': forms.Select(attrs={'class': 'form-select'}),
         }
         labels = {
             'linea': 'Línea',
             'cliente': 'Cliente',
+            'modulo': 'Módulo',
             'centro_costo': 'Centro de Costos',
         }
 
@@ -2827,4 +2829,11 @@ class LineaClienteCentroCostosForm(forms.ModelForm):
 
         self.fields['linea'].queryset = Linea.objects.all().order_by('Linea')
         self.fields['cliente'].queryset = Clientes.objects.all().order_by('Nombre_Cliente')
+
+        # Ajusta el order_by si tu campo se llama distinto
+        try:
+            self.fields['modulo'].queryset = Modulo.objects.all().order_by('Modulo')
+        except Exception:
+            self.fields['modulo'].queryset = Modulo.objects.all()
+
         self.fields['centro_costo'].queryset = CentrosCostos.objects.all().order_by('codigoCeCo')
