@@ -1090,39 +1090,54 @@ class LineaClienteCentroCostos(models.Model):
         related_name='lineas_centros',
     )
 
+    # ✅ NUEVO: Modulo
+    modulo = models.ForeignKey(
+        'Modulo',
+        on_delete=models.CASCADE,
+        db_column='ModuloId',
+        related_name='lineas_clientes_centros',
+    )
+
     centro_costo = models.ForeignKey(
         'CentrosCostos',
         on_delete=models.CASCADE,
         db_column='CentroCostoId',
-        related_name='lineas_clientes',
+        related_name='lineas_clientes_modulos',
     )
 
     # ✅ “Nombres reconocibles” listos para retorno (sin reemplazar IDs)
     @property
     def linea_nombre(self):
-        return self.linea.Linea
+        return getattr(self.linea, "Linea", str(self.linea))
 
     @property
     def cliente_nombre(self):
-        return self.cliente.Nombre_Cliente
+        return getattr(self.cliente, "Nombre_Cliente", str(self.cliente))
+
+    @property
+    def modulo_nombre(self):
+        # Ajusta el campo real si tu tabla Modulo usa otro nombre
+        return getattr(self.modulo, "Modulo", getattr(self.modulo, "Nombre", str(self.modulo)))
 
     @property
     def codigo_ceco(self):
-        return self.centro_costo.codigoCeCo
+        return getattr(self.centro_costo, "codigoCeCo", str(self.centro_costo))
 
     def __str__(self):
-        return f"{self.linea.Linea} | {self.cliente.Nombre_Cliente} | {self.centro_costo.codigoCeCo}"
+        return f"{self.linea_nombre} | {self.cliente_nombre} | {self.modulo_nombre} | {self.codigo_ceco}"
 
     class Meta:
         db_table = 'Linea_Cliente_CentroCostos'
         constraints = [
             models.UniqueConstraint(
-                fields=['linea', 'cliente', 'centro_costo'],
-                name='uniq_linea_cliente_centrocosto'
+                fields=['linea', 'cliente', 'modulo', 'centro_costo'],
+                name='uniq_linea_cliente_modulo_centrocosto'
             )
         ]
         indexes = [
-            models.Index(fields=['linea'], name='idx_lccc_linea'),
-            models.Index(fields=['cliente'], name='idx_lccc_cliente'),
-            models.Index(fields=['centro_costo'], name='idx_lccc_centrocosto'),
+            models.Index(fields=['linea'], name='idx_lcccm_linea'),
+            models.Index(fields=['cliente'], name='idx_lcccm_cliente'),
+            models.Index(fields=['modulo'], name='idx_lcccm_modulo'),
+            models.Index(fields=['centro_costo'], name='idx_lcccm_centrocosto'),
+            models.Index(fields=['linea', 'cliente', 'modulo'], name='idx_lcccm_lcm'),
         ]

@@ -1,12 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block titulo %} Relación Línea - Cliente - Centro de Costos {% endblock %}
+{% block titulo %} Relación Línea - Cliente - Módulo - Centro de Costos {% endblock %}
 
 {% block contenido %}
 <div class="card">
 
-  {# Mensajes Django -> messages.js los convierte en floating #}
   {% if messages %}
     <div class="messages d-none">
       {% for message in messages %}
@@ -18,7 +17,7 @@
   {% endif %}
 
   <div class="card-header d-flex justify-content-between align-items-center">
-    <h4 class="card-title">Línea / Cliente / Centro de Costos</h4>
+    <h4 class="card-title">Línea / Cliente / Módulo / Centro de Costos</h4>
   </div>
 
   <div class="card-body">
@@ -76,6 +75,15 @@
                 </span>
               </th>
 
+              <th data-sort="Modulo" class="sortable" data-direction="default">
+                Módulo
+                <span class="sort-icon">
+                  <i class="fas fa-sort sort-icon-default"></i>
+                  <i class="fas fa-sort-up sort-icon-asc"></i>
+                  <i class="fas fa-sort-down sort-icon-desc"></i>
+                </span>
+              </th>
+
               <th data-sort="CeCo" class="sortable" data-direction="default">
                 Centro de Costos (Código)
                 <span class="sort-icon">
@@ -116,6 +124,17 @@
                 </select>
               </td>
 
+              <td data-field="Modulo">
+                <span class="cell-text">{{ rel.modulo.Modulo }}</span>
+                <select name="ModuloId" class="form-select d-none">
+                  {% for m in modulos %}
+                    <option value="{{ m.ModuloId }}" {% if m.ModuloId == rel.modulo_id %}selected{% endif %}>
+                      {{ m.Modulo }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </td>
+
               <td data-field="CeCo">
                 <span class="cell-text">{{ rel.centro_costo.codigoCeCo }}</span>
                 <select name="CentroCostoId" class="form-select d-none">
@@ -129,7 +148,7 @@
             </tr>
             {% empty %}
             <tr>
-              <td colspan="4">No hay datos disponibles.</td>
+              <td colspan="5">No hay datos disponibles.</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -139,7 +158,6 @@
     </div>
   </div>
 
-  <!-- Modal confirmación eliminar -->
   <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">

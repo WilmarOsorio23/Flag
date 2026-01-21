@@ -43,11 +43,11 @@ def _to_decimal(v) -> Decimal:
 
 def build_lccc_index():
     """
-    Construye un índice en memoria para resolver CentroCostoId por (LineaId, ClienteId).
+    Índice en memoria para resolver CentroCostoId por (LineaId, ClienteId, ModuloId).
 
     Retorna:
-      - idx[(linea_id, cliente_id)] = centro_costo_id  (elige determinístico si hay múltiples)
-      - multi_keys = set(keys) donde hay más de 1 CECO para el mismo (linea, cliente)
+      - idx[(linea_id, cliente_id, modulo_id)] = centro_costo_id
+      - multi_keys = set(keys) donde hay más de 1 CECO para el mismo (linea, cliente, modulo)
 
     Regla cuando hay múltiples:
       - se elige el primero por codigoCeCo ASC, luego por id ASC
@@ -55,15 +55,21 @@ def build_lccc_index():
     qs = (
         LineaClienteCentroCostos.objects
         .select_related("centro_costo")
-        .only("linea_id", "cliente_id", "centro_costo_id", "centro_costo__codigoCeCo")
-        .order_by("linea_id", "cliente_id", "centro_costo__codigoCeCo", "centro_costo_id")
+        .only(
+            "linea_id", "cliente_id", "modulo_id",
+            "centro_costo_id", "centro_costo__codigoCeCo"
+        )
+        .order_by(
+            "linea_id", "cliente_id", "modulo_id",
+            "centro_costo__codigoCeCo", "centro_costo_id"
+        )
     )
 
     idx = {}
     multi_keys = set()
 
     for r in qs:
-        key = (int(r.linea_id), int(r.cliente_id))
+        key = (int(r.linea_id), int(r.cliente_id), int(r.modulo_id))
         if key in idx:
             multi_keys.add(key)
             continue
@@ -71,11 +77,13 @@ def build_lccc_index():
 
     return idx, multi_keys
 
-
-def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, modulo_id, horas, lccc_idx=None, lccc_multi=None, warnings=None):
+def guardar_tiempos_cliente(
+    anio, mes, documento, cliente_id, linea_id, modulo_id, horas,
+    lccc_idx=None, lccc_multi=None, warnings=None
+):
     """
     Guarda Tiempos_Cliente y asigna automaticamente centrocostosId según:
-      Linea_Cliente_CentroCostos (LineaId + ClienteId) -> CentroCostoId
+      Linea_Cliente_CentroCostos (LineaId + ClienteId + ModuloId) -> CentroCostoId
     """
     try:
         if not modulo_id:
@@ -94,24 +102,25 @@ def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, modulo_i
 
         horas_dec = _to_decimal(horas)
 
-        # ✅ Resolver CECO por índice en memoria (1 query total en el request)
+        # ✅ Resolver CECO por (linea, cliente, modulo)
         ceco_id = None
-        key = (linea_id, cliente_id)
+        key = (linea_id, cliente_id, modulo_id)
 
         if lccc_idx is not None:
             ceco_id = lccc_idx.get(key)
 
-            # warnings opcionales (no rompen el flujo)
             if warnings is not None:
                 if ceco_id is None:
-                    warnings.append(f"Sin CECO para LineaId={linea_id}, ClienteId={cliente_id}")
+                    warnings.append(
+                        f"Sin CECO para LineaId={linea_id}, ClienteId={cliente_id}, ModuloId={modulo_id}"
+                    )
                 elif lccc_multi and key in lccc_multi:
                     warnings.append(
-                        f"Múltiples CECO para LineaId={linea_id}, ClienteId={cliente_id}. "
+                        f"Múltiples CECO para LineaId={linea_id}, ClienteId={cliente_id}, ModuloId={modulo_id}. "
                         f"Se usó CentroCostoId={ceco_id} (por orden codigoCeCo)."
                     )
 
-        # Si no hay horas -> elimina el registro (mismo comportamiento que ya tenías)
+        # Si no hay horas -> elimina
         if horas_dec <= 0:
             Tiempos_Cliente.objects.filter(
                 Anio=anio,
@@ -132,20 +141,18 @@ def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, modulo_i
             ModuloId_id=modulo_id,
             defaults={
                 'Horas': horas_dec,
-                'centrocostosId_id': ceco_id,  # ✅ auto-CECO
+                'centrocostosId_id': ceco_id,
             }
         )
 
         if not creado:
             changed = False
 
-            # actualizar horas si cambia
             if tiempo_cliente.Horas != horas_dec:
                 tiempo_cliente.Horas = horas_dec
                 changed = True
 
-            # ✅ siempre sincronizar CECO con la relación (si existe índice)
-            # si no hay relación -> queda NULL
+            # sincroniza CECO (si no existe relación -> NULL)
             if lccc_idx is not None and tiempo_cliente.centrocostosId_id != ceco_id:
                 tiempo_cliente.centrocostosId_id = ceco_id
                 changed = True
@@ -157,7 +164,6 @@ def guardar_tiempos_cliente(anio, mes, documento, cliente_id, linea_id, modulo_i
 
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos del cliente: {str(e)}")
-
 
 def guardar_tiempos_concepto(anio, mes, documento, concepto_id, linea_id, horas):
     try:

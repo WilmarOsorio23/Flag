@@ -9,20 +9,23 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from Modulo.decorators import verificar_permiso
 from Modulo.forms import LineaClienteCentroCostosForm
-from Modulo.models import LineaClienteCentroCostos, Linea, Clientes, CentrosCostos
+from Modulo.models import LineaClienteCentroCostos, Linea, Clientes, CentrosCostos, Modulo
 
 
 @login_required
 @verificar_permiso('can_manage_linea_cliente_centrocostos')
 def linea_cliente_centrocostos_index(request):
-    lccc_data = (LineaClienteCentroCostos.objects
-                 .select_related('linea', 'cliente', 'centro_costo')
-                 .all())
+    lccc_data = (
+        LineaClienteCentroCostos.objects
+        .select_related('linea', 'cliente', 'modulo', 'centro_costo')
+        .all()
+    )
 
     context = {
         'lccc_data': lccc_data,
         'lineas': Linea.objects.all().order_by('Linea'),
         'clientes': Clientes.objects.all().order_by('Nombre_Cliente'),
+        'modulos': Modulo.objects.all().order_by('Modulo'),
         'centros_costos': CentrosCostos.objects.all().order_by('codigoCeCo'),
     }
     return render(request, 'LineaClienteCentroCostos/linea_cliente_centrocostos_index.html', context)
@@ -39,7 +42,7 @@ def linea_cliente_centrocostos_crear(request):
                 messages.success(request, 'Relación creada correctamente.')
                 return redirect('linea_cliente_centrocostos_index')
             except IntegrityError:
-                messages.error(request, 'Ya existe una relación con esa combinación (Línea/Cliente/CeCo).')
+                messages.error(request, 'Ya existe una relación con esa combinación (Línea/Cliente/Módulo/CECO).')
         else:
             messages.error(request, 'Formulario inválido. Revisa los campos.')
     else:
@@ -56,26 +59,32 @@ def linea_cliente_centrocostos_editar(request, id):
 
     try:
         data = json.loads(request.body or '{}')
-
         rel = get_object_or_404(LineaClienteCentroCostos, pk=id)
 
         linea_id = data.get('LineaId')
         cliente_id = data.get('ClienteId')
+        modulo_id = data.get('ModuloId')
         ceco_id = data.get('CentroCostoId')
 
-        if not (linea_id and cliente_id and ceco_id):
-            return JsonResponse({'error': 'Faltan campos: LineaId, ClienteId, CentroCostoId.'}, status=400)
+        if not (linea_id and cliente_id and modulo_id and ceco_id):
+            return JsonResponse(
+                {'error': 'Faltan campos: LineaId, ClienteId, ModuloId, CentroCostoId.'},
+                status=400
+            )
 
-        # Validar existencia (evita FK inválidas)
+        # Validar existencia
         if not Linea.objects.filter(pk=linea_id).exists():
             return JsonResponse({'error': 'La Línea seleccionada no existe.'}, status=400)
         if not Clientes.objects.filter(pk=cliente_id).exists():
             return JsonResponse({'error': 'El Cliente seleccionado no existe.'}, status=400)
+        if not Modulo.objects.filter(pk=modulo_id).exists():
+            return JsonResponse({'error': 'El Módulo seleccionado no existe.'}, status=400)
         if not CentrosCostos.objects.filter(pk=ceco_id).exists():
             return JsonResponse({'error': 'El Centro de Costos seleccionado no existe.'}, status=400)
 
         rel.linea_id = int(linea_id)
         rel.cliente_id = int(cliente_id)
+        rel.modulo_id = int(modulo_id)
         rel.centro_costo_id = int(ceco_id)
 
         try:
@@ -103,10 +112,6 @@ def linea_cliente_centrocostos_eliminar(request):
 @login_required
 @verificar_permiso('can_manage_linea_cliente_centrocostos')
 def linea_cliente_centrocostos_verificar_relaciones(request):
-    """
-    Verificación genérica: si algún modelo tiene FK hacia LineaClienteCentroCostos,
-    bloquea la eliminación.
-    """
     if request.method != 'POST':
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
@@ -120,7 +125,6 @@ def linea_cliente_centrocostos_verificar_relaciones(request):
         except LineaClienteCentroCostos.DoesNotExist:
             continue
 
-        # Si tiene objetos relacionados por reverse FK/M2M (cuando existan en el futuro)
         for rel in obj._meta.related_objects:
             accessor = rel.get_accessor_name()
             manager = getattr(obj, accessor, None)
@@ -143,24 +147,32 @@ def linea_cliente_centrocostos_descargar_excel(request):
 
         ids = list(map(int, ids.split(',')))
 
-        qs = (LineaClienteCentroCostos.objects
-              .select_related('linea', 'cliente', 'centro_costo')
-              .filter(id__in=ids))
+        qs = (
+            LineaClienteCentroCostos.objects
+            .select_related('linea', 'cliente', 'modulo', 'centro_costo')
+            .filter(id__in=ids)
+        )
 
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="Linea_Cliente_CentroCostos.xlsx"'
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="Linea_Cliente_Modulo_CentroCostos.xlsx"'
 
-        data = []
+        data_rows = []
         for r in qs:
-            data.append([
+            data_rows.append([
                 r.id,
                 r.linea.Linea,
                 r.cliente.Nombre_Cliente,
+                getattr(r.modulo, "Modulo", str(r.modulo)),
                 r.centro_costo.codigoCeCo,
                 r.centro_costo.descripcionCeCo
             ])
 
-        df = pd.DataFrame(data, columns=['Id', 'Linea', 'Cliente', 'CodigoCeCo', 'DescripcionCeCo'])
+        df = pd.DataFrame(
+            data_rows,
+            columns=['Id', 'Linea', 'Cliente', 'Modulo', 'CodigoCeCo', 'DescripcionCeCo']
+        )
         df.to_excel(response, index=False)
         return response
 
