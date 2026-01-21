@@ -21,7 +21,6 @@ from Modulo.models import (
     Nomina,
     Tarifa_Consultores,
     Tarifa_Clientes,
-    IPC,
     Horas_Habiles,
     IND,  # <= NUEVO
 )
@@ -39,15 +38,6 @@ def obtener_horas_habiles(anio: str) -> dict:
             'horas_diarias': r.Horas_Laborales
         } for r in registros
     }
-
-
-def obtener_ipc_anio(anio):
-    """Obtiene el IPC de un año (retorna 1 si no existe)"""
-    try:
-        ipc = IPC.objects.filter(Anio=str(anio)).order_by('-Mes').first()
-        return ipc.Indice if ipc else 1
-    except Exception:
-        return 1
 
 
 def obtener_indice_ind(anio, mes):
@@ -164,17 +154,14 @@ def calcular_costos_por_ceco_modulo_mes(anio: str, meses: list, lineas_ids: list
                 )
                 if entrada:
                     salario = entrada[2]  # Decimal
-                    # Ajuste por IPC del año
-                    ipc = obtener_ipc_anio(anio_int)
-                    salario_ajustado = salario * Decimal(str(ipc))
 
                     horas_mes_total = hh_mes.get('horas_mes', Decimal('1'))
                     if horas_mes_total:
-                        costo_hora = salario_ajustado / horas_mes_total
+                        costo_hora = salario / horas_mes_total
                     else:
                         costo_hora = Decimal('0')
 
-                    # NUEVO: Ajuste adicional por índice IND (año / mes)
+                    # Mantener ajuste IND
                     indice_ind = obtener_indice_ind(anio_int, mes_int)
                     costo_hora = costo_hora * indice_ind
 
