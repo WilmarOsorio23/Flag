@@ -173,7 +173,7 @@
                 <li><a class="nav-item nav-link" href="{% url 'informes_clientes_index' %}"><i class="fas fa-user"></i> Informe Clientes</a></li>
                 {% endif %}
                 {% if user|has_permission:'can_view_informe_clientes_contratos' %}
-                <li><a class="nav-item nav-link" href="{% url 'informes_clientes_contratos_index' %}"><i class="fas a-file-contract"></i> Informe Clientes Contratos</a></li>
+                <li><a class="nav-item nav-link" href="{% url 'informes_clientes_contratos_index' %}"><i class="fas fa-file-contract"></i> Informe Clientes Contratos</a></li>
                 {% endif %}
                 {% if user|has_permission:'can_view_informe_otros_si' %}
                 <li><a class="nav-item nav-link" href="{% url 'informes_otros_si_index' %}"><i class="fas fa-file-contract"></i> Informe Contratos Otros Si</a></li>
