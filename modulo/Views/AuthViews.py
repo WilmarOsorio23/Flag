@@ -216,7 +216,7 @@ def user_list(request):
 
     return render(
         request,
-        'Users/Userlist.html',
+        'Users/UserList.html',
         {
             "page_obj": page_obj,
             "q": q,
@@ -349,15 +349,15 @@ def cambiar_password(request):
 
         if not request.user.check_password(old_password):
             messages.error(request, "La contraseña actual es incorrecta.")
-            return render(request, 'Users/Changepassword.html')
+            return render(request, 'Users/ChangePassword.html')
 
         if new_password1 != new_password2:
             messages.error(request, "Las nuevas contraseñas no coinciden.")
-            return render(request, 'Users/Changepassword.html')
+            return render(request, 'Users/ChangePassword.html')
 
         if len(new_password1 or "") < 8:
             messages.error(request, "La nueva contraseña debe tener al menos 8 caracteres.")
-            return render(request, 'Users/Changepassword.html')
+            return render(request, 'Users/ChangePassword.html')
 
         request.user.set_password(new_password1)
         request.user.save()
