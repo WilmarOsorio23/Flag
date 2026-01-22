@@ -1,67 +1,50 @@
 from .base import *
 import os
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xg$8kvggebts&j%)(_%!ez(4z9-za&cg28wc98gq(u)din5m(1'
+SECRET_KEY = os.environ["SECRET_KEY"]
+DEBUG = os.environ.get("DEBUG", "0") == "1"
 
-DEBUG = False
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()]
 
-ALLOWED_HOSTS = ['gif.flagsoluciones.com']
-
-# Database
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'analisisproduc',  # Base de datos de producción
-        'USER': 'analisisproduc',   # Usuario de producción
-        'PASSWORD': 'Admdev2024.*',  # Contraseña de producción
-        'HOST': 'web.flagsoluciones.com',
-        'PORT': '3306'
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.environ.get("DB_NAME", "analisisproduc"),
+        "USER": os.environ["DB_USER"],
+        "PASSWORD": os.environ["DB_PASSWORD"],
+        "HOST": os.environ["DB_HOST"],
+        "PORT": os.environ.get("DB_PORT", "3306"),
+        "OPTIONS": {"charset": "utf8mb4"},
     }
 }
 
-# Mensaje de debug para mostrar la configuración
-print("\n=== Configuración de Base de Datos ===")
-print(f"Nombre de BD: {DATABASES['default']['NAME']}")
-print(f"Usuario: {DATABASES['default']['USER']}")
-print(f"Host: {DATABASES['default']['HOST']}")
-print("=====================================\n")
+STATIC_ROOT = os.environ.get("STATIC_ROOT", os.path.join(BASE_DIR, "staticfiles"))
+MEDIA_ROOT = os.environ.get("MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
 
-# Configuración de archivos estáticos
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'Modulo', 'static'),
-]
-STATIC_ROOT = '/var/www/vhosts/gif.flagsoluciones.com/httpdocs/staticfiles'
+# Seguridad (solo si está detrás de HTTPS)
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SECURE_BROWSER_XSS_FILTER = False
+SECURE_CONTENT_TYPE_NOSNIFF = False
+X_FRAME_OPTIONS = "DENY"
 
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/vhosts/gif.flagsoluciones.com/httpdocs/media'
-
-# Configuración de seguridad
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'DENY'
-
-# Logging
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': 'django_production.log',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "ERROR",
+            "class": "logging.FileHandler",
+            "filename": "django_production.log",
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'ERROR',
-            'propagate': True,
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "ERROR",
+            "propagate": True,
         },
     },
-} 
+}

@@ -1,60 +1,43 @@
 from .base import *
 import os
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-03wz*^i+6am@4m6_--r7()a429+u&rq8o=e38p*(druigcq1t)'
+SECRET_KEY = os.environ["SECRET_KEY"]
+DEBUG = os.environ.get("DEBUG", "1") == "1"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()]
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'devgif.flagsoluciones.com']
-
-# Database
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'analisisdev',
-        'USER': 'analisisdev',
-        'PASSWORD': 'Admdev2024*.',
-        'HOST': 'web.flagsoluciones.com',
-        'PORT': '3306'
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.environ.get("DB_NAME", "analisisdev"),
+        "USER": os.environ["DB_USER"],
+        "PASSWORD": os.environ["DB_PASSWORD"],
+        "HOST": os.environ["DB_HOST"],
+        "PORT": os.environ.get("DB_PORT", "3306"),
+        "OPTIONS": {"charset": "utf8mb4"},
     }
 }
 
-# Mensaje de debug para mostrar la configuración
-print("\n=== Configuración de Base de Datos ===")
-print(f"Nombre de BD: {DATABASES['default']['NAME']}")
-print(f"Usuario: {DATABASES['default']['USER']}")
-print(f"Host: {DATABASES['default']['HOST']}")
-print("=====================================\n")
+# Static / Media (flexible)
+STATIC_ROOT = os.environ.get("STATIC_ROOT", os.path.join(BASE_DIR, "staticfiles"))
+MEDIA_ROOT = os.environ.get("MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
 
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'Modulo', 'static'),
-]
-STATIC_ROOT = '/var/www/vhosts/devgif.flagsoluciones.com/httpdocs/staticfiles'
-
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/vhosts/devgif.flagsoluciones.com/httpdocs/media'
-
-# Logging
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'django_debug.log',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": "django_debug.log",
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
         },
     },
-} 
+}

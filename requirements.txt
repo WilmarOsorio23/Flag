@@ -27,3 +27,5 @@ types-PyYAML==6.0.12.20250516
 typing_extensions==4.14.0
 tzdata==2024.2
 XlsxWriter==3.2.2
+gunicorn==23.0.0
+whitenoise==6.10.0
