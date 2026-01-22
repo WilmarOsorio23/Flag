@@ -1,5 +1,6 @@
 from django.urls import path
-from Modulo.Views import ActMaestro, InformeClientes, ClientesFactura, IndicadoresOperatividad, IndicadoresTotales, InformeFacturacionCentrocostos, InformeTiemposConsultores, Modulo
+from Modulo.Views import ActMaestro, InformeClientes, ClientesFactura, IndicadoresOperatividad, IndicadoresTotales, InformeFacturacionCentrocostos, InformeTiemposConsultores
+from Modulo.Views import Modulo as ModuloView
 from Modulo.Views import Ipc
 from Modulo.Views import Ind
 from Modulo.Views import TipoDocumento
@@ -72,12 +73,12 @@ urlpatterns = [
     path('nosotros', views.nosotros, name='nosotros'),
 
     # Rutas para tabla Modulo
-    path('Modulo', Modulo.modulo, name='Modulo'),
-    path('Modulo/crear', Modulo.crear, name='crear'),
-    path('Modulo/editar/<int:id>/', Modulo.editar, name='editar'),
-    path('Modulo/eliminar', Modulo.eliminar, name='eliminar'),
-    path('verificar-relaciones/', Modulo.verificar_relaciones, name='verificar_relaciones'),
-    path('Modulo/descargar_excel', Modulo.descargar_excel, name='descargar_excel'),
+    path('Modulo', ModuloView.modulo, name='Modulo'),
+    path('Modulo/crear', ModuloView.crear, name='crear'),
+    path('Modulo/editar/<int:id>/', ModuloView.editar, name='editar'),
+    path('Modulo/eliminar', ModuloView.eliminar, name='eliminar'),
+    path('verificar-relaciones/', ModuloView.verificar_relaciones, name='verificar_relaciones'),
+    path('Modulo/descargar_excel', ModuloView.descargar_excel, name='descargar_excel'),
 
     # Rutas para tabla Moneda
     path('moneda/', Moneda.moneda_index, name='moneda_index'),

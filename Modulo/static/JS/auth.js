@@ -73,7 +73,7 @@ const PERMISSION_CATEGORIES = {
     ]
   };
   
-  // URL configurable desde base.html
+  // URL configurable desde Base.html
   const CHECK_URL = window.CHECK_PERMISSION_URL || '/check-permission/';
   
   async function fetchPermisos(permisos = []) {

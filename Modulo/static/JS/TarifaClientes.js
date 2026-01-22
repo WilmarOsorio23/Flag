@@ -13,7 +13,7 @@
     }
   
     function getCsrfToken() {
-      // Meta en base.html
+      // Meta en Base.html
       const meta = qs('meta[name="csrf-token"]');
       if (meta?.content) return meta.content;
       // Fallback
