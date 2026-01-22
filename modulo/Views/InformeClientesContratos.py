@@ -169,7 +169,7 @@ def clientes_contratos_filtrado(request):
         'contratos_con_polizas': contratos_con_polizas,
     })
 
-    return render(request, 'Informes/Informesclientescontratosindex.html', context)
+    return render(request, 'Informes/InformesclientescontratosIndex.html', context)
 
 @login_required
 @verificar_permiso('can_view_informe_clientes_contratos')

@@ -203,7 +203,7 @@ def informe_totales(request):
         'total_global': total_global
     }
 
-    return render(request, 'Informes/Informesservconsultorindex.html', context) 
+    return render(request, 'Informes/InformesservconsultorIndex.html', context) 
 
 
 @login_required

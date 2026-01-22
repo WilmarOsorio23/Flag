@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_detalle_gastos')
 def detalle_gastos_index(request):
     detalles = Detalle_Gastos.objects.all()
-    print("Buscando plantilla en: Detalle_Gastos/detalle_gastos_index.html")
+    print("Buscando plantilla en: Detalle_Gastos/detalle_gastos_Index.html")
     return render(request, 'DetalleGastos/DetalleGastosIndex.html', {'detalles': detalles})
 
 @login_required

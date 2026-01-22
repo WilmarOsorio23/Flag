@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 
 def actividad_pagare_index(request):
     actividades = ActividadPagare.objects.all()
-    return render(request, 'Actmaestro/Actmaestroindex.html', {
+    return render(request, 'Actmaestro/ActmaestroIndex.html', {
         'actividades': actividades
     })
 
@@ -64,7 +64,7 @@ def actividad_pagare_editar(request, id):
         
         # Si no es una solicitud POST, renderiza el formulario
         form = ActividadPagareForm(instance=actividad)
-        return render(request, 'Actmaestro/Actmaestroeditar.html', {
+        return render(request, 'Actmaestro/ActmaestroEditar.html', {
             'form': form,
             'actividad': actividad
         })

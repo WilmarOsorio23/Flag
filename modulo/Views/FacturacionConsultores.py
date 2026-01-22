@@ -258,7 +258,7 @@ def facturacion_consultores(request):
         'pagina_actual': page,
         'total_registros': total_registros,
     }
-    return render(request, 'Facturacionconsultores/Facturacionconsultoresindex.html', context)
+    return render(request, 'Facturacionconsultores/FacturacionconsultoresIndex.html', context)
 
 def safe_decimal(value):
     try:

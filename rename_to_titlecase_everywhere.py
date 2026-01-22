@@ -113,29 +113,60 @@ def run_git(git_exe: str, args: list[str], repo_root: Path, verbose: bool):
     )
 
 def git_mv_safe(git_exe: str, src: Path, dst: Path, repo_root: Path, verbose: bool, dry: bool):
-    # ❗️OJO: NO uses (src == dst) en Windows, porque ignora case.
-    if same_path_exact(src, dst):
-        print(f"[SKIP] (exact) {src}")
+    """
+    - Usa paths RELATIVOS (git-friendly)
+    - Si src ya no está trackeado pero dst sí, asume "ya renombrado" y hace SKIP
+    - Si case-only, hace 2 pasos con tmp
+    """
+    src_rel = rel_to_repo(src, repo_root)
+    dst_rel = rel_to_repo(dst, repo_root)
+
+    src_tracked = git_is_tracked(git_exe, repo_root, src_rel)
+    dst_tracked = git_is_tracked(git_exe, repo_root, dst_rel)
+
+    # ✅ Idempotencia: si ya está renombrado, no intentes mover otra vez
+    if (not src_tracked) and (dst_tracked or dst.exists()):
+        if verbose:
+            print(f"[SKIP] ya renombrado: {src_rel} -> {dst_rel}")
         return False
 
+    # Si no existe ni trackeado ni en FS, no hay nada que hacer
+    if (not src_tracked) and (not src.exists()):
+        if verbose:
+            print(f"[WARN] src no existe/no trackeado, skip: {src_rel}")
+        return False
+
+    # Si src==dst (misma ruta exacta)
+    if src.resolve() == dst.resolve():
+        if verbose:
+            print(f"[SKIP] {src_rel} == {dst_rel}")
+        return False
+
+    # Windows case-only rename: usa tmp
+    if src.name.lower() == dst.name.lower():
+        tmp_name = f"__tmp__casefix__{uuid.uuid4().hex}__{src.name}"
+        tmp = src.with_name(tmp_name)
+        tmp_rel = rel_to_repo(tmp, repo_root)
+
+        if dry:
+            print(f"[DRY] git mv {src_rel} {tmp_rel}")
+            print(f"[DRY] git mv {tmp_rel} {dst_rel}")
+            return True
+
+        run_git(git_exe, ["mv", src_rel, tmp_rel], repo_root, verbose)
+        run_git(git_exe, ["mv", tmp_rel, dst_rel], repo_root, verbose)
+        if verbose:
+            print(f"[OK]  {src_rel} -> {dst_rel}  (case-only via tmp)")
+        return True
+
+    # Normal rename
     if dry:
-        if is_case_only(src, dst):
-            tmp = src.with_name(f"__tmp__casefix__{uuid.uuid4().hex}__{src.name}")
-            print(f"[DRY] git mv {src} -> {tmp}")
-            print(f"[DRY] git mv {tmp} -> {dst}")
-        else:
-            print(f"[DRY] git mv {src} -> {dst}")
+        print(f"[DRY] git mv {src_rel} {dst_rel}")
         return True
 
-    if is_case_only(src, dst):
-        tmp = src.with_name(f"__tmp__casefix__{uuid.uuid4().hex}__{src.name}")
-        run_git(git_exe, ["mv", os.fspath(src), os.fspath(tmp)], repo_root, verbose)
-        run_git(git_exe, ["mv", os.fspath(tmp), os.fspath(dst)], repo_root, verbose)
-        print(f"[OK]  {src.relative_to(repo_root)} -> {dst.relative_to(repo_root)}  (case-only via tmp)")
-        return True
-
-    run_git(git_exe, ["mv", os.fspath(src), os.fspath(dst)], repo_root, verbose)
-    print(f"[OK]  {src.relative_to(repo_root)} -> {dst.relative_to(repo_root)}")
+    run_git(git_exe, ["mv", src_rel, dst_rel], repo_root, verbose)
+    if verbose:
+        print(f"[OK]  {src_rel} -> {dst_rel}")
     return True
 
 def ensure_parent(dst: Path, dry: bool):
@@ -350,17 +381,36 @@ def print_git_status(git_exe: str, repo_root: Path):
     print("=" * 90)
     print(out if out else "✅ No hay cambios detectados por git (status limpio).")
 
+def rel_to_repo(p: Path, repo_root: Path) -> str:
+    # git espera paths relativos al repo
+    return p.resolve().relative_to(repo_root.resolve()).as_posix()
+
+def git_is_tracked(git_exe: str, repo_root: Path, rel_path: str) -> bool:
+    try:
+        subprocess.run(
+            [git_exe, "ls-files", "--error-unmatch", rel_path],
+            cwd=str(repo_root),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
 # ================== MAIN ==================
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--apply", action="store_true")
-    parser.add_argument("--no-update-refs", action="store_true")
-    parser.add_argument("--git-exe", default=os.environ.get("GIT_EXE"))
-    parser.add_argument("--verbose", action="store_true")
+    parser.add_argument("--apply", action="store_true", help="Ejecuta cambios (por defecto es dry-run)")
+    parser.add_argument("--no-update-refs", action="store_true", help="No actualiza referencias en .py/.html")
+    parser.add_argument("--refs-only", action="store_true", help="Solo actualiza referencias, NO hace renombres")
+    parser.add_argument("--git-exe", default=os.environ.get("GIT_EXE"), help="Ruta a git.exe (opcional)")
+    parser.add_argument("--verbose", action="store_true", help="Muestra salida de git")
     args = parser.parse_args()
 
     dry = not args.apply
     update_refs = not args.no_update_refs
+    refs_only = args.refs_only
     verbose = args.verbose
 
     repo_root = find_repo_root_from_cwd()
@@ -370,11 +420,19 @@ def main():
     print(f"Mode: {'APPLY' if not dry else 'DRY RUN'}")
     print(f"Use git: YES -> {git_exe}")
     print(f"Update references: {('YES' if update_refs else 'NO')}")
+    if refs_only:
+        print("Renames: NO (refs-only)")
 
     # validar git
     subprocess.run([git_exe, "--version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    subprocess.run([git_exe, "rev-parse", "--is-inside-work-tree"], cwd=os.fspath(repo_root),
-                   check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    subprocess.run(
+        [git_exe, "rev-parse", "--is-inside-work-tree"],
+        cwd=os.fspath(repo_root),
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
 
     dir_pairs_orig = [(repo_root / Path(a), repo_root / Path(b)) for a, b in RENAME_DIRS]
     file_pairs_orig = [(repo_root / Path(a), repo_root / Path(b)) for a, b in RENAME_FILES]
@@ -401,47 +459,43 @@ def main():
     for src, dst in file_pairs_orig:
         print(f"  {src.relative_to(repo_root)}  ->  {dst.relative_to(repo_root)}")
 
-    print("\n" + "=" * 90)
-    print("RENOMBRANDO" if not dry else "SIMULANDO RENOMBRADO")
-    print("=" * 90)
-
     applied_dir_pairs = []
 
-    # 1) directorios primero
-    for src, dst in sorted(dir_pairs_orig, key=lambda p: len(os.fspath(p[0]).split(os.sep)), reverse=True):
-        src_cur = apply_dir_map(src, applied_dir_pairs)
-        dst_cur = apply_dir_map(dst, applied_dir_pairs)
+    if not refs_only:
+        print("\n" + "=" * 90)
+        print("RENOMBRANDO" if not dry else "SIMULANDO RENOMBRADO")
+        print("=" * 90)
 
-        if not dry and not src_cur.exists():
-            print(f"[WARN] dir no existe, skip: {src_cur.relative_to(repo_root)}")
-            continue
+        # 1) directorios primero
+        for src, dst in sorted(dir_pairs_orig, key=lambda p: len(os.fspath(p[0]).split(os.sep)), reverse=True):
+            src_cur = apply_dir_map(src, applied_dir_pairs)
+            dst_cur = apply_dir_map(dst, applied_dir_pairs)
 
-        if not dry and (not is_case_only(src_cur, dst_cur)) and dst_cur.exists():
-            print(f"[WARN] destino ya existe, skip: {dst_cur.relative_to(repo_root)}")
-            continue
+            # En renombres siempre usamos git, y git_mv_safe ya maneja:
+            # - caso "ya renombrado" (src no trackeado pero dst sí) => SKIP
+            # - case-only => tmp rename
+            moved = git_mv_safe(git_exe, src_cur, dst_cur, repo_root, verbose, dry)
+            if moved and not dry:
+                applied_dir_pairs.append((src_cur, dst_cur))
+    else:
+        print("\n" + "=" * 90)
+        print("SKIP RENOMBRADO (refs-only)")
+        print("=" * 90)
 
-        moved = git_mv_safe(git_exe, src_cur, dst_cur, repo_root, verbose, dry)
-        if moved and not dry:
-            applied_dir_pairs.append((src_cur, dst_cur))
+    if not refs_only:
+        # 2) archivos
+        for src, dst in file_pairs_orig:
+            src_cur = apply_dir_map(src, applied_dir_pairs)
+            dst_cur = apply_dir_map(dst, applied_dir_pairs)
 
-    # 2) archivos
-    for src, dst in file_pairs_orig:
-        src_cur = apply_dir_map(src, applied_dir_pairs)
-        dst_cur = apply_dir_map(dst, applied_dir_pairs)
+            ensure_parent(dst_cur, dry)
+            git_mv_safe(git_exe, src_cur, dst_cur, repo_root, verbose, dry)
 
-        if not dry and not src_cur.exists():
-            print(f"[WARN] file no existe, skip: {src_cur.relative_to(repo_root)}")
-            continue
-
-        ensure_parent(dst_cur, dry)
-
-        if not dry and (not is_case_only(src_cur, dst_cur)) and dst_cur.exists():
-            print(f"[WARN] destino ya existe, skip: {dst_cur.relative_to(repo_root)}")
-            continue
-
-        git_mv_safe(git_exe, src_cur, dst_cur, repo_root, verbose, dry)
-
-    ensure_views_init(repo_root, dry)
+        ensure_views_init(repo_root, dry)
+    else:
+        # Aun en refs-only, es útil asegurar __init__.py si te interesa,
+        # pero NO lo creamos si estás en dry-run.
+        ensure_views_init(repo_root, dry)
 
     if update_refs:
         print("\n" + "=" * 90)
@@ -457,6 +511,7 @@ def main():
     print("  2) python manage.py check")
     print("  3) corre el server local")
     print("  4) commit + push")
+
 
 if __name__ == "__main__":
     main()

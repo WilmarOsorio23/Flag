@@ -110,7 +110,7 @@ def pagare_index(request):
 
     return render(
         request,
-        'Pagare/Pagareindex.html',
+        'Pagare/PagareIndex.html',
         {
             "form": form,
             "empleados": empleados,

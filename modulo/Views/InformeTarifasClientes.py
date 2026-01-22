@@ -113,7 +113,7 @@ def tarifas_clientes_filtrado(request):
         'anios_disponibles': anios_disponibles,
     }
 
-    return render(request, 'Informes/Informestarifasclientesindex.html', context)
+    return render(request, 'Informes/InformestarifasclientesIndex.html', context)
 
 @login_required
 @verificar_permiso('can_view_informe_tarifas_clientes')

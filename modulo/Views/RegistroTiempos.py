@@ -525,7 +525,7 @@ def registro_tiempos_index(request):
         'show_data': show_data,
         'mensaje': "No se encontraron resultados para los filtros aplicados." if (not colaborador_info and 'buscar' in request.GET) else ""
     }
-    return render(request, 'Registrotiempos/Registrotiemposindex.html', context)
+    return render(request, 'Registrotiempos/RegistrotiemposIndex.html', context)
 
 
 def filtrar_colaboradores(form, empleados, consultores, clientes, tiempo_clientes, tiempo_conceptos):

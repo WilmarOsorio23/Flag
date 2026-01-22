@@ -32,7 +32,7 @@ def tarifa_clientes_index(request):
     form = Tarifa_ClientesForm()
     return render(
         request,
-        'Tarifaclientes/Tarifaclientesindex.html',
+        'Tarifaclientes/TarifaclientesIndex.html',
         {'tarifa_clientes_data': tarifa_clientes_data, 'form': form},
     )
 

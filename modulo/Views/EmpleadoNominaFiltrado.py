@@ -193,7 +193,7 @@ def empleado_nomina_filtrado(request):
         ),
     }
 
-    return render(request, 'Informes/Informessalariosindex.html', context)
+    return render(request, 'Informes/InformessalariosIndex.html', context)
 
 
 @login_required

@@ -29,7 +29,7 @@ def clientes_index(request):
     
     # Serializar contactos_por_cliente a JSON
     contactos_por_cliente_json = json.dumps(contactos_por_cliente)
-    return render(request, 'Clientes/Clientesindex.html', {
+    return render(request, 'Clientes/ClientesIndex.html', {
         'clientes': clientes,
         'contactos_por_cliente': contactos_por_cliente_json
     })

@@ -59,7 +59,7 @@ def nomina_index(request):
     form = NominaForm()
     return render(
         request,
-        'Nomina/Nominaindex.html',
+        'Nomina/NominaIndex.html',
         {
             'nomina_rows': nomina_rows,
             'form': form,

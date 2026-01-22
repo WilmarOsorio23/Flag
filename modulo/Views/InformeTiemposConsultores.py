@@ -210,7 +210,7 @@ def tiempos_clientes_filtrado(request):
 
     return render(
         request,
-        'Informes/Informestiemposconsultoresindex.html',
+        'Informes/InformestiemposconsultoresIndex.html',
         context,
     )
 

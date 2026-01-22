@@ -165,7 +165,7 @@ def consultores_filtrado(request):
         )
     }
 
-    return render(request, 'Informes/Informesconsultoresindex.html', context)
+    return render(request, 'Informes/InformesconsultoresIndex.html', context)
 
 @login_required
 @verificar_permiso('can_view_informe_consultores')

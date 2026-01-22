@@ -161,7 +161,7 @@ def clientes_filtrado(request):
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."
     }
 
-    return render(request, 'Informes/Informesclientesindex.html', context)
+    return render(request, 'Informes/InformesclientesIndex.html', context)
 
 @login_required
 @verificar_permiso('can_view_informe_clientes')

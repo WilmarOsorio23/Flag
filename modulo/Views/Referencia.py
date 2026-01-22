@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_referencias')
 def referencia_index(request):
     Referencias = Referencia.objects.all()
-    return render(request, 'Referencia/Referenciaindex.html', {'Referencias': Referencias})
+    return render(request, 'Referencia/ReferenciaIndex.html', {'Referencias': Referencias})
 
 @login_required
 @verificar_permiso('can_manage_referencias')

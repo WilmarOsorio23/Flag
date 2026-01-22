@@ -467,7 +467,7 @@ def clientes_factura_index(request):
         'mensaje': "No se encontraron resultados para los filtros aplicados." if not facturacion_info else ""
     }
 
-    return render(request, 'Clientesfactura/Clientesfacturaindex.html', context)
+    return render(request, 'Clientesfactura/ClientesfacturaIndex.html', context)
 
 def calcular_totales_facturacion(facturacion_info):
     totales = {

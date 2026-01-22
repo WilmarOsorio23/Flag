@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 def cargos_index(request):
     # Ordenar los módulos por el campo 'id' en orden ascendente
     lista  = Cargos.objects.all().order_by('CargoId')
-    return render(request, 'Cargos/Cargosindex.html', {'Cargos': lista})
+    return render(request, 'Cargos/CargosIndex.html', {'Cargos': lista})
 
 @login_required
 @verificar_permiso('can_manage_cargos')

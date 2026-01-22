@@ -63,7 +63,7 @@ def tipo_pagare_editar(request, id):
         
         # Si no es una solicitud POST, renderiza el formulario
         form = TipoPagareForm(instance=tipo_pagare)
-        return render(request, 'Tipomaestro/Tipopagareeditar.html', {
+        return render(request, 'Tipomaestro/TipopagareEditar.html', {
             'form': form,
             'tipo_pagare': tipo_pagare
         })
