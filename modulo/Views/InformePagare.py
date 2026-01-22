@@ -243,7 +243,7 @@ def informe_pagares(request):
         "mensaje": "No se encontraron resultados para los filtros aplicados" if not pagares_info else "",
         "fecha_actual": fecha_actual,
     }
-    return render(request, 'Pagare/Informepagare.html', context)
+    return render(request, 'Pagare/InformePagare.html', context)
 
 
 # ----------------------------
