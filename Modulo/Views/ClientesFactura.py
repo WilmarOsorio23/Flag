@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction   
 from django.forms import ValidationError
 from django.shortcuts import render
-from Modulo import models
+from modulo import models
 from modulo.forms import FacturacionFilterForm
 from modulo.models import Clientes, ClientesContratos, FacturacionClientes, Linea, Tarifa_Clientes
 from collections import defaultdict

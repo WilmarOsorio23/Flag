@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 import pandas as pd
 from django.db.models import Q
-from Modulo import models
+from modulo import models
 from django.db import models
 from modulo.forms import ClientesForm
 from modulo.models import Clientes, Contactos, Tiempos_Cliente, TiemposFacturables, Tarifa_Clientes

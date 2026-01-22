@@ -3,8 +3,7 @@ from pyexpat.errors import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 import pandas as pd
-from Modulo import models
-import Modulo
+from modulo import models
 from modulo.forms import IPCForm
 from modulo.models import IPC
 from django.views.decorators.csrf import csrf_exempt
@@ -50,7 +49,7 @@ def ipc_editar(request, id):
                 return JsonResponse({'status': 'success'})
             else:
                 return JsonResponse({'errors': form.errors}, status=400)
-        except Modulo.DoesNotExist:
+        except IPC.DoesNotExist:
             return JsonResponse({'error': 'Módulo no encontrado'}, status=404)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)

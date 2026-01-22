@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
 from django.db import transaction
-from Modulo import models
+from modulo import models
 from django.db.models import Sum
 from modulo.forms import Total_Costos_IndirectosForm,DetalleCostosIndirectosForm,DetalleCostosIndirectosFormOpcion2
 from modulo.models import Total_Costos_Indirectos,Detalle_Costos_Indirectos,Costos_Indirectos

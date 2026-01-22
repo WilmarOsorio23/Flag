@@ -6,7 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
-from Modulo import models
+from modulo import models
 from django.db import models
 from modulo.forms import CertificacionForm
 from modulo.models import Certificacion, Detalle_Certificacion

@@ -4,7 +4,7 @@ from pyexpat.errors import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
-from Modulo import models
+from modulo import models
 from modulo.forms import LineaForm
 from modulo.models import Consultores, Empleado, Linea
 from django.db import models

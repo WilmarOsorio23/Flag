@@ -3,7 +3,7 @@ import json
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
-from Modulo import models
+from modulo import models
 from django.db.models import Sum
 from modulo.forms import TotalGastosForm,DetalleGastosFormOpcion2
 from modulo.models import Total_Gastos, Detalle_Gastos, Gastos

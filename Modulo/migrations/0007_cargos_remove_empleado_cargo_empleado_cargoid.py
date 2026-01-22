@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('Modulo', '0006_alter_nomina_documento'),
+        ('modulo', '0006_alter_nomina_documento'),
     ]
 
     operations = [

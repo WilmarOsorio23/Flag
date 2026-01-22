@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('Modulo', '0004_rename_nombre_linea_linea_and_more'),
+        ('modulo', '0004_rename_nombre_linea_linea_and_more'),
     ]
 
     operations = [

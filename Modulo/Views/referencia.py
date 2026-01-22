@@ -3,7 +3,7 @@ import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 import pandas as pd
-from Modulo import models
+from modulo import models
 from modulo.forms import ReferenciaForm
 from modulo.models import Referencia, Tarifa_Clientes
 from django.contrib import messages

@@ -4,7 +4,7 @@ from pyexpat.errors import messages
 # from turtle import pd # Eliminada ya que no es necesaria para la web
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from Modulo import models
+from modulo import models
 from modulo.forms import PerfilForm
 from modulo.models import Consultores, Empleado, Nomina, Perfil
 from django.db import models

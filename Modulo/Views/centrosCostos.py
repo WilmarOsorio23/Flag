@@ -3,7 +3,7 @@ import json
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
-from Modulo import models
+from modulo import models
 from modulo.forms import CentrosCostosForm
 from modulo.models import CentrosCostos, Tarifa_Clientes
 from django.contrib import messages

@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('Modulo', '0002_rename_costosindirectos_costos_indirectos_and_more'),
+        ('modulo', '0002_rename_costosindirectos_costos_indirectos_and_more'),
     ]
 
     operations = [

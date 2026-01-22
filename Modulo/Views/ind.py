@@ -3,8 +3,7 @@ from pyexpat.errors import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
-from Modulo import models
-import Modulo
+from modulo import models
 from modulo.forms import INDForm
 from modulo.models import IND
 from django.views.decorators.csrf import csrf_exempt
@@ -46,7 +45,7 @@ def ind_editar(request, id):
             ind.save()
             print(JsonResponse({'status': 'success'}))
             return JsonResponse({'status': 'success'})
-        except Modulo.DoesNotExist:
+        except IND.DoesNotExist:
             return JsonResponse({'status': 'error', 'errors': ['Ind no encontrado']})
         except ValueError as ve:
             return JsonResponse({'status': 'error', 'errors': ['Error al procesar los datos: ' + str(ve)]})
