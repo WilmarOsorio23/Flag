@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 
 def actividad_pagare_index(request):
     actividades = ActividadPagare.objects.all()
-    return render(request, 'Actmaestro/ActmaestroIndex.html', {
+    return render(request, 'ActMaestro/ActMaestroIndex.html', {
         'actividades': actividades
     })
 
