@@ -236,7 +236,7 @@ def indicadores_facturacion(request):
                     meses_nombres
                 )
                 
-                return render(request, 'Indicadores/Indicadoresfacturacion.html', {
+                return render(request, 'Indicadores/IndicadoresFacturacion.html', {
                     'form': form,
                     'resultados': resultados,
                     'graficos_por_linea': graficos_por_linea,
@@ -252,7 +252,7 @@ def indicadores_facturacion(request):
             meses_nombres = []
             anio = None
             
-        return render(request, 'Indicadores/Indicadoresfacturacion.html', {
+        return render(request, 'Indicadores/IndicadoresFacturacion.html', {
             'form': form,
             'graficos_por_linea': graficos_por_linea,
             'resultados': resultados,

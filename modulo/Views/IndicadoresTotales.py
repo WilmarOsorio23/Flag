@@ -607,7 +607,7 @@ def indicadores_totales(request):
         else:
             # Mostrar errores y no guardar nada
             context['form_errors'] = form.errors
-            return render(request, 'Indicadores/Indicadorestotales.html', context)
+            return render(request, 'Indicadores/IndicadoresTotales.html', context)
         for cliente in clientes:
             cliente_id = cliente.ClienteId
             datos = {
@@ -711,7 +711,7 @@ def indicadores_totales(request):
         'lineas_ids': lineas_ids,
         'valores_diciembre_cliente': valores_diciembre_cliente,
     }
-    return render(request, 'Indicadores/Indicadorestotales.html', context)
+    return render(request, 'Indicadores/IndicadoresTotales.html', context)
 
 def calcular_resultados(anio, meses, lineas_seleccionadas, clientes, lineas_ids, clientes_ids, horas_habiles, datos_precargados, valores_diciembre):
     """Función encapsulada para recalcular resultados con los mismos parámetros"""

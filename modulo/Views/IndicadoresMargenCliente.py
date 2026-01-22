@@ -281,4 +281,4 @@ def indicadores_margen_cliente(request):
         'anio': anio,
         'Lineas': lineas_seleccionadas,
     }
-    return render(request, 'Indicadores/Indicadoresmargencliente.html', context)
+    return render(request, 'Indicadores/IndicadoresMargenCliente.html', context)

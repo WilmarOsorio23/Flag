@@ -25,7 +25,7 @@ def tarifa_consultores_index(request):
     total_paginas = (total_registros + page_size - 1) // page_size
     tarifa_consultores = tarifa_consultores_qs[(page-1)*page_size:page*page_size]
     form = Tarifa_ConsultoresForm()
-    return render(request, 'Tarifaconsultores/TarifaconsultoresIndex.html', {
+    return render(request, 'TarifaConsultores/TarifaConsultoresIndex.html', {
         'tarifa_consultores': tarifa_consultores,
         'form': form,
         'total_paginas': total_paginas,

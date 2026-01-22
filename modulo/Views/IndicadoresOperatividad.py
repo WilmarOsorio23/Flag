@@ -40,7 +40,7 @@ def indicadores_operatividad_index(request):
 
         # Validar que se haya seleccionado un año
         if not anio:
-            return render(request, 'Indicadores/IndicadoresoperatividadIndex.html', context)
+            return render(request, 'Indicadores/IndicadoresOperatividadIndex.html', context)
         
         # Si no se selecciona ningún mes, mostrar todos los meses con datos para el año seleccionado
         if not meses_seleccionados:
@@ -78,7 +78,7 @@ def indicadores_operatividad_index(request):
                 'grafico_horas': "<p>No hay datos para generar el gráfico de horas.</p>"
             })
 
-    return render(request, 'Indicadores/IndicadoresoperatividadIndex.html', context)
+    return render(request, 'Indicadores/IndicadoresOperatividadIndex.html', context)
 
 def obtener_horas_habiles(anio, meses):
     registros = Horas_Habiles.objects.filter(Anio=anio, Mes__in=meses)

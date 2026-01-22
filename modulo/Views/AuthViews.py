@@ -161,7 +161,7 @@ def role_delete(request, role_id):
         "users_with_role": users_with_role,
         "can_delete": not users_with_role.exists(),
     }
-    return render(request, 'Roles/Roleconfirmdelete.html', context)
+    return render(request, 'Roles/RolecConfirmDelete.html', context)
 
 
 # -------------------------
@@ -366,4 +366,4 @@ def cambiar_password(request):
         update_session_auth_hash(request, request.user)
         return redirect("inicio")
 
-    return render(request, 'Users/Changepassword.html')
+    return render(request, 'Users/ChangePassword.html')
