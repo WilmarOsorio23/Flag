@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}
+  Informe de Clientes
+{% endblock %}
+
+{% block contenido %}
+  <div class="card">
+    <div class="card-header">
+      <h4 class="card-title">Informe de Clientes</h4>
+    </div>
+    <div class="card-body informes-table">
+      <div class="container-fluid mb-3">
+        <!-- Formulario de filtros -->
+        <form method="GET">
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="Cliente">{{ form.Nombre_Cliente.label }}</label>
+              {{ form.Nombre_Cliente }}
+            </div>
+            <div class="col-md-4">
+              <label for="Activo">{{ form.Activo.label }}</label>
+              {{ form.Activo }}
+            </div>
+            <div class="col-md-4">
+              <label for="Pais">{{ form.Pais.label }}</label>
+              {{ form.Pais }}
+            </div>
+          </div>
+          <div class="row mb-3">            
+            <div class="col-md-4">
+              <label for="Ciudad">{{ form.Ciudad.label }}</label>
+              {{ form.Ciudad }}
+            </div>
+            <div class="col-md-4">
+              <label for="TipoCliente">{{ form.TipoCliente.label }}</label>
+              {{ form.TipoCliente }}
+            </div>
+            <div class="col-md-4">
+              <label for="Nacional">{{ form.Nacional.label }}</label>
+              {{ form.Nacional }}
+            </div>
+          </div>
+          <!-- Botón de búsqueda -->
+          <div class="row">
+            <div class="col-md-6 text-start">
+              <button type="submit" name="buscar" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+              <button type="button" id="btn-reset-filtros" class="btn btn-secondary ms-2">
+                <i class="fas fa-redo"></i> Reiniciar
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Apartado para cards -->
+        {% if busqueda_realizada %}
+        <div class="mt-4 mb-3">
+          <div class="d-flex flex-row flex-nowrap overflow-auto gap-2">
+      
+              <!-- Total Clientes -->
+              <div class="card shadow-sm p-3 text-primary text-start h-100" style="min-width: 220px;">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <h5 class="fw-bold mb-0">{{ total_clientes }}</h5>
+                      <i class="fas fa-users fa-2x"></i>
+                  </div>
+                  <small class="text-muted mt-2 d-block">Total Clientes</small>
+              </div>
+      
+              <!-- Clientes Activos / Inactivos -->
+              <div class="card shadow-sm p-3 h-100" style="min-width: 220px; cursor:pointer;" id="cardActivosInactivos">
+                  <div class="card-body p-0">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                          <div>
+                              <div class="fw-bold">
+                                  <span class="text-success">{{ clientes_activos }}</span> / 
+                                  <span class="text-danger">{{ clientes_inactivos }}</span>
+                              </div>
+                              <small class="text-muted">Activos / Inactivos</small>
+                          </div>
+                          <i class="fas fa-users fa-2x text-primary"></i>
+                      </div>
+                      <div class="progress" style="height: 6px;">
+                          {% with total=clientes_activos|add:clientes_inactivos %}
+                              {% if total > 0 %}
+                                  {% widthratio clientes_activos total 100 as porcentaje_activos %}
+                                  <div class="progress-bar bg-success" role="progressbar" style="width: {{ porcentaje_activos }}%;"></div>
+                                  {% widthratio clientes_inactivos total 100 as porcentaje_inactivos %}
+                                  <div class="progress-bar bg-danger" role="progressbar" style="width: {{ porcentaje_inactivos }}%;"></div>
+                              {% endif %}
+                          {% endwith %}
+                      </div>
+                  </div>
+              </div>
+      
+              <!-- Distribución por Tipo de Cliente -->
+              <div class="card shadow-sm p-3 text-warning text-start h-100" style="min-width: 220px; cursor:pointer;" id="cardTipoCliente">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <i class="fas fa-user-tag fa-2x"></i>
+                  </div>
+                  <small class="text-muted d-block mt-2">Por Tipo de Cliente</small>
+                  {% for tipo, cantidad in conteo_tipo_cliente.items %}
+                      <p class="mb-1">{{ tipo }}: <strong>{{ cantidad }}</strong></p>
+                  {% endfor %}
+              </div>
+      
+              <!-- Distribución por País -->
+              <div class="card shadow-sm p-3 text-info text-start h-100" style="min-width: 220px; cursor:pointer;" id="cardPaises">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <i class="fas fa-globe fa-2x"></i>
+                  </div>
+                  <small class="text-muted d-block mt-2">Por País</small>
+                  {% for pais, cantidad in conteo_paises.items %}
+                      <p class="mb-1">{{ pais }}: <strong>{{ cantidad }}</strong></p>
+                  {% endfor %}
+              </div>
+      
+              <!-- Nacionales / Internacionales -->
+              <div class="card shadow-sm p-3 text-secondary text-start h-100" style="min-width: 220px;  cursor:pointer;" id="cardNacionalidad">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <h5 class="fw-bold mb-0">
+                          {{ clientes_nacionales }} / {{ clientes_internacionales }}
+                      </h5>
+                      <i class="fas fa-flag fa-2x"></i>
+                  </div>
+                  <small class="text-muted mt-2 d-block">Nacionales / Internacionales</small>
+              </div>
+      
+          </div>
+      </div>
+      {% endif %}
+
+        <!-- Botón para descargar Excel -->
+        <div class="row">
+          <div class="col-md-6 text-end offset-md-6">
+            <form method="GET" action="{% url 'exportar_clientes_excel' %}">
+              <!-- Pasar todos los filtros actuales -->
+              <input type="hidden" name="Nombre_Cliente" value="{{ form.Nombre_Cliente.value|default:'' }}" />
+              <input type="hidden" name="Activo" value="{{ form.Activo.value|default:'' }}" />
+              <input type="hidden" name="Pais" value="{{ form.Pais.value|default:'' }}" />
+              <input type="hidden" name="Ciudad" value="{{ form.Ciudad.value|default:'' }}" />
+              <input type="hidden" name="TipoCliente" value="{{ form.TipoCliente.value|default:'' }}" />
+              <input type="hidden" name="Nacional" value="{{ form.Nacional.value|default:'' }}" />
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Descargar Excel
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tabla con resultados filtrados -->
+      {% if show_data %}
+        <!-- Tabla de clientes -->
+        <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
+          <table class="table table-bordered table-hover table-primary w-100">
+            <thead>
+              <tr>
+                <th data-sort="DocumentoId" class="sortable" data-direction="default">
+                    Documento
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th data-sort="TipoDocumentoID" class="sortable" data-direction="default">
+                    Tipo Documento
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th data-sort="Nombre_Cliente" class="sortable" data-direction="default">
+                    Nombre Cliente
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th>Activo</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Retiro</th>
+                <th data-sort="Direccion" class="sortable" data-direction="default">
+                    Dirección
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th data-sort="Telefono" class="sortable" data-direction="default">
+                    Teléfono
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th>Correo Electrónico</th>
+                <th>Contacto</th>
+                <th>Buzón Facturación</th>
+                <th data-sort="TipoCliente" class="sortable" data-direction="default">
+                    Tipo Cliente
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th data-sort="Ciudad" class="sortable" data-direction="default">
+                    Ciudad
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th data-sort="Departamento" class="sortable" data-direction="default">
+                    Departamento
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th data-sort="Pais" class="sortable" data-direction="default">
+                    País
+                    <span class="sort-icon">
+                        <i class="fas fa-sort sort-icon-default"></i>
+                        <i class="fas fa-sort-up sort-icon-asc"></i>
+                        <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                </th>
+                <th>Nacional</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cliente in clientes_info %}
+                <tr>
+                    <td class="text-end">{{ cliente.DocumentoId }}</td>
+                    <td class="text-start">{{ cliente.TipoDocumentoID }}</td>
+                    <td class="text-start">{{ cliente.Nombre_Cliente }}</td>
+                    <td>{{ cliente.Activo }}</td>
+                    <td>{{ cliente.Fecha_Inicio|date:'d/m/Y' }}</td>
+                    <td>{{ cliente.Fecha_Retiro|date:'d/m/Y'|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.Direccion|default_if_none:'' }}</td>
+                    <td class="text-end">{{ cliente.Telefono|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.CorreoElectronico|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.ContactoID|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.BuzonFacturacion|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.TipoCliente|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.Ciudad|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.Departamento|default_if_none:'' }}</td>
+                    <td class="text-start">{{ cliente.Pais|default_if_none:'' }}</td>
+                    <td>{{ cliente.Nacional|default_if_none:'' }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="alert alert-warning" role="alert">
+            {% if not busqueda_realizada %}
+                No se ha realizado ninguna búsqueda aún.
+            {% else %}
+                No se encontraron resultados para los filtros aplicados.
+      {% endif %}
+        </div>
+    {% endif %}
+    </div>
+  </div>
+
+<!-- Modales para Gráficos -->
+<div class="modal fade" id="graficoActivosInactivosModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Distribución Activos / Inactivos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <canvas id="graficoActivosInactivosCanvas" width="400" height="400"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="graficoTipoClienteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Clientes por Tipo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <canvas id="graficoTipoClienteCanvas" width="400" height="400"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="graficoPaisesModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Clientes por País</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <canvas id="graficoPaisesCanvas" width="400" height="400"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="graficoNacionalidadModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nacionales / Internacionales</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <canvas id="graficoNacionalidadCanvas" width="400" height="400"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Carga dinámica de datos para los gráficos en JS -->
+{% block extra_js %}
+  {{ labels_tipo_cliente|json_script:"labels-tipo-cliente" }}
+  {{ values_tipo_cliente|json_script:"values-tipo-cliente" }}
+
+  {{ labels_paises|json_script:"labels-paises" }}
+  {{ values_paises|json_script:"values-paises" }}
+
+  {{ labels_nacionalidad|json_script:"labels-nacionalidad" }}
+  {{ values_nacionalidad|json_script:"values-nacionalidad" }}
+
+  {{ labels_activos|json_script:"labels-activos" }}
+  {{ values_activos|json_script:"values-activos" }}
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src=\"{% static 'JS/InformesClientes.js' %}\"></script>
+{% endblock %}
+
+{% endblock %}

@@ -1,0 +1,393 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block titulo %} Informe Otros Sí {% endblock %}
+
+{% block contenido %}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Informe Contratos - Otros Sí</h4>
+    </div>
+
+    <div class="card-body informes-table">
+        <div class="container-fluid mb-3">
+            <form id="filtro-otros-si-form" method="GET">
+                
+                <div class="row mb-3">
+
+                    <!-- Cliente -->
+                    <div class="col-md-3">
+                        <label for="id_Nombre_Cliente">{{ form.Nombre_Cliente.label }}</label>
+                        {{ form.Nombre_Cliente }}
+                    </div>
+
+                    <!-- Filtro Fecha Inicio -->
+                    <div class="col-md-3">
+                        <label for="fecha_inicio">{{ form.FechaInicio.label }}</label>
+                        {{ form.FechaInicio }}
+                    </div>
+
+                    <!-- Contrato -->
+                    <div class="col-md-3">
+                        <label for="id_Contrato">{{ form.Contrato.label }}</label>
+                        {{ form.Contrato }}
+                    </div>
+                    
+                    <!-- Filtro Contrato Vigente -->
+                    <div class="col-md-3">
+                        <label for="id_ContratoVigente">{{ form.ContratoVigente.label }}</label>
+                        {{ form.ContratoVigente }}
+                    </div>
+                    
+                </div>
+
+                    <div class="row">
+                        <div class="col-md-6 text-start">
+                            <button type="submit" name="buscar" class="btn btn-primary">
+                                <i class="fas fa-glasses"></i> Buscar
+                            </button>
+                            <button type="button" id="btn-reset-filtros" class="btn btn-secondary ms-2">
+                                <i class="fas fa-redo"></i> Reiniciar
+                            </button>
+                        </div>
+                    </div>
+            </form>
+
+        </div>
+
+        <!-- Apartado para cards -->
+        {% if show_data %}
+            <div class="mb-3">
+            <div class="d-flex flex-row flex-nowrap overflow-auto gap-2">
+
+            <!-- Total Contratos -->
+            <div class="card shadow-sm p-3" style="min-width: 220px; font-size: 0.85rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="text-info fw-bold mb-0">{{ total_contratos }}</h5>
+                    <small class="text-muted">Total Contratos</small>
+                </div>
+                <i class="fas fa-file-contract fa-2x text-info"></i>
+                </div>
+            </div>
+
+            <!-- Valor Total Otro Sí -->
+            <div class="card shadow-sm p-3" style="min-width: 220px; font-size: 0.85rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="text-info fw-bold mb-0">${{ valor_total|floatformat:2 }}</h5>
+                    <small class="text-muted">Valor Total Otro Sí</small>
+                </div>
+                <i class="fas fa-hand-holding-usd fa-2x text-info"></i>
+                </div>
+            </div>
+
+            <!-- Firmado Interno -->
+            <div class="card shadow-sm p-3" style="min-width: 220px; font-size: 0.85rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="text-secondary fw-bold mb-0">{{ contratos_firmados }}</h5>
+                    <small class="text-muted">Firmado Interno</small>
+                </div>
+                <i class="fas fa-user-shield fa-2x text-secondary"></i>
+                </div>
+                <div class="progress mt-3" style="height: 5px;">
+                <div class="progress-bar bg-secondary" role="progressbar"
+                    style="width: {{ porcentaje_firmado_interno }}%;"
+                    aria-valuenow="{{ contratos_firmados }}" aria-valuemin="0"
+                    aria-valuemax="{{ total_contratos }}"></div>
+                </div>
+                <div class="text-end mt-1" style="font-size: 0.75rem; color: #888;">
+                {{ contratos_firmados }}/{{ total_contratos }}
+                </div>
+            </div>
+
+            <!-- Firmado Cliente -->
+            <div class="card shadow-sm p-3" style="min-width: 220px; font-size: 0.85rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="text-info fw-bold mb-0">{{ contratos_firmados_cliente }}</h5>
+                    <small class="text-muted">Firmado Cliente</small>
+                </div>
+                <i class="fas fa-user-check fa-2x text-info"></i>
+                </div>
+                <div class="progress mt-3" style="height: 5px;">
+                <div class="progress-bar bg-info" role="progressbar"
+                    style="width: {{ porcentaje_firmado_cliente }}%;"
+                    aria-valuenow="{{ contratos_firmados_cliente }}" aria-valuemin="0"
+                    aria-valuemax="{{ total_contratos }}"></div>
+                </div>
+                <div class="text-end mt-1" style="font-size: 0.75rem; color: #888;">
+                {{ contratos_firmados_cliente }}/{{ total_contratos }}
+                </div>
+            </div>
+
+            <!-- Con Pólizas -->
+            <div class="card shadow-sm p-3" style="min-width: 220px; font-size: 0.85rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="text-success fw-bold mb-0">{{ contratos_con_polizas }}</h5>
+                    <small class="text-muted">Con Pólizas</small>
+                </div>
+                <i class="fas fa-shield-alt fa-2x text-success"></i>
+                </div>
+                <div class="progress mt-3" style="height: 5px;">
+                <div class="progress-bar bg-success" role="progressbar"
+                    style="width: {{ porcentaje_con_polizas }}%;"
+                    aria-valuenow="{{ contratos_con_polizas }}" aria-valuemin="0"
+                    aria-valuemax="{{ total_contratos }}"></div>
+                </div>
+                <div class="text-end mt-1" style="font-size: 0.75rem; color: #888;">
+                {{ contratos_con_polizas }}/{{ total_contratos }}
+                </div>
+            </div>
+
+            <!-- Card Monedas -->
+        <div class="card shadow-sm p-3" id="cardMonedas" style="min-width: 220px; font-size: 0.85rem;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold mb-0">
+                        <span class="text-primary">{{ total_usd }}</span> /
+                        <span class="text-success">{{ total_cop }}</span> /
+                        <span class="text-warning">{{ total_mxn }}</span>
+                    </h5>
+                    <small class="text-muted">USD / COP / MXN</small>
+                </div>
+                <i class="fas fa-coins fa-2x text-primary"></i>
+            </div>
+            <div class="progress mt-3" style="height: 5px;">
+                {% if total_usd > 0 %}
+                <div class="progress-bar bg-primary" role="progressbar"
+                    style="width: {{ porcentaje_usd_display }}%;" 
+                    aria-valuenow="{{ total_usd }}" aria-valuemin="0" aria-valuemax="{{ total_contratos }}">
+                </div>
+                {% endif %}
+                
+                {% if total_cop > 0 %}
+                <div class="progress-bar bg-success" role="progressbar"
+                    style="width: {{ porcentaje_cop_display }}%;" 
+                    aria-valuenow="{{ total_cop }}" aria-valuemin="0" aria-valuemax="{{ total_contratos }}">
+                </div>
+                {% endif %}
+                
+                {% if total_mxn > 0 %}
+                <div class="progress-bar bg-warning" role="progressbar"
+                    style="width: {{ porcentaje_mxn_display }}%;" 
+                    aria-valuenow="{{ total_mxn }}" aria-valuemin="0" aria-valuemax="{{ total_contratos }}">
+                </div>
+                {% endif %}
+            </div>
+            <div class="text-end mt-1" style="font-size: 0.75rem; color: #888;">
+                {{ total_monedas }}/{{ total_contratos }}
+            </div>
+        </div>
+
+            </div>
+            </div>
+        {% endif %}
+        <!-- Botón de Descargar Excel -->
+            <div class="row">
+                <div class="col-md-6 text-end offset-md-6">
+                    <form id="download-form" method="GET" action="{% url 'exportar_otros_si_excel' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="Nombre_Cliente" value="{{ form.Nombre_Cliente.value }}">
+                        <input type="hidden" name="FechaInicio" value="{{ form.FechaInicio.value }}">
+                        <input type="hidden" name="Contrato" value="{{ form.Contrato.value }}">
+                        <input type="hidden" name="ContratoVigente" value="{{ form.ContratoVigente.value }}">
+
+                        <button type="submit" class="btn btn-success mt-3">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </button>
+                    </form>
+                </div>
+            </div>
+        
+        <!-- Tabla con resultados filtrados -->
+        {% if show_data %}
+        <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
+            <table class="table table-bordered table-hover table-primary w-100" id="otrosSiTable">
+                <thead>
+                    <tr>
+                        <th data-sort="documento" class="sortable" data-direction="default">
+                            Documento Cliente
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="nombre" class="sortable" data-direction="default">
+                            Nombre Cliente
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="fecha_inicio" class="sortable" data-direction="default">
+                            Fecha Inicio
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="fecha_fin" class="sortable" data-direction="default">
+                            Fecha Fin
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="por_vencer" class="sortable" data-direction="default">
+                            Por Vencer
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="numero_otro" class="sortable" data-direction="default">
+                            Número Otro Sí
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="contrato" class="sortable" data-direction="default">
+                            Contrato
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="valor" class="sortable" data-direction="default">
+                            Valor Otro Sí
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="iva" class="sortable" data-direction="default">
+                            Incluye IVA
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="polizas" class="sortable" data-direction="default">
+                            Polizas
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="descripcion" class="sortable" data-direction="default">
+                            Descripción Polizas
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="firmado" class="sortable" data-direction="default">
+                            Firmado (Interno)
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="firmado_cliente" class="sortable" data-direction="default">
+                            Firmado Cliente
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="moneda" class="sortable" data-direction="default">
+                            Moneda
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cliente in cliente_otros_si_info %}
+                        {% for otro in cliente.otros_si %}
+                            <tr>
+                                <td data-field="documento" class="text-end">{{ cliente.documento }}</td>
+                                <td data-field="nombre" class="text-start">{{ cliente.nombre }}</td>
+                                <td data-field="fecha_inicio" class="text-end">{{ otro.FechaInicio|date:'d/m/Y'|default_if_none:"" }}</td>
+                                <td data-field="fecha_fin0" class="text-end">{{ otro.FechaFin|date:'d/m/Y'|default_if_none:"" }}</td>
+                                <td data-field="por_vencer" class="text-center align-middle">
+                                    {% if otro.por_vencer %}
+                                        <span class="text-warning" title="Por vencer" style="font-size: 1.2rem;">⚠️</span>
+                                    {% endif %}
+                                </td>
+                                <td data-field="numero_otro" class="text-end">{{ otro.NumeroOtroSi }}</td>
+                                <td data-field="contrato" class="text-end">{{ otro.Contrato }}</td>
+                                <td data-field="valor" class="text-end">{{ otro.ValorOtroSi|currency_format }}</td>
+                                <td data-field="iva" class="text-end">{{ otro.ValorIncluyeIva|yesno:"SI,NO" }}</td>
+                                <td data-field="polizas" class="text-end">{{ otro.Polizas|yesno:"SI,NO" }}</td>
+                                <td data-field="descripcion" class="text-start">{{ otro.PolizasDesc|default_if_none:"" }}</td>
+                                <td data-field="firmado" class="text-end">{{ otro.FirmadoFlag|yesno:"SI,NO" }}</td>
+                                <td data-field="firmado_cliente" class="text-end">{{ otro.FirmadoCliente|yesno:"SI,NO" }}</td>
+                                <td data-field="moneda" class="text-end">{{ otro.moneda }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% empty %}
+                        <tr>
+                            <td colspan="13">No hay datos disponibles.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+                <div class="alert alert-warning" role="alert">
+                    {% if not busqueda_realizada %}
+                        No se ha realizado ninguna búsqueda aún.
+                    {% else %}
+                        No se encontraron resultados para los filtros aplicados.
+                    {% endif %}
+                </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- MODAL DE GRÁFICO DE MONEDAS -->
+<div class="modal fade" id="graficoMonedasModal" tabindex="-1" aria-labelledby="graficoMonedasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="graficoMonedasLabel">Distribución de Monedas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <canvas id="graficoMonedasCanvas"
+                        width="400" height="400"
+                        data-usd="{{ total_usd }}"
+                        data-cop="{{ total_cop }}"
+                        data-mxn="{{ total_mxn }}">
+                </canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src=\"{% static 'JS/InformesOtrosSi.js' %}\"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{% endblock %}

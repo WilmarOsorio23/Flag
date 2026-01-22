@@ -23,7 +23,7 @@ from Modulo.Views import Nomina
 from Modulo.Views.Nomina import (
     nomina_index, nomina_crear, nomina_editar, nomina_eliminar,
     nomina_descargar_excel, verificar_relaciones,
-    nomina_bulk_preview, nomina_bulk_create,   # <-- NUEVO
+    nomina_bulk_preview, nomina_bulk_create
 )
 from Modulo.Views import InformeCertificaciones
 from Modulo.Views.InformePagare import exportar_pagares_excel, informe_pagares

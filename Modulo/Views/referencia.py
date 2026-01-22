@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_referencias')
 def referencia_index(request):
     Referencias = Referencia.objects.all()
-    return render(request, 'referencia/referencia_index.html', {'Referencias': Referencias})
+    return render(request, 'Referencia/Referenciaindex.html', {'Referencias': Referencias})
 
 @login_required
 @verificar_permiso('can_manage_referencias')
@@ -31,7 +31,7 @@ def referencia_crear(request):
         return redirect('referencia_index')
     else:
      form = ReferenciaForm()
-     return render(request, 'referencia/referencia_form.html', {'form': form})
+     return render(request, 'Referencia/ReferenciaForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_referencias')

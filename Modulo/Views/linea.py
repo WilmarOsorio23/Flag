@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 
 def linea_index(request):
     linea_data = Linea.objects.all()
-    return render(request, 'Linea/linea_index.html', {'lineas': linea_data})
+    return render(request, 'Linea/LineaIndex.html', {'lineas': linea_data})
 
 @login_required
 @verificar_permiso('can_manage_linea')
@@ -33,7 +33,7 @@ def linea_crear(request):
             return redirect('linea_index')
     else:
         form = LineaForm()
-    return render(request, 'linea/linea_form.html', {'form': form})
+    return render(request, 'Linea/LineaForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_linea')

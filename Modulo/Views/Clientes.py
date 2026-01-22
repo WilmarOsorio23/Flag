@@ -29,7 +29,7 @@ def clientes_index(request):
     
     # Serializar contactos_por_cliente a JSON
     contactos_por_cliente_json = json.dumps(contactos_por_cliente)
-    return render(request, 'clientes/clientes_index.html', {
+    return render(request, 'Clientes/Clientesindex.html', {
         'clientes': clientes,
         'contactos_por_cliente': contactos_por_cliente_json
     })
@@ -50,7 +50,7 @@ def clientes_crear(request):
     else:
         form = ClientesForm()
     
-    return render(request, 'clientes/clientes_form.html', {'form': form})
+    return render(request, 'Clientes/ClientesForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_clientes')

@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block titulo %} Contratos Otros Si {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
+        <span id="alert-icon" class="alert-heading"></span>
+        <span id="alert-message"></span>
+    </div>
+    {% if messages %}
+    <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="card-header d-flex justify-content-between align-items-center"> 
+        <h4 class="card-title">Contratos Otros Si</h4>
+    </div>
+    <div class="card-body">
+        <!-- CRUD Icons -->
+        <div class="button-group">
+            <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'contratos_otros_si_crear' %}" role="button"></a> 
+            <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button" onclick="enableEdit();"></a> 
+            <i class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
+            <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar"></button> 
+            <form id="download-form" method="POST" action="{% url 'contratos_otros_si_descargar_excel' %}" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="items_to_download" id="items_to_download">
+                <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
+            </form>
+            <!-- Botones de Guardar y Cancelar -->  
+            <button id="save-button" 
+            class="btn btn-outline-success fas fa-save d-none" 
+            title="Guardar" 
+            type="button" 
+            onclick="saveRow();">
+            </button>
+            <button id="cancel-button" 
+            class="btn btn-outline-danger fas fa-times d-none" 
+            title="Cancelar" 
+            type="button"
+            onclick="cancelEdit();">
+            </button>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        <div class="table-responsive">
+            <form id="delete-form" method="POST" action="{% url 'contratos_otros_si_eliminar' %}">
+                {% csrf_token %}
+                <table class="table table-primary">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all"></th>
+                            <th data-sort="Cliente" class="sortable" data-direction="default">
+                                Cliente
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="FechaInicio" class="sortable" data-direction="default">
+                                Fecha Inicio
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="FechaFin" class="sortable" data-direction="default">
+                                Fecha Fin
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="NumeroOtroSi" class="sortable" data-direction="default">
+                                Número Otro Si
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="ValorOtroSi" class="sortable" data-direction="default">
+                                Valor Otro Si
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="ValorIncluyeIva" class="sortable" data-direction="default">
+                                Valor Incluye Iva
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Polizas" class="sortable" data-direction="default">
+                                Polizas
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="PolizasDesc" class="sortable" data-direction="default">
+                                Descripción Polizas
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="FirmadoFlag" class="sortable" data-direction="default">
+                                Firmado Flag
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="FirmadoCliente" class="sortable" data-direction="default">
+                                Firmado Cliente
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Moneda" class="sortable" data-direction="default">
+                                Moneda
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="Contrato" class="sortable" data-direction="default">
+                                Contrato
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contrato in contratos_otros_si_data %}
+                        <tr>
+                            <td >
+                                <input type="checkbox" class="row-select" name="items_to_delete" value="{{ contrato.ContratosOtrosSiId }}">
+                            </td>
+                            <td data-field="Cliente" class="text-start" style="overflow: visible; text-overflow: ellipsis; min-width: 180px;">
+                                <span class="form-control-plaintext">{{ contrato.ClienteId.Nombre_Cliente }}</span>
+                                <input type="text" class="form-control d-none" name="Nombre_Cliente" value="{{ contrato.ClienteId.Nombre_Cliente }}" readonly>
+                            </td>
+                            <td data-field="FechaInicio" class="text-start">
+                                <span class="form-control-plaintext">{{ contrato.FechaInicio|date:'Y-m-d' }}</span>
+                                <input type="date" class="form-control d-none" name="FechaInicio" value="{{ contrato.FechaInicio|date:'Y-m-d' }}" readonly>
+                            </td>
+                            <td data-field="FechaFin" class="text-start">
+                                <span class="form-control-plaintext">{{ contrato.FechaFin|date:'Y-m-d' }}</span>
+                                <input type="date" class="form-control d-none" name="FechaFin" value="{{ contrato.FechaFin|date:'Y-m-d' }}" readonly>
+                            </td>
+                            <td data-field="NumeroOtroSi" class="text-end" style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
+                                <span class="form-control-plaintext">{{ contrato.NumeroOtroSi }}</span>
+                                <input type="text" class="form-control d-none" name="NumeroOtroSi" value="{{ contrato.NumeroOtroSi }}" readonly>
+                            </td>
+                            <td data-field="ValorOtroSi" class="text-end">
+                                <span class="form-control-plaintext">{{contrato.ValorOtroSi|default_if_none:''|currency_format }}</span>
+                                <input type="text" name="ValorOtroSi" class="form-control d-none" value="{{contrato.ValorOtroSi|default_if_none:''|currency_format }}" readonly>
+                            </td>
+                            <td data-field="ValorIncluyeIva">
+                                <span class="form-control-plaintext boolean-display" data-field="ValorIncluyeIva">
+                                    {% if contrato.ValorIncluyeIva %}Sí{% else %}No{% endif %}
+                                </span>
+                                <input type="checkbox" class="form-check-input boolean-edit d-none" 
+                                       name="ValorIncluyeIva" {% if contrato.ValorIncluyeIva %}checked{% endif %}>
+                            </td>
+                            
+                            <td data-field="Polizas">
+                                <span class="form-control-plaintext boolean-display" data-field="Polizas">
+                                    {% if contrato.Polizas %}Sí{% else %}No{% endif %}
+                                </span>
+                                <input type="checkbox" class="form-check-input boolean-edit d-none" 
+                                       name="Polizas" {% if contrato.Polizas %}checked{% endif %}>
+                            </td>
+                            <td data-field="PolizasDesc" class="text-start" style="overflow: visible; text-overflow: ellipsis; min-width: 120px;">
+                                <span class="form-control-plaintext">{{ contrato.PolizasDesc|default_if_none:'' }}</span>
+                                <input type="text" class="form-control d-none" name="PolizasDesc" value="{{ contrato.PolizasDesc|default_if_none:'' }}" readonly>
+                            </td>
+                            <td data-field="FirmadoFlag">
+                                <span class="form-control-plaintext boolean-display" data-field="FirmadoFlag">
+                                    {% if contrato.FirmadoFlag %}Sí{% else %}No{% endif %}
+                                </span>
+                                <input type="checkbox" class="form-check-input boolean-edit d-none" 
+                                       name="FirmadoFlag" {% if contrato.FirmadoFlag %}checked{% endif %}>
+                            </td>
+                            <td data-field="FirmadoCliente" >
+                                <span class="form-control-plaintext boolean-display" data-field="FirmadoCliente">
+                                    {% if contrato.FirmadoCliente %}Sí{% else %}No{% endif %}
+                                </span>
+                                <input type="checkbox" class="form-check-input boolean-edit d-none" 
+                                       name="FirmadoCliente" {% if contrato.FirmadoCliente %}checked{% endif %}>
+                            </td>
+                            <td data-field="Moneda">
+                                <span class="form-control d-none">{{ contrato.monedaId.Nombre }}</span>
+                                <select name="moneda" class="form-control-plaintext" disabled>
+                                    {% for moneda in form.fields.monedaId.queryset %}
+                                        <option value="{{ moneda.id }}"{% if contrato.monedaId.id == moneda.id %} selected{% endif %}>
+                                            {{ moneda.Nombre }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td data-field="Contrato" class="text-end">
+                                <span class="form-control d-none">
+                                    {% for contrato_cliente in contrato.ClienteId.clientescontratos_set.all %}
+                                        {% if contrato_cliente.Contrato == contrato.Contrato %}
+                                            {{ contrato_cliente.Contrato }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                                <select name="Contrato" class="form-control-plaintext" disabled>
+                                    
+                                    {% for contrato_cliente in contrato.ClienteId.clientescontratos_set.all %}
+                                        <option value="{{ contrato_cliente.Contrato }}" {% if contrato_cliente.Contrato == contrato.Contrato %}selected{% endif %}>
+                                            {{ contrato_cliente.Contrato }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </form>
+            <!-- Modal de confirmación -->
+            <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            ¿Estás seguro de que deseas eliminar este contrato?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                            <button id="confirm-delete-btn" type="button" class="btn btn-danger">Sí</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src=\"{% static 'JS/Contratosotrossi.js' %}\"></script>
+
+{% endblock %}

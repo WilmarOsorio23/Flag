@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_costos_indirectos')
 def costos_indirectos_index(request):
     costos_indirectos = Costos_Indirectos.objects.all()
-    return render(request, 'Costos_Indirectos/costos_indirecto_index.html', {'costos_indirectos': costos_indirectos})
+    return render(request, 'CostosIndirectos/CostosIndirectoIndex.html', {'costos_indirectos': costos_indirectos})
 
 @login_required
 @verificar_permiso('can_manage_costos_indirectos')
@@ -33,7 +33,7 @@ def costos_indirectos_crear(request):
             return redirect('costos_indirectos_index')
     else:
         form = CostosIndirectosForm()
-    return render(request, 'Costos_Indirectos/costos_indirecto_forms.html', {'form': form})
+    return render(request, 'CostosIndirectos/CostosIndirectoForms.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_costos_indirectos')

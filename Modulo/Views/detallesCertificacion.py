@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 def detalle_certificacion_index(request):
     detalles_certificacion = Detalle_Certificacion.objects.all()
     #print(detalles_certificacion) 
-    return render(request, 'Detalle_Certificacion/detalle_certificacion_index.html', {'detalles_certificacion': detalles_certificacion})
+    return render(request, 'DetalleCertificacion/DetalleCertificacionIndex.html', {'detalles_certificacion': detalles_certificacion})
 
 @login_required
 @verificar_permiso('can_manage_detalle_certificacion')
@@ -36,7 +36,7 @@ def detalle_certificacion_crear(request):
         return redirect('detalle_certificacion_index')
  else:
     form = Detalle_CertificacionForm()
-    return render(request, 'Detalle_Certificacion/detalle_certificacion_form.html', {'form': form})
+    return render(request, 'DetalleCertificacion/DetalleCertificacionForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_detalle_certificacion')

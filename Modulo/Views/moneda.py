@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_moneda')
 def moneda_index(request):
     monedas = Moneda.objects.all()
-    return render(request, 'Moneda/Moneda_index.html', {'monedas': monedas})  
+    return render(request, 'Moneda/MonedaIndex.html', {'monedas': monedas})  
 
 @login_required
 @verificar_permiso('can_manage_moneda')
@@ -32,7 +32,7 @@ def moneda_crear(request):
         return redirect('moneda_index')
   else:
      form = MonedaForm()
-     return render(request, 'Moneda/Moneda_form.html', {'form': form})
+     return render(request, 'Moneda/MonedaForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_moneda')

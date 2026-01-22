@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 def cargos_index(request):
     # Ordenar los módulos por el campo 'id' en orden ascendente
     lista  = Cargos.objects.all().order_by('CargoId')
-    return render(request, 'Cargos/cargos_index.html', {'Cargos': lista})
+    return render(request, 'Cargos/Cargosindex.html', {'Cargos': lista})
 
 @login_required
 @verificar_permiso('can_manage_cargos')
@@ -34,7 +34,7 @@ def crear(request):
             return redirect('cargos_index')
     else:
         form = CargosForm()
-    return render(request, 'Cargos/cargos_crear.html', {'form': form})
+    return render(request, 'Cargos/CargosCrear.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_cargos')

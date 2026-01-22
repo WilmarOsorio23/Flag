@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block titulo %}
+  Informe de Tiempos Consultores
+{% endblock %}
+
+{% block contenido %}
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4 class="card-title">Informe de Tiempos Consultores</h4>
+    </div>
+    <div class="card-body informes-table">
+      <div class="container-fluid mb-3">
+        <!-- Formulario de filtros -->
+        <form method="GET">
+          <div class="row mb-3">
+            <!-- Filtro Año -->
+            <div class="col-md-3">
+              <label for="Anio" class="form-label">{{ form.Anio.label }}</label>
+              <div class="dropdown">
+                <button 
+                  class="btn btn-outline-primary dropdown-toggle w-100" 
+                  type="button" 
+                  id="dropdownAnio" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false"
+                  data-selected-text="Seleccione Año">
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownAnio">
+                  {% for value, label in form.Anio.field.choices %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                        <input type="radio" name="Anio" value="{{ value }}" {% if form.Anio.value == value %}checked{% endif %}>{{ label }}
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+
+            <!-- Filtro Documento -->
+            <div class="col-md-3">
+              <label for="documento" class="form-label">{{ form.documento.label }}</label> 
+              <div class="dropdown">
+                <button 
+                  class="btn btn-outline-primary dropdown-toggle w-100" 
+                  type="button" 
+                  id="dropdownDocumento" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false"
+                  data-selected-text="Seleccione Consultor">
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownDocumento">
+                  {% for checkbox in form.documento %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+
+            <!-- Filtro Línea -->
+            <div class="col-md-3">
+              <label for="LineaId" class="form-label">{{ form.LineaId.label }}</label>
+              <div class="dropdown">
+                <button 
+                  class="btn btn-outline-primary dropdown-toggle w-100" 
+                  type="button" 
+                  id="dropdownLinea" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false"
+                  data-selected-text="Seleccione Línea">
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
+                  {% for checkbox in form.LineaId %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+
+            <!-- Filtro Mes -->
+            <div class="col-md-3">
+              <label for="Mes" class="form-label">{{ form.Mes.label }}</label>
+              <div class="dropdown">
+                <button 
+                  class="btn btn-outline-primary dropdown-toggle w-100" 
+                  type="button" 
+                  id="dropdownMes" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false"
+                  data-selected-text="Seleccione Mes">
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownMes">
+                  {% for checkbox in form.Mes %}
+                    <li class="dropdown-item">
+                      <label class="form-check-label w-100">
+                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botón de búsqueda -->
+          <div class="row">
+            <div class="col-md-6 text-start">
+              <button type="submit" name="buscar" class="btn btn-primary">
+                <i class="fas fa-search"></i> Buscar
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Botón para descargar Excel -->
+        <div class="row mt-3">
+          <div class="col-md-6 text-end offset-md-6">
+            <form method="GET" action="{% url 'exportar_tiempos_clientes_excel' %}">
+              <input type="hidden" name="Anio" value="{{ form.Anio.value|default:'' }}">
+              <input type="hidden" name="Mes" value="{{ form.Mes.value|default:'' }}">
+              <input type="hidden" name="Documento" value="{{ form.documento.value|default:'' }}">
+              <input type="hidden" name="LineaId" value="{{ form.LineaId.value|default:'' }}">
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Descargar Excel
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {% if show_data %}
+        <!-- Tabla de tiempos consultores -->
+        <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
+          <table class="table table-bordered table-hover table-primary w-100" id="infoTiemposClienteTable">
+            <thead>
+              <tr>
+                <th data-sort="documento" class="sortable" data-direction="default">
+                  Documento
+                  <span class="sort-icon">
+                    <i class="fas fa-sort sort-icon-default"></i>
+                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="nombre" class="sortable" data-direction="default">
+                  Nombre Consultor
+                  <span class="sort-icon">
+                    <i class="fas fa-sort sort-icon-default"></i>
+                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="empresa" class="sortable" data-direction="default">
+                  Empresa
+                  <span class="sort-icon">
+                    <i class="fas fa-sort sort-icon-default"></i>
+                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="linea" class="sortable" data-direction="default">
+                  Línea
+                  <span class="sort-icon">
+                    <i class="fas fa-sort sort-icon-default"></i>
+                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="cliente" class="sortable" data-direction="default">
+                  Cliente
+                  <span class="sort-icon">
+                    <i class="fas fa-sort sort-icon-default"></i>
+                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="modulo" class="sortable" data-direction="default">
+                  Módulo
+                  <span class="sort-icon">
+                    <i class="fas fa-sort sort-icon-default"></i>
+                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="anio" class="sortable" data-direction="default">
+                  Año
+                  <span class="sort-icon">
+                    <i class="fas fa-sort sort-icon-default"></i>
+                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="mes" class="sortable" data-direction="default">
+                  Mes
+                  <span class="sort-icon">
+                    <i class="fas fa-sort sort-icon-default"></i>
+                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+                <th data-sort="horas" class="sortable" data-direction="default">
+                  Horas
+                  <span class="sort-icon">
+                    <i class="fas fa-sort sort-icon-default"></i>
+                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                  </span>
+                </th>
+
+                {# Columnas dinámicas para facturaciones #}
+                {% for i in max_facturaciones|get_range %}
+                  <th data-sort="cta_cobro_{{ i }}" class="sortable" data-direction="default">
+                    Cta Cobro {{ i }}
+                    <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                  </th>
+                  <th data-sort="horas_facturacion_{{ i }}" class="sortable" data-direction="default">
+                    Horas Facturación {{ i }}
+                    <span class="sort-icon">
+                      <i class="fas fa-sort sort-icon-default"></i>
+                      <i class="fas fa-sort-up sort-icon-asc"></i>
+                      <i class="fas fa-sort-down sort-icon-desc"></i>
+                    </span>
+                  </th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% if tiempos_info %}
+                {% for registro in tiempos_info %}
+                  <tr>
+                    <td data-field="documento" class="text-end">{{ registro.Documento }}</td>
+                    <td data-field="nombre" class="text-start">{{ registro.Nombre }}</td>
+                    <td data-field="empresa" class="text-start">{{ registro.Empresa }}</td>
+                    <td data-field="linea" class="text-start">{{ registro.Linea }}</td>
+                    <td data-field="cliente" class="text-start">{{ registro.Cliente }}</td>
+                    <td data-field="modulo" class="text-start">{{ registro.Modulo }}</td>
+                    <td data-field="anio" class="text-end">{{ registro.Anio }}</td>
+                    <td data-field="mes" class="text-end">{{ registro.Mes }}</td>
+                    <td data-field="horas" class="text-end">{{ registro.Horas }}</td>
+
+                    {# Celdas para facturaciones dinámicas #}
+                    {% for i in max_facturaciones|get_range %}
+                      <td data-field="cta_cobro_{{ i }}" class="text-start">
+                        {% with factura=registro.Facturaciones|index:i %}
+                          {% if factura %}
+                            {{ factura.Cta_Cobro }}
+                          {% else %}
+                            -
+                          {% endif %}
+                        {% endwith %}
+                      </td>
+                      <td data-field="horas_facturacion_{{ i }}" class="text-end">
+                        {% with factura=registro.Facturaciones|index:i %}
+                          {% if factura %}
+                            {{ factura.Horas_Facturacion }}
+                          {% else %}
+                            -
+                          {% endif %}
+                        {% endwith %}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="{{ 9|add:max_facturaciones|multiply:2 }}">No hay datos disponibles.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="alert alert-warning">{{ mensaje }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script src=\"{% static 'JS/InformesTiemposConsultores.js' %}\"></script>
+{% endblock %}

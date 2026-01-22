@@ -28,7 +28,7 @@ def linea_cliente_centrocostos_index(request):
         'modulos': Modulo.objects.all().order_by('Modulo'),
         'centros_costos': CentrosCostos.objects.all().order_by('codigoCeCo'),
     }
-    return render(request, 'LineaClienteCentroCostos/linea_cliente_centrocostos_index.html', context)
+    return render(request, 'Lineaclientecentrocostos/Lineaclientecentrocostosindex.html', context)
 
 
 @login_required
@@ -48,7 +48,7 @@ def linea_cliente_centrocostos_crear(request):
     else:
         form = LineaClienteCentroCostosForm()
 
-    return render(request, 'LineaClienteCentroCostos/linea_cliente_centrocostos_form.html', {'form': form})
+    return render(request, 'LineaClienteCentroCostos/LineaClienteCentrocostosForm.html', {'form': form})
 
 
 @login_required

@@ -59,7 +59,7 @@ def nomina_index(request):
     form = NominaForm()
     return render(
         request,
-        'nomina/nomina_index.html',
+        'Nomina/Nominaindex.html',
         {
             'nomina_rows': nomina_rows,
             'form': form,
@@ -77,7 +77,7 @@ def nomina_crear(request):
             return redirect('nomina_index')
     else:
         form = NominaForm()
-    return render(request, 'Nomina/nomina_form.html', {'form': form})
+    return render(request, 'Nomina/NominaForm.html', {'form': form})
 
 
 @login_required

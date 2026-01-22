@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_conceptos')
 def conceptos_index(request):
     concepto = Concepto.objects.all()
-    return render(request, 'Conceptos/conceptos_index.html', {'conceptos': concepto})
+    return render(request, 'Conceptos/ConceptosIndex.html', {'conceptos': concepto})
 
 @login_required
 @verificar_permiso('can_manage_conceptos')
@@ -34,7 +34,7 @@ def conceptos_crear(request):
             return redirect('conceptos_index')
     else:
         form = ConceptoForm()
-    return render(request, 'conceptos/conceptos_form.html', {'form': form})
+    return render(request, 'Conceptos/ConceptosForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_conceptos')

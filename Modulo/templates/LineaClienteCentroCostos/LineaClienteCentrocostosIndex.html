@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %} Relación Línea - Cliente - Módulo - Centro de Costos {% endblock %}
+
+{% block contenido %}
+<div class="card">
+
+  {% if messages %}
+    <div class="messages d-none">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h4 class="card-title">Línea / Cliente / Módulo / Centro de Costos</h4>
+  </div>
+
+  <div class="card-body">
+    <div class="button-group">
+      <a class="btn btn-outline-primary fas fa-plus-circle" title="Crear"
+         href="{% url 'linea_cliente_centrocostos_crear' %}" role="button"></a>
+
+      <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar"
+         href="#" role="button" onclick="enableEdit();"></a>
+
+      <i class="btn btn-outline-primary fas fa-eye" title="Visualizar"
+         role="button" style="margin-right:10px;"></i>
+
+      <button type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar"></button>
+
+      <form id="download-form" method="POST" action="{% url 'linea_cliente_centrocostos_descargar_excel' %}" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="items_to_download" id="items_to_download">
+        <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar"></button>
+      </form>
+
+      <button id="save-button" class="btn btn-outline-success fas fa-save d-none"
+              title="Guardar" type="button" onclick="saveRow();"></button>
+
+      <button id="cancel-button" class="btn btn-outline-danger fas fa-times d-none"
+              title="Cancelar" type="button" onclick="cancelEdit();"></button>
+    </div>
+  </div>
+
+  <div class="card-footer text-muted">
+    <div class="table-responsive">
+      <form id="delete-form" method="POST" action="{% url 'linea_cliente_centrocostos_eliminar' %}">
+        {% csrf_token %}
+
+        <table class="table table-primary">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="select-all"></th>
+
+              <th data-sort="Linea" class="sortable" data-direction="default">
+                Línea
+                <span class="sort-icon">
+                  <i class="fas fa-sort sort-icon-default"></i>
+                  <i class="fas fa-sort-up sort-icon-asc"></i>
+                  <i class="fas fa-sort-down sort-icon-desc"></i>
+                </span>
+              </th>
+
+              <th data-sort="Cliente" class="sortable" data-direction="default">
+                Cliente
+                <span class="sort-icon">
+                  <i class="fas fa-sort sort-icon-default"></i>
+                  <i class="fas fa-sort-up sort-icon-asc"></i>
+                  <i class="fas fa-sort-down sort-icon-desc"></i>
+                </span>
+              </th>
+
+              <th data-sort="Modulo" class="sortable" data-direction="default">
+                Módulo
+                <span class="sort-icon">
+                  <i class="fas fa-sort sort-icon-default"></i>
+                  <i class="fas fa-sort-up sort-icon-asc"></i>
+                  <i class="fas fa-sort-down sort-icon-desc"></i>
+                </span>
+              </th>
+
+              <th data-sort="CeCo" class="sortable" data-direction="default">
+                Centro de Costos (Código)
+                <span class="sort-icon">
+                  <i class="fas fa-sort sort-icon-default"></i>
+                  <i class="fas fa-sort-up sort-icon-asc"></i>
+                  <i class="fas fa-sort-down sort-icon-desc"></i>
+                </span>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for rel in lccc_data %}
+            <tr id="row-{{ rel.id }}">
+              <td>
+                <input type="checkbox" class="row-select" name="items_to_delete" value="{{ rel.id }}">
+              </td>
+
+              <td data-field="Linea">
+                <span class="cell-text">{{ rel.linea.Linea }}</span>
+                <select name="LineaId" class="form-select d-none">
+                  {% for l in lineas %}
+                    <option value="{{ l.LineaId }}" {% if l.LineaId == rel.linea_id %}selected{% endif %}>
+                      {{ l.Linea }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </td>
+
+              <td data-field="Cliente">
+                <span class="cell-text">{{ rel.cliente.Nombre_Cliente }}</span>
+                <select name="ClienteId" class="form-select d-none">
+                  {% for c in clientes %}
+                    <option value="{{ c.ClienteId }}" {% if c.ClienteId == rel.cliente_id %}selected{% endif %}>
+                      {{ c.Nombre_Cliente }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </td>
+
+              <td data-field="Modulo">
+                <span class="cell-text">{{ rel.modulo.Modulo }}</span>
+                <select name="ModuloId" class="form-select d-none">
+                  {% for m in modulos %}
+                    <option value="{{ m.ModuloId }}" {% if m.ModuloId == rel.modulo_id %}selected{% endif %}>
+                      {{ m.Modulo }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </td>
+
+              <td data-field="CeCo">
+                <span class="cell-text">{{ rel.centro_costo.codigoCeCo }}</span>
+                <select name="CentroCostoId" class="form-select d-none">
+                  {% for cc in centros_costos %}
+                    <option value="{{ cc.id }}" {% if cc.id == rel.centro_costo_id %}selected{% endif %}>
+                      {{ cc.codigoCeCo }} - {{ cc.descripcionCeCo }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5">No hay datos disponibles.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+      </form>
+    </div>
+  </div>
+
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">¿Estás seguro de que deseas eliminar los registros seleccionados?</div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+          <button id="confirm-delete-btn" type="button" class="btn btn-danger">Sí</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="{% static 'messages.js' %}"></script>
+<script src=\"{% static 'JS/LineaClienteCentrocostos.js' %}\"></script>
+{% endblock %}

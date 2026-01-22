@@ -1,0 +1,490 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block titulo %} Indicadores Totales {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title">Indicadores de Totales</h4>
+    </div>
+    <div class="card-body" style="overflow: visible; position: relative;">
+        <div class="container-fluid mb-3">
+            <form method="GET">
+                <div class="row mb-3">
+                    <!-- Filtro Año -->
+                    <div class="col-md-3">
+                        <label for="anio" class="form-label">{{ form.Anio.label }}</label>
+                        {{ form.Anio }}
+                    </div>
+                
+                    <!-- Filtro Mes -->
+                    <div class="col-md-3">
+                        <label for="mes" class="form-label">{{ form.Mes.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownMes"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Meses"
+                            >
+                                Seleccione Meses
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownMes">
+                                {% for checkbox in form.Mes %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <!-- Filtro Línea -->
+                    <div class="col-md-3">
+                        <label for="linea" class="form-label">{{ form.LineaId.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownLinea"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Líneas"
+                            >
+                                Seleccione Líneas
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
+                                {% for checkbox in form.LineaId %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Filtro Clientes -->
+                    <div class="col-md-3">
+                        <label for="linea" class="form-label">{{ form.ClienteId.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownCliente"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Clientes"
+                            >
+                                Seleccione Líneas
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownCliente">
+                                {% for checkbox in form.ClienteId %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>     
+                                            
+                <div class="row container-fluid">
+                    <div class="col-md-6 text-start">
+                        <button type="submit" name="buscar" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Generar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Pestañas -->
+        <ul class="nav nav-tabs justify-content-center mb-4" id="myTab" role="tablist">
+            <!-- Totales -->
+            <li class="nav-item w-25" role="presentation">
+                <button class="nav-link active w-100 btn btn-light text-primary" id="totales-tab" 
+                        data-bs-toggle="tab" data-bs-target="#totales" 
+                        type="button" role="tab" aria-controls="totales" aria-selected="true">
+                    Totales
+                </button>
+            </li>
+            <!-- Totales por línea -->
+            <li class="nav-item w-25" role="presentation">
+                <button class="nav-link w-100 btn btn-light text-primary" id="lineas-tab" 
+                        data-bs-toggle="tab" data-bs-target="#lineas" 
+                        type="button" role="tab" aria-controls="lineas" aria-selected="false">
+                    Totales por línea
+                </button>
+            </li>
+            <!-- Gráfica Totales -->
+            <li class="nav-item w-25" role="presentation">
+                <button class="nav-link w-100 btn btn-light text-primary" id="grafico-totales-tab" 
+                        data-bs-toggle="tab" data-bs-target="#grafico-totales" 
+                        type="button" role="tab" aria-controls="grafico-totales" aria-selected="false">
+                    Gráfica Totales
+                </button>
+            </li>
+            <!-- Gráfica por Línea -->
+            <li class="nav-item w-25" role="presentation">
+                <button class="nav-link w-100 btn btn-light text-primary" id="grafico-lineas-tab" 
+                        data-bs-toggle="tab" data-bs-target="#grafico-lineas" 
+                        type="button" role="tab" aria-controls="grafico-lineas" aria-selected="false">
+                    Gráfica por Línea
+                </button>
+            </li>
+        </ul>
+
+        <!-- Contenido de las pestañas -->
+        <div class="tab-content" id="myTabContent">
+            <!-- Pestaña de Totales -->
+            <div class="tab-pane fade show active p-1" id="totales" role="tabpanel" aria-labelledby="totales-tab">
+                {% if resultados.general %}
+                <!-- Tabla Principal -->
+                <form method="POST">
+                    {% csrf_token %}
+                    {# Campos ocultos para los filtros activos #}
+                    <input type="hidden" name="Anio" value="{{ form.Anio.value }}">
+                    {% for mes in form.Mes.value %}
+                        <input type="hidden" name="Mes" value="{{ mes }}">
+                    {% endfor %}
+                    {% for linea in form.LineaId.value %}
+                        <input type="hidden" name="LineaId" value="{{ linea }}">
+                    {% endfor %}
+                    {% for cliente in form.ClienteId.value %}
+                        <input type="hidden" name="ClienteId" value="{{ cliente }}">
+                    {% endfor %}
+                    {# Mostrar errores del formulario si existen #}
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Guardar Datos
+                        </button>
+                    </div>
+                    <div class="table-responsive table-fixed-columns">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="fixed-column fixed-column-1" rowspan="2">Mes</th>
+                                    <th class="fixed-column fixed-column-2" rowspan="2">Días</th>
+                                    <th class="fixed-column fixed-column-3" rowspan="2">Horas</th>
+                                    {% for cliente in Clientes %}
+                                        {% with nombre_cliente=cliente.Nombre_Cliente %}
+                                        <th colspan="6" class="text-center">{{ nombre_cliente }}</th>
+                                        {% endwith %}
+                                    {% endfor %}
+                                    {% for concepto in Conceptos %}
+                                    <th rowspan="2">{{ concepto.Descripcion }}</th>
+                                    {% endfor %}
+                                    <th rowspan="2">Costo No Op</th>
+                                    <th rowspan="2">Costo Vacaciones</th>
+                                    <th rowspan="2">Costo Incapacidades</th>
+                                    <th rowspan="2">Total Horas</th>
+                                </tr>
+                                <tr>
+                                    {% for cliente in Clientes %}
+                                    <th>Trabajado</th>
+                                    <th> Costo</th>
+                                    <th>Facturado</th>
+                                    <th> Facturado</th>
+                                    <th>Pend.Fact</th>
+                                    <th> Pend.Fact</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Fila para Diciembre del Año Anterior (solo si hay Enero en los meses seleccionados) -->
+                                {% if '1' in resultados.general.keys %}
+                                <tr class="bg-light diciembre-anterior">
+                                    <td class="fixed-column fixed-column-1">Diciembre {{ anio|add:"-1" }}</td>
+                                    <td class="fixed-column fixed-column-2">-</td>
+                                    <td class="fixed-column fixed-column-3">-</td>
+                                    {% for cliente in Clientes %}
+                                    {% with dic=valores_diciembre_cliente|get_item:cliente.ClienteId %}
+                                    <td>
+                                        <input type="number" step="0.01"
+                                            name="diciembre_trabajado_{{ cliente.ClienteId }}"
+                                            value="{{ dic|get_item:'trabajado' }}"
+                                            class="form-control mb-2"
+                                            placeholder="Horas Trabajadas"
+                                            data-toggle-target="diciembre_facturado_{{ cliente.ClienteId }}">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01"
+                                            name="diciembre_costo_{{ cliente.ClienteId }}"
+                                            value="{{ dic|get_item:'costo' }}"
+                                            class="form-control mb-2"
+                                            placeholder="Costo"
+                                            data-toggle-target="diciembre_valor_facturado_{{ cliente.ClienteId }}">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01"
+                                            name="diciembre_facturado_{{ cliente.ClienteId }}"
+                                            value="{{ dic|get_item:'facturado' }}"
+                                            class="form-control mb-2"
+                                            placeholder="Horas Facturadas"
+                                            data-toggle-target="diciembre_trabajado_{{ cliente.ClienteId }}">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01"
+                                            name="diciembre_valor_facturado_{{ cliente.ClienteId }}"
+                                            value="{{ dic|get_item:'valor_facturado' }}"
+                                            class="form-control"
+                                            placeholder="Valor Facturado"
+                                            data-toggle-target="diciembre_costo_{{ cliente.ClienteId }}">
+                                    </td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    {% endwith %}
+                                    {% endfor %}
+                                    <!-- Celdas vacías para conceptos y totales -->
+                                    {% for concepto in Conceptos %}
+                                    <td>-</td>
+                                    {% endfor %}
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                                {% endif %}
+                                {% for mes, datos in resultados.general.items|slice:":12" %} 
+                                <tr>
+                                    <td class="fixed-column fixed-column-1">{{ MESES|get_item:mes }}</td>
+                                    <td class="fixed-column fixed-column-2">{{ datos.Dias }}</td>
+                                    <td class="fixed-column fixed-column-3">{{ datos.Horas|floatformat:2 }}</td>
+                                    
+                                    {% for cliente in Clientes %}
+                                        {% with c=datos.Clientes|get_item:cliente.Nombre_Cliente %}
+                                        <td data-cliente="{{ cliente.Nombre_Cliente }}">{{ c.Trabajado|default:0|floatformat:2 }}</td>
+                                        <td data-cliente="{{ cliente.Nombre_Cliente }}">{{ c.Costo|default:0|currency_format }}</td>
+                                        <td data-cliente="{{ cliente.Nombre_Cliente }}">{{ c.Facturado.horas|default:0|floatformat:2 }}</td>
+                                        <td data-cliente="{{ cliente.Nombre_Cliente }}">{{ c.Facturado.valor|default:0|currency_format }}</td>
+                                        <td data-cliente="{{ cliente.Nombre_Cliente }}">{{ c.Pendiente.horas|default:0|floatformat:2 }}</td>
+                                        <td data-cliente="{{ cliente.Nombre_Cliente }}">{{ c.Pendiente.valor|default:0|currency_format }}</td>
+                                        {% endwith %}
+                                    {% endfor %}
+                                    
+                                    {% for concepto in Conceptos %}
+                                        <td>{{ datos.Conceptos_Horas|get_item:concepto.Descripcion|default:0|floatformat:2 }}</td>
+                                    {% endfor %}
+                                    
+                                    <td>{{ datos.totales_mes.costo_no_op|default:0|currency_format }}</td>
+                                    <td>{{ datos.totales_mes.costo_vacaciones|default:0|currency_format }}</td>
+                                    <td>{{ datos.totales_mes.costo_incapacidades|default:0|currency_format }}</td>
+                                    <td>{{ datos.totales_mes.total_horas|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th class="fixed-column fixed-column-1">TOTALES</th>
+                                    <th class="fixed-column fixed-column-2 total-dias">{{ resultados.totales.Dias|default:0|floatformat:2 }}</th>
+                                    <th class="fixed-column fixed-column-3 total-horas">{{ resultados.totales.Horas|default:0|floatformat:2 }}</th>
+                                    {% for cliente in Clientes %}
+                                        {% with total=resultados.totales|get_item:cliente.Nombre_Cliente %}
+                                        <th class="total-trabajado" data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Trabajado|default:0|floatformat:2 }}</th>
+                                        <th class="total-costo" data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Costo|default:0|currency_format }}</th>
+                                        <th class="total-facturado-horas" data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Facturado_horas|default:0|floatformat:2 }}</th>
+                                        <th class="total-facturado-valor" data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Facturado_valor|default:0|currency_format }}</th>
+                                        <th class="total-pendiente-horas" data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Pendiente_horas|default:0|floatformat:2 }}</th>
+                                        <th class="total-pendiente-valor" data-cliente="{{ cliente.Nombre_Cliente }}">{{ total.Pendiente_valor|default:0|currency_format }}</th>
+                                        {% endwith %}
+                                    {% endfor %}
+                                    {% for concepto in Conceptos %}
+                                        <th>{{ resultados.totales.Conceptos_Horas|get_item:concepto.Descripcion|default:0|floatformat:2 }}</th>
+                                    {% endfor %}
+                                </tr>
+                                <tr>
+                                    <th class="fixed-column fixed-column-1">Dif fact / Tbjo</th>
+                                    {% for cliente in Clientes %}
+                                        {% with total=resultados.totales|get_item:cliente.Nombre_Cliente %}
+                                            <td colspan="4"></td>
+                                            <th>{{ total.Dif_Fact_Horas|default:0|floatformat:2 }}</th>
+                                            <th>{{ total.Dif_Fact_Valor|default:0|currency_format }}</th>
+                                        {% endwith %}
+                                    {% endfor %}
+                                </tr>
+                                <tr>
+                                    <th class="fixed-column fixed-column-1">% Margen Bruto</th>
+                                    {% for cliente in Clientes %}
+                                        {% with total=resultados.totales|get_item:cliente.Nombre_Cliente %}
+                                            <td colspan="5"></td>
+                                            <th>{{ total.Margen_Bruto|default:0|floatformat:2 }}%</th>
+                                        {% endwith %}
+                                    {% endfor %}
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning mt-3">
+                        No se encontraron datos con los filtros seleccionados
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+            <!-- Pestaña de Totales por Línea -->
+            <div class="tab-pane fade p-3" id="lineas" role="tabpanel" aria-labelledby="lineas-tab">
+                {% if resultados.lineas %}
+                    {% for linea in Lineas %}
+                        {% with linea_data=resultados.lineas|get_item:linea.LineaId %}
+                            <div class="mb-5">
+                                <div class="card-header text-center bg-primary text-white py-2">
+                                    {{ linea.Linea }}
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Mes</th>
+                                                <th>Días</th>
+                                                <th>Horas</th>
+                                                <th>Trabajado</th>
+                                                <th> Costo</th>
+                                                <th>Facturado</th>
+                                                <th> Facturado</th>
+                                                <th>Pend.Fact</th>
+                                                <th> Pend.Fact</th>
+                                                <th>Tot Fact</th>
+                                                <th> Tot Fact</th>
+                                                <th>Dif Horas</th>
+                                                <th>Dif Valor</th>
+                                                <th>% Margen</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Cambio clave aquí: iterar directamente sobre linea_data.general.items -->
+                                            {% for mes, datos in linea_data.general.items|dictsort:0 %}
+                                                <tr>
+                                                    <td>{{ MESES|get_item:mes }}</td>
+                                                    <td>{{ datos.Dias }}</td>
+                                                    <td>{{ datos.Horas|floatformat:2 }}</td>
+                                                    <td>{{ datos.Trabajado|default:0|floatformat:2 }}</td>
+                                                    <td>{{ datos.Costo|default:0|currency_format }}</td>
+                                                    <td>{{ datos.Facturado.horas|default:0|floatformat:2 }}</td>
+                                                    <td>{{ datos.Facturado.valor|default:0|currency_format }}</td>
+                                                    <td>{{ datos.Pendiente.horas|default:0|floatformat:2 }}</td>
+                                                    <td>{{ datos.Pendiente.valor|default:0|currency_format }}</td>
+                                                    <td>{{ datos.TotalFacturado.horas|default:0|floatformat:2 }}</td>
+                                                    <td>{{ datos.TotalFacturado.valor|default:0|currency_format }}</td>
+                                                    <td>{{ datos.Dif_Horas|default:0|floatformat:2 }}</td>
+                                                    <td>{{ datos.Dif_Valor|default:0|currency_format }}</td>
+                                                    <td>{{ datos.Margen|default:0|floatformat:2 }}%</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th>TOTALES</th>
+                                                <th>{{ linea_data.totales.Dias|default:0|floatformat:2 }}</th>
+                                                <th>{{ linea_data.totales.Horas|default:0|floatformat:2 }}</th>
+                                                <th>{{ linea_data.totales.Trabajado|default:0|floatformat:2 }}</th>
+                                                <th>{{ linea_data.totales.Costo|default:0|currency_format }}</th>
+                                                <th>{{ linea_data.totales.Facturado_horas|default:0|floatformat:2 }}</th>
+                                                <th>{{ linea_data.totales.Facturado_valor|default:0|currency_format }}</th>
+                                                <th>{{ linea_data.totales.Pendiente_horas|default:0|floatformat:2 }}</th>
+                                                <th>{{ linea_data.totales.Pendiente_valor|default:0|currency_format }}</th>
+                                                <th>{{ linea_data.totales.TotalFacturado_horas|default:0|floatformat:2 }}</th>
+                                                <th>{{ linea_data.totales.TotalFacturado_valor|default:0|currency_format }}</th>
+                                                <th>{{ linea_data.totales.Dif_Horas|default:0|floatformat:2 }}</th>
+                                                <th>{{ linea_data.totales.Dif_Valor|default:0|currency_format }}</th>
+                                                <th>{{ linea_data.totales.Margen|default:0|floatformat:2 }}%</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        {% endwith %}
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-warning">No hay datos</div>
+                {% endif %}
+            </div>
+            <!-- Pestaña de Gráfica Totales -->
+            <div class="tab-pane fade p-3" id="grafico-totales" role="tabpanel" aria-labelledby="grafico-totales-tab">
+                {% if resultados.general %}
+                <div class="card h-100 w-100 border-0 shadow-none bg-transparent">
+                    <div class="card-header text-center bg-primary text-white py-2">
+                        Totales Generales por Cliente
+                    </div>
+                    <div class="card-body p-0" style="height: 70vh;">
+                        <canvas id="grafico-totales-generales" class="grafico-full"></canvas>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">No hay datos</div>
+                {% endif %}
+            </div>
+            <!-- Pestaña de Gráfica por Línea -->
+            <div class="tab-pane fade p-3" id="grafico-lineas" role="tabpanel" aria-labelledby="grafico-lineas-tab">
+                {% if resultados.lineas %}
+                <div class="card h-100 w-100 border-0 shadow-none bg-transparent">
+                    <div class="card-header text-center bg-primary text-white py-2">
+                        Totales por Línea
+                    </div>
+                    <div class="card-body p-0" style="height: 70vh;">
+                        <canvas id="grafico-totales-linea" class="grafico-full"></canvas>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">No hay datos</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const Clientes = JSON.parse('{{ Clientes_json|escapejs|safe }}');
+    
+    // Exponer Lineas y ResultadosLineas para las gráficas
+    window.Lineas = [
+        {% for linea in Lineas %}
+            {LineaId: {{ linea.LineaId }}, Linea: "{{ linea.Linea|escapejs }}"},
+        {% endfor %}
+    ];
+    
+    window.ResultadosLineas = {
+        {% for linea in Lineas %}
+            {{ linea.LineaId }}: {
+                general: {
+                    {% for mes in resultados.lineas|get_item:linea.LineaId|get_item:'general' %}
+                        {% with datos=resultados.lineas|get_item:linea.LineaId|get_item:'general'|get_item:mes %}
+                        '{{ mes }}': {
+                            Trabajado: {{ datos.Trabajado|default:0|floatformat:2 }},
+                            Facturado: { 
+                                "horas": {{ datos.Facturado.horas|default:0|floatformat:2 }},
+                                "valor": {{ datos.Facturado.valor|default:0|currency_format }}
+                            },
+                            Pendiente: { 
+                                "horas": {{ datos.Pendiente.horas|default:0|floatformat:2 }},
+                                "valor": {{ datos.Pendiente.valor|default:0|currency_format }}
+                            }
+                        },
+                        {% endwith %}
+                    {% endfor %}
+                }
+            },
+        {% endfor %}
+    };
+</script>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src=\"{% static 'JS/IndicadoresTotales.js' %}\"></script>
+{% endblock %}
+
+<style>
+.grafico-full {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 400px;
+    max-height: 100vh;
+    aspect-ratio: 2/1;
+}
+</style>

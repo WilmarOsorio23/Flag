@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_contactos')
 def contactos_index(request):
     contactos = Contactos.objects.all()
-    return render(request, 'Contactos/contactos_index.html', {'contactos': contactos})  
+    return render(request, 'Contactos/ContactosIndex.html', {'contactos': contactos})  
 
 @login_required
 @verificar_permiso('can_manage_contactos')
@@ -30,7 +30,7 @@ def contactos_crear(request):
         return redirect('contactos_index')
     else:
         form = ContactosForm()
-    return render(request, 'Contactos/contactos_form.html', {'form': form}) 
+    return render(request, 'Contactos/ContactosForm.html', {'form': form}) 
 
 @login_required
 @verificar_permiso('can_manage_contactos')

@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block titulo %} Indicadores Margen Clientes {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title">Indicador de Margen por Cliente</h4>
+    </div>
+    <div class="card-body" style="overflow: visible; position: relative;">
+        <div class="container-fluid mb-3">
+            <form method="GET">
+                <div class="row mb-3">
+                    <!-- Filtro Año -->
+                    <div class="col-md-3">
+                        <label for="anio" class="form-label">{{ form.Anio.label }}</label>
+                        {{ form.Anio }}
+                    </div>
+                    <!-- Filtro Mes -->
+                    <div class="col-md-3">
+                        <label for="mes" class="form-label">{{ form.Mes.label }}</label>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="dropdownMes" data-bs-toggle="dropdown" aria-expanded="false" data-selected-text="Seleccione Meses">Seleccione Meses</button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownMes">
+                                {% for checkbox in form.Mes %}
+                                    <li class="dropdown-item">{{ checkbox.tag }} {{ checkbox.choice_label }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Filtro Línea -->
+                    <div class="col-md-3">
+                        <label for="linea" class="form-label">{{ form.LineaId.label }}</label>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="dropdownLinea" data-bs-toggle="dropdown" aria-expanded="false" data-selected-text="Seleccione Líneas">Seleccione Líneas</button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
+                                {% for checkbox in form.LineaId %}
+                                    <li class="dropdown-item">{{ checkbox.tag }} {{ checkbox.choice_label }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Filtro Clientes -->
+                    <div class="col-md-3">
+                        <label for="cliente" class="form-label">{{ form.ClienteId.label }}</label>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="dropdownCliente" data-bs-toggle="dropdown" aria-expanded="false" data-selected-text="Seleccione Clientes">Seleccione Clientes</button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownCliente">
+                                {% for checkbox in form.ClienteId %}
+                                    <li class="dropdown-item">{{ checkbox.tag }} {{ checkbox.choice_label }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="row container-fluid">
+                    <div class="col-md-6 text-start">
+                        <button type="submit" name="buscar" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Generar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!-- Pestañas -->
+        <ul class="nav nav-tabs justify-content-center mb-4" id="myTab" role="tablist">
+            <li class="nav-item w-50" role="presentation">
+                <button class="nav-link active w-100 btn btn-light text-primary" id="tabla-tab" data-bs-toggle="tab" data-bs-target="#tabla" type="button" role="tab" aria-controls="tabla" aria-selected="true">
+                    Tabla
+                </button>
+            </li>
+            <li class="nav-item w-50" role="presentation">
+                <button class="nav-link w-100 btn btn-light text-primary" id="graficas-tab" data-bs-toggle="tab" data-bs-target="#graficas" type="button" role="tab" aria-controls="graficas" aria-selected="false">
+                    Gráficas
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="tabla" role="tabpanel" aria-labelledby="tabla-tab">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="tabla-margen-clientes">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Cliente</th>
+                                <th> Costo</th>
+                                <th> Facturado</th>
+                                <th> Pend.Fact</th>
+                                <th> Tot.Fact</th>
+                                <th> Utilidad Bruta</th>
+                                <th>% Margen Bruto</th>
+                                <th>Meta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% if resultados and resultados.totales %}
+                            {% for cliente, datos in resultados.totales.items %}
+                            <tr>
+                                <td>{{ cliente }}</td>
+                                <td>{{ datos.Costo|currency_format }}</td>
+                                <td>{{ datos.Facturado_valor|currency_format }}</td>
+                                <td>{{ datos.Pendiente_valor|currency_format }}</td>
+                                <td>{{ datos.total_facturado|currency_format }}</td>
+                                <td>{{ datos.utilidad_bruta|currency_format }}</td>
+                                <td>{% if datos.total_facturado > 0 %}{{ datos.margen_bruto|floatformat:2 }}%{% else %}-{% endif %}</td>
+                                <td>25%</td>
+                            </tr>
+                            {% endfor %}
+                            <!-- Fila de totales -->
+                            <tr>
+                                <th><strong>TOTALES</strong></th>
+                                <th>{{ resultados.totales_agregados.costo_total|currency_format }}</th>
+                                <th>{{ resultados.totales_agregados.facturado_valor_total|currency_format }}</th>
+                                <th>{{ resultados.totales_agregados.pendiente_valor_total|currency_format }}</th>
+                                <th>{{ resultados.totales_agregados.total_facturado_total|currency_format }}</th>
+                                <th>{{ resultados.totales_agregados.utilidad_bruta_total|currency_format }}</th>
+                                <th>
+                                    {% if resultados.totales_agregados.total_facturado_total > 0 %}
+                                        {{ resultados.totales_agregados.margen_bruto_total|currency_format }}%
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </th>
+                                <th>-</th>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="8">No hay datos para mostrar.</td></tr>
+                        {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="graficas" role="tabpanel" aria-labelledby="graficas-tab">
+                <div id="grafica-margen-clientes"></div>
+                <!-- Tabla de resumen mejorada -->
+                <div class="table-responsive mt-4">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th></th>
+                                {% if resultados and resultados.totales %}
+                                    {% for cliente, datos in resultados.totales.items %}
+                                        <th class="text-center">{{ cliente }}</th>
+                                    {% endfor %}
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span style="display:inline-block;width:16px;height:16px;background:orange;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>
+                                    <span style="vertical-align:middle;">% Margen Bruto</span>
+                                </td>
+                                {% if resultados and resultados.totales %}
+                                    {% for cliente, datos in resultados.totales.items %}
+                                        <td class="text-center">{% if datos.total_facturado > 0 %}{{ datos.margen_bruto|floatformat:2 }}%{% else %}-{% endif %}</td>
+                                    {% endfor %}
+                                {% endif %}
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span style="display:inline-block;width:16px;height:16px;background:navy;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>
+                                    <span style="vertical-align:middle;">Meta</span>
+                                </td>
+                                {% if resultados and resultados.totales %}
+                                    {% for cliente, datos in resultados.totales.items %}
+                                        <td class="text-center">25%</td>
+                                    {% endfor %}
+                                {% endif %}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src=\"{% static 'JS/IndicadoresMargenCliente.js' %}\"></script>
+{% endblock %}

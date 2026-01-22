@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 def detalle_gastos_index(request):
     detalles = Detalle_Gastos.objects.all()
     print("Buscando plantilla en: Detalle_Gastos/detalle_gastos_index.html")
-    return render(request, 'Detalle_Gastos/detalle_gastos_index.html', {'detalles': detalles})
+    return render(request, 'DetalleGastos/DetalleGastosIndex.html', {'detalles': detalles})
 
 @login_required
 @verificar_permiso('can_manage_detalle_gastos')
@@ -32,7 +32,7 @@ def detalle_gastos_crear(request):
             return redirect('detalle_gastos_index')
     else:
         form = DetalleGastosForm()
-    return render(request, 'Detalle_Gastos/detalle_gastos_form.html', {'form': form})
+    return render(request, 'DetalleGastos/DetalleGastosForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_detalle_gastos')

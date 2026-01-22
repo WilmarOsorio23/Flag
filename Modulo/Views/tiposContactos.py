@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_tipos_contactos')
 def Tipos_contactos_index(request):
     tipos_contactos_data = TiposContactos.objects.all()
-    return render(request, 'Tipos_Contactos/Tipos_Contactos_index.html', {'tipos_contactos_data': tipos_contactos_data})  
+    return render(request, 'TiposContactos/TiposContactosIndex.html', {'tipos_contactos_data': tipos_contactos_data})  
 
 @login_required
 @verificar_permiso('can_manage_tipos_contactos')
@@ -30,7 +30,7 @@ def Tipos_contactos_crear(request):
             return redirect('tipos_contactos_index')
     else:   
         form = TiposContactosForm()
-    return render(request, 'Tipos_Contactos/Tipos_Contactos_form.html', {'form': form})
+    return render(request, 'TiposContactos/TiposContactosForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_tipos_contactos')

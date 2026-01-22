@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_tipo_pagare')
 def tipo_pagare_index(request):
     tipos_pagare = TipoPagare.objects.all()
-    return render(request, 'Tipo_Maestro/TipoPagare_index.html', {
+    return render(request, 'TipoMaestro/TipoPagareIndex.html', {
         'tipos_pagare': tipos_pagare
     })
 
@@ -31,11 +31,11 @@ def tipo_pagare_crear(request):
                 return redirect('tipo_pagare_index')
             except IntegrityError:
                 messages.error(request, '¡El código ya existe!')
-                return render(request, 'Tipo_Maestro/TipoPagare_crear.html', {'form': form})
+                return render(request, 'TipoMaestro/TipoPagareCrear.html', {'form': form})
     else:
         form = TipoPagareForm()
     
-    return render(request, 'Tipo_Maestro/TipoPagare_crear.html', {'form': form})
+    return render(request, 'TipoMaestro/TipoPagareCrear.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_tipo_pagare')
@@ -45,7 +45,7 @@ def tipo_pagare_editar(request, id):
 
         if request.method == 'POST':
             # Verifica si la solicitud es JSON (AJAX)
-            if request.content_type == 'application/json':
+            if request.content_type == 'Application/Json':
                 data = json.loads(request.body)
                 tipo_pagare.Desc_Tipo_Pagare = data.get('Desc_Tipo_Pagare', tipo_pagare.Desc_Tipo_Pagare)
                 tipo_pagare.save()
@@ -63,7 +63,7 @@ def tipo_pagare_editar(request, id):
         
         # Si no es una solicitud POST, renderiza el formulario
         form = TipoPagareForm(instance=tipo_pagare)
-        return render(request, 'Tipo_Maestro/TipoPagare_editar.html', {
+        return render(request, 'Tipomaestro/Tipopagareeditar.html', {
             'form': form,
             'tipo_pagare': tipo_pagare
         })
@@ -99,7 +99,7 @@ def tipo_pagare_eliminar(request):
 @verificar_permiso('can_manage_tipo_pagare')
 def tipo_pagare_confirmar_delete(request, id):
     tipo_pagare = get_object_or_404(TipoPagare, Tipo_PagareId=id)
-    return render(request, 'Tipo_Maestro/TipoPagare_confirmar_delete.html', {
+    return render(request, 'Tipomaestro/Tipopagareconfirmardelete.html', {
         'tipo_pagare': tipo_pagare
     })
 

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %} Lista de IND {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
+        <span id="alert-icon" class="alert-heading"></span>
+        <span id="alert-message"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% if messages %}
+    <div style="position: absolute; margin-top: 30vh; margin-left: 20.7vw; z-index: 1050;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="card-header d-flex justify-content-between align-items-center"> 
+        <h4 class="card-title">Indice Prestacional</h4>
+    </div>
+    <div class="card-body">
+        <!-- CRUD Icons -->
+        <div class="button-group" >
+            <a name="" id="" class="btn btn-outline-primary fas fa-plus-circle" title="Crear" href="{% url 'ind_crear' %}" role="button" ></a> 
+            <a id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" href="#" role="button"  onclick="enableEdit();"></a>
+            <i name="" id="" class="btn btn-outline-primary fas fa-eye" title="Visualizar" href="#" role="button" style="margin-right: 10px;"></i> 
+            <button type="submit" form="delete-form" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" ></button> 
+            <form id="download-form" method="POST" action="{% url 'ind_descargar_excel' %}" style="display:inline;">
+                {% csrf_token %}
+                
+                <button type="submit" class="btn btn-outline-info fas fa-download" title="Descargar" ></button>
+            </form>
+             <!-- Botones de Guardar y Cancelar -->
+            <button id="save-button" 
+            class="btn btn-outline-success fas fa-save d-none" 
+            title="Guardar" 
+            type="button" 
+            onclick="saveRow();">
+           </button>
+           <button id="cancel-button" 
+            class="btn btn-outline-danger fas fa-times d-none" 
+            title="Cancelar" 
+            type="button"
+            onclick="cancelEdit();">
+    </button>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        
+        <div class="table-responsive">
+            <form id="delete-form" method="POST" action="{% url 'ind_eliminar' %}">
+                {% csrf_token %}
+                <table class="table table-primary">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all"></th>
+                            <th scope="col">Año</th>
+                            <th scope="col">Mes</th>
+                            <th scope="col">Indice</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ind in ind_data %}
+                        <tr id="row-{{ ind.id }}">
+                            <td><input type="checkbox" class="row-select" name="items_to_delete" value="{{ ind.id }}"></td>
+                            <td><input type="text" name="Anio" class="form-control-plaintext" value="{{ ind.Anio }}" readonly></td>
+                            <td><input type="text" name="Mes" class="form-control-plaintext" value="{{ ind.Mes }}" readonly></td>
+                            <td><input type="text" name="Indice" class="form-control-plaintext" value="{{ ind.Indice }}" readonly></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">No hay datos disponibles.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </form>
+        </div>
+         <!-- Modal de confirmación -->
+         <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+            <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar este módulo?
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <button id="confirm-delete-btn" type="button" class="btn btn-danger">Sí</button>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src=\"{% static 'JS/Ind.js' %}\"></script>
+{% endblock %}

@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 def modulo(request):
     # Ordenar los módulos por el campo 'id' en orden ascendente
     lista_modulos  = Modulo.objects.all().order_by('ModuloId')
-    return render(request, 'Modulo/index.html', {'Modulo': lista_modulos})
+    return render(request, 'Modulo/Index.html', {'Modulo': lista_modulos})
 
 @login_required
 @verificar_permiso('can_manage_modulo')
@@ -34,7 +34,7 @@ def crear(request):
             return redirect('Modulo')
     else:
         form = ModuloForm()
-    return render(request, 'Modulo/crear.html', {'form': form})
+    return render(request, 'Modulo/Crear.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_modulo')

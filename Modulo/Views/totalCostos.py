@@ -22,11 +22,11 @@ def total_costos_indirectos_index(request):
         total_costos_indirectos_data = Total_Costos_Indirectos.objects.all()
 
         # Pasar los datos al contexto
-        return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_index.html', {
+        return render(request, 'TotalCostosIndirectos/TotalCostosIndirectosIndex.html', {
             'total_costos_indirectos_data': total_costos_indirectos_data
         })
     except Exception as e:
-        return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_index.html', {
+        return render(request, 'TotalCostosIndirectos/TotalCostosIndirectosIndex.html', {
             'error_message': f'Error al cargar los datos: {str(e)}'
         })
 
@@ -47,7 +47,7 @@ def crear_detalle_costos(request, total_costos_id):
     else:
         form = DetalleCostosIndirectosFormOpcion2()
 
-    return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_crear_detalle.html', {'form': form, 'total_costos': total_costos})
+    return render(request, 'TotalCostosIndirectos/TotalCostosIndirectosCrearDetalle.html', {'form': form, 'total_costos': total_costos})
 
 @login_required
 @verificar_permiso('can_manage_total_costos_indirectos')
@@ -64,7 +64,7 @@ def total_costos_indirectos_crear(request):
             return redirect('total_costos_indirectos_index')
     else:
         form = Total_Costos_IndirectosForm()
-    return render(request, 'Total_Costos_Indirectos/total_costos_indirectos_form.html', {'form': form})
+    return render(request, 'TotalCostosIndirectos/TotalCostosIndirectosForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_total_costos_indirectos')

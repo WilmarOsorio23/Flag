@@ -110,7 +110,7 @@ def pagare_index(request):
 
     return render(
         request,
-        "Pagare/Pagare_index.html",
+        'Pagare/Pagareindex.html',
         {
             "form": form,
             "empleados": empleados,
@@ -297,7 +297,7 @@ def guardar_pagare(request):
     ]
     """
     try:
-        if request.content_type != "application/json":
+        if request.content_type != "Application/Json":
             return json_error("Se esperaba JSON.", 400)
 
         payload = json.loads(request.body or "[]")
@@ -426,7 +426,7 @@ def pag_planeado(request, pagare_id: int):
 
     return render(
         request,
-        "Pagare/Pag_Planeado.html",
+        'Pagare/Pagplaneado.html',
         {
             "pagare": pagare,
             "todas_actividades": todas_actividades,
@@ -471,7 +471,7 @@ def pag_ejecutado(request, pagare_id: int):
 
     return render(
         request,
-        "Pagare/Pag_Ejecutado.html",
+        'Pagare/Pagejecutado.html',
         {
             "pagare": pagare,
             "todas_actividades": todas_actividades,

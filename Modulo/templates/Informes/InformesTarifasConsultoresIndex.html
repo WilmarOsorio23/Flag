@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+<!-- Titulo de la pestaña en navegador -->
+{% block titulo %} Informe de Tarifas consultores {% endblock %}
+
+{% block contenido %}
+
+<div class="card">
+    <div class="card-header">
+         <!-- Titulo del informe -->
+        <h4 class="card-title">Informe de Tarifas consultores</h4>
+    </div>
+    <div class="card-body informes-table">
+        <div class="container-fluid mb-3">
+            <!-- Formulario principal -->
+            <form method="GET">
+                <!-- Filtros en la parte superior: Consultor, Línea, Año -->
+                <div class="row mb-3">
+                    <!--Filtro Año -->
+                    <div class="col-md-3">
+                        <label for="anio" class="form-label">{{ form.anio.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownAnio"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Años"
+                            >
+                                Seleccione Años
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownAnio">
+                                {% for checkbox in form.anio %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!--Filtro Consultor --> 
+                    <div class="col-md-3">
+                        <label for="consultor">{{ form.Nombre.label }}</label>
+                        {{ form.Nombre }}
+                    </div>
+
+                    <!--Filtro Línea --> 
+                    <div class="col-md-3">
+                        <label for="linea">{{ form.LineaId.label }}</label>
+                        {{ form.LineaId }}
+                    </div>
+                </div>
+                    <!-- Botones debajo de filtros: Buscar y Descarga Excel -->
+                    <!-- Botón Buscar -->
+                    <div class = "row">
+                        <div class="col-md-6 text-start">
+                            <button type="submit" name="buscar" class="btn btn-primary">
+                                <i class="fas fa-glasses"></i>Buscar 
+                            </button>
+                            <button type="button" id="btn-reset-filtros" class="btn btn-secondary ms-2">
+                                <i class="fas fa-redo"></i> Reiniciar
+                            </button>
+                        </div>
+                    </div>
+            </form>
+
+             <!-- Botón de Descargar Excel -->
+             <div class="row">
+                <div class="col-md-6 text-end offset-md-6">
+                    <form id="download-form" method="GET" action="{% url 'exportar_tarifas_consultores_excel' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}">
+                        <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}">
+                        {% for anio in form.anio.value %}
+                            <input type="hidden" name="anio" value="{{ anio }}">
+                        {% endfor %}
+                        <button type="submit" class="btn btn-success mt-3">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+            {% if show_data %}
+            <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
+                <table class="table table-bordered table-hover table-primary w-100" id="consultoresTarifasTable">
+
+                    <!-- Encabezado de la tabla -->
+                    <thead>
+                        <tr>
+                            <th data-sort="linea" class="sortable" data-direction="default">
+                                Línea
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="empresa" class="sortable" data-direction="default">
+                                Empresa
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="documento_colaborador" class="sortable" data-direction="default">
+                                Documento Consultor
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="nombre_consultor" class="sortable" data-direction="default">
+                                Nombre Consultor
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="certificado" class="sortable" data-direction="default">
+                                Certificado
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="perfil" class="sortable" data-direction="default">
+                                Perfil
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="modulo" class="sortable" data-direction="default">
+                                Módulo
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="año" class="sortable" data-direction="default">
+                                Año
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="mes" class="sortable" data-direction="default">
+                                Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="cliente" class="sortable" data-direction="default">
+                                Cliente
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="tarifa_hora" class="sortable" data-direction="default">
+                                Tarifa Hora
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="tarifa_dia" class="sortable" data-direction="default">
+                                Tarifa Día
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="tarifa_mes" class="sortable" data-direction="default">
+                                Tarifa Mes
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="moneda" class="sortable" data-direction="default">
+                                Moneda
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="iva" class="sortable" data-direction="default">
+                                IVA
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="rtefte" class="sortable" data-direction="default">
+                                rteFte
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <!-- Lectura de campos para mostrar -->
+                    <tbody>
+                        {% for consultor in consultor_tarifas_info %}
+                            {% for anio, tarifas in consultor.tarifas.items %}
+                                {% for tarifa in tarifas %}
+                                    <tr>
+                                        <td class="text-start">{{ consultor.linea }}</td>
+                                        <td class="text-start">{{ consultor.empresa }}</td>
+                                        <td class="text-end">{{ consultor.documento }}</td>
+                                        <td class="text-start">{{ consultor.nombre }}</td>
+                                        <td>{{ consultor.certificado }}</td>
+                                        <td class="text-start">{{ consultor.perfil }}</td>
+                                        <td class="text-start">{{ consultor.modulo }}</td>
+                                        <td class="text-end">{{ anio }}</td> <!-- Mostrar el año en cada fila -->
+                                        <td class="text-end">{{ tarifa.mes }}</td>
+                                        <td class="text-start">{{ tarifa.clienteID }}</td>
+                                        <td class="text-end">{{ tarifa.tarifa_hora|currency_format }}</td>
+                                        <td class="text-end">{{ tarifa.tarifa_dia|currency_format }}</td>
+                                        <td class="text-end">{{ tarifa.tarifa_mes|currency_format }}</td>
+                                        <td>{{ tarifa.moneda }}</td>
+                                        <td class="text-end">{{ tarifa.iva|default_if_none:'' }}</td>
+                                        <td class="text-end">{{ tarifa.rteFte|default_if_none:'' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="14">No hay datos disponibles.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+            {% else %}
+                <div class="alert alert-warning" role="alert">
+                    {% if not busqueda_realizada %}
+                        No se ha realizado ninguna búsqueda aún.
+                    {% else %}
+                        No se encontraron resultados para los filtros aplicados.
+                    {% endif %}
+                </div>
+            {% endif %}
+    </div>
+</div>
+<script src=\"{% static 'JS/InformesTarifasConsultores.js' %}\"></script>
+{% endblock %}

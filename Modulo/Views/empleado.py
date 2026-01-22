@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 def empleado_index(request):
     empleados = Empleado.objects.all()
     form = EmpleadoForm()
-    return render(request, 'empleado/empleado_index.html', {'empleados': empleados, 'form': form})
+    return render(request, 'Empleado/EmpleadoIndex.html', {'empleados': empleados, 'form': form})
 
 @login_required
 @verificar_permiso('can_manage_empleados')
@@ -30,7 +30,7 @@ def empleado_crear(request):
     else:
         form = EmpleadoForm()
     
-    return render(request, 'empleado/empleado_form.html', {'form': form})
+    return render(request, 'Empleado/EmpleadoForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_empleados')

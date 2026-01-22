@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 def contratos_otros_si_index(request):
     contratos_otros_si_data = ContratosOtrosSi.objects.all()
     form=ContratosOtrosSiForm()
-    return render(request, 'contratos_otros_si/contratos_otros_si_index.html', {'contratos_otros_si_data': contratos_otros_si_data, 'form': form})
+    return render(request, 'ContratosOtrosSi/ContratosOtrosSiIndex.html', {'contratos_otros_si_data': contratos_otros_si_data, 'form': form})
 
 @login_required
 @verificar_permiso('can_manage_contratos_otros_si')
@@ -36,7 +36,7 @@ def contratos_otros_si_crear(request):
                 return redirect('contratos_otros_si_index')
     else:
         form = ContratosOtrosSiForm()
-    return render(request, 'contratos_otros_si/Contratos_Otros_Si_crear.html', {'form': form})
+    return render(request, 'ContratosOtrosSi/ContratosOtrosSiCrear.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_contratos_otros_si')
@@ -97,7 +97,7 @@ def contratos_otros_si_editar(request, id):
             return JsonResponse({'error': str(e)}, status=500)
     contratos_cliente = ClientesContratos.objects.filter(ClienteId=contrato.ClienteId)
     form = ContratosOtrosSiForm(instance=contrato, cliente_id=contrato.ClienteId_id)
-    return render(request, 'contratos_otros_si/contratos_otros_si_form.html', {
+    return render(request, 'Contratosotrossi/Contratosotrossiform.html', {
         'form': form,
         'contratos_cliente': contratos_cliente,
     })

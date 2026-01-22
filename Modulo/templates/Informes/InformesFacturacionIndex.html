@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block titulo %} Informe de Facturación {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Informe de Facturación</h4>
+    </div>
+    <div class="card-body">
+        <div class="container-fluid mb-3">
+            <!-- Formulario principal -->
+            <form method="GET">
+                <div class="row mb-3">
+                    <!-- Filtro Año -->
+                    <div class="col-md-3">
+                        <label for="{{ form.Anio.id_for_label }}" class="form-label">{{ form.Anio.label }}</label>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="dropdownAnio" data-bs-toggle="dropdown" aria-expanded="false" data-selected-text="Seleccionar Año">
+                                Seleccionar Año
+                            </button>
+                            <ul class="dropdown-menu w-100">
+                                {% for value, label in form.Anio.field.choices %}
+                                    <li><a class="dropdown-item anio-option" data-value="{{ value }}">{{ label }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <input type="hidden" name="{{ form.Anio.html_name }}" id="selectedAnio">
+                    </div>
+
+                    <!-- Filtro Línea -->
+                    <div class="col-md-3">
+                        <label for="linea" class="form-label">{{ form.LineaId.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownLinea"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Líneas"
+                            >
+                                Seleccione Líneas
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownLinea">
+                                {% for checkbox in form.LineaId %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Filtro Cliente -->
+                    <div class="col-md-3">
+                        <label for="cliente" class="form-label">{{ form.ClienteId.label }}</label>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownCliente"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-selected-text="Seleccione Cliente"
+                            >
+                                Seleccione Cliente
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="dropdownCliente">
+                                {% for checkbox in form.ClienteId %}
+                                    <li class="dropdown-item">
+                                        {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Botón Buscar -->
+                    <div class="col-md-3 text-start">
+                        <button type="submit" name="buscar" class="btn btn-primary mt-3">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Pestañas -->
+        <ul class="nav nav-tabs justify-content-center mb-4" id="myTab" role="tablist">
+            <!-- Primera pestaña -->
+            <li class="nav-item w-50" role="presentation">
+                <button class="nav-link active w-100 btn btn-light text-primary" id="indicadores-tab" 
+                        data-bs-toggle="tab" data-bs-target="#indicadores" 
+                        type="button" role="tab" aria-controls="indicadores" aria-selected="true">
+                    Indicadores
+                </button>
+            </li>
+            <!-- Segunda pestaña -->
+            <li class="nav-item w-50" role="presentation">
+                <button class="nav-link w-100 btn btn-light text-primary" id="graficos-tab" 
+                        data-bs-toggle="tab" data-bs-target="#graficos" 
+                        type="button" role="tab" aria-controls="graficos" aria-selected="false">
+                    Gráficos Indicadores
+                </button>
+            </li>
+        </ul>
+
+        <!-- Contenido de las pestañas -->
+        <div class="tab-content" id="myTabContent">
+            <!-- Pestaña de Indicadores -->
+            <div class="tab-pane fade show active p-3" id="indicadores" role="tabpanel" aria-labelledby="indicadores-tab">
+                {% if rows %}
+                <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
+                    <table class="table table-bordered table-hover table-primary w-100" id="estudiosTable">
+                        <!-- Encabezado de la tabla -->
+                        <thead>
+                            <tr>
+                                <!-- Totales por Línea -->
+                                <th colspan="{{ lineas_activas|length|add:2 }}">Totales por Línea</th>
+                                <!-- Clientes Activos agrupados -->
+                                {% regroup clientes_activos by 0 as clientes_grouped %}
+                                {% for grupo in clientes_grouped %}
+                                    <th colspan="{{ grupo.list|length }}">{{ grupo.grouper.Nombre_Cliente }}</th>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <th rowspan="1">Meses</th>
+                                <!-- Líneas Activas -->
+                                {% for linea in lineas_activas %}
+                                    <th>{{ linea.Linea }}</th>
+                                {% endfor %}
+                                <th rowspan="1">Total General</th>
+                                <!-- Columnas por Cliente-Línea -->
+                                {% for cliente, linea in clientes_activos %}
+                                    <th>{{ linea.Linea }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows %}
+                            <tr>
+                                <td>{{ row.mes }}</td>
+                                <!-- Líneas activas -->
+                                {% for linea in lineas_activas %}
+                                    <td>{{ row.totales_linea|get_item:linea.LineaId|currency_format }}</td>
+                                {% endfor %}
+                                <td>{{ row.total_general|currency_format }}</td>
+                                <!-- Clientes activos -->
+                                {% for cliente, linea in clientes_activos %}
+                                    <td>{{ row.clientes|get_item:cliente.ClienteId|get_item:'totales'|get_item:linea.LineaId|currency_format }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        
+                        <tfoot>
+                            <tr>
+                                <th>Total</th>
+                                {% for linea in lineas_activas %}
+                                    <th>{{ footer.totales_linea|get_item:linea.LineaId|currency_format }}</th>
+                                {% endfor %}
+                                <th>{{ footer.total_general|currency_format }}</th>
+                                {% for cliente, linea in clientes_activos %}
+                                    <th>{{ footer.clientes|get_item:cliente.ClienteId|get_item:'totales'|get_item:linea.LineaId|floatformat:2 }}</th>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <th>% Participación</th>
+                                {% for linea in lineas_activas %}
+                                    <th>
+                                        {% with total_linea=footer.totales_linea|get_item:linea.LineaId %}
+                                        {% with total_general=footer.total_general %}
+                                            {% if total_general > 0 %}
+                                                {% widthratio total_linea total_general 100 as participation %}
+                                                {{ participation|floatformat:2 }}%
+                                            {% else %}
+                                                0.00%
+                                            {% endif %}
+                                        {% endwith %}
+                                        {% endwith %}
+                                    </th>
+                                {% endfor %}
+                                <th>
+                                    {% with total_general=footer.total_general %}
+                                        {% if total_general > 0 %}
+                                            100.00%
+                                        {% else %}
+                                            0.00%
+                                        {% endif %}
+                                    {% endwith %}
+                                </th>
+                                {% for cliente, linea in clientes_activos %}
+                                    <th>
+                                        {% with total_cliente_linea=footer.clientes|get_item:cliente.ClienteId|get_item:'totales'|get_item:linea.LineaId %}
+                                        {% with total_linea_primaria=footer.totales_linea|get_item:linea.LineaId %}
+                                            {% if total_linea_primaria > 0 %}
+                                                {% widthratio total_cliente_linea total_linea_primaria 100 as participation %}
+                                                {{ participation|floatformat:2 }}%
+                                            {% else %}
+                                                0.00%
+                                            {% endif %}
+                                        {% endwith %}
+                                        {% endwith %}
+                                    </th>
+                                {% endfor %}
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                    <div class="alert alert-warning" role="alert">
+                        {{ mensaje }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Pestaña de Gráficos -->
+            <div class="tab-pane fade p-3" id="graficos" role="tabpanel" aria-labelledby="graficos-tab">
+                <div class="row g-3">
+                    {% for grafico in graficos_por_linea %}
+                        <div class="col-lg-6">
+                            <div class="card h-100">
+                                <div class="card-header text-center bg-primary text-white py-2">
+                                    {{ grafico.nombre }}
+                                </div>
+                                <div class="card-body" style="height: 400px;">
+                                    <canvas id="grafico-{{ forloop.counter }}"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="alert alert-info text-center m-0">
+                            Genere un reporte primero para ver los gráficos
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            {{ graficos_por_linea|json_script:"graficos-data" }}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Verificar que Chart.js se cargue correctamente -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src=\"{% static 'JS/InformesFacturacion.js' %}\"></script>
+
+{% endblock %}

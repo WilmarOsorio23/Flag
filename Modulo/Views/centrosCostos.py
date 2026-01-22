@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_centros_costos')
 def centros_costos_index(request):
     centros_costos_data = CentrosCostos.objects.all()
-    return render(request, 'CentrosCostos/centros_costos_index.html', {'centros_costos_data': centros_costos_data})
+    return render(request, 'CentrosCostos/CentrosCostosIndex.html', {'centros_costos_data': centros_costos_data})
 
 @login_required
 @verificar_permiso('can_manage_centros_costos')
@@ -31,7 +31,7 @@ def centros_costos_crear(request):
             return redirect('centros_costos_index')
     else:
         form = CentrosCostosForm()
-    return render(request,'CentrosCostos/centros_costos_form.html', {'form': form})
+    return render(request,'CentrosCostos/CentrosCostosForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_centros_costos')

@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_ipc')
 def ipc_index(request):
     ipc_data = IPC.objects.all().order_by('-Anio','Mes')
-    return render(request, 'ipc/ipc_index.html', {'ipc_data': ipc_data})
+    return render(request, 'IPC/IpcIndex.html', {'ipc_data': ipc_data})
 
 @login_required
 @verificar_permiso('can_manage_ipc')
@@ -33,7 +33,7 @@ def ipc_crear(request):
             return redirect('ipc_index')
     else:
         form = IPCForm()
-    return render(request, 'ipc/ipc_form.html', {'form': form})
+    return render(request, 'IPC/IpcForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_ipc')

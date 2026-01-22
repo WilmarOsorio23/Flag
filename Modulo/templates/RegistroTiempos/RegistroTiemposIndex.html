@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block titulo %} Lista de Registros de tiempos {% endblock %}
+
+{% block contenido %}
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h4 class="card-title">Registro de Tiempos</h4>
+  </div>
+
+  <div class="card-body">
+    {# Contenedor de mensajes para messages.js (y mensajes iniciales de Django) #}
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="messages"></div>
+    {% endif %}
+
+    <div class="container-fluid mb-3">
+      <!-- Filtros -->
+      <form method="GET">
+        <div class="row mb-3">
+          <div class="col-md-2">
+            <label for="anio">{{ form.Anio.label }}</label>
+            {{ form.Anio }}
+          </div>
+          <div class="col-md-2">
+            <label for="mes">{{ form.Mes.label }}</label>
+            {{ form.Mes }}
+          </div>
+          <div class="col-md-2">
+            <label for="linea">{{ form.LineaId.label }}</label>
+            {{ form.LineaId }}
+          </div>
+          <div class="col-md-2">
+            <label for="empleado">{{ form.Empleado.label }}</label>
+            {{ form.Empleado }}
+          </div>
+          <div class="col-md-2">
+            <label for="consultor">{{ form.Consultor.label }}</label>
+            {{ form.Consultor }}
+          </div>
+          <div class="col-md-2">
+            <label for="cliente">{{ form.ClienteId.label }}</label>
+            {{ form.ClienteId }}
+          </div>
+        </div>
+
+        <div class="row container-fluid">
+          <div class="col-md-6 text-start">
+            <button type="submit" name="buscar" class="btn btn-primary">
+              <i class="fas fa-search"></i> Buscar
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="container-fluid mb-2">
+      <div class="row align-items-center">
+        <div class="col-md-6 mb-2 mb-md-0">
+          <!-- Botón Guardar -->
+          <button id="save-button"
+                  class="btn btn-success btn-lg d-flex align-items-center"
+                  title="Guardar"
+                  type="button"
+                  onclick="saveAllRows()">
+            <i class="fas fa-save me-2"></i> Guardar
+          </button>
+        </div>
+        <div class="col-md-6 d-flex justify-content-end">
+          <!-- Resumen Año/Mes y horas hábiles -->
+          <div class="text-end p-2 bg-light rounded shadow-sm">
+            <div class="row mb-2">
+              <div class="col-auto">
+                <p class="mb-1">
+                  <strong class="text-primary">Año:</strong>
+                  <span id="anio-original" class="text-muted"></span>
+                </p>
+              </div>
+              <div class="col-auto">
+                <p class="mb-1">
+                  <strong class="text-primary">Días Hábiles:</strong>
+                  <span id="dias-habiles" class="text-muted"></span>
+                </p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-auto">
+                <p class="mb-1">
+                  <strong class="text-primary">Mes:</strong>
+                  <span id="mes-original" class="text-muted"></span>
+                </p>
+              </div>
+              <div class="col-auto">
+                <p class="mb-1">
+                  <strong class="text-primary">Horas Hábiles:</strong>
+                  <span id="horas-habiles" class="text-muted"></span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  {% if show_data %}
+    <div class="card-footer text-muted">
+      <div class="table-responsive">
+        <form id="delete-form" method="POST">
+          {% csrf_token %}
+          <table class="table table-primary">
+            <thead>
+              <tr>
+                <th class="sticky-column" scope="col">Colaborador</th>
+                <th scope="col">Línea</th>
+                <th scope="col">Perfil</th>
+                <th scope="col">Módulo</th>
+                <th scope="col">Empresa</th>
+                {% for cliente in Clientes %}
+                  <th>{{ cliente.Nombre_Cliente }}</th>
+                {% endfor %}
+                <th scope="col">Total Operación</th>
+                {% for concepto in Conceptos %}
+                  <th>{{ concepto.Descripcion }}</th>
+                {% endfor %}
+                <th scope="col">Total Conceptos</th>
+                <th scope="col">Total</th>
+                <th scope="col">Dif. Horas</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for empleado in colaborador_info %}
+                <tr id="row-{{ empleado.Documento }}">
+                  <td class="sticky-column" style="text-align:left;">
+                    {{ empleado.Nombre }}
+                    <input type="text" name="Documento" class="form-control-plaintext d-none" value="{{ empleado.Documento }}" readonly>
+                  </td>
+
+                  <td>
+                    {{ empleado.Linea }}
+                    <input type="text" name="LineaId" class="form-control d-none" value="{{ empleado.LineaId }}">
+                  </td>
+                  <td>{{ empleado.Perfil }}</td>
+                  <td>
+                    {{ empleado.Modulo }}
+                    <input type="hidden" name="ModuloId" value="{{ empleado.ModuloId }}">
+                  </td>
+                  <td>{{ empleado.Empresa }}</td>
+
+                  {# Clientes por fila #}
+                  {% for cliente in Clientes %}
+                    {% with celda=empleado.Clientes|get_item:cliente.ClienteId %}
+                      <td style="min-width:150px;">
+                        <input type="text" name="ClienteId_{{ forloop.counter }}" class="form-control d-none" value="{{ cliente.ClienteId }}">
+                        <input type="text" name="Tiempo_Clientes_{{ forloop.counter }}" class="form-control" value="{{ celda.tiempo_clientes|default:0 }}">
+                      </td>
+                    {% endwith %}
+                  {% endfor %}
+
+                  <td data-total-clientes-row>
+                    {{ empleado.Total_Clientes }}
+                    <input type="text" name="Total_Clientes" class="form-control d-none" value="{{ empleado.Total_Clientes }}">
+                  </td>
+
+                  {# Conceptos por fila #}
+                  {% for concepto in Conceptos %}
+                    {% with celda=empleado.Conceptos|get_item:concepto.ConceptoId %}
+                      <td style="min-width:150px;">
+                        <input type="text" name="ConceptoId_{{ forloop.counter }}" class="form-control d-none" value="{{ concepto.ConceptoId }}">
+                        <input type="text" name="Tiempo_Conceptos_{{ forloop.counter }}" class="form-control" value="{{ celda.tiempo_conceptos|default:0 }}">
+                      </td>
+                    {% endwith %}
+                  {% endfor %}
+
+                  <td data-total-conceptos-row>{{ empleado.Total_Conceptos }}</td>
+                  <td data-total-horas-row>{{ empleado.Total_Horas }}</td>
+                  <td data-dif-horas-row>0</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="50">No hay datos disponibles.</td></tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="5">Total Horas</th>
+                {% for cliente in Clientes %}
+                  <th data-cliente-id="{{ cliente.ClienteId }}">{{ Totales|get_item:cliente.ClienteId }}</th>
+                {% endfor %}
+                <th data-total-clientes>{{ Totales.Total_Clientes }}</th>
+
+                {% for concepto in Conceptos %}
+                  <th data-concepto-id="{{ concepto.ConceptoId }}">{{ Totales|get_item:concepto.ConceptoId }}</th>
+                {% endfor %}
+                <th data-total-conceptos>{{ Totales.Total_Conceptos }}</th>
+                <th data-total-horas>{{ Totales.Total_Horas }}</th>
+                <th data-dif-horas>{{ Totales.Dif_horas }}</th>
+              </tr>
+
+              {% for linea in Tiempo_Lineas %}
+                <tr>
+                  <th colspan="2">Horas Facturables</th>
+                  <td colspan="3">{{ linea.Linea }}</td>
+
+                  {% for cliente in Clientes %}
+                    {% with celda=linea.Clientes|get_item:cliente.ClienteId %}
+                      <td>
+                        <input type="text" name="Hora_Facturable_{{ forloop.counter }}" class="form-control" value="{{ celda.horas_facturables|default:0 }}">
+                        <input type="hidden" name="LineaId_{{ forloop.counter }}" value="{{ linea.LineaId }}">
+                        <input type="hidden" name="ClienteId_{{ forloop.counter }}" value="{{ cliente.ClienteId }}">
+                      </td>
+                    {% endwith %}
+                  {% endfor %}
+
+                  <td data-total-facturable-linea-row></td>
+                  <td colspan="{{ Conceptos|length|add:'3' }}"></td>
+                </tr>
+              {% endfor %}
+            </tfoot>
+          </table>
+        </form>
+      </div>
+    </div>
+  {% else %}
+    <div class="card-footer text-muted">
+      <div class="text-center text-muted py-3">
+        Usa los filtros de arriba y pulsa <strong>Buscar</strong> para ver los registros de tiempos.
+        {% if mensaje %}
+          <div class="mt-2">{{ mensaje }}</div>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script src=\"{% static 'JS/RegistroTiempos.js' %}\"></script>
+{% endblock %}

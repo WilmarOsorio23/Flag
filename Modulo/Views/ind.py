@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_ind')
 def ind_index(request):
     ind_data = IND.objects.all().order_by('-Anio','Mes')
-    return render(request, 'ind/ind_index.html', {'ind_data': ind_data})
+    return render(request, 'IND/IndIndex.html', {'ind_data': ind_data})
 
 def ind_crear(request):
     if request.method == 'POST':
@@ -30,7 +30,7 @@ def ind_crear(request):
             return redirect('ind_index')
     else:
         form = INDForm()
-    return render(request, 'ind/ind_form.html', {'form': form})
+    return render(request, 'IND/IndForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_ind')

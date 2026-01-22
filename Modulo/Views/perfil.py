@@ -18,7 +18,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_perfil')
 def perfil_index(request):
     perfil_data = Perfil.objects.all()
-    return render(request, 'perfil/perfil_index.html', {'perfil_data': perfil_data})
+    return render(request, 'Perfil/PerfilIndex.html', {'perfil_data': perfil_data})
 
 @login_required
 @verificar_permiso('can_manage_perfil')
@@ -31,7 +31,7 @@ def perfil_crear(request):
             return redirect('perfil_index')
      else:
         form = PerfilForm()
-     return render(request, 'Perfil/perfil_form.html', {'form': form})
+     return render(request, 'Perfil/PerfilForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_perfil')

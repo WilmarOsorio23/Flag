@@ -21,11 +21,11 @@ def total_gastos_index(request):
         total_gastos_data = Total_Gastos.objects.all()
 
         # Pasar los datos al contexto
-        return render(request, 'Total_Gastos/total_gastos_index.html', {
+        return render(request, 'TotalGastos/TotalGastosIndex.html', {
             'total_gastos_data': total_gastos_data
         })
     except Exception as e:
-        return render(request, 'Total_Gastos/total_gastos_index.html', {
+        return render(request, 'TotalGastos/TotalGastosIndex.html', {
             'error_message': f'Error al cargar los datos: {str(e)}'
         })
     
@@ -45,7 +45,7 @@ def crear_detalle_gastos(request, total_gastos_id):
             return redirect('total_gastos_index')  # O a donde quieras redirigir
     else:
         form = DetalleGastosFormOpcion2()
-    return render(request, 'Total_gastos/total_gastos_crear_detalle.html', {'form': form, 'total_gastos': total_gastos})
+    return render(request, 'TotalGastos/TotalGastosCrearDetalle.html', {'form': form, 'total_gastos': total_gastos})
 
 @login_required
 @verificar_permiso('can_manage_total_gastos')
@@ -62,7 +62,7 @@ def total_gastos_crear(request):
             return redirect('total_gastos_index')
     else:
         form = TotalGastosForm()
-    return render(request, 'total_gastos/total_gastos_form.html', {'form': form})
+    return render(request, 'TotalGastos/TotalGastosForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_total_gastos')

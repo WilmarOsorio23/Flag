@@ -18,7 +18,7 @@ from django.contrib.auth.decorators import login_required
 def gasto_index(request):
     # Ordenar los gastos por el campo 'id' en orden ascendente
     gastos = Gastos.objects.all().order_by('GastoId')
-    return render(request, 'Gastos/gasto_index.html', {'gastos': gastos})   
+    return render(request, 'Gastos/GastoIndex.html', {'gastos': gastos})   
 
 @login_required
 @verificar_permiso('can_manage_gastos')
@@ -34,7 +34,7 @@ def gasto_crear(request):
             return redirect('gastos_index')
     else:
         form = GastoForm()
-    return render(request, 'Gastos/gasto_form.html', {'form': form})
+    return render(request, 'Gastos/GastoForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_gastos')

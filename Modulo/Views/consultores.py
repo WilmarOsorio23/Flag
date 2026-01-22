@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 def consultores_index(request):
     consultores = Consultores.objects.all()
     form = ConsultoresForm()
-    return render(request, 'consultores/consultores_index.html', {'consultores': consultores, 'form': form})
+    return render(request, 'Consultores/ConsultoresIndex.html', {'consultores': consultores, 'form': form})
 
 @login_required
 @verificar_permiso('can_manage_consultores')
@@ -31,7 +31,7 @@ def consultores_crear(request):
     else:
         form = ConsultoresForm()
     
-    return render(request, 'consultores/consultores_form.html', {'form': form})
+    return render(request, 'Consultores/ConsultoresForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_consultores')

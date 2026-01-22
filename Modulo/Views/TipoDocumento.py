@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_tipo_documento')
 def tipo_documento_index(request):
     tipo_documentos = TipoDocumento.objects.all()
-    return render(request, 'Tipo_Documento/tipo_documento_index.html', {'tipo_documentos': tipo_documentos})
+    return render(request, 'TipoDocumento/TipoDocumentoIndex.html', {'tipo_documentos': tipo_documentos})
 
 @login_required
 @verificar_permiso('can_manage_tipo_documento')
@@ -34,7 +34,7 @@ def tipo_documento_crear(request):
             return redirect('tipo_documento_index')
     else:
         form = TipoDocumentoForm()
-    return render(request, 'Tipo_Documento/tipo_documento_form.html', {'form': form})
+    return render(request, 'TipoDocumento/TipoDocumentoForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_tipo_documento')

@@ -1,0 +1,587 @@
+{# Modulo/templates/Pagare/Pagare_index.html #}
+{% extends 'base.html' %}
+{% load static %}
+{% block titulo %} Pagarés {% endblock %}
+
+{% block contenido %}
+
+<link rel="stylesheet" href="'Pagare.css'">
+
+<div
+  id="pagare-app"
+  class="pagare-index"
+  data-url-eliminar="{% url 'eliminar_pagares' %}"
+  data-url-obtener="{% url 'obtener_datos_pagares' %}"
+  data-url-actualizar="{% url 'actualizar_pagare' %}"
+  data-url-guardar="{% url 'guardar_pagare' %}"
+>
+
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div id="message-container" class="message-container"></div>
+
+  <div class="card pagare-page">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h4 class="card-title mb-0">Pagarés</h4>
+        <div class="text-muted small">Crea, actualiza y controla el avance con resumen automático.</div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="badge text-bg-light border pagare-pill" id="pagare-mode-pill">Modo: Crear</span>
+
+        <button type="button" class="btn btn-danger btn-sm" id="btn-eliminar-pagares" disabled>
+          <i class="fas fa-trash me-1"></i>Eliminar
+        </button>
+
+        <button type="button" class="btn btn-primary btn-sm" id="btn-actualizar-pagares" disabled>
+          <i class="fas fa-pen me-1"></i>Editar
+        </button>
+
+        {# ✅ Guardar cambios = verde #}
+        <button id="guardar-pagares-btn" class="btn btn-success btn-sm d-none" type="button">
+          <i class="fas fa-save me-1"></i>Guardar cambios
+        </button>
+
+        <button id="cancelar-pagares-btn" class="btn btn-outline-danger btn-sm d-none" type="button">
+          <i class="fas fa-times me-1"></i>Cancelar
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      <form method="GET" action="{% url 'pagare_index' %}" class="pagare-filters">
+        <div class="row g-2 align-items-end">
+          <div class="col-12 col-lg-6">
+            <label class="form-label fw-semibold">Empleados activos</label>
+            <div class="dropdown">
+              <button
+                class="btn btn-outline-primary dropdown-toggle w-100"
+                type="button"
+                id="dropdownEmpleado"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                data-selected-text="Seleccione Empleados Activos"
+              >
+                Seleccione Empleados Activos
+              </button>
+
+              <ul class="dropdown-menu w-100" aria-labelledby="dropdownEmpleado">
+                {% for checkbox in form.documento %}
+                  <li class="dropdown-item">
+                    <label for="{{ checkbox.id_for_label }}" class="ms-2">
+                      {{ checkbox.tag }} {{ checkbox.choice_label }}
+                    </label>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="form-text">Tip: selecciona uno o varios y presiona <b>Filtrar</b>.</div>
+          </div>
+
+          <div id="pagares-data" style="display:none;">
+            {% for pagare in pagares %}
+              <div
+                data-documento="{{ pagare.Documento }}"
+                data-pagare-id="{{ pagare.Pagare_Id }}"
+                data-tipo="{{ pagare.Tipo_Pagare.Desc_Tipo_Pagare }}"
+                data-fecha="{{ pagare.Fecha_Creacion_Pagare|date:'Y-m-d' }}"
+                data-estado="{{ pagare.estado }}"
+              ></div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12 col-lg-6" id="contenedor-pagares">
+            <label class="form-label fw-semibold">Pagarés existentes (para editar/eliminar)</label>
+            <div class="dropdown">
+              <button
+                class="btn btn-outline-info dropdown-toggle w-100"
+                type="button"
+                id="dropdownPagares"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Seleccionar pagaré(s)
+              </button>
+
+              <ul class="dropdown-menu w-100" id="lista-pagares"></ul>
+            </div>
+            <div class="form-text">
+              Al seleccionar pagaré(s) se cargan y luego eliges <b>pagaré activo por empleado</b>.
+            </div>
+          </div>
+
+          <div class="col-12 d-flex gap-2 justify-content-end">
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i class="fas fa-search"></i> Filtrar
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <input type="hidden" id="csrf-token" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+      <div class="table-responsive mt-2 pagare-employee-table">
+        <table class="table table-bordered mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th>Cédula</th>
+              <th>Nombre</th>
+              <th>Línea</th>
+              <th>Cargo</th>
+              <th>Ingreso</th>
+              <th>Retiro</th>
+              <th>Ingreso Operación</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for empleado in empleados %}
+              <tr>
+                <td>{{ empleado.Documento }}</td>
+                <td>{{ empleado.Nombre }}</td>
+                <td>{{ empleado.LineaId.Linea|default:"Sin Línea" }}</td>
+                <td>{{ empleado.CargoId.Cargo|default:"Sin Cargo" }}</td>
+                <td>{{ empleado.FechaIngreso }}</td>
+                <td>{{ empleado.FechaRetiro }}</td>
+                <td>{{ empleado.FechaOperacion }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7" class="text-center">No se encontraron empleados activos.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if empleados %}
+        <div class="mt-3">
+          {% for empleado in empleados %}
+            <div class="card mb-4 tarjeta-empleado pagare-employee-card" data-doc="{{ empleado.Documento }}">
+              <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="min-w-0">
+                  <div class="fw-bold text-truncate">
+                    {{ empleado.Nombre }} <span class="text-muted">— {{ empleado.Documento }}</span>
+                  </div>
+                  <div class="text-muted small">
+                    {{ empleado.LineaId.Linea|default:"Sin Línea" }} · {{ empleado.CargoId.Cargo|default:"Sin Cargo" }}
+                  </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <span class="badge text-bg-primary pagare-status-badge" id="badge-estado-{{ empleado.Documento }}">
+                    Proceso
+                  </span>
+
+                  {# ✅ Selector pagaré activo por empleado (aparece en modo edición) #}
+                  <div class="pg-active-select d-none" id="pg-active-wrap-{{ empleado.Documento }}">
+                    <label class="small text-muted mb-0">Pagaré activo</label>
+                    <select
+                      class="form-select form-select-sm pagare-active-select"
+                      id="selector_pagare_{{ empleado.Documento }}"
+                      data-doc="{{ empleado.Documento }}"
+                    >
+                      <option value="">—</option>
+                    </select>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm pagare-set-active"
+                    data-doc="{{ empleado.Documento }}"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasPagareSummary"
+                    aria-controls="offcanvasPagareSummary"
+                  >
+                    <i class="fas fa-eye me-1"></i>Ver resumen
+                  </button>
+
+                  {# ✅ Crear pagaré = verde #}
+                  <button
+                    class="btn btn-success btn-sm btn-guardar-pagare"
+                    type="button"
+                    data-doc="{{ empleado.Documento }}"
+                  >
+                    <i class="fas fa-save"></i> Crear pagaré
+                  </button>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <div class="pagare-section">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h6 class="mb-0 fw-bold">Datos del pagaré</h6>
+                    <div class="text-muted small">Campos obligatorios marcados con *</div>
+                  </div>
+
+                  <input
+                    type="hidden"
+                    class="pagare-id"
+                    name="pagare_id_{{ empleado.Documento }}"
+                    id="pagare_id_{{ empleado.Documento }}"
+                    data-doc="{{ empleado.Documento }}"
+                    value=""
+                  >
+
+                  <div class="row g-2">
+                    <div class="col-12 col-md-4">
+                      <label class="form-label">Fecha creación *</label>
+                      <input
+                        type="date"
+                        class="form-control fecha-creacion-input"
+                        id="fecha_creacion_{{ empleado.Documento }}"
+                        name="fecha_creacion_{{ empleado.Documento }}"
+                        value=""
+                        data-doc="{{ empleado.Documento }}"
+                      >
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                      <label class="form-label">Tipo pagaré *</label>
+                      <select
+                        name="tipo_pagare_{{ empleado.Documento }}"
+                        class="form-select"
+                        id="tipo_pagare_{{ empleado.Documento }}"
+                        data-doc="{{ empleado.Documento }}"
+                        required
+                      >
+                        <option value="" selected disabled>Seleccione…</option>
+                        {% for tipo in tipos_pagare %}
+                          <option value="{{ tipo.Tipo_PagareId }}">{{ tipo.Desc_Tipo_Pagare }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                      <label class="form-label">Estado *</label>
+                      <select
+                        class="form-select"
+                        name="estado_{{ empleado.Documento }}"
+                        id="estado_{{ empleado.Documento }}"
+                        data-doc="{{ empleado.Documento }}"
+                        required
+                      >
+                        <option value="proceso" selected>Proceso</option>
+                        <option value="terminado">Terminado</option>
+                        <option value="cancelado">Cancelado</option>
+                      </select>
+                    </div>
+
+                    <div class="col-12">
+                      <label class="form-label">Descripción *</label>
+                      <input
+                        type="text"
+                        name="descripcion_{{ empleado.Documento }}"
+                        id="descripcion_{{ empleado.Documento }}"
+                        class="form-control descripcion"
+                        value=""
+                        data-doc="{{ empleado.Documento }}"
+                        maxlength="150"
+                        required
+                        placeholder="Ej: Certificación técnica, inducción, etc."
+                      >
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                      <label class="form-label">Meses condonación *</label>
+                      <input
+                        type="number"
+                        name="meses_condonacion_{{ empleado.Documento }}"
+                        id="meses_condonacion_{{ empleado.Documento }}"
+                        data-documento="{{ empleado.Documento }}"
+                        class="meses-condonacion form-control"
+                        min="0"
+                        required
+                        placeholder="Ej: 6"
+                      >
+                      <div class="form-text">Se usa para calcular fecha fin y cuota mensual.</div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                      <label class="form-label">Valor pagaré (COP) *</label>
+                      <input
+                        type="number"
+                        name="valor_pagare_{{ empleado.Documento }}"
+                        id="valor_pagare_{{ empleado.Documento }}"
+                        class="valor-pagare form-control"
+                        data-documento="{{ empleado.Documento }}"
+                        min="0"
+                        required
+                        placeholder="Ej: 1500000"
+                      >
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                      <label class="form-label">% ejecución</label>
+                      <input
+                        type="text"
+                        name="ejecucion_{{ empleado.Documento }}"
+                        class="ejecucion form-control"
+                        id="ejecucion_{{ empleado.Documento }}"
+                        data-documento="{{ empleado.Documento }}"
+                        readonly
+                      >
+                      <div class="form-text">Se calcula con horas ejecutadas / planeadas.</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">Fecha inicio condonación</label>
+                      <input
+                        type="date"
+                        name="fecha_inicio_{{ empleado.Documento }}"
+                        id="fecha_inicio_{{ empleado.Documento }}"
+                        class="fecha-inicio form-control"
+                        data-documento="{{ empleado.Documento }}"
+                        disabled
+                      >
+                      <div class="form-text">Se habilita cuando la ejecución llega a 100%.</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">Fecha fin condonación</label>
+                      <input
+                        type="date"
+                        name="fecha_fin_{{ empleado.Documento }}"
+                        id="fecha_fin_{{ empleado.Documento }}"
+                        class="fecha-fin form-control"
+                        data-documento="{{ empleado.Documento }}"
+                        readonly
+                      >
+                      <div class="form-text">Automática: inicio + meses.</div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">Valor capacitación otorgada</label>
+                      <input
+                        type="text"
+                        name="valor_capacitacion_{{ empleado.Documento }}"
+                        id="valor_capacitacion_{{ empleado.Documento }}"
+                        class="valor-capacitacion form-control"
+                        data-documento="{{ empleado.Documento }}"
+                        readonly
+                      >
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <label class="form-label">Pendiente (estimado)</label>
+                      <input type="text" id="saldo_pendiente_{{ empleado.Documento }}" class="form-control" readonly>
+                      <div class="form-text">Total - otorgado (según ejecución).</div>
+                    </div>
+                  </div>
+                </div>
+
+                <hr class="my-3">
+
+                <div class="row g-3">
+                  <div class="col-12 col-lg-6">
+                    <div class="pagare-subcard">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0 fw-bold">Planeado</h6>
+                        <span class="text-muted small">Define temas y horas planeadas</span>
+                      </div>
+
+                      <div class="dropdown mb-2">
+                        <button
+                          class="btn btn-outline-primary dropdown-toggle w-100"
+                          type="button"
+                          id="dropdownActividades_{{ empleado.Documento }}"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                          Seleccionar actividades
+                        </button>
+
+                        <ul class="dropdown-menu w-100" aria-labelledby="dropdownActividades_{{ empleado.Documento }}">
+                          {% for actividad in actividades %}
+                            <li class="dropdown-item">
+                              <label class="d-flex align-items-center">
+                                <input
+                                  type="checkbox"
+                                  class="form-check-input actividad-checkbox me-2"
+                                  value="{{ actividad.Act_PagareId }}"
+                                  data-nombre="{{ actividad.Descripcion_Act }}"
+                                >
+                                {{ actividad.Descripcion_Act }}
+                              </label>
+                            </li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="btn btn-primary w-100 btn-agregar-actividades"
+                        data-documento="{{ empleado.Documento }}"
+                      >
+                        <i class="fas fa-plus"></i> Agregar actividad
+                      </button>
+
+                      <div class="table-responsive mt-2 pagare-table-mini">
+                        <table class="table table-bordered mb-0">
+                          <thead class="table-dark">
+                            <tr>
+                              <th>Actividad</th>
+                              <th style="width:140px;">Horas</th>
+                              <th style="width:80px;">Acción</th>
+                            </tr>
+                          </thead>
+
+                          <tbody class="actividades-agregadas" id="actividades-{{ empleado.Documento }}">
+                            <tr class="no-actividades">
+                              <td colspan="3" class="text-center py-3 bg-light">
+                                <i class="fas fa-info-circle"></i> No hay actividades
+                              </td>
+                            </tr>
+                          </tbody>
+
+                          <tfoot>
+                            <tr>
+                              <th class="text-end">Total:</th>
+                              <td><input type="text" class="total-planeado form-control" id="total-planeado-{{ empleado.Documento }}" readonly></td>
+                              <td></td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-lg-6">
+                    <div class="pagare-subcard">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0 fw-bold">Ejecutado</h6>
+                        <span class="text-muted small">Registra horas ejecutadas</span>
+                      </div>
+
+                      <div class="table-responsive mt-2 pagare-table-mini">
+                        <table class="table table-bordered mb-0">
+                          <thead class="table-dark">
+                            <tr>
+                              <th>Actividad</th>
+                              <th style="width:160px;">Horas</th>
+                              <th style="width:80px;">Acción</th>
+                            </tr>
+                          </thead>
+
+                          <tbody id="ejecutado-{{ empleado.Documento }}">
+                            <tr class="no-actividades">
+                              <td colspan="3" class="text-center py-3 bg-light">
+                                <i class="fas fa-info-circle"></i> No hay actividades
+                              </td>
+                            </tr>
+                          </tbody>
+
+                          <tfoot>
+                            <tr>
+                              <th class="text-end">Total:</th>
+                              <td><input type="text" class="total-ejecutado form-control" id="total-ejecutado-{{ empleado.Documento }}" readonly></td>
+                              <td></td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasPagareSummary" aria-labelledby="offcanvasPagareSummaryLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasPagareSummaryLabel">Resumen activo</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+    </div>
+
+    <div class="offcanvas-body">
+      <div class="pagare-global" id="pagare-global-summary">
+        <div class="text-muted small mb-2">Se actualiza con el empleado donde estés editando.</div>
+
+        <div class="pagare-global-box">
+          <div class="d-flex justify-content-between">
+            <div class="text-muted small">Empleado</div>
+            <div class="fw-semibold" id="g-doc">—</div>
+          </div>
+
+          <div class="d-flex justify-content-between mt-2">
+            <div class="text-muted small">Ejecución</div>
+            <div class="fw-semibold" id="g-ejec">0%</div>
+          </div>
+          <div class="progress mt-1" style="height:10px;">
+            <div class="progress-bar" id="g-bar" style="width:0%"></div>
+          </div>
+
+          <hr class="my-3">
+
+          <div class="d-flex justify-content-between">
+            <div class="text-muted small">Valor pagaré</div>
+            <div class="fw-bold" id="g-valor">$0</div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div class="text-muted small">Otorgado</div>
+            <div class="fw-bold" id="g-otorgado">$0</div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div class="text-muted small">Pendiente</div>
+            <div class="fw-bold" id="g-pendiente">$0</div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div class="text-muted small">Cuota mensual</div>
+            <div class="fw-bold" id="g-cuota">$0</div>
+          </div>
+
+          <hr class="my-3">
+
+          <div class="d-flex justify-content-between">
+            <div class="text-muted small">Planeado (h)</div>
+            <div class="fw-semibold" id="g-plan">0.00</div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div class="text-muted small">Ejecutado (h)</div>
+            <div class="fw-semibold" id="g-ejec-h">0.00</div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div class="text-muted small">Pendiente (h)</div>
+            <div class="fw-semibold" id="g-pend-h">0.00</div>
+          </div>
+
+          <div class="d-flex justify-content-between mt-2">
+            <div class="text-muted small">Condonación</div>
+            <div class="small" id="g-cond">—</div>
+          </div>
+        </div>
+
+        <div class="pagare-global-help mt-3">
+          <div class="fw-semibold mb-1">Ayudas rápidas</div>
+          <ul class="mb-0 small text-muted">
+            <li>La ejecución se calcula por horas (ejecutado/planeado).</li>
+            <li>“Inicio condonación” se habilita al 100%.</li>
+            <li>“Fin” se calcula con meses.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src=\"{% static 'JS/Pagare.js' %}\"></script>
+{% endblock %}

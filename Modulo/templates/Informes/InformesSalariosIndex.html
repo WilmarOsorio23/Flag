@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block titulo %} Informe de Salarios {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Informe Salarios</h4>
+    </div>
+    <div class="card-body informes-table">
+        <div class="container-fluid mb-3">
+            <!-- Formulario principal -->
+            <form method="GET">
+                <!-- Filtros en la parte superior -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label for="colaborador">{{ form.Nombre.label }}</label>
+                        {{ form.Nombre }}
+                    </div>
+                    <div class="col-md-3">
+                        <label for="linea">{{ form.LineaId.label }}</label>
+                        {{ form.LineaId }}
+                    </div>
+                    <div class="col-md-3">
+                        <label for="cargo">{{ form.Cargo.label }}</label>
+                        {{ form.Cargo }}
+                    </div>
+                    <div class="col-md-3">
+                        <label for="anio">{{ form.Anio.label }}</label>
+                        {{ form.Anio }}
+                    </div>
+                </div>
+        
+                <!-- Botones en la parte inferior -->
+                <div class="row">
+                    <div class="col-md-6 text-start">
+                        <button type="submit" name="buscar" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                        <button type="button" id="btn-reset-filtros" class="btn btn-secondary ms-2">
+                            <i class="fas fa-redo"></i> Reiniciar
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Apartado para cards -->
+            {% if busqueda_realizada %}
+            <div class="mt-4 mb-3">
+                <div class="d-flex flex-row flex-nowrap overflow-auto gap-2">
+                                
+                    <!-- Colaboradores con Certificación -->
+                    <div class="card shadow-sm p-3 text-success text-start" style="min-width: 220px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0">{{ total_certificados }}</h5>
+                            <i class="fas fa-certificate fa-2x"></i>
+                        </div>
+                        <small class="text-muted mt-2 d-block">Con Certificación SAP</small>
+                    </div>
+            
+                    <!-- Distribución por Línea -->
+                    <div class="card shadow-sm p-3 text-info text-start" style="min-width: 220px; cursor:pointer;" id="cardLinea">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <i class="fas fa-stream fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 mt-2">
+                            <small class="text-muted d-block">Por Línea</small>
+                            {% for linea, cantidad in conteo_lineas.items %}
+                                <p class="mb-1">{{ linea }}: <strong>{{ cantidad }}</strong></p>
+                            {% endfor %}
+                        </div>
+                    </div>
+            
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Botón de Descargar Excel -->
+            <div class="row">
+                <div class="col-md-6 text-end offset-md-6">
+                    <form id="download-form" method="GET" action="{% url 'exportar_nomina_excel' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="Nombre" value="{{ form.Nombre.value }}">
+                        <input type="hidden" name="LineaId" value="{{ form.LineaId.value }}">
+                        <input type="hidden" name="Cargo" value="{{ form.Cargo.value }}">
+                        <input type="hidden" name="Anio" value="{{ form.Anio.value }}">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div> 
+
+        <!-- Tabla con resultados filtrados -->
+        {% if show_data %}
+        <div class="table-responsive" style="max-height: 80vh; overflow: auto;">
+            <table class="table table-bordered table-hover table-primary w-100" id="nominaTable">
+                <thead>
+                    <tr>
+                        <th data-sort="nombre_linea" class="sortable" data-direction="default">
+                            Nombre Línea 
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="documento_colaborador" class="sortable" data-direction="default">
+                            Documento Colaborador 
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="nombre_colaborador" class="sortable" data-direction="default">
+                            Nombre Colaborador 
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="cargo" class="sortable" data-direction="default">
+                            Cargo 
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="perfil" class="sortable" data-direction="default">
+                            Perfil 
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="Modulo" class="sortable" data-direction="default">
+                            Módulo
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="certificado" class="sortable" data-direction="default">
+                            Certificado
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="fecha_ingreso" class="sortable" data-direction="default">
+                            Fecha Ingreso
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="anios" class="sortable" data-direction="default">
+                            Años en Flag
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        <th data-sort="año" class="sortable" data-direction="default">
+                            Año 
+                            <span class="sort-icon">
+                                <i class="fas fa-sort sort-icon-default"></i>
+                                <i class="fas fa-sort-up sort-icon-asc"></i>
+                                <i class="fas fa-sort-down sort-icon-desc"></i>
+                            </span>
+                        </th>
+                        {% for mes in meses %}
+                            <th data-sort="salario" class="sortable" data-direction="default">
+                                Salario {{ mes }}
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                            <th data-sort="cliente" class="sortable" data-direction="default">
+                                Cliente {{ mes }}
+                                <span class="sort-icon">
+                                    <i class="fas fa-sort sort-icon-default"></i>
+                                    <i class="fas fa-sort-up sort-icon-asc"></i>
+                                    <i class="fas fa-sort-down sort-icon-desc"></i>
+                                </span>
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for empleado in empleado_info %}
+                        <tr>
+                            <td class="text-start">{{ empleado.nombre_linea }}</td>
+                            <td class="text-end">{{ empleado.documento_colaborador }}</td>
+                            <td class="text-start">{{ empleado.nombre_colaborador }}</td>
+                            <td class="text-start">{{ empleado.cargo }}</td>
+                            <td class="text-start">{{ empleado.perfil }}</td>
+                            <td class="text-start">{{ empleado.modulo }}</td>
+                            <td class="text-start">{{ empleado.certificado }}</td>
+                            <td class="text-end">{{ empleado.fecha_ingreso|date:'d/m/Y' }}</td>
+                            <td class="text-end">{{ empleado.años_en_flag }}</td>
+                            <td class="text-end">{{ empleado.año }}</td>
+                            {% for mes_data in empleado.meses %}
+                                <td class="text-end">{{ mes_data.salario|currency_format }}</td>
+                                <td class="text-start">{{ mes_data.cliente }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">No hay datos disponibles.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                {% if not busqueda_realizada %}
+                    No se ha realizado ninguna búsqueda aún.
+                {% else %}
+                    No se encontraron resultados para los filtros aplicados.
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal Gráfico por Línea -->
+<div class="modal fade" id="graficoLineaModal" tabindex="-1" aria-labelledby="graficoLineaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="graficoLineaLabel">Colaboradores con Certificación por Línea</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="graficoLineaCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+</div>
+
+    <!-- Carga dinámica de datos para los gráficos en JS -->
+    {% block extra_js %}
+        {{ lineas_labels|json_script:"labels-linea" }}
+        {{ lineas_data|json_script:"values-linea" }}
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src=\"{% static 'JS/InformesSalarios.js' %}\"></script>
+    {% endblock %}
+{% endblock %}

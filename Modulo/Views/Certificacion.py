@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 @verificar_permiso('can_manage_certificacion')
 def certificacion_index(request):
     certificaciones = Certificacion.objects.all()
-    return render(request, 'Certificacion/certificacion_index.html', {'certificaciones': certificaciones})
+    return render(request, 'Certificacion/CertificacionIndex.html', {'certificaciones': certificaciones})
 
 @login_required
 @verificar_permiso('can_manage_certificacion')
@@ -33,7 +33,7 @@ def certificacion_crear(request):
             return redirect('certificacion_index')
     else:
         form = CertificacionForm()
-    return render(request, 'Certificacion/certificacion_form.html', {'form': form})
+    return render(request, 'Certificacion/CertificacionForm.html', {'form': form})
 
 @login_required
 @verificar_permiso('can_manage_certificacion')
