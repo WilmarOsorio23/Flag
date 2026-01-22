@@ -57,7 +57,7 @@ from modulo.Views import InformeFacturacion
 from modulo.Views import InformeHistorialCargos
 from modulo.Views import IndicadoresFacturacion
 from modulo.Views import IndicadoresMargenCliente
-from modulo.Views import LineaClienteCentrocostos
+from modulo.Views import LineaClienteCentroCostos
 from modulo.Views import FacturacionConsultores
 from modulo.Views import InformeFacturacionConsultores
 from modulo.Views import InformeServConsultor
@@ -455,12 +455,12 @@ urlpatterns = [
     path('TipoPagare/descargar_excel/', tipo_pagare_descargar_excel, name='tipo_pagare_descargar_excel'),
 
     #Ruta para maestro de linea Cliente CentroCostos
-    path('linea_cliente_centrocostos/', LineaClienteCentrocostos.linea_cliente_centrocostos_index, name='linea_cliente_centrocostos_index'),
-    path('linea_cliente_centrocostos/crear', LineaClienteCentrocostos.linea_cliente_centrocostos_crear, name='linea_cliente_centrocostos_crear'),
-    path('linea_cliente_centrocostos/editar/<int:id>/', LineaClienteCentrocostos.linea_cliente_centrocostos_editar, name='linea_cliente_centrocostos_editar'),
-    path('linea_cliente_centrocostos/eliminar', LineaClienteCentrocostos.linea_cliente_centrocostos_eliminar, name='linea_cliente_centrocostos_eliminar'),
-    path('linea_cliente_centrocostos/verificar-relaciones/', LineaClienteCentrocostos.linea_cliente_centrocostos_verificar_relaciones, name='linea_cliente_centrocostos_verificar_relaciones'),
-    path('linea_cliente_centrocostos/descargar_excel', LineaClienteCentrocostos.linea_cliente_centrocostos_descargar_excel, name='linea_cliente_centrocostos_descargar_excel'),
+    path('linea_cliente_centrocostos/', LineaClienteCentroCostos.linea_cliente_centrocostos_index, name='linea_cliente_centrocostos_index'),
+    path('linea_cliente_centrocostos/crear', LineaClienteCentroCostos.linea_cliente_centrocostos_crear, name='linea_cliente_centrocostos_crear'),
+    path('linea_cliente_centrocostos/editar/<int:id>/', LineaClienteCentroCostos.linea_cliente_centrocostos_editar, name='linea_cliente_centrocostos_editar'),
+    path('linea_cliente_centrocostos/eliminar', LineaClienteCentroCostos.linea_cliente_centrocostos_eliminar, name='linea_cliente_centrocostos_eliminar'),
+    path('linea_cliente_centrocostos/verificar-relaciones/', LineaClienteCentroCostos.linea_cliente_centrocostos_verificar_relaciones, name='linea_cliente_centrocostos_verificar_relaciones'),
+    path('linea_cliente_centrocostos/descargar_excel', LineaClienteCentroCostos.linea_cliente_centrocostos_descargar_excel, name='linea_cliente_centrocostos_descargar_excel'),
 
     # Autenticación
     path('cambiar-password/', AuthViews.cambiar_password, name='cambiar_password'),     
