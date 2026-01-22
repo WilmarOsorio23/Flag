@@ -34,11 +34,11 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def inicio(request):
-    return render(request, 'paginas/Inicio.html')
+    return render(request, 'Paginas/Inicio.html')
 
 @login_required
 def nosotros(request):
-    return render(request, 'paginas/nosotros.html')
+    return render(request, 'Paginas/Nosotros.html')
 
 def login_view(request):
     if request.method == 'POST':
@@ -50,9 +50,9 @@ def login_view(request):
             return redirect('inicio')
         else:
             messages.error(request, 'Usuario o contraseña incorrectos.')
-            return render(request, 'Login/login.html', {'form': { 'errors': True }})
+            return render(request, 'Login/Login.html', {'form': { 'errors': True }})
     else:
-        return render(request, 'Login/login.html', {'form': {}})
+        return render(request, 'Login/Login.html', {'form': {}})
 
 def logout_view(request):
     logout(request)
