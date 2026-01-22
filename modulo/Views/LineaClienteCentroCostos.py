@@ -48,7 +48,7 @@ def linea_cliente_centrocostos_crear(request):
     else:
         form = LineaClienteCentroCostosForm()
 
-    return render(request, 'LineaClienteCentroCostos/LineaClienteCentrocostosForm.html', {'form': form})
+    return render(request, 'LineaClienteCentroCostos/LineaClienteCentroCostosForm.html', {'form': form})
 
 
 @login_required
