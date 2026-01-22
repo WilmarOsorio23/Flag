@@ -99,7 +99,7 @@ def tipo_pagare_eliminar(request):
 @verificar_permiso('can_manage_tipo_pagare')
 def tipo_pagare_confirmar_delete(request, id):
     tipo_pagare = get_object_or_404(TipoPagare, Tipo_PagareId=id)
-    return render(request, 'Tipomaestro/Tipopagareconfirmardelete.html', {
+    return render(request, 'Tipomaestro/TipopagareConfirmarDelete.html', {
         'tipo_pagare': tipo_pagare
     })
 
