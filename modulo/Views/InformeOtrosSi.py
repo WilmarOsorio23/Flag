@@ -251,7 +251,7 @@ def informe_otros_si(request):
         'porcentaje_mxn_display': porcentaje_mxn_display,
     }
 
-    return render(request, 'Informes/InformesotrossiIndex.html', context)
+    return render(request, 'Informes/InformesOtrosSiIndex.html', context)
 
 
 @login_required

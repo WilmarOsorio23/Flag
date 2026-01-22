@@ -182,7 +182,7 @@ def informes_facturacion_index(request):
         'clientes_activos': clientes_activos
     }
 
-    return render(request, 'Informes/InformesfacturacionIndex.html', context)
+    return render(request, 'Informes/InformesFacturacionIndex.html', context)
 
 
 def generar_graficos_por_linea(rows, lineas_activas, clientes_activos, footer):
@@ -334,7 +334,7 @@ def informes_facturacion_index(request):
         'graficos_por_linea': graficos_por_linea
     }
 
-    return render(request, 'Informes/InformesfacturacionIndex.html', context)
+    return render(request, 'Informes/InformesFacturacionIndex.html', context)
 
 @login_required
 @verificar_permiso('can_view_informe_facturacion')

@@ -449,7 +449,7 @@ def informe_facturacion_CentroCostos(request):
         'costos_por_ceco_linea_mes': convert_to_regular_dict(costos_por_ceco_linea_mes),
     }
 
-    return render(request, 'Informes/InformefacturacioncentrocostosIndex.html', context)
+    return render(request, 'Informes/InformeFacturacionCentroCostosIndex.html', context)
 
 
 @login_required

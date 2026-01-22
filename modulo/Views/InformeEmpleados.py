@@ -242,7 +242,7 @@ def informe_empleados(request):
         'lineas_data': list(lineas_data.values()),
     }
 
-    return render(request, 'Informes/InformesempleadoIndex.html', context)
+    return render(request, 'Informes/InformesEmpleadoIndex.html', context)
 
 
 @login_required

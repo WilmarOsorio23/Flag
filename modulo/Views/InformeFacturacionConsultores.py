@@ -160,7 +160,7 @@ def informe_totales_por_mes(request):
         'total_global': total_global
     }
 
-    return render(request, 'Informes/InformesfacturacionconsultoresIndex.html', context)
+    return render(request, 'Informes/InformesFacturacionConsultoresIndex.html', context)
 
 @login_required
 @verificar_permiso('can_view_informe_facturacion_consultores')

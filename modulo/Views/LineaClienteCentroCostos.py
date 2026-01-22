@@ -28,7 +28,7 @@ def linea_cliente_centrocostos_index(request):
         'modulos': Modulo.objects.all().order_by('Modulo'),
         'centros_costos': CentrosCostos.objects.all().order_by('codigoCeCo'),
     }
-    return render(request, 'Lineaclientecentrocostos/LineaclientecentrocostosIndex.html', context)
+    return render(request, 'LineaClienteCentroCostos/LineaClienteCentroCostosIndex.html', context)
 
 
 @login_required
