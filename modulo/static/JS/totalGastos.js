@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-// Habilitar edición en los detalles seleccionados
+    // Habilitar edición en los detalles seleccionados
     window.enableEditDetails = function () {
         const selected = document.querySelectorAll('.detail-select:checked');
         if (selected.length === 0) {
@@ -300,26 +300,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar tooltips
     addTooltips();
 
-window.visualizarDetalles = function() {
-    let selected = document.querySelectorAll('.row-select:checked');
+    window.visualizarDetalles = function() {
+        let selected = document.querySelectorAll('.row-select:checked');
 
-        if (selected.length !== 1) {
-            showMessage('Debes seleccionar un solo elemento para visualizar.', 'danger');
-            return;
-        }
+            if (selected.length !== 1) {
+                showMessage('Debes seleccionar un solo elemento para visualizar.', 'danger');
+                return;
+            }
 
-        let id = selected[0].value;
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.checked = false);
+            let id = selected[0].value;
+            document.querySelectorAll('.row-select').forEach(checkbox => checkbox.checked = false);
 
-        fetch(`/total_gastos/visualizar/${id}/`)
-            .then(response => response.json())
-            .then(data => {
-                actualizarTablaDetalles(data);
-            })
-            .catch(error => {
-                console.error('❌ Error al obtener los detalles:', error);
-                showMessage('Error al cargar los detalles.', 'danger');
-            });
+            fetch(`/total_gastos/visualizar/${id}/`)
+                .then(response => response.json())
+                .then(data => {
+                    actualizarTablaDetalles(data);
+                })
+                .catch(error => {
+                    console.error('❌ Error al obtener los detalles:', error);
+                    showMessage('Error al cargar los detalles.', 'danger');
+                });
     };
 
     // Función para actualizar la tabla con los detalles
@@ -512,6 +512,6 @@ window.visualizarDetalles = function() {
         
             rows.forEach(row => tbody.appendChild(row));
         }
-    }
-
+    };
+}
 });
