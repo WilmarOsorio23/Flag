@@ -1,68 +1,68 @@
 from django.urls import path
-from Modulo.Views import ActMaestro, InformeClientes, ClientesFactura, IndicadoresOperatividad, IndicadoresTotales, InformeFacturacionCentrocostos, InformeTiemposConsultores
-from Modulo.Views import Modulo as ModuloView
-from Modulo.Views import Ipc
-from Modulo.Views import Ind
-from Modulo.Views import TipoDocumento
-from Modulo.Views import Certificacion
-from Modulo.Views import Conceptos
-from Modulo.Views import Clientes
-from Modulo.Views import CostosIndirectos
-from Modulo.Views import Gastos
-from Modulo.Views import Cargos
-from Modulo.Views import EmpleadoNominaFiltrado
-from Modulo.Views import InformeEmpleados
-from Modulo.Views import InformeEstudios  
-from Modulo.Views import InformeConsultores
-from Modulo.Views import InformeTarifasConsultores
-from Modulo.Views import InformeTarifasClientes
-from Modulo.Views import InformeClientesContratos
-from Modulo.Views import InformeOtrosSi
-from Modulo.Views import Empleado
-from Modulo.Views import Consultores
-from Modulo.Views import Nomina
-from Modulo.Views.Nomina import (
+from modulo.Views import ActMaestro, InformeClientes, ClientesFactura, IndicadoresOperatividad, IndicadoresTotales, InformeFacturacionCentrocostos, InformeTiemposConsultores
+from modulo.Views import Modulo as ModuloView
+from modulo.Views import Ipc
+from modulo.Views import Ind
+from modulo.Views import TipoDocumento
+from modulo.Views import Certificacion
+from modulo.Views import Conceptos
+from modulo.Views import Clientes
+from modulo.Views import CostosIndirectos
+from modulo.Views import Gastos
+from modulo.Views import Cargos
+from modulo.Views import EmpleadoNominaFiltrado
+from modulo.Views import InformeEmpleados
+from modulo.Views import InformeEstudios  
+from modulo.Views import InformeConsultores
+from modulo.Views import InformeTarifasConsultores
+from modulo.Views import InformeTarifasClientes
+from modulo.Views import InformeClientesContratos
+from modulo.Views import InformeOtrosSi
+from modulo.Views import Empleado
+from modulo.Views import Consultores
+from modulo.Views import Nomina
+from modulo.Views.Nomina import (
     nomina_index, nomina_crear, nomina_editar, nomina_eliminar,
     nomina_descargar_excel, verificar_relaciones,
     nomina_bulk_preview, nomina_bulk_create
 )
-from Modulo.Views import InformeCertificaciones
-from Modulo.Views.InformePagare import exportar_pagares_excel, informe_pagares
-from Modulo.Views.Pagare import actualizar_pagare, eliminar_pagares, guardar_pagare, obtener_datos_pagares, obtener_pagares_empleado, pag_ejecutado, pag_planeado, pagare_index
-from Modulo.Views.TipoPagare import tipo_pagare_confirmar_delete, tipo_pagare_crear, tipo_pagare_descargar_excel, tipo_pagare_editar, tipo_pagare_eliminar, tipo_pagare_index
-from Modulo.models import TiposContactos
-from Modulo.views import ActividadPagare
+from modulo.Views import InformeCertificaciones
+from modulo.Views.InformePagare import exportar_pagares_excel, informe_pagares
+from modulo.Views.Pagare import actualizar_pagare, eliminar_pagares, guardar_pagare, obtener_datos_pagares, obtener_pagares_empleado, pag_ejecutado, pag_planeado, pagare_index
+from modulo.Views.TipoPagare import tipo_pagare_confirmar_delete, tipo_pagare_crear, tipo_pagare_descargar_excel, tipo_pagare_editar, tipo_pagare_eliminar, tipo_pagare_index
+from modulo.models import TiposContactos
+from modulo.views import ActividadPagare
 from . import views
-from Modulo.Views import Perfil
-from Modulo.Views import Linea
-from Modulo.Views import DetallesCostosIndirectos
-from Modulo.Views import DetallesCertificacion
-from Modulo.Views import DetalleGastos
-from Modulo.Views import TotalGasto
-from Modulo.Views import TotalCostos
-from Modulo.Views import TiposContactos
-from Modulo.Views import Contactos
-from Modulo.Views import HistorialCargos
-from Modulo.Views import EmpleadosEstudios
-from Modulo.Views import RegistroTiempos
-from Modulo.Views import HorasHabiles
-from Modulo.Views import TarifaConsultores
-from Modulo.Views import Moneda
-from Modulo.Views import ClientesContratos
-from Modulo.Views import ContratosOtrosSi
-from Modulo.Views import TarifaClientes
-from Modulo.Views import Referencia
-from Modulo.Views import CentrosCostos
-from Modulo.Views import InformeFacturacion
-from Modulo.Views import InformeHistorialCargos
-from Modulo.Views import IndicadoresFacturacion
-from Modulo.Views import IndicadoresMargenCliente
-from Modulo.Views import LineaClienteCentrocostos
-from Modulo.Views import FacturacionConsultores
-from Modulo.Views import InformeFacturacionConsultores
-from Modulo.Views import InformeServConsultor
-from Modulo.Views import AuthViews
-from Modulo.Views import InformeDetalleFacturacionConsultores
+from modulo.Views import Perfil
+from modulo.Views import Linea
+from modulo.Views import DetallesCostosIndirectos
+from modulo.Views import DetallesCertificacion
+from modulo.Views import DetalleGastos
+from modulo.Views import TotalGasto
+from modulo.Views import TotalCostos
+from modulo.Views import TiposContactos
+from modulo.Views import Contactos
+from modulo.Views import HistorialCargos
+from modulo.Views import EmpleadosEstudios
+from modulo.Views import RegistroTiempos
+from modulo.Views import HorasHabiles
+from modulo.Views import TarifaConsultores
+from modulo.Views import Moneda
+from modulo.Views import ClientesContratos
+from modulo.Views import ContratosOtrosSi
+from modulo.Views import TarifaClientes
+from modulo.Views import Referencia
+from modulo.Views import CentrosCostos
+from modulo.Views import InformeFacturacion
+from modulo.Views import InformeHistorialCargos
+from modulo.Views import IndicadoresFacturacion
+from modulo.Views import IndicadoresMargenCliente
+from modulo.Views import LineaClienteCentrocostos
+from modulo.Views import FacturacionConsultores
+from modulo.Views import InformeFacturacionConsultores
+from modulo.Views import InformeServConsultor
+from modulo.Views import AuthViews
+from modulo.Views import InformeDetalleFacturacionConsultores
 
 
 

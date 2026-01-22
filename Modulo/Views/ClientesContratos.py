@@ -4,12 +4,12 @@ import logging
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
-from Modulo.forms import ClientesContratosForm
-from Modulo.models import ClientesContratos, ContratosOtrosSi
+from modulo.forms import ClientesContratosForm
+from modulo.models import ClientesContratos, ContratosOtrosSi
 from django.db import models
 from django.contrib import messages
 from django.db import IntegrityError
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

@@ -6,12 +6,12 @@ import pandas as pd
 from django.db import transaction
 from Modulo import models
 from django.db.models import Sum
-from Modulo.forms import Total_Costos_IndirectosForm,DetalleCostosIndirectosForm,DetalleCostosIndirectosFormOpcion2
-from Modulo.models import Total_Costos_Indirectos,Detalle_Costos_Indirectos,Costos_Indirectos
+from modulo.forms import Total_Costos_IndirectosForm,DetalleCostosIndirectosForm,DetalleCostosIndirectosFormOpcion2
+from modulo.models import Total_Costos_Indirectos,Detalle_Costos_Indirectos,Costos_Indirectos
 from django.db import models
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

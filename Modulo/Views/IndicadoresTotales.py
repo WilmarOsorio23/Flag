@@ -6,8 +6,8 @@ from django.shortcuts import redirect, render
 from django.core.cache import cache
 from django.http import JsonResponse
 import json
-from Modulo.forms import Ind_Totales_FilterForm
-from Modulo.models import Clientes, Concepto, FacturacionClientes, Horas_Habiles, Ind_Totales_Diciembre, Linea, Nomina, Tarifa_Clientes, Tarifa_Consultores, Tiempos_Cliente, TiemposConcepto, IPC
+from modulo.forms import Ind_Totales_FilterForm
+from modulo.models import Clientes, Concepto, FacturacionClientes, Horas_Habiles, Ind_Totales_Diciembre, Linea, Nomina, Tarifa_Clientes, Tarifa_Consultores, Tiempos_Cliente, TiemposConcepto, IPC
 
 MESES = {
     '1': 'Enero', '2': 'Febrero', '3': 'Marzo', '4': 'Abril',
@@ -15,7 +15,7 @@ MESES = {
     '9': 'Septiembre', '10': 'Octubre', '11': 'Noviembre', '12': 'Diciembre'
 }
 
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 # Funciones auxiliares

@@ -10,14 +10,14 @@ from django.db.models import Q, Count
 from django.shortcuts import render
 
 # Formularios y modelos del módulo
-from Modulo.forms import EmpleadoFilterForm
-from Modulo.models import Empleado
+from modulo.forms import EmpleadoFilterForm
+from modulo.models import Empleado
 
 # Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 

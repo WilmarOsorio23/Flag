@@ -9,13 +9,13 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 # Formularios y modelos del módulo
-from Modulo.forms import ClienteFilterForm
-from Modulo.models import Clientes
+from modulo.forms import ClienteFilterForm
+from modulo.models import Clientes
 
 # Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 # Función para filtrar clientes

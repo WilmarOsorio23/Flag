@@ -5,8 +5,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 # Formularios y modelos del módulo
-from Modulo.forms import ConsultorFilterForm
-from Modulo.models import Consultores
+from modulo.forms import ConsultorFilterForm
+from modulo.models import Consultores
 
 # Librerías para Excel
 from openpyxl import Workbook
@@ -15,7 +15,7 @@ from openpyxl.styles import Font, Alignment, Border, Side
 # Librerías estándar y de terceros
 from datetime import datetime
 from collections import Counter
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 

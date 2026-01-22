@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from Modulo.models import Facturacion_Consultores, Tiempos_Cliente, Tarifa_Consultores, Consultores, Linea, Clientes, Modulo
-from Modulo.forms import FacturacionConsultoresFilterForm
+from modulo.models import Facturacion_Consultores, Tiempos_Cliente, Tarifa_Consultores, Consultores, Linea, Clientes, Modulo
+from modulo.forms import FacturacionConsultoresFilterForm
 from decimal import Decimal
 from datetime import date
 from decimal import Decimal, InvalidOperation
@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
 from django.shortcuts import redirect
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 # QUITAR LOS DECORADORES DE ESTA FUNCIÓN - No es una vista

@@ -4,11 +4,11 @@ from urllib import request
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
-from Modulo.forms import HistorialCargosForm
-from Modulo.models import Historial_Cargos
+from modulo.forms import HistorialCargosForm
+from modulo.models import Historial_Cargos
 from django.db import models
 from django.contrib import messages
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

@@ -2,14 +2,14 @@ from django import forms
 from django.shortcuts import render
 from datetime import date, datetime
 from collections import defaultdict
-from Modulo.forms import HistorialCargosFilterForm
-from Modulo.models import Empleado, Linea, Cargos, Historial_Cargos
+from modulo.forms import HistorialCargosFilterForm
+from modulo.models import Empleado, Linea, Cargos, Historial_Cargos
 from django.http import HttpResponse
 from django.db.models import Q
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 def filtrar_historial_cargos(request):

@@ -9,13 +9,13 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 # Formularios y modelos del módulo
-from Modulo.forms import EstudiosFilterForm
-from Modulo.models import Empleado, Empleados_Estudios
+from modulo.forms import EstudiosFilterForm
+from modulo.models import Empleado, Empleados_Estudios
 
 # Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 # Función para filtrar Empleado y Empleados_Estudios

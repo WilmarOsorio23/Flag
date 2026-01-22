@@ -7,9 +7,9 @@ from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from Modulo.decorators import verificar_permiso
-from Modulo.forms import LineaClienteCentroCostosForm
-from Modulo.models import LineaClienteCentroCostos, Linea, Clientes, CentrosCostos, Modulo
+from modulo.decorators import verificar_permiso
+from modulo.forms import LineaClienteCentroCostosForm
+from modulo.models import LineaClienteCentroCostos, Linea, Clientes, CentrosCostos, Modulo
 
 
 @login_required

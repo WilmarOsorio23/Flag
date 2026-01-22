@@ -5,9 +5,9 @@ from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.contrib import messages
 import pandas as pd
 from django.http import HttpResponseBadRequest
-from Modulo.models import ActividadPagare
-from Modulo.forms import ActividadPagareForm
-from Modulo.decorators import verificar_permiso
+from modulo.models import ActividadPagare
+from modulo.forms import ActividadPagareForm
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

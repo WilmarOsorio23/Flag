@@ -8,9 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from Modulo import models
 from django.db import models
-from Modulo.forms import CertificacionForm
-from Modulo.models import Certificacion, Detalle_Certificacion
-from Modulo.decorators import verificar_permiso
+from modulo.forms import CertificacionForm
+from modulo.models import Certificacion, Detalle_Certificacion
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

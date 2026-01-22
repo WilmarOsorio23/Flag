@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from collections import defaultdict
 from django.http import HttpResponse
-from Modulo.forms import TarifaClienteFilterForm
-from Modulo.models import Clientes, Tarifa_Clientes
+from modulo.forms import TarifaClienteFilterForm
+from modulo.models import Clientes, Tarifa_Clientes
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 from datetime import datetime
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 #Función para filtrar Tarifas de clientes

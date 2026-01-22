@@ -12,9 +12,9 @@ from django.utils.dateparse import parse_date, parse_datetime
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Side, Border
 
-from Modulo.forms import EmpleadoConPagareFilterForm
-from Modulo.models import Empleado, Pagare
-from Modulo.decorators import verificar_permiso
+from modulo.forms import EmpleadoConPagareFilterForm
+from modulo.models import Empleado, Pagare
+from modulo.decorators import verificar_permiso
 
 logger = logging.getLogger(__name__)
 

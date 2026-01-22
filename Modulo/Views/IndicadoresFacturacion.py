@@ -2,11 +2,11 @@ from django.shortcuts import render
 from django.db.models import Sum, F, Q, Case, When, Value, DecimalField, FloatField
 from django.db.models.functions import Coalesce
 from decimal import Decimal
-from Modulo.models import (
+from modulo.models import (
     Ind_Operat_Clientes, Linea, Tiempos_Cliente, TiemposConcepto, FacturacionClientes,
     Horas_Habiles
 )
-from Modulo.forms import Ind_Facturacion_FilterForm
+from modulo.forms import Ind_Facturacion_FilterForm
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
@@ -18,7 +18,7 @@ MESES = {
     9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dic'
 }
 
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 def obtener_horas_habiles(anio: str) -> dict:

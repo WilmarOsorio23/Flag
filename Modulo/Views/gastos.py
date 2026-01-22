@@ -8,9 +8,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 from django.contrib import messages
-from Modulo.forms import GastoForm
-from Modulo.models import Detalle_Gastos, Gastos
-from Modulo.decorators import verificar_permiso
+from modulo.forms import GastoForm
+from modulo.models import Detalle_Gastos, Gastos
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

@@ -4,12 +4,12 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
 from Modulo import models
-from Modulo.forms import MonedaForm
-from Modulo.models import Moneda, Tarifa_Clientes
-from Modulo.models import Tarifa_Consultores
+from modulo.forms import MonedaForm
+from modulo.models import Moneda, Tarifa_Clientes
+from modulo.models import Tarifa_Consultores
 from django.contrib import messages
 from django.db import models
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

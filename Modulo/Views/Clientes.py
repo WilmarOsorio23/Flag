@@ -10,9 +10,9 @@ import pandas as pd
 from django.db.models import Q
 from Modulo import models
 from django.db import models
-from Modulo.forms import ClientesForm
-from Modulo.models import Clientes, Contactos, Tiempos_Cliente, TiemposFacturables, Tarifa_Clientes
-from Modulo.decorators import verificar_permiso
+from modulo.forms import ClientesForm
+from modulo.models import Clientes, Contactos, Tiempos_Cliente, TiemposFacturables, Tarifa_Clientes
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

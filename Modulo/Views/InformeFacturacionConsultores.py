@@ -1,15 +1,15 @@
 from decimal import Decimal
 from django.shortcuts import render
-from Modulo.models import Facturacion_Consultores, Linea
+from modulo.models import Facturacion_Consultores, Linea
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Border, Side, Alignment, numbers
 from openpyxl.utils import get_column_letter
 from django.http import HttpResponse
 from datetime import datetime
-from Modulo.forms import TotalesPorMesFilterForm
+from modulo.forms import TotalesPorMesFilterForm
 from django.db.models import Sum
 from collections import defaultdict
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 def filtrar_datos(form=None):

@@ -5,12 +5,12 @@ from django.shortcuts import redirect, render
 import pandas as pd
 from Modulo import models
 import Modulo
-from Modulo.forms import IPCForm
-from Modulo.models import IPC
+from modulo.forms import IPCForm
+from modulo.models import IPC
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 from django.contrib import messages
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

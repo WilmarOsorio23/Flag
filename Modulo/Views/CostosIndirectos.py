@@ -8,9 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from Modulo import models
 from django.db import models
-from Modulo.forms import CostosIndirectosForm
-from Modulo.models import Costos_Indirectos, Detalle_Costos_Indirectos
-from Modulo.decorators import verificar_permiso
+from modulo.forms import CostosIndirectosForm
+from modulo.models import Costos_Indirectos, Detalle_Costos_Indirectos
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

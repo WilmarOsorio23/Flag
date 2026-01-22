@@ -4,8 +4,8 @@ from django.shortcuts import render
 from django.db.models.functions import Coalesce
 from collections import defaultdict
 
-from Modulo.forms import Ind_Operatividad_FilterForm
-from Modulo.models import Ind_Operat_Clientes, Ind_Operat_Conceptos, Horas_Habiles, Linea, Concepto
+from modulo.forms import Ind_Operatividad_FilterForm
+from modulo.models import Ind_Operat_Clientes, Ind_Operat_Conceptos, Horas_Habiles, Linea, Concepto
 
 from plotly.offline import plot
 import plotly.graph_objs as go
@@ -17,7 +17,7 @@ MESES = {
     '9': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dic'
 }
 
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

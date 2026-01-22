@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from Modulo.models import UserRole
+from modulo.models import UserRole
 
 class Command(BaseCommand):
     help = 'Initialize predefined roles with their permissions'

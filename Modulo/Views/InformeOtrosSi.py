@@ -10,14 +10,14 @@ from django.shortcuts import render
 from django.http import JsonResponse
 
 # Formularios y modelos del módulo
-from Modulo.forms import OtrosSiFilterForm
-from Modulo.models import Clientes, ContratosOtrosSi, ClientesContratos
-from Modulo.models import Clientes
+from modulo.forms import OtrosSiFilterForm
+from modulo.models import Clientes, ContratosOtrosSi, ClientesContratos
+from modulo.models import Clientes
 
 # Librerías para Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 

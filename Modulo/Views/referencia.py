@@ -4,11 +4,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 import pandas as pd
 from Modulo import models
-from Modulo.forms import ReferenciaForm
-from Modulo.models import Referencia, Tarifa_Clientes
+from modulo.forms import ReferenciaForm
+from modulo.models import Referencia, Tarifa_Clientes
 from django.contrib import messages
 from django.db import models
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

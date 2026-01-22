@@ -3,15 +3,15 @@ from django import template
 from django.shortcuts import render, HttpResponse
 from collections import defaultdict
 from django.db.models import Sum
-from Modulo.forms import InformeFacturacionForm
-from Modulo.models import FacturacionClientes, Linea, Clientes
+from modulo.forms import InformeFacturacionForm
+from modulo.models import FacturacionClientes, Linea, Clientes
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 from openpyxl.cell import MergedCell
 from datetime import datetime
 from decimal import Decimal
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 

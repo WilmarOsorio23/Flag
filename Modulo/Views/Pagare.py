@@ -10,9 +10,9 @@ from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.utils.dateparse import parse_date
 
-from Modulo.decorators import verificar_permiso
-from Modulo.forms import PagareFilterForm
-from Modulo.models import Empleado, Pagare, PagarePlaneado, PagareEjecutado, TipoPagare, ActividadPagare
+from modulo.decorators import verificar_permiso
+from modulo.forms import PagareFilterForm
+from modulo.models import Empleado, Pagare, PagarePlaneado, PagareEjecutado, TipoPagare, ActividadPagare
 from django.shortcuts import redirect
 from django.contrib import messages
 

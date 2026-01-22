@@ -8,9 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from Modulo import models
 from django.db import models
-from Modulo.forms import ConceptoForm
-from Modulo.models import Concepto, TiemposConcepto
-from Modulo.decorators import verificar_permiso
+from modulo.forms import ConceptoForm
+from modulo.models import Concepto, TiemposConcepto
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

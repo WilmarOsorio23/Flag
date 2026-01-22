@@ -5,13 +5,13 @@ from pyexpat.errors import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from Modulo import models
-from Modulo.forms import PerfilForm
-from Modulo.models import Consultores, Empleado, Nomina, Perfil
+from modulo.forms import PerfilForm
+from modulo.models import Consultores, Empleado, Nomina, Perfil
 from django.db import models
 import pandas as pd
 from django.contrib import messages
 from django.core.cache import cache
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

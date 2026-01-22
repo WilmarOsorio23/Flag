@@ -9,9 +9,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.db.models import Q
-from Modulo.forms import NominaForm
-from Modulo.models import Clientes, Empleado, Nomina
-from Modulo.decorators import verificar_permiso
+from modulo.forms import NominaForm
+from modulo.models import Clientes, Empleado, Nomina
+from modulo.decorators import verificar_permiso
 
 
 @login_required

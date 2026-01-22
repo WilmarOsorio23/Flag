@@ -12,10 +12,10 @@ from django.db import transaction
 from django.forms import ValidationError
 from django.shortcuts import render
 from Modulo import models
-from Modulo.forms import FacturacionFilterForm
-from Modulo.models import Clientes, ClientesContratos, FacturacionClientes, Linea, Tarifa_Clientes
+from modulo.forms import FacturacionFilterForm
+from modulo.models import Clientes, ClientesContratos, FacturacionClientes, Linea, Tarifa_Clientes
 from collections import defaultdict
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 from django.db.models import OuterRef, Subquery, F, IntegerField, Value, Q
 

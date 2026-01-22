@@ -5,12 +5,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
 from Modulo import models
 from django.db.models import Sum
-from Modulo.forms import TotalGastosForm,DetalleGastosFormOpcion2
-from Modulo.models import Total_Gastos, Detalle_Gastos, Gastos
+from modulo.forms import TotalGastosForm,DetalleGastosFormOpcion2
+from modulo.models import Total_Gastos, Detalle_Gastos, Gastos
 from django.db import models
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

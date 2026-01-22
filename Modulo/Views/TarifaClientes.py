@@ -8,9 +8,9 @@ from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 
-from Modulo.forms import Tarifa_ClientesForm
-from Modulo.models import Tarifa_Clientes
-from Modulo.decorators import verificar_permiso
+from modulo.forms import Tarifa_ClientesForm
+from modulo.models import Tarifa_Clientes
+from modulo.decorators import verificar_permiso
 
 
 @login_required

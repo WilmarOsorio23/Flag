@@ -5,13 +5,13 @@ from collections import defaultdict
 from django.shortcuts import render, HttpResponse
 from django.db.models import Sum
 
-from Modulo.forms import inforTiempoEmpleadosFilterForm
-from Modulo.models import Consultores, Tiempos_Cliente, Facturacion_Consultores
+from modulo.forms import inforTiempoEmpleadosFilterForm
+from modulo.models import Consultores, Tiempos_Cliente, Facturacion_Consultores
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 

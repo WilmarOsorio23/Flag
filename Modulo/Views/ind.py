@@ -5,11 +5,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
 from Modulo import models
 import Modulo
-from Modulo.forms import INDForm
-from Modulo.models import IND
+from modulo.forms import INDForm
+from modulo.models import IND
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

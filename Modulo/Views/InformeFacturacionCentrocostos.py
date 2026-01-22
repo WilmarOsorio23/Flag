@@ -11,7 +11,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 from openpyxl.utils import get_column_letter
 
-from Modulo.models import (
+from modulo.models import (
     FacturacionClientes,
     Linea,
     CentrosCostos,
@@ -24,8 +24,8 @@ from Modulo.models import (
     Horas_Habiles,
     IND,  # <= NUEVO
 )
-from Modulo.forms import FacturacionClientesFilterForm
-from Modulo.decorators import verificar_permiso
+from modulo.forms import FacturacionClientesFilterForm
+from modulo.decorators import verificar_permiso
 
 
 def obtener_horas_habiles(anio: str) -> dict:

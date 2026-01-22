@@ -2,12 +2,12 @@ import json
 from urllib import request
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
-from Modulo.forms import EmpleadosEstudiosForm
-from Modulo.models import Empleados_Estudios
+from modulo.forms import EmpleadosEstudiosForm
+from modulo.models import Empleados_Estudios
 from django.db import models
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

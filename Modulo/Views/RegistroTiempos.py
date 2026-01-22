@@ -10,14 +10,14 @@ from django.shortcuts import render
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 
-from Modulo.forms import ColaboradorFilterForm
-from Modulo.models import (
+from modulo.forms import ColaboradorFilterForm
+from modulo.models import (
     Clientes, Concepto, Consultores, Empleado, Horas_Habiles,
     Ind_Operat_Clientes, Ind_Operat_Conceptos, Linea, Modulo,
     Tiempos_Cliente, TiemposConcepto, TiemposFacturables,
     LineaClienteCentroCostos,  # ✅ NUEVO
 )
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 
 
 # -------------------------

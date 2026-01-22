@@ -3,13 +3,13 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from django.shortcuts import get_object_or_404, redirect, render
-from Modulo.forms import Tarifa_ConsultoresForm
-from Modulo.models import Tarifa_Consultores
+from modulo.forms import Tarifa_ConsultoresForm
+from modulo.models import Tarifa_Consultores
 from django.db import models
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 import json
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

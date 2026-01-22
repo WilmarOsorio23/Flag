@@ -10,5 +10,5 @@ def healthz(_request):
 urlpatterns = [
     path("healthz", healthz),
     path("admin/", admin.site.urls),
-    path("", include("Modulo.urls")),
+    path("", include("modulo.urls")),
 ] + static(settings.STATIC_URL, document_root=getattr(settings, "STATIC_ROOT", None)) + static(settings.MEDIA_URL, document_root=getattr(settings, "MEDIA_ROOT", None))

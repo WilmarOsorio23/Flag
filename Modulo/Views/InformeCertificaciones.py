@@ -13,12 +13,12 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Side, Font
 
 # Modelos y formularios del módulo
-from Modulo.forms import EmpleadoFilterForm
-from Modulo.models import Certificacion, Detalle_Certificacion, Empleado
+from modulo.forms import EmpleadoFilterForm
+from modulo.models import Certificacion, Detalle_Certificacion, Empleado
 
 # Utilidad para conteo de elementos
 from collections import Counter
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 def filtrar_empleado(form, empleados, certificaciones, detalles):

@@ -2,11 +2,11 @@ from django import forms
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.db.models import Q
-from Modulo.models import Facturacion_Consultores, Empleado, Linea
-from Modulo.forms import FacturacionConsultoresDetalleFilterForm
+from modulo.models import Facturacion_Consultores, Empleado, Linea
+from modulo.forms import FacturacionConsultoresDetalleFilterForm
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side, numbers
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

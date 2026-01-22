@@ -7,9 +7,9 @@ from django.db import models
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
-from Modulo.forms import ModuloForm
-from Modulo.models import Consultores, Empleado, Modulo
-from Modulo.decorators import verificar_permiso
+from modulo.forms import ModuloForm
+from modulo.models import Consultores, Empleado, Modulo
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required

@@ -4,11 +4,11 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import pandas as pd
 from Modulo import models
-from Modulo.forms import DetalleGastosForm
-from Modulo.models import Detalle_Gastos
+from modulo.forms import DetalleGastosForm
+from modulo.models import Detalle_Gastos
 from django.db import models
 from django.contrib import messages
-from Modulo.decorators import verificar_permiso
+from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required
