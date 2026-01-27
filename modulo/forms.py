@@ -2573,64 +2573,82 @@ class FacturacionConsultoresDetalleFilterForm(forms.Form):
 class FacturacionClientesFilterForm(forms.Form):
     Anio = forms.ChoiceField(
         choices=[],
-        required=False,
-        label='Año',
-        widget=forms.Select(attrs={'class': 'form-select'})
+        required=True,  # ✅ ahora es obligatorio
+        label="Año",
+        widget=forms.Select(attrs={"class": "form-select"}),
+        error_messages={"required": "Debes seleccionar un año."},
     )
 
     LineaId = forms.ModelMultipleChoiceField(
         queryset=Linea.objects.all(),
         required=False,
         label="Línea",
-        widget=forms.CheckboxSelectMultiple()
+        widget=forms.CheckboxSelectMultiple(),
     )
 
     Mes = forms.MultipleChoiceField(
         choices=[],
         required=False,
-        label='Mes',
-        widget=forms.CheckboxSelectMultiple()
+        label="Mes",
+        widget=forms.CheckboxSelectMultiple(),
     )
+
     Ceco = forms.MultipleChoiceField(
         choices=[],
         required=False,
-        label='Ceco',
-        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'})
-    )  
+        label="Ceco",
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.populate_anio()  # ✅ primero anio
         self.populate_mes()
         self.populate_ceco()
-        
+
+    def populate_anio(self):
+        years = (
+            FacturacionClientes.objects.values_list("Anio", flat=True)
+            .distinct()
+            .order_by("-Anio")
+        )
+
+        # ✅ Sin opción vacía: fuerza selección real
+        self.fields["Anio"].choices = [(str(year), str(year)) for year in years]
+
     def populate_ceco(self):
-        # Obtener valores únicos de Ceco, excluyendo vacíos y nulos, sin duplicados
-        cecos_facturas = FacturacionClientes.objects.exclude(Ceco__isnull=True)\
-                                                .exclude(Ceco__exact='')\
-                                                .values_list('Ceco', flat=True)\
-                                                .distinct()
-    
+        # Obtener valores únicos de Ceco, excluyendo vacíos y nulos
+        cecos_facturas = (
+            FacturacionClientes.objects.exclude(Ceco__isnull=True)
+            .exclude(Ceco__exact="")
+            .values_list("Ceco", flat=True)
+            .distinct()
+        )
+
         cecos_validos = CentrosCostos.objects.filter(
             codigoCeCo__in=cecos_facturas
-        ).order_by('codigoCeCo')
-    
-        # Crear choices asegurando valores simples (no listas)
-        self.fields['Ceco'].choices = [('', 'Seleccione Ceco')] + [
-            (str(ceco.codigoCeCo), f"{ceco.codigoCeCo}") 
-            for ceco in cecos_validos
-        ]
+        ).order_by("codigoCeCo")
 
-        # Llenar el campo de años dinámicamente
-        years = FacturacionClientes.objects.values_list('Anio', flat=True).distinct().order_by('-Anio')
-        self.fields['Anio'].choices = [('', 'Seleccione el año')] + [(year, year) for year in years]
+        self.fields["Ceco"].choices = [
+            (str(ceco.codigoCeCo), f"{ceco.codigoCeCo}") for ceco in cecos_validos
+        ]
 
     def populate_mes(self):
         meses = [
-            ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),
-            ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
-            ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+            ("1", "Enero"), ("2", "Febrero"), ("3", "Marzo"), ("4", "Abril"),
+            ("5", "Mayo"), ("6", "Junio"), ("7", "Julio"), ("8", "Agosto"),
+            ("9", "Septiembre"), ("10", "Octubre"), ("11", "Noviembre"), ("12", "Diciembre"),
         ]
-        self.fields['Mes'].choices = [('', 'Seleccione el mes')] + meses    
+        self.fields["Mes"].choices = meses
+
+    def clean_Anio(self):
+        """
+        ✅ Seguridad extra: si por alguna razón llega '' o None, falla.
+        """
+        anio = self.cleaned_data.get("Anio")
+        if not anio or str(anio).strip() == "":
+            raise forms.ValidationError("Debes seleccionar un año.")
+        return anio  
 
 class TipoPagareForm(forms.ModelForm):
     class Meta:
