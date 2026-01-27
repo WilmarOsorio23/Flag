@@ -257,10 +257,14 @@ def calcular_costos_por_ceco_modulo_mes(
         key = (anio_int, mes_int)
         if key in ind_factor_cache:
             return ind_factor_cache[key]
-        ind_pct = _D(obtener_indice_ind(anio_int, mes_int), "0")
-        factor = Decimal("1") + (ind_pct / Decimal("100"))
+
+        ind_val = _D(obtener_indice_ind(anio_int, mes_int), "0")  # EJ: 1.56
+        # ✅ IND es FACTOR (multiplicador). Si no hay IND, usar 1.
+        factor = ind_val if ind_val > 0 else Decimal("1")
+
         ind_factor_cache[key] = factor
         return factor
+
 
     for mes_int in (meses_int or []):
         hh_mes = get_hh_mes(int(mes_int))
