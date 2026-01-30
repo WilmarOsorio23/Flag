@@ -101,8 +101,9 @@ def empleado_filtrado(request):
 
     #Cálculo de Cards
     total_certificaciones = len(certificaciones_info)
-    modulos = [cert['Modulo'] for cert in certificaciones_info if cert['Modulo']]
-    conteo_modulos = dict(Counter(modulos))
+    nombres_cert = [cert['Certificacion'] for cert in certificaciones_info if cert['Certificacion']]
+    conteo_certificaciones = dict(Counter(nombres_cert))
+
     lineas = [cert['Linea'] for cert in certificaciones_info if cert['Linea']]
     conteo_lineas = dict(Counter(lineas))
 
@@ -112,10 +113,10 @@ def empleado_filtrado(request):
         'show_data': show_data,
         'busqueda_realizada': busqueda_realizada,
         'total_certificaciones': total_certificaciones,
-        'conteo_modulos': conteo_modulos,
+        'conteo_certificaciones': conteo_certificaciones,
         'conteo_lineas': conteo_lineas,
-        'modulos_labels': list(conteo_modulos.keys()),
-        'modulos_data': list(conteo_modulos.values()),
+        'cert_labels': list(conteo_certificaciones.keys()),
+        'cert_data': list(conteo_certificaciones.values()),
         'lineas_labels': list(conteo_lineas.keys()),
         'lineas_data': list(conteo_lineas.values()),
         'mensaje': "No se encontraron resultados para los filtros aplicados." if busqueda_realizada and not show_data else "No se ha realizado ninguna búsqueda aún."

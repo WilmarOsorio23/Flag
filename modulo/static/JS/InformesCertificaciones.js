@@ -69,16 +69,16 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   crearGraficoCard({
-    cardId: 'cardModulo',
-    modalId: 'graficoModuloModal',
-    canvasId: 'graficoModuloCanvas',
-    labelsScriptId: 'labels-modulo',
-    valuesScriptId: 'values-modulo',
-    chartVarName: 'moduloChart',
-    labelText: 'Certificaciones por Módulo',
+    cardId: 'cardCertificacion',          
+    modalId: 'graficoCertificacionModal',    
+    canvasId: 'graficoCertificacionCanvas',  
+    labelsScriptId: 'labels-certificacion',  
+    valuesScriptId: 'values-certificacion',  
+    chartVarName: 'certificacionChart',
+    labelText: 'Cantidad por Certificación',
     bgColor: 'rgba(25, 135, 84, 0.5)',
     borderColor: 'rgba(25, 135, 84, 1)'
-  });
+});
 
   crearGraficoCard({
     cardId: 'cardLinea',
