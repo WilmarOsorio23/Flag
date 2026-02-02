@@ -57,14 +57,14 @@
                     <small class="text-muted mt-2 d-block">Total Certificaciones</small>
                 </div>
         
-                <!-- Total por Módulo -->
-                <div class="card shadow-sm p-3 text-success text-start" style="min-width: 220px; cursor: pointer;" id="cardModulo">
+                <!-- Total Por Certificación -->
+                <div class="card shadow-sm p-3 text-success text-start" style="min-width: 220px; cursor: pointer;" id="cardCertificacion">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="fw-bold mb-0"><i class="fas fa-layer-group"></i></h5>
                     </div>
-                    <small class="text-muted mt-2 d-block">Por Módulo</small>
-                    {% for modulo, cantidad in conteo_modulos.items %}
-                        <p class="mb-1">{{ modulo }}: <strong>{{ cantidad }}</strong></p>
+                    <small class="text-muted mt-2 d-block">Por Certificación</small>
+                    {% for nombre, cantidad in conteo_certificaciones.items %}
+                        <p class="mb-1">{{ nombre }}: <strong>{{ cantidad }}</strong></p>
                     {% endfor %}
                 </div>
         
@@ -213,15 +213,15 @@
 
 
 <!-- Sección de modales con gráficos -->
-<div class="modal fade" id="graficoModuloModal" tabindex="-1" aria-labelledby="graficoModuloLabel" aria-hidden="true">
+<div class="modal fade" id="graficoCertificacionModal" tabindex="-1" aria-labelledby="graficoCertificacionLabel aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="graficoModuloLabel">Certificaciones por Módulo</h5>
+          <h5 class="modal-title" id="graficoCertificacionLabel">Certificaciones por Nombre</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
-          <canvas id="graficoModuloCanvas" width="400" height="400"></canvas>
+          <canvas id="graficoCertificacionCanvas" width="400" height="400"></canvas>
         </div>
       </div>
     </div>
@@ -244,8 +244,8 @@
 
   <!-- Carga dinámica de datos para los gráficos en JS -->
   {% block extra_js %}
-    {{ modulos_labels|json_script:"labels-modulo" }}
-    {{ modulos_data|json_script:"values-modulo" }}
+    {{ cert_labels|json_script:"labels-certificacion" }}
+    {{ cert_data|json_script:"values-certificacion" }}
     {{ lineas_labels|json_script:"labels-linea" }}
     {{ lineas_data|json_script:"values-linea" }}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
