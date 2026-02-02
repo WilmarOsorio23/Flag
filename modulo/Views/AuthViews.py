@@ -161,7 +161,7 @@ def role_delete(request, role_id):
         "users_with_role": users_with_role,
         "can_delete": not users_with_role.exists(),
     }
-    return render(request, 'Roles/RolecConfirmDelete.html', context)
+    return render(request, 'Roles/RoleConfirmDelete.html', context)
 
 
 # -------------------------

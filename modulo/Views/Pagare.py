@@ -426,7 +426,7 @@ def pag_planeado(request, pagare_id: int):
 
     return render(
         request,
-        'Pagare/Pagplaneado.html',
+        'Pagare/PagPlaneado.html',
         {
             "pagare": pagare,
             "todas_actividades": todas_actividades,
@@ -471,7 +471,7 @@ def pag_ejecutado(request, pagare_id: int):
 
     return render(
         request,
-        'Pagare/Pagejecutado.html',
+        'Pagare/PagEjecutado.html',
         {
             "pagare": pagare,
             "todas_actividades": todas_actividades,

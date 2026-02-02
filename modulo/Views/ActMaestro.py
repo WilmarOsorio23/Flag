@@ -64,7 +64,7 @@ def actividad_pagare_editar(request, id):
         
         # Si no es una solicitud POST, renderiza el formulario
         form = ActividadPagareForm(instance=actividad)
-        return render(request, 'Actmaestro/ActmaestroEditar.html', {
+        return render(request, 'ActMaestro/ActMaestroEditar.html', {
             'form': form,
             'actividad': actividad
         })
@@ -102,7 +102,7 @@ def actividad_pagare_eliminar(request):
 @verificar_permiso('can_manage_actividades_pagares')
 def actividad_pagare_confirmar_delete(request, id):
     actividad = get_object_or_404(ActividadPagare, Act_PagareId=id)
-    return render(request, 'Actmaestro/Actmaestroconfirmardelete.html', {
+    return render(request, 'ActMaestro/ActMaestroConfirmarDelete.html', {
         'actividad': actividad
     })
 

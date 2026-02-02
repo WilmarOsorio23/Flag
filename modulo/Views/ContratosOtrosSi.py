@@ -97,7 +97,7 @@ def contratos_otros_si_editar(request, id):
             return JsonResponse({'error': str(e)}, status=500)
     contratos_cliente = ClientesContratos.objects.filter(ClienteId=contrato.ClienteId)
     form = ContratosOtrosSiForm(instance=contrato, cliente_id=contrato.ClienteId_id)
-    return render(request, 'Contratosotrossi/Contratosotrossiform.html', {
+    return render(request, 'ContratosOtrosSi/ContratosOtrosSiForm.html', {
         'form': form,
         'contratos_cliente': contratos_cliente,
     })

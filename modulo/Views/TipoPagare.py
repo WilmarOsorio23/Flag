@@ -63,7 +63,7 @@ def tipo_pagare_editar(request, id):
         
         # Si no es una solicitud POST, renderiza el formulario
         form = TipoPagareForm(instance=tipo_pagare)
-        return render(request, 'Tipomaestro/TipopagareEditar.html', {
+        return render(request, 'TipoMaestro/TipoPagareEditar.html', {
             'form': form,
             'tipo_pagare': tipo_pagare
         })
@@ -99,7 +99,7 @@ def tipo_pagare_eliminar(request):
 @verificar_permiso('can_manage_tipo_pagare')
 def tipo_pagare_confirmar_delete(request, id):
     tipo_pagare = get_object_or_404(TipoPagare, Tipo_PagareId=id)
-    return render(request, 'Tipomaestro/TipopagareConfirmarDelete.html', {
+    return render(request, 'TipoMaestro/TipopagareConfirmarDelete.html', {
         'tipo_pagare': tipo_pagare
     })
 
