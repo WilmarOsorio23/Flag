@@ -4,13 +4,12 @@ import re
 import pandas as pd
 from decimal import Decimal, InvalidOperation
 from itertools import groupby
-
+from django.db.models import Q
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.db.models import Q
 
 from modulo.forms import NominaForm
 from modulo.models import Clientes, Empleado, Nomina
@@ -134,25 +133,92 @@ def parse_money_cop_to_decimal(value) -> Decimal:
 @verificar_permiso('can_manage_nomina')
 def nomina_index(request):
     """
-    ✅ BLOQUES POR EMPLEADO (alfabético)
-    ✅ SEPARACIÓN POR AÑO dentro del empleado
-    ✅ FIX visual: el nombre del empleado hace rowspan POR AÑO (no por todo el empleado)
-       para que la línea separadora 2026/2025 atraviese también la columna de empleado.
+    ✅ Filtros por GET: año, mes, empleado (texto), cliente
+    ✅ Bloques por empleado (alfabético)
+    ✅ Separación por año dentro del empleado
+    ✅ Nombre/Documento con rowspan por AÑO
     """
+    # ----------------------------
+    # 1) leer filtros
+    # ----------------------------
+    anio_raw = (request.GET.get("anio") or "").strip()
+    mes_raw = (request.GET.get("mes") or "").strip()
+    empleado_raw = (request.GET.get("empleado") or "").strip()
+    cliente_raw = (request.GET.get("cliente") or "").strip()
+
+    filters = {
+        "anio": anio_raw,
+        "mes": mes_raw,
+        "empleado": empleado_raw,
+        "cliente": cliente_raw,
+    }
+
+    # ----------------------------
+    # 2) queryset base
+    # ----------------------------
     qs = (
         Nomina.objects
-        .select_related('Documento', 'Cliente')
+        .select_related("Documento", "Cliente")
         .all()
-        .order_by(
-            'Documento__Nombre',
-            'Documento__Documento',
-            'Documento_id',
-            '-Anio',
-            'Mes',
-            'NominaId'
-        )
     )
 
+    # ----------------------------
+    # 3) aplicar filtros
+    # ----------------------------
+    # Año
+    if anio_raw:
+        try:
+            qs = qs.filter(Anio=int(anio_raw))
+        except Exception:
+            pass
+
+    # Mes (soporta CharField "01" o IntegerField 1)
+    if mes_raw:
+        try:
+            mes_int = int(str(mes_raw))
+            if 1 <= mes_int <= 12:
+                mes_2 = f"{mes_int:02d}"
+                mes_1 = str(mes_int)
+
+                mes_field = Nomina._meta.get_field("Mes")
+                mes_type = mes_field.get_internal_type()
+
+                if mes_type in ("CharField", "TextField"):
+                    qs = qs.filter(Mes__in=[mes_2, mes_1])
+                else:
+                    qs = qs.filter(Mes=mes_int)
+        except Exception:
+            pass
+
+    # Empleado (texto: nombre o documento)
+    if empleado_raw:
+        qs = qs.filter(
+            Q(Documento__Nombre__icontains=empleado_raw) |
+            Q(Documento__Documento__icontains=empleado_raw)
+        )
+
+    # Cliente
+    if cliente_raw:
+        try:
+            qs = qs.filter(Cliente_id=int(cliente_raw))
+        except Exception:
+            pass
+
+    # ----------------------------
+    # 4) orden (alfabético por empleado + año/mes)
+    # ----------------------------
+    qs = qs.order_by(
+        "Documento__Nombre",
+        "Documento__Documento",
+        "Documento_id",
+        "-Anio",
+        "Mes",
+        "NominaId",
+    )
+
+    # ----------------------------
+    # 5) construir rows (empleado -> años)
+    # ----------------------------
     nomina_rows = []
 
     for doc_id, doc_group in groupby(qs, key=lambda n: n.Documento_id):
@@ -168,31 +234,44 @@ def nomina_index(request):
 
             for k in range(i, j):
                 nomina_rows.append({
-                    'nomina': doc_list[k],
+                    "nomina": doc_list[k],
 
-                    # ✅ ahora el empleado se muestra por AÑO (una vez por bloque anual)
-                    'show_doc': (k == i),
-                    'doc_rowspan': year_span if (k == i) else 0,
+                    # empleado por AÑO
+                    "show_doc": (k == i),
+                    "doc_rowspan": year_span if (k == i) else 0,
 
-                    # año (una sola vez por bloque anual)
-                    'show_year': (k == i),
-                    'year_rowspan': year_span if (k == i) else 0,
+                    # año por bloque anual
+                    "show_year": (k == i),
+                    "year_rowspan": year_span if (k == i) else 0,
 
                     # estilos
-                    'is_group_start': (i == 0 and k == i),    # primera fila del empleado (primer año)
-                    'is_year_start': (k == i),                # primera fila del año
-                    'is_year_divider': (i != 0 and k == i),   # año nuevo dentro del mismo empleado
+                    "is_group_start": (i == 0 and k == i),
+                    "is_year_start": (k == i),
+                    "is_year_divider": (i != 0 and k == i),
                 })
 
             i = j
 
+    # ----------------------------
+    # 6) data para selects de filtros
+    # ----------------------------
+    years = (
+        Nomina.objects
+        .values_list("Anio", flat=True)
+        .distinct()
+        .order_by("-Anio")
+    )
+    months = list(range(1, 13))
     form = NominaForm()
     return render(
         request,
-        'Nomina/NominaIndex.html',
+        "Nomina/NominaIndex.html",
         {
-            'nomina_rows': nomina_rows,
-            'form': form,
+            "nomina_rows": nomina_rows,
+            "form": form,
+            "years": years,
+            "months": months,   # ✅ NUEVO
+            "filters": filters,
         },
     )
 
@@ -312,6 +391,10 @@ def nomina_descargar_excel(request):
     response['Content-Disposition'] = 'attachment; filename="Nomina.xlsx"'
     df.to_excel(response, index=False)
     return response
+
+
+# (bulk_preview y bulk_create se quedan igual como los tienes)
+
 
 
 # =========================================================

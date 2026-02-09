@@ -20,7 +20,7 @@
   </div>
 
   <div class="card-body">
-    <div class="button-group">
+    <div class="button-group mb-3">
       <a class="btn btn-outline-primary fas fa-plus-circle"
          title="Crear"
          href="{% url 'nomina_crear' %}"
@@ -76,6 +76,59 @@
               onclick="cancelEdit();">
       </button>
     </div>
+
+    <form id="filters-form" method="get" class="row g-2 align-items-end">
+      <div class="col-12 col-md-2">
+        <label class="form-label mb-1">Año</label>
+        <select name="anio" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          {% for y in years %}
+            <option value="{{ y }}" {% if filters.anio|stringformat:"s" == y|stringformat:"s" %}selected{% endif %}>
+              {{ y }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-2">
+        <label class="form-label mb-1">Mes</label>
+        <select name="mes" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          {% for mm in months %}
+            <option value="{{ mm }}" {% if filters.mes|stringformat:"s" == mm|stringformat:"s" %}selected{% endif %}>
+              {{ mm }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <label class="form-label mb-1">Empleado</label>
+        <input name="empleado"
+               type="text"
+               class="form-control form-control-sm"
+               placeholder="Nombre o documento"
+               value="{{ filters.empleado }}">
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label mb-1">Cliente</label>
+        <select name="cliente" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          {% for cliente in form.fields.Cliente.queryset %}
+            <option value="{{ cliente.ClienteId }}"
+                    {% if filters.cliente|stringformat:"s" == cliente.ClienteId|stringformat:"s" %}selected{% endif %}>
+              {{ cliente.Nombre_Cliente }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-1 d-grid gap-2">
+        <button type="submit" class="btn btn-primary btn-sm">Buscar</button>
+        <a href="{% url 'nomina_index' %}" class="btn btn-outline-secondary btn-sm">Limpiar</a>
+      </div>
+    </form>
   </div>
 
   <div class="card-footer text-muted">
@@ -105,7 +158,6 @@
                          value="{{ row.nomina.NominaId }}">
                 </td>
 
-                {# ✅ AÑO: rowspan por año dentro del bloque del empleado #}
                 {% if row.show_year %}
                   <td data-field="anio" class="text-start" rowspan="{{ row.year_rowspan }}">
                     <div class="fw-semibold">{{ row.nomina.Anio }}</div>
@@ -116,7 +168,6 @@
                   <span class="form-control-plaintext">{{ row.nomina.Mes }}</span>
                 </td>
 
-                {# ✅ EMPLEADO: rowspan por empleado (bloque) #}
                 {% if row.show_doc %}
                   <td data-field="documento" class="text-start" rowspan="{{ row.doc_rowspan }}">
                     <div class="fw-semibold">
@@ -151,6 +202,10 @@
                     {% endfor %}
                   </select>
                 </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="text-muted">No hay resultados con esos filtros.</td>
               </tr>
             {% endfor %}
           </tbody>

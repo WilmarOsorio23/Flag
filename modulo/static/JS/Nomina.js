@@ -243,6 +243,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // ============================
   document.querySelectorAll('form').forEach(form => {
     form.addEventListener('keydown', function (event) {
+      if (form.id === 'filters-form') return; // ✅ permitir Enter en filtros
       if (event.key === 'Enter') event.preventDefault();
     });
   });
