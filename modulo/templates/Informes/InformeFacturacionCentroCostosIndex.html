@@ -285,6 +285,35 @@
                           {% endwith %}
                         {% endfor %}
                       {% endfor %}
+
+                      {# ✅ NUEVO: Fila TOTAL por CECO #}
+                      <tr class="table-warning">
+                        <td colspan="4" class="text-center fw-bold">TOTAL {{ ceco }}</td>
+
+                        {% for mes_num, mes_nombre in meses %}
+                          <td class="text-center text-nowrap fw-bold">
+                            {{ totales_por_ceco_mes|get_item:ceco|get_item:mes_num|default:0|floatformat:2 }}
+                          </td>
+                          <td class="text-center text-nowrap fw-bold">
+                            {{ costos_por_ceco_mes|get_item:ceco|get_item:mes_num|default:0|floatformat:2 }}
+                          </td>
+                        {% endfor %}
+
+                        {% with total_facturado_ceco=totales_por_ceco|get_item:ceco|default:0 %}
+                        {% with total_costo_ceco=costos_por_ceco|get_item:ceco|default:0 %}
+                        {% with margen_ceco=total_facturado_ceco|sub:total_costo_ceco %}
+
+                          <td class="text-center text-nowrap fw-bold">{{ total_facturado_ceco|floatformat:2 }}</td>
+                          <td class="text-center text-nowrap fw-bold">{{ total_costo_ceco|floatformat:2 }}</td>
+                          <td class="text-center text-nowrap fw-bold {% if margen_ceco < 0 %}text-danger{% else %}text-success{% endif %}">
+                            {{ margen_ceco|floatformat:2 }}
+                          </td>
+
+                        {% endwith %}
+                        {% endwith %}
+                        {% endwith %}
+                      </tr>
+
                     {% endfor %}
 
                     <!-- Fila de total global -->

@@ -7,7 +7,8 @@
 {% block contenido %}
 <style>
   .compact-table td, .compact-table th { vertical-align: middle; }
-  .emp-start { border-top: 2px solid rgba(0,0,0,.08); }
+  .emp-start { border-top: 2px solid rgba(0,0,0,.18); }
+  .year-start td { border-top: 1px solid rgba(0,0,0,.12); }
   .cell-muted { color: rgba(0,0,0,.55); font-size: .85rem; }
   .modal-xl { max-width: 1100px; }
 </style>
@@ -37,7 +38,7 @@
          role="button"
          style="margin-right: 10px;"></i>
 
-      <!-- NUEVO: Copiar mes -->
+      <!-- Copiar mes -->
       <button type="button"
               class="btn btn-outline-secondary fas fa-copy"
               title="Copiar mes"
@@ -95,7 +96,8 @@
 
           <tbody>
             {% for row in nomina_rows %}
-              <tr id="row-{{ row.nomina.NominaId }}" class="{% if row.is_group_start %}emp-start{% endif %}">
+              <tr id="row-{{ row.nomina.NominaId }}"
+                  class="{% if row.is_group_start %}emp-start{% endif %} {% if row.is_year_start and not row.is_group_start %}year-start{% endif %}">
                 <td>
                   <input type="checkbox"
                          class="row-select"
@@ -103,6 +105,7 @@
                          value="{{ row.nomina.NominaId }}">
                 </td>
 
+                {# ✅ AÑO: rowspan por año dentro del bloque del empleado #}
                 {% if row.show_year %}
                   <td data-field="anio" class="text-start" rowspan="{{ row.year_rowspan }}">
                     <div class="fw-semibold">{{ row.nomina.Anio }}</div>
@@ -113,10 +116,15 @@
                   <span class="form-control-plaintext">{{ row.nomina.Mes }}</span>
                 </td>
 
+                {# ✅ EMPLEADO: rowspan por empleado (bloque) #}
                 {% if row.show_doc %}
                   <td data-field="documento" class="text-start" rowspan="{{ row.doc_rowspan }}">
-                    <div class="fw-semibold">{{ row.nomina.Documento.Nombre }}</div>
-                    <div class="cell-muted">{{ row.nomina.Documento.Documento }}</div>
+                    <div class="fw-semibold">
+                      {% if row.nomina.Documento %}{{ row.nomina.Documento.Nombre }}{% endif %}
+                    </div>
+                    <div class="cell-muted">
+                      {% if row.nomina.Documento %}{{ row.nomina.Documento.Documento }}{% endif %}
+                    </div>
                   </td>
                 {% endif %}
 
@@ -137,7 +145,7 @@
                           disabled>
                     {% for cliente in form.fields.Cliente.queryset %}
                       <option value="{{ cliente.ClienteId }}"
-                              {% if row.nomina.Cliente.ClienteId == cliente.ClienteId %}selected{% endif %}>
+                              {% if row.nomina.Cliente and row.nomina.Cliente.ClienteId == cliente.ClienteId %}selected{% endif %}>
                         {{ cliente.Nombre_Cliente }}
                       </option>
                     {% endfor %}
@@ -178,7 +186,7 @@
   </div>
 
   <!-- ===================================================== -->
-  <!-- NUEVO: Modal Copiar Mes (origen -> destino) -->
+  <!-- Modal Copiar Mes (origen -> destino) -->
   <!-- ===================================================== -->
   <div class="modal fade" id="bulkCopyModal" tabindex="-1" aria-labelledby="bulkCopyLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -221,8 +229,11 @@
                     <input id="bulk-dest-year" type="number" class="form-control" placeholder="2026">
                   </div>
                   <div class="col-6">
-                    <label class="form-label">Mes</label>
-                    <input id="bulk-dest-month" type="number" class="form-control" min="1" max="12" placeholder="1-12">
+                    <label class="form-label">Mes(es)</label>
+                    <input id="bulk-dest-month" type="text" class="form-control" placeholder="Ej: 1-12 o 1,2,3 o 5">
+                    <div class="small text-muted mt-1">
+                      Puedes crear para un solo mes (5), un rango (1-12) o una lista (1,2,3).
+                    </div>
                   </div>
                 </div>
 

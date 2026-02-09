@@ -1,6 +1,8 @@
 # Modulo/Views/Nomina.py
 import json
+import re
 import pandas as pd
+from decimal import Decimal, InvalidOperation
 from itertools import groupby
 
 from django.db import transaction
@@ -9,32 +11,152 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.db.models import Q
+
 from modulo.forms import NominaForm
 from modulo.models import Clientes, Empleado, Nomina
 from modulo.decorators import verificar_permiso
 
 
+# =========================================================
+# HELPERS
+# =========================================================
+def _D(v, default="0"):
+    try:
+        return Decimal(str(v if v is not None else default))
+    except Exception:
+        return Decimal(default)
+
+
+def format_cop_for_input(value) -> str:
+    """
+    Formato es-CO para inputs (sin símbolo): 24850000 -> "24.850.000"
+    """
+    d = _D(value, "0")
+    i = int(d)
+    return f"{i:,}".replace(",", ".")
+
+
+def parse_months_input(raw) -> list:
+    """
+    Acepta:
+      - "1"        -> [1]
+      - "01"       -> [1]
+      - "1-12"     -> [1..12]
+      - "1,2,3"    -> [1,2,3]
+      - "1 2 3"    -> [1,2,3]
+    """
+    s = str(raw or "").strip()
+    if not s:
+        raise ValueError("Mes destino vacío")
+
+    s = s.replace(" ", "")
+    months = []
+
+    if "-" in s:
+        a, b = s.split("-", 1)
+        a = int(a)
+        b = int(b)
+        if a < 1 or a > 12 or b < 1 or b > 12 or a > b:
+            raise ValueError("Rango de meses inválido")
+        months = list(range(a, b + 1))
+    else:
+        parts = [p for p in re.split(r"[,\s]+", s) if p]
+        for p in parts:
+            m = int(p)
+            if m < 1 or m > 12:
+                raise ValueError("Mes inválido")
+            months.append(m)
+
+    return sorted(set(months))
+
+
+def parse_money_cop_to_decimal(value) -> Decimal:
+    """
+    Parsea salarios COP desde:
+      "24850000"
+      "24.850.000"
+      "24,850,000"
+      "$ 24.850.000"
+      "24850000.00"
+      "24.850.000,00"
+    y retorna Decimal con 2 decimales (0.00).
+    """
+    s = str(value or "").strip()
+    if not s:
+        raise ValueError("Salario vacío")
+
+    s = s.replace("COP", "").replace("$", "").strip()
+    s = s.replace(" ", "")
+
+    if re.fullmatch(r"\d+", s):
+        return Decimal(s).quantize(Decimal("0.00"))
+
+    last_dot = s.rfind(".")
+    last_comma = s.rfind(",")
+
+    if last_dot != -1 and last_comma != -1:
+        if last_comma > last_dot:
+            s = s.replace(".", "")
+            s = s.replace(",", ".")
+        else:
+            s = s.replace(",", "")
+    else:
+        if "," in s:
+            after = s.split(",")[-1]
+            if len(after) in (1, 2):
+                s = s.replace(".", "")
+                s = s.replace(",", ".")
+            else:
+                s = s.replace(",", "")
+        elif "." in s:
+            after = s.split(".")[-1]
+            if len(after) in (1, 2):
+                s = s.replace(",", "")
+            else:
+                s = s.replace(".", "")
+
+    s = re.sub(r"[^0-9.]", "", s)
+    if s.count(".") > 1:
+        last = s.rfind(".")
+        s = s[:last].replace(".", "") + s[last:]
+
+    try:
+        return Decimal(s).quantize(Decimal("0.00"))
+    except InvalidOperation:
+        raise ValueError("Formato de salario no válido")
+
+
+# =========================================================
+# VISTAS CRUD
+# =========================================================
+
 @login_required
 @verificar_permiso('can_manage_nomina')
 def nomina_index(request):
     """
-    Lista de registros de nómina en vista compacta:
-    - Agrupa por empleado
-    - Rowspan para Empleado y Año dentro del bloque del empleado
+    ✅ BLOQUES POR EMPLEADO (alfabético)
+    ✅ SEPARACIÓN POR AÑO dentro del empleado
+    ✅ FIX visual: el nombre del empleado hace rowspan POR AÑO (no por todo el empleado)
+       para que la línea separadora 2026/2025 atraviese también la columna de empleado.
     """
     qs = (
         Nomina.objects
         .select_related('Documento', 'Cliente')
         .all()
-        .order_by('Documento__Nombre', 'Documento__Documento', '-Anio', 'Mes', 'NominaId')
+        .order_by(
+            'Documento__Nombre',
+            'Documento__Documento',
+            'Documento_id',
+            '-Anio',
+            'Mes',
+            'NominaId'
+        )
     )
 
     nomina_rows = []
 
-    # groupby requiere que el queryset esté ordenado por la misma llave del grouping
     for doc_id, doc_group in groupby(qs, key=lambda n: n.Documento_id):
         doc_list = list(doc_group)
-        doc_span = len(doc_list)
 
         i = 0
         while i < len(doc_list):
@@ -47,11 +169,19 @@ def nomina_index(request):
             for k in range(i, j):
                 nomina_rows.append({
                     'nomina': doc_list[k],
-                    'show_doc': (k == 0),
-                    'doc_rowspan': doc_span if (k == 0) else 0,
+
+                    # ✅ ahora el empleado se muestra por AÑO (una vez por bloque anual)
+                    'show_doc': (k == i),
+                    'doc_rowspan': year_span if (k == i) else 0,
+
+                    # año (una sola vez por bloque anual)
                     'show_year': (k == i),
                     'year_rowspan': year_span if (k == i) else 0,
-                    'is_group_start': (k == 0),
+
+                    # estilos
+                    'is_group_start': (i == 0 and k == i),    # primera fila del empleado (primer año)
+                    'is_year_start': (k == i),                # primera fila del año
+                    'is_year_divider': (i != 0 and k == i),   # año nuevo dentro del mismo empleado
                 })
 
             i = j
@@ -84,10 +214,6 @@ def nomina_crear(request):
 @verificar_permiso('can_manage_nomina')
 @require_POST
 def nomina_editar(request, id):
-    """
-    Edita un registro puntual de nómina vía fetch (JSON).
-    Solo actualiza Salario y Cliente.
-    """
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
@@ -98,10 +224,9 @@ def nomina_editar(request, id):
     salario = data.get('Salario')
     if salario is not None:
         try:
-            salario_str = str(salario).replace('.', '').replace(',', '.')
-            nomina.Salario = salario_str
-        except Exception:
-            return JsonResponse({'error': 'Formato de salario no válido'}, status=400)
+            nomina.Salario = parse_money_cop_to_decimal(salario)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
 
     cliente_id = data.get('Cliente')
     if cliente_id:
@@ -190,17 +315,13 @@ def nomina_descargar_excel(request):
 
 
 # =========================================================
-# NUEVO: BULK COPY (ORIGEN -> DESTINO) con preview editable
+# BULK COPY (ORIGEN -> DESTINO) con preview editable
 # =========================================================
 
 @login_required
 @verificar_permiso('can_manage_nomina')
 @require_POST
 def nomina_bulk_preview(request):
-    """
-    Devuelve los registros del mes/año origen para armar preview en el modal.
-    Soporta Mes como CharField ("01") o IntegerField (1).
-    """
     try:
         data = json.loads(request.body)
         anio = int(str(data.get('anio')).strip())
@@ -224,7 +345,6 @@ def nomina_bulk_preview(request):
         .order_by('Documento__Nombre', 'Documento__Documento', 'NominaId')
     )
 
-    # Si Mes es texto: busca "01" y también "1" por compatibilidad
     if mes_type in ("CharField", "TextField"):
         qs = qs.filter(Mes__in=[mes_2, mes_1])
     else:
@@ -237,7 +357,7 @@ def nomina_bulk_preview(request):
             'empleado_id': n.Documento_id,
             'empleado_documento': (n.Documento.Documento if n.Documento else ''),
             'empleado_nombre': (n.Documento.Nombre if n.Documento else ''),
-            'salario': str(n.Salario if n.Salario is not None else ''),
+            'salario': format_cop_for_input(n.Salario),
             'cliente_id': n.Cliente_id,
         })
 
@@ -248,10 +368,6 @@ def nomina_bulk_preview(request):
 @verificar_permiso('can_manage_nomina')
 @require_POST
 def nomina_bulk_create(request):
-    """
-    Crea registros en el mes/año destino con salario/cliente editados por línea.
-    Soporta Mes como CharField ("01") o IntegerField (1).
-    """
     try:
         data = json.loads(request.body)
         destino = data.get('destino', {})
@@ -259,24 +375,16 @@ def nomina_bulk_create(request):
         items = data.get('items') or []
 
         d_anio = int(str(destino.get('anio')).strip())
-        d_mes_int = int(str(destino.get('mes')).strip())
-    except Exception:
-        return JsonResponse({'error': 'Payload inválido.'}, status=400)
-
-    if d_mes_int < 1 or d_mes_int > 12:
-        return JsonResponse({'error': 'Mes destino inválido.'}, status=400)
+        raw_mes = destino.get('mes')
+        d_months = parse_months_input(raw_mes)
+    except Exception as e:
+        return JsonResponse({'error': f'Payload inválido. {str(e)}'}, status=400)
 
     if mode not in ('skip', 'overwrite'):
         mode = 'skip'
 
-    d_mes_2 = f"{d_mes_int:02d}"
-    d_mes_1 = str(d_mes_int)
-
     mes_field = Nomina._meta.get_field('Mes')
     mes_type = mes_field.get_internal_type()
-
-    # Valor que guardaremos en BD
-    mes_for_save = d_mes_2 if mes_type in ("CharField", "TextField") else d_mes_int
 
     created = 0
     updated = 0
@@ -288,41 +396,44 @@ def nomina_bulk_create(request):
             try:
                 empleado_id = int(it.get('empleado_id'))
                 cliente_id = int(it.get('cliente_id'))
-                salario = it.get('salario', '')
-
-                salario_str = str(salario).replace('.', '').replace(',', '.').strip()
-                if salario_str == '':
-                    raise ValueError('Salario vacío')
+                salario_raw = it.get('salario', '')
 
                 empleado = get_object_or_404(Empleado, pk=empleado_id)
                 cliente = get_object_or_404(Clientes, pk=cliente_id)
 
-                base_qs = Nomina.objects.filter(Anio=d_anio, Documento_id=empleado_id)
+                salario_dec = parse_money_cop_to_decimal(salario_raw)
 
-                if mes_type in ("CharField", "TextField"):
-                    existing = base_qs.filter(Mes__in=[d_mes_2, d_mes_1]).first()
-                else:
-                    existing = base_qs.filter(Mes=d_mes_int).first()
+                for d_mes_int in d_months:
+                    d_mes_2 = f"{d_mes_int:02d}"
+                    d_mes_1 = str(d_mes_int)
+                    mes_for_save = d_mes_2 if mes_type in ("CharField", "TextField") else d_mes_int
 
-                if existing:
-                    if mode == 'overwrite':
-                        existing.Salario = salario_str
-                        existing.Cliente = cliente
-                        existing.Mes = mes_for_save
-                        existing.save()
-                        updated += 1
+                    base_qs = Nomina.objects.filter(Anio=d_anio, Documento_id=empleado_id)
+
+                    if mes_type in ("CharField", "TextField"):
+                        existing = base_qs.filter(Mes__in=[d_mes_2, d_mes_1]).first()
                     else:
-                        skipped += 1
-                    continue
+                        existing = base_qs.filter(Mes=d_mes_int).first()
 
-                Nomina.objects.create(
-                    Anio=d_anio,
-                    Mes=mes_for_save,
-                    Documento=empleado,
-                    Salario=salario_str,
-                    Cliente=cliente,
-                )
-                created += 1
+                    if existing:
+                        if mode == 'overwrite':
+                            existing.Salario = salario_dec
+                            existing.Cliente = cliente
+                            existing.Mes = mes_for_save
+                            existing.save()
+                            updated += 1
+                        else:
+                            skipped += 1
+                        continue
+
+                    Nomina.objects.create(
+                        Anio=d_anio,
+                        Mes=mes_for_save,
+                        Documento=empleado,
+                        Salario=salario_dec,
+                        Cliente=cliente,
+                    )
+                    created += 1
 
             except Exception as e:
                 errors.append({'row': idx + 1, 'error': str(e)})
@@ -334,4 +445,5 @@ def nomina_bulk_create(request):
         'skipped': skipped,
         'errors': errors,
         'mode': mode,
+        'dest_months': d_months,
     })

@@ -1,4 +1,4 @@
-// Modulo/static/JS/nomina.js
+// Modulo/static/JS/Nomina.js
 document.addEventListener('DOMContentLoaded', function () {
   // ============================
   // HELPERS
@@ -15,6 +15,19 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.showInlineMessage) return window.showInlineMessage(msg, type, elementId);
     if (window.showMessage) return window.showMessage(msg, type);
     alert(`${type.toUpperCase()}: ${msg}`);
+  }
+
+  // ✅ limpia salario a SOLO DÍGITOS (evita multiplicaciones raras)
+  function moneyToDigits(v) {
+    const digits = String(v ?? '').replace(/[^\d]/g, '');
+    return digits;
+  }
+
+  // ✅ formatea a es-CO (24.850.000) para que el usuario vea bien
+  function formatDigitsAsCOP(digits) {
+    const n = parseInt(String(digits || '0'), 10);
+    if (!Number.isFinite(n)) return '';
+    return n.toLocaleString('es-CO');
   }
 
   const csrfToken = getCsrfToken();
@@ -52,8 +65,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const salarioEl = row.querySelector('input[name="salario"]');
     const clienteEl = row.querySelector('select[name="Cliente"]');
 
+    const salarioDigits = moneyToDigits(salarioEl ? salarioEl.value : '');
+
     const data = {
-      Salario: (salarioEl ? salarioEl.value.trim() : ''),
+      Salario: salarioDigits, // ✅ SIEMPRE dígitos
       Cliente: (clienteEl ? clienteEl.value.trim() : ''),
     };
 
@@ -148,6 +163,10 @@ document.addEventListener('DOMContentLoaded', function () {
           el.classList.remove('d-none', 'form-control-plaintext');
           el.classList.add('form-control');
           el.readOnly = false;
+
+          // ✅ mostrar bonito al editar (24.850.000)
+          const digits = moneyToDigits(el.value);
+          if (digits) el.value = formatDigitsAsCOP(digits);
         }
       }
       if (span) span.classList.add('d-none');
@@ -288,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // =========================================================
-  // NUEVO: BULK COPY MODAL (preview + create)
+  // BULK COPY MODAL (preview + create)
   // =========================================================
   const bulkLoadBtn = document.getElementById('bulk-load-btn');
   const bulkCreateBtn = document.getElementById('bulk-create-btn');
@@ -307,6 +326,18 @@ document.addEventListener('DOMContentLoaded', function () {
     return bulkClientTemplate ? bulkClientTemplate.innerHTML : '';
   }
 
+  function escapeHtml(str) {
+    return String(str ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+  function escapeAttr(str) {
+    return escapeHtml(str).replaceAll('\n', ' ').replaceAll('\r', ' ');
+  }
+
   function renderBulkRows(items) {
     const optionsHTML = getClientOptionsHTML();
     if (!items || items.length === 0) {
@@ -321,6 +352,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="text-muted small">${escapeHtml(it.empleado_documento || '')}</div>
       `;
 
+      // salario viene formateado (24.850.000)
       return `
         <tr data-empleado-id="${it.empleado_id}">
           <td><input type="checkbox" class="bulk-row-check" checked></td>
@@ -343,24 +375,21 @@ document.addEventListener('DOMContentLoaded', function () {
       if (sel && items[idx] && items[idx].cliente_id != null) {
         sel.value = String(items[idx].cliente_id);
       }
+
+      // autoformato al salir del input
+      const sal = tr.querySelector('.bulk-salario');
+      if (sal) {
+        sal.addEventListener('blur', () => {
+          const digits = moneyToDigits(sal.value);
+          if (digits) sal.value = formatDigitsAsCOP(digits);
+        });
+      }
     });
 
     bulkCreateBtn.disabled = false;
     if (bulkSelectAll) bulkSelectAll.checked = true;
 
     bulkSummary.textContent = `Filas cargadas: ${items.length}. Puedes ajustar salario/cliente por fila antes de crear.`;
-  }
-
-  function escapeHtml(str) {
-    return String(str ?? '')
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#039;');
-  }
-  function escapeAttr(str) {
-    return escapeHtml(str).replaceAll('\n', ' ').replaceAll('\r', ' ');
   }
 
   if (bulkSelectAll) {
@@ -413,7 +442,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (bulkCreateBtn) {
     bulkCreateBtn.addEventListener('click', async () => {
       const d_anio = (destYearEl?.value || '').trim();
-      const d_mes = (destMonthEl?.value || '').trim();
+      const d_mes = (destMonthEl?.value || '').trim(); // ✅ puede ser "1-12"
       const o_anio = (originYearEl?.value || '').trim();
       const o_mes = (originMonthEl?.value || '').trim();
       const mode = (bulkModeEl?.value || 'skip').trim();
@@ -423,18 +452,21 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
       if (!d_anio || !d_mes) {
-        inlineInfo('Debes ingresar Año y Mes de destino.', 'warning');
+        inlineInfo('Debes ingresar Año y Mes(es) de destino.', 'warning');
         return;
       }
 
       const rows = Array.from(bulkPreviewBody.querySelectorAll('tr'));
       const items = rows
         .filter(tr => tr.querySelector('.bulk-row-check')?.checked)
-        .map(tr => ({
-          empleado_id: tr.getAttribute('data-empleado-id'),
-          salario: tr.querySelector('.bulk-salario')?.value?.trim() || '',
-          cliente_id: tr.querySelector('.bulk-cliente')?.value || '',
-        }));
+        .map(tr => {
+          const salarioVisible = tr.querySelector('.bulk-salario')?.value ?? '';
+          return {
+            empleado_id: tr.getAttribute('data-empleado-id'),
+            salario: moneyToDigits(salarioVisible), // ✅ manda SOLO dígitos
+            cliente_id: tr.querySelector('.bulk-cliente')?.value || '',
+          };
+        });
 
       if (items.length === 0) {
         inlineInfo('No hay filas seleccionadas para crear.', 'warning');
@@ -469,8 +501,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const errs = (json.errors || []);
+        const months = (json.dest_months || []).join(', ');
         const msg =
-          `Listo. Creados: ${json.created || 0}, ` +
+          `Listo. Mes(es): ${months}. ` +
+          `Creados: ${json.created || 0}, ` +
           `Actualizados: ${json.updated || 0}, ` +
           `Omitidos: ${json.skipped || 0}.` +
           (errs.length ? ` Errores: ${errs.length} (revisa consola).` : '');

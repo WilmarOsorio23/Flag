@@ -265,7 +265,6 @@ def calcular_costos_por_ceco_modulo_mes(
         ind_factor_cache[key] = factor
         return factor
 
-
     for mes_int in (meses_int or []):
         hh_mes = get_hh_mes(int(mes_int))
         if not hh_mes:
@@ -400,8 +399,6 @@ def filtrar_datos(form=None):
             facturas = facturas.filter(Ceco__iregex=r"^(%s)$" % "|".join(cecos_filtro))
 
     # CALCULAR COSTOS (solo con año)
-    costos_por_ceco_modulo_mes = {}
-
     meses_int, meses_query = _build_month_sets(meses)
     lineas_ids = [l.LineaId for l in (lineas or Linea.objects.all())]
     horas_habiles = obtener_horas_habiles(anio)
@@ -498,6 +495,10 @@ def informe_facturacion_CentroCostos(request):
     costos_por_ceco_linea_mes = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
     costos_por_ceco_linea = defaultdict(lambda: defaultdict(float))
 
+    # ✅ NUEVO: Totales por CeCo y Mes (para fila TOTAL CECO en tabla)
+    totales_por_ceco_mes = defaultdict(lambda: defaultdict(float))
+    costos_por_ceco_mes = defaultdict(lambda: defaultdict(float))
+
     total_global = 0.0
 
     # Agrupar facturas por ceco + modulo + mes para evitar duplicados
@@ -547,6 +548,10 @@ def informe_facturacion_CentroCostos(request):
         # Acumular costos por línea y mes
         costos_por_ceco_linea_mes[ceco][linea][mes] += costo_mes
         costos_por_ceco_linea[ceco][linea] += costo_mes
+
+        # ✅ NUEVO: Totales por CeCo y Mes (facturación y costo)
+        totales_por_ceco_mes[ceco][mes] += valor
+        costos_por_ceco_mes[ceco][mes] += costo_mes
 
         # Totales facturación
         totales_por_linea[linea] += valor
@@ -605,6 +610,10 @@ def informe_facturacion_CentroCostos(request):
 
         "costos_por_ceco_linea": convert_to_regular_dict(costos_por_ceco_linea),
         "costos_por_ceco_linea_mes": convert_to_regular_dict(costos_por_ceco_linea_mes),
+
+        # ✅ NUEVO: para fila TOTAL CECO (por mes)
+        "totales_por_ceco_mes": convert_to_regular_dict(totales_por_ceco_mes),
+        "costos_por_ceco_mes": convert_to_regular_dict(costos_por_ceco_mes),
     }
 
     return render(request, "Informes/InformeFacturacionCentroCostosIndex.html", context)
@@ -661,6 +670,12 @@ def descargar_reporte_excel_facturacion_clientes(request):
     total_global = 0.0
     costo_global = 0.0
 
+    # ✅ NUEVO: totales por CECO (para fila TOTAL CECO en Excel)
+    totales_por_ceco = defaultdict(float)
+    costos_por_ceco = defaultdict(float)
+    totales_por_ceco_mes = defaultdict(lambda: defaultdict(float))
+    costos_por_ceco_mes = defaultdict(lambda: defaultdict(float))
+
     for key, valor in facturas_agrupadas_por_ceco_modulo_mes.items():
         ceco, modulo, mes_str = key.split("_")
         mes = int(mes_str)
@@ -693,6 +708,12 @@ def descargar_reporte_excel_facturacion_clientes(request):
         costos_por_mes[mes] += costo
         total_global += valor
         costo_global += costo
+
+        # ✅ NUEVO acumulado por CECO
+        totales_por_ceco[ceco] += valor
+        costos_por_ceco[ceco] += costo
+        totales_por_ceco_mes[ceco][mes] += valor
+        costos_por_ceco_mes[ceco][mes] += costo
 
     wb = Workbook()
     ws = wb.active
@@ -735,6 +756,22 @@ def descargar_reporte_excel_facturacion_clientes(request):
         "number_format": "#,##0.00",
     }
 
+    # ✅ NUEVO estilo TOTAL CECO
+    ceco_total_style = {
+        "font": Font(bold=True, color="000000"),
+        "fill": PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid"),
+        "border": Border(
+            left=Side(style="thin"), right=Side(style="thin"),
+            top=Side(style="thin"), bottom=Side(style="thin")
+        ),
+        "alignment": Alignment(horizontal="right", vertical="center"),
+        "number_format": "#,##0.00",
+    }
+    ceco_total_label_style = {
+        **ceco_total_style,
+        "alignment": Alignment(horizontal="center", vertical="center"),
+    }
+
     columns_fijas = [("Ceco", 15), ("Descripción", 30), ("Línea", 20), ("Módulo", 20)]
 
     columnas_por_mes = []
@@ -775,10 +812,13 @@ def descargar_reporte_excel_facturacion_clientes(request):
     row_num = 2
     for ceco, descripciones in datos.items():
         ceco_start_row = row_num
+
         for descripcion, lineas in descripciones.items():
             desc_start_row = row_num
+
             for linea, modulos in lineas.items():
                 linea_start_row = row_num
+
                 for modulo, meses_data in modulos.items():
                     ws.cell(row=row_num, column=1, value=ceco if row_num == ceco_start_row else "")
                     ws.cell(row=row_num, column=2, value=descripcion if row_num == desc_start_row else "")
@@ -837,9 +877,72 @@ def descargar_reporte_excel_facturacion_clientes(request):
 
                     row_num += 1
 
+        # ✅ NUEVO: TOTAL POR CECO (después de terminar todas las filas del CECO)
+        ws.cell(row=row_num, column=1, value=f"TOTAL {ceco}")
+        ws.merge_cells(start_row=row_num, start_column=1, end_row=row_num, end_column=4)
+
+        for c in range(1, 5):
+            cell = ws.cell(row=row_num, column=c)
+            for attr, value in ceco_total_label_style.items():
+                setattr(cell, attr, value)
+
+        col_num_data = 5
+        total_fact_ceco = 0.0
+        total_cost_ceco = 0.0
+
+        for mes_num, _mes_nombre in meses:
+            fact_mes = float(totales_por_ceco_mes[ceco].get(mes_num, 0.0))
+            cost_mes = float(costos_por_ceco_mes[ceco].get(mes_num, 0.0))
+            marg_mes = fact_mes - cost_mes
+
+            cell = ws.cell(row=row_num, column=col_num_data, value=fact_mes)
+            for attr, value in ceco_total_style.items():
+                setattr(cell, attr, value)
+            col_num_data += 1
+
+            cell = ws.cell(row=row_num, column=col_num_data, value=cost_mes)
+            for attr, value in ceco_total_style.items():
+                setattr(cell, attr, value)
+            col_num_data += 1
+
+            cell = ws.cell(row=row_num, column=col_num_data, value=marg_mes)
+            for attr, value in ceco_total_style.items():
+                setattr(cell, attr, value)
+            col_num_data += 1
+
+            total_fact_ceco += fact_mes
+            total_cost_ceco += cost_mes
+
+        total_marg_ceco = total_fact_ceco - total_cost_ceco
+
+        cell = ws.cell(row=row_num, column=col_num_data, value=total_fact_ceco)
+        for attr, value in ceco_total_style.items():
+            setattr(cell, attr, value)
+        col_num_data += 1
+
+        cell = ws.cell(row=row_num, column=col_num_data, value=total_cost_ceco)
+        for attr, value in ceco_total_style.items():
+            setattr(cell, attr, value)
+        col_num_data += 1
+
+        cell = ws.cell(row=row_num, column=col_num_data, value=total_marg_ceco)
+        for attr, value in ceco_total_style.items():
+            setattr(cell, attr, value)
+
+        row_num += 1
+
     # Total global
     if datos:
         ws.cell(row=row_num, column=1, value="TOTAL GLOBAL")
+        ws.merge_cells(start_row=row_num, start_column=1, end_row=row_num, end_column=4)
+
+        # Estilo label total global
+        for c in range(1, 5):
+            cell = ws.cell(row=row_num, column=c)
+            for attr, value in global_total_style.items():
+                if attr != "number_format":
+                    setattr(cell, attr, value)
+
         col_num_data = 5
 
         for mes_num, _mes_nombre in meses:
