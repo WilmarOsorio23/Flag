@@ -1203,11 +1203,15 @@ class EmpleadosEstudiosForm(forms.ModelForm):
             'fecha_Graduacion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
         labels = {
-            'titulo': 'Titulo',
-            'institucion': 'Institucion',
-            'fecha_Inicio': 'Fecha de Inicio',
-            'fecha_Fin': 'Fecha de Fin',
-            'fecha_Graduacion': 'Fecha de Graduacion',
+            'titulo': 'Título',
+            'institucion': 'Institución',
+            'fecha_Inicio': 'Fecha de Inicio (opcional)',
+            'fecha_Fin': 'Fecha de Fin (opcional)',
+            'fecha_Graduacion': 'Fecha de Graduación',
+        }
+        help_texts = {
+            'fecha_Inicio': 'Puede dejarse en blanco.',
+            'fecha_Fin': 'Puede dejarse en blanco.',
         }
 
 class HorasHabilesForm(forms.ModelForm):

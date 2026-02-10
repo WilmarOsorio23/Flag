@@ -648,8 +648,8 @@ class Empleados_Estudios(models.Model):
     documentoId = models.ForeignKey('Empleado', on_delete=models.CASCADE, db_column='documentoId')
     titulo = models.CharField(max_length=100)
     institucion = models.CharField(max_length=100)
-    fecha_Inicio = models.DateField()
-    fecha_Fin = models.DateField()
+    fecha_Inicio = models.DateField(null=True, blank=True)
+    fecha_Fin = models.DateField(null=True, blank=True)
     fecha_Graduacion = models.DateField()
 
     def __str__(self):

@@ -245,8 +245,8 @@
                                     <td class="text-start">{{ estudio.titulo }}</td>
                                     <td class="text-start">{{ estudio.institucion }}</td>
                                     <td class="text-end">{{ estudio.fecha_grado|date:'d/m/Y' }}</td>
-                                    <td class="text-end">{{ estudio.fecha_inicio|date:'d/m/Y' }}</td>
-                                    <td class="text-end">{{ estudio.fecha_fin|date:'d/m/Y' }}</td>
+                                    <td class="text-end">{% if estudio.fecha_inicio %}{{ estudio.fecha_inicio|date:'d/m/Y' }}{% else %}-{% endif %}</td>
+                                    <td class="text-end">{% if estudio.fecha_fin %}{{ estudio.fecha_fin|date:'d/m/Y' }}{% else %}-{% endif %}</td>
                                 </tr>
                             {% endfor %}
                         {% empty %}

@@ -38,8 +38,10 @@ def empleados_estudios_editar(request, id):
             estudios = get_object_or_404( Empleados_Estudios, pk=id)
             estudios.titulo = data.get('titulo', estudios.titulo)
             estudios.institucion = data.get('institucion', estudios.institucion)
-            estudios.fecha_Inicio = data.get('fecha_Inicio', estudios.fecha_Inicio)
-            estudios.fecha_Fin = data.get('fecha_Fin', estudios.fecha_Fin)
+            val_inicio = data.get('fecha_Inicio')
+            estudios.fecha_Inicio = val_inicio if val_inicio else None
+            val_fin = data.get('fecha_Fin')
+            estudios.fecha_Fin = val_fin if val_fin else None
             estudios.fecha_Graduacion = data.get('fecha_Graduacion', estudios.fecha_Graduacion)
             estudios.save()
 
@@ -80,8 +82,8 @@ def empleados_estudios_descargarExcel(request):
                 empleadoestudios.documentoId.Nombre,
                 empleadoestudios.titulo,
                 empleadoestudios.institucion,
-                empleadoestudios.fecha_Inicio,
-                empleadoestudios.fecha_Fin,
+                empleadoestudios.fecha_Inicio or '',
+                empleadoestudios.fecha_Fin or '',
                 empleadoestudios.fecha_Graduacion,
             ])
         df = pd.DataFrame(data, columns=['Id', 'documentoId', 'Nombre Empleado', 'Titulo', 'Institucion', 'FechaInicio', 'FechaFin', 'FechaGraduacion'])

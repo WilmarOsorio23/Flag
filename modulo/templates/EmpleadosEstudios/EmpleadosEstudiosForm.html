@@ -1,13 +1,55 @@
 {% extends "Base.html" %}
+{% load static %}
 
-{% block titulo %} Crear Empleados_Estudios {% endblock %}
+{% block titulo %} Crear estudio de empleado {% endblock %}
 
 {% block contenido %}
-    <h2>Crear Nuevo Empleados Estudios</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Guardar</button>
-        <a href="{% url 'empleados_estudios_index' %}" class="btn btn-danger">Cancelar</a>
-    </form>
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title mb-0">Crear nuevo estudio</h4>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label">{{ form.documentoId.label }}</label>
+                    {{ form.documentoId }}
+                    {% if form.documentoId.errors %}<div class="text-danger small">{{ form.documentoId.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.titulo.label }}</label>
+                    {{ form.titulo }}
+                    {% if form.titulo.errors %}<div class="text-danger small">{{ form.titulo.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.institucion.label }}</label>
+                    {{ form.institucion }}
+                    {% if form.institucion.errors %}<div class="text-danger small">{{ form.institucion.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.fecha_Inicio.label }}</label>
+                    {{ form.fecha_Inicio }}
+                    {% if form.fecha_Inicio.help_text %}<div class="form-text">{{ form.fecha_Inicio.help_text }}</div>{% endif %}
+                    {% if form.fecha_Inicio.errors %}<div class="text-danger small">{{ form.fecha_Inicio.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.fecha_Fin.label }}</label>
+                    {{ form.fecha_Fin }}
+                    {% if form.fecha_Fin.help_text %}<div class="form-text">{{ form.fecha_Fin.help_text }}</div>{% endif %}
+                    {% if form.fecha_Fin.errors %}<div class="text-danger small">{{ form.fecha_Fin.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.fecha_Graduacion.label }}</label>
+                    {{ form.fecha_Graduacion }}
+                    {% if form.fecha_Graduacion.errors %}<div class="text-danger small">{{ form.fecha_Graduacion.errors }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a href="{% url 'empleados_estudios_index' %}" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

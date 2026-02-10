@@ -184,8 +184,8 @@ def exportar_estudio_excel(request):
                     'Titulo': estudio['titulo'],
                     'Institucion': estudio['institucion'],
                     'Fecha Grado': estudio['fecha_grado'],
-                    'Fecha Inicio': estudio['fecha_inicio'],
-                    'Fecha Fin': estudio['fecha_fin']
+                    'Fecha Inicio': estudio['fecha_inicio'] or '',
+                    'Fecha Fin': estudio['fecha_fin'] or ''
                 }
                 data.append(fila)
 

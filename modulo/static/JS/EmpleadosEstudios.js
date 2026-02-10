@@ -102,11 +102,11 @@ document.addEventListener('DOMContentLoaded', function() {
        
         let selected = document.querySelectorAll('.row-select:checked');
         if (selected.length === 0) {
-            alert('No has seleccionado ningúna Nomina para editar.');
+            alert('No has seleccionado ningún estudio para editar.');
             return false;
         }
         if (selected.length > 1) {
-            alert('Solo puedes editar una Nomina a la vez.');
+            alert('Solo puedes editar un estudio a la vez.');
             return false;
         }
 

@@ -81,7 +81,7 @@
                                 </span>
                             </th>
                             <th data-sort="fecha_inicio" class="sortable" data-direction="default">
-                                Fecha de Inicio
+                                Fecha de Inicio <small class="text-muted">(opcional)</small>
                                 <span class="sort-icon">
                                     <i class="fas fa-sort sort-icon-default"></i>
                                     <i class="fas fa-sort-up sort-icon-asc"></i>
@@ -89,7 +89,7 @@
                                 </span>
                             </th>
                             <th data-sort="fecha_fin" class="sortable" data-direction="default">
-                                Fecha de Fin
+                                Fecha de Fin <small class="text-muted">(opcional)</small>
                                 <span class="sort-icon">
                                     <i class="fas fa-sort sort-icon-default"></i>
                                     <i class="fas fa-sort-up sort-icon-asc"></i>
@@ -114,8 +114,8 @@
                             <td data-field="nombre"><input type="text" name="NombreEmpleado" class="form-control-plaintext d-block text-start" value="{{ estudio.documentoId.Nombre }}" readonly></td>
                             <td data-field="titulo"><input type="text" name="titulo" class="form-control-plaintext d-block text-start" value="{{ estudio.titulo }}" readonly></td>
                             <td data-field="institucion"><input type="text" name="institucion" class="form-control-plaintext d-block text-start" value="{{ estudio.institucion }}" readonly></td>
-                            <td data-field="fecha_inicio"><input type="date" name="fecha_Inicio" class="form-control-plaintext d-block text-end" value="{{estudio.fecha_Inicio|date:'Y-m-d' }}" readonly></td>
-                            <td data-field="fecha_fin"><input type="date" name="fecha_Fin" class="form-control-plaintext d-block text-end" value="{{estudio.fecha_Fin|date:'Y-m-d'}}" readonly></td>
+                            <td data-field="fecha_inicio"><input type="date" name="fecha_Inicio" class="form-control-plaintext d-block text-end" value="{% if estudio.fecha_Inicio %}{{ estudio.fecha_Inicio|date:'Y-m-d' }}{% endif %}" readonly></td>
+                            <td data-field="fecha_fin"><input type="date" name="fecha_Fin" class="form-control-plaintext d-block text-end" value="{% if estudio.fecha_Fin %}{{ estudio.fecha_Fin|date:'Y-m-d' }}{% endif %}" readonly></td>
                             <td data-field="fecha_graduacion"><input type="date" name="fecha_Graduacion" class="form-control-plaintext d-block text-end" value="{{ estudio.fecha_Graduacion|date:'Y-m-d' }}" readonly></td>
                         </tr>
                         {% endfor %}
