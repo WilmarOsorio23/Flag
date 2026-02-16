@@ -4,6 +4,11 @@
 
 {% block contenido %}
 <div class="card">
+    <div id="message-box" class="alert alert-dismissible fade" role="alert" style="display: none;">
+        <span id="alert-icon"></span>
+        <span id="alert-message"></span>
+        <button type="button" class="btn-close" aria-label="Cerrar"></button>
+    </div>
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Empleados</h4>
     </div>
@@ -34,6 +39,51 @@
             </button>
         </div>
     </div>
+    <!-- Filtro -->
+    {% if filter_form %}
+    <style>
+      #filter-form .form-control, #filter-form select.form-control { height: calc(1.5em + 0.5rem); font-size: 0.875rem; border-radius: 0.35rem; }
+      #filter-form .input-group-text { border-radius: 0.35rem 0 0 0.35rem; font-size: 0.875rem; }
+      #filter-form .input-group .form-control { border-radius: 0 0.35rem 0.35rem 0; }
+    </style>
+    <div class="card-body border-bottom pb-3 pt-3 px-4" style="background: linear-gradient(180deg, #f1f3f5 0%, #fff 100%);">
+        <form method="get" action="{% url 'empleado_index' %}" id="filter-form">
+            <div class="d-flex flex-wrap align-items-end gap-3">
+                <div class="flex-shrink-0" style="min-width: 220px;">
+                    <label for="id_q" class="form-label small text-muted mb-1 fw-medium">{{ filter_form.q.label }}</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        {{ filter_form.q }}
+                    </div>
+                </div>
+                <div class="flex-shrink-0" style="min-width: 150px;">
+                    <label class="form-label small text-muted mb-1 fw-medium">{{ filter_form.LineaId.label }}</label>
+                    {{ filter_form.LineaId }}
+                </div>
+                <div class="flex-shrink-0" style="min-width: 150px;">
+                    <label class="form-label small text-muted mb-1 fw-medium">{{ filter_form.CargoId.label }}</label>
+                    {{ filter_form.CargoId }}
+                </div>
+                <div class="flex-shrink-0" style="min-width: 150px;">
+                    <label class="form-label small text-muted mb-1 fw-medium">{{ filter_form.PerfilId.label }}</label>
+                    {{ filter_form.PerfilId }}
+                </div>
+                <div class="flex-shrink-0" style="min-width: 150px;">
+                    <label class="form-label small text-muted mb-1 fw-medium">{{ filter_form.ModuloId.label }}</label>
+                    {{ filter_form.ModuloId }}
+                </div>
+                <div class="flex-shrink-0" style="min-width: 110px;">
+                    <label class="form-label small text-muted mb-1 fw-medium">{{ filter_form.Activo.label }}</label>
+                    {{ filter_form.Activo }}
+                </div>
+                <div class="flex-shrink-0 ms-1 d-flex gap-2 pb-1">
+                    <button type="submit" class="btn btn-primary btn-sm px-3 shadow-sm"><i class="fas fa-filter me-1"></i> Filtrar</button>
+                    <a href="{% url 'empleado_index' %}" class="btn btn-light btn-sm px-3 border"><i class="fas fa-eraser me-1"></i> Limpiar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% endif %}
     <div class="card-footer text-muted">
         <div class="table-responsive">
             <form id="delete-form" method="POST" action="{% url 'empleado_eliminar' %}">
@@ -194,6 +244,16 @@
                                     <i class="fas fa-sort-down sort-icon-desc"></i>
                                 </span>
                             </th>
+                            <th data-sort="genero" class="sortable" data-direction="default">Género</th>
+                            <th data-sort="estado_civil" class="sortable" data-direction="default">Estado civil</th>
+                            <th data-sort="numero_hijos" class="sortable" data-direction="default">Nº hijos</th>
+                            <th data-sort="tarjeta_profesional" class="sortable" data-direction="default">Tarj. prof.</th>
+                            <th data-sort="rh" class="sortable" data-direction="default">RH</th>
+                            <th data-sort="tipo_contrato" class="sortable" data-direction="default">Tipo contrato</th>
+                            <th data-sort="fondo_pension" class="sortable" data-direction="default">Fondo pensión</th>
+                            <th data-sort="eps" class="sortable" data-direction="default">EPS</th>
+                            <th data-sort="fondo_cesantias" class="sortable" data-direction="default">Fondo cesantías</th>
+                            <th data-sort="caja_compensacion" class="sortable" data-direction="default">Caja compensación</th>
                             <th data-sort="fecha_retiro" class="sortable" data-direction="default">
                                 Fecha Retiro
                                 <span class="sort-icon">
@@ -293,10 +353,11 @@
                             </td>
                             <td data-field="perfil" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
                                 <select name="PerfilId" class="form-control-plaintext d-block text-start" disabled>
+                                    <option value="">N/A</option>
                                     {% for perfil in form.fields.PerfilId.queryset %}
-                                        <option value="{{ perfil.PerfilId }}" {% if empleado.PerfilId.Perfil == perfil.Perfil %}selected{% endif %}>
+                                        <option value="{{ perfil.PerfilId }}" {% if empleado.PerfilId_id == perfil.PerfilId %}selected{% endif %}>
                                             {{ perfil.Perfil }}
-                                        </option>   
+                                        </option>
                                     {% endfor %}
                                 </select>
                             </td>
@@ -351,6 +412,34 @@
                                     <option value="0" {% if empleado.Activo == 0 %}selected{% endif %}>No</option>
                                 </select>
                             </td>
+                            <td data-field="genero">
+                                <select name="Genero" class="form-control-plaintext d-block text-start" disabled>
+                                    <option value="">—</option>
+                                    <option value="Masculino" {% if empleado.Genero == 'Masculino' %}selected{% endif %}>Masculino</option>
+                                    <option value="Femenino" {% if empleado.Genero == 'Femenino' %}selected{% endif %}>Femenino</option>
+                                </select>
+                            </td>
+                            <td data-field="estado_civil"><input type="text" name="EstadoCivil" class="form-control-plaintext d-block text-start" value="{{ empleado.EstadoCivil|default:'' }}" readonly></td>
+                            <td data-field="numero_hijos"><input type="number" name="NumeroHijos" class="form-control-plaintext d-block text-end" value="{{ empleado.NumeroHijos|default:'' }}" min="0" readonly></td>
+                            <td data-field="tarjeta_profesional">
+                                <select name="TarjetaProfesional" class="form-control-plaintext d-block text-start" disabled>
+                                    <option value="">—</option>
+                                    <option value="1" {% if empleado.TarjetaProfesional %}selected{% endif %}>Sí</option>
+                                    <option value="0" {% if empleado.TarjetaProfesional == False and empleado.TarjetaProfesional is not None %}selected{% endif %}>No</option>
+                                </select>
+                            </td>
+                            <td data-field="rh"><input type="text" name="RH" class="form-control-plaintext d-block text-start" value="{{ empleado.RH|default:'' }}" readonly></td>
+                            <td data-field="tipo_contrato">
+                                <select name="TipoContrato" class="form-control-plaintext d-block text-start" disabled>
+                                    <option value="">—</option>
+                                    <option value="Indefinido" {% if empleado.TipoContrato == 'Indefinido' %}selected{% endif %}>Indefinido</option>
+                                    <option value="Fijo" {% if empleado.TipoContrato == 'Fijo' %}selected{% endif %}>Fijo</option>
+                                </select>
+                            </td>
+                            <td data-field="fondo_pension"><input type="text" name="FondoPension" class="form-control-plaintext d-block text-start" value="{{ empleado.FondoPension|default:'' }}" readonly></td>
+                            <td data-field="eps"><input type="text" name="EPS" class="form-control-plaintext d-block text-start" value="{{ empleado.EPS|default:'' }}" readonly></td>
+                            <td data-field="fondo_cesantias"><input type="text" name="FondoCesantias" class="form-control-plaintext d-block text-start" value="{{ empleado.FondoCesantias|default:'' }}" readonly></td>
+                            <td data-field="caja_compensacion"><input type="text" name="CajaCompensacion" class="form-control-plaintext d-block text-start" value="{{ empleado.CajaCompensacion|default:'' }}" readonly></td>
                             <td data-field="fecha_retiro"><input type="date" name="FechaRetiro" class="form-control-plaintext d-block text-end" value="{{ empleado.FechaRetiro|date:'Y-m-d' }}" readonly></td>
                             <td data-field="dirreccion"><input type="text" name="Direccion" class="form-control-plaintext d-block text-start" value="{{ empleado.Direccion|default:"-" }}" readonly></td>
                             <td data-field="ciudad"><input type="text" name="Ciudad" class="form-control-plaintext d-block text-start" value="{{ empleado.Ciudad|default:"-" }}" readonly></td>
@@ -361,7 +450,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="4">No hay datos disponibles.</td>
+                            <td colspan="35">No hay datos disponibles.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

@@ -1,8 +1,10 @@
 class EmpleadoManager {
     constructor() {
-        this.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+        this.csrfToken = csrfEl ? csrfEl.value : '';
         this.deleteForm = document.getElementById('delete-form');
-        this.confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+        const modalEl = document.getElementById('confirmDeleteModal');
+        this.confirmDeleteModal = modalEl && typeof bootstrap !== 'undefined' ? new bootstrap.Modal(modalEl) : null;
         this.confirmDeleteButton = document.getElementById('confirm-delete-btn');
         this.init();
     }
@@ -24,13 +26,10 @@ class EmpleadoManager {
     }
 
     setupEventListeners() {
-        document.getElementById("select-all").addEventListener("change", (e) => {
-            this.toggleAllCheckboxes(e.target.checked);
-        });
-
-        document.querySelector('.btn-outline-danger.fas.fa-trash-alt').addEventListener('click', (e) => {
-            this.handleDeleteConfirmation(e);
-        });
+        const selectAll = document.getElementById("select-all");
+        if (selectAll) selectAll.addEventListener("change", (e) => this.toggleAllCheckboxes(e.target.checked));
+        const deleteBtn = document.querySelector('.btn-outline-danger.fas.fa-trash-alt');
+        if (deleteBtn) deleteBtn.addEventListener('click', (e) => this.handleDeleteConfirmation(e));
     }
 
     toggleAllCheckboxes(checked) {
@@ -40,14 +39,18 @@ class EmpleadoManager {
     async handleDeleteConfirmation(event) {
         event.preventDefault();
         const selectedIds = this.getSelectedIds();
-        
         if (selectedIds.length === 0) {
             this.showMessage('No has seleccionado ningún elemento para eliminar.', 'danger');
             return;
         }
-
+        if (!this.confirmDeleteModal) {
+            if (window.confirm('¿Eliminar los elementos seleccionados?')) {
+                document.getElementById('items_to_delete').value = selectedIds.join(',');
+                if (this.deleteForm) this.deleteForm.submit();
+            }
+            return;
+        }
         this.confirmDeleteModal.show();
-        
         this.confirmDeleteButton.onclick = async () => {
             const isRelated = await this.verifyRelations(selectedIds);
             if (isRelated) {
@@ -57,8 +60,9 @@ class EmpleadoManager {
                 return;
             }
 
-            document.getElementById('items_to_delete').value = selectedIds.join(',');
-            this.deleteForm.submit();
+            const hidden = document.getElementById('items_to_delete');
+            if (hidden) hidden.value = selectedIds.join(',');
+            if (this.deleteForm) this.deleteForm.submit();
         };
     }
 
@@ -67,8 +71,9 @@ class EmpleadoManager {
     }
 
     resetCheckboxes() {
-        document.getElementById('select-all').checked = false;
-        document.querySelectorAll('.row-select').forEach(checkbox => checkbox.checked = false);
+        const sel = document.getElementById('select-all');
+        if (sel) sel.checked = false;
+        document.querySelectorAll('.row-select').forEach(cb => { cb.checked = false; });
     }
 
     async verifyRelations(ids) {
@@ -90,31 +95,22 @@ class EmpleadoManager {
     }
 
     showMessage(message, type) {
+        if (typeof window.showMessage === 'function') {
+            window.showMessage(message, type || 'info');
+            return;
+        }
         const alertBox = document.getElementById('message-box');
-        const alertIcon = document.getElementById('alert-icon');
-        const alertMessage = document.getElementById('alert-message');
-
-        if (!alertBox) return;
-
-        alertMessage.textContent = message;
-        alertBox.className = `alert alert-${type} alert-dismissible fade show`;
-        
-        const icons = {
-            success: '✔️',
-            danger: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
-        };
-        alertIcon.textContent = icons[type] || '';
-
-        alertBox.style.display = 'block';
-
-        setTimeout(() => {
-            alertBox.classList.remove('show');
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-            }, 300);
-        }, 3000);
+        const msgEl = document.getElementById('alert-message');
+        if (alertBox && msgEl) {
+            msgEl.textContent = message;
+            alertBox.className = `alert alert-${type || 'info'} alert-dismissible fade show`;
+            alertBox.style.display = 'block';
+            const iconEl = document.getElementById('alert-icon');
+            if (iconEl) iconEl.textContent = { success: '✔️', danger: '❌', warning: '⚠️', info: 'ℹ️' }[type] || '';
+            setTimeout(() => { alertBox.classList.remove('show'); setTimeout(() => { alertBox.style.display = 'none'; }, 300); }, 4000);
+        } else {
+            window.alert((type === 'danger' ? 'Error: ' : '') + message);
+        }
     }
 
     setupTableSorting() {
@@ -182,14 +178,18 @@ class EmpleadoManager {
     updateSortIcons(currentHeader, direction, allHeaders) {
         allHeaders.forEach(header => {
             header.setAttribute('data-direction', 'default');
-            header.querySelector('.sort-icon-default').style.display = 'inline';
-            header.querySelector('.sort-icon-asc').style.display = 'none';
-            header.querySelector('.sort-icon-desc').style.display = 'none';
+            const def = header.querySelector('.sort-icon-default');
+            const asc = header.querySelector('.sort-icon-asc');
+            const desc = header.querySelector('.sort-icon-desc');
+            if (def) def.style.display = 'inline';
+            if (asc) asc.style.display = 'none';
+            if (desc) desc.style.display = 'none';
         });
-        
         currentHeader.setAttribute('data-direction', direction);
-        currentHeader.querySelector('.sort-icon-default').style.display = 'none';
-        currentHeader.querySelector(`.sort-icon-${direction}`).style.display = 'inline';
+        const defCur = currentHeader.querySelector('.sort-icon-default');
+        const dirCur = currentHeader.querySelector('.sort-icon-' + direction);
+        if (defCur) defCur.style.display = 'none';
+        if (dirCur) dirCur.style.display = 'inline';
     }
 
     // Métodos globales para uso en HTML
@@ -325,8 +325,10 @@ class EmpleadoManager {
             'TipoDocumento', 'Documento', 'Nombre', 'FechaNacimiento', 'FechaIngreso',
             'FechaOperacion', 'ModuloId', 'PerfilId', 'LineaId', 'CargoId', 'TituloProfesional',
             'FechaGrado', 'Universidad', 'ProfesionRealizada', 'AcademiaSAP', 'CertificadoSAP',
-            'OtrasCertificaciones', 'Postgrados', 'Activo', 'FechaRetiro', 'Direccion',
-            'Ciudad', 'Departamento', 'DireccionAlterna', 'Telefono1', 'Telefono2'
+            'OtrasCertificaciones', 'Postgrados', 'Activo',
+            'Genero', 'EstadoCivil', 'NumeroHijos', 'TarjetaProfesional', 'RH', 'TipoContrato',
+            'FondoPension', 'EPS', 'FondoCesantias', 'CajaCompensacion',
+            'FechaRetiro', 'Direccion', 'Ciudad', 'Departamento', 'DireccionAlterna', 'Telefono1', 'Telefono2'
         ];
 
         fields.forEach(field => {

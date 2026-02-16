@@ -331,6 +331,18 @@
                       <i class="fas fa-sort-down sort-icon-desc"></i>
                   </span>
                 </th>
+                <th>Edad</th>
+                <th>Años en empresa</th>
+                <th>Género</th>
+                <th>Estado civil</th>
+                <th>Nº hijos</th>
+                <th>Tarj. prof.</th>
+                <th>RH</th>
+                <th>Tipo contrato</th>
+                <th>Fondo pensión</th>
+                <th>EPS</th>
+                <th>Fondo cesantías</th>
+                <th>Caja compensación</th>
                 <th data-sort="Fecha_retiro" class="sortable" data-direction="default">
                   Fecha Retiro
                   <span class="sort-icon">
@@ -411,7 +423,19 @@
                   <td class="text-start">{{ empleado.OtrasCertificaciones }}</td>
                   <td class="text-start">{{ empleado.Postgrados }}</td>                  
                   <td class="text-start">{{ empleado.Activo }}</td>
-                  <td class="text-end">{{ empleado.FechaRetiro|date:'d/m/Y' }}</td>
+                  <td class="text-end">{{ empleado.Edad|default:"—" }}</td>
+                  <td class="text-end">{{ empleado.AnosEnEmpresa|default:"—" }}</td>
+                  <td class="text-start">{{ empleado.Genero|default:"" }}</td>
+                  <td class="text-start">{{ empleado.EstadoCivil|default:"" }}</td>
+                  <td class="text-end">{{ empleado.NumeroHijos|default:"" }}</td>
+                  <td class="text-start">{{ empleado.TarjetaProfesional|default:"" }}</td>
+                  <td class="text-start">{{ empleado.RH|default:"" }}</td>
+                  <td class="text-start">{{ empleado.TipoContrato|default:"" }}</td>
+                  <td class="text-start">{{ empleado.FondoPension|default:"" }}</td>
+                  <td class="text-start">{{ empleado.EPS|default:"" }}</td>
+                  <td class="text-start">{{ empleado.FondoCesantias|default:"" }}</td>
+                  <td class="text-start">{{ empleado.CajaCompensacion|default:"" }}</td>
+                  <td class="text-end">{% if empleado.FechaRetiro %}{{ empleado.FechaRetiro|date:'d/m/Y' }}{% else %}—{% endif %}</td>
                   <td class="text-start">{{ empleado.Direccion|default_if_none:"" }}</td>
                   <td class="text-start">{{ empleado.Ciudad|default_if_none:"" }}</td>
                   <td class="text-start">{{ empleado.Departamento|default_if_none:"" }}</td>

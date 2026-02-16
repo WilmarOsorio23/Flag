@@ -3,20 +3,46 @@ import json
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.db.models import Q, F, Func, Value
 import pandas as pd
-from modulo.forms import EmpleadoForm
+from modulo.forms import EmpleadoForm, EmpleadoIndexFilterForm
 from modulo.models import Empleado, Nomina
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import F, Func, Value
 from modulo.decorators import verificar_permiso
 from django.contrib.auth.decorators import login_required
 
 @login_required
 @verificar_permiso('can_manage_empleados')
 def empleado_index(request):
-    empleados = Empleado.objects.all()
+    empleados = Empleado.objects.select_related(
+        'TipoDocumento', 'ModuloId', 'PerfilId', 'LineaId', 'CargoId'
+    ).all()
+    filter_form = EmpleadoIndexFilterForm(request.GET or None)
+    if filter_form.is_valid():
+        q = (filter_form.cleaned_data.get('q') or '').strip()
+        if q:
+            empleados = empleados.filter(
+                Q(Nombre__icontains=q) | Q(Documento__icontains=q)
+            )
+        if filter_form.cleaned_data.get('LineaId'):
+            empleados = empleados.filter(LineaId=filter_form.cleaned_data['LineaId'])
+        if filter_form.cleaned_data.get('CargoId'):
+            empleados = empleados.filter(CargoId=filter_form.cleaned_data['CargoId'])
+        if filter_form.cleaned_data.get('PerfilId'):
+            empleados = empleados.filter(PerfilId=filter_form.cleaned_data['PerfilId'])
+        if filter_form.cleaned_data.get('ModuloId'):
+            empleados = empleados.filter(ModuloId=filter_form.cleaned_data['ModuloId'])
+        act = filter_form.cleaned_data.get('Activo')
+        if act == '1':
+            empleados = empleados.filter(Activo=True)
+        elif act == '0':
+            empleados = empleados.filter(Activo=False)
     form = EmpleadoForm()
-    return render(request, 'Empleado/EmpleadoIndex.html', {'empleados': empleados, 'form': form})
+    return render(request, 'Empleado/EmpleadoIndex.html', {
+        'empleados': empleados,
+        'form': form,
+        'filter_form': filter_form,
+    })
 
 @login_required
 @verificar_permiso('can_manage_empleados')
@@ -39,6 +65,17 @@ def empleado_editar(request, id):
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
+            # Normalizar campos opcionales enviados desde el front
+            if data.get('PerfilId') == '':
+                data['PerfilId'] = None
+            if data.get('TarjetaProfesional') == '':
+                data['TarjetaProfesional'] = None
+            elif data.get('TarjetaProfesional') == '1':
+                data['TarjetaProfesional'] = True
+            elif data.get('TarjetaProfesional') == '0':
+                data['TarjetaProfesional'] = False
+            if data.get('NumeroHijos') == '':
+                data['NumeroHijos'] = None
             empleado = get_object_or_404(Empleado, Documento=id)
             form = EmpleadoForm(data, instance=empleado)
 
@@ -110,66 +147,59 @@ def empleado_descargar_excel(request):
         response['Content-Disposition'] = 'attachment; filename="empleados.xlsx"'
 
         # Extraer los datos en formato lista para el DataFrame
+        def perfil_str(e):
+            return e.PerfilId.Perfil if e.PerfilId_id else 'N/A'
+
         data = [
             [
-                empleado.TipoDocumento.Nombre, 
-                empleado.Documento, 
-                empleado.Nombre, 
-                empleado.FechaNacimiento, 
-                empleado.FechaIngreso, 
-                empleado.FechaOperacion, 
-                empleado.ModuloId, 
-                empleado.PerfilId, 
-                empleado.LineaId, 
-                empleado.CargoId, 
-                empleado.TituloProfesional, 
-                empleado.FechaGrado, 
-                empleado.Universidad, 
-                empleado.ProfesionRealizada, 
-                empleado.AcademiaSAP, 
-                empleado.CertificadoSAP, 
-                empleado.OtrasCertificaciones, 
+                empleado.TipoDocumento.Nombre,
+                empleado.Documento,
+                empleado.Nombre,
+                empleado.FechaNacimiento,
+                empleado.FechaIngreso,
+                empleado.FechaOperacion,
+                empleado.ModuloId,
+                perfil_str(empleado),
+                empleado.LineaId,
+                empleado.CargoId,
+                empleado.TituloProfesional,
+                empleado.FechaGrado,
+                empleado.Universidad,
+                empleado.ProfesionRealizada,
+                empleado.AcademiaSAP,
+                empleado.CertificadoSAP,
+                empleado.OtrasCertificaciones,
                 empleado.Postgrados,
                 empleado.Activo,
+                getattr(empleado, 'Genero', None) or '',
+                getattr(empleado, 'EstadoCivil', None) or '',
+                getattr(empleado, 'NumeroHijos', None),
+                'Sí' if getattr(empleado, 'TarjetaProfesional', None) else ('No' if getattr(empleado, 'TarjetaProfesional', None) is False else ''),
+                getattr(empleado, 'RH', None) or '',
+                getattr(empleado, 'TipoContrato', None) or '',
+                getattr(empleado, 'FondoPension', None) or '',
+                getattr(empleado, 'EPS', None) or '',
+                getattr(empleado, 'FondoCesantias', None) or '',
+                getattr(empleado, 'CajaCompensacion', None) or '',
                 empleado.FechaRetiro,
                 empleado.Direccion,
                 empleado.Ciudad,
                 empleado.Departamento,
                 empleado.DireccionAlterna,
                 empleado.Telefono1,
-                empleado.Telefono2
+                empleado.Telefono2,
             ]
             for empleado in empleados_data
         ]
 
-        # Crear DataFrame y exportar a Excel
         df = pd.DataFrame(data, columns=[
-            'Tipo Documento', 
-            'Documento ID', 
-            'Nombre Empleado', 
-            'Fecha Nacimiento', 
-            'Fecha Ingreso', 
-            'Fecha Operación', 
-            'ID Módulo', 
-            'ID Perfil', 
-            'ID Línea', 
-            'Cargo', 
-            'Título Profesional', 
-            'Fecha Grado', 
-            'Universidad', 
-            'Profesión Realizada', 
-            'Academia SAP', 
-            'Certificado SAP', 
-            'Otras Certificaciones', 
-            'Postgrados', 
-            'Activo', 
-            'Fecha Retiro', 
-            'Dirección', 
-            'Ciudad', 
-            'Departamento', 
-            'Dirección Alterna', 
-            'Telefono 1', 
-            'Telefono 2'
+            'Tipo Documento', 'Documento ID', 'Nombre Empleado', 'Fecha Nacimiento', 'Fecha Ingreso',
+            'Fecha Operación', 'ID Módulo', 'Perfil', 'ID Línea', 'Cargo', 'Título Profesional',
+            'Fecha Grado', 'Universidad', 'Profesión Realizada', 'Academia SAP', 'Certificado SAP',
+            'Otras Certificaciones', 'Postgrados', 'Activo',
+            'Género', 'Estado civil', 'Nº hijos', 'Tarjeta profesional', 'RH', 'Tipo contrato',
+            'Fondo pensión', 'EPS', 'Fondo cesantías', 'Caja compensación',
+            'Fecha Retiro', 'Dirección', 'Ciudad', 'Departamento', 'Dirección Alterna', 'Telefono 1', 'Telefono 2',
         ])
 
         df.to_excel(response, index=False)

@@ -1,7 +1,7 @@
 # Informe de Empleados
 
 # Librerías estándar y utilitarias
-from datetime import datetime
+from datetime import datetime, date
 from collections import defaultdict, Counter
 
 # Django
@@ -52,15 +52,32 @@ def filtrar_empleados(form, empleados):
     return empleados
 
 
+def _calcular_edad(fecha_nacimiento):
+    if not fecha_nacimiento:
+        return None
+    hoy = date.today()
+    return hoy.year - fecha_nacimiento.year - (
+        (hoy.month, hoy.day) < (fecha_nacimiento.month, fecha_nacimiento.day)
+    )
+
+
+def _calcular_anos_empresa(fecha_ingreso):
+    if not fecha_ingreso:
+        return None
+    hoy = date.today()
+    return hoy.year - fecha_ingreso.year - (
+        (hoy.month, hoy.day) < (fecha_ingreso.month, fecha_ingreso.day)
+    )
+
+
 def obtener_informe_empleados(empleados):
     """
     Recorre el queryset de empleados y construye una lista de diccionarios
-    con los datos a mostrar y exportar. Incluye datos personales, académicos
-    y de certificación.
+    con los datos a mostrar y exportar. Incluye datos personales, académicos,
+    certificación, y campos ampliados. Edad y Años en empresa se calculan.
     """
     empleado_info = []
 
-    # El select_related se hace en la vista para evitar N+1 queries
     for empleado in empleados:
         datos_empleado = {
             'TipoDocumento': empleado.TipoDocumento.Nombre,
@@ -70,7 +87,7 @@ def obtener_informe_empleados(empleados):
             'FechaIngreso': empleado.FechaIngreso,
             'FechaOperacion': empleado.FechaOperacion,
             'Modulo': empleado.ModuloId.Modulo,
-            'Perfil': empleado.PerfilId.Perfil,
+            'Perfil': empleado.PerfilId.Perfil if empleado.PerfilId_id else 'N/A',
             'Linea': empleado.LineaId.Linea,
             'CargoId': empleado.CargoId.Cargo,
             'TituloProfesional': empleado.TituloProfesional,
@@ -83,12 +100,26 @@ def obtener_informe_empleados(empleados):
             'Postgrados': 'SI' if empleado.Postgrados else 'NO',
             'Activo': 'SI' if empleado.Activo else 'NO',
             'FechaRetiro': empleado.FechaRetiro,
-            'Direccion': empleado.Direccion if empleado.Direccion else '',
-            'Ciudad': empleado.Ciudad if empleado.Ciudad else '',
-            'Departamento': empleado.Departamento if empleado.Departamento else '',
-            'DireccionAlterna': empleado.DireccionAlterna if empleado.DireccionAlterna else '',
-            'Telefono1': empleado.Telefono1 if empleado.Telefono1 else '',
-            'Telefono2': empleado.Telefono2 if empleado.Telefono2 else '',
+            'Direccion': empleado.Direccion or '',
+            'Ciudad': empleado.Ciudad or '',
+            'Departamento': empleado.Departamento or '',
+            'DireccionAlterna': empleado.DireccionAlterna or '',
+            'Telefono1': empleado.Telefono1 or '',
+            'Telefono2': empleado.Telefono2 or '',
+            # Campos ampliados (getattr por si la BD aún no tiene las columnas)
+            'Genero': getattr(empleado, 'Genero', None) or '',
+            'EstadoCivil': getattr(empleado, 'EstadoCivil', None) or '',
+            'NumeroHijos': getattr(empleado, 'NumeroHijos', None) if getattr(empleado, 'NumeroHijos', None) is not None else '',
+            'TarjetaProfesional': ('SI' if getattr(empleado, 'TarjetaProfesional', None) else 'NO') if getattr(empleado, 'TarjetaProfesional', None) is not None else '',
+            'RH': getattr(empleado, 'RH', None) or '',
+            'TipoContrato': getattr(empleado, 'TipoContrato', None) or '',
+            'FondoPension': getattr(empleado, 'FondoPension', None) or '',
+            'EPS': getattr(empleado, 'EPS', None) or '',
+            'FondoCesantias': getattr(empleado, 'FondoCesantias', None) or '',
+            'CajaCompensacion': getattr(empleado, 'CajaCompensacion', None) or '',
+            # Calculados en el informe
+            'Edad': _calcular_edad(empleado.FechaNacimiento),
+            'AnosEnEmpresa': _calcular_anos_empresa(empleado.FechaIngreso),
         }
 
         empleado_info.append(datos_empleado)
@@ -303,7 +334,7 @@ def exportar_empleados_excel(request):
             'Documento': empleado['Documento'],
             'Nombre': empleado['Nombre'],
             'FechaNacimiento': empleado['FechaNacimiento'],
-            'FechaIngreso': empleado['FechaIngreso'],  # columna adicional como en el original
+            'FechaIngreso': empleado['FechaIngreso'],
             'FechaOperacion': empleado['FechaOperacion'],
             'TituloProfesional': empleado['TituloProfesional'],
             'FechaGrado': empleado['FechaGrado'],
@@ -320,6 +351,18 @@ def exportar_empleados_excel(request):
             'DireccionAlterna': empleado['DireccionAlterna'],
             'Telefono1': empleado['Telefono1'],
             'Telefono2': empleado['Telefono2'],
+            'Género': empleado['Genero'],
+            'Estado civil': empleado['EstadoCivil'],
+            'Nº hijos': empleado['NumeroHijos'],
+            'Tarjeta profesional': empleado['TarjetaProfesional'],
+            'RH': empleado['RH'],
+            'Tipo contrato': empleado['TipoContrato'],
+            'Fondo pensión': empleado['FondoPension'],
+            'EPS': empleado['EPS'],
+            'Fondo cesantías': empleado['FondoCesantias'],
+            'Caja compensación': empleado['CajaCompensacion'],
+            'Edad': empleado['Edad'],
+            'Años en la empresa': empleado['AnosEnEmpresa'],
         }
         data.append(fila)
 

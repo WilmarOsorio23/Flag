@@ -1033,7 +1033,17 @@ class EmpleadoForm(forms.ModelForm):
             'DireccionAlterna': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la dirección alterna'}),
             'Telefono1': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono 1'}),
             'Telefono2': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono 2'}),
-        }   
+            'Genero': forms.Select(attrs={'class': 'form-control'}, choices=[('', '—'), ('Masculino', 'Masculino'), ('Femenino', 'Femenino')]),
+            'EstadoCivil': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. Soltero, Casado'}),
+            'NumeroHijos': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'TarjetaProfesional': forms.Select(attrs={'class': 'form-control'}, choices=[('', '—'), ('1', 'Sí'), ('0', 'No')]),
+            'RH': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. O+, A+'}),
+            'TipoContrato': forms.Select(attrs={'class': 'form-control'}, choices=[('', '—'), ('Indefinido', 'Indefinido'), ('Fijo', 'Fijo')]),
+            'FondoPension': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Fondo de pensión'}),
+            'EPS': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'EPS'}),
+            'FondoCesantias': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Fondo de cesantías'}),
+            'CajaCompensacion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Caja de compensación'}),
+        }
         labels = {
             'TipoDocumento': 'Tipo de Documento',
             'Documento': 'Documento',
@@ -1042,7 +1052,7 @@ class EmpleadoForm(forms.ModelForm):
             'FechaIngreso': 'Fecha de Ingreso',
             'FechaOperacion': 'Fecha de Operación',
             'ModuloId': 'Módulo',
-            'PerfilId': 'Perfil',
+            'PerfilId': 'Perfil (N/A si aplica)',
             'LineaId': 'Línea',
             'CargoId': 'Cargo',
             'TituloProfesional': 'Título Profesional',
@@ -1061,8 +1071,69 @@ class EmpleadoForm(forms.ModelForm):
             'Departamento': 'Departamento',
             'DireccionAlterna': 'DirecccionAlterna',
             'Telefono1': 'Telefono1',
-            'Telefono2':'Telefono2',
+            'Telefono2': 'Telefono2',
+            'Genero': 'Género',
+            'EstadoCivil': 'Estado civil',
+            'NumeroHijos': 'Número de hijos',
+            'TarjetaProfesional': 'Tarjeta profesional',
+            'RH': 'RH',
+            'TipoContrato': 'Tipo de contrato',
+            'FondoPension': 'Fondo de pensión',
+            'EPS': 'EPS',
+            'FondoCesantias': 'Fondo de cesantías',
+            'CajaCompensacion': 'Caja de compensación',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['PerfilId'].empty_label = 'N/A'
+
+
+class EmpleadoIndexFilterForm(forms.Form):
+    """Filtro liviano para la lista de empleados (index)."""
+    q = forms.CharField(
+        required=False,
+        label='Buscar (nombre o documento)',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre o documento...'})
+    )
+    LineaId = forms.ModelChoiceField(
+        queryset=Linea.objects.all(),
+        required=False,
+        label='Línea',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    CargoId = forms.ModelChoiceField(
+        queryset=Cargos.objects.all(),
+        required=False,
+        label='Cargo',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    PerfilId = forms.ModelChoiceField(
+        queryset=Perfil.objects.all(),
+        required=False,
+        label='Perfil',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    ModuloId = forms.ModelChoiceField(
+        queryset=Modulo.objects.all(),
+        required=False,
+        label='Módulo',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    Activo = forms.ChoiceField(
+        choices=[('', 'Todos'), ('1', 'Sí'), ('0', 'No')],
+        required=False,
+        label='Activo',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['LineaId'].empty_label = 'Todas'
+        self.fields['CargoId'].empty_label = 'Todos'
+        self.fields['PerfilId'].empty_label = 'N/A / Todos'
+        self.fields['ModuloId'].empty_label = 'Todos'
+
 
 class EmpleadoFilterForm(forms.Form):
     Nombre = forms.ChoiceField(

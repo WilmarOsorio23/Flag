@@ -568,7 +568,7 @@ class Empleado(models.Model):
     FechaIngreso = models.DateField()
     FechaOperacion = models.DateField()
     ModuloId = models.ForeignKey(Modulo, on_delete=models.CASCADE, db_column='ModuloId')
-    PerfilId = models.ForeignKey(Perfil, on_delete=models.CASCADE, db_column='PerfilId')
+    PerfilId = models.ForeignKey(Perfil, on_delete=models.CASCADE, db_column='PerfilId', null=True, blank=True)
     LineaId = models.ForeignKey(Linea, on_delete=models.CASCADE, db_column='LineaId')
     CargoId = models.ForeignKey(Cargos, on_delete=models.CASCADE, db_column='CargoId')  # Cambiado aquí
     Activo =  models.BooleanField(default=True)
@@ -588,6 +588,20 @@ class Empleado(models.Model):
     DireccionAlterna = models.CharField(max_length=255, null=True, blank=True)
     Telefono1 = models.CharField(max_length=20, null=True, blank=True)
     Telefono2 = models.CharField(max_length=20, null=True, blank=True)
+
+    # Campos ampliados
+    GENERO_CHOICES = [('Masculino', 'Masculino'), ('Femenino', 'Femenino')]
+    TIPO_CONTRATO_CHOICES = [('Indefinido', 'Indefinido'), ('Fijo', 'Fijo')]
+    Genero = models.CharField(max_length=20, null=True, blank=True, choices=GENERO_CHOICES)
+    EstadoCivil = models.CharField(max_length=50, null=True, blank=True)
+    NumeroHijos = models.IntegerField(null=True, blank=True)
+    TarjetaProfesional = models.BooleanField(null=True, blank=True)
+    RH = models.CharField(max_length=10, null=True, blank=True)
+    TipoContrato = models.CharField(max_length=20, null=True, blank=True, choices=TIPO_CONTRATO_CHOICES)
+    FondoPension = models.CharField(max_length=100, null=True, blank=True)
+    EPS = models.CharField(max_length=100, null=True, blank=True)
+    FondoCesantias = models.CharField(max_length=100, null=True, blank=True)
+    CajaCompensacion = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
         db_table = 'Empleado'
