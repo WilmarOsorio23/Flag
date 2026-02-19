@@ -330,7 +330,7 @@
                                 <span class="d-block text-end">{{ empleado.Documento }}</span>
                                 <input type="text" name="Documento" class="form-control-plaintext d-none text-start" value="{{ empleado.Documento }}" readonly>
                             </td>
-                            <td data-field="nombre" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                            <td data-field="nombre" class="text-start">
                                 <input type="text" name="Nombre" class="form-control-plaintext d-block text-start" value="{{ empleado.Nombre }}" readonly>
                             </td>
                             <td data-field="fecha_nacimiento">
@@ -342,7 +342,7 @@
                             <td data-field="fecha_operacion">
                                 <input type="date" name="FechaOperacion" class="form-control-plaintext d-block text-end" value="{{ empleado.FechaOperacion|date:'Y-m-d' }}" readonly>
                             </td>
-                            <td data-field="modulo" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                            <td data-field="modulo" class="text-start">
                                 <select name="ModuloId" class="form-control-plaintext d-block text-start" disabled>
                                     {% for modulo in form.fields.ModuloId.queryset %}
                                         <option value="{{ modulo.ModuloId }}" {% if empleado.ModuloId.Modulo == modulo.Modulo %}selected{% endif %}>
@@ -351,7 +351,7 @@
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td data-field="perfil" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                            <td data-field="perfil" class="text-start">
                                 <select name="PerfilId" class="form-control-plaintext d-block text-start" disabled>
                                     <option value="">N/A</option>
                                     {% for perfil in form.fields.PerfilId.queryset %}
@@ -361,7 +361,7 @@
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td data-field="linea" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                            <td data-field="linea" class="text-start">
                                 <select name="LineaId" class="form-control-plaintext d-block text-start" disabled>
                                     {% for linea in form.fields.LineaId.queryset %}
                                         <option value="{{ linea.LineaId }}" {% if empleado.LineaId.Linea == linea.Linea %}selected{% endif %}>
@@ -370,7 +370,7 @@
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td data-field="cargo" style="overflow: visible; text-overflow: ellipsis; min-width: 150px;">
+                            <td data-field="cargo" class="text-start">
                                 <select name="CargoId" class="form-control-plaintext d-block text-start" disabled>
                                     {% for cargo in form.fields.CargoId.queryset %}
                                         <option value="{{ cargo.CargoId }}" {% if empleado.CargoId.Cargo == cargo.Cargo %}selected{% endif %}>
