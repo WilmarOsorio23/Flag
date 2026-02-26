@@ -49,10 +49,10 @@
     </div>
     <div class="card-footer text-muted">
         
-        <div class="table-responsive">
+        <div class="table-responsive table-app-wrap">
             <form id="delete-form" method="POST" action="{% url 'linea_eliminar' %}">
                 {% csrf_token %}
-                <table class="table table-primary" id="lineaTable">
+                <table class="table table-primary table-app" id="lineaTable">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>

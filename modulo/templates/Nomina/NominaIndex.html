@@ -6,7 +6,6 @@
 
 {% block contenido %}
 <style>
-  .compact-table td, .compact-table th { vertical-align: middle; }
   .emp-start { border-top: 2px solid rgba(0,0,0,.18); }
   .year-start td { border-top: 1px solid rgba(0,0,0,.12); }
   .cell-muted { color: rgba(0,0,0,.55); font-size: .85rem; }
@@ -132,10 +131,10 @@
   </div>
 
   <div class="card-footer text-muted">
-    <div class="table-responsive">
+    <div class="table-responsive table-app-wrap">
       <form id="delete-form" method="POST" action="{% url 'nomina_eliminar' %}">
         {% csrf_token %}
-        <table class="table table-primary compact-table">
+        <table class="table table-primary table-compact compact-table table-app">
           <thead>
             <tr>
               <th><input type="checkbox" id="select-all"></th>
@@ -316,8 +315,8 @@
             {% endfor %}
           </select>
 
-          <div class="table-responsive">
-            <table class="table table-sm table-striped align-middle">
+          <div class="table-responsive table-app-wrap">
+            <table class="table table-sm table-striped align-middle table-app">
               <thead>
                 <tr>
                   <th style="width:40px;">

@@ -238,6 +238,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
 
+                const cecoSelect = row.querySelector('select[name="CecoConceptos"]');
+                const cecoOriginal = cecoSelect ? (cecoSelect.getAttribute('data-original') || '') : '';
+                const cecoChanged = cecoSelect && cecoSelect.value !== cecoOriginal;
+                const cecoId = cecoSelect ? (cecoSelect.value || '') : '';
+
                 row.querySelectorAll('input[name^="ConceptoId_"]').forEach((input, i) => {
                     const concepto = (input.value || '').trim();
                     const tiempoConceptoInput = row.querySelector(`input[name="Tiempo_Conceptos_${i + 1}"]`);
@@ -245,7 +250,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     let tiempoConcepto = (tiempoConceptoInput.value || '').trim();
                     tiempoConcepto = tiempoConcepto === '' ? '0' : tiempoConcepto;
                     const original = tiempoConceptoInput.getAttribute('data-original') || '';
-                    if (concepto && tiempoConcepto !== original) {
+                    const horasNum = parseFloat(tiempoConcepto) || 0;
+                    // Incluir si cambió horas, cambió CeCo, o hay horas (para persistir CeCo aunque no haya cambio)
+                    if (concepto && (tiempoConcepto !== original || cecoChanged || horasNum > 0)) {
                         conceptos.push({ concepto, tiempoConcepto });
                     }
                 });
@@ -269,7 +276,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         Tiempo_Conceptos: tiempoConcepto,
                         Anio: window.originalAnio,
                         Mes: window.originalMes,
-                        LineaId: lineaId
+                        LineaId: lineaId,
+                        centrocostosId: cecoId || null
                     });
                 });
 
@@ -327,6 +335,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Actualizar data-original con los nuevos valores
                     document.querySelectorAll('input[name^="Tiempo_Clientes_"], input[name^="Tiempo_Conceptos_"], input[name^="Hora_Facturable_"]').forEach(input => {
                         input.setAttribute('data-original', input.value);
+                    });
+                    document.querySelectorAll('select[name="CecoConceptos"]').forEach(sel => {
+                        sel.setAttribute('data-original', sel.value || '');
                     });
                 } else {
                     saving.stop('danger', result.error ? `Error: ${result.error}` : 'Error al guardar los datos.');
@@ -508,6 +519,9 @@ document.addEventListener('DOMContentLoaded', function () {
     ).forEach(input => {
         input.setAttribute('data-original', input.value);
         input.addEventListener('input', onTotalsInputChange);
+    });
+    document.querySelectorAll('select[name="CecoConceptos"]').forEach(sel => {
+        sel.setAttribute('data-original', sel.value || '');
     });
 
     const anioSel = document.querySelector('select[name="Anio"]');

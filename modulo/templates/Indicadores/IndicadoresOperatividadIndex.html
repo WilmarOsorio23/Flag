@@ -115,10 +115,10 @@
             <!-- Pestaña de Indicadores -->
             <div class="tab-pane fade show active p-3" id="indicadores" role="tabpanel" aria-labelledby="indicadores-tab">
                 {% for resultado in resultados %}
-                <div class="table-responsive mb-4">  
-                    <table class="table table-bordered">
+                <div class="table-responsive table-app-wrap mb-4">  
+                    <table class="table table-bordered table-app">
                         <!-- Primera fila: Horas mes y horas hábiles -->
-                        <thead class="table-dark">
+                        <thead>
                             <tr>
                                 <th>Horas mes &emsp; &emsp;{{ selected_anio }}</th>
                                 {% for mes in selected_mes %}
@@ -128,7 +128,7 @@
                             </tr>
                         </thead>
                         <!-- Segunda fila: Línea y meses -->
-                        <thead class="table-dark">
+                        <thead>
                             <tr>
                                 <th>{{ resultado.linea }}</th>  <!-- Nombre de la línea -->
                                 {% for mes in selected_mes %}

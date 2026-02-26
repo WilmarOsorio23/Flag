@@ -67,7 +67,8 @@
     <hr>
 
     <h4>Actividades Ejecutadas</h4>
-    <table class="table" id="ejecutado-{{ pagare.Documento.Documento }}">
+    <div class="table-responsive table-app-wrap">
+    <table class="table table-app" id="ejecutado-{{ pagare.Documento.Documento }}">
         <thead>
             <tr>
                 <th>Actividad</th>
@@ -88,6 +89,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 
     <input type="checkbox" checked hidden value="{{ pagare.Documento.Documento }}">
 

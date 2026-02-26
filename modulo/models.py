@@ -416,6 +416,13 @@ class TiemposConcepto(models.Model):
     ConceptoId = models.ForeignKey('Concepto', on_delete=models.CASCADE, db_column='ConceptoId')
     LineaId = models.ForeignKey('Linea', on_delete=models.CASCADE, db_column='LineaId')
     Horas = models.DecimalField(max_digits=5, decimal_places=2)
+    centrocostosId = models.ForeignKey(
+        'CentrosCostos',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='centrocostosId',
+    )
 
     def __str__(self):
         return f"Año: {self.Anio}, Mes: {self.Mes}, Documento: {self.Documento}, Concepto: {self.ConceptoId}, Horas: {self.Horas}"

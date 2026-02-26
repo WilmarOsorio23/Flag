@@ -79,9 +79,9 @@
         </ul>
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="tabla" role="tabpanel" aria-labelledby="tabla-tab">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped" id="tabla-margen-clientes">
-                        <thead class="table-dark">
+                <div class="table-responsive table-app-wrap">
+                    <table class="table table-bordered table-striped table-app" id="tabla-margen-clientes">
+                        <thead>
                             <tr>
                                 <th>Cliente</th>
                                 <th> Costo</th>
@@ -134,9 +134,9 @@
             <div class="tab-pane fade" id="graficas" role="tabpanel" aria-labelledby="graficas-tab">
                 <div id="grafica-margen-clientes"></div>
                 <!-- Tabla de resumen mejorada -->
-                <div class="table-responsive mt-4">
-                    <table class="table table-bordered align-middle">
-                        <thead class="table-dark">
+                <div class="table-responsive table-app-wrap mt-4">
+                    <table class="table table-bordered table-app align-middle">
+                        <thead>
                             <tr>
                                 <th></th>
                                 {% if resultados and resultados.totales %}

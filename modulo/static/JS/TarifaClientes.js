@@ -318,64 +318,6 @@
           });
       };
   
-      // ---------- SORTING ----------
-      const table = qs("#tarifa-table");
-      if (table) {
-        const headers = qsa("th.sortable", table);
-        const collator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
-  
-        headers.forEach((header) => {
-          header.addEventListener("click", () => {
-            const column = header.getAttribute("data-sort");
-            const direction = header.getAttribute("data-direction") || "asc";
-            const newDirection = direction === "asc" ? "desc" : "asc";
-  
-            sortTableByColumn(table, column, newDirection, collator);
-  
-            headers.forEach((h) => {
-              h.setAttribute("data-direction", "default");
-              qs(".sort-icon-default", h).style.display = "inline";
-              qs(".sort-icon-asc", h).style.display = "none";
-              qs(".sort-icon-desc", h).style.display = "none";
-            });
-  
-            header.setAttribute("data-direction", newDirection);
-            qs(".sort-icon-default", header).style.display = "none";
-            qs(`.sort-icon-${newDirection}`, header).style.display = "inline";
-          });
-        });
-      }
-  
-      function sortTableByColumn(table, columnName, direction, collator) {
-        const tbody = qs("tbody", table);
-        const rows = qsa("tr", tbody);
-  
-        const withKeys = rows.map((row) => {
-          const cell = qs(`[data-field="${columnName}"]`, row);
-          let key = "";
-  
-          if (cell) {
-            const input = qs("input:not(.d-none)", cell);
-            const select = qs("select:not(.d-none)", cell);
-            const span = qs("span", cell);
-  
-            if (input) key = input.value.trim();
-            else if (select) key = (select.options[select.selectedIndex]?.text || "").trim();
-            else if (span) key = span.textContent.trim();
-          }
-  
-          return { row, key };
-        });
-  
-        withKeys.sort((a, b) => {
-          const cmp = collator.compare(a.key, b.key);
-          return direction === "asc" ? cmp : -cmp;
-        });
-  
-        const frag = document.createDocumentFragment();
-        withKeys.forEach(({ row }) => frag.appendChild(row));
-        tbody.appendChild(frag);
-      }
     });
   })();
   

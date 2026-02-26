@@ -62,10 +62,10 @@
     <!-- Panel de Resumen -->
 
         <!-- Tabla de resultados -->
-        <div class="table-responsive">
+        <div class="table-responsive table-app-wrap">
             <form id="delete-form" method="POST">
                 {% csrf_token %}
-                <table class="table table-primary" id="facturacionConsultoresTable">
+                <table class="table table-primary table-app" id="facturacionConsultoresTable">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>

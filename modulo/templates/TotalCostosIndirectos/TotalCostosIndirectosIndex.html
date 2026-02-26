@@ -65,10 +65,10 @@
     </div>
 
     <div class="card-footer text-muted">
-        <div class="table-responsive">
+        <div class="table-responsive table-app-wrap">
             <form id="delete-form" method="POST" action="{% url 'total_costos_indirectos_eliminar' %}">
                 {% csrf_token %}
-                <table class="table table-primary" id="tabla_detalles">
+                <table class="table table-primary table-app" id="tabla_detalles">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>
@@ -127,8 +127,8 @@
         <button id="guardar-detalles" class="btn btn-success d-none" onclick="saveDetails()">Guardar Cambios</button>
     </div>
     <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-striped" id="tabla-detalles">
+        <div class="table-responsive table-app-wrap">
+            <table class="table table-striped table-app" id="tabla-detalles">
                 <thead>
                     <tr>
                         <th><input type="checkbox" id="select-all-detalles"></th>

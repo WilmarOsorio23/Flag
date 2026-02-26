@@ -50,11 +50,11 @@
         </div>
     </div>
     <div class="card-footer text-muted">
-        <div class="table-responsive">
+        <div class="table-responsive table-app-wrap">
             <form id="delete-form" method="POST" action="{% url 'clientes_contratos_eliminar' %}">
                 {% csrf_token %}
                 <input type="hidden" name="items_to_delete" id="items_to_delete">
-                <table class="table table-primary">
+                <table class="table table-primary table-app">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>

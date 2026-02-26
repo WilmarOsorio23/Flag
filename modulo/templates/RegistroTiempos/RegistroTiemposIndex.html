@@ -116,28 +116,29 @@
   </div>
 
   {% if show_data %}
-    <div class="card-footer text-muted">
-      <div class="table-responsive">
+    <div class="card-footer card-footer--registro-tiempos">
+      <div class="table-responsive registro-tiempos-table-wrap">
         <form id="delete-form" method="POST">
           {% csrf_token %}
-          <table class="table table-primary">
+          <table class="table table-primary table-compact table-registro-tiempos" aria-label="Registro de horas por colaborador y cliente">
             <thead>
               <tr>
-                <th class="sticky-column" scope="col">Colaborador</th>
-                <th scope="col">Línea</th>
-                <th scope="col">Perfil</th>
-                <th scope="col">Módulo</th>
-                <th scope="col">Empresa</th>
+                <th class="sticky-column th-colaborador" scope="col">Colaborador</th>
+                <th class="th-info" scope="col">Línea</th>
+                <th class="th-info" scope="col">Perfil</th>
+                <th class="th-info" scope="col">Módulo</th>
+                <th class="th-info" scope="col">Empresa</th>
                 {% for cliente in Clientes %}
                   <th>{{ cliente.Nombre_Cliente }}</th>
                 {% endfor %}
-                <th scope="col">Total Operación</th>
+                <th class="th-total th-operacion" scope="col">Total Operación</th>
+                <th class="th-info" scope="col">CeCo conceptos</th>
                 {% for concepto in Conceptos %}
-                  <th>{{ concepto.Descripcion }}</th>
+                  <th class="th-concepto">{{ concepto.Descripcion }}</th>
                 {% endfor %}
-                <th scope="col">Total Conceptos</th>
-                <th scope="col">Total</th>
-                <th scope="col">Dif. Horas</th>
+                <th class="th-total th-conceptos" scope="col">Total Conceptos</th>
+                <th class="th-total th-horas" scope="col">Total</th>
+                <th class="th-total th-dif" scope="col">Dif. Horas</th>
               </tr>
             </thead>
             <tbody>
@@ -162,43 +163,53 @@
                   {# Clientes por fila #}
                   {% for cliente in Clientes %}
                     {% with celda=empleado.Clientes|get_item:cliente.ClienteId %}
-                      <td style="min-width:150px;">
+                      <td class="table-cell-narrow">
                         <input type="text" name="ClienteId_{{ forloop.counter }}" class="form-control d-none" value="{{ cliente.ClienteId }}">
                         <input type="text" name="Tiempo_Clientes_{{ forloop.counter }}" class="form-control" value="{{ celda.tiempo_clientes|default:0 }}">
                       </td>
                     {% endwith %}
                   {% endfor %}
 
-                  <td data-total-clientes-row>
+                  <td class="td-total td-operacion" data-total-clientes-row>
                     {{ empleado.Total_Clientes }}
                     <input type="text" name="Total_Clientes" class="form-control d-none" value="{{ empleado.Total_Clientes }}">
+                  </td>
+
+                  <td class="table-cell-narrow">
+                    <select name="CecoConceptos" class="form-control form-control-sm ceco-conceptos-select" data-selected="{{ empleado.CecoId|default:'' }}">
+                      <option value="">—</option>
+                      {% for ceco in CentrosCostos %}
+                        <option value="{{ ceco.id }}" {% if empleado.CecoId == ceco.id %}selected{% endif %}>{{ ceco.codigoCeCo }}</option>
+                      {% endfor %}
+                    </select>
                   </td>
 
                   {# Conceptos por fila #}
                   {% for concepto in Conceptos %}
                     {% with celda=empleado.Conceptos|get_item:concepto.ConceptoId %}
-                      <td style="min-width:150px;">
+                      <td class="table-cell-narrow">
                         <input type="text" name="ConceptoId_{{ forloop.counter }}" class="form-control d-none" value="{{ concepto.ConceptoId }}">
                         <input type="text" name="Tiempo_Conceptos_{{ forloop.counter }}" class="form-control" value="{{ celda.tiempo_conceptos|default:0 }}">
                       </td>
                     {% endwith %}
                   {% endfor %}
 
-                  <td data-total-conceptos-row>{{ empleado.Total_Conceptos }}</td>
-                  <td data-total-horas-row>{{ empleado.Total_Horas }}</td>
-                  <td data-dif-horas-row>0</td>
+                  <td class="td-total td-conceptos" data-total-conceptos-row>{{ empleado.Total_Conceptos }}</td>
+                  <td class="td-total td-horas" data-total-horas-row>{{ empleado.Total_Horas }}</td>
+                  <td class="td-total td-dif" data-dif-horas-row>{{ empleado.Dif_Horas|default:0 }}</td>
                 </tr>
               {% empty %}
                 <tr><td colspan="50">No hay datos disponibles.</td></tr>
               {% endfor %}
             </tbody>
             <tfoot>
-              <tr>
-                <th colspan="5">Total Horas</th>
+              <tr class="tfoot-total-row">
+                <th class="sticky-column" colspan="5">Total Horas</th>
                 {% for cliente in Clientes %}
                   <th data-cliente-id="{{ cliente.ClienteId }}">{{ Totales|get_item:cliente.ClienteId }}</th>
                 {% endfor %}
                 <th data-total-clientes>{{ Totales.Total_Clientes }}</th>
+                <th></th>
 
                 {% for concepto in Conceptos %}
                   <th data-concepto-id="{{ concepto.ConceptoId }}">{{ Totales|get_item:concepto.ConceptoId }}</th>
@@ -209,13 +220,13 @@
               </tr>
 
               {% for linea in Tiempo_Lineas %}
-                <tr>
-                  <th colspan="2">Horas Facturables</th>
+                <tr class="tfoot-facturables-row">
+                  <th class="sticky-column" colspan="2">Horas Facturables</th>
                   <td colspan="3">{{ linea.Linea }}</td>
 
                   {% for cliente in Clientes %}
                     {% with celda=linea.Clientes|get_item:cliente.ClienteId %}
-                      <td>
+                      <td class="table-cell-narrow">
                         <input type="text" name="Hora_Facturable_{{ forloop.counter }}" class="form-control" value="{{ celda.horas_facturables|default:0 }}">
                         <input type="hidden" name="LineaId_{{ forloop.counter }}" value="{{ linea.LineaId }}">
                         <input type="hidden" name="ClienteId_{{ forloop.counter }}" value="{{ cliente.ClienteId }}">
@@ -224,7 +235,7 @@
                   {% endfor %}
 
                   <td data-total-facturable-linea-row></td>
-                  <td colspan="{{ Conceptos|length|add:'3' }}"></td>
+                  <td colspan="{{ Conceptos|length|add:'4' }}"></td>
                 </tr>
               {% endfor %}
             </tfoot>

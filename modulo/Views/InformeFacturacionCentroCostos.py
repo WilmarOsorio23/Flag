@@ -503,6 +503,7 @@ def informe_facturacion_CentroCostos(request):
 
     # Agrupar facturas por ceco + modulo + mes para evitar duplicados
     facturas_agrupadas_por_ceco_modulo_mes = defaultdict(float)
+    keys_from_facturas = set()
     for item in facturas:
         ceco = item.get("Ceco", "Sin Ceco")
         modulo = item.get("ModuloId__Modulo", "Sin módulo")
@@ -515,6 +516,13 @@ def informe_facturacion_CentroCostos(request):
 
         key = f"{ceco}_{modulo}_{mes_str}"
         facturas_agrupadas_por_ceco_modulo_mes[key] += valor
+        keys_from_facturas.add((ceco, modulo, mes_str))
+
+    # Descripción CeCo para filas "solo costo" (sin factura)
+    descripciones_todos_cecos = dict(
+        CentrosCostos.objects.values_list("codigoCeCo", "descripcionCeCo")
+    )
+    linea_sin_facturacion = "Sin facturación"
 
     # Procesar facturas agrupadas
     for key, valor in facturas_agrupadas_por_ceco_modulo_mes.items():
@@ -571,6 +579,43 @@ def informe_facturacion_CentroCostos(request):
         costos_por_ceco_modulo[ceco][modulo] += costo_mes
         costos_por_mes[mes] += costo_mes
         costo_global += costo_mes
+
+    # Paso 2: filas "solo costo" (tiempos registrados sin facturación en ese mes)
+    for ceco, modulos_mes in (costos_por_ceco_modulo_mes or {}).items():
+        for modulo, meses_dict in (modulos_mes or {}).items():
+            for mes_str, costo_mes in (meses_dict or {}).items():
+                if (ceco, modulo, mes_str) in keys_from_facturas:
+                    continue
+                costo_mes = float(costo_mes or Decimal("0"))
+                if costo_mes <= 0:
+                    continue
+                mes = int(mes_str)
+                if meses_filtrados and str(mes) not in meses_filtrados:
+                    continue
+                descripcion = descripciones_todos_cecos.get(ceco, "")
+                linea = linea_sin_facturacion
+                datos.setdefault(ceco, {}).setdefault(descripcion, {}).setdefault(linea, {}).setdefault(modulo, {})
+                datos[ceco][descripcion][linea][modulo].setdefault(mes, {"total_valor": 0.0, "costo": 0.0})
+                datos[ceco][descripcion][linea][modulo][mes]["costo"] = costo_mes
+
+                costos_por_ceco_linea_mes[ceco][linea][mes] += costo_mes
+                costos_por_ceco_linea[ceco][linea] += costo_mes
+                totales_por_ceco_mes[ceco][mes] += 0.0
+                costos_por_ceco_mes[ceco][mes] += costo_mes
+                totales_por_linea[linea] += 0.0
+                totales_por_ceco[ceco] += 0.0
+                totales_por_modulo[modulo] += 0.0
+                totales_por_mes[mes] += 0.0
+                totales_por_linea_mes[linea][mes] += 0.0
+                totales_por_ceco_linea_modulo[ceco][linea][modulo] += 0.0
+                totales_por_ceco_modulo[ceco][modulo] += 0.0
+                totales_por_ceco_linea[ceco][linea] += 0.0
+                totales_por_ceco_linea_mes[ceco][linea][mes] += 0.0
+                costos_por_ceco[ceco] += costo_mes
+                costos_por_modulo[modulo] += costo_mes
+                costos_por_ceco_modulo[ceco][modulo] += costo_mes
+                costos_por_mes[mes] += costo_mes
+                costo_global += costo_mes
 
     cecos_con_totales = {}
     for ceco_k, descripciones in datos.items():
@@ -642,15 +687,13 @@ def descargar_reporte_excel_facturacion_clientes(request):
     except Exception as e:
         return HttpResponse(f"Error al obtener datos: {str(e)}")
 
-    if not facturas:
-        return HttpResponse("No hay datos disponibles para los filtros seleccionados.")
-
     meses = meses_completos
     if meses_filtrados:
         meses = [par for par in meses_completos if str(par[0]) in meses_filtrados]
 
-    # Agrupar facturas por ceco + modulo + mes para evitar duplicados
+    # Agrupar facturas por ceco + modulo + mes y marcar claves que vienen de facturación
     facturas_agrupadas_por_ceco_modulo_mes = defaultdict(float)
+    keys_from_facturas = set()
     for item in facturas:
         ceco = item.get("Ceco", "Sin Ceco")
         modulo = item.get("ModuloId__Modulo", "Sin módulo")
@@ -663,6 +706,12 @@ def descargar_reporte_excel_facturacion_clientes(request):
 
         key = f"{ceco}_{modulo}_{mes_str}"
         facturas_agrupadas_por_ceco_modulo_mes[key] += valor
+        keys_from_facturas.add((ceco, modulo, mes_str))
+
+    descripciones_todos_cecos = dict(
+        CentrosCostos.objects.values_list("codigoCeCo", "descripcionCeCo")
+    )
+    linea_sin_facturacion = "Sin facturación"
 
     datos = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict))))
     totales_por_mes = defaultdict(float)
@@ -670,7 +719,6 @@ def descargar_reporte_excel_facturacion_clientes(request):
     total_global = 0.0
     costo_global = 0.0
 
-    # ✅ NUEVO: totales por CECO (para fila TOTAL CECO en Excel)
     totales_por_ceco = defaultdict(float)
     costos_por_ceco = defaultdict(float)
     totales_por_ceco_mes = defaultdict(lambda: defaultdict(float))
@@ -709,11 +757,37 @@ def descargar_reporte_excel_facturacion_clientes(request):
         total_global += valor
         costo_global += costo
 
-        # ✅ NUEVO acumulado por CECO
         totales_por_ceco[ceco] += valor
         costos_por_ceco[ceco] += costo
         totales_por_ceco_mes[ceco][mes] += valor
         costos_por_ceco_mes[ceco][mes] += costo
+
+    # Filas "solo costo" (tiempos sin facturación en ese mes)
+    for ceco, modulos_mes in (costos_por_ceco_modulo_mes or {}).items():
+        for modulo, meses_dict in (modulos_mes or {}).items():
+            for mes_str, costo_mes in (meses_dict or {}).items():
+                if (ceco, modulo, mes_str) in keys_from_facturas:
+                    continue
+                costo_mes = float(costo_mes or Decimal("0"))
+                if costo_mes <= 0:
+                    continue
+                mes = int(mes_str)
+                if meses_filtrados and str(mes) not in meses_filtrados:
+                    continue
+                descripcion = descripciones_todos_cecos.get(ceco, "")
+                linea = linea_sin_facturacion
+                if mes not in datos[ceco][descripcion][linea][modulo]:
+                    datos[ceco][descripcion][linea][modulo][mes] = {"facturacion": 0.0, "costo": 0.0, "margen": 0.0}
+                datos[ceco][descripcion][linea][modulo][mes]["costo"] = costo_mes
+                datos[ceco][descripcion][linea][modulo][mes]["margen"] = -costo_mes
+
+                costos_por_mes[mes] += costo_mes
+                costo_global += costo_mes
+                costos_por_ceco[ceco] += costo_mes
+                costos_por_ceco_mes[ceco][mes] += costo_mes
+
+    if not datos:
+        return HttpResponse("No hay datos disponibles para los filtros seleccionados.")
 
     wb = Workbook()
     ws = wb.active

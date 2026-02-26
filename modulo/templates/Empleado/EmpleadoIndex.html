@@ -85,10 +85,10 @@
     </div>
     {% endif %}
     <div class="card-footer text-muted">
-        <div class="table-responsive">
+        <div class="table-responsive table-app-wrap">
             <form id="delete-form" method="POST" action="{% url 'empleado_eliminar' %}">
                 {% csrf_token %}
-                <table class="table table-primary" id="infoEmpleadosTable">
+                <table class="table table-primary table-app" id="infoEmpleadosTable">
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="select-all"></th>

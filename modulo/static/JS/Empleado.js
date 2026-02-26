@@ -12,7 +12,6 @@ class EmpleadoManager {
     init() {
         this.preventFormSubmissionOnEnter();
         this.setupEventListeners();
-        this.setupTableSorting();
     }
 
     preventFormSubmissionOnEnter() {
@@ -111,85 +110,6 @@ class EmpleadoManager {
         } else {
             window.alert((type === 'danger' ? 'Error: ' : '') + message);
         }
-    }
-
-    setupTableSorting() {
-        const table = document.getElementById('infoEmpleadosTable');
-        if (!table) return;
-
-        const headers = table.querySelectorAll('th.sortable');
-        headers.forEach(header => {
-            header.addEventListener('click', () => {
-                const column = header.getAttribute('data-sort');
-                const direction = header.getAttribute('data-direction') || 'asc';
-                const newDirection = direction === 'asc' ? 'desc' : 'asc';
-
-                this.sortTableByColumn(table, column, newDirection);
-                this.updateSortIcons(header, newDirection, headers);
-            });
-        });
-    }
-
-    sortTableByColumn(table, columnName, direction) {
-        const tbody = table.querySelector('tbody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        
-        const headerCells = Array.from(table.querySelectorAll('thead th'));
-        const columnIndex = headerCells.findIndex(th => 
-            th.getAttribute('data-sort') === columnName
-        );
-        
-        if (columnIndex === -1) return;
-
-        rows.sort((a, b) => {
-            const cellA = a.querySelector(`td[data-field="${columnName}"]`);
-            const cellB = b.querySelector(`td[data-field="${columnName}"]`);
-            
-            if (!cellA || !cellB) return 0;
-            
-            const textA = this.getCellText(cellA);
-            const textB = this.getCellText(cellB);
-
-            if (!isNaN(textA) && !isNaN(textB)) {
-                return direction === 'asc' ? textA - textB : textB - textA;
-            }
-
-            if (columnName.includes('fecha')) {
-                const dateA = new Date(textA);
-                const dateB = new Date(textB);
-                if (!isNaN(dateA) && !isNaN(dateB)) {
-                    return direction === 'asc' ? dateA - dateB : dateB - dateA;
-                }
-            }
-
-            return direction === 'asc' 
-                ? textA.localeCompare(textB) 
-                : textB.localeCompare(textA);
-        });
-
-        rows.forEach(row => tbody.appendChild(row));
-    }
-
-    getCellText(cell) {
-        const input = cell.querySelector('input, select');
-        return input ? input.value.trim() : cell.innerText.trim();
-    }
-
-    updateSortIcons(currentHeader, direction, allHeaders) {
-        allHeaders.forEach(header => {
-            header.setAttribute('data-direction', 'default');
-            const def = header.querySelector('.sort-icon-default');
-            const asc = header.querySelector('.sort-icon-asc');
-            const desc = header.querySelector('.sort-icon-desc');
-            if (def) def.style.display = 'inline';
-            if (asc) asc.style.display = 'none';
-            if (desc) desc.style.display = 'none';
-        });
-        currentHeader.setAttribute('data-direction', direction);
-        const defCur = currentHeader.querySelector('.sort-icon-default');
-        const dirCur = currentHeader.querySelector('.sort-icon-' + direction);
-        if (defCur) defCur.style.display = 'none';
-        if (dirCur) dirCur.style.display = 'inline';
     }
 
     // Métodos globales para uso en HTML

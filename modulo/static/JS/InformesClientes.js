@@ -117,55 +117,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   
     // =============================
-    // LÓGICA DE ORDENAMIENTO TABLA
-    // =============================
-    const table = document.querySelector('table');
-    const headers = table?.querySelectorAll('th.sortable');
-  
-    if (headers) {
-      headers.forEach(header => {
-        header.addEventListener('click', () => {
-          const column = header.getAttribute('data-sort');
-          const direction = header.getAttribute('data-direction') || 'asc';
-          const newDirection = direction === 'asc' ? 'desc' : 'asc';
-  
-          sortTableByColumn(table, column, newDirection);
-  
-          headers.forEach(h => h.setAttribute('data-direction', 'default'));
-          header.setAttribute('data-direction', newDirection);
-        });
-      });
-    }
-  
-    /**
-     * Ordena las filas de la tabla por una columna específica
-     * @param {HTMLTableElement} table 
-     * @param {string} columnName 
-     * @param {'asc'|'desc'} direction 
-     */
-    function sortTableByColumn(table, columnName, direction) {
-      const rows = Array.from(table.querySelectorAll('tbody tr'));
-      const columnIndex = Array.from(table.querySelectorAll('thead th'))
-        .findIndex(th => th.getAttribute('data-sort') === columnName);
-  
-      rows.sort((a, b) => {
-        const cellA = a.cells[columnIndex].innerText.trim();
-        const cellB = b.cells[columnIndex].innerText.trim();
-  
-        if (!isNaN(cellA) && !isNaN(cellB)) {
-          return direction === 'asc' ? cellA - cellB : cellB - cellA;
-        }
-  
-        return direction === 'asc'
-          ? cellA.localeCompare(cellB)
-          : cellB.localeCompare(cellA);
-      });
-  
-      const tbody = table.querySelector('tbody');
-      rows.forEach(row => tbody.appendChild(row));
-    }
-
-    // =============================
     // LÓGICA DE REINICIO DE FILTROS
     // =============================
     const resetBtn = document.getElementById('btn-reset-filtros');

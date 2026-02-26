@@ -12,10 +12,11 @@ from django.contrib.auth.decorators import login_required
 
 from modulo.forms import ColaboradorFilterForm
 from modulo.models import (
+    CentrosCostos,
     Clientes, Concepto, Consultores, Empleado, Horas_Habiles,
     Ind_Operat_Clientes, Ind_Operat_Conceptos, Linea, Modulo,
     Tiempos_Cliente, TiemposConcepto, TiemposFacturables,
-    LineaClienteCentroCostos,  # ✅ NUEVO
+    LineaClienteCentroCostos,
 )
 from modulo.decorators import verificar_permiso
 
@@ -165,15 +166,16 @@ def guardar_tiempos_cliente(
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos del cliente: {str(e)}")
 
-def guardar_tiempos_concepto(anio, mes, documento, concepto_id, linea_id, horas):
+def guardar_tiempos_concepto(anio, mes, documento, concepto_id, linea_id, horas, centrocostos_id=None):
     try:
+        defaults = {'Horas': horas, 'centrocostosId_id': centrocostos_id}
         tiempo_concepto, creado = TiemposConcepto.objects.get_or_create(
             Anio=anio,
             Mes=mes,
             Documento=documento,
-            defaults={'Horas': horas},
             ConceptoId_id=concepto_id,
-            LineaId_id=linea_id
+            LineaId_id=linea_id,
+            defaults=defaults,
         )
         if creado:
             if horas == '0':
@@ -181,9 +183,16 @@ def guardar_tiempos_concepto(anio, mes, documento, concepto_id, linea_id, horas)
         else:
             if horas == '0':
                 tiempo_concepto.delete()
-            elif tiempo_concepto.Horas != horas:
-                tiempo_concepto.Horas = horas
-                tiempo_concepto.save()
+            else:
+                changed = tiempo_concepto.Horas != horas
+                if tiempo_concepto.centrocostosId_id != centrocostos_id:
+                    tiempo_concepto.centrocostosId_id = centrocostos_id
+                    changed = True
+                if tiempo_concepto.Horas != horas:
+                    tiempo_concepto.Horas = horas
+                    changed = True
+                if changed:
+                    tiempo_concepto.save(update_fields=['Horas', 'centrocostosId_id'])
         return tiempo_concepto
     except Exception as e:
         raise ValidationError(f"Error al guardar los tiempos del concepto: {str(e)}")
@@ -282,14 +291,19 @@ def build_tiempo_clientes_index(qs):
 
 def build_tiempo_conceptos_index(qs):
     """
-    index[Documento][LineaId][ConceptoId] = horas
+    index[Documento][LineaId][ConceptoId] = {'horas': float, 'ceco_id': int|None}
     """
-    index = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+    index = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {'horas': 0.0, 'ceco_id': None})))
     for t in qs:
         doc = t.Documento
         linea = int(t.LineaId_id)
         concepto = int(t.ConceptoId_id)
-        index[doc][linea][concepto] += float(t.Horas)
+        ceco_id = getattr(t, 'centrocostosId_id', None)
+        if ceco_id is not None:
+            ceco_id = int(ceco_id)
+        entry = index[doc][linea][concepto]
+        entry['horas'] += float(t.Horas)
+        entry['ceco_id'] = ceco_id
     return index
 
 
@@ -345,13 +359,19 @@ def registro_tiempos_guardar(request):
                         )
 
                     elif 'ConceptoId' in row and 'Tiempo_Conceptos' in row:
+                        ceco_id = row.get('centrocostosId')
+                        if ceco_id is not None and str(ceco_id).strip() == '':
+                            ceco_id = None
+                        elif ceco_id is not None and str(ceco_id).isdigit():
+                            ceco_id = int(ceco_id)
                         guardar_tiempos_concepto(
                             anio,
                             mes,
                             documento,
                             row.get('ConceptoId'),
                             linea_id,
-                            row.get('Tiempo_Conceptos')
+                            row.get('Tiempo_Conceptos'),
+                            centrocostos_id=ceco_id,
                         )
 
                 elif 'LineaId' in row and 'Horas_Facturables' in row and 'ClienteId' in row:
@@ -413,7 +433,7 @@ def registro_tiempos_index(request):
         empleados = Empleado.objects.select_related('LineaId', 'PerfilId', 'ModuloId').all().order_by('Documento')
         consultores = Consultores.objects.select_related('LineaId', 'PerfilId', 'ModuloId').all().order_by('Documento')
         tiempo_clientes = Tiempos_Cliente.objects.select_related('ClienteId', 'LineaId', 'ModuloId').all()
-        tiempo_conceptos = TiemposConcepto.objects.select_related('ConceptoId', 'LineaId').all()
+        tiempo_conceptos = TiemposConcepto.objects.select_related('ConceptoId', 'LineaId', 'centrocostosId').all()
         horas_facturables = TiemposFacturables.objects.select_related('LineaId', 'ClienteId').all()
         lineas = Linea.objects.all()
 
@@ -513,11 +533,13 @@ def registro_tiempos_index(request):
 
     totales, totales_facturables = calcular_totales(colaborador_info, lineas_info)
 
+    centros_costos = CentrosCostos.objects.all().order_by('codigoCeCo')
     context = {
         'form': form,
         'colaborador_info': colaborador_info,
         'Clientes': clientes_visibles.only('ClienteId', 'Nombre_Cliente') if show_data else clientes_qs.none(),
         'Conceptos': conceptos_qs,
+        'CentrosCostos': centros_costos,
         'Totales': totales,
         'TotalesFacturables': totales_facturables,
         'Horas_Facturables': horas_facturables,
@@ -607,16 +629,27 @@ def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes_i
 
     total_horas_clientes = sum(clientes_colaborador.values())
 
-    # Horas por concepto desde índice en memoria
+    # Horas por concepto desde índice en memoria (índice ahora devuelve {'horas', 'ceco_id'})
     conceptos_colaborador = {c.ConceptoId: 0 for c in conceptos}
+    ceco_ids_en_fila = []
     horas_conceptos_map = (
         tiempo_conceptos_idx
             .get(colaborador.Documento, {})
             .get(linea_id, {})
     )
     for ccid in conceptos_colaborador:
-        if ccid in horas_conceptos_map:
-            conceptos_colaborador[ccid] = float(horas_conceptos_map[ccid])
+        entry = horas_conceptos_map.get(ccid)
+        if entry is not None:
+            h = float(entry.get('horas', 0) or 0)
+            conceptos_colaborador[ccid] = h
+            if h > 0 and entry.get('ceco_id') is not None:
+                ceco_ids_en_fila.append(entry['ceco_id'])
+    # CeCo por fila: único si todos los conceptos con horas comparten el mismo CeCo
+    row_ceco_id = None
+    if ceco_ids_en_fila:
+        unicos = set(ceco_ids_en_fila)
+        if len(unicos) == 1:
+            row_ceco_id = ceco_ids_en_fila[0]
 
     total_horas_conceptos = sum(conceptos_colaborador.values())
     total_horas_trabajadas = total_horas_clientes + total_horas_conceptos
@@ -651,6 +684,7 @@ def obtener_info_colaborador(colaborador, clientes, conceptos, tiempo_clientes_i
                 }
                 for ccid, horas in conceptos_colaborador.items()
             },
+            'CecoId': row_ceco_id,
             'Total_Conceptos': total_horas_conceptos,
             'Total_Horas': total_horas_trabajadas,
             'Activo': activo_flag,
