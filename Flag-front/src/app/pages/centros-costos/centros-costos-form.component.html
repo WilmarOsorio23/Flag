@@ -1,0 +1,20 @@
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">{{ form.value.CentroCostoId ? 'Editar Centro' : 'Crear Centro' }}</h5>
+    </div>
+    <div class="card-body">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+                <label class="form-label">Código</label>
+                <input formControlName="CentroCostoId" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <input formControlName="Descripcion" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-secondary"
+                (click)="router.navigate(['/centros-costos'])">Cancelar</button>
+        </form>
+    </div>
+</div>

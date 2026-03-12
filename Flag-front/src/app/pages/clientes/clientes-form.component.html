@@ -1,0 +1,45 @@
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">{{ form.value.DocumentoId ? 'Editar Cliente' : 'Crear Cliente' }}</h5>
+    </div>
+    <div class="card-body">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Tipo Documento</label>
+                    <input formControlName="TipoDocumentoID" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Documento ID</label>
+                    <input formControlName="DocumentoId" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Nombre Cliente</label>
+                    <input formControlName="Nombre_Cliente" class="form-control" />
+                </div>
+            </div>
+            <!-- more fields similar pattern can be added -->
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Activo</label>
+                    <input type="checkbox" formControlName="Activo" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Fecha Inicio</label>
+                    <input type="date" formControlName="Fecha_Inicio" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Fecha Retiro</label>
+                    <input type="date" formControlName="Fecha_Retiro" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Dirección</label>
+                    <input formControlName="Direccion" class="form-control" />
+                </div>
+            </div>
+            <!-- continue adding inputs for remaining properties -->
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-secondary" (click)="router.navigate(['/clientes'])">Cancelar</button>
+        </form>
+    </div>
+</div>

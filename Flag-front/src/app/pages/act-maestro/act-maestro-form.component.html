@@ -1,0 +1,20 @@
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">{{ form.value.Act_PagareId ? 'Editar Actividad' : 'Crear Actividad' }}</h5>
+    </div>
+    <div class="card-body">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+                <label class="form-label">Código</label>
+                <input formControlName="Act_PagareId" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <input formControlName="Descripcion_Act" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-secondary"
+                (click)="router.navigate(['/act-maestro'])">Cancelar</button>
+        </form>
+    </div>
+</div>

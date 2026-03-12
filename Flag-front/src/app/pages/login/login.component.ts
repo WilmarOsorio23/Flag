@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { HttpClient, HttpErrorResponse, HttpClientModule } from '@angular/common/http';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -11,7 +11,6 @@ import { HttpClient, HttpErrorResponse, HttpClientModule } from '@angular/common
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
-    HttpClientModule,
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
@@ -27,7 +26,7 @@ export class LoginComponent {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
+    private auth: AuthService,
     private router: Router
   ) {
     const params = new URLSearchParams(window.location.search);
@@ -41,19 +40,14 @@ export class LoginComponent {
 
     this.errorMessage = '';
 
-    this.http
-      .post('/login/', this.loginForm.value, { observe: 'response' })
-      .subscribe({
-        next: (res) => {
-          if (res.status === 200 || res.status === 302) {
-            this.router.navigateByUrl(this.nextParam);
-          }
-        },
-        error: (err: HttpErrorResponse) => {
-          // show generic error
-          this.errorMessage =
-            'Usuario/Email o contraseña incorrectos.';
-        },
-      });
+    this.auth.login(this.loginForm.value).subscribe({
+      next: () => {
+        this.router.navigateByUrl(this.nextParam);
+      },
+      error: () => {
+        this.errorMessage =
+          'Usuario/Email o contraseña incorrectos.';
+      },
+    });
   }
 }

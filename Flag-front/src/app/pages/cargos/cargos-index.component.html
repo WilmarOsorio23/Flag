@@ -1,0 +1,54 @@
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title">Gestión de Cargos</h4>
+    </div>
+    <div class="card-body">
+        <div class="button-group">
+            <button class="btn btn-outline-primary fas fa-plus-circle" (click)="goToCreate()"
+                title="Nuevo Cargo"></button>
+            <button id="edit-button" type="button" class="btn btn-outline-primary fas fa-edit" (click)="enableEdit()"
+                title="Editar"></button>
+            <button id="save-button" class="btn btn-outline-success fas fa-save" title="Guardar"
+                (click)="saveRow(cargos.find(c => c.CargoId === Array.from(selectedIds)[0]))"
+                [class.d-none]="selectedIds.size !== 1"></button>
+            <button id="cancel-button" class="btn btn-outline-danger fas fa-times" title="Cancelar"
+                (click)="cancelEdit()" [class.d-none]="selectedIds.size !== 1"></button>
+            <button id="delete-button" type="button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar"
+                (click)="deleteSelected()"></button>
+            <button class="btn btn-outline-info fas fa-download" title="Descargar Excel"
+                (click)="downloadSelected()"></button>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        <div class="table-responsive table-app-wrap">
+            <table class="table table-primary table-app">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all" (change)="toggleSelectAll($event)"></th>
+                        <th>ID</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let cargo of cargos" [attr.data-id]="cargo.CargoId">
+                        <td><input type="checkbox" class="row-select" [value]="cargo.CargoId"
+                                (change)="toggleSelection(cargo.CargoId, $event)"></td>
+                        <td>{{ cargo.CargoId }}</td>
+                        <td class="text-start">
+                            <span class="descripcion-text" [class.d-none]="cargo.editing">{{ cargo.Descripcion }}</span>
+                            <input type="text" name="Descripcion" class="descripcion-input form-control"
+                                [(ngModel)]="cargo.Descripcion" [readonly]="!cargo.editing"
+                                [class.d-none]="!cargo.editing" />
+                        </td>
+                    </tr>
+                    <tr *ngIf="cargos.length === 0">
+                        <td colspan="3">No hay cargos registrados</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="message-box" class="alert alert-dismissible fade" style="display: none;">
+        <span id="alert-message"></span>
+    </div>
+</div>

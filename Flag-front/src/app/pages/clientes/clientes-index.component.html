@@ -1,0 +1,85 @@
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title">Clientes</h4>
+    </div>
+    <div class="card-body">
+        <div class="button-group">
+            <button class="btn btn-outline-primary fas fa-plus-circle" (click)="goToCreate()" title="Crear"
+                role="button"></button>
+            <button id="edit-button" class="btn btn-outline-primary fas fa-edit" title="Editar" role="button"
+                (click)="enableEdit()"></button>
+            <button id="save-button" class="btn btn-outline-success fas fa-save d-none" title="Guardar" type="button"
+                (click)="saveRow(clientes.find(c => makeKey(c) === Array.from(selectedIds)[0]))"></button>
+            <button id="cancel-button" class="btn btn-outline-danger fas fa-times d-none" title="Cancelar" type="button"
+                (click)="cancelEdit()"></button>
+            <button id="delete-button" class="btn btn-outline-danger fas fa-trash-alt" title="Eliminar" type="button"
+                (click)="deleteSelected()"></button>
+            <button class="btn btn-outline-info fas fa-download" title="Descargar"
+                (click)="downloadSelected()"></button>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        <div class="table-responsive table-app-wrap">
+            <form id="delete-form" method="POST">
+                <table class="table table-primary table-app" id="clientesTable">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all" (change)="toggleSelectAll($event)"></th>
+                            <th>Tipo Documento</th>
+                            <th>Documento ID</th>
+                            <th>Nombre Cliente</th>
+                            <th>Activo</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Retiro</th>
+                            <th>Direccion</th>
+                            <th>Telefono</th>
+                            <th>Correo Electronico</th>
+                            <th>Contacto Principal</th>
+                            <th>Buzon Facturacion</th>
+                            <th>Tipo Cliente</th>
+                            <th>Ciudad</th>
+                            <th>Departamento</th>
+                            <th>Pais</th>
+                            <th>Nacional</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let cliente of clientes">
+                            <td><input type="checkbox" class="row-select" [value]="makeKey(cliente)"
+                                    (change)="toggleSelection(cliente, $event)"></td>
+                            <td>{{ cliente.TipoDocumentoID }}</td>
+                            <td>{{ cliente.DocumentoId }}</td>
+                            <td>
+                                <span [class.d-none]="cliente.editing">{{ cliente.Nombre_Cliente }}</span>
+                                <input type="text" class="form-control" [(ngModel)]="cliente.Nombre_Cliente"
+                                    [class.d-none]="!cliente.editing" [readonly]="!cliente.editing" />
+                            </td>
+                            <td>
+                                <input type="checkbox" [(ngModel)]="cliente.Activo" [disabled]="!cliente.editing" />
+                            </td>
+                            <td>{{ cliente.Fecha_Inicio }}</td>
+                            <td>{{ cliente.Fecha_Retiro }}</td>
+                            <td>
+                                <span [class.d-none]="cliente.editing">{{ cliente.Direccion }}</span>
+                                <input type="text" class="form-control" [(ngModel)]="cliente.Direccion"
+                                    [class.d-none]="!cliente.editing" [readonly]="!cliente.editing" />
+                            </td>
+                            <td>{{ cliente.Telefono }}</td>
+                            <td>{{ cliente.CorreoElectronico }}</td>
+                            <td>{{ cliente.ContactoID }}</td>
+                            <td>{{ cliente.BuzonFacturacion }}</td>
+                            <td>{{ cliente.TipoCliente }}</td>
+                            <td>{{ cliente.Ciudad }}</td>
+                            <td>{{ cliente.Departamento }}</td>
+                            <td>{{ cliente.Pais }}</td>
+                            <td>{{ cliente.Nacional ? 'Sí' : 'No' }}</td>
+                        </tr>
+                        <tr *ngIf="clientes.length === 0">
+                            <td colspan="17">No hay clientes registrados</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+</div>
